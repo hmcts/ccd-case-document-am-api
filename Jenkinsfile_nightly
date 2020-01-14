@@ -8,9 +8,9 @@ properties([
 @Library("Infrastructure")
 
 def type = "java"
-def product = "rpe"
-def component = "spring-boot-template"
+def product = "ccd"
+def component = "case-document-am-api"
 
 withNightlyPipeline(type, product, component) {
-  enableSlackNotifications('#rpe-build-notices')
+  enableSlackNotifications('#ccd-case-document-am-api-builds')
 }
