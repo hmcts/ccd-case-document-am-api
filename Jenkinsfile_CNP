@@ -38,6 +38,7 @@ withPipeline(type, product, component) {
     enableSlackNotifications('#ccd-case-document-am-api-builds')
   }
 
+  overrideVaultEnvironments(vaultOverrides)
   enableAksStagingDeployment()
   disableLegacyDeploymentOnAAT()
   enableDockerBuild()
