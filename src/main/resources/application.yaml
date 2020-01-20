@@ -1,5 +1,5 @@
 server:
-  port: 4550
+  port: ${PORT:4550}
 
 management:
   endpoint:
