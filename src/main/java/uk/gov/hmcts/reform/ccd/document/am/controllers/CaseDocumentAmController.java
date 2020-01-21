@@ -10,7 +10,7 @@ import static org.springframework.http.ResponseEntity.ok;
  * Default endpoints per application.
  */
 @RestController
-public class CaseDocumentAMController {
+public class CaseDocumentAmController {
 
     /**
      * Root GET endpoint.
