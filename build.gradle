@@ -124,9 +124,13 @@ project.tasks['sonarqube'].dependsOn jacocoTestReport
 
 sonarqube {
   properties {
-    property "sonar.projectName", "Reform :: spring-boot-template"
-    property "sonar.projectKey", "uk.gov.hmcts.reform:spring-boot-template"
+    property "sonar.projectName", "Reform :: ccd-case-document-am-api"
+    property "sonar.projectKey", "uk.gov.hmcts.reform:ccd-case-document-am-api"
     property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.destination.path}"
+    property "sonar.junit.reportPaths", "${project.buildDir}/test-results/junit-platform"
+    property "sonar.projectName", "ccd-case-document-am-api"
+    property "sonar.projectKey", "ccd-case-document-am-api"
+
   }
 }
 
