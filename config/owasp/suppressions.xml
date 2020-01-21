@@ -18,6 +18,7 @@
     <cve>CVE-2019-12418</cve>
     <cve>CVE-2019-15052</cve>
     <cve>CVE-2019-16370</cve>
+    <cve>CVE-2018-10237</cve>
   </suppress>
 
 </suppressions>
