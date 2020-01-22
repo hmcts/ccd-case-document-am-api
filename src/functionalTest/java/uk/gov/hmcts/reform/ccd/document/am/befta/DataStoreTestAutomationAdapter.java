@@ -1,4 +1,4 @@
-package uk.gov.hmcts.ccd.datastore.befta;
+package uk.gov.hmcts.reform.ccd.document.am.befta;
 
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;

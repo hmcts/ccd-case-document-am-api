@@ -66,17 +66,6 @@ jacocoTestCoverageVerification {
   }
 }
 
-//idea {
-//  module {
-////    testSourceDirs += project.sourceSets.integrationTest.java.srcDirs
-////    testSourceDirs += project.sourceSets.integrationTest.resources.srcDirs
-//    testSourceDirs += project.sourceSets.functionalTest.java.srcDirs
-//    testSourceDirs += project.sourceSets.functionalTest.resources.srcDirs
-//    testSourceDirs += project.sourceSets.smokeTest.java.srcDirs
-//    testSourceDirs += project.sourceSets.smokeTest.resources.srcDirs
-//  }
-//}
-
 configurations {
   integrationTestCompile.extendsFrom testCompile
   integrationTestRuntime.extendsFrom testRuntime
@@ -85,12 +74,11 @@ configurations {
   cucumberRuntime.extendsFrom(functionalRuntime)
 }
 
-
 sourceSets {
   functionalTest {
     java {
-      compileClasspath += main.output + test.output
-      runtimeClasspath += main.output + test.output
+      compileClasspath += main.output
+      runtimeClasspath += main.output
       srcDir file('src/functionalTest/java')
     }
     resources.srcDir file('src/functionalTest/resources')
@@ -125,10 +113,10 @@ task functional(type: Test, description: 'Runs the functional tests.', group: 'V
   doFirst {
     generateCucumberReports.enabled = true
     javaexec {
-      main = "uk.gov.hmcts.ccd.datastore.befta.DataStoreBeftaMain"
+      main = "uk.gov.hmcts.reform.ccd.document.am.befta.DataStoreBeftaMain"
       classpath += configurations.cucumberRuntime + sourceSets.functionalTest.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
       args = ['--plugin', "json:${projectDir}/target/cucumber.json", '--tags', 'not @Ignore', '--glue',
-              'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features/F-051']
+              'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features']
     }
   }
 }
