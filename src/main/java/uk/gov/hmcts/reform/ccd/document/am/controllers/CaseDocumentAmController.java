@@ -1,8 +1,14 @@
 package uk.gov.hmcts.reform.ccd.document.am.controllers;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -24,5 +30,11 @@ public class CaseDocumentAmController {
     @GetMapping("/")
     public ResponseEntity<String> welcome() {
         return ok("Welcome to CCD Case Document AM Controller");
+    }
+
+    @RequestMapping(value = "/cases/", method = RequestMethod.GET)
+    public ResponseEntity<List<String>> getCases() {
+        List<String> cases = Arrays.asList("C101", "C102", "C103", "C104", "C105");
+        return new ResponseEntity<List<String>>(cases, HttpStatus.OK);
     }
 }
