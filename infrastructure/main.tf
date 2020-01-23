@@ -61,6 +61,11 @@ resource "random_string" "draft_encryption_key" {
   }
 }
 
+resource "azurerm_resource_group" "rg" {
+  name     = "${var.product}-shared-${var.env}"
+  location = "${var.location}"
+}
+
 module "ccd-case-document-am-api" {
   source   = "git@github.com:hmcts/cnp-module-webapp?ref=master"
   product  = "${local.app_full_name}"
