@@ -25,6 +25,11 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
   ]
 }
 
+def vaultOverrides = [
+    'preview' : 'aat',
+    'spreview': 'saat'
+]
+
 // Vars needed for functional and smoke tests run against AKS
 
 withPipeline(type, product, component) {
@@ -38,6 +43,7 @@ withPipeline(type, product, component) {
     enableSlackNotifications('#ccd-case-document-am-api-builds')
   }
 
+  overrideVaultEnvironments(vaultOverrides)
   enableAksStagingDeployment()
   disableLegacyDeploymentOnAAT()
   enableDockerBuild()

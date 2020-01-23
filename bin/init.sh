@@ -25,18 +25,18 @@ then
 fi
 
 declare -a files_with_port=(.env Dockerfile README.md src/main/resources/application.yaml)
-declare -a files_with_slug=(build.gradle docker-compose.yml Dockerfile README.md web.config ./infrastructure/main.tf ./src/main/java/uk/gov/hmcts/reform/demo/controllers/RootController.java)
+declare -a files_with_slug=(build.gradle docker-compose.yml Dockerfile README.md web.config ./infrastructure/main.tf ./src/main/java/uk/gov/hmcts/reform/demo/controllers/CaseDocumentAmController.java)
 
 # Replace port number
 for i in ${files_with_port[@]}
 do
-  perl -i -pe "s/4550/$port/g" ${i}
+  perl -i -pe "s/4455/$port/g" ${i}
 done
 
 # Replace spring-boot-template slug
 for i in ${files_with_slug[@]}
 do
-  perl -i -pe "s/spring-boot-template/$slug/g" ${i}
+  perl -i -pe "s/ccd-case-document-am-api/$slug/g" ${i}
 done
 
 # Replace demo package in all files under ./src

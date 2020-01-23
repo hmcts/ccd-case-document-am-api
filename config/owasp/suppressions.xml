@@ -18,4 +18,45 @@
     <cve>CVE-2019-12418</cve>
   </suppress>
 
+  <suppress until="2020-01-31">
+    <notes><![CDATA[
+   relates to guava 20.0 jar
+   ]]></notes>
+    <packageUrl regex="true">^pkg:maven/com.google.guava/guava@20.0*$</packageUrl>
+    <cve>CVE-2018-10237</cve>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[
+      file name: gradle-pitest-plugin-1.3.0.jar
+      ]]></notes>
+    <sha1>544d22a32e5c409c643a6a7f15513f74bbabccde</sha1>
+    <cpe>cpe:/a:gradle:gradle</cpe>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[
+       file name: gradle-pitest-plugin-1.3.0.jar
+       ]]></notes>
+    <sha1>544d22a32e5c409c643a6a7f15513f74bbabccde</sha1>
+    <cpe>cpe:/a:gradle:gradle</cpe>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[
+       file name: gradle-pitest-plugin-1.3.0.jar
+       ]]></notes>
+    <sha1>544d22a32e5c409c643a6a7f15513f74bbabccde</sha1>
+    <cve>CVE-2019-15052</cve>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[
+       file name: gradle-pitest-plugin-1.3.0.jar
+       ]]></notes>
+    <sha1>544d22a32e5c409c643a6a7f15513f74bbabccde</sha1>
+    <cve>CVE-2019-16370</cve>
+  </suppress>
+
+
 </suppressions>
