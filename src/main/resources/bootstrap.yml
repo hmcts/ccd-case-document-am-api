@@ -1,0 +1,7 @@
+spring:
+  cloud:
+    propertiesvolume:
+      paths: /mnt/secrets/ccd
+      prefixed: false
+      aliases:
+        AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key
