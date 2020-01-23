@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.demo.controllers.endpoints;
+package uk.gov.hmcts.reform.ccd.document.am.controllers.endpoints;
 
 
 import org.springframework.http.MediaType;

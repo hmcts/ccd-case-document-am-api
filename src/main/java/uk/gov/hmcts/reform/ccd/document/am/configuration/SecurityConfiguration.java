@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.demo.configuration;
+package uk.gov.hmcts.reform.ccd.document.am.configuration;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 

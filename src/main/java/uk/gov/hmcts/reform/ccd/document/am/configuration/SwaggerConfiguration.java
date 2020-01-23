@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.demo.configuration;
+package uk.gov.hmcts.reform.ccd.document.am.configuration;
 
 import static com.google.common.collect.Lists.newArrayList;
 

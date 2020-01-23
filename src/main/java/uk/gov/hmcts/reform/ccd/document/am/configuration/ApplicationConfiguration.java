@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.demo.configuration;
+package uk.gov.hmcts.reform.ccd.document.am.configuration;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
