@@ -24,7 +24,7 @@ public class SmokeTest {
     }
 
     @Test
-    @Tag("SmokeTest")
+    @Tag("smokeTest")
     public void shouldReturnWelcomeMessage() {
         Response response = get("/health");
         Assert.assertEquals("message", response.getStatusCode(), 200);

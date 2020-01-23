@@ -115,11 +115,11 @@ task integration(type: Test, description: 'Runs the integration tests.', group: 
 
 task smoke(type: Test) {
   description = "Runs Smoke Tests"
-  testClassesDirs = sourceSets.test.output.classesDirs
-  classpath = sourceSets.test.runtimeClasspath
+  testClassesDirs = sourceSets.smokeTest.output.classesDirs
+  classpath = sourceSets.smokeTest.runtimeClasspath
 
   useJUnitPlatform {
-    includeTags = ['SmokeTest']
+    includeTags = ['smokeTest']
   }
 }
 
