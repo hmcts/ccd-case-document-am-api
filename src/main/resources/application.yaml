@@ -15,6 +15,52 @@ management:
 spring:
   application:
     name: Spring Boot Template
+
+security:
+  anonymousPaths:
+    - "/"
+    - "/health"
+    - "/health/liveness"
+    - "/actuator/**"
+    - "/loggers/**"
+    - "/swagger-ui.html"
+    - "/swagger-resources/**"
+    - "/v2/api-docs"
+    - "/webjars/springfox-swagger-ui/**"
+    - "/search/**"
+    - "/csrf"
+    - "/error"
+    - "/favicon.ico"
+  ### Update list with service id of any service going to interact with casse document api
+  authorisedServices:
+    - ccd-case-document-am-api
+    - ccd_gw
+    - xui_webapp
+
+
+
+### dependency configuration
+auth.provider.service.client.baseUrl: ${IDAM_S2S_URL:http://localhost:4502}
+idam:
+  s2s-auth:
+    totp_secret: ${S2S_SECRET:AAAAAAAAAAAAAAAB}
+    microservice: ccd-case-document-am-api
+    url: ${S2S_URL:http://localhost:4502}
+    pbaFromUserAccountMap: false
+usermap:
+  pbaFromUserAccountMap:
+    - "false"
+
+
+auth.idam.client.baseUrl: ${idam_url:http://localhost:4501}
+
+
+
+#auth.idam.client.detailsUri: "/o/userinfo"
+## Secure roles configuration
+
+
+
 #  datasource:
 #    driver-class-name: org.postgresql.Driver
 #    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
