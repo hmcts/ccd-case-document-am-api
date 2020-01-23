@@ -281,7 +281,7 @@ dependencies {
   compile group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version: '0.0.4'
-  compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.reformS2sClient
+  compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.0.0'
   compile group: 'uk.gov.hmcts.reform', name: 'health-spring-boot-starter', version: versions.reformHealthStarter
   compile(group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4') {
     // TODO remove when auth-checker-lib upgrades its dependency to spring boot 2.0.x
@@ -298,7 +298,7 @@ dependencies {
   compile group: 'io.github.openfeign', name: 'feign-core', version: '9.1.0'
 
   compile group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
-
+  compile group: 'javax.inject', name: 'javax.inject', version: '1'
   compile group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
   compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.1.RELEASE'
@@ -316,10 +316,6 @@ dependencies {
 
   //Added for functional test automation
   compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.2.1.RELEASE'
-  compile (group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.3') {
-    exclude group: 'uk.gov.hmcts.reform', module: 'java-logging-spring'
-  }
-  compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '2.0.0'
   testCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.1.0'
   compile group: 'io.cucumber', name: 'cucumber-java', version: '5.0.0'
   testCompile group: 'io.cucumber', name: 'cucumber-junit', version: '5.0.0'
