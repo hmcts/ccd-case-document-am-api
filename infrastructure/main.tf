@@ -49,7 +49,7 @@ resource "azurerm_key_vault_secret" "ccd-case-document-am-api-s2s-secret" {
   key_vault_id = "${data.azurerm_key_vault.ccd_shared_key_vault.id}"
 }
 
-
+/*
 resource "random_string" "draft_encryption_key" {
   length  = 16
   special = true
@@ -59,7 +59,7 @@ resource "random_string" "draft_encryption_key" {
   lifecycle {
     ignore_changes = ["*"]
   }
-}
+}*/
 
 resource "azurerm_resource_group" "rg" {
   name     = "${var.product}-shared-${var.env}"
@@ -86,22 +86,11 @@ module "ccd-case-document-am-api" {
   enable_ase                      = "${var.enable_ase}"
 
   app_settings = {
-    ENABLE_DB_MIGRATE = "false"
 
     IDAM_USER_URL                       = "${var.idam_api_url}"
     IDAM_S2S_URL                        = "${local.s2s_url}"
-    DATA_STORE_IDAM_KEY                 = "${data.azurerm_key_vault_secret.ccd-case-document-am-api_s2s_key.value}"
+    //DATA_STORE_IDAM_KEY                 = "${data.azurerm_key_vault_secret.ccd-case-document-am-api_s2s_key.value}"
 
-    CCD_DRAFT_ENCRYPTION_KEY            = "${random_string.draft_encryption_key.result}"
-
-    HTTP_CLIENT_CONNECTION_TIMEOUT        = "${var.http_client_connection_timeout}"
-    HTTP_CLIENT_READ_TIMEOUT              = "${var.http_client_read_timeout}"
-    HTTP_CLIENT_MAX_TOTAL                 = "${var.http_client_max_total}"
-    HTTP_CLIENT_SECONDS_IDLE_CONNECTION   = "${var.http_client_seconds_idle_connection}"
-    HTTP_CLIENT_MAX_CLIENT_PER_ROUTE      = "${var.http_client_max_client_per_route}"
-    HTTP_CLIENT_VALIDATE_AFTER_INACTIVITY = "${var.http_client_validate_after_inactivity}"
-
-    JPA_CRITERIA_IN_SEARCH_ENABLED        = false
   }
 
 }
