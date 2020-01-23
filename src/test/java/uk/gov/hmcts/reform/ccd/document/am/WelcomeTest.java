@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
-public class GetWelcomeTest {
+public class WelcomeTest {
     private final CaseDocumentAmController caseDocumentAmController = new CaseDocumentAmController();
 
     @Test
