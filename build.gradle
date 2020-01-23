@@ -119,7 +119,7 @@ task smoke(type: Test) {
   classpath = sourceSets.test.runtimeClasspath
 
   useJUnitPlatform {
-    includeTags = ['smokeTest']
+    includeTags = ['SmokeTest']
   }
 }
 

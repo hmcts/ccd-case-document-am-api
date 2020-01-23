@@ -1,19 +1,13 @@
 package uk.gov.hmcts.reform.ccd.document.am;
 
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.Assert;
 import org.junit.Before;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import uk.gov.hmcts.reform.ccd.document.am.controllers.CaseDocumentAmController;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import static io.restassured.RestAssured.get;
-import static org.hamcrest.core.IsEqual.equalTo;
 
 public class SmokeTest {
 
@@ -30,11 +24,10 @@ public class SmokeTest {
     }
 
     @Test
-    @Tag("smokeTest")
+    @Tag("SmokeTest")
     public void shouldReturnWelcomeMessage() {
-        get("/health")
-            .then()
-            .statusCode(200);
+        Response response = get("/health");
+        Assert.assertEquals("message", response.getStatusCode(), 200);
 
     }
 }
