@@ -87,3 +87,5 @@ variable "http_client_validate_after_inactivity" {
   default = "0"
 }
 
+variable "deployment_namespace" {}
+
