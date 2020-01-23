@@ -22,8 +22,8 @@ The template is a working application with a minimal setup. It contains:
  * MIT license and contribution information
  * Helm chart using chart-java.
 
-The application exposes health endpoint (http://localhost:4550/health) and metrics endpoint
-(http://localhost:4550/metrics).
+The application exposes health endpoint (http://localhost:4455/health) and metrics endpoint
+(http://localhost:4455/metrics).
 
 ## Plugins
 
@@ -133,12 +133,12 @@ by executing the following command:
 ```
 
 This will start the API container exposing the application's port
-(set to `4550` in this template app).
+(set to `4455` in this template app).
 
 In order to test if the application is up, you can call its health endpoint:
 
 ```bash
-  curl http://localhost:4550/health
+  curl http://localhost:4455/health
 ```
 
 You should get a response similar to this:
