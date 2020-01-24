@@ -89,9 +89,9 @@ sourceSets {
     java {
       compileClasspath += main.output
       runtimeClasspath += main.output
-      srcDir file('src/smokeTest/java')
+      srcDir file('src/integrationTest/java')
     }
-    resources.srcDir file('src/smokeTest/resources')
+    resources.srcDir file('src/integrationTest/resources')
   }
 }
 
