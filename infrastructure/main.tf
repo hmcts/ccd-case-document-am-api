@@ -26,7 +26,7 @@ locals {
   // S2S
   s2s_url = "http://rpe-service-auth-provider-${local.env_ase_url}"
 
-}
+ }
 
 data "azurerm_key_vault" "ccd_shared_key_vault" {
   name = "${local.vaultName}"
