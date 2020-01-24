@@ -48,7 +48,7 @@ public class TestEndpointTest {
     }
 
     @Test
-    public void verifyTestS2SAuthenticate()
+    public void verifyTestS2SAuthentication()
     {
         try {
             final MvcResult result = mockMvc.perform(get(URL).contentType(JSON_CONTENT_TYPE).header(AUTHORIZATION, "Bearer user1"))
