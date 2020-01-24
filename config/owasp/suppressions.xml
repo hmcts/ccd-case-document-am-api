@@ -66,4 +66,21 @@
     <cve>CVE-2020-5397</cve>
   </suppress>
 
+  <suppress until="2020-01-31">
+    <notes><![CDATA[
+   relates to spring_framework spring-contex
+   ]]></notes>
+    <cpe>cpe:2.3:a:apache:groovy:2.5.8:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2016-6497</cve>
+  </suppress>
+
+  <suppress until="2020-01-31">
+    <notes><![CDATA[
+   relates to org.apache.sling.javax.activation
+   ]]></notes>
+    <cpe>cpe:2.3:a:apache:sling:0.1.0:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2016-5394</cve>
+    <cve>CVE-2016-6798</cve>
+  </suppress>
+
 </suppressions>
