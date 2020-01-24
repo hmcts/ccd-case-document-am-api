@@ -26,7 +26,7 @@ apply plugin: 'project-report'
 apply plugin: 'idea'
 
 def versions = [
-  junit           : '5.5.0',
+  junit              : '5.5.0',
   lombok             : '1.18.6',
   gradlePitest       : '1.3.0',
   pitest             : '1.4.2',
@@ -64,7 +64,6 @@ jacocoTestCoverageVerification {
     }
   }
 }
-
 
 
 sourceSets {
@@ -117,6 +116,9 @@ task smoke(type: Test) {
   description = "Runs Smoke Tests"
   testClassesDirs = sourceSets.smokeTest.output.classesDirs
   classpath = sourceSets.smokeTest.runtimeClasspath
+  useJUnitPlatform {
+    includeTags = ['SmokeTest']
+  }
 }
 
 checkstyle {
@@ -253,6 +255,7 @@ dependencies {
   testCompile group: 'org.pitest', name: 'pitest', version: versions.pitest
   testCompile 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.3.0'
   testCompile 'org.codehaus.sonar-plugins:sonar-pitest-plugin:0.5'
+  testCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.3.0'
 
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test'
 
@@ -260,6 +263,8 @@ dependencies {
   integrationTestCompile sourceSets.test.runtimeClasspath
 
   functionalTestCompile sourceSets.main.runtimeClasspath
+  functionalTestCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
+  functionalTestCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.3.0'
 
   smokeTestCompile sourceSets.main.runtimeClasspath
 }
