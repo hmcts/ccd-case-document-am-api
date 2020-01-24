@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import static io.restassured.RestAssured.get;
 
 public class SmokeTest {
 
@@ -26,7 +25,7 @@ public class SmokeTest {
     @Test
     @Tag("SmokeTest")
     void healthCheckReturnsOK() {
-        Response response = get("/health");
+        Response response = RestAssured.get("/health");
         Assert.assertEquals("Application is not running",
             response.getStatusCode(), 200);
     }
