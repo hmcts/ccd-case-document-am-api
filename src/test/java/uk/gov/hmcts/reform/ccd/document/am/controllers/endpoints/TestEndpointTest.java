@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import org.springframework.http.MediaType;
@@ -36,7 +36,8 @@ public class TestEndpointTest {
         MediaType.APPLICATION_JSON.getSubtype(),
         Charset.forName("utf8"));
 
-    private  final String URL = "http://localhost:4455/test/helloworld";
+    @Value("${hello.api.url}")
+    private  String URL;
 
 
     private MockMvc mockMvc;

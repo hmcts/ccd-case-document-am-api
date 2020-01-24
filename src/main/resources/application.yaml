@@ -53,3 +53,6 @@ usermap:
 
 
 auth.idam.client.baseUrl: ${idam_url:http://localhost:4501}
+hello:
+  api:
+    url: "http://localhost:4455/test/helloworld"
