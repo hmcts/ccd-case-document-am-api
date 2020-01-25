@@ -21,7 +21,6 @@ import java.nio.charset.Charset;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -53,7 +52,7 @@ public class TestEndpointTest {
     public void verifyTestS2SAuthentication()
     {
         try {
-            final MvcResult result = mockMvc.perform(get(URL).contentType(JSON_CONTENT_TYPE).header(AUTHORIZATION, "Bearer user1"))
+            final MvcResult result = mockMvc.perform(get(URL).contentType(JSON_CONTENT_TYPE))
                 .andExpect(status().is(200))
                 .andReturn();
             String actual = result.getResponse().getContentAsString();
