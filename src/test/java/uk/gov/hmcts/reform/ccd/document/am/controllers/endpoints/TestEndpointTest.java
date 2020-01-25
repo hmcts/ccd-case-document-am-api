@@ -39,6 +39,8 @@ public class TestEndpointTest {
     @Value("${hello.api.url}")
     private  String URL;
 
+    private final String expected="Hello World !!";
+
 
     private MockMvc mockMvc;
 
@@ -54,9 +56,9 @@ public class TestEndpointTest {
             final MvcResult result = mockMvc.perform(get(URL).contentType(JSON_CONTENT_TYPE).header(AUTHORIZATION, "Bearer user1"))
                 .andExpect(status().is(200))
                 .andReturn();
-         String responseAsString = result.getResponse().getContentAsString();
-            assertNotNull(responseAsString);
-            assertEquals(responseAsString, "Hello World !!");
+            String actual = result.getResponse().getContentAsString();
+            assertNotNull(actual);
+            assertEquals(actual, expected);
         } catch (Exception e) {
             e.printStackTrace();
         }
