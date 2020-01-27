@@ -39,7 +39,10 @@ def versions = [
   springBoot         : '2.1.4.RELEASE',
   springHystrix      : '2.1.1.RELEASE',
   springfoxSwagger   : '2.9.2',
-  pact_version       : '3.5.24'
+  pact_version       : '3.5.24',
+  rest_assured       : '3.3.0',
+  cucumber           : '5.0.0',
+  feign_jackson      : '9.7.0'
 ]
 
 mainClassName = 'uk.gov.hmcts.reform.ccd.document.am.Application'
@@ -143,6 +146,7 @@ checkstyle {
 
 pmd {
   toolVersion = "6.18.0"
+  //**** Need to fix the pmd errors and enable following.
   //sourceSets = [sourceSets.main, sourceSets.test, sourceSets.functionalTest, sourceSets.integrationTest, sourceSets.smokeTest]
   sourceSets = [sourceSets.test]
   reportsDir = file("$project.buildDir/reports/pmd")
@@ -282,16 +286,17 @@ dependencies {
     exclude group: 'uk.gov.hmcts.reform', module: 'java-logging-spring'
   }
   compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '2.0.0'
-  testCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.1.0'
-  compile group: 'io.cucumber', name: 'cucumber-java', version: '5.0.0'
-  testCompile group: 'io.cucumber', name: 'cucumber-junit', version: '5.0.0'
-  testCompile 'io.github.openfeign:feign-jackson:9.7.0'
+
+  compile group: 'io.cucumber', name: 'cucumber-java', version: versions.cucumber
+  testCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.rest_assured
+  testCompile group: 'io.cucumber', name: 'cucumber-junit', version: versions.cucumber
+  testCompile group: 'io.github.openfeign', name: 'feign-jackson', version: versions.feign_jackson
 
   smokeTestCompile group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
   smokeTestCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
   smokeTestCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
   smokeTestCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: versions.serenity
-  smokeTestCompile group: 'io.rest-assured', name: 'rest-assured', version: '3.3.0'
+  smokeTestCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.rest_assured
   
   integrationTestCompile sourceSets.main.runtimeClasspath
   integrationTestCompile sourceSets.test.runtimeClasspath
