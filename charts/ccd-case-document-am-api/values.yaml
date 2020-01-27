@@ -1,0 +1,5 @@
+java:
+  image: 'hmctspublic.azurecr.io/ccd/case-document-am-api:latest'
+  applicationPort: 4455
+  environment:
+

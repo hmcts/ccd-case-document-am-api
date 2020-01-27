@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
-public class GetWelcomeTest {
+public class WelcomeTest {
     private final CaseDocumentAmController caseDocumentAmController = new CaseDocumentAmController();
 
     @Test
@@ -18,6 +18,7 @@ public class GetWelcomeTest {
         assertNotNull(caseDocumentControllerResponse, "No Response from CaseDocumentAmController");
         assertEquals(HttpStatus.OK, caseDocumentControllerResponse.getStatusCode(), "Status code is NOT OK");
         assertEquals(caseDocumentControllerResponse.getBody(),
-            "Welcome to CCD Case Document AM Controller", "Response body does not have expected value");
+            "Welcome to CCD Case Document AM Controller",
+            "Response body does not have expected value");
     }
 }

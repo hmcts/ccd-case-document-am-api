@@ -1,11 +1,6 @@
 language: java
-
-branches:
-  only:
-    - master
-
-#services:
-#  - docker
+jdk:
+  - openjdk8
 
 before_cache:
 - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -17,13 +12,14 @@ cache:
   - $HOME/.gradle/wrapper/
 
 before_install:
-#  - curl https://raw.githubusercontent.com/hmcts/reform-api-docs/master/bin/publish-swagger-docs.sh > publish-swagger-docs.sh
+  - curl https://raw.githubusercontent.com/hmcts/reform-api-docs/master/bin/publish-swagger-docs.sh > publish-swagger-docs.sh
 
 script:
+  - ./gradlew dependencyCheckAnalyze || echo 'dependencyCheckAnalyze failed'
   - ./gradlew test
   - ./gradlew integration
 
 after_success:
   - ./gradlew jacocoTestReport
   - bash <(curl -s https://codecov.io/bash)
-#  - test "$TRAVIS_BRANCH" = "master" && test "$TRAVIS_PULL_REQUEST" = "false" && sh ./publish-swagger-docs.sh
+  - test "$TRAVIS_BRANCH" = "master" && test "$TRAVIS_PULL_REQUEST" = "false" && sh ./publish-swagger-docs.sh
