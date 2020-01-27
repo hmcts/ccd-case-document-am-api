@@ -36,7 +36,8 @@ import org.springframework.context.annotation.Configuration;
 public class AuthCheckerConfiguration {
 
     List<String> authorisedServices;
-    List<String> authorisedRoles = new ArrayList<>();
+
+    List<String> authorisedRoles;
 
     public List<String> getAuthorisedServices() {
         return authorisedServices;
@@ -48,6 +49,9 @@ public class AuthCheckerConfiguration {
 
     public List<String> getAuthorisedRoles() {
         return authorisedRoles;
+    }
+    public void setAuthorisedRoles(List<String> authorisedRoles) {
+        this.authorisedRoles = authorisedRoles;
     }
 
     @Bean

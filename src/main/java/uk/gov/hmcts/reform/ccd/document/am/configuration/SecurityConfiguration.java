@@ -27,36 +27,10 @@ import uk.gov.hmcts.reform.auth.checker.spring.serviceonly.AuthCheckerServiceOnl
 @Slf4j
 public class SecurityConfiguration  {
 
-    @Configuration
-    @Order(1)
-    public static class PostApiSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
-
-        private AuthCheckerServiceOnlyFilter authCheckerServiceOnlyFilter;
-
-        public PostApiSecurityConfigurationAdapter(RequestAuthorizer<Service> serviceRequestAuthorizer,
-
-                                                   AuthenticationManager authenticationManager) {
-
-            authCheckerServiceOnlyFilter = new AuthCheckerServiceOnlyFilter(serviceRequestAuthorizer);
-
-            authCheckerServiceOnlyFilter.setAuthenticationManager(authenticationManager);
-
-        }
-
-        protected void configure(HttpSecurity http) throws Exception {
-
-            http.requestMatchers()
-                .and()
-                .addFilter(authCheckerServiceOnlyFilter)
-                .csrf().disable()
-                .authorizeRequests()
-                .anyRequest().authenticated();
-        }
-    }
 
     @ConfigurationProperties(prefix = "security")
     @Configuration
-    @Order(2)
+
     public static class RestAllApiSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         List<String> anonymousPaths;
