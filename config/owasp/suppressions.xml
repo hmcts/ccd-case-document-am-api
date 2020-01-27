@@ -9,7 +9,7 @@
     <cve>CVE-2018-1258</cve>
   </suppress>
 
-  <suppress until="2020-01-31">
+  <suppress>
     <notes><![CDATA[
    relates to form based authentication, not relevant to us, fix will be picked up in next spring boot update
    ]]></notes>
@@ -18,7 +18,7 @@
     <cve>CVE-2019-12418</cve>
   </suppress>
 
-  <suppress until="2020-01-31">
+  <suppress>
     <notes><![CDATA[
    relates to guava 20.0 jar
    ]]></notes>
@@ -58,5 +58,29 @@
     <cve>CVE-2019-16370</cve>
   </suppress>
 
+  <suppress>
+    <notes><![CDATA[
+   relates to spring_framework spring-contex
+   ]]></notes>
+    <cpe>cpe:2.3:a:pivotal_software:spring_framework:5.2.2:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2020-5397</cve>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[
+   relates to spring_framework spring-contex
+   ]]></notes>
+    <cpe>cpe:2.3:a:apache:groovy:2.5.8:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2016-6497</cve>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[
+   relates to org.apache.sling.javax.activation
+   ]]></notes>
+    <cpe>cpe:2.3:a:apache:sling:0.1.0:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2016-5394</cve>
+    <cve>CVE-2016-6798</cve>
+  </suppress>
 
 </suppressions>
