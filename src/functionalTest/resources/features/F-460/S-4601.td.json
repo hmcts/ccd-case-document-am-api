@@ -3,13 +3,7 @@
   "_extends_": "F-460_Test_Data_Base",
   "_guid_": "S-4601",
   "specs": [
-    "an active Solicitor profile in CCD with a specific variation of ACLs on a case type",
-    "an active solicitor profile with another specific variation of ACLs on the same case type",
-    "an active Solicitor profile having full permissions on the same case type",
-    "is made by the privileged user who just created the case",
-    "contains values for all fields under the case type",
-    "does not contain document fields 1,3,6 for Solicitor 1 as it does not has read access on these fields",
-    "does not contain document fields 2,5,7 for Solicitor 3 as it does not has read access on these fields"
+    "an active Solicitor profile in CCD with a specific variation of ACLs on a case type"
   ],
   "user": {
     "username": "befta.caseworker.2.solicitor.2@gmail.com",
