@@ -20,37 +20,15 @@ public class DataStoreTestAutomationAdapter extends DefaultTestAutomationAdapter
     private Logger logger = LoggerFactory.getLogger(DataStoreTestAutomationAdapter.class);
 
     private static final String[] TEST_DEFINITIONS_NEEDED_FOR_TA = {
-        "src/functionalTest/resources/CCD_CNP_27.xlsx",
-        "src/functionalTest/resources/CCD_CNP_27_AUTOTEST1.xlsx",
-        "src/functionalTest/resources/CCD_CNP_27_AUTOTEST2.xlsx",
-        "src/functionalTest/resources/CCD_CNP_RDM5118.xlsx",
-
-        "src/functionalTest/resources/CCD_BEFTA_JURISDICTION1.xlsx",
-        "src/functionalTest/resources/CCD_BEFTA_JURISDICTION2.xlsx",
-        "src/functionalTest/resources/CCD_BEFTA_JURISDICTION3.xlsx"
+        "src/functionalTest/resources/CCD_BEFTA_JURISDICTION2.xlsx"
     };
 
     private static final String[][] CCD_ROLES_NEEDED_FOR_TA = {
-            { "caseworker-autotest1", "PUBLIC" },
-            { "caseworker-autotest1-private", "PRIVATE" },
-            { "caseworker-autotest1-senior", "RESTRICTED" },
-            { "caseworker-autotest1-solicitor", "PRIVATE" },
-
-            { "caseworker-autotest2", "PUBLIC" },
-            { "caseworker-autotest2-private", "PRIVATE" },
-            { "caseworker-autotest2-senior", "RESTRICTED" },
-            { "caseworker-autotest2-solicitor", "PRIVATE" },
-
-            { "caseworker-befta_jurisdiction_1", "PUBLIC" },
-
             { "caseworker-befta_jurisdiction_2", "PUBLIC" },
             { "caseworker-befta_jurisdiction_2-solicitor_1", "PUBLIC" },
             { "caseworker-befta_jurisdiction_2-solicitor_2", "PUBLIC" },
             { "caseworker-befta_jurisdiction_2-solicitor_3", "PUBLIC" },
             { "citizen", "PUBLIC" },
-
-            { "caseworker-befta_jurisdiction_3", "PUBLIC" },
-            { "caseworker-befta_jurisdiction_3-solicitor", "PUBLIC" }
     };
 
     @Override
