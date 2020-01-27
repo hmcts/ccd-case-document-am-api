@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.ccd.document.am.befta;
 
 @SuppressWarnings("checkstyle:HideUtilityClassConstructor")
-public class DataStoreTestDataLoader {
+public class CaseDocumentAmTestDataLoader {
 
     public static void main(String[] args) {
-        new DataStoreTestAutomationAdapter().loadTestDataIfNecessary();
+        new CaseDocumentAmTestAutomationAdapter().loadTestDataIfNecessary();
     }
 
 }

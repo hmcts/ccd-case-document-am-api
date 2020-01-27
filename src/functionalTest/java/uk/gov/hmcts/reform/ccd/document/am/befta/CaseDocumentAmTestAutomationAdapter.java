@@ -15,9 +15,9 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DataStoreTestAutomationAdapter extends DefaultTestAutomationAdapter {
+public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAdapter {
 
-    private Logger logger = LoggerFactory.getLogger(DataStoreTestAutomationAdapter.class);
+    private Logger logger = LoggerFactory.getLogger( CaseDocumentAmTestAutomationAdapter.class);
 
     private static final String[] TEST_DEFINITIONS_NEEDED_FOR_TA = {
         "src/functionalTest/resources/CCD_BEFTA_JURISDICTION2.xlsx"
