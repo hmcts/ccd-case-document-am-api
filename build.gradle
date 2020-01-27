@@ -69,8 +69,8 @@ jacocoTestCoverageVerification {
 sourceSets {
   functionalTest {
     java {
-      compileClasspath += main.output
-      runtimeClasspath += main.output
+      compileClasspath += main.output + test.output
+      runtimeClasspath += main.output + test.output
       srcDir file('src/functionalTest/java')
     }
     resources.srcDir file('src/functionalTest/resources')
@@ -78,8 +78,8 @@ sourceSets {
 
   integrationTest {
     java {
-      compileClasspath += main.output
-      runtimeClasspath += main.output
+      compileClasspath += main.output + test.output
+      runtimeClasspath += main.output + test.output
       srcDir file('src/integrationTest/java')
     }
     resources.srcDir file('src/integrationTest/resources')
@@ -267,7 +267,7 @@ dependencies {
   testCompile group: 'io.rest-assured', name: 'rest-assured-common', version: '4.0.0'
   testCompile group: 'io.rest-assured', name: 'json-path', version: '4.0.0'
   testCompile group: 'io.rest-assured', name: 'xml-path', version: '4.0.0'
- 
+
   smokeTestCompile sourceSets.main.runtimeClasspath
   smokeTestCompile sourceSets.test.runtimeClasspath
   smokeTestCompileOnly group: 'org.projectlombok', name: 'lombok', version: versions.lombok
