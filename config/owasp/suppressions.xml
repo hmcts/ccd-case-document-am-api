@@ -25,6 +25,27 @@
     <packageUrl regex="true">^pkg:maven/com.google.guava/guava@20.0*$</packageUrl>
     <cve>CVE-2018-10237</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: spring-security-core-5.2.1.RELEASE.jar
+   ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org.springframework.security/spring-security-core@.*$</packageUrl>
+    <cve>CVE-2018-1258</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: spring-security-config-5.2.1.RELEASE.jar
+   ]]></notes>
+    <gav regex="true">^org\.springframework\.security:spring-security-config:.*$</gav>
+    <cve>CVE-2018-1258</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+       file name: spring-security-web-5.2.1.RELEASE.jar
+       ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring-security-web@.*$</packageUrl>
+    <cpe>cpe:/a:pivotal_software:spring_security</cpe>
+  </suppress>
 
   <suppress>
     <notes><![CDATA[
