@@ -83,5 +83,12 @@
     <cve>CVE-2016-5394</cve>
     <cve>CVE-2016-6798</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to pivotal_software:spring_security
+   ]]></notes>
+    <cpe>cpe:2.3:a:pivotal_software:spring_security:5.2.1:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2018-1258</cve>
+  </suppress>
 
 </suppressions>
