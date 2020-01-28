@@ -4,7 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -26,7 +27,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class TestEndpointTest {
+public class HelloEndpointTest {
+    Logger log = LoggerFactory.getLogger(HelloEndpointTest.class);
+
     @Inject
     private WebApplicationContext wac;
 
@@ -36,30 +39,28 @@ public class TestEndpointTest {
         Charset.forName("utf8"));
 
     @Value("${hello.api.url}")
-    private  String URL;
+    private  String url;
 
-    private final String expected="Hello World !!";
-
+    private static String expected = "Hello World !!";
 
     private MockMvc mockMvc;
 
     @Before
-    public void setUP(){
+    public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
     }
 
     @Test
-    public void verifyTestS2SAuthentication()
-    {
+    public void verifyTestS2SAuthentication() {
         try {
-            final MvcResult result = mockMvc.perform(get(URL).contentType(JSON_CONTENT_TYPE))
+            final MvcResult result = mockMvc.perform(get(url).contentType(JSON_CONTENT_TYPE))
                 .andExpect(status().is(200))
                 .andReturn();
             String actual = result.getResponse().getContentAsString();
-            assertNotNull(actual);
-            assertEquals(actual, expected);
+            assertNotNull("Response body should not be null", actual);
+            assertEquals("Response should be match with expected result", actual, expected);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Not Authorise the Service");
         }
 
     }
