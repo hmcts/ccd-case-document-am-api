@@ -27,6 +27,10 @@ locals {
   s2s_url = "http://rpe-service-auth-provider-${local.env_ase_url}"
   idam_url = "${var.env == "prod" ? "https://idam-api.platform.hmcts.net" : "https://idam-api.${local.local_env}.platform.hmcts.net" }"
 
+  custom_redirect_uri = "${var.frontend_url}/oauth2redirect"
+  default_redirect_uri = "https://ccd-case-management-web-${local.env_ase_url}/oauth2redirect"
+  oauth2_redirect_uri = "${var.frontend_url != "" ? local.custom_redirect_uri : local.default_redirect_uri}"
+
  }
 
 data "azurerm_key_vault" "ccd_shared_key_vault" {
