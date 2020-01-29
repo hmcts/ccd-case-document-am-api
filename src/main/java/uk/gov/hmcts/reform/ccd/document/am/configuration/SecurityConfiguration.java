@@ -1,93 +1,66 @@
 package uk.gov.hmcts.reform.ccd.document.am.configuration;
 
-import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
-
-import java.util.List;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-
 import uk.gov.hmcts.reform.auth.checker.core.RequestAuthorizer;
 import uk.gov.hmcts.reform.auth.checker.core.service.Service;
 import uk.gov.hmcts.reform.auth.checker.core.user.User;
 import uk.gov.hmcts.reform.auth.checker.spring.serviceanduser.AuthCheckerServiceAndUserFilter;
-import uk.gov.hmcts.reform.auth.checker.spring.serviceonly.AuthCheckerServiceOnlyFilter;
 
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+
+@Configuration
 @EnableWebSecurity
-@Slf4j
-public class SecurityConfiguration  {
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+    private final AuthCheckerServiceAndUserFilter authCheckerFilter;
 
-    @ConfigurationProperties(prefix = "security")
-    @Configuration
+    @Autowired
+    public SecurityConfiguration(final  RequestAuthorizer<User> userRequestAuthorizer,
+                                       final RequestAuthorizer<Service> serviceRequestAuthorizer,
+                                       final AuthenticationManager authenticationManager) {
+        super();
 
-    public static class RestAllApiSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
+        this.authCheckerFilter = new AuthCheckerServiceAndUserFilter(serviceRequestAuthorizer, userRequestAuthorizer);
 
-        List<String> anonymousPaths;
-
-        private AuthCheckerServiceAndUserFilter authCheckerServiceAndUserFilter;
-
-        public List<String> getAnonymousPaths() {
-            return anonymousPaths;
-        }
-
-        public void setAnonymousPaths(List<String> anonymousPaths) {
-            this.anonymousPaths = anonymousPaths;
-        }
-
-        @Override
-        public void configure(WebSecurity web) {
-            web.ignoring()
-                .antMatchers(anonymousPaths.toArray(new String[0]));
-        }
-
-
-        public RestAllApiSecurityConfigurationAdapter(RequestAuthorizer<User> userRequestAuthorizer,
-
-                                                      RequestAuthorizer<Service> serviceRequestAuthorizer,
-
-                                                      AuthenticationManager authenticationManager) {
-
-            authCheckerServiceAndUserFilter = new AuthCheckerServiceAndUserFilter(serviceRequestAuthorizer, userRequestAuthorizer);
-
-            authCheckerServiceAndUserFilter.setAuthenticationManager(authenticationManager);
-
-        }
-
-        @Override
-        protected void configure(HttpSecurity http) throws AccessDeniedException,Exception {
-
-            http.authorizeRequests()
-                .antMatchers("/actuator/**","/search/**")
-                .permitAll()
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(STATELESS)
-                .and()
-                .csrf()
-                .disable()
-                .formLogin()
-                .disable()
-                .logout()
-                .disable()
-                .authorizeRequests()
-                .anyRequest()
-                .authenticated()
-                .and()
-                .addFilter(authCheckerServiceAndUserFilter);
-        }
-
-
+        this.authCheckerFilter.setAuthenticationManager(authenticationManager);
     }
 
+    @Override
+    public void configure(WebSecurity web) {
+        web.ignoring().antMatchers("/swagger-ui.html",
+                                   "/webjars/springfox-swagger-ui/**",
+                                   "/swagger-resources/**",
+                                   "/v2/**",
+                                   "/health",
+                                   "/health/liveness",
+                                   "/status/health",
+                                   "/loggers/**",
+                                   "/");
+    }
+
+    @Override
+    protected void configure(final HttpSecurity http) throws Exception {
+        // Don't erase user credentials as this is needed for the user profile
+        final ProviderManager authenticationManager = (ProviderManager) authenticationManager();
+        authenticationManager.setEraseCredentialsAfterAuthentication(false);
+        authCheckerFilter.setAuthenticationManager(authenticationManager());
+
+        http
+            .addFilter(authCheckerFilter)
+            .sessionManagement().sessionCreationPolicy(STATELESS).and()
+            .csrf().disable()
+            .formLogin().disable()
+            .logout().disable()
+            .authorizeRequests()
+            .anyRequest()
+            .authenticated();
+
+    }
 }

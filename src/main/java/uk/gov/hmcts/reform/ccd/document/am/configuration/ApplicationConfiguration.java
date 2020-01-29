@@ -18,7 +18,7 @@ public class ApplicationConfiguration {
         this.s2sSecret = s2sSecret;
         this.s2sMicroService = s2sMicroService;
         this.s2sUrl = s2sUrl;
-         }
+    }
 
     public String getS2sSecret() {
         return s2sSecret;

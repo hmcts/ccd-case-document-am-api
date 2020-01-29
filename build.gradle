@@ -9,10 +9,8 @@ buildscript {
 
 plugins {
   id 'application'
-  //id 'checkstyle'
-//  id 'pmd'
+  id 'checkstyle'
   id 'jacoco'
-  id 'io.spring.dependency-management' version '1.0.8.RELEASE'
   id "info.solidsoft.pitest" version '1.3.0'
   id 'org.springframework.boot' version '2.2.2.RELEASE'
   id 'org.owasp.dependencycheck' version '5.2.4'
@@ -24,6 +22,8 @@ apply plugin: 'java'
 apply plugin: 'net.serenity-bdd.aggregator'
 apply plugin: 'project-report'
 apply plugin: 'idea'
+apply plugin: 'pmd'
+apply plugin: 'io.spring.dependency-management'
 
 def versions = [
   junit              : '5.5.0',
@@ -122,21 +122,18 @@ task smoke(type: Test) {
 }
 //Commented checkStyle and Pmd rules for time being to build the project.Once will fix the checkstyle and pmd issues will uncomment it.
 
-//checkstyle {
-//  maxWarnings = 0
-//  toolVersion = '8.24'
-//  // need to set configDir to rootDir otherwise submodule will use submodule/config/checkstyle
-//  configDir = new File(rootDir, 'config/checkstyle')
-//}
-//
-//pmd {
-//  toolVersion = "6.18.0"
-//  sourceSets = [sourceSets.main, sourceSets.test, sourceSets.functionalTest, sourceSets.integrationTest, sourceSets.smokeTest]
-//  reportsDir = file("$project.buildDir/reports/pmd")
-//  // https://github.com/pmd/pmd/issues/876
-//  ruleSets = []
-//  ruleSetFiles = files("config/pmd/ruleset.xml")
-//}
+checkstyle {
+  maxWarnings = 0
+  toolVersion = '8.18'
+  // need to set configDir to rootDir otherwise submodule will use submodule/config/checkstyle
+  configDir = new File(rootDir, 'config/checkstyle')
+}
+
+pmd {
+  toolVersion = "6.18.0"
+  ruleSets = []
+  ruleSetFiles = files("config/pmd/ruleset.xml")
+}
 
 jacocoTestReport {
   executionData(test, integration)
@@ -180,7 +177,7 @@ sonarqube {
     property "sonar.coverage.jacoco.xmlReportPaths", "${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml"
     property "sonar.pitest.mode", "reuseReport"
     property "sonar.pitest.reportsDirectory", "build/reports/pitest"
-    property "sonar.exclusions", "src/main/java/uk/gov/hmcts/reform/ccd/document/am/**,"
+    property "sonar.exclusions", "build/generated-sources/**/*.java,**/service/doclink/**"
     property "sonar.junit.reportPaths", "${project.buildDir}/test-results/junit-platform"
     property "sonar.projectName", "ccd-case-document-am-api"
     property "sonar.projectKey", "ccd-case-document-am-api"
@@ -205,13 +202,15 @@ dependencyUpdates.resolutionStrategy {
   }
 }
 
-// https://jeremylong.github.io/DependencyCheck/dependency-check-gradle/configuration.html
+ //https://jeremylong.github.io/DependencyCheck/dependency-check-gradle/configuration.html
 dependencyCheck {
   // Specifies if the build should be failed if a CVSS score above a specified level is identified.
   // range of 0-10 fails the build, anything greater and it doesn't fail the build
   failBuildOnCVSS = System.getProperty('dependencyCheck.failBuild') == 'true' ? 0 : 11
   suppressionFiles = ['config/owasp/suppressions.xml']
 }
+
+
 
 dependencyUpdates.resolutionStrategy = {
   componentSelection { rules ->
@@ -242,9 +241,10 @@ dependencies {
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-json'
   compile group: 'uk.gov.hmcts.reform', name: 'health-spring-boot-starter', version: '0.0.5'
+  compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
 
   //Added for Spring Security Implementation
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: versions.springBoot
+  //compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: versions.springBoot
 
 
   //Added for S2S and User Authentication
@@ -260,6 +260,7 @@ dependencies {
   compile group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
   compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.1.RELEASE'
+  testCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
 
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit
   testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: versions.junit
@@ -289,6 +290,18 @@ dependencies {
   smokeTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 
 
+}
+dependencyManagement {
+
+
+  dependencies {
+
+    // CVE-2019-10086
+    dependencySet(group: 'commons-beanutils', version: '1.9.4') {
+      entry 'commons-beanutils'
+    }
+
+  }
 }
 
 test {

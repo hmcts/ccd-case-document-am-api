@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableSet;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
@@ -50,6 +48,7 @@ public class AuthCheckerConfiguration {
     public List<String> getAuthorisedRoles() {
         return authorisedRoles;
     }
+
     public void setAuthorisedRoles(List<String> authorisedRoles) {
         this.authorisedRoles = authorisedRoles;
     }
@@ -100,7 +99,6 @@ public class AuthCheckerConfiguration {
         HttpsURLConnection.setDefaultHostnameVerifier(allowAllHostnameVerifier);
         HttpsURLConnection.setDefaultSSLSocketFactory(sslContextWithoutValidation.getSocketFactory());
 
-        CloseableHttpClient client = httpClientBuilder.build();
-        return client;
+        return httpClientBuilder.build();
     }
 }
