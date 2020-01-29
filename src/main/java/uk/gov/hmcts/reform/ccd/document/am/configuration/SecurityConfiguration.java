@@ -22,7 +22,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private final AuthCheckerServiceAndUserFilter authCheckerFilter;
 
     @Autowired
-    public SecurityConfiguration(final  RequestAuthorizer<User> userRequestAuthorizer,
+    public SecurityConfiguration(@Autowired final  RequestAuthorizer<User> userRequestAuthorizer,
                                        final RequestAuthorizer<Service> serviceRequestAuthorizer,
                                        final AuthenticationManager authenticationManager) {
         super();
