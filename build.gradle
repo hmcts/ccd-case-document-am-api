@@ -244,7 +244,7 @@ dependencies {
   compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
 
   //Added for Spring Security Implementation
-  //compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: versions.springBoot
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: versions.springBoot
 
 
   //Added for S2S and User Authentication
