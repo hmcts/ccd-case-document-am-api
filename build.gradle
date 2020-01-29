@@ -177,7 +177,7 @@ sonarqube {
     property "sonar.coverage.jacoco.xmlReportPaths", "${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml"
     property "sonar.pitest.mode", "reuseReport"
     property "sonar.pitest.reportsDirectory", "build/reports/pitest"
-    property "sonar.exclusions", "build/generated-sources/**/*.java,**/service/doclink/**"
+    property "sonar.exclusions", "src/main/java/uk/gov/hmcts/reform/ccd/document/am/**,"
     property "sonar.junit.reportPaths", "${project.buildDir}/test-results/junit-platform"
     property "sonar.projectName", "ccd-case-document-am-api"
     property "sonar.projectKey", "ccd-case-document-am-api"
@@ -209,8 +209,6 @@ dependencyCheck {
   failBuildOnCVSS = System.getProperty('dependencyCheck.failBuild') == 'true' ? 0 : 11
   suppressionFiles = ['config/owasp/suppressions.xml']
 }
-
-
 
 dependencyUpdates.resolutionStrategy = {
   componentSelection { rules ->
@@ -244,7 +242,7 @@ dependencies {
   compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
 
   //Added for Spring Security Implementation
-  //compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: versions.springBoot
+  compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: versions.springBoot
 
 
   //Added for S2S and User Authentication
