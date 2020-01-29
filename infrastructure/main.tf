@@ -94,7 +94,7 @@ module "ccd-case-document-am-api" {
     ENABLE_DB_MIGRATE = "false"
 
     IDAM_USER_URL                       = "${var.idam_api_url}"
-    IDAM_S2S_URL                        = "${local.idam_url}"
+    IDAM_S2S_URL                        = "${local.s2s_url}"
     DATA_STORE_IDAM_KEY                 = "${data.azurerm_key_vault_secret.ccd-case-document-am-api_s2s_key.value}"
 
     CCD_DRAFT_ENCRYPTION_KEY            = "${random_string.draft_encryption_key.result}"
