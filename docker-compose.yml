@@ -7,5 +7,7 @@ services:
       context: .
     image: hmcts/ccd-case-document-am-api
     container_name: ccd-case-document-am-api
+    environment:
+      - IDAM_S2S_URL
     ports:
       - 4455:4455
