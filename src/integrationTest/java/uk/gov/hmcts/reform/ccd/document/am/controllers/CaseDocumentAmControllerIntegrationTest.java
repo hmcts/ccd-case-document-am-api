@@ -14,9 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.context.WebApplicationContext;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.http.HttpStatus.SC_OK;
@@ -32,15 +30,12 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 @RunWith(SpringIntegrationSerenityRunner.class)
 public class CaseDocumentAmControllerIntegrationTest {
 
-    @Autowired
-    private WebApplicationContext wac;
-
     private MockMvc mockMvc;
 
     @Autowired
     CaseDocumentAmController caseDocumentAmController;
 
-    protected static final ObjectMapper mapper = new ObjectMapper();
+    protected static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Before
     public void setUp() {
@@ -52,8 +47,7 @@ public class CaseDocumentAmControllerIntegrationTest {
     }
 
     @Test
-    public void getWelComeAPI() throws Exception
-    {
+    public void welComeAPITest() throws Exception {
         Response response = SerenityRest
             .given()
             .relaxedHTTPSValidation()
@@ -63,14 +57,13 @@ public class CaseDocumentAmControllerIntegrationTest {
             .andReturn();
         response.then().assertThat().statusCode(SC_OK);
 
-        final MvcResult result = mockMvc.perform(get("/").contentType(MediaType.APPLICATION_JSON)).
-            andExpect(status().isOk()).andReturn();
-        assertEquals("Welcome to CCD Case Document AM Controller", result.getResponse().getContentAsString());
+        final MvcResult result = mockMvc.perform(get("/").contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk()).andReturn();
+        assertEquals("Assert for data","Welcome to CCD Case Document AM Controller", result.getResponse().getContentAsString());
     }
 
     @Test
-    public void getCaseDetailsAPI() throws Exception
-    {
+    public void caseDetailsAPITest() throws Exception {
         Response response = SerenityRest
             .given()
             .relaxedHTTPSValidation()
@@ -79,15 +72,15 @@ public class CaseDocumentAmControllerIntegrationTest {
             .get("/")
             .andReturn();
         response.then().assertThat().statusCode(SC_OK);
-
-        final MvcResult result  = mockMvc.perform(get("/cases/").contentType(MediaType.APPLICATION_JSON)).
-            andExpect(status().isOk()).andReturn();
-        List list = mapper.readValue(result.getResponse().getContentAsString(), ArrayList.class);
-        assertEquals("C101", list.get(0));
-        assertEquals("C102", list.get(1));
-        assertEquals("C103", list.get(2));
-        assertEquals("C104", list.get(3));
-        assertEquals("C105", list.get(4));
+        String message = "Assert for case value";
+        final MvcResult result  = mockMvc.perform(get("/cases/").contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk()).andReturn();
+        List list = MAPPER.readValue(result.getResponse().getContentAsString(), List.class);
+        assertEquals(message, "C101", list.get(0));
+        assertEquals(message, "C102", list.get(1));
+        assertEquals(message,"C103", list.get(2));
+        assertEquals(message,"C104", list.get(3));
+        assertEquals(message,"C105", list.get(4));
     }
 }
 

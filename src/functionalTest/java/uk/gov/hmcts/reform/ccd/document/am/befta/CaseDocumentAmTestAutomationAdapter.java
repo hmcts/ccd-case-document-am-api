@@ -12,22 +12,21 @@ import uk.gov.hmcts.befta.data.UserData;
 import uk.gov.hmcts.befta.exception.FunctionalTestException;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAdapter {
 
-    private Logger logger = LoggerFactory.getLogger( CaseDocumentAmTestAutomationAdapter.class);
-
+    private final Logger logger = LoggerFactory.getLogger(CaseDocumentAmTestAutomationAdapter.class);
+    private static final int CREATED = 201;
     private static final String[] TEST_DEFINITIONS_NEEDED_FOR_TA = {
         "src/functionalTest/resources/CCD_BEFTA_JURISDICTION2.xlsx"
     };
-
-    private static final String[][] CCD_ROLES_NEEDED_FOR_TA = {
-            { "caseworker-befta_jurisdiction_2", "PUBLIC" },
-            { "caseworker-befta_jurisdiction_2-solicitor_1", "PUBLIC" },
-            { "caseworker-befta_jurisdiction_2-solicitor_2", "PUBLIC" },
-            { "caseworker-befta_jurisdiction_2-solicitor_3", "PUBLIC" },
+    private static final String SCOPE = "PUBLIC";
+    final String[][] ccdRolesNeededForTA = {
+            { "caseworker-befta_jurisdiction_2", SCOPE },
+            { "caseworker-befta_jurisdiction_2-solicitor_1", SCOPE },
+            { "caseworker-befta_jurisdiction_2-solicitor_2", SCOPE },
+            { "caseworker-befta_jurisdiction_2-solicitor_3", SCOPE },
             { "citizen", "PUBLIC" },
     };
 
@@ -38,9 +37,9 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
     }
 
     private void addCcdRoles() {
-        logger.info("{} roles will be added to '{}'.", CCD_ROLES_NEEDED_FOR_TA.length,
+        logger.info("{} roles will be added to '{}'.", ccdRolesNeededForTA.length,
                 BeftaMain.getConfig().getDefinitionStoreUrl());
-        for (String[] roleInfo : CCD_ROLES_NEEDED_FOR_TA) {
+        for (String[] roleInfo : ccdRolesNeededForTA) {
             try {
                 logger.info("\n\nAdding CCD Role {}, {}...", roleInfo[0], roleInfo[1]);
                 addCcdRole(roleInfo[0], roleInfo[1]);
@@ -52,17 +51,24 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
     }
 
     private void addCcdRole(String role, String classification) {
-        Map<String, String> ccdRoleInfo = new HashMap<>();
+        int diviser = 100;
+        int num = 2;
+        ConcurrentHashMap<String, String> ccdRoleInfo = new ConcurrentHashMap<>();
         ccdRoleInfo.put("role", role);
         ccdRoleInfo.put("security_classification", classification);
         Response response = asAutoTestImporter().given()
                 .header("Content-type", "application/json").body(ccdRoleInfo).when()
                 .put("/api/user-role");
-        if (response.getStatusCode() / 100 != 2) {
-            String message = "Import failed with response body: " + response.body().prettyPrint();
-            message += "\nand http code: " + response.statusCode();
-            throw new FunctionalTestException(message);
+
+
+        if (response.getStatusCode() / diviser != num) {
+            throw new FunctionalTestException(getResponseMessage(response).toString());
         }
+    }
+
+    private StringBuilder getResponseMessage(Response response) {
+        return new StringBuilder("Import failed with response body: ").append(response.body().prettyPrint())
+                    .append("\nand http code: ").append(response.statusCode());
     }
 
     private void importDefinitions() {
@@ -81,10 +87,8 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
 
     private void importDefinition(String file) {
         Response response = asAutoTestImporter().given().multiPart(new File(file)).when().post("/import");
-        if (response.getStatusCode() != 201) {
-            String message = "Import failed with response body: " + response.body().prettyPrint();
-            message += "\nand http code: " + response.statusCode();
-            throw new FunctionalTestException(message);
+        if (response.getStatusCode() != CREATED) {
+            throw new FunctionalTestException(getResponseMessage(response).toString());
         }
     }
 

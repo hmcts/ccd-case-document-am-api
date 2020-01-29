@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.apache.http.HttpStatus.SC_OK;
+import static org.junit.Assert.assertEquals;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -32,5 +33,6 @@ public class SmokeTest {
             .get("/")
             .andReturn();
         response.then().assertThat().statusCode(SC_OK);
+        assertEquals("Assert for data","Smoke Test", "Smoke Test");
     }
 }
