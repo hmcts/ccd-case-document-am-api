@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.document.am.config;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,7 @@ class SwaggerPublisher {
 
     @DisplayName("Generate swagger documentation")
     @Test
+    @Disabled
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void generateDocs() throws Exception {
         byte[] specs = mvc.perform(get("/v2/api-docs"))
@@ -40,6 +42,5 @@ class SwaggerPublisher {
         try (OutputStream outputStream = Files.newOutputStream(Paths.get("/tmp/swagger-specs.json"))) {
             outputStream.write(specs);
         }
-
     }
 }
