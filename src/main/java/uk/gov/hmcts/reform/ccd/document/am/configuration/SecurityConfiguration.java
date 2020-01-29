@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.ccd.document.am.configuration;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -13,6 +12,8 @@ import uk.gov.hmcts.reform.auth.checker.core.service.Service;
 import uk.gov.hmcts.reform.auth.checker.core.user.User;
 import uk.gov.hmcts.reform.auth.checker.spring.serviceanduser.AuthCheckerServiceAndUserFilter;
 
+import javax.inject.Inject;
+
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
@@ -21,10 +22,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final AuthCheckerServiceAndUserFilter authCheckerFilter;
 
-    @Autowired
-    public SecurityConfiguration(@Autowired final  RequestAuthorizer<User> userRequestAuthorizer,
-                                       final RequestAuthorizer<Service> serviceRequestAuthorizer,
-                                       final AuthenticationManager authenticationManager) {
+    @Inject
+    public SecurityConfiguration(final RequestAuthorizer<User> userRequestAuthorizer,
+                                 final RequestAuthorizer<Service> serviceRequestAuthorizer,
+                                 final AuthenticationManager authenticationManager) {
         super();
 
         this.authCheckerFilter = new AuthCheckerServiceAndUserFilter(serviceRequestAuthorizer, userRequestAuthorizer);
@@ -35,14 +36,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) {
         web.ignoring().antMatchers("/swagger-ui.html",
-                                   "/webjars/springfox-swagger-ui/**",
-                                   "/swagger-resources/**",
-                                   "/v2/**",
-                                   "/health",
-                                   "/health/liveness",
-                                   "/status/health",
-                                   "/loggers/**",
-                                   "/");
+            "/webjars/springfox-swagger-ui/**",
+            "/swagger-resources/**",
+            "/v2/**",
+            "/health",
+            "/health/liveness",
+            "/status/health",
+            "/loggers/**",
+            "/");
     }
 
     @Override
