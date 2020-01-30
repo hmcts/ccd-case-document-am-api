@@ -52,6 +52,6 @@ idam:
 
 
 auth.idam.client.baseUrl: ${IDAM_USER_URL:https://idam-api.aat.platform.hmcts.net}
-hello:
+testS2S:
   api:
-    url: "/test/helloworld"
+    url: "/testS2SAuthorization"

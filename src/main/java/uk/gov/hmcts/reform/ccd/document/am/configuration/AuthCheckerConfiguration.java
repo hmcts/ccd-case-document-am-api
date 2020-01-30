@@ -15,6 +15,8 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.servlet.http.HttpServletRequest;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.http.client.HttpClient;
@@ -33,25 +35,11 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class AuthCheckerConfiguration {
 
-    List<String> authorisedServices;
+    @Getter @Setter
+    private List<String> authorisedServices;
 
-    List<String> authorisedRoles;
-
-    public List<String> getAuthorisedServices() {
-        return authorisedServices;
-    }
-
-    public void setAuthorisedServices(List<String> authorisedServices) {
-        this.authorisedServices = authorisedServices;
-    }
-
-    public List<String> getAuthorisedRoles() {
-        return authorisedRoles;
-    }
-
-    public void setAuthorisedRoles(List<String> authorisedRoles) {
-        this.authorisedRoles = authorisedRoles;
-    }
+    @Getter @Setter
+    private List<String> authorisedRoles;
 
     @Bean
     public Function<HttpServletRequest, Collection<String>> authorizedServicesExtractor() {
@@ -72,26 +60,26 @@ public class AuthCheckerConfiguration {
 
     @Bean(name = {"serviceTokenParserHttpClient", "userTokenParserHttpClient"})
     @ConditionalOnProperty(
-            value = "ssl.verification.enable",
-            havingValue = "false",
-            matchIfMissing = true)
+        value = "ssl.verification.enable",
+        havingValue = "false",
+        matchIfMissing = true)
     public HttpClient userTokenParserHttpClient()
-            throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+        throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
         HttpClientBuilder httpClientBuilder = HttpClients.custom()
-                .disableCookieManagement()
-                .disableAuthCaching()
-                .useSystemProperties();
+            .disableCookieManagement()
+            .disableAuthCaching()
+            .useSystemProperties();
 
         TrustStrategy acceptingTrustStrategy = (chain, authType) -> true;
         // ignore Sonar's weak hostname verifier as we are deliberately disabling SSL verification
         HostnameVerifier allowAllHostnameVerifier = (hostName, session) -> true; // NOSONAR
         SSLContext sslContextWithoutValidation = SSLContexts.custom()
-                .loadTrustMaterial(null, acceptingTrustStrategy)
-                .build();
+            .loadTrustMaterial(null, acceptingTrustStrategy)
+            .build();
 
         SSLConnectionSocketFactory allowAllSslSocketFactory = new SSLConnectionSocketFactory(
-                sslContextWithoutValidation,
-                allowAllHostnameVerifier);
+            sslContextWithoutValidation,
+            allowAllHostnameVerifier);
 
         httpClientBuilder.setSSLSocketFactory(allowAllSslSocketFactory);
 

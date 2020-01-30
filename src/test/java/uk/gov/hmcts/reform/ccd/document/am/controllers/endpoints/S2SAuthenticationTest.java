@@ -27,21 +27,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class HelloEndpointTest {
-    Logger log = LoggerFactory.getLogger(HelloEndpointTest.class);
+public class S2SAuthenticationTest {
+    Logger log = LoggerFactory.getLogger(S2SAuthenticationTest.class);
 
     @Inject
     private WebApplicationContext wac;
 
-    protected static final MediaType JSON_CONTENT_TYPE = new MediaType(
+    private static final MediaType JSON_CONTENT_TYPE = new MediaType(
         MediaType.APPLICATION_JSON.getType(),
         MediaType.APPLICATION_JSON.getSubtype(),
         Charset.forName("utf8"));
 
-    @Value("${hello.api.url}")
-    private  String url;
-
-    private static String expected = "Hello World !!";
+    @Value("${testS2S.api.url}")
+    private String url;
 
     private MockMvc mockMvc;
 
@@ -52,6 +50,7 @@ public class HelloEndpointTest {
 
     @Test
     public void verifyTestS2SAuthentication() {
+        String expected = "S2S Authentication is successful !!";
         try {
             final MvcResult result = mockMvc.perform(get(url).contentType(JSON_CONTENT_TYPE))
                 .andExpect(status().is(200))
@@ -60,10 +59,7 @@ public class HelloEndpointTest {
             assertNotNull("Response body should not be null", actual);
             assertEquals("Response should be match with expected result", actual, expected);
         } catch (Exception e) {
-            log.error("Not Authorise the Service");
+            log.error("Service is not Authorised");
         }
-
     }
-
-
 }
