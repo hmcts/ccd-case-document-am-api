@@ -35,11 +35,25 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class AuthCheckerConfiguration {
 
-    @Getter @Setter
-    private List<String> authorisedServices;
+    List<String> authorisedServices;
 
-    @Getter @Setter
-    private List<String> authorisedRoles;
+    List<String> authorisedRoles;
+
+    public List<String> getAuthorisedServices() {
+        return authorisedServices;
+    }
+
+    public void setAuthorisedServices(List<String> authorisedServices) {
+        this.authorisedServices = authorisedServices;
+    }
+
+    public List<String> getAuthorisedRoles() {
+        return authorisedRoles;
+    }
+
+    public void setAuthorisedRoles(List<String> authorisedRoles) {
+        this.authorisedRoles = authorisedRoles;
+    }
 
     @Bean
     public Function<HttpServletRequest, Collection<String>> authorizedServicesExtractor() {
