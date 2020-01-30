@@ -192,4 +192,64 @@
     <cpe>^pkg:javascript/jquery-ui-dialog@1.11.2</cpe>
     <cve>CVE-2016-7103</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to serenity-core-2.1.0.jar jquery 1.8
+   ]]></notes>
+    <cpe>^pkg:javascript/jquery@1.8.3</cpe>
+    <cve>CVE-2012-6708</cve>
+    <cve>CVE-2015-9251</cve>
+    <cve>CVE-2019-11358</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to serenity-core-2.1.0.jar jquery.min.js
+   ]]></notes>
+    <cpe>^pkg:javascript/jquery@1.10.2</cpe>
+    <cve>CVE-2015-9251</cve>
+    <cve>CVE-2019-11358</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to serenity-core-2.1.0.jar jquery@3.1.1
+   ]]></notes>
+    <cpe>^pkg:javascript/jquery@1.10.2</cpe>
+    <cve>CVE-2019-11358</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to pkg:javascript/bootstrap@3.3.0
+   ]]></notes>
+    <cpe>^pkg:javascript/bootstrap@3.3.0</cpe>
+    <cve>CVE-2018-14040</cve>
+    <cve>CVE-2018-14041</cve>
+    <cve>CVE-2018-14042</cve>
+    <cve>CVE-2019-8331</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to pkg:javascript/jquery@1.5.1
+   ]]></notes>
+    <cpe>^pkg:javascript/jquery@1.5.1</cpe>
+    <cve>CVE-2011-4969</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to bouncycastle
+   ]]></notes>
+    <cpe>cpe:2.3:a:bouncycastle:legion-of-the-bouncy-castle-java-crytography-api:1.54:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2018-1000613</cve>
+    <cve>CVE-2017-13098</cve>
+    <cve>CVE-2018-1000180</cve>
+    <cve>CVE-2016-1000352</cve><cve>CVE-2016-2427</cve>
+    <cve>CVE-2016-1000346</cve>
+    <cve>CVE-2016-1000345</cve>
+    <cve>CVE-2016-1000344</cve>
+    <cve>CVE-2016-1000343</cve>
+    <cve>CVE-2016-1000342</cve>
+    <cve>CVE-2016-1000341</cve>
+    <cve>CVE-2016-1000340</cve>
+    <cve>CVE-2016-1000339</cve>
+    <cve>CVE-2016-1000338</cve>
+  </suppress>
 </suppressions>
