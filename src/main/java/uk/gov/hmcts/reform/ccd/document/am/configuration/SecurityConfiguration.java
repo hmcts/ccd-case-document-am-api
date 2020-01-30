@@ -22,9 +22,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private final AuthCheckerServiceAndUserFilter authCheckerFilter;
 
     @Autowired
-    public SecurityConfiguration(final  RequestAuthorizer<User> userRequestAuthorizer,
-                                       final RequestAuthorizer<Service> serviceRequestAuthorizer,
-                                       final AuthenticationManager authenticationManager) {
+    public SecurityConfiguration(final RequestAuthorizer<User> userRequestAuthorizer,
+                                 final RequestAuthorizer<Service> serviceRequestAuthorizer,
+                                 final AuthenticationManager authenticationManager) {
         super();
 
         this.authCheckerFilter = new AuthCheckerServiceAndUserFilter(serviceRequestAuthorizer, userRequestAuthorizer);
@@ -35,14 +35,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) {
         web.ignoring().antMatchers("/swagger-ui.html",
-                                   "/webjars/springfox-swagger-ui/**",
-                                   "/swagger-resources/**",
-                                   "/v2/**",
-                                   "/health",
-                                   "/health/liveness",
-                                   "/status/health",
-                                   "/loggers/**",
-                                   "/");
+            "/webjars/springfox-swagger-ui/**",
+            "/swagger-resources/**",
+            "/v2/**",
+            "/health",
+            "/health/liveness",
+            "/status/health",
+            "/loggers/**",
+            "/");
     }
 
     @Override

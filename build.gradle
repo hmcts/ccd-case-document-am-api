@@ -11,6 +11,8 @@ plugins {
   id 'application'
   id 'checkstyle'
   id 'jacoco'
+  id 'pmd'
+  id 'io.spring.dependency-management' version '1.0.8.RELEASE'
   id "info.solidsoft.pitest" version '1.3.0'
   id 'org.springframework.boot' version '2.2.2.RELEASE'
   id 'org.owasp.dependencycheck' version '5.2.4'
@@ -22,8 +24,6 @@ apply plugin: 'java'
 apply plugin: 'net.serenity-bdd.aggregator'
 apply plugin: 'project-report'
 apply plugin: 'idea'
-apply plugin: 'pmd'
-apply plugin: 'io.spring.dependency-management'
 
 def versions = [
   junit              : '5.5.0',
@@ -120,13 +120,15 @@ task smoke(type: Test) {
     includeTags = ['SmokeTest']
   }
 }
-//Commented checkStyle and Pmd rules for time being to build the project.Once will fix the checkstyle and pmd issues will uncomment it.
 
 checkstyle {
   maxWarnings = 0
   toolVersion = '8.18'
   // need to set configDir to rootDir otherwise submodule will use submodule/config/checkstyle
   configDir = new File(rootDir, 'config/checkstyle')
+
+  checkstyleMain.shouldRunAfter(compileJava)
+  test.shouldRunAfter(checkstyleTest)
 }
 
 pmd {
@@ -202,7 +204,7 @@ dependencyUpdates.resolutionStrategy {
   }
 }
 
- //https://jeremylong.github.io/DependencyCheck/dependency-check-gradle/configuration.html
+//https://jeremylong.github.io/DependencyCheck/dependency-check-gradle/configuration.html
 dependencyCheck {
   // Specifies if the build should be failed if a CVSS score above a specified level is identified.
   // range of 0-10 fails the build, anything greater and it doesn't fail the build
@@ -243,8 +245,7 @@ dependencies {
 
   //Added for Spring Security Implementation
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: versions.springBoot
-
-
+  
   //Added for S2S and User Authentication
   compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.reformS2sClient
   compile(group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4') {
@@ -263,8 +264,6 @@ dependencies {
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit
   testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: versions.junit
   testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: versions.junit
-  testCompile group: 'junit', name: 'junit', version: '4.12'
-
 
   testCompile group: 'org.pitest', name: 'pitest', version: versions.pitest
   testCompile 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.3.0'
@@ -286,21 +285,8 @@ dependencies {
   smokeTestCompile sourceSets.test.runtimeClasspath
   smokeTestCompileOnly group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   smokeTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-
-
 }
-dependencyManagement {
 
-
-  dependencies {
-
-    // CVE-2019-10086
-    dependencySet(group: 'commons-beanutils', version: '1.9.4') {
-      entry 'commons-beanutils'
-    }
-
-  }
-}
 
 test {
   useJUnitPlatform()
