@@ -180,11 +180,16 @@
   </suppress>
   <suppress>
     <notes><![CDATA[
-   relates to serenity-core-2.1.0.jar
+   relates to serenity-core-2.1.0.jar jquery-ui.min.js
    ]]></notes>
-    <cpe>^pkg:javascript/jquery@1.8.3</cpe>
-    <cve>CVE-2012-6708</cve>
-    <cve>CVE-2015-9251</cve>
-    <cve>CVE-2019-11358</cve>
+    <cpe>^pkg:javascript/jquery-ui-dialog@1.11.2</cpe>
+    <cve>CVE-2016-7103</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to serenity-core-2.1.0.jar jquery-ui.js
+   ]]></notes>
+    <cpe>^pkg:javascript/jquery-ui-dialog@1.11.2</cpe>
+    <cve>CVE-2016-7103</cve>
   </suppress>
 </suppressions>
