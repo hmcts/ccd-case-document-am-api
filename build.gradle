@@ -156,7 +156,7 @@ pmd {
 }
 
 jacocoTestReport {
-  executionData(test, integration)
+  executionData(test)
   reports {
     xml.enabled = true
     csv.enabled = false
@@ -168,15 +168,6 @@ project.tasks['sonarqube'].dependsOn jacocoTestReport
 
 jacoco {
   toolVersion = "0.8.1"
-}
-
-jacocoTestReport {
-  executionData(test, integration)
-  reports {
-    xml.enabled = true
-    csv.enabled = false
-    xml.destination = file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
-  }
 }
 
 pitest {
