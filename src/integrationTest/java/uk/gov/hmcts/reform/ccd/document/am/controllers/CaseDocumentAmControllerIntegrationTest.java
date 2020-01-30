@@ -41,7 +41,7 @@ public class CaseDocumentAmControllerIntegrationTest {
     public void setUp() {
         this.mockMvc = standaloneSetup(this.caseDocumentAmController).build();
         final String targetInstance = StringUtils.defaultIfBlank(System.getenv("TEST_URL"),
-                                                                 "http://localhost:4455");
+            "http://localhost:4455");
         RestAssured.baseURI = targetInstance;
         RestAssured.useRelaxedHTTPSValidation();
     }
@@ -59,7 +59,7 @@ public class CaseDocumentAmControllerIntegrationTest {
 
         final MvcResult result = mockMvc.perform(get("/").contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk()).andReturn();
-        assertEquals("Assert for data","Welcome to CCD Case Document AM Controller", result.getResponse().getContentAsString());
+        assertEquals("Assert for data", "Welcome to CCD Case Document AM Controller", result.getResponse().getContentAsString());
     }
 
     @Test
@@ -73,14 +73,14 @@ public class CaseDocumentAmControllerIntegrationTest {
             .andReturn();
         response.then().assertThat().statusCode(SC_OK);
         String message = "Assert for case value";
-        final MvcResult result  = mockMvc.perform(get("/cases/").contentType(MediaType.APPLICATION_JSON))
+        final MvcResult result = mockMvc.perform(get("/cases/").contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk()).andReturn();
         List list = MAPPER.readValue(result.getResponse().getContentAsString(), List.class);
         assertEquals(message, "C101", list.get(0));
         assertEquals(message, "C102", list.get(1));
-        assertEquals(message,"C103", list.get(2));
-        assertEquals(message,"C104", list.get(3));
-        assertEquals(message,"C105", list.get(4));
+        assertEquals(message, "C103", list.get(2));
+        assertEquals(message, "C104", list.get(3));
+        assertEquals(message, "C105", list.get(4));
     }
 }
 
