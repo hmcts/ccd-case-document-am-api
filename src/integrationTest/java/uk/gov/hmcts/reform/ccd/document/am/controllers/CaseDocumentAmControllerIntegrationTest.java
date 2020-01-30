@@ -41,7 +41,7 @@ public class CaseDocumentAmControllerIntegrationTest {
     public void setUp() {
         this.mockMvc = standaloneSetup(this.caseDocumentAmController).build();
         final String targetInstance = StringUtils.defaultIfBlank(System.getenv("TEST_URL"),
-                                                                 "Need to update URL here");
+                                                                 "http://localhost:4455");
         RestAssured.baseURI = targetInstance;
         RestAssured.useRelaxedHTTPSValidation();
     }

@@ -15,24 +15,43 @@ management:
 spring:
   application:
     name: Spring Boot Template
-#  datasource:
-#    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
-#    username: ${DB_USER_NAME}
-#    password: ${DB_PASSWORD}
-#    properties:
-#      charSet: UTF-8
-#    hikari:
-#      minimumIdle: 2
-#      maximumPoolSize: 10
-#      idleTimeout: 10000
-#      poolName: {to-be-defined}HikariCP
-#      maxLifetime: 7200000
-#      connectionTimeout: 30000
-#  jpa:
-#    properties:
-#      hibernate:
-#        jdbc:
-#          lob:
-#            # silence the 'wall-of-text' - unnecessary exception throw about blob types
-#            non_contextual_creation: true
+
+security:
+  anonymousPaths:
+    - "/"
+    - "/health"
+    - "/health/liveness"
+    - "/actuator/**"
+    - "/loggers/**"
+    - "/swagger-ui.html"
+    - "/swagger-resources/**"
+    - "/v2/api-docs"
+    - "/webjars/springfox-swagger-ui/**"
+    - "/search/**"
+    - "/csrf"
+    - "/error"
+    - "/favicon.ico"
+  ### Update list with service id of any service going to interact with casse document api
+  authorisedServices:
+    - ccd-case-document-am-api
+    - ccd_gw
+    - xui_webapp
+  authorisedRoles:
+    - caseworker
+
+
+
+### dependency configuration
+auth.provider.service.client.baseUrl: ${IDAM_S2S_URL:http://rpe-service-auth-provider-aat.service.core-compute-aat.internal}
+idam:
+  s2s-auth:
+    totp_secret: ${S2S_SECRET:AAAAAAAAAAAAAAAB}
+    microservice: ccd-case-document-am-api
+    url: ${IDAM_S2S_URL:http://rpe-service-auth-provider-aat.service.core-compute-aat.internal}
+
+
+
+auth.idam.client.baseUrl: ${IDAM_USER_URL:https://idam-api.aat.platform.hmcts.net}
+hello:
+  api:
+    url: "/test/helloworld"

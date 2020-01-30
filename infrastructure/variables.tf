@@ -87,5 +87,11 @@ variable "http_client_validate_after_inactivity" {
   default = "0"
 }
 
+variable "frontend_url" {
+  description = "Optional front end URL to use for building redirect URI"
+  type = "string"
+  default = ""
+}
+
 variable "deployment_namespace" {}
 
