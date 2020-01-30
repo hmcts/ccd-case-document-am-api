@@ -62,7 +62,7 @@ public class CaseDocumentAmControllerIntegrationTest {
             .get("/")
             .andReturn();
         response.then().assertThat().statusCode(SC_OK);
-        logger.info("\n\nwelComeAPITest {}...statusCode {} ", response.then().assertThat().statusCode(SC_OK));
+        logger.info("\n\nwelComeAPITest...statusCode {} ", response.statusCode());
         final MvcResult result = mockMvc.perform(get("/").contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk()).andReturn();
         logger.info("\n\nCaseDocumentAmControllerIntegrationTest setUp MvcResult {}...", result);
