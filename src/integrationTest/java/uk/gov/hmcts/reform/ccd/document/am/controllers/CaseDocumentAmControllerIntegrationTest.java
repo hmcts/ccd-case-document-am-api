@@ -9,6 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -30,6 +32,8 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 @RunWith(SpringIntegrationSerenityRunner.class)
 public class CaseDocumentAmControllerIntegrationTest {
 
+    Logger logger = LoggerFactory.getLogger(CaseDocumentAmControllerIntegrationTest.class);
+
     private MockMvc mockMvc;
 
     @Autowired
@@ -42,12 +46,14 @@ public class CaseDocumentAmControllerIntegrationTest {
         this.mockMvc = standaloneSetup(this.caseDocumentAmController).build();
         final String targetInstance = StringUtils.defaultIfBlank(System.getenv("TEST_URL"),
             "http://localhost:4455");
+        logger.info("\n\nCaseDocumentAmControllerIntegrationTest setUp targetInstance {}...", targetInstance);
         RestAssured.baseURI = targetInstance;
         RestAssured.useRelaxedHTTPSValidation();
     }
 
     @Test
     public void welComeAPITest() throws Exception {
+        logger.info("\n\nCaseDocumentAmControllerIntegrationTest : Inside  welComeAPITesti method...");
         Response response = SerenityRest
             .given()
             .relaxedHTTPSValidation()
@@ -56,9 +62,11 @@ public class CaseDocumentAmControllerIntegrationTest {
             .get("/")
             .andReturn();
         response.then().assertThat().statusCode(SC_OK);
-
+        logger.info("\n\nwelComeAPITest {}...statusCode {} ", response.then().assertThat().statusCode(SC_OK));
         final MvcResult result = mockMvc.perform(get("/").contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk()).andReturn();
+        logger.info("\n\nCaseDocumentAmControllerIntegrationTest setUp MvcResult {}...", result);
+        logger.info("\n\nCaseDocumentAmControllerIntegrationTest setUp getContentAsString {}...", result.getResponse().getContentAsString());
         assertEquals("Assert for data", "Welcome to CCD Case Document AM Controller", result.getResponse().getContentAsString());
     }
 
