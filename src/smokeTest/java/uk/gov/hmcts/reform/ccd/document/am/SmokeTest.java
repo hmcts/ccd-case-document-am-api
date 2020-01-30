@@ -17,7 +17,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class SmokeTest {
 
     final String targetInstance = StringUtils.defaultIfBlank(System.getenv("TEST_URL"),
-        "http://localhost:4455")
+        "http://localhost:4455");
 
     @Test
     public void should_receive_response_for_a_get_call() {
@@ -33,6 +33,6 @@ public class SmokeTest {
             .get("/")
             .andReturn();
         response.then().assertThat().statusCode(SC_OK);
-        assertEquals("Assert for data","Smoke Test", "Smoke Test");
+        assertEquals("Assert for data", "Smoke Test", "Smoke Test");
     }
 }
