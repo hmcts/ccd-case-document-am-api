@@ -192,4 +192,35 @@
     <cpe>^pkg:javascript/jquery-ui-dialog@1.11.2</cpe>
     <cve>CVE-2016-7103</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to cucumber-jvm-deps-1.0.6/com.thoughtworks.xstream
+   ]]></notes>
+    <cpe>cpe:2.3:a:jruby:jruby:1.0.0:rc1:*:*:*:*:*:*</cpe>
+    <cve>CVE-2010-1330</cve>
+    <cve>CVE-2011-4838</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to cucumber-jvm-deps-1.0.6/com.thoughtworks.xstream
+   ]]></notes>
+    <cpe>cpe:2.3:a:xstream_project:xstream:1.4.7:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2016-3674</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to jruby-complete-1.7.26/jruby
+   ]]></notes>
+    <cpe>cpe:2.3:a:jruby:jruby:1.0.0:rc1:*:*:*:*:*:*</cpe>
+    <cve>CVE-2010-1330</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to org.eclipse.jetty/jetty-xml
+   ]]></notes>
+    <cpe>cpe:2.3:a:eclipse:jetty:9.4.12:20180830:*:*:*:*:*:*</cpe>
+    <cpe>cpe:2.3:a:jetty:jetty:9.4.12.v20180830:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2019-10241</cve>
+    <cve>CVE-2019-10247</cve>
+  </suppress>
 </suppressions>
