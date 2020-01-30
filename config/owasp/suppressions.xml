@@ -125,4 +125,66 @@
     <cve>CVE-2018-11797</cve>
     <cve>CVE-2018-8036</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to phantomjs
+   ]]></notes>
+    <cpe>cpe:2.3:a:phantomjs:phantomjs:1.4.4:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2019-17221</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to Common Beanutils
+   ]]></notes>
+    <cpe>cpe:2.3:a:apache:commons_beanutils:1.8.3:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2014-0114</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to XStream project
+   ]]></notes>
+    <cpe>cpe:2.3:a:xstream_project:xstream:1.4.9:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2017-7957</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to Filters 2.0.235.jar
+   ]]></notes>
+    <cpe>cpe:2.3:a:image_processing_software:image_processing_software:2.0.235:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2005-0406</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to AsciiDoctor
+   ]]></notes>
+    <cpe>cpe:2.3:a:asciidoctor:asciidoctor:1.5.6:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2018-18385</cve>
+
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to flexmark-ext-xwiki-macros-0.34.30.jar
+   ]]></notes>
+    <cpe>cpe:2.3:a:xwiki:xwiki:0.34.30:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2007-4898</cve>
+    <cve>CVE-2010-4641</cve>
+    <cve>CVE-2010-4642</cve>
+    <cve>CVE-2018-16277</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to openhtmltopdf-jsoup-dom-converter-0.0.1-RC13.jar
+   ]]></notes>
+    <cpe>cpe:2.3:a:jsoup:jsoup:0.0.1.rc13:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2015-6748</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to serenity-core-2.1.0.jar
+   ]]></notes>
+    <cpe>^pkg:javascript/jquery@1.8.3</cpe>
+    <cve>CVE-2012-6708</cve>
+    <cve>CVE-2015-9251</cve>
+    <cve>CVE-2019-11358</cve>
+  </suppress>
 </suppressions>
