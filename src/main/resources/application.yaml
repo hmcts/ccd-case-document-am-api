@@ -55,3 +55,7 @@ auth.idam.client.baseUrl: ${IDAM_USER_URL:https://idam-api.aat.platform.hmcts.ne
 testS2S:
   api:
     url: "/testS2SAuthorization"
+
+launchdarkly:
+  sdk:
+    key: ${LAUNCHDARKLY_SDK_KEY:}
