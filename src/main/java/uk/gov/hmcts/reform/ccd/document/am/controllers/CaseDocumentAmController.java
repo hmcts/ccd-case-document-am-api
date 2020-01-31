@@ -32,12 +32,6 @@ public class CaseDocumentAmController {
         return ok("Welcome to CCD Case Document AM Controller");
     }
 
-    @RequestMapping(value = "/testS2SAuthorization", method = RequestMethod.GET)
-    public ResponseEntity<String> testS2SAuthorization() {
-
-        return ok("S2S Authentication is successful !!");
-    }
-
     @RequestMapping(value = "/cases/", method = RequestMethod.GET)
     public ResponseEntity<List<String>> getCases() {
         List<String> cases = Arrays.asList("C101", "C102", "C103", "C104", "C105");
