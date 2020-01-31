@@ -24,7 +24,7 @@ public class LaunchDarklyConfiguration {
 
         // LaunchDarkly servers use dynamic IP addresses behind a load balancer, which could lead
         // to connection issues if the DNS cache is not updated frequently
-        Security.setProperty("networkaddress.cache.ttl" , "60");
+        Security.setProperty("networkaddress.cache.ttl", "60");
     }
 
     @Bean
