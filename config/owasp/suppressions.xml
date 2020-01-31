@@ -96,4 +96,33 @@
     <cpe>cpe:2.3:a:apache:commons_beanutils:1.9.3:*:*:*:*:*:*:*</cpe>
     <cve>CVE-2019-10086</cve>
   </suppress>
+
+  <suppress>
+    <notes>
+      <![CDATA[
+        file name: launchdarkly-java-server-sdk-4.11.1.jar
+
+        The LaunchDarkly Java SDK comes as a fat jar with a bundled dependency on an old version of Google Guava
+        which has CVE-2018-10237 associated with it. This bundled dependency is only used internally at runtime,
+        and would be extremely difficult to attack as all LaunchDarkly traffic is sent down an encrypted channel.
+      ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:maven/com\.google\.guava/guava@.*$</packageUrl>
+    <cve>CVE-2018-10237</cve>
+  </suppress>
+
+  <suppress>
+    <notes>
+      <![CDATA[
+        file name: launchdarkly-java-server-sdk-4.11.1.jar
+
+        The LaunchDarkly Java SDK comes as a fat jar with a bundled dependency on an old version of okhttp
+        which has CVE-2018-20200 associated with it. This bundled dependency is only used internally at runtime,
+        and would be extremely difficult to attack as all LaunchDarkly traffic is sent down an encrypted channel.
+      ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:maven/com\.squareup\.okhttp3/okhttp@.*$</packageUrl>
+    <cve>CVE-2018-20200</cve>
+  </suppress>
+
 </suppressions>

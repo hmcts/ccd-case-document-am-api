@@ -210,6 +210,11 @@ dependencyCheck {
   // range of 0-10 fails the build, anything greater and it doesn't fail the build
   failBuildOnCVSS = System.getProperty('dependencyCheck.failBuild') == 'true' ? 0 : 11
   suppressionFiles = ['config/owasp/suppressions.xml']
+
+  analyzers {
+    // Disable scanning of .NET related binaries
+    assemblyEnabled = false
+  }
 }
 
 dependencyUpdates.resolutionStrategy = {
@@ -234,6 +239,11 @@ repositories {
   }
 }
 
+configurations.all {
+  resolutionStrategy {
+    force 'com.google.guava:guava:28.2-jre'
+  }
+}
 
 dependencies {
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
@@ -260,7 +270,7 @@ dependencies {
   compile group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
   compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.1.RELEASE'
 
-  compile 'com.launchdarkly:launchdarkly-java-server-sdk:4.10.1'
+  compile 'com.launchdarkly:launchdarkly-java-server-sdk:4.11.1'
   compile 'com.google.code.gson:gson:2.8.6'
   compile 'org.slf4j:slf4j-api:1.7.30'
 
@@ -291,7 +301,6 @@ dependencies {
   smokeTestCompileOnly group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   smokeTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 }
-
 
 test {
   useJUnitPlatform()
