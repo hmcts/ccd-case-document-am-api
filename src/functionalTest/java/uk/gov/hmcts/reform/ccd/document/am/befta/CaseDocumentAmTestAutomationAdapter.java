@@ -51,7 +51,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
     }
 
     private void addCcdRole(String role, String classification) {
-        int diviser = 100;
+        int divisor = 100;
         int num = 2;
         ConcurrentHashMap<String, String> ccdRoleInfo = new ConcurrentHashMap<>();
         ccdRoleInfo.put("role", role);
@@ -61,7 +61,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
                 .put("/api/user-role");
 
 
-        if (response.getStatusCode() / diviser != num) {
+        if (response.getStatusCode() / divisor != num) {
             throw new FunctionalTestException(getResponseMessage(response).toString());
         }
     }
