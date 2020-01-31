@@ -8,5 +8,4 @@ public class CaseDocumentAmBeftaMain extends BeftaMain {
         setTaAdapter(new CaseDocumentAmTestAutomationAdapter());
         BeftaMain.main(args);
     }
-
 }
