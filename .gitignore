@@ -3,6 +3,9 @@
 !gradle/wrapper/gradle-wrapper.jar
 *.class
 bin/main/application.yaml
+/auto-environment/idam-ui-automation/node_modules/
+/auto-environment/idam-ui-automation/output/
+
 
 ### STS ###
 .apt_generated
