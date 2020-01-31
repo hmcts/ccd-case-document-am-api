@@ -13,3 +13,4 @@ java:
         - ccd-ELASTIC-SEARCH-DATA-NODES-URL
         - ccd-ELASTIC-SEARCH-PASSWORD
   environment:
+    DEFINITION_STORE_HOST: http://ccd-definition-store-api-pr-469.service.core-compute-preview.internal/
