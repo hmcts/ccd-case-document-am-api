@@ -1,5 +1,15 @@
 java:
-  environment:
-  # Don't modify below here
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
+  aadIdentityName:
+  keyVaults:
+    ccd:
+      resourceGroup: ccd-shared
+      secrets:
+        - data-store-api-draftStoreEncryptionSecret
+        - data-store-api-draft-key
+        - ccd-data-s2s-secret
+        - ccd-ELASTIC-SEARCH-URL
+        - ccd-ELASTIC-SEARCH-DATA-NODES-URL
+        - ccd-ELASTIC-SEARCH-PASSWORD
+  environment:
