@@ -6,6 +6,5 @@ import uk.gov.hmcts.befta.player.DefaultBackEndFunctionalTestScenarioPlayer;
 public class CaseDocumentBeftaScenarioPlayer extends DefaultBackEndFunctionalTestScenarioPlayer {
     public CaseDocumentBeftaScenarioPlayer() {
         super();
-        RestAssured.baseURI = "http://ccd-data-store-api-aat.service.core-compute-aat.internal/";
     }
 }
