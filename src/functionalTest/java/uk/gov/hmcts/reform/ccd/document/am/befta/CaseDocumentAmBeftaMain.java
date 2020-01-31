@@ -6,7 +6,6 @@ public class CaseDocumentAmBeftaMain extends BeftaMain {
 
     public static void main(String[] args) {
         setTaAdapter(new CaseDocumentAmTestAutomationAdapter());
-        new CaseDocumentBeftaScenarioPlayer();
         BeftaMain.main(args);
     }
 }
