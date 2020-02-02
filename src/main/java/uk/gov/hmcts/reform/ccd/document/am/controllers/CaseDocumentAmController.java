@@ -3,8 +3,6 @@ package uk.gov.hmcts.reform.ccd.document.am.controllers;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
@@ -32,8 +30,6 @@ public class CaseDocumentAmController {
         return ok("Welcome to CCD Case Document AM Controller");
     }
 
-    @RequestMapping(value = "/testS2SAuthorization", method = RequestMethod.GET)
-    public ResponseEntity<String> testS2SAuthorization() {
 
         return ok("S2S Authentication is successful !!");
     }
