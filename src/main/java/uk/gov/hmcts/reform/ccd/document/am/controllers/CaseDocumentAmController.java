@@ -25,6 +25,4 @@ public class CaseDocumentAmController {
     public ResponseEntity<String> welcome() {
         return ok("Welcome to CCD Case Document AM Controller");
     }
-
-
 }

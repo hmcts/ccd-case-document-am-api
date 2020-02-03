@@ -59,3 +59,7 @@ testS2S:
 launchdarkly:
   sdk:
     key: ${LAUNCHDARKLY_SDK_KEY:}
+
+integrationTest:
+  api:
+    url: "/"

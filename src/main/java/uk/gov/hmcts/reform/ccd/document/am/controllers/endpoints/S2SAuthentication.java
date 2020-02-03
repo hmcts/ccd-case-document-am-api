@@ -15,8 +15,6 @@ public class S2SAuthentication {
 
         return ok("S2S Authentication is successful !!");
     }
-
-
 }
 
 
