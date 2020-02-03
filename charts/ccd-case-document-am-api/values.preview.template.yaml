@@ -6,11 +6,6 @@ java:
     ccd:
       resourceGroup: ccd-shared
       secrets:
-        - data-store-api-draftStoreEncryptionSecret
-        - data-store-api-draft-key
-        - ccd-data-s2s-secret
-        - ccd-ELASTIC-SEARCH-URL
-        - ccd-ELASTIC-SEARCH-DATA-NODES-URL
-        - ccd-ELASTIC-SEARCH-PASSWORD
+
   environment:
     DEFINITION_STORE_HOST: http://ccd-definition-store-api-aat.service.core-compute-aat.internal/
