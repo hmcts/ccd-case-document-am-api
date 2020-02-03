@@ -6,5 +6,4 @@ public class CaseDocumentAmTestDataLoader {
     public static void main(String[] args) {
         new CaseDocumentAmTestAutomationAdapter().loadTestDataIfNecessary();
     }
-
 }
