@@ -31,10 +31,4 @@ public class CaseDocumentAmController {
     public ResponseEntity<String> welcome() {
         return ok("Welcome to CCD Case Document AM Controller");
     }
-
-    @RequestMapping(value = "/cases/", method = RequestMethod.GET)
-    public ResponseEntity<List<String>> getCases() {
-        List<String> cases = Arrays.asList("C101", "C102", "C103", "C104", "C105");
-        return new ResponseEntity<List<String>>(cases, HttpStatus.OK);
-    }
 }

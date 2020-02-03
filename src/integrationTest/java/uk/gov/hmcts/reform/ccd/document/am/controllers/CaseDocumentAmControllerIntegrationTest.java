@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 @RunWith(SpringIntegrationSerenityRunner.class)
 public class CaseDocumentAmControllerIntegrationTest {
 
-    Logger logger = LoggerFactory.getLogger(CaseDocumentAmControllerIntegrationTest.class);
+    private Logger logger = LoggerFactory.getLogger(CaseDocumentAmControllerIntegrationTest.class);
 
     private MockMvc mockMvc;
 
