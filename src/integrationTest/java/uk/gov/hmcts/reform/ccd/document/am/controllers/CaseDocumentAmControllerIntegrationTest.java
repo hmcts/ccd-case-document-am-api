@@ -2,8 +2,6 @@
 package uk.gov.hmcts.reform.ccd.document.am.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.restassured.RestAssured;
-import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -25,14 +24,14 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 
 
 @SpringBootTest
-@RunWith(SpringIntegrationSerenityRunner.class)
+@RunWith(SpringRunner.class)
 public class CaseDocumentAmControllerIntegrationTest {
 
     Logger logger = LoggerFactory.getLogger(CaseDocumentAmControllerIntegrationTest.class);
 
     private MockMvc mockMvc;
 
-    @Value("${getwelcome.api.url}")
+    @Value("${integrationTest.api.url}")
     private String url;
 
     private static final MediaType JSON_CONTENT_TYPE = new MediaType(
@@ -47,20 +46,12 @@ public class CaseDocumentAmControllerIntegrationTest {
 
     @Before
     public void setUp() {
-        RestAssured.baseURI = url;
-        RestAssured.useRelaxedHTTPSValidation();
         this.mockMvc = standaloneSetup(this.caseDocumentAmController).build();
     }
 
     @Test
     public void welComeAPITest() throws Exception {
         logger.info("\n\nCaseDocumentAmControllerIntegrationTest : Inside  welComeAPITesti method...{}", url);
-        /*Response response = SerenityRest
-            .given()
-            .relaxedHTTPSValidation()
-            .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-            .when()
-            .get(url);*/
         final MvcResult result = mockMvc.perform(get(url).contentType(JSON_CONTENT_TYPE))
             .andExpect(status().is(200))
             .andReturn();
