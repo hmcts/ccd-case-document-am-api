@@ -55,18 +55,6 @@ resource "azurerm_key_vault_secret" "ccd-case-document-am-api-s2s-secret" {
   key_vault_id = "${data.azurerm_key_vault.ccd_shared_key_vault.id}"
 }
 
-
-resource "random_string" "draft_encryption_key" {
-  length  = 16
-  special = true
-  upper   = true
-  lower   = true
-  number  = true
-  lifecycle {
-    ignore_changes = ["*"]
-  }
-}
-
 resource "azurerm_resource_group" "rg" {
   name     = "${var.product}-shared-${var.env}"
   location = "${var.location}"
@@ -98,7 +86,6 @@ module "ccd-case-document-am-api" {
     IDAM_S2S_URL                        = "${local.s2s_url}"
     DATA_STORE_IDAM_KEY                 = "${data.azurerm_key_vault_secret.ccd-case-document-am-api_s2s_key.value}"
 
-    CCD_DRAFT_ENCRYPTION_KEY            = "${random_string.draft_encryption_key.result}"
     DEFINITION_STORE_HOST               = "${local.definition_store_host}"
 
     HTTP_CLIENT_CONNECTION_TIMEOUT        = "${var.http_client_connection_timeout}"
