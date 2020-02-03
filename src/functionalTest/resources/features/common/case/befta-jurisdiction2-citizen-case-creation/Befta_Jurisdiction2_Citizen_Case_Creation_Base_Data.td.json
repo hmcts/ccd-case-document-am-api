@@ -4,11 +4,9 @@
   "operationName": "Submit case creation as Case worker",
   "method": "POST",
   "uri": "/citizens/{uid}/jurisdictions/{jid}/case-types/{ctid}/cases",
-
   "specs": [
     "by a privileged user with full ACL to create a case of this case type"
   ],
-
   "request": {
     "headers": {
       "_extends_": "Common_Request_Headers"
@@ -27,7 +25,6 @@
       "draft_id": null
     }
   },
-
   "expectedResponse": {
     "_extends_": "Common_201_Response",
     "headers": {

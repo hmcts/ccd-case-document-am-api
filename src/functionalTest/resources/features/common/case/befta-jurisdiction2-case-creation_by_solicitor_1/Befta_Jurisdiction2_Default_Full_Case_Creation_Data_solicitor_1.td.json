@@ -26,7 +26,6 @@
     "headers": {
       "_extends_": "Common_Response_Headers",
       "Vary": "Accept-Encoding"
-
     },
     "body": {
       "id": "[[ANY]]",

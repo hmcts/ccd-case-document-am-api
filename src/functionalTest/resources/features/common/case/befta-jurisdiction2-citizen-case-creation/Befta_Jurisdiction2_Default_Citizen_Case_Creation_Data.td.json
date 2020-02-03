@@ -1,7 +1,6 @@
 {
   "_guid_": "Befta_Jurisdiction2_Default_Citizen_Case_Creation_Data",
   "_extends_": "Befta_Jurisdiction2_Citizen_Case_Creation_Base_Data",
-
   "users": {
     "invokingUser": {
       "username": "befta.citizen.2@gmail.com",
@@ -24,7 +23,7 @@
     "responseMessage": "OK",
     "headers": {
       "_extends_": "Common_Response_Headers",
-      "Transfer-Encoding" : "chunked",
+      "Transfer-Encoding": "chunked",
       "Vary": "Accept-Encoding"
     },
     "body": {
@@ -49,10 +48,10 @@
           "document_filename": "Elastic Search test Case.png"
         }
       },
-      "data_classification" : {
+      "data_classification": {
         "_extends_": "Befta_Citizen_Data_Securities_Classification"
       },
-      "security_classifications" : {
+      "security_classifications": {
         "_extends_": "Befta_Citizen_Data_Securities_Classification"
       },
       "after_submit_callback_response": null,

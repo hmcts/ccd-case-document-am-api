@@ -1,9 +1,7 @@
 {
   "_guid_": "Befta_Jurisdiction2_Citizen_Case_Creation_Data",
   "_extends_": "Befta_Jurisdiction2_Default_Full_Case_Creation_Data",
-
   "uri": "/citizens/{uid}/jurisdictions/{jid}/case-types/{ctid}/cases",
-
   "users": {
     "invokingUser": {
       "username": "befta.citizen.2@gmail.com",
@@ -11,7 +9,6 @@
     }
   },
   "request": {
-
     "body": {
       "event_token": "${[scenarioContext][parentContext][childContexts][S-578_Citizen_Token_Creation_Data][testData][actualResponse][body][token]}"
     }

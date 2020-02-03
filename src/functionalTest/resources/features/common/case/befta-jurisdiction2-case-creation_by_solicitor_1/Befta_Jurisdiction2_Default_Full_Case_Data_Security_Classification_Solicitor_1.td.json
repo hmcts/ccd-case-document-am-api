@@ -14,8 +14,7 @@
     },
     "classification": "PUBLIC"
   },
-
-  "FixedListField" : "PUBLIC",
+  "FixedListField": "PUBLIC",
   "FixedRadioListField": "PUBLIC",
   "DateTimeField": "PUBLIC",
   "PhoneUKField": "PUBLIC",

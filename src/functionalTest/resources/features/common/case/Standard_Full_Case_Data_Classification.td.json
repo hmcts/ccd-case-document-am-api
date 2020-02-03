@@ -1,6 +1,5 @@
 {
   "_guid_": "Standard_Full_Case_Data_Classification",
-
   "MoneyGBPField": "PUBLIC",
   "FixedListField": "PUBLIC",
   "AddressUKField": {
@@ -15,11 +14,11 @@
       "Country": "PUBLIC"
     }
   },
-  "ComplexField" : {
-    "classification" : "PUBLIC",
-    "value" : {
-      "ComplexTextField" : "PUBLIC",
-      "ComplexFixedListField" : "PUBLIC"
+  "ComplexField": {
+    "classification": "PUBLIC",
+    "value": {
+      "ComplexTextField": "PUBLIC",
+      "ComplexFixedListField": "PUBLIC"
     }
   },
   "DateTimeField": "PUBLIC",
