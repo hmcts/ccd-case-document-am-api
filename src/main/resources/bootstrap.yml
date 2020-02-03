@@ -6,4 +6,5 @@ spring:
       aliases:
         ccd-gw : CCD_GW_SERVICE_SECRET
         ccd-data-s2s-secret: DATA_STORE_IDAM_KEY
+        data-store-api-draft-key: CCD_DRAFT_ENCRYPTION_KEY
         AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key
