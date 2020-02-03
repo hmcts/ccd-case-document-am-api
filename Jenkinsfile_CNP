@@ -21,7 +21,6 @@ def secrets = [
         secret('ccd-caseworker-autotest-password', 'CCD_CASEWORKER_AUTOTEST_PASSWORD'),
         secret('ccd-importer-autotest-email', 'CCD_IMPORT_AUTOTEST_EMAIL'),
         secret('ccd-importer-autotest-password', 'CCD_IMPORT_AUTOTEST_PASSWORD'),
-
         secret('ccd-befta-caseworker-2-solicitor-1-pwd', 'CCD_BEFTA_CASEWORKER_2_SOLICITOR_1_PWD'),
         secret('ccd-befta-caseworker-2-solicitor-2-pwd', 'CCD_BEFTA_CASEWORKER_2_SOLICITOR_2_PWD'),
         secret('ccd-befta-caseworker-2-solicitor-3-pwd', 'CCD_BEFTA_CASEWORKER_2_SOLICITOR_3_PWD'),
