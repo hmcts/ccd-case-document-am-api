@@ -68,7 +68,7 @@
 
   <suppress>
     <notes><![CDATA[
-   relates to spring_framework spring-contex
+   relates to spring_framework spring-context
    ]]></notes>
     <cpe>cpe:2.3:a:apache:groovy:2.5.8:*:*:*:*:*:*:*</cpe>
     <cve>CVE-2016-6497</cve>
@@ -95,5 +95,200 @@
    ]]></notes>
     <cpe>cpe:2.3:a:apache:commons_beanutils:1.9.3:*:*:*:*:*:*:*</cpe>
     <cve>CVE-2019-10086</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+       file name: selenium-opera-driver-3.141.59.jar
+       ]]></notes>
+    <cpe>cpe:2.3:a:opera:opera:3.141.59:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2003-1561</cve>
+    <cve>CVE-2008-1761</cve>
+    <cve>CVE-2008-1764</cve>
+    <cve>CVE-2008-3079</cve>
+    <cve>CVE-2008-3172</cve>
+    <cve>CVE-2008-4293</cve>
+    <cve>CVE-2008-4695</cve>
+    <cve>CVE-2008-4696</cve>
+    <cve>CVE-2008-4794</cve>
+    <cve>CVE-2008-4795</cve>
+    <cve>CVE-2008-5679</cve>
+    <cve>CVE-2009-0915</cve>
+    <cve>CVE-2010-5227</cve>
+    <cve>CVE-2015-8960</cve>
+    <cve>CVE-2019-19788</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+       file name: pdfbox-2.0.8.jar
+       ]]></notes>
+    <cpe>cpe:2.3:a:apache:pdfbox:2.0.8:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2018-11797</cve>
+    <cve>CVE-2018-8036</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to phantomjs
+   ]]></notes>
+    <cpe>cpe:2.3:a:phantomjs:phantomjs:1.4.4:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2019-17221</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to Common Beanutils
+   ]]></notes>
+    <cpe>cpe:2.3:a:apache:commons_beanutils:1.8.3:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2014-0114</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to XStream project
+   ]]></notes>
+    <cpe>cpe:2.3:a:xstream_project:xstream:1.4.9:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2017-7957</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to Filters 2.0.235.jar
+   ]]></notes>
+    <cpe>cpe:2.3:a:image_processing_software:image_processing_software:2.0.235:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2005-0406</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to AsciiDoctor
+   ]]></notes>
+    <cpe>cpe:2.3:a:asciidoctor:asciidoctor:1.5.6:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2018-18385</cve>
+
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to flexmark-ext-xwiki-macros-0.34.30.jar
+   ]]></notes>
+    <cpe>cpe:2.3:a:xwiki:xwiki:0.34.30:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2007-4898</cve>
+    <cve>CVE-2010-4641</cve>
+    <cve>CVE-2010-4642</cve>
+    <cve>CVE-2018-16277</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to openhtmltopdf-jsoup-dom-converter-0.0.1-RC13.jar
+   ]]></notes>
+    <cpe>cpe:2.3:a:jsoup:jsoup:0.0.1.rc13:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2015-6748</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to serenity-core-2.1.0.jar jquery-ui.min.js
+   ]]></notes>
+    <cpe>^pkg:javascript/jquery-ui-dialog@1.11.2</cpe>
+    <cve>CVE-2016-7103</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to serenity-core-2.1.0.jar jquery-ui.js
+   ]]></notes>
+    <cpe>^pkg:javascript/jquery-ui-dialog@1.11.2</cpe>
+    <cve>CVE-2016-7103</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to cucumber-jvm-deps-1.0.6/com.thoughtworks.xstream
+   ]]></notes>
+    <cpe>cpe:2.3:a:jruby:jruby:1.0.0:rc1:*:*:*:*:*:*</cpe>
+    <cve>CVE-2010-1330</cve>
+    <cve>CVE-2011-4838</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to cucumber-jvm-deps-1.0.6/com.thoughtworks.xstream
+   ]]></notes>
+    <cpe>cpe:2.3:a:xstream_project:xstream:1.4.7:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2016-3674</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to jruby-complete-1.7.26/jruby
+   ]]></notes>
+    <cpe>cpe:2.3:a:jruby:jruby:1.0.0:rc1:*:*:*:*:*:*</cpe>
+    <cve>CVE-2010-1330</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to org.eclipse.jetty/jetty-xml
+   ]]></notes>
+    <cpe>cpe:2.3:a:eclipse:jetty:9.4.12:20180830:*:*:*:*:*:*</cpe>
+    <cpe>cpe:2.3:a:jetty:jetty:9.4.12.v20180830:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2019-10241</cve>
+    <cve>CVE-2019-10247</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to serenity-core-2.1.0.jar jquery 1.8
+   ]]></notes>
+    <cpe>^pkg:javascript/jquery@1.8.3</cpe>
+    <cve>CVE-2012-6708</cve>
+    <cve>CVE-2015-9251</cve>
+    <cve>CVE-2019-11358</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to serenity-core-2.1.0.jar jquery.min.js
+   ]]></notes>
+    <cpe>^pkg:javascript/jquery@1.10.2</cpe>
+    <cve>CVE-2015-9251</cve>
+    <cve>CVE-2019-11358</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to serenity-core-2.1.0.jar jquery@3.1.1
+   ]]></notes>
+    <cpe>^pkg:javascript/jquery@1.10.2</cpe>
+    <cve>CVE-2019-11358</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to pkg:javascript/bootstrap@3.3.0
+   ]]></notes>
+    <cpe>^pkg:javascript/bootstrap@3.3.0</cpe>
+    <cve>CVE-2018-14040</cve>
+    <cve>CVE-2018-14041</cve>
+    <cve>CVE-2018-14042</cve>
+    <cve>CVE-2019-8331</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to pkg:javascript/jquery@1.5.1
+   ]]></notes>
+    <cpe>^pkg:javascript/jquery@1.5.1</cpe>
+    <cve>CVE-2011-4969</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to bouncycastle
+   ]]></notes>
+    <cpe>cpe:2.3:a:bouncycastle:legion-of-the-bouncy-castle-java-crytography-api:1.54:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2018-1000613</cve>
+    <cve>CVE-2017-13098</cve>
+    <cve>CVE-2018-1000180</cve>
+    <cve>CVE-2016-1000352</cve><cve>CVE-2016-2427</cve>
+    <cve>CVE-2016-1000346</cve>
+    <cve>CVE-2016-1000345</cve>
+    <cve>CVE-2016-1000344</cve>
+    <cve>CVE-2016-1000343</cve>
+    <cve>CVE-2016-1000342</cve>
+    <cve>CVE-2016-1000341</cve>
+    <cve>CVE-2016-1000340</cve>
+    <cve>CVE-2016-1000339</cve>
+    <cve>CVE-2016-1000338</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to readline.jar
+   ]]></notes>
+    <cpe>cpe:2.3:a:jruby:jruby:1.0.0:rc1:*:*:*:*:*:*</cpe>
+    <cve>CVE-2010-1330</cve>
+    <cve>CVE-2011-4838</cve>
   </suppress>
 </suppressions>
