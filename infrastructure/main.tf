@@ -25,6 +25,12 @@ locals {
 
   // S2S
   s2s_url = "http://rpe-service-auth-provider-${local.env_ase_url}"
+  idam_url = "${var.env == "prod" ? "https://idam-api.platform.hmcts.net" : "https://idam-api.${local.local_env}.platform.hmcts.net" }"
+
+  custom_redirect_uri = "${var.frontend_url}/oauth2redirect"
+  default_redirect_uri = "https://ccd-case-management-web-${local.env_ase_url}/oauth2redirect"
+  oauth2_redirect_uri = "${var.frontend_url != "" ? local.custom_redirect_uri : local.default_redirect_uri}"
+  definition_store_host = "http://ccd-definition-store-api-${local.env_ase_url}"
 
  }
 
@@ -93,6 +99,7 @@ module "ccd-case-document-am-api" {
     DATA_STORE_IDAM_KEY                 = "${data.azurerm_key_vault_secret.ccd-case-document-am-api_s2s_key.value}"
 
     CCD_DRAFT_ENCRYPTION_KEY            = "${random_string.draft_encryption_key.result}"
+    DEFINITION_STORE_HOST               = "${local.definition_store_host}"
 
     HTTP_CLIENT_CONNECTION_TIMEOUT        = "${var.http_client_connection_timeout}"
     HTTP_CLIENT_READ_TIMEOUT              = "${var.http_client_read_timeout}"
