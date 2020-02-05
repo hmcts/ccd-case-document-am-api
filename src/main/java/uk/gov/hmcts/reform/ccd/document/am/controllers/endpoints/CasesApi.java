@@ -24,37 +24,47 @@ import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BAD_REQUEST;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.TAG;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FORBIDDEN;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.RESOURCE_NOT_FOUND;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.S2S_API_PARAM;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.UNAUTHORIZED;
+
 @Api(value = "cases", description = "the cases API")
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public interface CasesApi {
 
     @ApiOperation(value = "Deletes a Case Document.", nickname = "deleteDocumentbyDocumentId",
                   notes = "This API will be the single point of reference for deleting any case related documents from doc-store.",
-                  response = String.class, tags = {"case-document-controller",})
+                  response = String.class, tags = {TAG})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = String.class),
         @ApiResponse(code = 204, message = "No Content"),
-        @ApiResponse(code = 400, message = "Bad Request", response = ErrorMap.class),
-        @ApiResponse(code = 401, message = "Unauthorized", response = ErrorMap.class),
-        @ApiResponse(code = 403, message = "Forbidden", response = ErrorMap.class),
-        @ApiResponse(code = 404, message = "Resource not found", response = ErrorMap.class)})
+        @ApiResponse(code = 400, message = BAD_REQUEST, response = ErrorMap.class),
+        @ApiResponse(code = 401, message = UNAUTHORIZED, response = ErrorMap.class),
+        @ApiResponse(code = 403, message = FORBIDDEN, response = ErrorMap.class),
+        @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND, response = ErrorMap.class)})
     @RequestMapping(value = "/cases/documents/{documentId}",
-                    produces = {"application/json"},
+                    produces = {APPLICATION_JSON},
                     method = RequestMethod.DELETE)
     ResponseEntity<String> deleteDocumentbyDocumentId(
-        @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
-        @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
+        @ApiParam(value = S2S_API_PARAM, required = true)
+        @RequestHeader(value = SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
 
         @ApiParam(value = "documentId", required = true)
         @PathVariable("documentId") UUID documentId,
 
-        @ApiParam(value = "permanent delete flag")
-        @Valid @RequestParam(value = "permanent", required = false) Boolean permanent,
+        @ApiParam("permanent delete flag")
+        @Valid @RequestParam("permanent") Boolean permanent,
 
-        @ApiParam(value = "User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
+        @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
                           + " and will be used for authorisation.")
         @RequestHeader(value = "User-Id", required = false) String userId,
 
-        @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
+        @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles);
 
 
@@ -62,109 +72,109 @@ public interface CasesApi {
                   nickname = "getDocumentBinaryConetentbyDocumentId",
                   notes = "This API will be the single point of reference for downloading any case related documents from doc-store. It will retrieve the "
                           + "binary content of the requested document.",
-                  response = Object.class, tags = {"case-document-controller",})
+                  response = Object.class, tags = {TAG})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Returns contents of a file", response = Object.class),
-        @ApiResponse(code = 400, message = "Bad Request", response = ErrorMap.class),
-        @ApiResponse(code = 401, message = "Unauthorized", response = ErrorMap.class),
-        @ApiResponse(code = 403, message = "Forbidden", response = ErrorMap.class),
-        @ApiResponse(code = 404, message = "Resource not found", response = ErrorMap.class)})
-    @RequestMapping(value = "/cases/documents/{documentId}/binary", produces = {"application/json"}, method = RequestMethod.GET)
+        @ApiResponse(code = 400, message = BAD_REQUEST, response = ErrorMap.class),
+        @ApiResponse(code = 401, message = UNAUTHORIZED, response = ErrorMap.class),
+        @ApiResponse(code = 403, message = FORBIDDEN, response = ErrorMap.class),
+        @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND, response = ErrorMap.class)})
+    @RequestMapping(value = "/cases/documents/{documentId}/binary", produces = {APPLICATION_JSON}, method = RequestMethod.GET)
     ResponseEntity<Object> getDocumentBinaryContentbyDocumentId(
 
-        @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
-        @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
+        @ApiParam(value = S2S_API_PARAM, required = true)
+        @RequestHeader(value = SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
         @ApiParam(value = "documentId", required = true)
         @PathVariable("documentId") UUID documentId,
-        @ApiParam(value = "User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
+        @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
                           + " and will be used for authorisation.")
         @RequestHeader(value = "User-Id", required = false) String userId,
-        @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
+        @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles);
 
 
     @ApiOperation(value = "Retrieves JSON representation of a Case Document.", nickname = "getDocumentbyDocumentId",
                   notes = "This API will be the single point of reference for downloading any case related documents from doc-store. It will retrieve json "
                           + "representation of the document.",
-                  response = StoredDocumentHalResource.class, tags = {"case-document-controller",})
+                  response = StoredDocumentHalResource.class, tags = {TAG})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = StoredDocumentHalResource.class),
-        @ApiResponse(code = 401, message = "Unauthorized", response = String.class),
-        @ApiResponse(code = 403, message = "Forbidden", response = ErrorMap.class, responseContainer = "List"),
+        @ApiResponse(code = 401, message = UNAUTHORIZED, response = String.class),
+        @ApiResponse(code = 403, message = FORBIDDEN, response = ErrorMap.class, responseContainer = "List"),
         @ApiResponse(code = 404, message = "Not Found", response = String.class)})
-    @RequestMapping(value = "/cases/documents/{documentId}", produces = {"application/json"}, method = RequestMethod.GET)
+    @RequestMapping(value = "/cases/documents/{documentId}", produces = {APPLICATION_JSON}, method = RequestMethod.GET)
     ResponseEntity<StoredDocumentHalResource> getDocumentbyDocumentId(
 
-        @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
-        @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
+        @ApiParam(value = S2S_API_PARAM, required = true)
+        @RequestHeader(value = SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
 
         @ApiParam(value = "documentId", required = true) @PathVariable("documentId") UUID documentId,
-        @ApiParam(value = "User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
+        @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
                           + " and will be used for authorisation.")
         @RequestHeader(value = "User-Id", required = false) String userId,
 
-        @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
+        @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles);
 
 
     @ApiOperation(value = "Updates document instance (ex. ttl).", nickname = "patchDocumentbyDocumentId",
                   notes = "This API will be the single point of reference for patching any case related documents from doc-store. for example removing the "
                           + "ttl from document.",
-                  response = StoredDocumentHalResource.class, tags = {"case-document-controller",})
+                  response = StoredDocumentHalResource.class, tags = {"case-document-controller"})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = StoredDocumentHalResource.class),
-        @ApiResponse(code = 401, message = "Unauthorized", response = String.class),
-        @ApiResponse(code = 403, message = "Forbidden", response = ErrorMap.class, responseContainer = "List"),
+        @ApiResponse(code = 401, message = UNAUTHORIZED, response = String.class),
+        @ApiResponse(code = 403, message = FORBIDDEN, response = ErrorMap.class, responseContainer = "List"),
         @ApiResponse(code = 404, message = "Not Found", response = String.class)})
     @RequestMapping(value = "/cases/documents/{documentId}",
-                    produces = {"application/json"},
-                    consumes = {"application/json"},
+                    produces = {APPLICATION_JSON},
+                    consumes = {APPLICATION_JSON},
                     method = RequestMethod.PATCH)
     ResponseEntity<StoredDocumentHalResource> patchDocumentbyDocumentId(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody UpdateDocumentCommand body,
 
-        @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
-        @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
+        @ApiParam(value = S2S_API_PARAM, required = true)
+        @RequestHeader(value = SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
 
         @ApiParam(value = "documentId", required = true)
         @PathVariable("documentId") UUID documentId,
 
-        @ApiParam(value = "User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
+        @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
                           + " and will be used for authorisation.")
         @RequestHeader(value = "User-Id", required = false) String userId,
 
-        @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
+        @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles);
 
 
     @ApiOperation(value = "Updates a list of Case Documents with provided Metadata", nickname = "patchMetaDataOnDocuments",
                   notes = "This API will perform bulk operation of 'Update metadata and TTL removal' on list of Case Documents. It will return positive "
                           + "response if both bulk operations are executed sucessfully else an appropriate negative response will be returned.",
-                  response = StoredDocumentHalResource.class, tags = {"case-document-controller",})
+                  response = StoredDocumentHalResource.class, tags = {TAG})
     @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Created", response = StoredDocumentHalResource.class),
         @ApiResponse(code = 204, message = "No Content"),
-        @ApiResponse(code = 400, message = "Bad Request", response = ErrorMap.class),
-        @ApiResponse(code = 401, message = "Unauthorized", response = ErrorMap.class),
-        @ApiResponse(code = 403, message = "Forbidden", response = ErrorMap.class),
-        @ApiResponse(code = 404, message = "Resource not found", response = ErrorMap.class)})
+        @ApiResponse(code = 400, message = BAD_REQUEST, response = ErrorMap.class),
+        @ApiResponse(code = 401, message = UNAUTHORIZED, response = ErrorMap.class),
+        @ApiResponse(code = 403, message = FORBIDDEN, response = ErrorMap.class),
+        @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND, response = ErrorMap.class)})
     @RequestMapping(value = "/cases/documents/attachToCase",
-                    produces = {"application/json"},
-                    consumes = {"application/json"},
+                    produces = {APPLICATION_JSON},
+                    consumes = {APPLICATION_JSON},
                     method = RequestMethod.PATCH)
     ResponseEntity<StoredDocumentHalResource> patchMetaDataOnDocuments(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody CaseDocumentMetadata body,
 
-        @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
-        @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
+        @ApiParam(value = S2S_API_PARAM, required = true)
+        @RequestHeader(value = SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
 
-        @ApiParam(value = "User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
+        @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
                           + " and will be used for authorisation.")
         @RequestHeader(value = "User-Id", required = false) String userId,
 
-        @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
+        @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles);
 
 
@@ -173,47 +183,47 @@ public interface CasesApi {
                   response = StoredDocumentHalResourceCollection.class, tags = {"case-document-search-controller",})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = StoredDocumentHalResourceCollection.class),
-        @ApiResponse(code = 400, message = "Bad Request", response = ErrorMap.class),
-        @ApiResponse(code = 401, message = "Unauthorized", response = ErrorMap.class),
-        @ApiResponse(code = 403, message = "Forbidden", response = ErrorMap.class),
-        @ApiResponse(code = 404, message = "Resource not found", response = ErrorMap.class)})
+        @ApiResponse(code = 400, message = BAD_REQUEST, response = ErrorMap.class),
+        @ApiResponse(code = 401, message = UNAUTHORIZED, response = ErrorMap.class),
+        @ApiResponse(code = 403, message = FORBIDDEN, response = ErrorMap.class),
+        @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND, response = ErrorMap.class)})
     @RequestMapping(value = "/cases/documents/filter",
-                    produces = {"application/json"},
-                    consumes = {"application/json"},
+                    produces = {APPLICATION_JSON},
+                    consumes = {APPLICATION_JSON},
                     method = RequestMethod.POST)
     ResponseEntity<StoredDocumentHalResourceCollection> postDocumentsSearchCommand(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody MetadataSearchCommand body,
-        @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
-        @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
-        @ApiParam(value = "User-id of the currently authenticated user. If provided will be used to populate the creator field of a"
+        @ApiParam(value = S2S_API_PARAM, required = true)
+        @RequestHeader(value = SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
+        @ApiParam("User-id of the currently authenticated user. If provided will be used to populate the creator field of a"
                           + " document and will be used for authorisation.")
         @RequestHeader(value = "User-Id", required = false) String userId,
-        @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
+        @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles,
-        @ApiParam(value = "") @Valid @RequestParam(value = "offset", required = false) Long offset,
-        @ApiParam(value = "") @Valid @RequestParam(value = "pageNumber", required = false) Integer pageNumber,
-        @ApiParam(value = "") @Valid @RequestParam(value = "pageSize", required = false) Integer pageSize,
-        @ApiParam(value = "") @Valid @RequestParam(value = "paged", required = false) Boolean paged,
-        @ApiParam(value = "") @Valid @RequestParam(value = "sort.sorted", required = false) Boolean sortSorted,
-        @ApiParam(value = "") @Valid @RequestParam(value = "sort.unsorted", required = false) Boolean sortUnsorted,
-        @ApiParam(value = "") @Valid @RequestParam(value = "unpaged", required = false) Boolean unpaged);
+        @ApiParam("") @Valid @RequestParam(value = "offset", required = false) Long offset,
+        @ApiParam("") @Valid @RequestParam(value = "pageNumber", required = false) Integer pageNumber,
+        @ApiParam("") @Valid @RequestParam(value = "pageSize", required = false) Integer pageSize,
+        @ApiParam("") @Valid @RequestParam(value = "paged", required = false) Boolean paged,
+        @ApiParam("") @Valid @RequestParam(value = "sort.sorted", required = false) Boolean sortSorted,
+        @ApiParam("") @Valid @RequestParam(value = "sort.unsorted", required = false) Boolean sortUnsorted,
+        @ApiParam("") @Valid @RequestParam(value = "unpaged", required = false) Boolean unpaged);
 
 
     @ApiOperation(value = "Creates a list of Stored Documents by uploading a list of binary/text files", nickname = "postDocumentsWithBinaryFile",
                   notes = "This API will be the single point of reference for uploading any case related documents to doc-store. It will return the document"
                           + " URL along with generated hashed-token. The hashed-token would be valid only for case creation purpose and discarded once "
                           + "document is attached with its case.",
-                  response = StoredDocumentHalResourceCollection.class, tags = {"case-document-controller",})
+                  response = StoredDocumentHalResourceCollection.class, tags = {TAG})
     @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Created", response = StoredDocumentHalResourceCollection.class),
         @ApiResponse(code = 204, message = "No Content"),
-        @ApiResponse(code = 400, message = "Bad Request", response = ErrorMap.class),
-        @ApiResponse(code = 401, message = "Unauthorized", response = ErrorMap.class),
-        @ApiResponse(code = 403, message = "Forbidden", response = ErrorMap.class),
-        @ApiResponse(code = 404, message = "Resource not found", response = ErrorMap.class)})
+        @ApiResponse(code = 400, message = BAD_REQUEST, response = ErrorMap.class),
+        @ApiResponse(code = 401, message = UNAUTHORIZED, response = ErrorMap.class),
+        @ApiResponse(code = 403, message = FORBIDDEN, response = ErrorMap.class),
+        @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND, response = ErrorMap.class)})
     @RequestMapping(value = "/cases/documents",
-                    produces = {"application/json"},
+                    produces = {APPLICATION_JSON},
                     consumes = {"multipart/form-data"},
                     method = RequestMethod.POST)
     ResponseEntity<StoredDocumentHalResourceCollection> postDocumentsWithBinaryFile(
@@ -221,15 +231,15 @@ public interface CasesApi {
         @ApiParam(value = "", required = true) @RequestParam(value = "ttl", required = true) Date ttl,
         @ApiParam(value = "", required = true) @RequestParam(value = "roles", required = true) List<String> roles,
         @ApiParam(value = "", required = true) @RequestParam(value = "files", required = true) List<java.io.File> files,
-        @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
-        @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
+        @ApiParam(value = S2S_API_PARAM, required = true)
+        @RequestHeader(value = SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
         @ApiParam(value = "CaseType identifier for the case document.", required = true)
         @RequestHeader(value = "caseTypeId", required = true) String caseTypeId,
         @ApiParam(value = "Jurisdiction identifier for the case document.", required = true)
         @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId,
-        @ApiParam(value = "User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
+        @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
                           + " and will be used for authorisation.")
-        @RequestHeader(value = "User-Id", required = false) String userId,
+        @RequestHeader("User-Id") String userId,
         @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles);
 
