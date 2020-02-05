@@ -11,28 +11,27 @@ import io.swagger.annotations.ApiModelProperty;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
-public class Body {
+public class DocumentPayloadBody {
     @JsonProperty("classification")
-    private String classification = null;
+    private String classification;
 
     @JsonProperty("ttl")
-    private OffsetDateTime ttl = null;
+    private OffsetDateTime ttl;
 
     @JsonProperty("roles")
     @Valid
-    private List<String> roles = null;
+    private List<String> roles;
 
     @JsonProperty("files")
     @Valid
-    private List<java.io.File> files = null;
+    private List<java.io.File> files;
 
-    public Body classification(String classification) {
+    public DocumentPayloadBody classification(String classification) {
         this.classification = classification;
         return this;
     }
 
     @ApiModelProperty(value = "")
-
     public String getClassification() {
         return classification;
     }
@@ -41,7 +40,7 @@ public class Body {
         this.classification = classification;
     }
 
-    public Body ttl(OffsetDateTime ttl) {
+    public DocumentPayloadBody ttl(OffsetDateTime ttl) {
         this.ttl = ttl;
         return this;
     }
@@ -57,12 +56,12 @@ public class Body {
         this.ttl = ttl;
     }
 
-    public Body roles(List<String> roles) {
+    public DocumentPayloadBody roles(List<String> roles) {
         this.roles = roles;
         return this;
     }
 
-    public Body addRolesItem(String rolesItem) {
+    public DocumentPayloadBody addRolesItem(String rolesItem) {
         if (this.roles == null) {
             this.roles = new ArrayList<String>();
         }
@@ -80,12 +79,12 @@ public class Body {
         this.roles = roles;
     }
 
-    public Body files(List<java.io.File> files) {
+    public DocumentPayloadBody files(List<java.io.File> files) {
         this.files = files;
         return this;
     }
 
-    public Body addFilesItem(java.io.File filesItem) {
+    public DocumentPayloadBody addFilesItem(java.io.File filesItem) {
         if (this.files == null) {
             this.files = new ArrayList<java.io.File>();
         }
@@ -112,11 +111,11 @@ public class Body {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Body body = (Body) o;
-        return Objects.equals(this.classification, body.classification)
-               && Objects.equals(this.ttl, body.ttl)
-               && Objects.equals(this.roles, body.roles)
-               && Objects.equals(this.files, body.files);
+        DocumentPayloadBody documentPayloadBody = (DocumentPayloadBody) o;
+        return Objects.equals(this.classification, documentPayloadBody.classification)
+               && Objects.equals(this.ttl, documentPayloadBody.ttl)
+               && Objects.equals(this.roles, documentPayloadBody.roles)
+               && Objects.equals(this.files, documentPayloadBody.files);
     }
 
     @Override
@@ -127,7 +126,7 @@ public class Body {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("class Body {\n");
+        sb.append("class DocumentPayloadBody {\n");
 
         sb.append("    classification: ").append(toIndentedString(classification)).append("\n");
         sb.append("    ttl: ").append(toIndentedString(ttl)).append("\n");
