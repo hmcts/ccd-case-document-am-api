@@ -7,7 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import java.util.Objects;
 
 /**
- * Link
+ * Link.
  */
 @Validated
 public class Link {
@@ -41,7 +41,7 @@ public class Link {
     }
 
     /**
-     * Get deprecation
+     * Get deprecation.
      *
      * @return deprecation
      **/
@@ -61,7 +61,7 @@ public class Link {
     }
 
     /**
-     * Get href
+     * Get href.
      *
      * @return href
      **/
@@ -81,7 +81,7 @@ public class Link {
     }
 
     /**
-     * Get hreflang
+     * Get hreflang.
      *
      * @return hreflang
      **/
@@ -101,7 +101,7 @@ public class Link {
     }
 
     /**
-     * Get media
+     * Get media.
      *
      * @return media
      **/
@@ -121,7 +121,7 @@ public class Link {
     }
 
     /**
-     * Get rel
+     * Get rel.
      *
      * @return rel
      **/
@@ -141,7 +141,7 @@ public class Link {
     }
 
     /**
-     * Get templated
+     * Get templated.
      *
      * @return templated
      **/
@@ -161,7 +161,7 @@ public class Link {
     }
 
     /**
-     * Get title
+     * Get title.
      *
      * @return title
      **/
@@ -181,7 +181,7 @@ public class Link {
     }
 
     /**
-     * Get type
+     * Get type.
      *
      * @return type
      **/
@@ -205,14 +205,14 @@ public class Link {
             return false;
         }
         Link link = (Link) o;
-        return Objects.equals(this.deprecation, link.deprecation) &&
-            Objects.equals(this.href, link.href) &&
-            Objects.equals(this.hreflang, link.hreflang) &&
-            Objects.equals(this.media, link.media) &&
-            Objects.equals(this.rel, link.rel) &&
-            Objects.equals(this.templated, link.templated) &&
-            Objects.equals(this.title, link.title) &&
-            Objects.equals(this.type, link.type);
+        return Objects.equals(this.deprecation, link.deprecation)
+               && Objects.equals(this.href, link.href)
+               && Objects.equals(this.hreflang, link.hreflang)
+               && Objects.equals(this.media, link.media)
+               && Objects.equals(this.rel, link.rel)
+               && Objects.equals(this.templated, link.templated)
+               && Objects.equals(this.title, link.title)
+               && Objects.equals(this.type, link.type);
     }
 
     @Override
@@ -237,10 +237,6 @@ public class Link {
         return sb.toString();
     }
 
-    /**
-     * Convert the given object to string with each line indented by 4 spaces
-     * (except the first line).
-     */
     private String toIndentedString(Object o) {
         if (o == null) {
             return "null";

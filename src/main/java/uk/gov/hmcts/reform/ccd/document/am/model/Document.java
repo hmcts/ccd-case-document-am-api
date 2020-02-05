@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 /**
- * Document
+ * Document.
  */
 @Validated
 public class Document {
@@ -35,7 +35,7 @@ public class Document {
     }
 
     /**
-     * Unique ID for the document
+     * Unique ID for the document.
      *
      * @return id
      **/
@@ -56,7 +56,7 @@ public class Document {
     }
 
     /**
-     * The document URL
+     * The document URL.
      *
      * @return url
      **/
@@ -77,7 +77,7 @@ public class Document {
     }
 
     /**
-     * The document name
+     * The document name.
      *
      * @return name
      **/
@@ -97,7 +97,7 @@ public class Document {
     }
 
     /**
-     * The document type
+     * The document type.
      *
      * @return type
      **/
@@ -117,7 +117,7 @@ public class Document {
     }
 
     /**
-     * The document description
+     * The document description.
      *
      * @return description
      **/
@@ -141,11 +141,11 @@ public class Document {
             return false;
         }
         Document document = (Document) o;
-        return Objects.equals(this.id, document.id) &&
-            Objects.equals(this.url, document.url) &&
-            Objects.equals(this.name, document.name) &&
-            Objects.equals(this.type, document.type) &&
-            Objects.equals(this.description, document.description);
+        return Objects.equals(this.id, document.id)
+               && Objects.equals(this.url, document.url)
+               && Objects.equals(this.name, document.name)
+               && Objects.equals(this.type, document.type)
+               && Objects.equals(this.description, document.description);
     }
 
     @Override
@@ -167,10 +167,6 @@ public class Document {
         return sb.toString();
     }
 
-    /**
-     * Convert the given object to string with each line indented by 4 spaces
-     * (except the first line).
-     */
     private String toIndentedString(Object o) {
         if (o == null) {
             return "null";

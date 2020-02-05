@@ -1,17 +1,17 @@
 package uk.gov.hmcts.reform.ccd.document.am.model;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 /**
- * CaseDocumentMetadata
+ * CaseDocumentMetadata.
  */
 @Validated
 
@@ -35,7 +35,7 @@ public class CaseDocumentMetadata {
     }
 
     /**
-     * The CaseId of the Document
+     * The CaseId of the Document.
      *
      * @return caseId
      **/
@@ -56,7 +56,7 @@ public class CaseDocumentMetadata {
     }
 
     /**
-     * The CaseTypeId of the Document
+     * The CaseTypeId of the Document.
      *
      * @return caseTypeId
      **/
@@ -77,7 +77,7 @@ public class CaseDocumentMetadata {
     }
 
     /**
-     * The JurisdictionId of the Document
+     * The JurisdictionId of the Document.
      *
      * @return jurisdictionId
      **/
@@ -103,7 +103,7 @@ public class CaseDocumentMetadata {
     }
 
     /**
-     * List of embedded document objects
+     * List of embedded document objects.
      *
      * @return documents
      **/
@@ -128,10 +128,10 @@ public class CaseDocumentMetadata {
             return false;
         }
         CaseDocumentMetadata caseDocumentMetadata = (CaseDocumentMetadata) o;
-        return Objects.equals(this.caseId, caseDocumentMetadata.caseId) &&
-            Objects.equals(this.caseTypeId, caseDocumentMetadata.caseTypeId) &&
-            Objects.equals(this.jurisdictionId, caseDocumentMetadata.jurisdictionId) &&
-            Objects.equals(this.documents, caseDocumentMetadata.documents);
+        return Objects.equals(this.caseId, caseDocumentMetadata.caseId)
+               && Objects.equals(this.caseTypeId, caseDocumentMetadata.caseTypeId)
+               && Objects.equals(this.jurisdictionId, caseDocumentMetadata.jurisdictionId)
+               && Objects.equals(this.documents, caseDocumentMetadata.documents);
     }
 
     @Override
@@ -153,7 +153,7 @@ public class CaseDocumentMetadata {
     }
 
     /**
-     * Convert the given object to string with each line indented by 4 spaces
+     * Convert the given object to string with each line indented by 4 spaces.
      * (except the first line).
      */
     private String toIndentedString(Object o) {

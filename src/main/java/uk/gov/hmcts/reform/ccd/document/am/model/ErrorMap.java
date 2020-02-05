@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 /**
- * ErrorMap
+ * ErrorMap.
  */
 @Validated
 public class ErrorMap {
@@ -24,7 +24,7 @@ public class ErrorMap {
     }
 
     /**
-     * The error code
+     * The error code.
      *
      * @return code
      **/
@@ -45,7 +45,7 @@ public class ErrorMap {
     }
 
     /**
-     * The error message
+     * The error message.
      *
      * @return message
      **/
@@ -70,8 +70,8 @@ public class ErrorMap {
             return false;
         }
         ErrorMap errorMap = (ErrorMap) o;
-        return Objects.equals(this.code, errorMap.code) &&
-            Objects.equals(this.message, errorMap.message);
+        return Objects.equals(this.code, errorMap.code)
+               && Objects.equals(this.message, errorMap.message);
     }
 
     @Override
@@ -90,10 +90,6 @@ public class ErrorMap {
         return sb.toString();
     }
 
-    /**
-     * Convert the given object to string with each line indented by 4 spaces
-     * (except the first line).
-     */
     private String toIndentedString(Object o) {
         if (o == null) {
             return "null";

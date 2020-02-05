@@ -7,7 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import java.util.Objects;
 
 /**
- * MetadataSearchCommand
+ * MetadataSearchCommand.
  */
 @Validated
 public class MetadataSearchCommand {
@@ -23,7 +23,7 @@ public class MetadataSearchCommand {
     }
 
     /**
-     * Get name
+     * Get name.
      *
      * @return name
      **/
@@ -43,7 +43,7 @@ public class MetadataSearchCommand {
     }
 
     /**
-     * Get value
+     * Get value.
      *
      * @return value
      **/
@@ -67,8 +67,8 @@ public class MetadataSearchCommand {
             return false;
         }
         MetadataSearchCommand metadataSearchCommand = (MetadataSearchCommand) o;
-        return Objects.equals(this.name, metadataSearchCommand.name) &&
-            Objects.equals(this.value, metadataSearchCommand.value);
+        return Objects.equals(this.name, metadataSearchCommand.name)
+               && Objects.equals(this.value, metadataSearchCommand.value);
     }
 
     @Override
@@ -87,10 +87,6 @@ public class MetadataSearchCommand {
         return sb.toString();
     }
 
-    /**
-     * Convert the given object to string with each line indented by 4 spaces
-     * (except the first line).
-     */
     private String toIndentedString(Object o) {
         if (o == null) {
             return "null";

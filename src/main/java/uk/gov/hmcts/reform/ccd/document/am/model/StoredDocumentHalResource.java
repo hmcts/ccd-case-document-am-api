@@ -1,27 +1,27 @@
 package uk.gov.hmcts.reform.ccd.document.am.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
-import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-
-import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import javax.validation.Valid;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
+import io.swagger.annotations.ApiModelProperty;
+import org.springframework.validation.annotation.Validated;
 
 /**
- * StoredDocumentHalResource
+ * StoredDocumentHalResource.
  */
 @Validated
 public class StoredDocumentHalResource {
-    @JsonProperty("_embedded")
+    @JsonProperty("embedded")
     @Valid
-    private Map<String, ResourceSupport> _embedded = null;
+    private Map<String, ResourceSupport> embedded = null;
     @JsonProperty("classification")
     private ClassificationEnum classification = ClassificationEnum.PRIVATE;
     @JsonProperty("createdBy")
@@ -50,32 +50,32 @@ public class StoredDocumentHalResource {
     @JsonProperty("ttl")
     private Date ttl = null;
 
-    public StoredDocumentHalResource _embedded(Map<String, ResourceSupport> _embedded) {
-        this._embedded = _embedded;
+    public StoredDocumentHalResource embedded(Map<String, ResourceSupport> embedded) {
+        this.embedded = embedded;
         return this;
     }
 
-    public StoredDocumentHalResource putEmbeddedItem(String key, ResourceSupport _embeddedItem) {
-        if (this._embedded == null) {
-            this._embedded = new HashMap<String, ResourceSupport>();
+    public StoredDocumentHalResource putEmbeddedItem(String key, ResourceSupport embeddedItem) {
+        if (this.embedded == null) {
+            this.embedded = new HashMap<String, ResourceSupport>();
         }
-        this._embedded.put(key, _embeddedItem);
+        this.embedded.put(key, embeddedItem);
         return this;
     }
 
     /**
-     * Get _embedded
+     * Get embedded.
      *
-     * @return _embedded
+     * @return embedded
      **/
     @ApiModelProperty(value = "")
     @Valid
     public Map<String, ResourceSupport> getEmbedded() {
-        return _embedded;
+        return embedded;
     }
 
-    public void setEmbedded(Map<String, ResourceSupport> _embedded) {
-        this._embedded = _embedded;
+    public void setEmbedded(Map<String, ResourceSupport> embedded) {
+        this.embedded = embedded;
     }
 
     public StoredDocumentHalResource classification(ClassificationEnum classification) {
@@ -84,7 +84,7 @@ public class StoredDocumentHalResource {
     }
 
     /**
-     * Get classification
+     * Get classification.
      *
      * @return classification
      **/
@@ -104,7 +104,7 @@ public class StoredDocumentHalResource {
     }
 
     /**
-     * Get createdBy
+     * Get createdBy.
      *
      * @return createdBy
      **/
@@ -124,7 +124,7 @@ public class StoredDocumentHalResource {
     }
 
     /**
-     * Get createdOn
+     * Get createdOn.
      *
      * @return createdOn
      **/
@@ -145,7 +145,7 @@ public class StoredDocumentHalResource {
     }
 
     /**
-     * Get lastModifiedBy
+     * Get lastModifiedBy.
      *
      * @return lastModifiedBy
      **/
@@ -173,7 +173,7 @@ public class StoredDocumentHalResource {
     }
 
     /**
-     * Get links
+     * Get links.
      *
      * @return links
      **/
@@ -201,7 +201,7 @@ public class StoredDocumentHalResource {
     }
 
     /**
-     * Get metadata
+     * Get metadata.
      *
      * @return metadata
      **/
@@ -221,7 +221,7 @@ public class StoredDocumentHalResource {
     }
 
     /**
-     * Get mimeType
+     * Get mimeType.
      *
      * @return mimeType
      **/
@@ -241,7 +241,7 @@ public class StoredDocumentHalResource {
     }
 
     /**
-     * Get modifiedOn
+     * Get modifiedOn.
      *
      * @return modifiedOn
      **/
@@ -262,7 +262,7 @@ public class StoredDocumentHalResource {
     }
 
     /**
-     * Get originalDocumentName
+     * Get originalDocumentName.
      *
      * @return originalDocumentName
      **/
@@ -290,7 +290,7 @@ public class StoredDocumentHalResource {
     }
 
     /**
-     * Get roles
+     * Get roles.
      *
      * @return roles
      **/
@@ -310,7 +310,7 @@ public class StoredDocumentHalResource {
     }
 
     /**
-     * Get size
+     * Get size.
      *
      * @return size
      **/
@@ -330,7 +330,7 @@ public class StoredDocumentHalResource {
     }
 
     /**
-     * Get ttl
+     * Get ttl.
      *
      * @return ttl
      **/
@@ -354,24 +354,26 @@ public class StoredDocumentHalResource {
             return false;
         }
         StoredDocumentHalResource storedDocumentHalResource = (StoredDocumentHalResource) o;
-        return Objects.equals(this._embedded, storedDocumentHalResource._embedded) &&
-            Objects.equals(this.classification, storedDocumentHalResource.classification) &&
-            Objects.equals(this.createdBy, storedDocumentHalResource.createdBy) &&
-            Objects.equals(this.createdOn, storedDocumentHalResource.createdOn) &&
-            Objects.equals(this.lastModifiedBy, storedDocumentHalResource.lastModifiedBy) &&
-            Objects.equals(this.links, storedDocumentHalResource.links) &&
-            Objects.equals(this.metadata, storedDocumentHalResource.metadata) &&
-            Objects.equals(this.mimeType, storedDocumentHalResource.mimeType) &&
-            Objects.equals(this.modifiedOn, storedDocumentHalResource.modifiedOn) &&
-            Objects.equals(this.originalDocumentName, storedDocumentHalResource.originalDocumentName) &&
-            Objects.equals(this.roles, storedDocumentHalResource.roles) &&
-            Objects.equals(this.size, storedDocumentHalResource.size) &&
-            Objects.equals(this.ttl, storedDocumentHalResource.ttl);
+        return Objects.equals(this.embedded, storedDocumentHalResource.embedded)
+               && Objects.equals(this.classification, storedDocumentHalResource.classification)
+               && Objects.equals(this.createdBy, storedDocumentHalResource.createdBy)
+               && Objects.equals(this.createdOn, storedDocumentHalResource.createdOn)
+               && Objects.equals(this.lastModifiedBy, storedDocumentHalResource.lastModifiedBy)
+               && Objects.equals(this.links, storedDocumentHalResource.links)
+               && Objects.equals(this.metadata, storedDocumentHalResource.metadata)
+               && Objects.equals(this.mimeType, storedDocumentHalResource.mimeType)
+               && Objects.equals(this.modifiedOn, storedDocumentHalResource.modifiedOn)
+               && Objects.equals(this.originalDocumentName, storedDocumentHalResource.originalDocumentName)
+               && Objects.equals(this.roles, storedDocumentHalResource.roles)
+               && Objects.equals(this.size, storedDocumentHalResource.size)
+               && Objects.equals(this.ttl, storedDocumentHalResource.ttl);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_embedded, classification, createdBy, createdOn, lastModifiedBy, links, metadata, mimeType, modifiedOn, originalDocumentName, roles, size, ttl);
+        return Objects
+            .hash(embedded, classification, createdBy, createdOn, lastModifiedBy, links, metadata, mimeType, modifiedOn, originalDocumentName, roles, size,
+                  ttl);
     }
 
     @Override
@@ -379,7 +381,7 @@ public class StoredDocumentHalResource {
         StringBuilder sb = new StringBuilder();
         sb.append("class StoredDocumentHalResource {\n");
 
-        sb.append("    _embedded: ").append(toIndentedString(_embedded)).append("\n");
+        sb.append("    embedded: ").append(toIndentedString(embedded)).append("\n");
         sb.append("    classification: ").append(toIndentedString(classification)).append("\n");
         sb.append("    createdBy: ").append(toIndentedString(createdBy)).append("\n");
         sb.append("    createdOn: ").append(toIndentedString(createdOn)).append("\n");
@@ -396,10 +398,6 @@ public class StoredDocumentHalResource {
         return sb.toString();
     }
 
-    /**
-     * Convert the given object to string with each line indented by 4 spaces
-     * (except the first line).
-     */
     private String toIndentedString(Object o) {
         if (o == null) {
             return "null";
@@ -408,7 +406,7 @@ public class StoredDocumentHalResource {
     }
 
     /**
-     * Gets or Sets classification
+     * Gets or Sets classification.
      */
     public enum ClassificationEnum {
         PUBLIC("PUBLIC"),

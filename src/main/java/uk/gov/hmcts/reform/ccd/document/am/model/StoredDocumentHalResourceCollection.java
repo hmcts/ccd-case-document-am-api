@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * StoredDocumentHalResourceCollection
+ * StoredDocumentHalResourceCollection.
  */
 @Validated
 public class StoredDocumentHalResourceCollection {
@@ -64,7 +64,7 @@ public class StoredDocumentHalResourceCollection {
     }
 
     /**
-     * Get links
+     * Get links.
      *
      * @return links
      **/
@@ -88,8 +88,8 @@ public class StoredDocumentHalResourceCollection {
             return false;
         }
         StoredDocumentHalResourceCollection storedDocumentHalResourceCollection = (StoredDocumentHalResourceCollection) o;
-        return Objects.equals(this.content, storedDocumentHalResourceCollection.content) &&
-            Objects.equals(this.links, storedDocumentHalResourceCollection.links);
+        return Objects.equals(this.content, storedDocumentHalResourceCollection.content)
+               && Objects.equals(this.links, storedDocumentHalResourceCollection.links);
     }
 
     @Override
@@ -108,10 +108,6 @@ public class StoredDocumentHalResourceCollection {
         return sb.toString();
     }
 
-    /**
-     * Convert the given object to string with each line indented by 4 spaces
-     * (except the first line).
-     */
     private String toIndentedString(Object o) {
         if (o == null) {
             return "null";

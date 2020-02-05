@@ -1,18 +1,15 @@
 package uk.gov.hmcts.reform.ccd.document.am.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-
-import javax.validation.Valid;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import javax.validation.Valid;
 
-/**
- * Body
- */
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModelProperty;
+import org.springframework.validation.annotation.Validated;
+
 @Validated
 public class Body {
     @JsonProperty("classification")
@@ -34,11 +31,6 @@ public class Body {
         return this;
     }
 
-    /**
-     * Get classification
-     *
-     * @return classification
-     **/
     @ApiModelProperty(value = "")
 
     public String getClassification() {
@@ -54,11 +46,6 @@ public class Body {
         return this;
     }
 
-    /**
-     * Get ttl
-     *
-     * @return ttl
-     **/
     @ApiModelProperty(value = "")
 
     @Valid
@@ -83,11 +70,6 @@ public class Body {
         return this;
     }
 
-    /**
-     * Get roles
-     *
-     * @return roles
-     **/
     @ApiModelProperty(value = "")
 
     public List<String> getRoles() {
@@ -111,11 +93,6 @@ public class Body {
         return this;
     }
 
-    /**
-     * Get files
-     *
-     * @return files
-     **/
     @ApiModelProperty(value = "")
     @Valid
     public List<java.io.File> getFiles() {
@@ -136,10 +113,10 @@ public class Body {
             return false;
         }
         Body body = (Body) o;
-        return Objects.equals(this.classification, body.classification) &&
-            Objects.equals(this.ttl, body.ttl) &&
-            Objects.equals(this.roles, body.roles) &&
-            Objects.equals(this.files, body.files);
+        return Objects.equals(this.classification, body.classification)
+               && Objects.equals(this.ttl, body.ttl)
+               && Objects.equals(this.roles, body.roles)
+               && Objects.equals(this.files, body.files);
     }
 
     @Override
