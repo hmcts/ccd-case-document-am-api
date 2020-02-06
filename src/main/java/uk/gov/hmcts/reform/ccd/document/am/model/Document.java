@@ -31,11 +31,6 @@ public class Document {
     @JsonProperty("hashToken")
     private String hashToken = null;
 
-    public Document id(String id) {
-        this.id = id;
-        return this;
-    }
-
     /**
      * Unique ID for the document.
      *
@@ -50,11 +45,6 @@ public class Document {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public Document url(String url) {
-        this.url = url;
-        return this;
     }
 
     /**
@@ -73,11 +63,6 @@ public class Document {
         this.url = url;
     }
 
-    public Document name(String name) {
-        this.name = name;
-        return this;
-    }
-
     /**
      * The document name.
      *
@@ -93,11 +78,6 @@ public class Document {
         this.name = name;
     }
 
-    public Document type(String type) {
-        this.type = type;
-        return this;
-    }
-
     /**
      * The document type.
      *
@@ -111,11 +91,6 @@ public class Document {
 
     public void setType(String type) {
         this.type = type;
-    }
-
-    public Document description(String description) {
-        this.description = description;
-        return this;
     }
 
     /**

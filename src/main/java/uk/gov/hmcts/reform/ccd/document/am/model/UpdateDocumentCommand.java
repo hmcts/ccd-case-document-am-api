@@ -16,11 +16,6 @@ public class UpdateDocumentCommand {
     @JsonProperty("ttl")
     private Date ttl = null;
 
-    public UpdateDocumentCommand ttl(Date ttl) {
-        this.ttl = ttl;
-        return this;
-    }
-
     /**
      * Get ttl.
      *

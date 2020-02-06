@@ -26,11 +26,6 @@ public class DocumentPayloadBody {
     @Valid
     private List<java.io.File> files;
 
-    public DocumentPayloadBody classification(String classification) {
-        this.classification = classification;
-        return this;
-    }
-
     @ApiModelProperty(value = "")
     public String getClassification() {
         return classification;
@@ -38,11 +33,6 @@ public class DocumentPayloadBody {
 
     public void setClassification(String classification) {
         this.classification = classification;
-    }
-
-    public DocumentPayloadBody ttl(OffsetDateTime ttl) {
-        this.ttl = ttl;
-        return this;
     }
 
     @ApiModelProperty(value = "")
@@ -54,11 +44,6 @@ public class DocumentPayloadBody {
 
     public void setTtl(OffsetDateTime ttl) {
         this.ttl = ttl;
-    }
-
-    public DocumentPayloadBody roles(List<String> roles) {
-        this.roles = roles;
-        return this;
     }
 
     public DocumentPayloadBody addRolesItem(String rolesItem) {
@@ -77,11 +62,6 @@ public class DocumentPayloadBody {
 
     public void setRoles(List<String> roles) {
         this.roles = roles;
-    }
-
-    public DocumentPayloadBody files(List<java.io.File> files) {
-        this.files = files;
-        return this;
     }
 
     public DocumentPayloadBody addFilesItem(java.io.File filesItem) {

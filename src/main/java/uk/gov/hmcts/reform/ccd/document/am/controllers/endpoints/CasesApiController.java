@@ -32,8 +32,8 @@ public class CasesApiController implements CasesApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(CasesApiController.class);
 
-    private final ObjectMapper objectMapper;
-    private final HttpServletRequest request;
+    private transient ObjectMapper objectMapper;
+    private transient HttpServletRequest request;
 
     @Autowired
     public CasesApiController(ObjectMapper objectMapper, HttpServletRequest request) {

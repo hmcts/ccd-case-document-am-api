@@ -17,11 +17,6 @@ public class MetadataSearchCommand {
     @JsonProperty("value")
     private String value = null;
 
-    public MetadataSearchCommand name(String name) {
-        this.name = name;
-        return this;
-    }
-
     /**
      * Get name.
      *
@@ -35,11 +30,6 @@ public class MetadataSearchCommand {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public MetadataSearchCommand value(String value) {
-        this.value = value;
-        return this;
     }
 
     /**

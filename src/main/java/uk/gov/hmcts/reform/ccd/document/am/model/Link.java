@@ -27,7 +27,7 @@ public class Link {
     private String rel = null;
 
     @JsonProperty("templated")
-    private Boolean templated = null;
+    private transient boolean templated;
 
     @JsonProperty("title")
     private String title = null;
@@ -35,10 +35,6 @@ public class Link {
     @JsonProperty("type")
     private String type = null;
 
-    public Link deprecation(String deprecation) {
-        this.deprecation = deprecation;
-        return this;
-    }
 
     /**
      * Get deprecation.
@@ -53,11 +49,6 @@ public class Link {
 
     public void setDeprecation(String deprecation) {
         this.deprecation = deprecation;
-    }
-
-    public Link href(String href) {
-        this.href = href;
-        return this;
     }
 
     /**
@@ -75,11 +66,6 @@ public class Link {
         this.href = href;
     }
 
-    public Link hreflang(String hreflang) {
-        this.hreflang = hreflang;
-        return this;
-    }
-
     /**
      * Get hreflang.
      *
@@ -93,11 +79,6 @@ public class Link {
 
     public void setHreflang(String hreflang) {
         this.hreflang = hreflang;
-    }
-
-    public Link media(String media) {
-        this.media = media;
-        return this;
     }
 
     /**
@@ -115,11 +96,6 @@ public class Link {
         this.media = media;
     }
 
-    public Link rel(String rel) {
-        this.rel = rel;
-        return this;
-    }
-
     /**
      * Get rel.
      *
@@ -135,10 +111,6 @@ public class Link {
         this.rel = rel;
     }
 
-    public Link templated(Boolean templated) {
-        this.templated = templated;
-        return this;
-    }
 
     /**
      * Get templated.
@@ -155,11 +127,6 @@ public class Link {
         this.templated = templated;
     }
 
-    public Link title(String title) {
-        this.title = title;
-        return this;
-    }
-
     /**
      * Get title.
      *
@@ -173,11 +140,6 @@ public class Link {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public Link type(String type) {
-        this.type = type;
-        return this;
     }
 
     /**

@@ -22,10 +22,6 @@ public class StoredDocumentHalResourceCollection {
     @Valid
     private List<Link> links = null;
 
-    public StoredDocumentHalResourceCollection content(List<StoredDocumentHalResource> content) {
-        this.content = content;
-        return this;
-    }
 
     public StoredDocumentHalResourceCollection addContentItem(StoredDocumentHalResource contentItem) {
         if (this.content == null) {
@@ -48,11 +44,6 @@ public class StoredDocumentHalResourceCollection {
 
     public void setContent(List<StoredDocumentHalResource> content) {
         this.content = content;
-    }
-
-    public StoredDocumentHalResourceCollection links(List<Link> links) {
-        this.links = links;
-        return this;
     }
 
     public StoredDocumentHalResourceCollection addLinksItem(Link linksItem) {

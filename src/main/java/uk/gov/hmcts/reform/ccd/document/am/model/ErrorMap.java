@@ -18,11 +18,6 @@ public class ErrorMap {
     @JsonProperty("message")
     private String message = null;
 
-    public ErrorMap code(String code) {
-        this.code = code;
-        return this;
-    }
-
     /**
      * The error code.
      *
@@ -37,11 +32,6 @@ public class ErrorMap {
 
     public void setCode(String code) {
         this.code = code;
-    }
-
-    public ErrorMap message(String message) {
-        this.message = message;
-        return this;
     }
 
     /**

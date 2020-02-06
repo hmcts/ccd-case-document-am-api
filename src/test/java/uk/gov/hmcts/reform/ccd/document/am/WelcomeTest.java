@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 public class WelcomeTest {
-    private CaseDocumentAmController caseDocumentAmController = new CaseDocumentAmController();
+    private transient CaseDocumentAmController caseDocumentAmController = new CaseDocumentAmController();
 
     @Test
     public void shouldReturnWelcomeMessage() {

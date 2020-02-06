@@ -18,11 +18,6 @@ public class ResourceSupport {
     @Valid
     private List<Link> links = null;
 
-    public ResourceSupport links(List<Link> links) {
-        this.links = links;
-        return this;
-    }
-
     public ResourceSupport addLinksItem(Link linksItem) {
         if (this.links == null) {
             this.links = new ArrayList<Link>();

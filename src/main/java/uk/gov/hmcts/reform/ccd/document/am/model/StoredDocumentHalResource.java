@@ -50,11 +50,6 @@ public class StoredDocumentHalResource {
     @JsonProperty("ttl")
     private Date ttl = null;
 
-    public StoredDocumentHalResource embedded(Map<String, ResourceSupport> embedded) {
-        this.embedded = embedded;
-        return this;
-    }
-
     public StoredDocumentHalResource putEmbeddedItem(String key, ResourceSupport embeddedItem) {
         if (this.embedded == null) {
             this.embedded = new HashMap<String, ResourceSupport>();
@@ -78,10 +73,6 @@ public class StoredDocumentHalResource {
         this.embedded = embedded;
     }
 
-    public StoredDocumentHalResource classification(ClassificationEnum classification) {
-        this.classification = classification;
-        return this;
-    }
 
     /**
      * Get classification.
@@ -98,11 +89,6 @@ public class StoredDocumentHalResource {
         this.classification = classification;
     }
 
-    public StoredDocumentHalResource createdBy(String createdBy) {
-        this.createdBy = createdBy;
-        return this;
-    }
-
     /**
      * Get createdBy.
      *
@@ -116,11 +102,6 @@ public class StoredDocumentHalResource {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
-    }
-
-    public StoredDocumentHalResource createdOn(Date createdOn) {
-        this.createdOn = createdOn;
-        return this;
     }
 
     /**
@@ -139,11 +120,6 @@ public class StoredDocumentHalResource {
         this.createdOn = createdOn;
     }
 
-    public StoredDocumentHalResource lastModifiedBy(String lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
-        return this;
-    }
-
     /**
      * Get lastModifiedBy.
      *
@@ -157,11 +133,6 @@ public class StoredDocumentHalResource {
 
     public void setLastModifiedBy(String lastModifiedBy) {
         this.lastModifiedBy = lastModifiedBy;
-    }
-
-    public StoredDocumentHalResource links(List<Link> links) {
-        this.links = links;
-        return this;
     }
 
     public StoredDocumentHalResource addLinksItem(Link linksItem) {
@@ -187,11 +158,6 @@ public class StoredDocumentHalResource {
         this.links = links;
     }
 
-    public StoredDocumentHalResource metadata(Map<String, String> metadata) {
-        this.metadata = metadata;
-        return this;
-    }
-
     public StoredDocumentHalResource putMetadataItem(String key, String metadataItem) {
         if (this.metadata == null) {
             this.metadata = new HashMap<String, String>();
@@ -215,11 +181,6 @@ public class StoredDocumentHalResource {
         this.metadata = metadata;
     }
 
-    public StoredDocumentHalResource mimeType(String mimeType) {
-        this.mimeType = mimeType;
-        return this;
-    }
-
     /**
      * Get mimeType.
      *
@@ -233,11 +194,6 @@ public class StoredDocumentHalResource {
 
     public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
-    }
-
-    public StoredDocumentHalResource modifiedOn(Date modifiedOn) {
-        this.modifiedOn = modifiedOn;
-        return this;
     }
 
     /**
@@ -256,11 +212,6 @@ public class StoredDocumentHalResource {
         this.modifiedOn = modifiedOn;
     }
 
-    public StoredDocumentHalResource originalDocumentName(String originalDocumentName) {
-        this.originalDocumentName = originalDocumentName;
-        return this;
-    }
-
     /**
      * Get originalDocumentName.
      *
@@ -274,11 +225,6 @@ public class StoredDocumentHalResource {
 
     public void setOriginalDocumentName(String originalDocumentName) {
         this.originalDocumentName = originalDocumentName;
-    }
-
-    public StoredDocumentHalResource roles(List<String> roles) {
-        this.roles = roles;
-        return this;
     }
 
     public StoredDocumentHalResource addRolesItem(String rolesItem) {
@@ -304,11 +250,6 @@ public class StoredDocumentHalResource {
         this.roles = roles;
     }
 
-    public StoredDocumentHalResource size(Long size) {
-        this.size = size;
-        return this;
-    }
-
     /**
      * Get size.
      *
@@ -322,11 +263,6 @@ public class StoredDocumentHalResource {
 
     public void setSize(Long size) {
         this.size = size;
-    }
-
-    public StoredDocumentHalResource ttl(Date ttl) {
-        this.ttl = ttl;
-        return this;
     }
 
     /**

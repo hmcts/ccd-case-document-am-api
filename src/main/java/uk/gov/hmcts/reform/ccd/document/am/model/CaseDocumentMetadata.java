@@ -16,23 +16,18 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 
 public class CaseDocumentMetadata {
-    @JsonProperty("caseId")
-    private String caseId = null;
+    @JsonProperty
+    private String caseId;
 
-    @JsonProperty("caseTypeId")
-    private String caseTypeId = null;
+    @JsonProperty
+    private String caseTypeId;
 
-    @JsonProperty("jurisdictionId")
-    private String jurisdictionId = null;
+    @JsonProperty
+    private String jurisdictionId;
 
-    @JsonProperty("documents")
+    @JsonProperty
     @Valid
     private List<Document> documents = new ArrayList<Document>();
-
-    public CaseDocumentMetadata caseId(String caseId) {
-        this.caseId = caseId;
-        return this;
-    }
 
     /**
      * The CaseId of the Document.
@@ -48,11 +43,6 @@ public class CaseDocumentMetadata {
 
     public void setCaseId(String caseId) {
         this.caseId = caseId;
-    }
-
-    public CaseDocumentMetadata caseTypeId(String caseTypeId) {
-        this.caseTypeId = caseTypeId;
-        return this;
     }
 
     /**
@@ -71,11 +61,6 @@ public class CaseDocumentMetadata {
         this.caseTypeId = caseTypeId;
     }
 
-    public CaseDocumentMetadata jurisdictionId(String jurisdictionId) {
-        this.jurisdictionId = jurisdictionId;
-        return this;
-    }
-
     /**
      * The JurisdictionId of the Document.
      *
@@ -90,16 +75,6 @@ public class CaseDocumentMetadata {
 
     public void setJurisdictionId(String jurisdictionId) {
         this.jurisdictionId = jurisdictionId;
-    }
-
-    public CaseDocumentMetadata documents(List<Document> documents) {
-        this.documents = documents;
-        return this;
-    }
-
-    public CaseDocumentMetadata addDocumentsItem(Document documentsItem) {
-        this.documents.add(documentsItem);
-        return this;
     }
 
     /**
