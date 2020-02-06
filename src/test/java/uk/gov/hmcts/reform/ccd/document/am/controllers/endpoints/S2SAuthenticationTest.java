@@ -38,6 +38,7 @@ public class S2SAuthenticationTest {
         MediaType.APPLICATION_JSON.getSubtype(),
         Charset.forName("utf8"));
 
+
     @Value("${testS2S.api.url}")
     private transient String url;
 
