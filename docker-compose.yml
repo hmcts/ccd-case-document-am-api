@@ -9,5 +9,6 @@ services:
     container_name: ccd-case-document-am-api
     environment:
       - IDAM_S2S_URL
+      - CASE_DOCUMENT_S2S_AUTHORISED_SERVICES=ccd-case-document-am-api,ccd_gw,xui_webapp
     ports:
       - 4455:4455

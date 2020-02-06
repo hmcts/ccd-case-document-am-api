@@ -107,6 +107,7 @@ module "ccd-case-document-am-api" {
     HTTP_CLIENT_SECONDS_IDLE_CONNECTION   = "${var.http_client_seconds_idle_connection}"
     HTTP_CLIENT_MAX_CLIENT_PER_ROUTE      = "${var.http_client_max_client_per_route}"
     HTTP_CLIENT_VALIDATE_AFTER_INACTIVITY = "${var.http_client_validate_after_inactivity}"
+    CASE_DOCUMENT_S2S_AUTHORISED_SERVICES = "${var.authorised-services}"
 
     JPA_CRITERIA_IN_SEARCH_ENABLED        = false
   }
