@@ -28,6 +28,8 @@ public class Document {
     private String description = null;
 
     //put hashtoken
+    @JsonProperty("hashToken")
+    private String hashToken = null;
 
     public Document id(String id) {
         this.id = id;
@@ -131,6 +133,21 @@ public class Document {
         this.description = description;
     }
 
+    /**
+     * The hashToken.
+     *
+     * @return hashToken
+     **/
+    @ApiModelProperty(value = "The hashToken")
+
+    public String getHashToken() {
+        return hashToken;
+    }
+
+    public void setHashToken(String hashToken) {
+        this.hashToken = hashToken;
+    }
+
 
     @Override
     public boolean equals(Object o) {
@@ -145,12 +162,13 @@ public class Document {
                && Objects.equals(this.url, document.url)
                && Objects.equals(this.name, document.name)
                && Objects.equals(this.type, document.type)
-               && Objects.equals(this.description, document.description);
+               && Objects.equals(this.description, document.description)
+               && Objects.equals(this.hashToken, document.hashToken);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, url, name, type, description);
+        return Objects.hash(id, url, name, type, description, hashToken);
     }
 
     @Override
@@ -163,6 +181,7 @@ public class Document {
         sb.append("    name: ").append(toIndentedString(name)).append("\n");
         sb.append("    type: ").append(toIndentedString(type)).append("\n");
         sb.append("    description: ").append(toIndentedString(description)).append("\n");
+        sb.append("    hashToken: ").append(toIndentedString(hashToken)).append("\n");
         sb.append("}");
         return sb.toString();
     }
