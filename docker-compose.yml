@@ -10,5 +10,8 @@ services:
     environment:
       - IDAM_S2S_URL
       - CASE_DOCUMENT_S2S_AUTHORISED_SERVICES=ccd-case-document-am-api,ccd_gw,xui_webapp
+      - IDAM_USER_URL
+      - CCD_DOCUMENT_API_IDAM_KEY
+      - AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY
     ports:
       - 4455:4455

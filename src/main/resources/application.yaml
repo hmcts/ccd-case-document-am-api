@@ -39,19 +39,15 @@ security:
   authorisedRoles:
     - caseworker
 
-
-
 ### dependency configuration
-auth.provider.service.client.baseUrl: ${IDAM_S2S_URL:http://rpe-service-auth-provider-aat.service.core-compute-aat.internal}
+auth.provider.service.client.baseUrl: ${IDAM_S2S_URL:http://localhost:4502}
 idam:
   s2s-auth:
-    totp_secret: ${S2S_SECRET:AAAAAAAAAAAAAAAB}
+    totp_secret: ${CCD_DOCUMENT_API_IDAM_KEY:AAAAAAAAAAAAAAAA}
     microservice: ccd-case-document-am-api
     url: ${IDAM_S2S_URL:http://rpe-service-auth-provider-aat.service.core-compute-aat.internal}
 
-
-
-auth.idam.client.baseUrl: ${IDAM_USER_URL:https://idam-api.aat.platform.hmcts.net}
+auth.idam.client.baseUrl: ${IDAM_USER_URL:http://localhost:4502}
 testS2S:
   api:
     url: "/testS2SAuthorization"
