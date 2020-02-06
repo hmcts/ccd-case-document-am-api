@@ -1,6 +1,10 @@
 package uk.gov.hmcts.reform.ccd.document.am.apihelper;
 
 public class Constants {
+
+    private Constants() {
+    }
+
     public static final String TAG = "case-document-controller";
     public static final String BAD_REQUEST = "Bad Request";
     public static final String UNAUTHORIZED = "Unauthorized";
