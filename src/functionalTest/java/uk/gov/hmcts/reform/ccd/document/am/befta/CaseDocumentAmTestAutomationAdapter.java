@@ -14,15 +14,16 @@ import uk.gov.hmcts.befta.exception.FunctionalTestException;
 import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
 
+@SuppressWarnings("PMD.DataflowAnomalyAnalysis")
 public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAdapter {
 
-    private final Logger logger = LoggerFactory.getLogger(CaseDocumentAmTestAutomationAdapter.class);
+    private static final Logger logger = LoggerFactory.getLogger(CaseDocumentAmTestAutomationAdapter.class);
     private static final int CREATED = 201;
     private static final String[] TEST_DEFINITIONS_NEEDED_FOR_TA = {
         "src/functionalTest/resources/CCD_BEFTA_JURISDICTION2.xlsx"
     };
     private static final String SCOPE = "PUBLIC";
-    final String[][] ccdRolesNeededForTA = {
+    final transient String[][] ccdRolesNeededForTA = {
         {"caseworker-befta_jurisdiction_2", SCOPE},
         {"caseworker-befta_jurisdiction_2-solicitor_1", SCOPE},
         {"caseworker-befta_jurisdiction_2-solicitor_2", SCOPE},

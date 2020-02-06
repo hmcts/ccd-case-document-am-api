@@ -149,10 +149,6 @@ checkstyle {
 
 pmd {
   toolVersion = "6.18.0"
-  sourceSets = [sourceSets.main, sourceSets.test, sourceSets.functionalTest, sourceSets.integrationTest, sourceSets.smokeTest]
-  reportsDir = file("$project.buildDir/reports/pmd")
-  ruleSets = []
-  ruleSetFiles = files("config/pmd/ruleset.xml")
 }
 
 jacocoTestReport {

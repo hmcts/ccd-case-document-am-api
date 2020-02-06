@@ -35,7 +35,7 @@ public class CaseDocumentControllerAdvice {
     private static final long serialVersionUID = 2L;
 
     private static final String LOG_STRING = "handling exception: {}";
-    private final Logger logger = LoggerFactory.getLogger(CaseDocumentControllerAdvice.class);
+    private static final Logger logger = LoggerFactory.getLogger(CaseDocumentControllerAdvice.class);
 
 
     @ExceptionHandler(UnauthorizedException.class)

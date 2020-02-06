@@ -17,7 +17,7 @@ import static org.springframework.http.ResponseEntity.ok;
 @RestController
 public class CaseDocumentAmController {
 
-    private final Logger logger = LoggerFactory.getLogger(CaseDocumentAmController.class);
+    private static final Logger logger = LoggerFactory.getLogger(CaseDocumentAmController.class);
 
     /**
      * Root GET endpoint.
@@ -35,7 +35,6 @@ public class CaseDocumentAmController {
 
     @GetMapping("/cases")
     public ResponseEntity<List<String>> getCases() {
-        logger.info("Inside /cases/caseId");
         throw new UnauthorizedException("This is an UnauthorizedException");
     }
 }
