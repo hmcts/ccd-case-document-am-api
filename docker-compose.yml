@@ -5,6 +5,10 @@ services:
   ccd-case-document-am-api:
     build:
       context: .
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
     image: hmcts/ccd-case-document-am-api
     container_name: ccd-case-document-am-api
     environment:

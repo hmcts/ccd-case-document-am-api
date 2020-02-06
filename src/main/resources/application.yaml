@@ -48,9 +48,6 @@ idam:
     url: ${IDAM_S2S_URL:http://rpe-service-auth-provider-aat.service.core-compute-aat.internal}
 
 auth.idam.client.baseUrl: ${IDAM_USER_URL:http://localhost:4502}
-testS2S:
-  api:
-    url: "/testS2SAuthorization"
-integrationTest:
-  api:
-    url: "/"
+
+testS2S.api.url: "/testS2SAuthorization"
+integrationTest.api.url: "/"
