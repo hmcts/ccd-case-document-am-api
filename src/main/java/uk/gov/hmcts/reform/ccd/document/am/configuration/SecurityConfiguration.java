@@ -19,7 +19,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    private final AuthCheckerServiceAndUserFilter authCheckerFilter;
+    private transient AuthCheckerServiceAndUserFilter authCheckerFilter;
 
     @Autowired
     public SecurityConfiguration(final RequestAuthorizer<User> userRequestAuthorizer,

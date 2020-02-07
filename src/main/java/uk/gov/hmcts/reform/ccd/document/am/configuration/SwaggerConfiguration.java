@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.ccd.document.am.config;
+package uk.gov.hmcts.reform.ccd.document.am.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,5 +22,4 @@ public class SwaggerConfiguration {
             .paths(PathSelectors.any())
             .build();
     }
-
 }

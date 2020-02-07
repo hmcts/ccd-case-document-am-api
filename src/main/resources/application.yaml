@@ -37,8 +37,6 @@ security:
   authorisedRoles:
     - caseworker
 
-
-
 ### dependency configuration
 auth.provider.service.client.baseUrl: ${IDAM_S2S_URL:http://localhost:4502}
 idam:
