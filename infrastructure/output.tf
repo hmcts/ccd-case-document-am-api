@@ -17,3 +17,8 @@ output "OAUTH2_CLIENT_ID" {
 output "OAUTH2_REDIRECT_URI" {
   value = "${local.oauth2_redirect_uri}"
 }
+
+output "DEFINITION_STORE_HOST" {
+  value = "${local.definition_store_host}"
+}
+

@@ -32,26 +32,23 @@ security:
     - "/error"
     - "/favicon.ico"
   ### Update list with service id of any service going to interact with casse document api
-  authorisedServices:
-    - ccd-case-document-am-api
-    - ccd_gw
-    - xui_webapp
+  authorisedServices: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_gw,xui_webapp,ccd_ps}
+
   authorisedRoles:
     - caseworker
 
-
-
 ### dependency configuration
-auth.provider.service.client.baseUrl: ${IDAM_S2S_URL:http://rpe-service-auth-provider-aat.service.core-compute-aat.internal}
+auth.provider.service.client.baseUrl: ${IDAM_S2S_URL:http://localhost:4502}
 idam:
   s2s-auth:
     totp_secret: ${S2S_SECRET:AAAAAAAAAAAAAAAB}
     microservice: ccd-case-document-am-api
-    url: ${IDAM_S2S_URL:http://rpe-service-auth-provider-aat.service.core-compute-aat.internal}
+    url: ${IDAM_S2S_URL:http://localhost:4502}
 
-
-
-auth.idam.client.baseUrl: ${IDAM_USER_URL:https://idam-api.aat.platform.hmcts.net}
-hello:
+auth.idam.client.baseUrl: ${IDAM_USER_URL:http://localhost:4501}
+testS2S:
   api:
-    url: "/test/helloworld"
+    url: "/testS2SAuthorization"
+integrationTest:
+  api:
+    url: "/"

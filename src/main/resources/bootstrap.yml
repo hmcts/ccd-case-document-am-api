@@ -1,7 +1,10 @@
 spring:
   cloud:
     propertiesvolume:
-      paths: /mnt/secrets/ccd
+      paths: /mnt/secrets/s2s,/mnt/secrets/casedocument
       prefixed: false
       aliases:
+        s2s-secret: idam.s2s-auth.totp_secret
         AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key
+
+
