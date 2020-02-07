@@ -29,7 +29,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
             {"caseworker-befta_jurisdiction_2-solicitor_2", PUBLIC},
             {"caseworker-befta_jurisdiction_2-solicitor_3", PUBLIC},
             {"citizen", "PUBLIC"},
-            };
+        };
 
     @Override
     public void doLoadTestData() {
