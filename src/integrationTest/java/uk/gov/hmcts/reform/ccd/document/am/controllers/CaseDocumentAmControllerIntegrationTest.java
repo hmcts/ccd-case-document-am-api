@@ -27,12 +27,12 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 @RunWith(SpringRunner.class)
 public class CaseDocumentAmControllerIntegrationTest {
 
-    private final Logger logger = LoggerFactory.getLogger(CaseDocumentAmControllerIntegrationTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(CaseDocumentAmControllerIntegrationTest.class);
 
-    private MockMvc mockMvc;
+    private transient MockMvc mockMvc;
 
     @Value("${integrationTest.api.url}")
-    private String url;
+    private transient String url;
 
     private static final MediaType JSON_CONTENT_TYPE = new MediaType(
         MediaType.APPLICATION_JSON.getType(),
@@ -40,7 +40,7 @@ public class CaseDocumentAmControllerIntegrationTest {
         Charset.forName("utf8"));
 
     @Autowired
-    CaseDocumentAmController caseDocumentAmController;
+    private transient CaseDocumentAmController caseDocumentAmController;
 
     protected static final ObjectMapper MAPPER = new ObjectMapper();
 

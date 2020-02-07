@@ -16,7 +16,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RunWith(SpringIntegrationSerenityRunner.class)
 public class SmokeTest {
 
-    private final String targetInstance = StringUtils.defaultIfBlank(System.getenv("TEST_URL"),
+    private static final String targetInstance = StringUtils.defaultIfBlank(System.getenv("TEST_URL"),
         "http://localhost:4455");
 
     @Test
