@@ -28,10 +28,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class S2SAuthenticationTest {
-    Logger log = LoggerFactory.getLogger(S2SAuthenticationTest.class);
+    private static final Logger log = LoggerFactory.getLogger(S2SAuthenticationTest.class);
 
     @Inject
-    private WebApplicationContext wac;
+    private transient WebApplicationContext wac;
 
     private static final MediaType JSON_CONTENT_TYPE = new MediaType(
         MediaType.APPLICATION_JSON.getType(),
@@ -39,9 +39,9 @@ public class S2SAuthenticationTest {
         Charset.forName("utf8"));
 
     @Value("${testS2S.api.url}")
-    private String url;
+    private transient String url;
 
-    private MockMvc mockMvc;
+    private transient MockMvc mockMvc;
 
     @Before
     public void setUp() {

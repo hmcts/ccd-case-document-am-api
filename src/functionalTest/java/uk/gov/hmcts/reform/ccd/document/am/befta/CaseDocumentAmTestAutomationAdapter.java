@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.ccd.document.am.befta;
 
+import java.io.File;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.response.Response;
@@ -11,10 +14,6 @@ import uk.gov.hmcts.befta.DefaultTestAutomationAdapter;
 import uk.gov.hmcts.befta.data.UserData;
 import uk.gov.hmcts.befta.exception.FunctionalTestException;
 
-import java.io.File;
-import java.util.concurrent.ConcurrentHashMap;
-
-@SuppressWarnings("PMD.DataflowAnomalyAnalysis")
 public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(CaseDocumentAmTestAutomationAdapter.class);
@@ -22,14 +21,15 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
     private static final String[] TEST_DEFINITIONS_NEEDED_FOR_TA = {
         "src/functionalTest/resources/CCD_BEFTA_JURISDICTION2.xlsx"
     };
-    private static final String SCOPE = "PUBLIC";
-    final transient String[][] ccdRolesNeededForTA = {
-        {"caseworker-befta_jurisdiction_2", SCOPE},
-        {"caseworker-befta_jurisdiction_2-solicitor_1", SCOPE},
-        {"caseworker-befta_jurisdiction_2-solicitor_2", SCOPE},
-        {"caseworker-befta_jurisdiction_2-solicitor_3", SCOPE},
-        {"citizen", "PUBLIC"},
-    };
+    private static final String PUBLIC = "PUBLIC";
+    private static final String[][] ccdRolesNeededForTA =
+        {
+            {"caseworker-befta_jurisdiction_2", PUBLIC},
+            {"caseworker-befta_jurisdiction_2-solicitor_1", PUBLIC},
+            {"caseworker-befta_jurisdiction_2-solicitor_2", PUBLIC},
+            {"caseworker-befta_jurisdiction_2-solicitor_3", PUBLIC},
+            {"citizen", "PUBLIC"},
+            };
 
     @Override
     public void doLoadTestData() {
@@ -39,7 +39,8 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
 
     private void addCcdRoles() {
         logger.info("{} roles will be added to '{}'.", ccdRolesNeededForTA.length,
-            BeftaMain.getConfig().getDefinitionStoreUrl());
+                    BeftaMain.getConfig().getDefinitionStoreUrl());
+
         for (String[] roleInfo : ccdRolesNeededForTA) {
             try {
                 logger.info("\n\nAdding CCD Role {}, {}...", roleInfo[0], roleInfo[1]);
@@ -58,8 +59,8 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
         ccdRoleInfo.put("role", role);
         ccdRoleInfo.put("security_classification", classification);
         Response response = asAutoTestImporter().given()
-            .header("Content-type", "application/json").body(ccdRoleInfo).when()
-            .put("/api/user-role");
+                                                .header("Content-type", "application/json").body(ccdRoleInfo).when()
+                                                .put("/api/user-role");
 
 
         if (response.getStatusCode() / divisor != num) {
@@ -69,12 +70,12 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
 
     private StringBuilder getResponseMessage(Response response) {
         return new StringBuilder("Import failed with response body: ").append(response.body().prettyPrint())
-            .append("\nand http code: ").append(response.statusCode());
+                                                                      .append("\nand http code: ").append(response.statusCode());
     }
 
     private void importDefinitions() {
         logger.info("{} definition files will be uploaded to '{}'.", TEST_DEFINITIONS_NEEDED_FOR_TA.length,
-            BeftaMain.getConfig().getDefinitionStoreUrl());
+                    BeftaMain.getConfig().getDefinitionStoreUrl());
         for (String fileName : TEST_DEFINITIONS_NEEDED_FOR_TA) {
             try {
                 logger.info("\n\nImporting {}...", fileName);
@@ -95,13 +96,13 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
 
     private RequestSpecification asAutoTestImporter() {
         UserData caseworker = new UserData(BeftaMain.getConfig().getImporterAutoTestEmail(),
-            BeftaMain.getConfig().getImporterAutoTestPassword());
+                                           BeftaMain.getConfig().getImporterAutoTestPassword());
         authenticate(caseworker);
 
         String s2sToken = getNewS2SToken();
         return RestAssured
             .given(new RequestSpecBuilder().setBaseUri(BeftaMain.getConfig().getDefinitionStoreUrl())
-                .build())
+                                           .build())
             .header("Authorization", "Bearer " + caseworker.getAccessToken())
             .header("ServiceAuthorization", s2sToken);
     }

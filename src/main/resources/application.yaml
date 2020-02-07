@@ -39,8 +39,6 @@ security:
   authorisedRoles:
     - caseworker
 
-
-
 ### dependency configuration
 auth.provider.service.client.baseUrl: ${IDAM_S2S_URL:http://rpe-service-auth-provider-aat.service.core-compute-aat.internal}
 idam:

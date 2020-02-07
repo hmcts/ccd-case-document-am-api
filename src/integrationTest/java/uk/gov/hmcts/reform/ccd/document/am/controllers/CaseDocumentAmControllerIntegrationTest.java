@@ -40,7 +40,7 @@ public class CaseDocumentAmControllerIntegrationTest {
         Charset.forName("utf8"));
 
     @Autowired
-    transient CaseDocumentAmController caseDocumentAmController;
+    private transient CaseDocumentAmController caseDocumentAmController;
 
     protected static final ObjectMapper MAPPER = new ObjectMapper();
 
