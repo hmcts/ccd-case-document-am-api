@@ -12,10 +12,11 @@ services:
     image: hmcts/ccd-case-document-am-api
     container_name: ccd-case-document-am-api
     environment:
-      - IDAM_S2S_URL
+      - IDAM_S2S_URL=http://localhost:4502
       - CASE_DOCUMENT_S2S_AUTHORISED_SERVICES=ccd-case-document-am-api,ccd_gw,xui_webapp
       - IDAM_USER_URL
       - CCD_DOCUMENT_API_IDAM_KEY
       - AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY
+      - MICROSERVICEKEYS_CCD_CASE_DOCUMENT_AM_API=AAAAAAAAAAAAAAAA
     ports:
       - 4455:4455
