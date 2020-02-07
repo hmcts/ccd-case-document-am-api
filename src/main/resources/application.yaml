@@ -39,8 +39,6 @@ security:
   authorisedRoles:
     - caseworker
 
-
-
 ### dependency configuration
 auth.provider.service.client.baseUrl: ${IDAM_S2S_URL:http://rpe-service-auth-provider-aat.service.core-compute-aat.internal}
 idam:
@@ -58,9 +56,3 @@ testS2S:
 integrationTest:
   api:
     url: "/"
-
-  springfox.documentation.swagger.v2.path=/api-docs
-  server.contextPath=/HMCTS-Reform-AM-Team/ccd-case-document-am-api/1.0.0
-  server.port=8080
-  spring.jackson.date-format=io.swagger.RFC3339DateFormat
-  spring.jackson.serialization.WRITE_DATES_AS_TIMESTAMPS=false
