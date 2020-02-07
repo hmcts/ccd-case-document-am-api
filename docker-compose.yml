@@ -11,3 +11,5 @@ services:
       - IDAM_S2S_URL
     ports:
       - 4455:4455
+    networks:
+      - ccd-network
