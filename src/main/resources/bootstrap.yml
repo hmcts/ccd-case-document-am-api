@@ -6,5 +6,3 @@ spring:
       aliases:
         s2s-secret: idam.s2s-auth.totp_secret
         AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key
-
-
