@@ -12,7 +12,7 @@ services:
     image: hmcts/ccd-case-document-am-api
     container_name: ccd-case-document-am-api
     environment:
-      CASE_DOCUMENT_S2S_AUTHORISED_SERVICES: ccd-case-document-am-api,ccd_gw,xui_webapp
+      CASE_DOCUMENT_S2S_AUTHORISED_SERVICES: ccd_case_document_am_api,ccd_gw,xui_webapp
       REFORM_SERVICE_NAME: ccd-case-document-am-api
       REFORM_TEAM: ccd
       REFORM_ENVIRONMENT: local
