@@ -36,6 +36,7 @@ security:
 
   authorisedRoles:
     - caseworker
+    - ccd-import
 
 ### dependency configuration
 auth.provider.service.client.baseUrl: ${IDAM_S2S_URL:http://localhost:4502}

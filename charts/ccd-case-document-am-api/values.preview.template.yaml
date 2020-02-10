@@ -11,4 +11,4 @@ java:
         - ccd-case-document-am-api-s2s-secret
   environment:
     DEFINITION_STORE_HOST: http://ccd-definition-store-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    CASE_DOCUMENT_S2S_AUTHORISED_SERVICES: ccd-case-document-am-api,ccd_gw,xui_webapp
+    CASE_DOCUMENT_S2S_AUTHORISED_SERVICES: ccd_case_document_am_api,ccd_gw,xui_webapp
