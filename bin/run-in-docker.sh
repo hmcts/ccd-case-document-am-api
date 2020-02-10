@@ -27,8 +27,8 @@ GRADLE_INSTALL=false
 # TODO sample: DB_PASSWORD   Defaults to 'dev'
 # environment variables
 #DB_PASSWORD=dev
-S2S_URL=localhost
-S2S_SECRET=secret
+#S2S_URL=localhost
+#S2S_SECRET=secret
 
 execute_script() {
   cd $(dirname "$0")/..
