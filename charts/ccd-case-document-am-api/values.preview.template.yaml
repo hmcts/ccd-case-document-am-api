@@ -9,6 +9,7 @@ java:
         - data-store-api-draftStoreEncryptionSecret
         - data-store-api-draft-key
         - ccd-data-s2s-secret
+        - ccd-case-document-am-api_s2s_key
   environment:
     DEFINITION_STORE_HOST: http://ccd-definition-store-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     CASE_DOCUMENT_S2S_AUTHORISED_SERVICES: ccd-case-document-am-api,ccd_gw,xui_webapp
