@@ -9,7 +9,7 @@ java:
         - data-store-api-draftStoreEncryptionSecret
         - data-store-api-draft-key
         - ccd-data-s2s-secret
-        - ccd-case-document-am-api_s2s_key
+        - ccd-case-document-am-api-s2s-secret
   environment:
     IDAM_S2S_URL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     IDAM_USER_URL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
