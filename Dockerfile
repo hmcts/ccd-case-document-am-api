@@ -1,3 +1,5 @@
+# Keep hub.Dockerfile aligned to this file as far as possible
+ARG JAVA_OPTS="-Djava.security.egd=file:/dev/./urandom"
 ARG APP_INSIGHTS_AGENT_VERSION=2.5.1
 
 # Application image

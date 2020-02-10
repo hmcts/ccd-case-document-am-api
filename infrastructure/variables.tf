@@ -93,5 +93,10 @@ variable "frontend_url" {
   default = ""
 }
 
+variable "authorised-services" {
+  type    = "string"
+  default = "ccd-case-document-am-api,ccd_gw,xui_webapp"
+}
+
 variable "deployment_namespace" {}
 

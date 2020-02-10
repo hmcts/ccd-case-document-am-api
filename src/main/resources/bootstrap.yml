@@ -1,10 +1,8 @@
 spring:
   cloud:
     propertiesvolume:
-      paths: /mnt/secrets/ccd
+      paths: /mnt/secrets/s2s,/mnt/secrets/casedocument
       prefixed: false
       aliases:
-        ccd-gw: CCD_GW_SERVICE_SECRET
-        ccd-data-s2s-secret: DATA_STORE_IDAM_KEY
-        data-store-api-draft-key: CCD_DRAFT_ENCRYPTION_KEY
+        s2s-secret: idam.s2s-auth.totp_secret
         AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key
