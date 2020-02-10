@@ -6,3 +6,4 @@ spring:
       aliases:
         s2s-secret: idam.s2s-auth.totp_secret
         AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key
+        ccd-case-document-am-api-s2s-secret: CCD_DOCUMENT_API_IDAM_KEY
