@@ -44,14 +44,14 @@ data "azurerm_key_vault" "s2s_vault" {
   resource_group_name = "rpe-service-auth-provider-${local.local_env}"
 }
 
-data "azurerm_key_vault_secret" "ccd-case-document-am-api_s2s_key" {
+data "azurerm_key_vault_secret" "ccd_case_document_am_api_s2s_key" {
   name = "microservicekey-ccd-case-document-am-api"
   key_vault_id = "${data.azurerm_key_vault.s2s_vault.id}"
 }
 
-resource "azurerm_key_vault_secret" "ccd-case-document-am-api-s2s-secret" {
+resource "azurerm_key_vault_secret" "ccd_case_document_am_api_s2s_secret" {
   name = "ccd-case-document-am-api-s2s-secret"
-  value = "${data.azurerm_key_vault_secret.ccd-case-document-am-api_s2s_key.value}"
+  value = "${data.azurerm_key_vault_secret.ccd_case_document_am_api_s2s_key.value}"
   key_vault_id = "${data.azurerm_key_vault.ccd_shared_key_vault.id}"
 }
 
@@ -97,7 +97,7 @@ module "ccd-case-document-am-api" {
 
     IDAM_USER_URL                       = "${var.idam_api_url}"
     IDAM_S2S_URL                        = "${local.s2s_url}"
-    CCD_DOCUMENT_API_IDAM_KEY           = "${data.azurerm_key_vault_secret.ccd-case-document-am-api_s2s_key.value}"
+    CCD_DOCUMENT_API_IDAM_KEY           = "${data.azurerm_key_vault_secret.ccd_case_document_am_api_s2s_key.value}"
 
     CCD_DRAFT_ENCRYPTION_KEY            = "${random_string.draft_encryption_key.result}"
     DEFINITION_STORE_HOST               = "${local.definition_store_host}"
