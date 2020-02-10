@@ -1,7 +1,7 @@
 java:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
-  aadIdentityName:
+  aadIdentityName: ccd
   keyVaults:
     ccd:
       resourceGroup: ccd-shared
