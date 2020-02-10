@@ -1,7 +1,7 @@
 spring:
   cloud:
     propertiesvolume:
-      paths: /mnt/secrets/s2s,/mnt/secrets/casedocument
+      paths: /mnt/secrets/s2s
       prefixed: false
       aliases:
         s2s-secret: idam.s2s-auth.totp_secret

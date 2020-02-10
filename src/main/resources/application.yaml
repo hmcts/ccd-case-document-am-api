@@ -14,7 +14,7 @@ management:
 #If you use a database then uncomment below lines and update db properties accordingly
 spring:
   application:
-    name: Spring Boot Template
+    name: CCD Case Document AM API
 
 security:
   anonymousPaths:
