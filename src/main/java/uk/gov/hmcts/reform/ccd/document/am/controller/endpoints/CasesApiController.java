@@ -1,5 +1,5 @@
 
-package uk.gov.hmcts.reform.ccd.document.am.controllers.endpoints;
+package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
 import java.io.IOException;
 import java.util.Date;
@@ -121,7 +121,7 @@ public class CasesApiController implements CasesApi {
 
         return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.NOT_IMPLEMENTED);
     }
-    
+
     @Override
     public ResponseEntity<StoredDocumentHalResource> patchDocumentbyDocumentId(
         @ApiParam(value = "", required = true)
@@ -153,7 +153,7 @@ public class CasesApiController implements CasesApi {
 
         return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.NOT_IMPLEMENTED);
     }
-    
+
     @Override
     public ResponseEntity<StoredDocumentHalResource> patchMetaDataOnDocuments(
 

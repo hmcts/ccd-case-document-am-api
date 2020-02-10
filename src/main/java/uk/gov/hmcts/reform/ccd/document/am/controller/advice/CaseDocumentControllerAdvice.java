@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.ccd.document.am.controllers.advice;
+package uk.gov.hmcts.reform.ccd.document.am.controller.advice;
 
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -10,10 +10,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
-import uk.gov.hmcts.reform.ccd.document.am.controllers.advice.exception.InvalidRequest;
-import uk.gov.hmcts.reform.ccd.document.am.controllers.advice.exception.RequiredFieldMissingException;
-import uk.gov.hmcts.reform.ccd.document.am.controllers.advice.exception.ResourceNotFoundException;
-import uk.gov.hmcts.reform.ccd.document.am.controllers.advice.exception.UnauthorizedException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.InvalidRequest;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.RequiredFieldMissingException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.UnauthorizedException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
@@ -22,10 +22,10 @@ import java.util.Locale;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static uk.gov.hmcts.reform.ccd.document.am.controllers.advice.ErrorConstants.INVALID_REQUEST;
-import static uk.gov.hmcts.reform.ccd.document.am.controllers.advice.ErrorConstants.UNAUTHORIZED;
-import static uk.gov.hmcts.reform.ccd.document.am.controllers.advice.ErrorConstants.RESOURCE_NOT_FOUND;
-import static uk.gov.hmcts.reform.ccd.document.am.controllers.advice.ErrorConstants.UNKNOWN_EXCEPTION;
+import static uk.gov.hmcts.reform.ccd.document.am.controller.advice.ErrorConstants.INVALID_REQUEST;
+import static uk.gov.hmcts.reform.ccd.document.am.controller.advice.ErrorConstants.UNAUTHORIZED;
+import static uk.gov.hmcts.reform.ccd.document.am.controller.advice.ErrorConstants.RESOURCE_NOT_FOUND;
+import static uk.gov.hmcts.reform.ccd.document.am.controller.advice.ErrorConstants.UNKNOWN_EXCEPTION;
 
 @Slf4j
 @ControllerAdvice(basePackages = "uk.gov.hmcts.reform.ccd.document.am.controllers")

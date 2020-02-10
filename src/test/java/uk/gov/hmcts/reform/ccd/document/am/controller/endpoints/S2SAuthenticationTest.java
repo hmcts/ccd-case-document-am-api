@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.ccd.document.am.controllers.endpoints;
+package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
 import org.junit.Before;
 import org.junit.Test;

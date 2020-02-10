@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.ccd.document.am.controllers.advice.exception;
+package uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception;
 
 public class UndefinedException extends RuntimeException {
 

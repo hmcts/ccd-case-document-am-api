@@ -1,5 +1,5 @@
 
-package uk.gov.hmcts.reform.ccd.document.am.controllers;
+package uk.gov.hmcts.reform.ccd.document.am.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;

@@ -1,9 +1,4 @@
-package uk.gov.hmcts.reform.ccd.document.am.controllers.endpoints;
-
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import javax.validation.Valid;
+package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -24,13 +19,18 @@ import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BAD_REQUEST;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.TAG;
+import javax.validation.Valid;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BAD_REQUEST;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FORBIDDEN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.RESOURCE_NOT_FOUND;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.S2S_API_PARAM;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.TAG;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.UNAUTHORIZED;
 
 @Api(value = "cases", description = "the cases API")

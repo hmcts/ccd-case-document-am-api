@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.ccd.document.am.controllers;
+package uk.gov.hmcts.reform.ccd.document.am.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.document.am.controllers.advice.exception.UnauthorizedException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.UnauthorizedException;
 
 import static org.springframework.http.ResponseEntity.ok;
 

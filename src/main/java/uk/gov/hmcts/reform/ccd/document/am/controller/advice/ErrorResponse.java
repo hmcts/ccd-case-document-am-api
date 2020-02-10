@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.ccd.document.am.controllers.advice;
+package uk.gov.hmcts.reform.ccd.document.am.controller.advice;
 
 import lombok.Builder;
 import lombok.Getter;
