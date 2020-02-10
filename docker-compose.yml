@@ -8,8 +8,24 @@ services:
     image: hmcts/ccd-case-document-am-api
     container_name: ccd-case-document-am-api
     environment:
-      - IDAM_S2S_URL
+      CASE_DOCUMENT_S2S_AUTHORISED_SERVICES: ccd_case_document_am_api,ccd_gw,xui_webapp
+      REFORM_SERVICE_NAME: ccd-case-document-am-api
+      REFORM_TEAM: ccd
+      REFORM_ENVIRONMENT: local
+      S2S_SECRET:
+      IDAM_USER_URL:
+      IDAM_S2S_URL:
+      S2S_KEY: S2S_KEY
+      CCD_DOCUMENT_API_IDAM_KEY:
+      USER_PROFILE_HOST:
+      AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY:
+      #JAVA_TOOL_OPTIONS: -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
     ports:
       - 4455:4455
+      #- 5005:5005
     networks:
       - ccd-network
+
+networks:
+  ccd-network:
+    external: true
