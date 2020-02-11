@@ -7,6 +7,7 @@ import java.util.UUID;
 public interface CaseDataStoreService {
 
     /**
+     * Root GET endpoint.
      *
      * @param caseReference 16-digit universally unique case reference
      * @param documentId Document Id

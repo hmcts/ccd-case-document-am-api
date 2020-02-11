@@ -27,5 +27,6 @@ public class CaseDocumentMetadata {
 
     @JsonProperty
     @Valid
+    @Builder.Default
     private List<Document> documents = new ArrayList<Document>();
 }

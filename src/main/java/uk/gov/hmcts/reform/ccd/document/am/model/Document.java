@@ -16,23 +16,23 @@ import java.util.List;
 @Builder
 public class Document {
     @JsonProperty("id")
-    private String id = null;
+    private String id;
 
     @JsonProperty("url")
-    private String url = null;
+    private String url;
 
     @JsonProperty("name")
-    private String name = null;
+    private String name;
 
     @JsonProperty("type")
-    private String type = null;
+    private String type;
 
     @JsonProperty("description")
-    private String description = null;
+    private String description;
 
     @JsonProperty("hashToken")
-    private String hashToken = null;
+    private String hashToken;
 
     @JsonProperty("permissions")
-    private List<Permission> permissions = null;
+    private List<Permission> permissions;
 }
