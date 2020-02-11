@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.ccd.document.am.service.Impl;
+package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;

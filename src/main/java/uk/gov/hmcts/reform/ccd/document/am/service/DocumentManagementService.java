@@ -35,6 +35,7 @@ public interface DocumentManagementService {
     ResponseEntity<?> getDocumentBinaryContent(final UUID documentId);
 
     /**
+     * Root GET endpoint.
      *
      * @param uploadDocumentsContent The uploaded document content sent by service UI
      * @return StoredDocumentHalResourceCollection object containing stored document details
