@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.ccd.document.am.service;
 
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
+import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
+import uk.gov.hmcts.reform.ccd.document.am.model.UploadDocumentsCommand;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -23,8 +25,15 @@ public interface DocumentManagementService {
 
     /**
      *
-     * @param documentId Document Id
+     * @param documentId Document Id for which binary content to be downloaded
      * @return OutputStream object containing binary content of document
      */
     ResponseEntity<?> getDocumentBinaryContent(final UUID documentId);
+
+    /**
+     *
+     * @param uploadDocumentsContent The uploaded document content sent by service UI
+     * @return StoredDocumentHalResourceCollection object containing stored document details
+     */
+    StoredDocumentHalResourceCollection uploadDocumentsContent(UploadDocumentsCommand uploadDocumentsContent);
 }
