@@ -9,7 +9,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication
 @EnableSwagger2
-@ComponentScan(basePackages = {"uk.gov.hmcts.reform.ccd.document.am.controllers.endpoints"})
+@ComponentScan(basePackages = {"uk.gov.hmcts.reform.ccd.document.am"})
 public class Swagger2SpringBoot implements CommandLineRunner {
 
     public static void main(String[] args) throws Exception {

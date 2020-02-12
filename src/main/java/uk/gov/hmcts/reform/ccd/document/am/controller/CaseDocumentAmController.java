@@ -1,16 +1,19 @@
 package uk.gov.hmcts.reform.ccd.document.am.controller;
 
+import static org.springframework.http.ResponseEntity.ok;
+
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.UnauthorizedException;
-
-import static org.springframework.http.ResponseEntity.ok;
-
-import java.util.List;
+import uk.gov.hmcts.reform.ccd.document.am.controller.endpoints.JSONPlaceHolderClient;
+import uk.gov.hmcts.reform.ccd.document.am.model.Post;
 
 /**
  * Default endpoints per application.
@@ -19,6 +22,9 @@ import java.util.List;
 public class CaseDocumentAmController {
 
     private static final Logger logger = LoggerFactory.getLogger(CaseDocumentAmController.class);
+
+    @Autowired
+    private JSONPlaceHolderClient jsonPlaceHolderClient;
 
     /**
      * Root GET endpoint.
@@ -43,4 +49,10 @@ public class CaseDocumentAmController {
     public String index() {
         return "redirect:swagger-ui.html";
     }
+
+    @GetMapping("/posts")
+    public ResponseEntity<List<Post>> getPosts() {
+        return ok(jsonPlaceHolderClient.getPosts());
+    }
+
 }
