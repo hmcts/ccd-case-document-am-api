@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.UnauthorizedException;
-import uk.gov.hmcts.reform.ccd.document.am.controller.endpoints.JSONPlaceHolderClient;
-import uk.gov.hmcts.reform.ccd.document.am.model.Post;
+import uk.gov.hmcts.reform.ccd.document.am.controller.endpoints.DocumentStoreFeignClient;
 
 /**
  * Default endpoints per application.
@@ -24,7 +23,7 @@ public class CaseDocumentAmController {
     private static final Logger logger = LoggerFactory.getLogger(CaseDocumentAmController.class);
 
     @Autowired
-    private JSONPlaceHolderClient jsonPlaceHolderClient;
+    private DocumentStoreFeignClient documentFeignClient;
 
     /**
      * Root GET endpoint.
@@ -50,9 +49,6 @@ public class CaseDocumentAmController {
         return "redirect:swagger-ui.html";
     }
 
-    @GetMapping("/posts")
-    public ResponseEntity<List<Post>> getPosts() {
-        return ok(jsonPlaceHolderClient.getPosts());
-    }
+
 
 }

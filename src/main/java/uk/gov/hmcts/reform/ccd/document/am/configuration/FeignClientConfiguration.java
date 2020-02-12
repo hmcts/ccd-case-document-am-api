@@ -4,11 +4,18 @@ import com.squareup.okhttp.OkHttpClient;
 import feign.Logger;
 import feign.RequestInterceptor;
 import feign.codec.ErrorDecoder;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Enumeration;
 
 @Configuration
+@Slf4j
 public class FeignClientConfiguration {
 
     @Bean
@@ -27,11 +34,24 @@ public class FeignClientConfiguration {
     }
 
     @Bean
-    public RequestInterceptor requestInterceptor() {
+    public RequestInterceptor requestInterceptor(FeignHeaderConfig config) {
         return requestTemplate -> {
-            requestTemplate.header("user", "ajeje");
-            requestTemplate.header("password", "brazof");
-            requestTemplate.header("Accept", ContentType.APPLICATION_JSON.getMimeType());
+            ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attrs != null) {
+                HttpServletRequest request = attrs.getRequest();
+                Enumeration<String> headerNames = request.getHeaderNames();
+                if (headerNames != null) {
+                    while (headerNames.hasMoreElements()) {
+                        String name = headerNames.nextElement();
+                        String value = request.getHeader(name);
+                        if (config.getHeaders().contains(name.toLowerCase())) {
+                            requestTemplate.header(name, value);
+                        }
+                    }
+                } else {
+                    log.warn("FeignHeadConfiguration", "Failed to get request header!");
+                }
+            }
         };
     }
 }

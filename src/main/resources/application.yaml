@@ -61,3 +61,7 @@ feign:
         connectTimeout: 5000
         readTimeout: 5000
         loggerLevel: basic
+  allow:
+    headers:
+      - authorization
+      - serviceauthorization

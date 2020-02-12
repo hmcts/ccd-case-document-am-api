@@ -16,7 +16,7 @@ public interface DocumentManagementService {
      * @param documentId Document Id
      * @return Optional containing document details including metadata when found; empty optional otherwise
      */
-    Optional<StoredDocumentHalResource> getDocumentMetadata(final UUID documentId);
+    ResponseEntity getDocumentMetadata(final UUID documentId);
 
     /**
      * Root GET endpoint.
