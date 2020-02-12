@@ -9,7 +9,6 @@ import java.util.Objects;
 import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -138,14 +137,6 @@ public class StoredDocumentHalResource {
     public void setLastModifiedBy(String lastModifiedBy) {
         this.lastModifiedBy = lastModifiedBy;
     }
-
-//    public StoredDocumentHalResource addLinksItem(Link linksItem) {
-//        if (this.links == null) {
-//            this.links = new ArrayList<Link>();
-//        }
-//        this.links.add(linksItem);
-//        return this;
-//    }
 
     /**
      * Get links.

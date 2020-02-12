@@ -42,7 +42,7 @@ public class CasesApiController implements CasesApi {
     public CasesApiController(ObjectMapper objectMapper, HttpServletRequest request,DocumentManagementService  documentManagementService) {
         this.objectMapper = objectMapper;
         this.request = request;
-        this.documentManagementService=documentManagementService;
+        this.documentManagementService = documentManagementService;
     }
 
     @Override
@@ -112,7 +112,7 @@ public class CasesApiController implements CasesApi {
         @RequestHeader(value = "User-Id", required = false) String userId,
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
-        ResponseEntity responseEntity=documentManagementService.getDocumentMetadata(documentId);
+        ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
 
         return  ResponseEntity
             .status(HttpStatus.OK)

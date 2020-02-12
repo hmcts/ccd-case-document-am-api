@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.ccd.document.am.controller.feign;
 
-
 import feign.Headers;
 import feign.Response;
 import org.springframework.cloud.openfeign.FeignClient;
