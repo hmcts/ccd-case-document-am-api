@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
+package uk.gov.hmcts.reform.ccd.document.am.controller.feign;
 
 
 import feign.Headers;

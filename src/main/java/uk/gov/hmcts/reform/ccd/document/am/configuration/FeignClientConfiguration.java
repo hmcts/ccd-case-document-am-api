@@ -18,20 +18,7 @@ import java.util.Enumeration;
 @Slf4j
 public class FeignClientConfiguration {
 
-    @Bean
-    public Logger.Level feignLoggerLevel() {
-        return Logger.Level.FULL;
-    }
 
-    @Bean
-    public ErrorDecoder errorDecoder() {
-        return new ErrorDecoder.Default();
-    }
-
-    @Bean
-    public OkHttpClient client() {
-        return new OkHttpClient();
-    }
 
     @Bean
     public RequestInterceptor requestInterceptor(FeignHeaderConfig config) {

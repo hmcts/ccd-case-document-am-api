@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.UnauthorizedException;
-import uk.gov.hmcts.reform.ccd.document.am.controller.endpoints.DocumentStoreFeignClient;
+import uk.gov.hmcts.reform.ccd.document.am.controller.feign.DocumentStoreFeignClient;
 
 /**
  * Default endpoints per application.
