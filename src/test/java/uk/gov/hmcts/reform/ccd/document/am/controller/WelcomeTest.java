@@ -1,9 +1,8 @@
-package uk.gov.hmcts.reform.ccd.document.am;
+package uk.gov.hmcts.reform.ccd.document.am.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import uk.gov.hmcts.reform.ccd.document.am.controller.CaseDocumentAmController;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
