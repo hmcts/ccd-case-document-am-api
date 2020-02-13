@@ -8,7 +8,7 @@ Feature: F-001: Retrieval of metadata from doc-store for given document id
   Scenario: Successful retrieval of metadata from doc-store for given document id for caseworker
     Given a user with [an active profile in CCD]
     And   a user with [an active caseworker profile in CCD with full permissions on a document field]
-    And   a successful call [by a privileged user to upload a document with mandatory metadata] as in [S-001-Default_Document_Upload_Data]
+    And   a successful call [by a privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data]
     When  a request is prepared with appropriate values
     And   it is submitted to call the [retrieval of metadata from doc-store for given document id] operation of [CCD data store]
     Then  a positive response is received
