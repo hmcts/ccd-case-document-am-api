@@ -19,7 +19,6 @@ import org.springframework.validation.annotation.Validated;
  * StoredDocumentHalResource.
  */
 @Validated
-@JsonIgnoreProperties(value = { "_embedded" })
 public class StoredDocumentHalResource {
 
     @JsonProperty("_embedded")
