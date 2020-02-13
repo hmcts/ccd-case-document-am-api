@@ -103,7 +103,7 @@ public interface CasesApi {
         @ApiResponse(code = 403, message = FORBIDDEN, response = ErrorMap.class, responseContainer = "List"),
         @ApiResponse(code = 404, message = "Not Found", response = String.class)})
     @RequestMapping(value = "/cases/documents/{documentId}", produces = {APPLICATION_JSON}, method = RequestMethod.GET)
-    ResponseEntity<StoredDocumentHalResource> getDocumentbyDocumentId(
+    ResponseEntity<Object> getDocumentbyDocumentId(
 
         @ApiParam(value = S2S_API_PARAM, required = true)
         @RequestHeader(value = SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,

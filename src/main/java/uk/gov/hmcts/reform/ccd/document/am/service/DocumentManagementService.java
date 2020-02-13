@@ -5,7 +5,6 @@ import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadDocumentsCommand;
 
-import java.util.Optional;
 import java.util.UUID;
 
 public interface DocumentManagementService {
@@ -16,7 +15,7 @@ public interface DocumentManagementService {
      * @param documentId Document Id
      * @return Optional containing document details including metadata when found; empty optional otherwise
      */
-    Optional<StoredDocumentHalResource> getDocumentMetadata(final UUID documentId);
+    ResponseEntity getDocumentMetadata(final UUID documentId);
 
     /**
      * Root GET endpoint.

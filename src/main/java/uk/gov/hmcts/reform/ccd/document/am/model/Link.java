@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.ccd.document.am.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -11,28 +13,37 @@ import java.util.Objects;
  */
 @Validated
 public class Link {
-    @JsonProperty("deprecation")
+    @JsonIgnore
     private String deprecation = null;
 
-    @JsonProperty("href")
+    @JsonIgnore
     private String href = null;
 
-    @JsonProperty("hreflang")
+    @JsonProperty("self")
+    private Map<String,String> self;
+
+    @JsonProperty("binary")
+    private Map<String,String> binary;
+
+    @JsonProperty("thumbnail")
+    private Map<String,String> thumbnail;
+
+    @JsonIgnore
     private String hreflang = null;
 
-    @JsonProperty("media")
+    @JsonIgnore
     private String media = null;
 
-    @JsonProperty("rel")
+    @JsonIgnore
     private String rel = null;
 
-    @JsonProperty("templated")
+    @JsonIgnore
     private transient boolean templated;
 
-    @JsonProperty("title")
+    @JsonIgnore
     private String title = null;
 
-    @JsonProperty("type")
+    @JsonIgnore
     private String type = null;
 
 
@@ -157,6 +168,23 @@ public class Link {
         this.type = type;
     }
 
+    public Map<String, String> getSelf() {
+        return self;
+    }
+
+    public Map<String, String> getBinary() {
+        return binary;
+    }
+
+    public void setSelf(Map<String, String> self) {
+        this.self = self;
+    }
+
+    public void setBinary(Map<String, String> binary) {
+        this.binary = binary;
+    }
+
+
 
     @Override
     public boolean equals(Object o) {
@@ -174,7 +202,9 @@ public class Link {
                && Objects.equals(this.rel, link.rel)
                && Objects.equals(this.templated, link.templated)
                && Objects.equals(this.title, link.title)
-               && Objects.equals(this.type, link.type);
+               && Objects.equals(this.type, link.type)
+               && Objects.equals(this.self, link.self)
+               && Objects.equals(this.binary, link.binary);
     }
 
     @Override
@@ -195,6 +225,8 @@ public class Link {
         sb.append("    templated: ").append(toIndentedString(templated)).append("\n");
         sb.append("    title: ").append(toIndentedString(title)).append("\n");
         sb.append("    type: ").append(toIndentedString(type)).append("\n");
+        sb.append("    self: ").append(toIndentedString(self)).append("\n");
+        sb.append("    binary: ").append(toIndentedString(binary)).append("\n");
         sb.append("}");
         return sb.toString();
     }

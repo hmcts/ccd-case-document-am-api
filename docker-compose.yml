@@ -13,12 +13,15 @@ services:
       REFORM_TEAM: ccd
       REFORM_ENVIRONMENT: local
       S2S_SECRET:
-      IDAM_USER_URL:
-      IDAM_S2S_URL:
+      eyJhbGciOiJIUzUxMiJ9:
+        eyJzdWIiOiJjY2RfZ3ciLCJleHAiOjE1ODE2MDc2OTh9:
+          fEZzmrF3zAOfw9Si27LXidUHyd99N3_wPzOHQUQ97_fGBcV-LVj-io9K1aYLMCPXoE3nrrr_IxwUg-29UbtiOA:
       S2S_KEY: S2S_KEY
       CCD_DOCUMENT_API_IDAM_KEY:
       USER_PROFILE_HOST:
       AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY:
+      IDAM_USER_URL: http://idam-api:5000
+      IDAM_S2S_URL: http://service-auth-provider-api:8080
       #JAVA_TOOL_OPTIONS: -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
     ports:
       - 4455:4455
