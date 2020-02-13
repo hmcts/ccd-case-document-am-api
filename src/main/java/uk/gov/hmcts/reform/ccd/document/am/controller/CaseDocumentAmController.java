@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 /**
  * Default endpoints per application.
  */
+
 @RestController
 public class CaseDocumentAmController {
 
