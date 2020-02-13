@@ -36,7 +36,7 @@ public class CasesApiController implements CasesApi {
 
     private transient ObjectMapper objectMapper;
     private transient HttpServletRequest request;
-    private DocumentManagementService  documentManagementService;
+    private transient DocumentManagementService  documentManagementService;
 
     @Autowired
     public CasesApiController(ObjectMapper objectMapper, HttpServletRequest request,DocumentManagementService  documentManagementService) {

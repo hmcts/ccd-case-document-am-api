@@ -21,7 +21,7 @@ import java.util.UUID;
 @Service
 public class DocumentManagementServiceImpl implements DocumentManagementService {
 
-    private DocumentStoreFeignClient documentStoreFeignClient;
+    private transient  DocumentStoreFeignClient documentStoreFeignClient;
 
     @Autowired
     public DocumentManagementServiceImpl(DocumentStoreFeignClient documentStoreFeignClient) {

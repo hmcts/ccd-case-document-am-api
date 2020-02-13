@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.ccd.document.am.configuration.FeignClientConfiguratio
 import java.util.UUID;
 
 @FeignClient(name = "DocumentStoreClient",
-             url = "http://localhost:3453/documents",
+             url = "${documentStoreUrl}",
              configuration = FeignClientConfiguration.class
              )
 public interface DocumentStoreFeignClient {

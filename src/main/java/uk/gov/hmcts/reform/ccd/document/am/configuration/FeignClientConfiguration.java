@@ -10,6 +10,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Enumeration;
+import java.util.Locale;
 
 @Configuration
 @Slf4j
@@ -28,7 +29,7 @@ public class FeignClientConfiguration {
                     while (headerNames.hasMoreElements()) {
                         String name = headerNames.nextElement();
                         String value = request.getHeader(name);
-                        if (config.getHeaders().contains(name.toLowerCase())) {
+                        if (config.getHeaders().contains(name.toLowerCase(Locale.ENGLISH))) {
                             requestTemplate.header(name, value);
                         }
                     }

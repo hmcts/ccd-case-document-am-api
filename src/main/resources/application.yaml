@@ -65,3 +65,4 @@ feign:
     headers:
       - authorization
       - serviceauthorization
+documentStoreUrl: ${Document_STORE_URL:http://localhost:3453/documents}
