@@ -30,16 +30,16 @@ import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 
 @Controller
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-public class CasesApiController implements CasesApi {
+public class CaseDocumentAmController implements CaseDocumentAm {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CasesApiController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CaseDocumentAmController.class);
 
     private transient ObjectMapper objectMapper;
     private transient HttpServletRequest request;
     private transient DocumentManagementService  documentManagementService;
 
     @Autowired
-    public CasesApiController(ObjectMapper objectMapper, HttpServletRequest request,DocumentManagementService  documentManagementService) {
+    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService  documentManagementService) {
         this.objectMapper = objectMapper;
         this.request = request;
         this.documentManagementService = documentManagementService;

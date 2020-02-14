@@ -35,7 +35,7 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.UNAUTHORIZ
 
 @Api(value = "cases", description = "the cases API")
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-public interface CasesApi {
+public interface CaseDocumentAm {
 
     @ApiOperation(value = "Deletes a Case Document.", nickname = "deleteDocumentbyDocumentId",
                   notes = "This API will be the single point of reference for deleting any case related documents from doc-store.",
