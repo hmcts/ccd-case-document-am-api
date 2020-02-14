@@ -1,7 +1,6 @@
 
 package uk.gov.hmcts.reform.ccd.document.am.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +15,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -38,7 +36,7 @@ public class WelcomeControllerIntegrationTest {
     private static final MediaType JSON_CONTENT_TYPE = new MediaType(
         MediaType.APPLICATION_JSON.getType(),
         MediaType.APPLICATION_JSON.getSubtype(),
-        StandardCharsets.UTF_8
+        Charset.forName("utf8")
     );
 
     @Autowired
