@@ -21,9 +21,9 @@ import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
  */
 
 @RestController
-public class CaseDocumentAmController {
+public class WelcomeController {
 
-    private static final Logger logger = LoggerFactory.getLogger(CaseDocumentAmController.class);
+    private static final Logger logger = LoggerFactory.getLogger(WelcomeController.class);
 
     @Autowired
     private DocumentStoreFeignClient documentFeignClient;
