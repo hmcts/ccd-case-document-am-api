@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -25,9 +26,9 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-public class CaseDocumentAmControllerIntegrationTest {
+public class WelcomeControllerIntegrationTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(CaseDocumentAmControllerIntegrationTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(WelcomeControllerIntegrationTest.class);
 
     private transient MockMvc mockMvc;
 
@@ -37,21 +38,20 @@ public class CaseDocumentAmControllerIntegrationTest {
     private static final MediaType JSON_CONTENT_TYPE = new MediaType(
         MediaType.APPLICATION_JSON.getType(),
         MediaType.APPLICATION_JSON.getSubtype(),
-        Charset.forName("utf8"));
+        StandardCharsets.UTF_8
+    );
 
     @Autowired
-    private transient CaseDocumentAmController caseDocumentAmController;
-
-    protected static final ObjectMapper MAPPER = new ObjectMapper();
+    private transient WelcomeController welcomeController;
 
     @Before
     public void setUp() {
-        this.mockMvc = standaloneSetup(this.caseDocumentAmController).build();
+        this.mockMvc = standaloneSetup(this.welcomeController).build();
     }
 
     @Test
     public void welComeAPITest() throws Exception {
-        logger.info("\n\nCaseDocumentAmControllerIntegrationTest : Inside  welComeAPITesti method...{}", url);
+        logger.info("\n\nWelcomeControllerIntegrationTest : Inside  welComeAPITesti method...{}", url);
         final MvcResult result = mockMvc.perform(get(url).contentType(JSON_CONTENT_TYPE))
             .andExpect(status().is(200))
             .andReturn();
