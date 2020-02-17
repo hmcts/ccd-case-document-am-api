@@ -112,6 +112,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "User-Id", required = false) String userId,
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
+
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
 
         return  ResponseEntity

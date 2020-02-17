@@ -15,12 +15,8 @@ public class V1MediaType extends MediaType {
 
     public static final MediaType V1_HAL_DOCUMENT_MEDIA_TYPE = valueOf(V1_HAL_DOCUMENT_MEDIA_TYPE_VALUE);
 
-
-
     public V1MediaType(String type, String subtype) {
         super(type, subtype);
     }
-
-
 
 }

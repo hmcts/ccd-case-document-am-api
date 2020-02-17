@@ -25,9 +25,6 @@ public class WelcomeController {
 
     private static final Logger logger = LoggerFactory.getLogger(WelcomeController.class);
 
-    @Autowired
-    private DocumentStoreFeignClient documentFeignClient;
-
     /**
      * Root GET endpoint.
      *

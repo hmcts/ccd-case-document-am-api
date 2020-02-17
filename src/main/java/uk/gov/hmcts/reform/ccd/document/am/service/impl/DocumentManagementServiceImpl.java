@@ -38,7 +38,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             log.error("Document Store api failed:: status code ::" + ex.status());
             throw new InvalidRequest("Document Store api failed!!");
         }
-
     }
 
     @Override

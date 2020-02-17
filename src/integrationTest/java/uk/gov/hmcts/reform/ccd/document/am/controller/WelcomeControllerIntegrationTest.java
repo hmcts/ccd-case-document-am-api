@@ -49,7 +49,7 @@ public class WelcomeControllerIntegrationTest {
 
     @Test
     public void welComeAPITest() throws Exception {
-        logger.info("\n\nWelcomeControllerIntegrationTest : Inside  welComeAPITesti method...{}", url);
+        logger.info("\n\nWelcomeControllerIntegrationTest : Inside  Welcome API Test method...{}", url);
         final MvcResult result = mockMvc.perform(get(url).contentType(JSON_CONTENT_TYPE))
             .andExpect(status().is(200))
             .andReturn();
