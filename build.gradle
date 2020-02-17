@@ -161,7 +161,7 @@ jacocoTestReport {
 project.tasks['sonarqube'].dependsOn jacocoTestReport
 
 jacoco {
-  toolVersion = "0.8.1"
+  toolVersion = "0.8.2"
 }
 
 pitest {
@@ -266,7 +266,6 @@ dependencies {
 
   compile group: 'org.springframework', name: 'spring-tx', version: '5.2.3.RELEASE'
 
-  compile 'com.squareup.okhttp:okhttp:2.5.0'
   testCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
 
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit
