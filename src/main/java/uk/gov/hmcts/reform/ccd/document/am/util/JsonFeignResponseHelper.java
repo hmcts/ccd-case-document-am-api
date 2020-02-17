@@ -54,10 +54,11 @@ public class JsonFeignResponseHelper {
 
         return responseEntityHeaders;
     }
-    public static void addHateoasLinks(Optional payload,UUID documentId){
-        if(payload.isPresent()){
-            Object obj=payload.get();
-            if(obj instanceof StoredDocumentHalResource){
+
+    public static void addHateoasLinks(Optional payload,UUID documentId) {
+        if (payload.isPresent()) {
+            Object obj = payload.get();
+            if (obj instanceof StoredDocumentHalResource) {
                 ((StoredDocumentHalResource) obj).addLinks(documentId);
             }
 

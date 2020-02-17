@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModelProperty;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.validation.annotation.Validated;
-import uk.gov.hmcts.reform.ccd.document.am.controller.endpoints.CasesApiController;
+import uk.gov.hmcts.reform.ccd.document.am.controller.endpoints.CaseDocumentAmController;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -28,7 +28,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
  */
 @Validated
 @JsonIgnoreProperties(value = { "_links" })
-public class StoredDocumentHalResource extends ResourceSupport{
+public class StoredDocumentHalResource extends ResourceSupport {
 
     @JsonProperty("_embedded")
     @Valid
@@ -166,9 +166,10 @@ public class StoredDocumentHalResource extends ResourceSupport{
     public void setMetadata(Map<String, String> metadata) {
         this.metadata = metadata;
     }
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public void addLinks(UUID documentId) {
-        add(linkTo(methodOn(CasesApiController.class).getDocumentbyDocumentId("dsds",documentId,"323","caseworker-1")).withSelfRel());
+        add(linkTo(methodOn(CaseDocumentAmController.class).getDocumentbyDocumentId("dsds", documentId, "323", "caseworker-1")).withSelfRel());
 
     }
 
