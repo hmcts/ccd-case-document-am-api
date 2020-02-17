@@ -262,7 +262,7 @@ dependencies {
   compile group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
   compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.1.RELEASE'
-
+  compile group: 'org.springframework.hateoas', name: 'spring-hateoas', version: '0.25.1.RELEASE'
   compile group: 'org.springframework', name: 'spring-tx', version: '5.2.3.RELEASE'
 
   testCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'

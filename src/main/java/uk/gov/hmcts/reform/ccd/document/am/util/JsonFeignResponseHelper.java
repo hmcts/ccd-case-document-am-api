@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,7 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
+import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 
 @SuppressWarnings("unchecked")
 public class JsonFeignResponseHelper {
@@ -30,8 +31,9 @@ public class JsonFeignResponseHelper {
         }
     }
 
-    public static ResponseEntity toResponseEntity(Response response, Class clazz) {
+    public static ResponseEntity toResponseEntity(Response response, Class clazz, UUID documentId) {
         Optional payload = decode(response, clazz);
+        addHateoasLinks(payload,documentId);
 
         return new ResponseEntity(
             payload.orElse(null),
@@ -48,5 +50,16 @@ public class JsonFeignResponseHelper {
         });
 
         return responseEntityHeaders;
+    }
+
+    public static void addHateoasLinks(Optional payload,UUID documentId) {
+        if (payload.isPresent()) {
+            Object obj = payload.get();
+            if (obj instanceof StoredDocumentHalResource) {
+                ((StoredDocumentHalResource) obj).addLinks(documentId);
+            }
+
+        }
+
     }
 }
