@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
+import java.util.UUID;
+
 import feign.FeignException;
 import feign.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -15,13 +17,11 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UploadDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.document.am.util.JsonFeignResponseHelper;
 
-import java.util.UUID;
-
 @Slf4j
 @Service
 public class DocumentManagementServiceImpl implements DocumentManagementService {
 
-    private transient  DocumentStoreFeignClient documentStoreFeignClient;
+    private transient DocumentStoreFeignClient documentStoreFeignClient;
 
     @Autowired
     public DocumentManagementServiceImpl(DocumentStoreFeignClient documentStoreFeignClient) {
@@ -33,8 +33,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
         try (Response response = documentStoreFeignClient.getMetadataForDocument(documentId);) {
             Class clazz = response.status() > 300 ? ErrorResponse.class : StoredDocumentHalResource.class;
-            return JsonFeignResponseHelper.toResponseEntity(response, clazz,documentId);
-        }  catch (FeignException ex) {
+            return JsonFeignResponseHelper.toResponseEntity(response, clazz, documentId);
+        } catch (FeignException ex) {
             log.error("Document Store api failed:: status code ::" + ex.status());
             throw new InvalidRequest("Document Store api failed!!");
         }
