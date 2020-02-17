@@ -1,9 +1,10 @@
 
-package uk.gov.hmcts.reform.ccd.document.am.controllers.endpoints;
+package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -25,20 +26,23 @@ import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 
 @Controller
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-public class CasesApiController implements CasesApi {
+public class CaseDocumentAmController implements CaseDocumentAm {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CasesApiController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CaseDocumentAmController.class);
 
     private transient ObjectMapper objectMapper;
     private transient HttpServletRequest request;
+    private transient DocumentManagementService  documentManagementService;
 
     @Autowired
-    public CasesApiController(ObjectMapper objectMapper, HttpServletRequest request) {
+    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService  documentManagementService) {
         this.objectMapper = objectMapper;
         this.request = request;
+        this.documentManagementService = documentManagementService;
     }
 
     @Override
@@ -96,7 +100,7 @@ public class CasesApiController implements CasesApi {
     }
 
     @Override
-    public ResponseEntity<StoredDocumentHalResource> getDocumentbyDocumentId(
+    public ResponseEntity<Object> getDocumentbyDocumentId(
         @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
         @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
 
@@ -108,20 +112,14 @@ public class CasesApiController implements CasesApi {
         @RequestHeader(value = "User-Id", required = false) String userId,
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<StoredDocumentHalResource>(objectMapper.readValue("",
-                    StoredDocumentHalResource.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                LOG.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
 
-        return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.NOT_IMPLEMENTED);
+        ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
+
+        return  ResponseEntity
+            .status(HttpStatus.OK)
+            .body(responseEntity.getBody());
     }
-    
+
     @Override
     public ResponseEntity<StoredDocumentHalResource> patchDocumentbyDocumentId(
         @ApiParam(value = "", required = true)
@@ -153,7 +151,7 @@ public class CasesApiController implements CasesApi {
 
         return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.NOT_IMPLEMENTED);
     }
-    
+
     @Override
     public ResponseEntity<StoredDocumentHalResource> patchMetaDataOnDocuments(
 
