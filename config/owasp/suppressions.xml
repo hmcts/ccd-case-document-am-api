@@ -266,6 +266,13 @@
   </suppress>
   <suppress>
     <notes><![CDATA[
+   relates to pkg:maven/org.seleniumhq.selenium/htmlunit-driver@2.36.0
+   ]]></notes>
+    <cpe>cpe:2.3:a:htmlunit_project:htmlunit:2.36.0:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2020-5529</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
    relates to bouncycastle
    ]]></notes>
     <cpe>cpe:2.3:a:bouncycastle:legion-of-the-bouncy-castle-java-crytography-api:1.54:*:*:*:*:*:*:*</cpe>
