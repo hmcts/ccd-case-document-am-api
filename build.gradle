@@ -245,6 +245,7 @@ dependencies {
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-json'
   compile group: 'uk.gov.hmcts.reform', name: 'health-spring-boot-starter', version: '0.0.5'
   compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
+  compile group: 'org.springframework.hateoas', name: 'spring-hateoas', version: '0.25.1.RELEASE'
 
   //Added for Spring Security Implementation
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: versions.springBoot
