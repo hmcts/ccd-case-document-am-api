@@ -9,6 +9,7 @@ import java.util.Objects;
 import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModelProperty;
@@ -18,8 +19,10 @@ import org.springframework.validation.annotation.Validated;
  * StoredDocumentHalResource.
  */
 @Validated
+@JsonIgnoreProperties(value = { "_embedded" })
 public class StoredDocumentHalResource {
-    @JsonProperty("embedded")
+
+    @JsonProperty("_embedded")
     @Valid
     private Map<String, ResourceSupport> embedded = null;
     @JsonProperty("classification")
@@ -30,9 +33,9 @@ public class StoredDocumentHalResource {
     private Date createdOn = null;
     @JsonProperty("lastModifiedBy")
     private String lastModifiedBy = null;
-    @JsonProperty("links")
+    @JsonProperty("_links")
     @Valid
-    private List<Link> links = null;
+    private Link links = null;
     @JsonProperty("metadata")
     @Valid
     private Map<String, String> metadata = null;
@@ -135,14 +138,6 @@ public class StoredDocumentHalResource {
         this.lastModifiedBy = lastModifiedBy;
     }
 
-    public StoredDocumentHalResource addLinksItem(Link linksItem) {
-        if (this.links == null) {
-            this.links = new ArrayList<Link>();
-        }
-        this.links.add(linksItem);
-        return this;
-    }
-
     /**
      * Get links.
      *
@@ -150,11 +145,11 @@ public class StoredDocumentHalResource {
      **/
     @ApiModelProperty(value = "")
     @Valid
-    public List<Link> getLinks() {
+    public Link getLinks() {
         return links;
     }
 
-    public void setLinks(List<Link> links) {
+    public void setLinks(Link links) {
         this.links = links;
     }
 

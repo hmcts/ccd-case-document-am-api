@@ -53,3 +53,16 @@ testS2S:
 integrationTest:
   api:
     url: "/"
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic
+  allow:
+    headers:
+      - authorization
+      - serviceauthorization
+documentStoreUrl: ${Document_STORE_URL:http://localhost:3453/documents}
