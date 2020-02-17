@@ -6,20 +6,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModelProperty;
+import org.springframework.hateoas.ResourceSupport;
 import org.springframework.validation.annotation.Validated;
+import uk.gov.hmcts.reform.ccd.document.am.controller.endpoints.CasesApiController;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+
 
 /**
  * StoredDocumentHalResource.
  */
 @Validated
-public class StoredDocumentHalResource {
+@JsonIgnoreProperties(value = { "_links" })
+public class StoredDocumentHalResource extends ResourceSupport{
 
     @JsonProperty("_embedded")
     @Valid
@@ -32,9 +41,6 @@ public class StoredDocumentHalResource {
     private Date createdOn = null;
     @JsonProperty("lastModifiedBy")
     private String lastModifiedBy = null;
-    @JsonProperty("_links")
-    @Valid
-    private Link links = null;
     @JsonProperty("metadata")
     @Valid
     private Map<String, String> metadata = null;
@@ -137,20 +143,6 @@ public class StoredDocumentHalResource {
         this.lastModifiedBy = lastModifiedBy;
     }
 
-    /**
-     * Get links.
-     *
-     * @return links
-     **/
-    @ApiModelProperty(value = "")
-    @Valid
-    public Link getLinks() {
-        return links;
-    }
-
-    public void setLinks(Link links) {
-        this.links = links;
-    }
 
     public StoredDocumentHalResource putMetadataItem(String key, String metadataItem) {
         if (this.metadata == null) {
@@ -173,6 +165,11 @@ public class StoredDocumentHalResource {
 
     public void setMetadata(Map<String, String> metadata) {
         this.metadata = metadata;
+    }
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public void addLinks(UUID documentId) {
+        add(linkTo(methodOn(CasesApiController.class).getDocumentbyDocumentId("dsds",documentId,"323","caseworker-1")).withSelfRel());
+
     }
 
     /**
@@ -289,7 +286,6 @@ public class StoredDocumentHalResource {
                && Objects.equals(this.createdBy, storedDocumentHalResource.createdBy)
                && Objects.equals(this.createdOn, storedDocumentHalResource.createdOn)
                && Objects.equals(this.lastModifiedBy, storedDocumentHalResource.lastModifiedBy)
-               && Objects.equals(this.links, storedDocumentHalResource.links)
                && Objects.equals(this.metadata, storedDocumentHalResource.metadata)
                && Objects.equals(this.mimeType, storedDocumentHalResource.mimeType)
                && Objects.equals(this.modifiedOn, storedDocumentHalResource.modifiedOn)
@@ -302,7 +298,7 @@ public class StoredDocumentHalResource {
     @Override
     public int hashCode() {
         return Objects
-            .hash(embedded, classification, createdBy, createdOn, lastModifiedBy, links, metadata, mimeType, modifiedOn, originalDocumentName, roles, size,
+            .hash(embedded, classification, createdBy, createdOn, lastModifiedBy,  metadata, mimeType, modifiedOn, originalDocumentName, roles, size,
                   ttl);
     }
 
@@ -316,7 +312,6 @@ public class StoredDocumentHalResource {
         sb.append("    createdBy: ").append(toIndentedString(createdBy)).append("\n");
         sb.append("    createdOn: ").append(toIndentedString(createdOn)).append("\n");
         sb.append("    lastModifiedBy: ").append(toIndentedString(lastModifiedBy)).append("\n");
-        sb.append("    links: ").append(toIndentedString(links)).append("\n");
         sb.append("    metadata: ").append(toIndentedString(metadata)).append("\n");
         sb.append("    mimeType: ").append(toIndentedString(mimeType)).append("\n");
         sb.append("    modifiedOn: ").append(toIndentedString(modifiedOn)).append("\n");

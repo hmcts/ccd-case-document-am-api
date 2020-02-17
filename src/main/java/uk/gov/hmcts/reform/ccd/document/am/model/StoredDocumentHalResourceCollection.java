@@ -18,9 +18,6 @@ public class StoredDocumentHalResourceCollection {
     @Valid
     private List<StoredDocumentHalResource> content = null;
 
-    @JsonProperty("links")
-    @Valid
-    private List<Link> links = null;
 
 
     public StoredDocumentHalResourceCollection addContentItem(StoredDocumentHalResource contentItem) {
@@ -46,29 +43,6 @@ public class StoredDocumentHalResourceCollection {
         this.content = content;
     }
 
-    public StoredDocumentHalResourceCollection addLinksItem(Link linksItem) {
-        if (this.links == null) {
-            this.links = new ArrayList<Link>();
-        }
-        this.links.add(linksItem);
-        return this;
-    }
-
-    /**
-     * Get links.
-     *
-     * @return links
-     **/
-    @ApiModelProperty(value = "")
-    @Valid
-    public List<Link> getLinks() {
-        return links;
-    }
-
-    public void setLinks(List<Link> links) {
-        this.links = links;
-    }
-
 
     @Override
     public boolean equals(Object o) {
@@ -79,13 +53,13 @@ public class StoredDocumentHalResourceCollection {
             return false;
         }
         StoredDocumentHalResourceCollection storedDocumentHalResourceCollection = (StoredDocumentHalResourceCollection) o;
-        return Objects.equals(this.content, storedDocumentHalResourceCollection.content)
-               && Objects.equals(this.links, storedDocumentHalResourceCollection.links);
+        return Objects.equals(this.content, storedDocumentHalResourceCollection.content);
+
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(content, links);
+        return Objects.hash(content);
     }
 
     @Override
@@ -94,7 +68,6 @@ public class StoredDocumentHalResourceCollection {
         sb.append("class StoredDocumentHalResourceCollection {\n");
 
         sb.append("    content: ").append(toIndentedString(content)).append("\n");
-        sb.append("    links: ").append(toIndentedString(links)).append("\n");
         sb.append("}");
         return sb.toString();
     }

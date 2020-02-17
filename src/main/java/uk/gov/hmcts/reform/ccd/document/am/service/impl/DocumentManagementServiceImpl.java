@@ -32,8 +32,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public ResponseEntity getDocumentMetadata(UUID documentId) {
 
         try (Response response = documentStoreFeignClient.getMetadataForDocument(documentId);) {
-            Class clazz = response.status() != 200 ? ErrorResponse.class : StoredDocumentHalResource.class;
-            return JsonFeignResponseHelper.toResponseEntity(response, clazz);
+            Class clazz = response.status() > 300 ? ErrorResponse.class : StoredDocumentHalResource.class;
+            return JsonFeignResponseHelper.toResponseEntity(response, clazz,documentId);
         }  catch (FeignException ex) {
             log.error("Document Store api failed:: status code ::" + ex.status());
             throw new InvalidRequest("Document Store api failed!!");
