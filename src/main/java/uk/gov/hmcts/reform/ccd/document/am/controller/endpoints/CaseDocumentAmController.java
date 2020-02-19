@@ -22,10 +22,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
+import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 
 @Controller
@@ -37,12 +40,15 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     private transient ObjectMapper objectMapper;
     private transient HttpServletRequest request;
     private transient DocumentManagementService  documentManagementService;
+    private transient CaseDataStoreService caseDataStoreService;
 
     @Autowired
-    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService  documentManagementService) {
+    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService  documentManagementService,
+                                    CaseDataStoreService caseDataStoreService) {
         this.objectMapper = objectMapper;
         this.request = request;
         this.documentManagementService = documentManagementService;
+        this.caseDataStoreService = caseDataStoreService;
     }
 
     @Override
@@ -86,17 +92,23 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "User-Id", required = false) String userId,
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<Object>(objectMapper.readValue("{ }", Object.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                LOG.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<Object>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+
+
+        ResponseEntity documentMetadata = documentManagementService.getDocumentMetadata(documentId);
+        String caseId = documentManagementService.extractDocumentMetadata(documentMetadata.getBody());
+        CaseDocumentMetadata caseDocumentMetadata = caseDataStoreService.getCaseDocumentMetadata(caseId,documentId);
+        for (Document document : caseDocumentMetadata.getDocuments()) {
+            if (document.getPermissions().contains(Permission.READ)) {
+                ResponseEntity   responseEntity = documentManagementService.getDocumentBinaryContent(documentId);
+                return  ResponseEntity
+                    .status(responseEntity.getStatusCode())
+                    .body(responseEntity.getBody());
             }
         }
 
-        return new ResponseEntity<Object>(HttpStatus.NOT_IMPLEMENTED);
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid Request");
     }
 
     @Override
