@@ -4,14 +4,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,8 +25,6 @@ public class CaseDocumentAmControllerTest {
 
     private transient ResponseEntity responseEntity = new ResponseEntity(HttpStatus.OK);
     private transient String serviceAuthorization = "";
-
-    HttpServletRequest mockedRequest = Mockito.mock(HttpServletRequest.class);
 
     @BeforeEach
     public void setUp() {
