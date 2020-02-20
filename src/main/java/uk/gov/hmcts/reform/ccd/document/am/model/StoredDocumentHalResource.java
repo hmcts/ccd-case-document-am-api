@@ -10,7 +10,6 @@ import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Data;
@@ -62,7 +61,6 @@ public class StoredDocumentHalResource extends ResourceSupport {
     @JsonProperty("ttl")
     private Date ttl = null;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     public void addLinks(UUID documentId) {
         add(linkTo(methodOn(CaseDocumentAmController.class).getDocumentbyDocumentId("dsds", documentId, "323", "caseworker-1")).withSelfRel());
 
