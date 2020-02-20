@@ -3,12 +3,23 @@ package uk.gov.hmcts.reform.ccd.document.am.befta;
 import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.validation.constraints.NotNull;
+
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.befta.BeftaMain;
 import uk.gov.hmcts.befta.DefaultTestAutomationAdapter;
 import uk.gov.hmcts.befta.data.UserData;
@@ -29,7 +40,8 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
             {"caseworker-befta_jurisdiction_2-solicitor_2", PUBLIC},
             {"caseworker-befta_jurisdiction_2-solicitor_3", PUBLIC},
             {"citizen", "PUBLIC"},
-        };
+            };
+
 
     @Override
     public void doLoadTestData() {
@@ -106,4 +118,5 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
             .header("Authorization", "Bearer " + caseworker.getAccessToken())
             .header("ServiceAuthorization", s2sToken);
     }
+
 }
