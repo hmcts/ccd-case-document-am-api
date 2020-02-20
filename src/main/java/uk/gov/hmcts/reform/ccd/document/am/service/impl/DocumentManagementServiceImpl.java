@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.ErrorResponse;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.InvalidRequest;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
@@ -29,13 +30,18 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private transient DocumentStoreFeignClient documentStoreFeignClient;
 
+    private final ServiceAuthTokenGenerator tokenGenerator;
+
     @Autowired
-    public DocumentManagementServiceImpl(DocumentStoreFeignClient documentStoreFeignClient) {
+    public DocumentManagementServiceImpl(DocumentStoreFeignClient documentStoreFeignClient, ServiceAuthTokenGenerator tokenGenerator) {
         this.documentStoreFeignClient = documentStoreFeignClient;
+        this.tokenGenerator = tokenGenerator;
     }
 
     @Override
     public ResponseEntity getDocumentMetadata(UUID documentId) {
+
+        String serviceToken=getServiceToken();
 
         try (Response response = documentStoreFeignClient.getMetadataForDocument(documentId)) {
             Class clazz = response.status() > 300 ? ErrorResponse.class : StoredDocumentHalResource.class;
@@ -79,5 +85,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Override
     public StoredDocumentHalResourceCollection uploadDocumentsContent(UploadDocumentsCommand uploadDocumentsContent) {
         return null;
+    }
+
+    private String getServiceToken(){
+        return tokenGenerator.generate();
     }
 }
