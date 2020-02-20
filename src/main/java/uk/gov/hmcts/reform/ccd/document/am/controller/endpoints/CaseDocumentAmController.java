@@ -131,9 +131,6 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-            headers.set("classification", "PUBLIC");
-            headers.set("roles", "caseworker");
-            headers.set("user-id", "auto.test.cnp@gmail.com");
             headers.set("ServiceAuthorization", serviceAuthorization);
 
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity
@@ -141,11 +138,6 @@ public class CaseDocumentAmController implements CaseDocumentAm {
                 map, headers);
 
         ResponseEntity<String> responseEntity1 = restTemplate.postForEntity(uploadFilesUrl, requestEntity, String.class);
-   /*     ResponseEntity<String> result = restTemplate.exchange(
-            contextPath.get() + path, HttpMethod.POST, requestEntity,
-            String.class);*/
-
-
 
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
 

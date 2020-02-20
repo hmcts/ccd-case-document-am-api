@@ -1,0 +1,55 @@
+{
+  "_guid_": "S-000-Prerequisite",
+  "_extends_": "S-000-Base-Success",
+  "users": {
+    "invokingUser": {
+      "username": "befta.caseworker.2@gmail.com",
+      "password": "Pa55word11"
+    }
+  },
+  "specs": [
+    "to retrieve a user profile"
+  ],
+  "productName": "CCD Data Store",
+  "operationName": "Retrieve a user profile",
+  "method": "GET",
+  "uri": "/documents/{documentId}",
+  "request": {
+    "pathVariables": {
+      "documentId": "1dda5ac6-fa2c-42cc-83ab-48e711b7e383"
+    },
+    "headers": {
+      "user-roles": "caseworker"
+    }
+  },
+  "expectedResponse": {
+    "responseCode": 200,
+    "responseMessage": "OK",
+    "headers": {
+      "Access-Control-Allow-Credentials": "true",
+      "Access-Control-Allow-Headers": "undefined",
+      "Access-Control-Allow-Methods": "GET,POST,OPTIONS,PUT,DELETE",
+      "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+      "connection": "close",
+      "content-encoding": "gzip",
+      "content-type": "application/json;charset=UTF-8",
+      "date": "[[ANY]]",
+      "expires": "0",
+      "pragma": "no-cache",
+      "request-context": "appId=cid-v1:",
+      "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+      "Surrogate-Control": "no-store",
+      "transfer-encoding": "chunked",
+      "vary": "accept-encoding",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
+      "x-xss-protection": "1; mode=block"
+    },
+    "body": {
+      "user": "[[ANY]]",
+      "channels": null,
+      "jurisdictions": "[[ANY]]",
+      "default": "[[ANY]]"
+    }
+  }
+}
