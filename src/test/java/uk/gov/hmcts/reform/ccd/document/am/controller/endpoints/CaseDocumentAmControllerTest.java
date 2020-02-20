@@ -4,12 +4,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,6 +27,8 @@ public class CaseDocumentAmControllerTest {
 
     private transient ResponseEntity responseEntity = new ResponseEntity(HttpStatus.OK);
     private transient String serviceAuthorization = "";
+
+    HttpServletRequest mockedRequest = Mockito.mock(HttpServletRequest.class);
 
     @BeforeEach
     public void setUp() {
@@ -50,11 +54,35 @@ public class CaseDocumentAmControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Status code");
     }
 
+    @Test
+    public void shouldGetDocumentBinaryContent() {
+        doReturn(setDocumentBinaryContent()).when(documentManagementService).getDocumentBinaryContent(getUuid());
+
+        ResponseEntity<Object> response = testee.getDocumentBinaryContentbyDocumentId(serviceAuthorization, getUuid(), "", "");
+        assertNotNull(response, "Valid binary content from API");
+        assertNotNull(response.getBody(), "Valid response body");
+        assertEquals(HttpStatus.OK, response.getStatusCode(), "Status code is OK");
+    }
+
+    @Test
+    public void shouldNotGetDocumentBinaryContentWhenDocumentIdDoesNotExist() {
+        doReturn(responseEntity).when(documentManagementService).getDocumentBinaryContent(getUuid());
+
+        ResponseEntity<Object> response = testee.getDocumentBinaryContentbyDocumentId(serviceAuthorization, getUuid(), "", "");
+        assertNotNull(response, "Invalid Response from API");
+        assertNotNull(response.getBody(), "Empty response body");
+        assertEquals(HttpStatus.OK, response.getStatusCode(), "Status code is OK");
+    }
+
     private ResponseEntity<StoredDocumentHalResource> setDocumentMetaData() {
         StoredDocumentHalResource resource = new StoredDocumentHalResource();
         resource.setCreatedBy("test");
         resource.setOriginalDocumentName("test.png");
         return new ResponseEntity<StoredDocumentHalResource>(resource, HttpStatus.ACCEPTED);
+    }
+
+    private ResponseEntity<Object> setDocumentBinaryContent() {
+        return new ResponseEntity<Object>(new Object(), HttpStatus.ACCEPTED);
     }
 
     private UUID getUuid() {
