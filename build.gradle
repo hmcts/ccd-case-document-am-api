@@ -279,7 +279,7 @@ dependencies {
     exclude group: 'junit', module: 'junit'
   }
 
-  testCompile files('lib/befta-fw-1.0.9-SNAPSHOT.jar')
+  testCompile group: 'uk.gov.hmcts', name: 'befta-fw', version: '1.0.30.RDM-7716.1'
 
   //Added for functional test automation
   compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.2.1.RELEASE'

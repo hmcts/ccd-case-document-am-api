@@ -36,8 +36,8 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
 
     @Override
     public void doLoadTestData() {
-        //addCcdRoles();
-        //importDefinitions();
+        addCcdRoles();
+        importDefinitions();
     }
 
     private void addCcdRoles() {
