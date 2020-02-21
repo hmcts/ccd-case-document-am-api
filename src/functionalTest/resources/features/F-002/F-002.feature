@@ -12,6 +12,7 @@ Feature: F-002: Get Document Binary Content by Document ID
       And it is submitted to call the [Get Binary Content by Document ID] operation of [CCD Case Document]
       Then a positive response is received
       And the response [contains the binary content for the uploaded document]
+      And the response has all other details as expected
 
     @S-021
     Scenario: must successfully receive a document's binary for a null user id
@@ -22,6 +23,7 @@ Feature: F-002: Get Document Binary Content by Document ID
       And it is submitted to call the [Get Binary Content by Document ID] operation of [CCD Case Document]
       Then a positive response is received
       And the response [contains the binary content for the uploaded document]
+      And the response has all other details as expected
 
     @S-022
     Scenario: must successfully receive a document's binary content for a wrong user id
@@ -32,6 +34,7 @@ Feature: F-002: Get Document Binary Content by Document ID
       And it is submitted to call the [Get Binary Content by Document ID] operation of [CCD Case Document]
       Then a positive response is received
       And the response [contains the binary content for the uploaded document]
+      And the response has all other details as expected
 
     @S-023
     Scenario: must receive an error response for a non existing document id
