@@ -1,5 +1,5 @@
 @F-002
-Feature: F-002: Get Document's Binary Content from Doc-Store for a given document id
+Feature: F-002: Get Document Binary Content by Document ID
 
   Background: Load test data for the scenario
     Given an appropriate test context as detailed in the test data source
