@@ -11,8 +11,6 @@ import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.context.annotation.Bean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGeneratorFactory;
 import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 
 @SpringBootApplication
@@ -27,7 +25,7 @@ public class Application {
     }
 
     @Bean
-    public ServiceAuthorisationApi generateServiceAuthorisationApi(@Value("${idam.s2s-auth.url}") final String s2sUrl){
+    public ServiceAuthorisationApi generateServiceAuthorisationApi(@Value("${idam.s2s-auth.url}") final String s2sUrl) {
         return Feign.builder()
             .encoder(new JacksonEncoder())
             .contract(new SpringMvcContract())
@@ -43,5 +41,6 @@ public class Application {
     ) {
         return new ServiceAuthTokenGenerator(secret, microService, serviceAuthorisationApi);
     }
+
 
 }
