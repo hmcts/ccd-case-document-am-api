@@ -1,29 +1,17 @@
 {
-  "title": "must create and update successfully the respective fields with ACL permissions for a Citizen",
-  "_extends_": "S-578_Update_Case_For_Citizen_Data_Base",
-  "_guid_": "S-578",
+  "title": "must successfully get document metadata by document ID",
+  "_extends_": "F-001_Test_Base_data",
+  "_guid_": "S-001",
   "specs": [
-    "an active Citizen profile in CCD",
-    "an active citizen profile with another specific variation of ACLs on the same case type",
-    "contains updated values for DocumentField2, along with an HTTP-201 Created"
+    "an active caseworker profile in CCD with full permissions on a document field",
+    "contains the metadata for the document uploaded above"
   ],
   "user": {
-    "username": "befta.citizen.2@gmail.com",
+    "username": "befta.caseworker.2.solicitor.3@gmail.com",
     "password": "Pa55word11"
   },
-  "request": {
-    "body": {
-      "data": {
-        "DocumentField2":{
-          "document_url":"http://dm-store-aat.service.core-compute-aat.internal/documents/ae5c9e4b-1385-483e-b1b7-607e75dd3943",
-          "document_binary_url":"http://dm-store-aat.service.core-compute-aat.internal/documents/ae5c9e4b-1385-483e-b1b7-607e75dd3943/binary",
-          "document_filename":"Elastic Search test Case.png --> updated by Citizen"
-        }
-      }
-    }
-  },
   "expectedResponse": {
-    "responseCode": 201,
+    "responseCode": 200,
     "responseMessage": "OK",
     "headers": {
       "_extends_": "Common_Response_Headers",

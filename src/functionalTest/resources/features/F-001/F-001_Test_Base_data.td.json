@@ -1,12 +1,12 @@
 {
-  "_guid_": "F-460_Test_Data_Base_Get_Dcoument",
-  "productName": "CCD Data Store",
-  "operationName": "Get Case for Case Worker",
+  "_guid_": "F-001_Test_Base_data",
+  "productName": "CCD Case Document AM API",
+  "operationName": "Get Document Metadata by Document ID",
   "specs": [
-    "Get the document from Document Store"
+    "an active caseworker profile in CCD with full permissions on a document field"
   ],
   "method": "GET",
-  "uri": "/documents/{documentId}",
+  "uri": "/cases/documents/{documentId}",
   "user": {
     "username": "befta.caseworker.2.solicitor.3@gmail.com",
     "password": "Pa55word11"
@@ -16,7 +16,7 @@
       "_extends_": "Common_Request_Headers"
     },
     "pathVariables": {
-      "documentId": "fcdca3b6-607f-41af-ad8c-92267c921d44"
+      "documentId": "405b2ba6-ec0d-4df5-8474-266776fc6ba1"
     }
   },
   "expectedResponse": {
