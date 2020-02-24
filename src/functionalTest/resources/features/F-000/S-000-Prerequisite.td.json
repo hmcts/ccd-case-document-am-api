@@ -29,11 +29,11 @@
       "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
       "connection": "close",
       "content-type": "application/vnd.uk.gov.hmcts.dm.document.v1+hal+json;charset=UTF-8",
-      "date": "Mon, 24 Feb 2020 13:18:32 GMT",
+      "date": [["ANYTHING_PRESENT"]],
       "Expires": "0",
       "Pragma": "no-cache",
-      "request-context": "appId=cid-v1:59871fc9-bac4-41d8-ad63-e64e5ce709d4",
-      "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+      "request-context": [["ANYTHING_PRESENT"]],
+      "Strict-Transport-Security": [["ANYTHING_PRESENT"]],
       "Surrogate-Control": "no-store",
       "transfer-encoding": "chunked",
       "x-content-type-options": "nosniff",
@@ -41,13 +41,13 @@
       "x-xss-protection": "1; mode=block"
     },
     "body": {
-      "size": 688879,
+      "size": [["ANYTHING_PRESENT"]],
       "mimeType": "image/png",
-      "originalDocumentName": "Screenshot 2020-02-11 at 10.47.51 am.png",
-      "createdBy": "5ba5d987-df28-482c-b877-3f244f7c27cf",
-      "lastModifiedBy": "5ba5d987-df28-482c-b877-3f244f7c27cf",
-      "modifiedOn": "2020-02-24T13:15:15+0000",
-      "createdOn": "2020-02-24T13:15:15+0000",
+      "originalDocumentName": [["ANYTHING_PRESENT"]],
+      "createdBy": [["ANYTHING_PRESENT"]],
+      "lastModifiedBy": [["ANYTHING_PRESENT"]],
+      "modifiedOn": [["ANYTHING_PRESENT"]],
+      "createdOn": [["ANYTHING_PRESENT"]],
       "classification": "PUBLIC",
       "roles": [],
       "metadata": {},
@@ -67,11 +67,11 @@
           "_embedded": {
             "documentVersions": [
               {
-                "size": 688879,
+                "size": [["ANYTHING_PRESENT"]],
                 "mimeType": "image/png",
-                "originalDocumentName": "Screenshot 2020-02-11 at 10.47.51 am.png",
-                "createdBy": "5ba5d987-df28-482c-b877-3f244f7c27cf",
-                "createdOn": "2020-02-24T13:15:15+0000",
+                "originalDocumentName": [["ANYTHING_PRESENT"]],
+                "createdBy": [["ANYTHING_PRESENT"]],
+                "createdOn": [["ANYTHING_PRESENT"]],
                 "_links": {
                   "document": {
                     "href": "http://dm-store:8080/documents/ea37fcab-2e13-4d52-b496-aad6e9056128"
