@@ -1,12 +1,17 @@
 package uk.gov.hmcts.reform.ccd.document.am.befta;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.validation.constraints.NotNull;
 
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.internal.util.IOUtils;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.slf4j.Logger;
@@ -15,6 +20,7 @@ import uk.gov.hmcts.befta.BeftaMain;
 import uk.gov.hmcts.befta.DefaultTestAutomationAdapter;
 import uk.gov.hmcts.befta.data.UserData;
 import uk.gov.hmcts.befta.exception.FunctionalTestException;
+import uk.gov.hmcts.befta.util.BeftaUtils;
 
 public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAdapter {
 
@@ -36,6 +42,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
 
     @Override
     public void doLoadTestData() {
+
         addCcdRoles();
         importDefinitions();
     }

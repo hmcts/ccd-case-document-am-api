@@ -10,8 +10,7 @@
 
 	"specs": [
 		"a detailed profile in CCD",
-		"uses a uid that exists in IDAM",
-    "to retrieve the metadata by document id"
+		"uses a uid that exists in IDAM"
 	],
 
 	"users": {

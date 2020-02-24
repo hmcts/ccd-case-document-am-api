@@ -1,0 +1,32 @@
+{
+  "_guid_": "S-000-Upload",
+  "_extends_": "S-000-Base-Success",
+  "users": {
+    "invokingUser": {
+      "username": "befta.caseworker.2@gmail.com",
+      "password": "Pa55word11"
+    }
+  },
+  "specs": [
+    "to retrieve a user profile"
+  ],
+  "productName": "CCD Data Store",
+  "operationName": "Retrieve a user profile",
+  "method": "POST",
+  "uri": "/documents",
+  "request": {
+    "body": {
+      "classification": "PUBLIC",
+      "roles": "caseworker",
+      "user-id": "auto.test.cnp@gmail.com",
+      "__fileInBody__": {
+        "fullPath": "/Users/462450/IdeaProjects/ccd-case-document-am-api/src/functionalTest/resources/S-000.txt"
+      }
+    },
+    "headers": {
+      "Content-Type": "multipart/form-data;boundary=A"
+    }
+  },
+  "expectedResponse": {
+  }
+}
