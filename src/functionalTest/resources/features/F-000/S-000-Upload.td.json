@@ -31,19 +31,84 @@
 				{
 					"key": "files",
 					"filePath": "1.png"
-				},
-				{
-					"key": "files",
-					"filePath": "2.png"
-				},
-				{
-					"key": "files",
-					"filePath": "3.png"
 				}
 			]
 		}
 	},
 	"expectedResponse": {
-		
-	}
+    "responseCode" : 200,
+    "responseMessage" : "OK",
+    "headers" : {
+      "Access-Control-Allow-Credentials" : "true",
+      "Access-Control-Allow-Headers" : "undefined",
+      "Access-Control-Allow-Methods" : "GET,POST,OPTIONS,PUT,DELETE",
+      "Cache-Control" : "no-store, no-cache, must-revalidate, proxy-revalidate",
+      "connection" : "close",
+      "content-type" : "application/vnd.uk.gov.hmcts.dm.document-collection.v1+hal+json;charset=UTF-8",
+      "date": "[[ANYTHING_PRESENT]]",
+      "Expires" : "0",
+      "Pragma" : "no-cache",
+      "request-context" : "[[ANYTHING_PRESENT]]",
+      "Strict-Transport-Security" : "[[ANYTHING_PRESENT]]",
+      "Surrogate-Control" : "no-store",
+      "transfer-encoding" : "chunked",
+      "x-content-type-options" : "nosniff",
+      "x-frame-options" : "DENY",
+      "x-xss-protection" : "1; mode=block"
+    },
+    "body" : {
+      "_embedded" : {
+        "documents" : [ {
+          "size" : "[[ANYTHING_PRESENT]]",
+          "mimeType" : "multipart/form-data",
+          "originalDocumentName" : "[[ANYTHING_PRESENT]]",
+          "createdBy" : "[[ANYTHING_PRESENT]]",
+          "lastModifiedBy" : "[[ANYTHING_PRESENT]]",
+          "modifiedOn" : "[[ANYTHING_PRESENT]]",
+          "createdOn" : "[[ANYTHING_PRESENT]]",
+          "classification" : "PUBLIC",
+          "roles" : [ "caseworker" ],
+          "_links" : {
+            "self" : {
+              "href" : "[[ANYTHING_PRESENT]]"
+            },
+            "binary" : {
+              "href" : "[[ANYTHING_PRESENT]]"
+            },
+            "thumbnail" : {
+              "href" : "[[ANYTHING_PRESENT]]"
+            }
+          },
+          "_embedded" : {
+            "allDocumentVersions" : {
+              "_embedded" : {
+                "documentVersions" : [ {
+                  "size" : "[[ANYTHING_PRESENT]]",
+                  "mimeType" : "multipart/form-data",
+                  "originalDocumentName" : "[[ANYTHING_PRESENT]]",
+                  "createdBy" : "[[ANYTHING_PRESENT]]",
+                  "createdOn" : "[[ANYTHING_PRESENT]]",
+                  "_links" : {
+                    "document" : {
+                      "href" : "[[ANYTHING_PRESENT]]"
+                    },
+                    "self" : {
+                      "href" : "[[ANYTHING_PRESENT]]"
+                    },
+                    "binary" : {
+                      "href" : "[[ANYTHING_PRESENT]]"
+                    },
+                    "thumbnail" : {
+                      "href" : "[[ANYTHING_PRESENT]]"
+                    }
+                  }
+                } ]
+              }
+            }
+          }
+        }
+        ]
+      }
+    }
+}
 }
