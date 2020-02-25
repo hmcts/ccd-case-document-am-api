@@ -14,6 +14,7 @@ import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -101,8 +102,15 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         for (Document document : caseDocumentMetadata.getDocuments()) {
             if (document.getPermissions().contains(Permission.READ)) {
                 ResponseEntity   responseEntity = documentManagementService.getDocumentBinaryContent(documentId);
+                HttpHeaders headers = new HttpHeaders();
+                headers.add("OriginalFileName",responseEntity.getHeaders().getFirst("OriginalFileName"));
+                headers.add("Content-Disposition",responseEntity.getHeaders().getFirst("Content-Disposition"));
+                headers.add("data-source",responseEntity.getHeaders().getFirst("data-source"));
                 return  ResponseEntity
                     .status(responseEntity.getStatusCode())
+                    .headers(headers)
+                    .contentLength(responseEntity.getHeaders().getContentLength())
+                    .contentType(responseEntity.getHeaders().getContentType())
                     .body(responseEntity.getBody());
             }
         }
