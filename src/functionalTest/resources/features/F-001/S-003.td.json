@@ -1,7 +1,7 @@
 {
   "title": "must get an error response for a malformed document ID",
   "_extends_": "F-001_Test_Base_data",
-  "_guid_": "S-001",
+  "_guid_": "S-003",
   "specs": [
     "an active caseworker profile in CCD with full permissions on a document field",
     "contains the metadata for the document uploaded above"
