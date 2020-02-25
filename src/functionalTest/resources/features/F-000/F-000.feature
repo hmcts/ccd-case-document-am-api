@@ -6,7 +6,7 @@ Feature: [SAMPLE] Get default settings for user
 
   @S-000
   Scenario: [SAMPLE] must return default user setting successfully for a user having a profile in CCD
-    Given a successful call [to retrieve the metadata by document id] as in [S-000-Prerequisite]
+    Given a successful call [to retrieve the metadata by document id] as in [S-000-Upload]
     And a user with [a detailed profile in CCD]
     And a case that has just been created as in [Befta_Default_Full_Case_Creation_Data]
     When a request is prepared with appropriate values

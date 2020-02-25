@@ -8,7 +8,7 @@
 		}
 	},
 	"specs": [
-		"to retrieve a user profile"
+		"to retrieve the metadata by document id"
 	],
 	"productName": "CCD Data Store",
 	"operationName": "Retrieve a user profile",
@@ -16,7 +16,7 @@
 	"uri": "/documents",
 	"request": {
 		"headers": {
-			"Content-Type": "multipart/form-data;boundary=A"
+			"Content-Type": "multipart/form-data"
 		},
 		"body": {
 			"arrayInMap": [
@@ -30,15 +30,15 @@
 				},
 				{
 					"key": "files",
-					"filePath": "/features/F-000/S-000.td.json"
+					"filePath": "1.png"
 				},
 				{
 					"key": "files",
-					"filePath": "/features/F-000/F-000.feature"
+					"filePath": "2.png"
 				},
 				{
 					"key": "files",
-					"filePath": "/features/F-000/S-000-Upload.td.json"
+					"filePath": "3.png"
 				}
 			]
 		}
