@@ -19,7 +19,7 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.feign.DocumentStoreFeignCl
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadDocumentsCommand;
-import uk.gov.hmcts.reform.ccd.document.am.model.UploadedEvidence;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentStreamOject;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.document.am.util.JsonFeignResponseHelper;
 
@@ -64,8 +64,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             ResponseEntity<Resource> response = documentStoreFeignClient.getDocumentBinary(documentId);
 
             if (HttpStatus.OK.equals(response.getStatusCode())) {
-                return ResponseEntity.status(response.getStatusCode()).body(new UploadedEvidence(response.getBody(),
-                         response.getHeaders().get("originalfilename").get(0), response.getHeaders().get(HttpHeaders.CONTENT_TYPE).get(0)));
+                return ResponseEntity.status(response.getStatusCode()).body(new DocumentStreamOject(response.getBody(),
+                                                                                                    response.getHeaders().get("originalfilename").get(0), response.getHeaders().get(HttpHeaders.CONTENT_TYPE).get(0)));
             } else {
                 return ResponseEntity
                     .status(response.getStatusCode())
