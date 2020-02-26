@@ -1,0 +1,31 @@
+{
+  "_guid_": "Default_Document_Upload_Data",
+  "_extends_": "Default_Document_Upload_Data_Base",
+  "users": {
+    "invokingUser": {
+      "username": "befta.caseworker.2.solicitor.1@gmail.com",
+      "password": "Pa55word11"
+    }
+  },
+  "specs": [
+    "by another privileged user to upload a document with mandatory metadata"
+  ],
+  "request": {
+    "body": {
+      "arrayInMap": [
+        {
+          "key": "classification",
+          "value": "PUBLIC"
+        },
+        {
+          "key": "roles",
+          "value": "caseworker"
+        },
+        {
+          "key": "files",
+          "filePath": "SampleImage.png"
+        }
+      ]
+    }
+  }
+}
