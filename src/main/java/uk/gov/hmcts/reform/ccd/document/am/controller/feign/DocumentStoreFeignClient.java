@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.document.am.controller.feign;
 
+import feign.Body;
 import feign.Headers;
 import feign.Response;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -19,4 +20,5 @@ public interface DocumentStoreFeignClient {
     @RequestMapping(method = RequestMethod.GET, value = "/{documentId}")
     @Headers({"Authorization: {authorization}", "ServiceAuthorization: {serviceAuthorization}", "Content-Type: application/json"})
     Response getMetadataForDocument(@PathVariable("documentId") UUID documentId);
+
 }
