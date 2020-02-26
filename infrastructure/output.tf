@@ -22,3 +22,7 @@ output "DEFINITION_STORE_HOST" {
   value = "${local.definition_store_host}"
 }
 
+output "TEST_URL" {
+  value = "${local.test_url}"
+}
+

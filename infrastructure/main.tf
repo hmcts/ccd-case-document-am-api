@@ -31,6 +31,7 @@ locals {
   default_redirect_uri = "https://ccd-case-management-web-${local.env_ase_url}/oauth2redirect"
   oauth2_redirect_uri = "${var.frontend_url != "" ? local.custom_redirect_uri : local.default_redirect_uri}"
   definition_store_host = "http://ccd-definition-store-api-${local.env_ase_url}"
+  test_url = "https://ccd-api-gateway-web-pr-287.service.core-compute-preview.internal"
 
  }
 
@@ -109,6 +110,7 @@ module "ccd-case-document-am-api" {
     HTTP_CLIENT_MAX_CLIENT_PER_ROUTE      = "${var.http_client_max_client_per_route}"
     HTTP_CLIENT_VALIDATE_AFTER_INACTIVITY = "${var.http_client_validate_after_inactivity}"
     CASE_DOCUMENT_S2S_AUTHORISED_SERVICES = "${var.authorised-services}"
+    TEST_URL                              = "${var.test}"
 
     JPA_CRITERIA_IN_SEARCH_ENABLED        = false
   }
