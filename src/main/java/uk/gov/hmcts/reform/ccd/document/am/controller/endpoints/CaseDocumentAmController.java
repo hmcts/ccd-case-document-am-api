@@ -1,6 +1,7 @@
 
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
+
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.S2S_API_PARAM;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
 
@@ -49,7 +50,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     private transient HttpServletRequest request;
     private transient DocumentManagementService  documentManagementService;
     private RestTemplate restTemplate;
-    private String dmStoreURL = "http://localhost:4506";
+    private String dmStoreURL = "http://localhost:4506/documents";
 
     @Autowired
     public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService  documentManagementService, RestTemplate restTemplate) {
@@ -252,7 +253,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
         File pdfFile = Paths.get("SampleImage.png").toFile();
-        map.add("files", pdfFile);
+        map.add("files", new ClassPathResource("SampleImage.png"));
         map.set("classification", "PUBLIC");
         map.set("roles", "caseworker");
         map.set("user-id", "auto.test.cnp@gmail.com");
