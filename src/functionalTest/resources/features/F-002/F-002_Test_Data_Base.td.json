@@ -4,7 +4,7 @@
   "operationName": "Get Document Binary Content by Document ID",
 
   "method": "GET",
-  "uri": "/api/cases/documents/{documentId}/binary",
+  "uri": "cases/documents/{documentId}/binary",
   "user": {
     "username": "befta.caseworker.2.solicitor.3@gmail.com",
     "password": "Pa55word11"
@@ -41,27 +41,7 @@
       "x-xss-protection" : "1; mode=block"
     },
     "body" : {
-      "size" : 164215,
-      "mimeType" : "image/png",
-      "originalDocumentName" : "Screenshot 2019-12-30 at 16.49.21.png",
-      "createdBy" : "a54ba0bd-6d8b-46ab-9a1e-87cfeebaefdd",
-      "lastModifiedBy" : "a54ba0bd-6d8b-46ab-9a1e-87cfeebaefdd",
-      "modifiedOn" : "[[ANY]]",
-      "createdOn" : "[[ANY]]",
-      "classification" : "PUBLIC",
-      "roles" : [ ],
-      "metadata" : { },
-      "_links" : {
-        "self" : {
-          "href" : "http://dm-store:8080/documents/ac3ada44-1a57-42d4-8313-07067c6f50ff"
-        },
-        "binary" : {
-          "href" : "http://dm-store:8080/documents/ac3ada44-1a57-42d4-8313-07067c6f50ff/binary"
-        },
-        "thumbnail" : {
-          "href" : "http://dm-store:8080/documents/ac3ada44-1a57-42d4-8313-07067c6f50ff/thumbnail"
-        }
-      }
+
     }
   }
 }
