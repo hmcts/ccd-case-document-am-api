@@ -15,7 +15,7 @@ import java.util.UUID;
 public class CaseDataStoreServiceImpl implements CaseDataStoreService {
     @Override
     public CaseDocumentMetadata getCaseDocumentMetadata(String caseReference, UUID documentId) {
-        Document document = Document.builder().permissions(Arrays.asList(Permission.CREATE,Permission.READ)).build();
+        Document document = Document.builder().permissions(Arrays.asList(Permission.CREATE,Permission.READ)).id("edbdc865-303b-4583-bf5b-573937b5b7da").build();
         return  CaseDocumentMetadata.builder().caseId(caseReference).documents(Arrays.asList(document)).build();
 
     }

@@ -7,11 +7,7 @@ import feign.FeignException;
 import feign.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.ErrorResponse;
@@ -51,7 +47,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public String extractDocumentMetadata(Object storedDocument) {
+    public String extractCaseIdFromMetadata(Object storedDocument) {
         if (storedDocument instanceof StoredDocumentHalResource) {
             Map<String,String> metadata = ((StoredDocumentHalResource) storedDocument).getMetadata();
             return metadata.get("caseId");
@@ -60,22 +56,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public ResponseEntity getDocumentBinaryContent(UUID documentId) {
+    public ResponseEntity<Resource> getDocumentBinaryContent(UUID documentId) {
 
         try  {
-            ResponseEntity<Resource> response = documentStoreFeignClient.getDocumentBinary(documentId);
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("OriginalFileName",response.getHeaders().get("OriginalFileName").get(0));
-            headers.add("Content-Disposition",response.getHeaders().get("Content-Disposition").get(0));
-            headers.add("data-source",response.getHeaders().get("data-source").get(0));
-            if (HttpStatus.OK.equals(response.getStatusCode())) {
-                return ResponseEntity.ok().headers(headers).contentLength(Integer.parseInt(response.getHeaders().get("Content-Length").get(0)))
-                    .contentType(MediaType.parseMediaType(response.getHeaders().get("Content-Type").get(0))).body((ByteArrayResource) response.getBody());
-            } else {
-                return ResponseEntity
-                    .status(response.getStatusCode())
-                    .body(response.getBody());
-            }
+            return documentStoreFeignClient.getDocumentBinary(documentId);
 
         } catch (FeignException ex) {
             log.error("Cannot download document that is stored::" + ex.status());

@@ -14,8 +14,11 @@ import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -97,21 +100,23 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
 
         ResponseEntity documentMetadata = documentManagementService.getDocumentMetadata(documentId);
-        String caseId = documentManagementService.extractDocumentMetadata(documentMetadata.getBody());
+        String caseId = documentManagementService.extractCaseIdFromMetadata(documentMetadata.getBody());
         CaseDocumentMetadata caseDocumentMetadata = caseDataStoreService.getCaseDocumentMetadata(caseId,documentId);
         for (Document document : caseDocumentMetadata.getDocuments()) {
-            if (document.getPermissions().contains(Permission.READ)) {
-                ResponseEntity   responseEntity = documentManagementService.getDocumentBinaryContent(documentId);
+            if (document.getPermissions().contains(Permission.READ) && document.getId().equals(documentId.toString())) {
+                ResponseEntity<Resource> response = documentManagementService.getDocumentBinaryContent(documentId);
                 HttpHeaders headers = new HttpHeaders();
-                headers.add("OriginalFileName",responseEntity.getHeaders().getFirst("OriginalFileName"));
-                headers.add("Content-Disposition",responseEntity.getHeaders().getFirst("Content-Disposition"));
-                headers.add("data-source",responseEntity.getHeaders().getFirst("data-source"));
-                return  ResponseEntity
-                    .status(responseEntity.getStatusCode())
-                    .headers(headers)
-                    .contentLength(responseEntity.getHeaders().getContentLength())
-                    .contentType(responseEntity.getHeaders().getContentType())
-                    .body(responseEntity.getBody());
+                headers.add("OriginalFileName",response.getHeaders().get("OriginalFileName").get(0));
+                headers.add("Content-Disposition",response.getHeaders().get("Content-Disposition").get(0));
+                headers.add("data-source",response.getHeaders().get("data-source").get(0));
+                if (HttpStatus.OK.equals(response.getStatusCode())) {
+                    return ResponseEntity.ok().headers(headers).contentLength(Integer.parseInt(response.getHeaders().get("Content-Length").get(0)))
+                        .contentType(MediaType.parseMediaType(response.getHeaders().get("Content-Type").get(0))).body((ByteArrayResource) response.getBody());
+                } else {
+                    return ResponseEntity
+                        .status(response.getStatusCode())
+                        .body(response.getBody());
+                }
             }
         }
 

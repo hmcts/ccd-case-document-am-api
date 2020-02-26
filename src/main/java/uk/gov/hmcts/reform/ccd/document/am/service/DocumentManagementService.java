@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.document.am.service;
 
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadDocumentsCommand;
@@ -22,7 +23,7 @@ public interface DocumentManagementService {
      * @param storedDocument This is the storedDocument response object returned by DM-store
      * @return String containing case id extracted from document metadata
      **/
-    String extractDocumentMetadata(Object storedDocument);
+    String extractCaseIdFromMetadata(Object storedDocument);
 
     /**
      * Root GET endpoint.
@@ -30,7 +31,7 @@ public interface DocumentManagementService {
      * @param documentId Document Id for which binary content to be downloaded
      * @return OutputStream object containing binary content of document
      **/
-    ResponseEntity getDocumentBinaryContent(final UUID documentId);
+    ResponseEntity<Resource> getDocumentBinaryContent(final UUID documentId);
 
     /**
      * Root GET endpoint.

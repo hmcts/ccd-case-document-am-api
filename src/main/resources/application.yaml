@@ -67,5 +67,6 @@ feign:
       - authorization
       - serviceauthorization
       - user-roles
+      - user-id
 documentStoreUrl: ${Document_STORE_URL:http://localhost:4506/documents}
 caseDataStoreUrl: ${CASE_DATA_STORE_URL:http://localhost:3453/data}
