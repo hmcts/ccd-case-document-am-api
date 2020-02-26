@@ -1,0 +1,20 @@
+{
+	"_guid_": "S-000",
+	"_extends_": "S-000-Test-Base-data",
+	"title": "Get Document Metadata by Document ID",
+
+	"specs": [
+		"an active caseworker profile in CCD with full permissions on a document field",
+    "uses a uid that exists in IDAM",
+    "to retrieve the metadata by document id"
+	],
+
+  "request": {
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  }
+}

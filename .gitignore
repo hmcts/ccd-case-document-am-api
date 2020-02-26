@@ -21,3 +21,4 @@ bin/main/application.yaml
 
 .DS_Store
 target/
+/bin/
