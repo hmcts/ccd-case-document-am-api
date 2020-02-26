@@ -4,7 +4,9 @@ package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.S2S_API_PARAM;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -249,7 +251,8 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-        map.add("files", new ClassPathResource("file.png"));
+        File pdfFile = Paths.get("SampleImage.png").toFile();
+        map.add("files", pdfFile);
         map.set("classification", "PUBLIC");
         map.set("roles", "caseworker");
         map.set("user-id", "auto.test.cnp@gmail.com");
