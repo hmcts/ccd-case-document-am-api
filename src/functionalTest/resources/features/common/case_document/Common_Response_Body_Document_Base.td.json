@@ -1,0 +1,56 @@
+{
+  "_guid_": "Common_Response_Body_Document_Base",
+
+  "size": "[[ANYTHING_PRESENT]]",
+  "mimeType": "multipart/form-data",
+  "originalDocumentName": "[[ANYTHING_PRESENT]]",
+  "createdBy": "[[ANYTHING_PRESENT]]",
+  "lastModifiedBy": "[[ANYTHING_PRESENT]]",
+  "modifiedOn": "[[ANYTHING_PRESENT]]",
+  "createdOn": "[[ANYTHING_PRESENT]]",
+  "classification": "PUBLIC",
+  "roles": [
+    "caseworker"
+  ],
+  "_links": {
+    "self": {
+      "href": "[[ANYTHING_PRESENT]]"
+    },
+    "binary": {
+      "href": "[[ANYTHING_PRESENT]]"
+    },
+    "thumbnail": {
+      "href": "[[ANYTHING_PRESENT]]"
+    }
+  },
+  "_embedded": {
+    "allDocumentVersions": {
+      "_embedded": {
+        "documentVersions": [
+          {
+            "size": "[[ANYTHING_PRESENT]]",
+            "mimeType": "multipart/form-data",
+            "originalDocumentName": "[[ANYTHING_PRESENT]]",
+            "createdBy": "[[ANYTHING_PRESENT]]",
+            "createdOn": "[[ANYTHING_PRESENT]]",
+            "_links": {
+              "document": {
+                "href": "[[ANYTHING_PRESENT]]"
+              },
+              "self": {
+                "href": "[[ANYTHING_PRESENT]]"
+              },
+              "binary": {
+                "href": "[[ANYTHING_PRESENT]]"
+              },
+              "thumbnail": {
+                "href": "[[ANYTHING_PRESENT]]"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+
