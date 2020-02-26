@@ -227,7 +227,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
     @Override
     public ResponseEntity<StoredDocumentHalResourceCollection> uploadDocuments(
-        @ApiParam(value = "", required = true) @RequestParam(value = "files", required = true) List<java.io.File> files,
+        @ApiParam(value = "", required = true) @RequestParam(value = "files", required = true) List files,
         @ApiParam(value = "", required = true) @RequestParam(value = "classification", required = true) String classification,
         @ApiParam(value = "", required = true) @RequestParam(value = "ttl", required = true) Date ttl,
         @ApiParam(value = "", required = false) @RequestParam(value = "roles", required = false) List<String> roles,
