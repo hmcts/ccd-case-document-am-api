@@ -17,7 +17,7 @@ services:
       CCD_DOCUMENT_API_IDAM_KEY:
       DEFINITION_STORE_HOST:
       USER_PROFILE_HOST:
-      Document_STORE_URL: http://ccd-api-gateway:3453/documents
+      DOCUMENY_STORE_URL: http://ccd-api-gateway:3453/documents
       AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY:
       IDAM_USER_URL: http://idam-api:5000
       IDAM_S2S_URL: http://service-auth-provider-api:8080
