@@ -51,7 +51,8 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     private String dmStoreURL = "http://localhost:4506";
 
     @Autowired
-    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService  documentManagementService) {
+    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService  documentManagementService, RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
         this.request = request;
         this.documentManagementService = documentManagementService;
@@ -229,7 +230,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     public ResponseEntity<StoredDocumentHalResourceCollection> uploadDocuments(
         @ApiParam(value = "", required = true) @RequestParam(value = "files", required = true) List files,
         @ApiParam(value = "", required = true) @RequestParam(value = "classification", required = true) String classification,
-        @ApiParam(value = "", required = true) @RequestParam(value = "ttl", required = true) Date ttl,
+        @ApiParam(value = "", required = true) @RequestParam(value = "ttl", required = false) Date ttl,
         @ApiParam(value = "", required = false) @RequestParam(value = "roles", required = false) List<String> roles,
 
         @ApiParam(value = S2S_API_PARAM, required = true)

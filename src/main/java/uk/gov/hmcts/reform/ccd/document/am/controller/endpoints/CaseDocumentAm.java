@@ -230,7 +230,7 @@ public interface CaseDocumentAm {
     ResponseEntity<StoredDocumentHalResourceCollection> uploadDocuments(
         @ApiParam(value = "", required = true) @RequestParam(value = "files", required = true) List files,
         @ApiParam(value = "", required = true) @RequestParam(value = "classification", required = true) String classification,
-        @ApiParam(value = "", required = true) @RequestParam(value = "ttl", required = true) Date ttl,
+        @ApiParam(value = "", required = true) @RequestParam(value = "ttl", required = false) Date ttl,
         @ApiParam(value = "", required = false) @RequestParam(value = "roles", required = false) List<String> roles,
 
         @ApiParam(value = S2S_API_PARAM, required = true)
