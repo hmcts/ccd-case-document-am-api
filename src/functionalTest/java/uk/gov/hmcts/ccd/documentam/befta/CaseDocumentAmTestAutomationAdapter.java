@@ -11,7 +11,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
 
     private static final Logger logger = LoggerFactory.getLogger(CaseDocumentAmTestAutomationAdapter.class);
 
-    private TestDataLoaderToDefinitionStore loader = new TestDataLoaderToDefinitionStore(this);
+    private transient TestDataLoaderToDefinitionStore loader = new TestDataLoaderToDefinitionStore(this);
 
     @Override
     public void doLoadTestData() {
