@@ -37,25 +37,5 @@ public class ApplicationConfiguration {
     public String getS2sUrl() {
         return s2sUrl;
     }
-    @Bean
-    public RestTemplate restTemplate() {
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(getHttpClient()));
-        return restTemplate;
-    }
 
-    private CloseableHttpClient getHttpClient() {
-        int timeout = 10000;
-        RequestConfig config = RequestConfig.custom()
-                                            .setConnectTimeout(timeout)
-                                            .setConnectionRequestTimeout(timeout)
-                                            .setSocketTimeout(timeout)
-                                            .build();
-
-        return HttpClientBuilder
-            .create()
-            .useSystemProperties()
-            .setDefaultRequestConfig(config)
-            .build();
-    }
 }

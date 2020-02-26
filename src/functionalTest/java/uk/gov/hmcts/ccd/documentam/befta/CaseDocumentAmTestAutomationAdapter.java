@@ -14,15 +14,16 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
         loader.addCcdRoles();
         loader.importDefinitions();
     }
+
     @Override
     public Object calculateCustomValue(BackEndFunctionalTestScenarioContext scenarioContext, Object key) {
         if (key.equals("documentIdInTheResponse")) {
             //actualResponse][body][_embedded][documents][0][_links][self][href]
-            try{
-                String href = (String) ReflectionUtils.deepGetFieldInObject(scenarioContext, "testData.actualResponse.body._embedded.documents[0]._links.self.href");
-                return href.substring(href.length()-36);
-            }
-            catch (Exception e) {
+            try {
+                String href = (String) ReflectionUtils
+                    .deepGetFieldInObject(scenarioContext, "testData.actualResponse.body._embedded.documents[0]._links.self.href");
+                return href.substring(href.length() - 36);
+            } catch (Exception e) {
                 e.printStackTrace();
                 return "Error extracting the Document Id";
             }

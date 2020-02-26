@@ -7,5 +7,4 @@ public class CaseDocumentAmBeftaMain {
     public static void main(String[] args) {
         BeftaMain.main(args, new CaseDocumentAmTestAutomationAdapter());
     }
-
 }
