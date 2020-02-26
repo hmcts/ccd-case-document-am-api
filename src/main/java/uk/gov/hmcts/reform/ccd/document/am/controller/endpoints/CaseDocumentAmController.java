@@ -35,6 +35,12 @@ import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DATA_SOURCE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
+
 @Controller
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class CaseDocumentAmController implements CaseDocumentAm {
@@ -106,12 +112,12 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             if (document.getPermissions().contains(Permission.READ) && document.getId().equals(documentId.toString())) {
                 ResponseEntity<Resource> response = documentManagementService.getDocumentBinaryContent(documentId);
                 HttpHeaders headers = new HttpHeaders();
-                headers.add("OriginalFileName",response.getHeaders().get("OriginalFileName").get(0));
-                headers.add("Content-Disposition",response.getHeaders().get("Content-Disposition").get(0));
-                headers.add("data-source",response.getHeaders().get("data-source").get(0));
+                headers.add(ORIGINAL_FILE_NAME,response.getHeaders().get(ORIGINAL_FILE_NAME).get(0));
+                headers.add(CONTENT_DISPOSITION,response.getHeaders().get(CONTENT_DISPOSITION).get(0));
+                headers.add(DATA_SOURCE,response.getHeaders().get(DATA_SOURCE).get(0));
                 if (HttpStatus.OK.equals(response.getStatusCode())) {
-                    return ResponseEntity.ok().headers(headers).contentLength(Integer.parseInt(response.getHeaders().get("Content-Length").get(0)))
-                        .contentType(MediaType.parseMediaType(response.getHeaders().get("Content-Type").get(0))).body((ByteArrayResource) response.getBody());
+                    return ResponseEntity.ok().headers(headers).contentLength(Integer.parseInt(response.getHeaders().get(CONTENT_LENGTH).get(0)))
+                        .contentType(MediaType.parseMediaType(response.getHeaders().get(CONTENT_TYPE).get(0))).body((ByteArrayResource) response.getBody());
                 } else {
                     return ResponseEntity
                         .status(response.getStatusCode())
