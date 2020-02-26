@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.ccd.document.am.controller;
 
 import static org.springframework.http.ResponseEntity.ok;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -12,8 +11,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.UnauthorizedException;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
+
 /**
  * Default endpoints per application.
  */
