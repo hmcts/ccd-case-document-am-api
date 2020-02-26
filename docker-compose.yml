@@ -15,6 +15,7 @@ services:
       S2S_SECRET:
       S2S_KEY: S2S_KEY
       CCD_DOCUMENT_API_IDAM_KEY:
+      DEFINITION_STORE_HOST:
       USER_PROFILE_HOST:
       Document_STORE_URL: http://ccd-api-gateway:3453/documents
       AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY:
