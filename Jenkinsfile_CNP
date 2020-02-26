@@ -63,6 +63,7 @@ env.DEFINITION_STORE_HOST = "http://ccd-definition-store-api-pr-469.service.core
 env.TEST_URL = "https://ccd-api-gateway-web-pr-287.service.core-compute-preview.internal"
 
 withPipeline(type, product, component) {
+env.TEST_URL = "https://ccd-api-gateway-web-pr-287.service.core-compute-preview.internal"
   onMaster {
     enableSlackNotifications('#ccd-case-document-am-api-builds')
   }
