@@ -37,11 +37,6 @@ public class WelcomeController {
         return ok("Welcome to CCD Case Document AM Controller");
     }
 
-    @GetMapping("/cases")
-    public ResponseEntity<List<String>> getCases() {
-        throw new UnauthorizedException("This is an UnauthorizedException");
-    }
-
     @RequestMapping("/swagger")
     public String index() {
         return "redirect:swagger-ui.html";
@@ -52,10 +47,6 @@ public class WelcomeController {
         return ResponseEntity
             .ok()
             .body(null);
-    }
-
-    public String extractDocumentMetadata(StoredDocumentHalResource storedDocument) {
-        return null;
     }
 
 }
