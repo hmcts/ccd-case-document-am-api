@@ -7,7 +7,6 @@
       "password": "Pa55word11"
     }
   },
-
   "request": {
 		"headers": {
 			"Authorization": "[[DYNAMIC]]",

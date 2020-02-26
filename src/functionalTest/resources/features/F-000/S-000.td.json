@@ -1,54 +1,20 @@
 {
 	"_guid_": "S-000",
-	"_extends_": "S-000-Base-Success",
-	"title": "must return default user setting successfully for a user having a profile in CCD",
-
-	"productName": "CCD Data Store",
-	"operationName": "Get default settings for user",
-	"method": "GET",
-	"uri": "/data/caseworkers/{uid}/profile",
+	"_extends_": "S-000-Test-Base-data",
+	"title": "Get Document Metadata by Document ID",
 
 	"specs": [
-		"a detailed profile in CCD",
-		"uses a uid that exists in IDAM",
+		"an active caseworker profile in CCD with full permissions on a document field",
+    "uses a uid that exists in IDAM",
     "to retrieve the metadata by document id"
 	],
 
-	"users": {
-		"invokingUser": {
-			"username": "befta.caseworker.2@gmail.com",
-			"password": "Pa55word11"
-		}
-	},
-
-	"request": {
-		"pathVariables": {
-			"uid": "[[DYNAMIC]]"
-		}
-	},
-
-	"expectedResponse": {
-		"responseCode": 200,
-		"headers": {
-			"X-Frame-Options": "[[ANY]]",
-			"Transfer-Encoding": "[[ANY]]",
-			"Cache-Control": "[[ANY]]",
-			"X-Content-Type-Options": "[[ANY]]",
-			"X-XSS-Protection": "[[ANY]]",
-			"Content-Encoding": "[[ANY]]",
-			"vary": "[[ANY]]",
-			"Expires": "[[ANY]]",
-			"Pragma": "[[ANY]]",
-			"Date": "[[ANY]]",
-			"Content-Type": "[[ANY]]",
-			"Content-Length": "[[ANY]]"
-		},
-
-		"body": {
-			"user": "[[ANY]]",
-			"channels": null,
-			"jurisdictions": "[[ANY]]",
-			"default": "[[ANY]]"
-		}
-	}
+  "request": {
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  }
 }
