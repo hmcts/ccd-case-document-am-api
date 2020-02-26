@@ -14,6 +14,9 @@ import uk.gov.hmcts.befta.BeftaMain;
                  features = {"classpath:features"})
 public class CaseDocumentApiBeftaRunner {
 
+    private CaseDocumentApiBeftaRunner() {
+    }
+
     @BeforeClass
     public static void setUp() {
         BeftaMain.setUp(new CaseDocumentAmTestAutomationAdapter());
