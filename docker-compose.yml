@@ -8,7 +8,7 @@ services:
     image: hmcts/ccd-case-document-am-api
     container_name: ccd-case-document-am-api
     environment:
-      CASE_DOCUMENT_S2S_AUTHORISED_SERVICES: ccd_case_document_am_api,ccd_gw,xui_webapp
+      CASE_DOCUMENT_S2S_AUTHORISED_SERVICES: ccd_gw,xui_webapp
       REFORM_SERVICE_NAME: ccd-case-document-am-api
       REFORM_TEAM: ccd
       REFORM_ENVIRONMENT: local
@@ -16,7 +16,7 @@ services:
       S2S_KEY: S2S_KEY
       CCD_DOCUMENT_API_IDAM_KEY:
       USER_PROFILE_HOST:
-      Document_STORE_URL: http://ccd-api-gateway:3453/documents
+      Document_STORE_URL: http://dm-store:8080/documents
       AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY:
       IDAM_USER_URL: http://idam-api:5000
       IDAM_S2S_URL: http://service-auth-provider-api:8080

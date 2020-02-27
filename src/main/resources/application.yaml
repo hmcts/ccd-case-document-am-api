@@ -15,7 +15,8 @@ management:
 spring:
   application:
     name: CCD Case Document AM API
-
+  jackson:
+    default-property-inclusion: NON_NULL
 security:
   anonymousPaths:
     - "/"
@@ -32,7 +33,7 @@ security:
     - "/error"
     - "/favicon.ico"
   ### Update list with service id of any service going to interact with casse document api
-  authorisedServices: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd-case-document-am-api,ccd_gw,xui_webapp}
+  authorisedServices: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_gw,xui_webapp}
 
   authorisedRoles:
     - caseworker
@@ -42,7 +43,7 @@ security:
 auth.provider.service.client.baseUrl: ${IDAM_S2S_URL:http://localhost:4502}
 idam:
   s2s-auth:
-    totp_secret: ${S2S_SECRET:AAAAAAAAAAAAAAAB}
+    totp_secret: ${IDAM_KEY_CASE_DOCUMENT:AAAAAAAAAAAAAAAA}
     microservice: ccd_case_document_am_api  # test checkin only. else refert to - instead of _
     url: ${IDAM_S2S_URL:http://localhost:4502}
 
@@ -65,4 +66,7 @@ feign:
     headers:
       - authorization
       - serviceauthorization
-documentStoreUrl: ${Document_STORE_URL:http://localhost:3453/documents}
+      - user-roles
+      - user-id
+documentStoreUrl: ${Document_STORE_URL:http://localhost:4506/documents}
+caseDataStoreUrl: ${CASE_DATA_STORE_URL:http://localhost:3453/data}
