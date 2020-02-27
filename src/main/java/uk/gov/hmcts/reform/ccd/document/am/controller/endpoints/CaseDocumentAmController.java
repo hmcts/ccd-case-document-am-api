@@ -255,15 +255,15 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         map.set("classification", "PUBLIC");
         map.set("roles", "caseworker");
         map.set("user-id", "5ba5d987-df28-482c-b877-3f244f7c27cf");
-        map.set("caseTypeId", "AAT");
-        map.set("jurisdictionId", "AUTOTEST1");
+        map.set("caseTypeId", "BEFTA_CASETYPE_2_2");
+        map.set("jurisdictionId", "BEFTA_JURISDICTION_2");
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         headers.set("ServiceAuthorization", serviceAuthorization);
         headers.set("Authorization", "5ba5d987-df28-482c-b877-3f244f7c27cf");
-        headers.set("caseTypeId", "AAT");
-        headers.set("jurisdictionId", "AUTOTEST1");
+        headers.set("caseTypeId", "BEFTA_CASETYPE_2_2");
+        headers.set("jurisdictionId", "BEFTA_JURISDICTION_2");
         headers.set("roles", "caseworker");
         headers.set("user-id", "5ba5d987-df28-482c-b877-3f244f7c27cf");
 

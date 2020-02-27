@@ -9,7 +9,7 @@
       "Authorization": "[[DYNAMIC]]",
       "ServiceAuthorization": "[[DYNAMIC]]",
       "Content-Type": "multipart/form-data",
-      "caseTypeId": "AAT",
+      "caseTypeId": "BEFTA_CASETYPE_2_2",
       "jurisdictionId": "BEFTA_JURISDICTION_2",
       "uid": "[[DYNAMIC]]",
       "user-id": "[$uid]",
