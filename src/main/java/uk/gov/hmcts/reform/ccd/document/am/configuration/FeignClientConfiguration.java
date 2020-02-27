@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.ccd.document.am.configuration;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
 
 import java.util.Enumeration;
-import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 
 import feign.RequestInterceptor;
@@ -41,16 +40,13 @@ public class FeignClientConfiguration {
                         String name = headerNames.nextElement();
                         String value = request.getHeader(name);
                         System.out.println("Header Name :" + name + "     Value : " + value);
-
-                            if (name.equalsIgnoreCase(SERVICE_AUTHORIZATION)) {
-                                String serviceToken = tokenGenerator.generate();
-                                System.out.println("Generated Service Token for " + name + "  is: " + serviceToken);
-                                requestTemplate.header(name, serviceToken);
-                            } else {
-                                requestTemplate.header(name, value);
-                            }
-
-
+                        if (name.equalsIgnoreCase(SERVICE_AUTHORIZATION)) {
+                            String serviceToken = tokenGenerator.generate();
+                            System.out.println("Generated Service Token for " + name + "  is: " + serviceToken);
+                            requestTemplate.header(name, serviceToken);
+                        } else {
+                            requestTemplate.header(name, value);
+                        }
                     }
 
                 } else {
