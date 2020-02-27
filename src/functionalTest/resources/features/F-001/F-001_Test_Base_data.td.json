@@ -13,10 +13,10 @@
   },
   "request": {
     "headers": {
-      "_extends_": "Common_Request_Headers"
+      "Content-Type": "application/json"
     },
     "pathVariables": {
-      "documentId": "405b2ba6-ec0d-4df5-8474-266776fc6ba1"
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
     }
   },
   "expectedResponse": {
