@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
 import java.util.Map;
-import java.util.Map;
 import java.util.UUID;
 
 import feign.FeignException;
@@ -45,6 +44,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             return JsonFeignResponseHelper.toResponseEntity(response, clazz, documentId);
         } catch (FeignException ex) {
             log.error("Document Store api failed:: status code ::" + ex.status());
+            log.error("Document Store error message::" + ex.getMessage());
+
             throw new InvalidRequest("Document Store api failed!!");
         }
     }
