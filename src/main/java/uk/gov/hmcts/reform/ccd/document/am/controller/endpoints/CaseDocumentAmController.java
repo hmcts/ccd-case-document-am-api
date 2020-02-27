@@ -104,30 +104,53 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
 
 
-
+        CaseDocumentMetadata caseDocumentMetadata;
         ResponseEntity documentMetadata = documentManagementService.getDocumentMetadata(documentId);
-        String caseId = documentManagementService.extractCaseIdFromMetadata(documentMetadata.getBody());
-        CaseDocumentMetadata caseDocumentMetadata = caseDataStoreService.getCaseDocumentMetadata(caseId,documentId);
-        for (Document document : caseDocumentMetadata.getDocuments()) {
-            if (document.getPermissions().contains(Permission.READ) && document.getId().equals(documentId.toString())) {
-                ResponseEntity<Resource> response = documentManagementService.getDocumentBinaryContent(documentId);
-                HttpHeaders headers = new HttpHeaders();
-                headers.add(ORIGINAL_FILE_NAME,response.getHeaders().get(ORIGINAL_FILE_NAME).get(0));
-                headers.add(CONTENT_DISPOSITION,response.getHeaders().get(CONTENT_DISPOSITION).get(0));
-                headers.add(DATA_SOURCE,response.getHeaders().get(DATA_SOURCE).get(0));
-                if (HttpStatus.OK.equals(response.getStatusCode())) {
-                    return ResponseEntity.ok().headers(headers).contentLength(Integer.parseInt(response.getHeaders().get(CONTENT_LENGTH).get(0)))
-                        .contentType(MediaType.parseMediaType(response.getHeaders().get(CONTENT_TYPE).get(0))).body((ByteArrayResource) response.getBody());
-                } else {
-                    return ResponseEntity
-                        .status(response.getStatusCode())
-                        .body(response.getBody());
-                }
+        if (HttpStatus.OK.equals(documentMetadata.getStatusCode())) {
+            String caseId = documentManagementService.extractCaseIdFromMetadata(documentMetadata.getBody());
+            if (caseId != null) {
+                caseDocumentMetadata = caseDataStoreService.getCaseDocumentMetadata(
+                    caseId,
+                    documentId
+                );
+            } else {
+                LOG.debug("Case Id is missing in document meta data " + HttpStatus.NOT_FOUND);
+                return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("Case Id is missing in document meta data");
             }
+
+            if (caseDocumentMetadata.getDocuments().isPresent()) {
+                for (Document document : caseDocumentMetadata.getDocuments().get()) {
+                    if (document.getId() != null && document.getId().equals(documentId.toString()) && document.getPermissions().contains(Permission.READ)) {
+                        ResponseEntity<Resource> response = documentManagementService.getDocumentBinaryContent(documentId);
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.add(ORIGINAL_FILE_NAME, response.getHeaders().get(ORIGINAL_FILE_NAME).get(0));
+                        headers.add(CONTENT_DISPOSITION, response.getHeaders().get(CONTENT_DISPOSITION).get(0));
+                        headers.add(DATA_SOURCE, response.getHeaders().get(DATA_SOURCE).get(0));
+                        if (HttpStatus.OK.equals(response.getStatusCode())) {
+                            LOG.debug("Successfully received the actual file for requested documentid " + response.getStatusCode());
+                            return ResponseEntity.ok().headers(headers).contentLength(Integer.parseInt(response.getHeaders().get(
+                              CONTENT_LENGTH).get(0)))
+                              .contentType(MediaType.parseMediaType(response.getHeaders().get(CONTENT_TYPE).get(0))).body(
+                                  (ByteArrayResource) response.getBody());
+                        } else {
+                            LOG.debug("There are some error to received actual file for requested documentid " + response.getStatusCode());
+                            return ResponseEntity
+                              .status(response.getStatusCode())
+                           .body(response.getBody());
+                        }
+                    }
+                }
+            } else {
+                LOG.debug("Document doesn't exist for requested documetd id at CCD Data Store API Side " + HttpStatus.NOT_FOUND);
+                return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("Document doesn't exist for requested documetd id at CCD Data Store API Side");
+            }
+        } else {
+            LOG.debug("Document doesn't exist for requested documetd id at Document Store API Side " + documentMetadata.getStatusCode());
+            return  ResponseEntity.status(documentMetadata.getStatusCode()).body("Document doesn't exist for requested documetd id at Document Store API Side");
         }
 
-
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid Request");
+        LOG.debug("User don't have read permission on requested document " + HttpStatus.FORBIDDEN);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User don't have read permission on requested document");
     }
 
     @Override

@@ -62,7 +62,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             return documentStoreFeignClient.getDocumentBinary(documentId);
 
         } catch (FeignException ex) {
-            log.error("Cannot download document that is stored::" + ex.status());
+            log.error("Requested document could not be downloaded, DM Store Response Code ::" + ex.getMessage());
             throw new ResourceNotFoundException("Cannot download document that is stored");
         }
     }

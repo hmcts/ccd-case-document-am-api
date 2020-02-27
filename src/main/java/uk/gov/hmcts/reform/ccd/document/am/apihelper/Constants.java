@@ -11,7 +11,7 @@ public class Constants {
     public static final String RESOURCE_NOT_FOUND = "Resource not found";
     public static final String FORBIDDEN = "Forbidden";
     public static final String APPLICATION_JSON = "application/json";
-    public static final String SERVICE_AUTHORIZATION = "ServiceAuthorization";
+    public static final String SERVICE_AUTHORIZATION = "serviceauthorization";
     public static final String S2S_API_PARAM = "Service Auth (S2S). Use it when accessing the API on App Tier level.";
     public static final String ORIGINAL_FILE_NAME = "OriginalFileName";
     public static final String CONTENT_DISPOSITION = "Content-Disposition";

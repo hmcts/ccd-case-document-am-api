@@ -6,8 +6,8 @@ import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * CaseDocumentMetadata.
@@ -28,5 +28,5 @@ public class CaseDocumentMetadata {
     @JsonProperty
     @Valid
     @Builder.Default
-    private List<Document> documents = new ArrayList<Document>();
+    private Optional<List<Document>> documents = Optional.empty();
 }

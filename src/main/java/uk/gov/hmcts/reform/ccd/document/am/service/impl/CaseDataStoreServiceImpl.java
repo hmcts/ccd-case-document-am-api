@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -15,8 +16,8 @@ import java.util.UUID;
 public class CaseDataStoreServiceImpl implements CaseDataStoreService {
     @Override
     public CaseDocumentMetadata getCaseDocumentMetadata(String caseReference, UUID documentId) {
-        Document document = Document.builder().permissions(Arrays.asList(Permission.CREATE,Permission.READ)).id("edbdc865-303b-4583-bf5b-573937b5b7da").build();
-        return  CaseDocumentMetadata.builder().caseId(caseReference).documents(Arrays.asList(document)).build();
+        Document document = Document.builder().permissions(Arrays.asList(Permission.CREATE,Permission.READ)).id(documentId.toString()).build();
+        return  CaseDocumentMetadata.builder().caseId(caseReference).documents(Optional.of(Arrays.asList(document))).build();
 
     }
 }
