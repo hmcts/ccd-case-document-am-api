@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.APPLICATION_JSON;

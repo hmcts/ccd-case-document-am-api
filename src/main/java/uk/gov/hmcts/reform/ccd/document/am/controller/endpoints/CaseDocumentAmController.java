@@ -1,13 +1,9 @@
-
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
-
 
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.S2S_API_PARAM;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -37,7 +33,6 @@ import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
-import uk.gov.hmcts.reform.ccd.document.am.model.UploadDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 
 @Controller
@@ -49,11 +44,12 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     private transient ObjectMapper objectMapper;
     private transient HttpServletRequest request;
     private transient DocumentManagementService  documentManagementService;
-    private RestTemplate restTemplate;
-    private String dmStoreURL = "http://localhost:4506/documents";
+    private transient RestTemplate restTemplate;
+    private transient String dmStoreURL = "http://localhost:4506/documents";
 
     @Autowired
-    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService  documentManagementService, RestTemplate restTemplate) {
+    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService  documentManagementService,
+                                    RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
         this.request = request;
@@ -252,7 +248,6 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-        File pdfFile = Paths.get("SampleImage.png").toFile();
         map.add("files", new ClassPathResource("SampleImage.png"));
         map.set("classification", "PUBLIC");
         map.set("roles", "caseworker");

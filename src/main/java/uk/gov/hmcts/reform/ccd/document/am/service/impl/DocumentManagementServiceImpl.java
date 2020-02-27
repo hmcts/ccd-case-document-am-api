@@ -52,7 +52,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Override
     public StoredDocumentHalResourceCollection uploadDocumentsContent(UploadDocumentsCommand uploadDocumentsContent) {
-       return null;
-
+        return null;
     }
 }
