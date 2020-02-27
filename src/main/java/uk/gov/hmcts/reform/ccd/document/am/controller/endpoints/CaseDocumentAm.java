@@ -210,7 +210,7 @@ public interface CaseDocumentAm {
         @ApiParam("") @Valid @RequestParam(value = "unpaged", required = false) Boolean unpaged);
 
 
-    @ApiOperation(value = "Creates a list of Stored Documents by uploading a list of binary/text files", nickname = "postDocumentsWithBinaryFile",
+    @ApiOperation(value = "Creates a list of Stored Documents by uploading a list of binary/text files", nickname = "uploadDocuments",
                   notes = "This API will be the single point of reference for uploading any case related documents to doc-store. It will return the document"
                           + " URL along with generated hashed-token. The hashed-token would be valid only for case creation purpose and discarded once "
                           + "document is attached with its case.",
@@ -226,21 +226,26 @@ public interface CaseDocumentAm {
                     produces = {APPLICATION_JSON},
                     consumes = {"multipart/form-data"},
                     method = RequestMethod.POST)
-    ResponseEntity<StoredDocumentHalResourceCollection> postDocumentsWithBinaryFile(
+    ResponseEntity<Object> uploadDocuments(
+        @ApiParam(value = "", required = true) @RequestParam(value = "files", required = true) List files,
         @ApiParam(value = "", required = true) @RequestParam(value = "classification", required = true) String classification,
-        @ApiParam(value = "", required = true) @RequestParam(value = "ttl", required = true) Date ttl,
-        @ApiParam(value = "", required = true) @RequestParam(value = "roles", required = true) List<String> roles,
-        @ApiParam(value = "", required = true) @RequestParam(value = "files", required = true) List<java.io.File> files,
+        @ApiParam(value = "", required = true) @RequestParam(value = "ttl", required = false) Date ttl,
+        @ApiParam(value = "", required = false) @RequestParam(value = "roles", required = false) List<String> roles,
+
         @ApiParam(value = S2S_API_PARAM, required = true)
         @RequestHeader(value = SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
+
         @ApiParam(value = "CaseType identifier for the case document.", required = true)
         @RequestHeader(value = "caseTypeId", required = true) String caseTypeId,
+
         @ApiParam(value = "Jurisdiction identifier for the case document.", required = true)
         @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId,
+
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
                           + " and will be used for authorisation.")
-        @RequestHeader("User-Id") String userId,
+        @RequestHeader("user-id") String userId,
+
         @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
-        @RequestHeader(value = "User-Roles", required = false) String userRoles);
+        @RequestHeader(value = "user-roles", required = false) String userRoles);
 
 }

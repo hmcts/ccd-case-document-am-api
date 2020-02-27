@@ -4,17 +4,26 @@
     "Access-Control-Allow-Credentials": "true",
     "Access-Control-Allow-Headers": "undefined",
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS,PUT,DELETE",
-    "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-    "connection": "close",
+    "Cache-Control": "[[ANYTHING_PRESENT]]",
+    "connection": "[[ANYTHING_PRESENT]]",
     "date": "[[ANYTHING_PRESENT]]",
     "Expires": "0",
-    "Pragma": "no-cache",
+    "Pragma": "[[ANYTHING_PRESENT]]",
     "request-context": "[[ANYTHING_PRESENT]]",
     "Strict-Transport-Security": "[[ANYTHING_PRESENT]]",
-    "Surrogate-Control": "no-store",
-    "transfer-encoding": "chunked",
-    "x-content-type-options": "nosniff",
+    "Surrogate-Control": "[[ANYTHING_PRESENT]]",
+    "transfer-encoding": "[[ANYTHING_PRESENT]]",
+    "x-content-type-options": "[[ANYTHING_PRESENT]]",
     "x-frame-options": "DENY",
-    "x-xss-protection": "1; mode=block"
+    "x-xss-protection": "1; mode=block",
+  "Content-Type" : "application/vnd.uk.gov.hmcts.dm.document-collection.v1+hal+json;charset=UTF-8",
+
+  "Keep-Alive" : "timeout=60",
+  "Pragma" : "no-cache",
+  "Request-Context" : "appId=cid-v1:59871fc9-bac4-41d8-ad63-e64e5ce709d4",
+  "Transfer-Encoding" : "chunked",
+  "X-Content-Type-Options" : "nosniff",
+  "X-Frame-Options" : "DENY",
+  "X-XSS-Protection" : "1; mode=block"
 
 }

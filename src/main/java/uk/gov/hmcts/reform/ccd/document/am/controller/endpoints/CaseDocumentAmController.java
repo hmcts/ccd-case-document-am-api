@@ -1,5 +1,7 @@
-
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
+
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.S2S_API_PARAM;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
 
 import java.io.IOException;
 import java.util.Date;
@@ -13,13 +15,19 @@ import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
@@ -36,9 +44,13 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     private transient ObjectMapper objectMapper;
     private transient HttpServletRequest request;
     private transient DocumentManagementService  documentManagementService;
+    private transient RestTemplate restTemplate;
+    private transient String dmStoreURL = "http://localhost:4506/documents";
 
     @Autowired
-    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService  documentManagementService) {
+    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService  documentManagementService,
+                                    RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
         this.request = request;
         this.documentManagementService = documentManagementService;
@@ -213,35 +225,51 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     }
 
     @Override
-    public ResponseEntity<StoredDocumentHalResourceCollection> postDocumentsWithBinaryFile(
+    public ResponseEntity<Object> uploadDocuments(
+        @ApiParam(value = "", required = true) @RequestParam(value = "files", required = true) List files,
         @ApiParam(value = "", required = true) @RequestParam(value = "classification", required = true) String classification,
-        @ApiParam(value = "", required = true) @RequestParam(value = "ttl", required = true) Date ttl,
-        @ApiParam(value = "", required = true) @RequestParam(value = "roles", required = true) List<String> roles,
-        @ApiParam(value = "", required = true) @RequestParam(value = "files", required = true) List<java.io.File> files,
-        @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
-        @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
+        @ApiParam(value = "", required = true) @RequestParam(value = "ttl", required = false) Date ttl,
+        @ApiParam(value = "", required = false) @RequestParam(value = "roles", required = false) List<String> roles,
+
+        @ApiParam(value = S2S_API_PARAM, required = true)
+        @RequestHeader(value = SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
+
         @ApiParam(value = "CaseType identifier for the case document.", required = true)
         @RequestHeader(value = "caseTypeId", required = true) String caseTypeId,
+
         @ApiParam(value = "Jurisdiction identifier for the case document.", required = true)
         @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId,
+
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-                          + " and will be used for authorisation.")
-        @RequestHeader(value = "User-Id", required = false) String userId,
-        @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
-        @RequestHeader(value = "User-Roles", required = false) String userRoles) {
+                  + " and will be used for authorisation.")
+        @RequestHeader("user-id") String userId,
 
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<StoredDocumentHalResourceCollection>(objectMapper.readValue("",
-                    StoredDocumentHalResourceCollection.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                LOG.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<StoredDocumentHalResourceCollection>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
+        @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
+        @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
-        return new ResponseEntity<StoredDocumentHalResourceCollection>(HttpStatus.NOT_IMPLEMENTED);
+        LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+        map.add("files", new ClassPathResource("SampleImage.png"));
+        map.set("classification", "PUBLIC");
+        map.set("roles", "caseworker");
+        map.set("user-id", "5ba5d987-df28-482c-b877-3f244f7c27cf");
+        map.set("caseTypeId", "AAT");
+        map.set("jurisdictionId", "AUTOTEST1");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.set("ServiceAuthorization", serviceAuthorization);
+        headers.set("Authorization", "5ba5d987-df28-482c-b877-3f244f7c27cf");
+        headers.set("caseTypeId", "AAT");
+        headers.set("jurisdictionId", "AUTOTEST1");
+        headers.set("roles", "caseworker");
+        headers.set("user-id", "5ba5d987-df28-482c-b877-3f244f7c27cf");
+
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity
+            = new HttpEntity<LinkedMultiValueMap<String, Object>>(
+            map, headers);
+
+        ResponseEntity<Object> responseEntity1 = restTemplate.postForEntity(dmStoreURL, requestEntity, Object.class);
+        return responseEntity1;
     }
 
 }

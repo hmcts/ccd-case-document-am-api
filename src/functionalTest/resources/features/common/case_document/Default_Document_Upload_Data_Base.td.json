@@ -8,7 +8,11 @@
     "headers": {
       "Authorization": "[[DYNAMIC]]",
       "ServiceAuthorization": "[[DYNAMIC]]",
-      "Content-Type": "multipart/form-data"
+      "Content-Type": "multipart/form-data",
+      "caseTypeId" : "AAT",
+      "jurisdictionId": "BEFTA_JURISDICTION_2",
+      "user-id": "5ba5d987-df28-482c-b877-3f244f7c27cf",
+      "user-roles": "caseworker"
     }
   },
   "expectedResponse": {
