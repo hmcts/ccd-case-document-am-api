@@ -30,8 +30,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Override
     public ResponseEntity getDocumentMetadata(UUID documentId) {
+        log.error("Getting Metadata for " + documentId);
 
         try (Response response = documentStoreFeignClient.getMetadataForDocument(documentId);) {
+            log.error("Response from Document Store Feign Client: " + response.status());
             Class clazz = response.status() > 300 ? ErrorResponse.class : StoredDocumentHalResource.class;
             return JsonFeignResponseHelper.toResponseEntity(response, clazz, documentId);
         } catch (FeignException ex) {

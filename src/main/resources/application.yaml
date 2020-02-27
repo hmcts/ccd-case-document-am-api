@@ -70,7 +70,7 @@ feign:
       - authorization
       - serviceauthorization
 
-documentStoreUrl: ${DOCUMENT_STORE_URL:http://localhost:4506/documents}
+documentStoreUrl: ${DOCUMENT_STORE_URL:http://localhost:4506}
 
 ccd:
   case-definition:

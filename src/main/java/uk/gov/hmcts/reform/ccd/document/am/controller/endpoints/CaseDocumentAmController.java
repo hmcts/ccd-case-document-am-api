@@ -126,6 +126,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "User-Id", required = false) String userId,
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
+        LOG.error("Getting document Metadata");
 
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
 
@@ -255,17 +256,10 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         map.set("classification", "PUBLIC");
         map.set("roles", "caseworker");
         map.set("user-id", "5ba5d987-df28-482c-b877-3f244f7c27cf");
-        map.set("caseTypeId", "BEFTA_CASETYPE_2_2");
-        map.set("jurisdictionId", "BEFTA_JURISDICTION_2");
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         headers.set("ServiceAuthorization", serviceAuthorization);
-        headers.set("Authorization", "5ba5d987-df28-482c-b877-3f244f7c27cf");
-        headers.set("caseTypeId", "BEFTA_CASETYPE_2_2");
-        headers.set("jurisdictionId", "BEFTA_JURISDICTION_2");
-        headers.set("roles", "caseworker");
-        headers.set("user-id", "5ba5d987-df28-482c-b877-3f244f7c27cf");
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity
             = new HttpEntity<LinkedMultiValueMap<String, Object>>(
