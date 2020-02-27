@@ -72,5 +72,5 @@ ccd:
   case-definition:
     host: ${DEFINITION_STORE_HOST:http://localhost:4451}
 
-documentStoreUrl: ${DOCUMENT_STORE_URL:http://localhost:4506}
+documentStoreUrl: ${DOCUMENT_STORE_URL:http://localhost:4506/documents}
 caseDataStoreUrl: ${CASE_DATA_STORE_URL:http://localhost:3453/data}
