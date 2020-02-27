@@ -13,9 +13,6 @@
   "request": {
     "headers": {
       "_extends_": "Common_Request_Headers"
-    },
-    "pathVariables": {
-      "documentId": "0c80d244-1407-4bbb-8767-3d0f42a822dd"
     }
   },
 
