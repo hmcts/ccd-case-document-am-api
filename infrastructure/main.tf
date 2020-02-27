@@ -32,6 +32,7 @@ locals {
   oauth2_redirect_uri = "${var.frontend_url != "" ? local.custom_redirect_uri : local.default_redirect_uri}"
   definition_store_host = "http://ccd-definition-store-api-${local.env_ase_url}"
   document_store_url = "http://dm-store-${local.env_ase_url}"
+
  }
 
 data "azurerm_key_vault" "ccd_shared_key_vault" {

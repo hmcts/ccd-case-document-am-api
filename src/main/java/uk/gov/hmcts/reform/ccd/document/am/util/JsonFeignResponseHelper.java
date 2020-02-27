@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.ccd.document.am.util;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -26,7 +25,7 @@ public class JsonFeignResponseHelper {
     public static Optional decode(Response response, Class clazz) {
         try {
             return Optional.of(json.readValue(response.body().asReader(), clazz));
-        } catch (IOException e) {
+        } catch (Exception e) {
             return Optional.empty();
         }
     }

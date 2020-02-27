@@ -1,8 +1,5 @@
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.S2S_API_PARAM;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
-
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -16,7 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -29,11 +28,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
+import uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
+import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 
 @Controller
@@ -46,17 +49,19 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     private transient HttpServletRequest request;
     private transient DocumentManagementService  documentManagementService;
     private transient RestTemplate restTemplate;
+    private transient CaseDataStoreService caseDataStoreService;
 
     @Value("${documentStoreUrl}")
     private transient String dmStoreURL;
 
     @Autowired
-    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService  documentManagementService,
-                                    RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request,
+                                    RestTemplate restTemplate, DocumentManagementService  documentManagementService,CaseDataStoreService caseDataStoreService) {
         this.objectMapper = objectMapper;
         this.request = request;
         this.documentManagementService = documentManagementService;
+        this.restTemplate = restTemplate;
+        this.caseDataStoreService = caseDataStoreService;
     }
 
     @Override
@@ -71,7 +76,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @Valid @RequestParam(value = "permanent", required = false) Boolean permanent,
 
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-                          + " and will be used for authorisation.")
+                  + " and will be used for authorisation.")
         @RequestHeader(value = "User-Id", required = false) String userId,
 
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
@@ -96,21 +101,59 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam("documentId")
         @PathVariable("documentId") UUID documentId,
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-                          + " and will be used for authorisation.")
+                  + " and will be used for authorisation.")
         @RequestHeader(value = "User-Id", required = false) String userId,
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<Object>(objectMapper.readValue("{ }", Object.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                LOG.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<Object>(HttpStatus.INTERNAL_SERVER_ERROR);
+
+
+        CaseDocumentMetadata caseDocumentMetadata;
+        ResponseEntity documentMetadata = documentManagementService.getDocumentMetadata(documentId);
+        if (HttpStatus.OK.equals(documentMetadata.getStatusCode())) {
+            String caseId = documentManagementService.extractCaseIdFromMetadata(documentMetadata.getBody());
+            if (caseId != null) {
+                caseDocumentMetadata = caseDataStoreService.getCaseDocumentMetadata(
+                    caseId,
+                    documentId
+                                                                                   );
+            } else {
+                LOG.debug("Case Id is missing in document meta data " + HttpStatus.NOT_FOUND);
+                return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("Case Id is missing in document meta data");
             }
+
+            if (caseDocumentMetadata.getDocuments().isPresent()) {
+                for (Document document : caseDocumentMetadata.getDocuments().get()) {
+                    if (document.getId() != null && document.getId().equals(documentId.toString()) && document.getPermissions().contains(Permission.READ)) {
+                        ResponseEntity<Resource> response = documentManagementService.getDocumentBinaryContent(documentId);
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.add(Constants.ORIGINAL_FILE_NAME, response.getHeaders().get(Constants.ORIGINAL_FILE_NAME).get(0));
+                        headers.add(HttpHeaders.CONTENT_DISPOSITION, response.getHeaders().get(HttpHeaders.CONTENT_DISPOSITION).get(0));
+                        headers.add(Constants.DATA_SOURCE, response.getHeaders().get(Constants.DATA_SOURCE).get(0));
+                        if (HttpStatus.OK.equals(response.getStatusCode())) {
+                            LOG.debug("Successfully received the actual file for requested documentid " + response.getStatusCode());
+                            return ResponseEntity.ok().headers(headers).contentLength(Integer.parseInt(response.getHeaders().get(
+                                HttpHeaders.CONTENT_LENGTH).get(0)))
+                                                 .contentType(MediaType.parseMediaType(response.getHeaders().get(HttpHeaders.CONTENT_TYPE).get(0))).body(
+                                    (ByteArrayResource) response.getBody());
+                        } else {
+                            LOG.debug("There are some error to received actual file for requested documentid " + response.getStatusCode());
+                            return ResponseEntity
+                                .status(response.getStatusCode())
+                                .body(response.getBody());
+                        }
+                    }
+                }
+            } else {
+                LOG.debug("Document doesn't exist for requested documetd id at CCD Data Store API Side " + HttpStatus.NOT_FOUND);
+                return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("Document doesn't exist for requested documetd id at CCD Data Store API Side");
+            }
+        } else {
+            LOG.debug("Document doesn't exist for requested documetd id at Document Store API Side " + documentMetadata.getStatusCode());
+            return  ResponseEntity.status(documentMetadata.getStatusCode()).body("Document doesn't exist for requested documetd id at Document Store API Side");
         }
 
-        return new ResponseEntity<Object>(HttpStatus.NOT_IMPLEMENTED);
+        LOG.debug("User don't have read permission on requested document " + HttpStatus.FORBIDDEN);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User don't have read permission on requested document");
     }
 
     @Override
@@ -122,10 +165,10 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @PathVariable("documentId") UUID documentId,
 
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-                          + " and will be used for authorisation.")
-        @RequestHeader(value = "User-Id", required = false) String userId,
+                  + " and will be used for authorisation.")
+        @RequestHeader(value = "user-id", required = false) String userId,
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
-        @RequestHeader(value = "User-Roles", required = false) String userRoles) {
+        @RequestHeader(value = "user-roles", required = false) String userRoles) {
         LOG.error("Getting document Metadata");
 
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
@@ -147,7 +190,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @PathVariable("documentId") UUID documentId,
 
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-                          + " and will be used for authorisation.")
+                  + " and will be used for authorisation.")
         @RequestHeader(value = "User-Id", required = false) String userId,
 
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
@@ -157,7 +200,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         if (accept != null && accept.contains("application/json")) {
             try {
                 return new ResponseEntity<StoredDocumentHalResource>(objectMapper.readValue("",
-                    StoredDocumentHalResource.class), HttpStatus.NOT_IMPLEMENTED);
+                                                                                            StoredDocumentHalResource.class), HttpStatus.NOT_IMPLEMENTED);
             } catch (IOException e) {
                 LOG.error("Couldn't serialize response for content type application/json", e);
                 return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -177,7 +220,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
 
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-                          + " and will be used for authorisation.")
+                  + " and will be used for authorisation.")
         @RequestHeader(value = "User-Id", required = false) String userId,
 
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
@@ -186,7 +229,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         if (accept != null && accept.contains("application/json")) {
             try {
                 return new ResponseEntity<StoredDocumentHalResource>(objectMapper.readValue("",
-                    StoredDocumentHalResource.class), HttpStatus.NOT_IMPLEMENTED);
+                                                                                            StoredDocumentHalResource.class), HttpStatus.NOT_IMPLEMENTED);
             } catch (IOException e) {
                 LOG.error("Couldn't serialize response for content type application/json", e);
                 return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -202,9 +245,9 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
         @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-                          + " and will be used for authorisation.")
+                  + " and will be used for authorisation.")
         @RequestHeader(
-        value = "User-Id", required = false) String userId,
+            value = "User-Id", required = false) String userId,
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles,
         @ApiParam("") @Valid @RequestParam(value = "offset", required = false) Long offset,
@@ -218,7 +261,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         if (accept != null && accept.contains("application/json")) {
             try {
                 return new ResponseEntity<StoredDocumentHalResourceCollection>(objectMapper.readValue("",
-                    StoredDocumentHalResourceCollection.class), HttpStatus.NOT_IMPLEMENTED);
+                                            StoredDocumentHalResourceCollection.class), HttpStatus.NOT_IMPLEMENTED);
             } catch (IOException e) {
                 LOG.error("Couldn't serialize response for content type application/json", e);
                 return new ResponseEntity<StoredDocumentHalResourceCollection>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -235,8 +278,8 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam(value = "", required = true) @RequestParam(value = "ttl", required = false) Date ttl,
         @ApiParam(value = "", required = false) @RequestParam(value = "roles", required = false) List<String> roles,
 
-        @ApiParam(value = S2S_API_PARAM, required = true)
-        @RequestHeader(value = SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
+        @ApiParam(value = Constants.S2S_API_PARAM, required = true)
+        @RequestHeader(value = Constants.SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
 
         @ApiParam(value = "CaseType identifier for the case document.", required = true)
         @RequestHeader(value = "caseTypeId", required = true) String caseTypeId,
@@ -274,9 +317,8 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             = new HttpEntity<LinkedMultiValueMap<String, Object>>(
             map, headers);
 
-        LOG.error("Document Store URL is : " + dmStoreURL + "/documents");
-
-        ResponseEntity<Object> responseEntity1 = restTemplate.postForEntity(dmStoreURL + "/documents", requestEntity, Object.class);
+        LOG.error("Document Store URL is : " + dmStoreURL);
+        ResponseEntity<Object> responseEntity1 = restTemplate.postForEntity(dmStoreURL, requestEntity, Object.class);
         return responseEntity1;
     }
 
