@@ -40,13 +40,9 @@ public class FeignClientConfiguration {
                         String name = headerNames.nextElement();
                         String value = request.getHeader(name);
                         System.out.println("Header Name :" + name + "     Value : " + value);
-                        if (name.equalsIgnoreCase(SERVICE_AUTHORIZATION)) {
-                            String serviceToken = tokenGenerator.generate();
-                            System.out.println("Generated Service Token for " + name + "  is: " + serviceToken);
-                            requestTemplate.header(name, serviceToken);
-                        } else {
-                            requestTemplate.header(name, value);
-                        }
+                        String serviceToken = tokenGenerator.generate();
+                        System.out.println("Generated Service Token for " + name + "  is: " + serviceToken);
+                        requestTemplate.header(SERVICE_AUTHORIZATION, serviceToken);
                     }
 
                 } else {
