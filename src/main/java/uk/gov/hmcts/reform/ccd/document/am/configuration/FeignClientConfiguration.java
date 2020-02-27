@@ -41,7 +41,7 @@ public class FeignClientConfiguration {
                         String name = headerNames.nextElement();
                         String value = request.getHeader(name);
                         if (config.getHeaders().contains(name.toLowerCase(Locale.ENGLISH))) {
-                            if (name.equals(SERVICE_AUTHORIZATION)) {
+                            if (name.equalsIgnoreCase(SERVICE_AUTHORIZATION)) {
                                 requestTemplate.header(name, tokenGenerator.generate());
                             } else {
                                 requestTemplate.header(name, value);
