@@ -78,4 +78,4 @@ ccd:
     host: ${DEFINITION_STORE_HOST:http://localhost:4451}
 
 caseDataStoreUrl: ${CASE_DATA_STORE_URL:http://localhost:3453/data}
-documentStoreUrl: ${DOCUMENT_STORE_URL:http://localhost:4506}
+documentStoreUrl: ${DOCUMENT_STORE_URL:http://localhost:4506/documents}
