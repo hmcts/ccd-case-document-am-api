@@ -5,7 +5,7 @@
   "productName": "CCD Case Document AM API",
   "operationName": "Get Document Metadata by Document ID",
   "method": "GET",
-  "uri": "/documents/{documentId}",
+  "uri": "/cases/documents/{documentId}",
 
   "expectedResponse": {
     "headers": {
