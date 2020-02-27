@@ -264,6 +264,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         headers.set("ServiceAuthorization", serviceAuthorization);
         headers.set("Authorization", "5ba5d987-df28-482c-b877-3f244f7c27cf");
+
         headers.set("caseTypeId", "BEFTA_CASETYPE_2_2");
         headers.set("jurisdictionId", "BEFTA_JURISDICTION_2");
         headers.set("roles", "caseworker");
