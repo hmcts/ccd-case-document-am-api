@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -45,7 +46,9 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     private transient HttpServletRequest request;
     private transient DocumentManagementService  documentManagementService;
     private transient RestTemplate restTemplate;
-    private transient String dmStoreURL = "http://localhost:4506/documents";
+
+    @Value("${documentStoreUrl}")
+    private transient String dmStoreURL ;
 
     @Autowired
     public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService  documentManagementService,

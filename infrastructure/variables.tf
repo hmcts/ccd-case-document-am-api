@@ -99,7 +99,3 @@ variable "authorised-services" {
 }
 
 variable "deployment_namespace" {}
-
-variable "test_url" {
-  default = "https://ccd-api-gateway-web-pr-287.service.core-compute-preview.internal"
-}

@@ -59,11 +59,10 @@ env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.int
 env.BEFTA_S2S_CLIENT_ID = "ccd_gw"
 env.OAUTH2_CLIENT_ID = "ccd_gateway"
 env.OAUTH2_REDIRECT_URI = "https://www-ccd.aat.platform.hmcts.net/oauth2redirect"
+env.DOCUMENT_STORE_URL = ""
 env.DEFINITION_STORE_HOST = "http://ccd-definition-store-api-pr-469.service.core-compute-preview.internal"
-env.TEST_URL = "https://ccd-api-gateway-web-pr-287.service.core-compute-preview.internal"
 
 withPipeline(type, product, component) {
-env.TEST_URL = "https://ccd-api-gateway-web-pr-287.service.core-compute-preview.internal"
   onMaster {
     enableSlackNotifications('#ccd-case-document-am-api-builds')
   }
