@@ -35,10 +35,12 @@ public class FeignClientConfiguration {
             if (attrs != null) {
                 HttpServletRequest request = attrs.getRequest();
                 Enumeration<String> headerNames = request.getHeaderNames();
+                System.out.println("Header Names" + headerNames);
                 if (headerNames != null) {
                     while (headerNames.hasMoreElements()) {
                         String name = headerNames.nextElement();
                         String value = request.getHeader(name);
+                        System.out.println("Header Name :" + name + "     Value : " + value);
                         if (config.getHeaders().contains(name.toLowerCase(Locale.ENGLISH))) {
                             if (name.equalsIgnoreCase(SERVICE_AUTHORIZATION)) {
                                 String serviceToken = tokenGenerator.generate();
