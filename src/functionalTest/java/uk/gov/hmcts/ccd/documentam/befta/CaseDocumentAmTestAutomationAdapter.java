@@ -22,7 +22,6 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
     @Override
     public Object calculateCustomValue(BackEndFunctionalTestScenarioContext scenarioContext, Object key) {
         if (key.equals("documentIdInTheResponse")) {
-
             try {
                 String href = (String) ReflectionUtils
                     .deepGetFieldInObject(scenarioContext,
