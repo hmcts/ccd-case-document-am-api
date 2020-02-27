@@ -10,8 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import uk.gov.hmcts.reform.auth.checker.core.RequestAuthorizer;
 import uk.gov.hmcts.reform.auth.checker.core.service.Service;
-import uk.gov.hmcts.reform.auth.checker.core.user.User;
-import uk.gov.hmcts.reform.auth.checker.spring.serviceanduser.AuthCheckerServiceAndUserFilter;
+import uk.gov.hmcts.reform.auth.checker.spring.serviceonly.AuthCheckerServiceOnlyFilter;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
@@ -19,17 +18,17 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    private transient AuthCheckerServiceAndUserFilter authCheckerFilter;
+    private transient AuthCheckerServiceOnlyFilter serviceOnlyFilter;
 
     @Autowired
-    public SecurityConfiguration(final RequestAuthorizer<User> userRequestAuthorizer,
+    public SecurityConfiguration(
                                  final RequestAuthorizer<Service> serviceRequestAuthorizer,
                                  final AuthenticationManager authenticationManager) {
         super();
 
-        this.authCheckerFilter = new AuthCheckerServiceAndUserFilter(serviceRequestAuthorizer, userRequestAuthorizer);
+        this.serviceOnlyFilter = new AuthCheckerServiceOnlyFilter(serviceRequestAuthorizer);
 
-        this.authCheckerFilter.setAuthenticationManager(authenticationManager);
+        this.serviceOnlyFilter.setAuthenticationManager(authenticationManager);
     }
 
     @Override
@@ -50,10 +49,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         // Don't erase user credentials as this is needed for the user profile
         final ProviderManager authenticationManager = (ProviderManager) authenticationManager();
         authenticationManager.setEraseCredentialsAfterAuthentication(false);
-        authCheckerFilter.setAuthenticationManager(authenticationManager());
+        serviceOnlyFilter.setAuthenticationManager(authenticationManager());
 
         http
-            .addFilter(authCheckerFilter)
+            .addFilter(serviceOnlyFilter)
             .sessionManagement().sessionCreationPolicy(STATELESS).and()
             .csrf().disable()
             .formLogin().disable()
