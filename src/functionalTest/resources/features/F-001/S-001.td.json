@@ -6,62 +6,15 @@
     "an active caseworker profile in CCD with full permissions on a document field",
     "contains the metadata for the document uploaded above"
   ],
-  "user": {
-    "username": "befta.caseworker.2.solicitor.3@gmail.com",
-    "password": "Pa55word11"
+  "request": {
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
   },
   "expectedResponse": {
-    "responseCode": 200,
-    "responseMessage": "OK",
-    "headers": {
-      "_extends_": "Common_Response_Headers",
-      "Transfer-Encoding" : "chunked",
-      "Cache-Control" : "no-cache, no-store, max-age=0, must-revalidate",
-      "Connection" : "keep-alive",
-      "Content-Type" : "application/json",
-      "Date" : "Mon, 24 Feb 2020 15:58:17 GMT",
-      "Expires" : "0",
-      "Keep-Alive" : "timeou",
-      "Pragma" : "no-cache",
 
-      "X-Content-Type-Options" : "nosniff",
-      "X-Frame-Options" : "DENY",
-      "X-XSS-Protection" : "1; mode=block"
-    },
-    "body" : {
-      "_links" : {
-        "self" : {
-          "href" : "[[ANY]]"
-        }
-      },
-      "id" : "[[ANY]]",
-      "jurisdiction" : "BEFTA_JURISDICTION_2",
-      "case_type" : "BEFTA_CASETYPE_2_1",
-      "created_on" : "[[ANY]]",
-      "last_modified_on" : "[[ANY]]",
-      "state" : "TODO",
-      "security_classification" : "PUBLIC",
-      "data" : {
-        "_extends_": "Befta_Citizen_Case_Data",
-        "DocumentField4" : {
-          "document_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/e56f0aea-4a5f-46d5-82d3-01b536420870",
-          "document_filename" : "Screenshot 2019-11-14 at 1.57.32 pm.png",
-          "document_binary_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/e56f0aea-4a5f-46d5-82d3-01b536420870/binary"
-        },
-        "DocumentField2" : {
-          "document_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/ae5c9e4b-1385-483e-b1b7-607e75dd3943",
-          "document_binary_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/ae5c9e4b-1385-483e-b1b7-607e75dd3943/binary",
-          "document_filename" : "Elastic Search test Case.png --> updated by Citizen"
-        }
-      },
-      "data_classification" : {
-        "_extends_": "Befta_Citizen_Data_Securities_Classification"
-      },
-      "after_submit_callback_response" : null,
-      "callback_response_status_code" : null,
-      "callback_response_status" : null,
-      "delete_draft_response_status_code" : null,
-      "delete_draft_response_status" : null
-    }
   }
 }

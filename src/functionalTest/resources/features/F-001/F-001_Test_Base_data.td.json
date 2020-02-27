@@ -1,97 +1,12 @@
 {
   "_guid_": "F-001_Test_Base_data",
+  "_extends_": "F-001-Base-Root",
   "productName": "CCD Case Document AM API",
   "operationName": "Get Document Metadata by Document ID",
   "specs": [
     "an active caseworker profile in CCD with full permissions on a document field"
   ],
   "method": "GET",
-  "uri": "/cases/documents/{documentId}",
-  "user": {
-    "username": "befta.caseworker.2.solicitor.3@gmail.com",
-    "password": "Pa55word11"
-  },
-  "request": {
-    "headers": {
-      "Content-Type": "application/json"
-    },
-    "pathVariables": {
-      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
-    }
-  },
-  "expectedResponse": {
-    "responseCode" : 200,
-    "responseMessage" : "OK",
-    "headers": {
-      "Access-Control-Allow-Credentials" : "true",
-      "Access-Control-Allow-Headers" : "undefined",
-      "Access-Control-Allow-Methods" : "GET,POST,OPTIONS,PUT,DELETE",
-      "Cache-Control" : "[[ANY]]",
-      "connection" : "[[ANY]]",
-      "content-type" : "[[ANY]]",
-      "date" : "[[ANY]]",
-      "Expires" : "0",
-      "Pragma" : "no-cache",
-      "request-context" : "[[ANY]]",
-      "Strict-Transport-Security" : "[[ANY]]",
-      "Surrogate-Control" : "no-store",
-      "transfer-encoding" : "chunked",
-      "x-content-type-options" : "nosniff",
-      "x-frame-options" : "DENY",
-      "x-xss-protection" : "1; mode=block"
-    },
-    "body" : {
-      "size" : 164215,
-      "mimeType" : "image/png",
-      "originalDocumentName" : "Screenshot 2019-12-30 at 16.49.21.png",
-      "createdBy" : "a54ba0bd-6d8b-46ab-9a1e-87cfeebaefdd",
-      "lastModifiedBy" : "a54ba0bd-6d8b-46ab-9a1e-87cfeebaefdd",
-      "modifiedOn" : "[[ANY]]",
-      "createdOn" : "[[ANY]]",
-      "classification" : "PUBLIC",
-      "roles" : [ ],
-      "metadata" : { },
-      "_links" : {
-        "self" : {
-          "href" : "http://dm-store:8080/documents/ac3ada44-1a57-42d4-8313-07067c6f50ff"
-        },
-        "binary" : {
-          "href" : "http://dm-store:8080/documents/ac3ada44-1a57-42d4-8313-07067c6f50ff/binary"
-        },
-        "thumbnail" : {
-          "href" : "http://dm-store:8080/documents/ac3ada44-1a57-42d4-8313-07067c6f50ff/thumbnail"
-        }
-      },
-      "_embedded" : {
-        "allDocumentVersions" : {
-          "_embedded" : {
-            "documentVersions" : [ {
-              "size" : 164215,
-              "mimeType" : "image/png",
-              "originalDocumentName" : "Screenshot 2019-12-30 at 16.49.21.png",
-              "createdBy" : "a54ba0bd-6d8b-46ab-9a1e-87cfeebaefdd",
-              "createdOn" :"[[ANY]]",
-              "_links" : {
-                "document" : {
-                  "href" : "http://dm-store:8080/documents/ac3ada44-1a57-42d4-8313-07067c6f50ff"
-                },
-                "self" : {
-                  "href" : "http://dm-store:8080/documents/ac3ada44-1a57-42d4-8313-07067c6f50ff/versions/c70e79cf-ab89-4127-9e84-55aeb888828a"
-                },
-                "binary" : {
-                  "href" : "http://dm-store:8080/documents/ac3ada44-1a57-42d4-8313-07067c6f50ff/versions/c70e79cf-ab89-4127-9e84-55aeb888828a/binary"
-                },
-                "thumbnail" : {
-                  "href" : "http://dm-store:8080/documents/ac3ada44-1a57-42d4-8313-07067c6f50ff/versions/c70e79cf-ab89-4127-9e84-55aeb888828a/thumbnail"
-                },
-                "migrate" : {
-                  "href" : "http://dm-store:8080/documents/ac3ada44-1a57-42d4-8313-07067c6f50ff/versions/c70e79cf-ab89-4127-9e84-55aeb888828a/migrate"
-                }
-              }
-            } ]
-          }
-        }
-      }
-    }
-  }
+  "uri": "/cases/documents/{documentId}"
+
 }
