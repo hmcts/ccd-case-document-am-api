@@ -50,11 +50,35 @@ public class CaseDocumentAmControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Status code");
     }
 
+    @Test
+    public void shouldGetDocumentBinaryContent() {
+        doReturn(setDocumentBinaryContent()).when(documentManagementService).getDocumentBinaryContent(getUuid());
+
+        ResponseEntity<Object> response = testee.getDocumentBinaryContentbyDocumentId(serviceAuthorization, getUuid(), "", "");
+        assertNotNull(response, "Valid binary content from API");
+        assertNotNull(response.getBody(), "Valid response body");
+        assertEquals(HttpStatus.OK, response.getStatusCode(), "Status code is OK");
+    }
+
+    @Test
+    public void shouldNotGetDocumentBinaryContentWhenDocumentIdDoesNotExist() {
+        doReturn(responseEntity).when(documentManagementService).getDocumentBinaryContent(getUuid());
+
+        ResponseEntity<Object> response = testee.getDocumentBinaryContentbyDocumentId(serviceAuthorization, getUuid(), "", "");
+        assertNotNull(response, "Invalid Response from API");
+        assertNotNull(response.getBody(), "Empty response body");
+        assertEquals(HttpStatus.OK, response.getStatusCode(), "Status code is OK");
+    }
+
     private ResponseEntity<StoredDocumentHalResource> setDocumentMetaData() {
         StoredDocumentHalResource resource = new StoredDocumentHalResource();
         resource.setCreatedBy("test");
         resource.setOriginalDocumentName("test.png");
         return new ResponseEntity<StoredDocumentHalResource>(resource, HttpStatus.ACCEPTED);
+    }
+
+    private ResponseEntity<Object> setDocumentBinaryContent() {
+        return new ResponseEntity<Object>(new Object(), HttpStatus.ACCEPTED);
     }
 
     private UUID getUuid() {
