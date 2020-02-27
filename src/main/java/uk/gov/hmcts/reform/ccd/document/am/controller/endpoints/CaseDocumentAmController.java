@@ -271,8 +271,8 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             = new HttpEntity<LinkedMultiValueMap<String, Object>>(
             map, headers);
 
-        LOG.error("Document Store URL is : " + dmStoreURL);
-        ResponseEntity<Object> responseEntity1 = restTemplate.postForEntity(dmStoreURL, requestEntity, Object.class);
+        LOG.error("Document Store URL is : " + dmStoreURL+"/documents");
+        ResponseEntity<Object> responseEntity1 = restTemplate.postForEntity(dmStoreURL+"/documents", requestEntity, Object.class);
         return responseEntity1;
     }
 
