@@ -275,6 +275,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             map, headers);
 
         LOG.error("Document Store URL is : " + dmStoreURL + "/documents");
+
         ResponseEntity<Object> responseEntity1 = restTemplate.postForEntity(dmStoreURL + "/documents", requestEntity, Object.class);
         return responseEntity1;
     }
