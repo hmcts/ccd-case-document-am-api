@@ -229,7 +229,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     }
 
     @Override
-    public ResponseEntity<StoredDocumentHalResourceCollection> uploadDocuments(
+    public ResponseEntity<Object> uploadDocuments(
         @ApiParam(value = "", required = true) @RequestParam(value = "files", required = true) List files,
         @ApiParam(value = "", required = true) @RequestParam(value = "classification", required = true) String classification,
         @ApiParam(value = "", required = true) @RequestParam(value = "ttl", required = false) Date ttl,
@@ -256,21 +256,24 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         map.add("files", new ClassPathResource("SampleImage.png"));
         map.set("classification", "PUBLIC");
         map.set("roles", "caseworker");
-        map.set("user-id", "auto.test.cnp@gmail.com");
+        map.set("user-id", "5ba5d987-df28-482c-b877-3f244f7c27cf");
         map.set("caseTypeId", "AAT");
         map.set("jurisdictionId", "AUTOTEST1");
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         headers.set("ServiceAuthorization", serviceAuthorization);
+        headers.set("Authorization", "5ba5d987-df28-482c-b877-3f244f7c27cf");
         headers.set("caseTypeId", "AAT");
         headers.set("jurisdictionId", "AUTOTEST1");
+        headers.set("roles", "caseworker");
+        headers.set("user-id", "5ba5d987-df28-482c-b877-3f244f7c27cf");
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity
             = new HttpEntity<LinkedMultiValueMap<String, Object>>(
             map, headers);
 
-        ResponseEntity<StoredDocumentHalResourceCollection> responseEntity1 = restTemplate.postForEntity(dmStoreURL, requestEntity, StoredDocumentHalResourceCollection.class);
+        ResponseEntity<Object> responseEntity1 = restTemplate.postForEntity(dmStoreURL, requestEntity, Object.class);
         return responseEntity1;
     }
 

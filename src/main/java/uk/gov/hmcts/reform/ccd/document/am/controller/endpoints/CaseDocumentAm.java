@@ -227,7 +227,7 @@ public interface CaseDocumentAm {
                     produces = {APPLICATION_JSON},
                     consumes = {"multipart/form-data"},
                     method = RequestMethod.POST)
-    ResponseEntity<StoredDocumentHalResourceCollection> uploadDocuments(
+    ResponseEntity<Object> uploadDocuments(
         @ApiParam(value = "", required = true) @RequestParam(value = "files", required = true) List files,
         @ApiParam(value = "", required = true) @RequestParam(value = "classification", required = true) String classification,
         @ApiParam(value = "", required = true) @RequestParam(value = "ttl", required = false) Date ttl,

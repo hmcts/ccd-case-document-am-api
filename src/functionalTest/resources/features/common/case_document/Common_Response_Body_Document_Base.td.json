@@ -2,7 +2,7 @@
   "_guid_": "Common_Response_Body_Document_Base",
 
   "size": "[[ANYTHING_PRESENT]]",
-  "mimeType": "multipart/form-data",
+  "mimeType": "[[ANYTHING_PRESENT]]",
   "originalDocumentName": "[[ANYTHING_PRESENT]]",
   "createdBy": "[[ANYTHING_PRESENT]]",
   "lastModifiedBy": "[[ANYTHING_PRESENT]]",
@@ -29,7 +29,7 @@
         "documentVersions": [
           {
             "size": "[[ANYTHING_PRESENT]]",
-            "mimeType": "multipart/form-data",
+            "mimeType": "[[ANYTHING_PRESENT]]",
             "originalDocumentName": "[[ANYTHING_PRESENT]]",
             "createdBy": "[[ANYTHING_PRESENT]]",
             "createdOn": "[[ANYTHING_PRESENT]]",
