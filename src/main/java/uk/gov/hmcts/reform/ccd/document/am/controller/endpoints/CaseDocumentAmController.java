@@ -48,7 +48,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     private transient RestTemplate restTemplate;
 
     @Value("${documentStoreUrl}")
-    private transient String dmStoreURL ;
+    private transient String dmStoreURL;
 
     @Autowired
     public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService  documentManagementService,
