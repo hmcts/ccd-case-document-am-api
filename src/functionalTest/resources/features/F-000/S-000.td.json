@@ -1,20 +1,32 @@
 {
 	"_guid_": "S-000",
 	"_extends_": "S-000-Test-Base-data",
+  "users": {
+    "invokingUser": {
+      "username": "befta.caseworker.2.solicitor.1@gmail.com",
+      "password": "Pa55word11"
+    }
+  },
 	"title": "Get Document Metadata by Document ID",
+  "request": {
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": "[[DYNAMIC]]",
+      "ServiceAuthorization": "[[DYNAMIC]]",
+      "caseTypeId": "BEFTA_CASETYPE_2_2",
+      "jurisdictionId": "BEFTA_JURISDICTION_2",
+      "uid": "[[DYNAMIC]]",
+      "user-id": "[someUserId]",
+      "user-roles": "caseworker"
+    },
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  },
 
 	"specs": [
 		"an active caseworker profile in CCD with full permissions on a document field",
     "uses a uid that exists in IDAM",
     "to retrieve the metadata by document id"
-	],
-
-  "request": {
-    "headers": {
-      "Content-Type": "application/json"
-    },
-    "pathVariables": {
-      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
-    }
-  }
+	]
 }
