@@ -257,10 +257,14 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         map.set("classification", "PUBLIC");
         map.set("roles", "caseworker");
         map.set("user-id", "auto.test.cnp@gmail.com");
+        map.set("caseTypeId", "AAT");
+        map.set("jurisdictionId", "AUTOTEST1");
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         headers.set("ServiceAuthorization", serviceAuthorization);
+        headers.set("caseTypeId", "AAT");
+        headers.set("jurisdictionId", "AUTOTEST1");
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity
             = new HttpEntity<LinkedMultiValueMap<String, Object>>(
