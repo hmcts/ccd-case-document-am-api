@@ -115,15 +115,15 @@ tasks.withType(JavaCompile) {
 task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
   classpath = sourceSets.functionalTest.runtimeClasspath
-  /*doFirst {
+  doFirst {
     generateCucumberReports.enabled = true
     javaexec {
-      main = "uk.gov.hmcts.reform.ccd.document.am.befta.CaseDocumentAmBeftaMain"
+      main = "uk.gov.hmcts.ccd.documentam.befta.CaseDocumentAmBeftaMain"
       classpath += configurations.cucumberRuntime + sourceSets.functionalTest.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
       args = ['--plugin', "json:${projectDir}/target/cucumber.json", '--tags', 'not @Ignore', '--glue',
-              'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features/featureForMicroserviceOnly']
+              'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features/']
     }
-  }*/
+  }
 }
 
 task integration(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
@@ -278,10 +278,7 @@ dependencies {
   testCompile (group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot) {
     exclude group: 'junit', module: 'junit'
   }
-
-  testCompile files('lib/befta-fw-1.0.9-SNAPSHOT.jar')
-
-  //Added for functional test automation
+  testCompile group: 'uk.gov.hmcts', name: 'befta-fw', version: '1.1.1'
   compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.2.1.RELEASE'
 
   compile group: 'io.cucumber', name: 'cucumber-java', version: versions.cucumber
