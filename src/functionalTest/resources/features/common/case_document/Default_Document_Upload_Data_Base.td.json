@@ -12,7 +12,7 @@
       "caseTypeId": "BEFTA_CASETYPE_2_2",
       "jurisdictionId": "BEFTA_JURISDICTION_2",
       "uid": "[[DYNAMIC]]",
-      "user-id": "[$uid]",
+      "user-id": "[someUserId]",
       "user-roles": "caseworker"
     }
   },
