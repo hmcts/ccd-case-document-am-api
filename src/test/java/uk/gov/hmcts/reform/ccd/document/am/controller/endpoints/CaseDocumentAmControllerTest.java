@@ -206,9 +206,8 @@ public class CaseDocumentAmControllerTest {
     }
 
     private CaseDocumentMetadata getCaseDocumentMetadata(String docId, List<Permission> permission) {
-        Document document = Document.builder().permissions(permission).build();
-        document.setId(docId);
-        return CaseDocumentMetadata.builder().caseId("").documents(Optional.of(Arrays.asList(document))).build();
+        Document document = Document.builder().permissions(permission).id(docId).build();
+        return CaseDocumentMetadata.builder().caseId(CASE_ID).documents(Optional.of(Arrays.asList(document))).build();
     }
 
     private ResponseEntity<ByteArrayResource> setDocumentBinaryContent(String responseType) {
