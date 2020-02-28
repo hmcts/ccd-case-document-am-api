@@ -47,7 +47,7 @@ security:
 auth.provider.service.client.baseUrl: ${IDAM_S2S_URL:http://localhost:4502}
 idam:
   s2s-auth:
-    totp_secret: ${IDAM_KEY_CASE_DOCUMENT:AAAAAAAAAAAAAAAA}
+    totp_secret: ${S2S_SECRET:AAAAAAAAAAAAAAAA}
     microservice: ccd_case_document_am_api  # test checkin only. else refert to - instead of _
     url: ${IDAM_S2S_URL:http://localhost:4502}
 
