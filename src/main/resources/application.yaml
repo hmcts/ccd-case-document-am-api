@@ -68,8 +68,8 @@ feign:
         loggerLevel: basic
   allow:
     headers:
-      - Authorization
-      - ServiceAuthorization
+      - authorization
+      - serviceauthorization
       - user-roles
       - user-id
 
