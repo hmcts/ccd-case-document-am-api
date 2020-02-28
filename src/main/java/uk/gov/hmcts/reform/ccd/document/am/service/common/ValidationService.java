@@ -9,7 +9,7 @@ public class ValidationService {
 
 
     /**
-     * Validate a number string using Luhn algorithm.
+     * Validate a number string using  algorithm.
      *
      * @param numberString =null
      * @return
@@ -18,13 +18,8 @@ public class ValidationService {
         if (numberString == null || numberString.length() != 16) {
             return false;
         }
-        try {
-            Long.parseLong(numberString);
-        } catch (NumberFormatException nfe) {
-            return false;
-        }
 
-        return false;
+        return true;
     }
 
 

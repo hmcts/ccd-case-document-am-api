@@ -16,12 +16,14 @@ import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
+import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.lang.Boolean.TRUE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -40,6 +42,9 @@ public class CaseDocumentAmControllerTest {
     private transient DocumentManagementService documentManagementService;
 
     @Mock
+    private transient ValidationService validationService;
+
+    @Mock
     private transient CaseDataStoreService caseDataStoreService;
 
     private transient ResponseEntity responseEntity = new ResponseEntity(HttpStatus.OK);
@@ -52,6 +57,7 @@ public class CaseDocumentAmControllerTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(validationService.validate(any(String.class))).thenReturn(TRUE);
     }
 
     @Test
@@ -133,7 +139,7 @@ public class CaseDocumentAmControllerTest {
             () -> verify(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid()),
             () -> assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN)),
             () -> assertNotNull(response.getBody()),
-            () -> assertThat(response.getBody(), is("User don't have read permission on requested document"))
+            () -> assertThat(response.getBody(), is("Insufficient permission on requested case document"))
         );
     }
 
@@ -155,11 +161,11 @@ public class CaseDocumentAmControllerTest {
 
         assertAll(
             () -> verify(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid()),
-            () -> assertThat(response.getStatusCode(), is(HttpStatus.NOT_FOUND)),
+            () -> assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN)),
             () -> assertNotNull(response.getBody()),
             () -> assertThat(
                 response.getBody(),
-                is("Document doesn't exist for requested documetd id at CCD Data Store API Side")
+                is("Insufficient permission on requested case document")
             )
         );
     }
@@ -174,6 +180,7 @@ public class CaseDocumentAmControllerTest {
                 Permission.READ
             )
         );
+
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
         doReturn(caseDocumentMetadata).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
@@ -190,7 +197,7 @@ public class CaseDocumentAmControllerTest {
             () -> verify(documentManagementService).getDocumentMetadata(getUuid()),
             () -> assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN)),
             () -> assertNotNull(response.getBody()),
-            () -> assertThat(response.getBody(), is("User don't have read permission on requested document"))
+            () -> assertThat(response.getBody(), is("Insufficient permission on requested case document"))
         );
     }
 
@@ -207,7 +214,7 @@ public class CaseDocumentAmControllerTest {
 
     private CaseDocumentMetadata getCaseDocumentMetadata(String docId, List<Permission> permission) {
         Document document = Document.builder().permissions(permission).id(docId).build();
-        return CaseDocumentMetadata.builder().caseId(CASE_ID).documents(Optional.of(Arrays.asList(document))).build();
+        return CaseDocumentMetadata.builder().caseId(CASE_ID).document(Optional.of(document)).build();
     }
 
     private ResponseEntity<ByteArrayResource> setDocumentBinaryContent(String responseType) {
