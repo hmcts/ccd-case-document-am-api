@@ -66,3 +66,6 @@ feign:
       - authorization
       - serviceauthorization
 documentStoreUrl: ${Document_STORE_URL:http://localhost:3453/documents}
+ccd:
+  case-definition:
+    host: ${DEFINITION_STORE_HOST:http://localhost:4451}
