@@ -34,7 +34,7 @@ def secrets = [
         secret('ccd-api-gateway-oauth2-client-secret', 'OAUTH2_CLIENT_SECRET')
     ],
     's2s-${env}': [
-        secret('microservicekey-ccd-gw', 'BEFTA_S2S_CLIENT_SECRET'),
+        secret('microservicekey-ccd-gw', 'CCD_GW_SERVICE_SECRET'),
         secret('microservicekey-ccd-case-document-am-api', 'CCD_DOCUMENT_API_IDAM_KEY')
     ]
 ]
@@ -57,6 +57,7 @@ def vaultOverrides = [
 env.IDAM_URL = "https://idam-api.aat.platform.hmcts.net"
 env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
 env.BEFTA_S2S_CLIENT_ID = "ccd_gw"
+env.CCD_GW_SERVICE_NAME = "ccd_gw"
 env.OAUTH2_CLIENT_ID = "ccd_gateway"
 env.OAUTH2_REDIRECT_URI = "https://www-ccd.aat.platform.hmcts.net/oauth2redirect"
 env.DOCUMENT_STORE_URL = "http://dm-store-aat.service.core-compute-aat.internal/documents"
