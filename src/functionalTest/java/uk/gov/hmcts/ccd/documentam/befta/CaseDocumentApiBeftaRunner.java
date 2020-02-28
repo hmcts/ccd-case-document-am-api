@@ -1,21 +1,19 @@
 package uk.gov.hmcts.ccd.documentam.befta;
 
-import io.cucumber.junit.Cucumber;
-import io.cucumber.junit.CucumberOptions;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
+
+import io.cucumber.junit.Cucumber;
+import io.cucumber.junit.CucumberOptions;
 import uk.gov.hmcts.befta.BeftaMain;
 
 
 @RunWith(Cucumber.class)
 @CucumberOptions(plugin = "json:target/cucumber.json",
-                 glue = "uk.gov.hmcts.befta.player",
-                 features = {"classpath:features"})
+    glue = "uk.gov.hmcts.befta.player",
+    features = {"classpath:features"})
 public class CaseDocumentApiBeftaRunner {
-
-    private CaseDocumentApiBeftaRunner() {
-    }
 
     @BeforeClass
     public static void setUp() {

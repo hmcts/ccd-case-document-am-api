@@ -31,7 +31,6 @@ locals {
   default_redirect_uri = "https://ccd-case-management-web-${local.env_ase_url}/oauth2redirect"
   oauth2_redirect_uri = "${var.frontend_url != "" ? local.custom_redirect_uri : local.default_redirect_uri}"
   definition_store_host = "http://ccd-definition-store-api-${local.env_ase_url}"
-  test_url = "https://ccd-api-gateway-web-pr-287.service.core-compute-preview.internal"
 
  }
 
