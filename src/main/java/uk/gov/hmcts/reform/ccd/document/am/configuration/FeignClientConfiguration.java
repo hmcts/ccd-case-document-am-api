@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.ccd.document.am.configuration;
 
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
-
 import java.util.Enumeration;
 import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
@@ -46,22 +44,17 @@ public class FeignClientConfiguration {
                         System.out.println("Header Name :" + name + "     Value : " + value);
                         if (config.getHeaders().contains(name.toLowerCase(Locale.ENGLISH))) {
                             System.out.println("Config headers has the name " + name);
-                            if (name.equals(SERVICE_AUTHORIZATION)) {
+                            if (name.equals("serviceauthorization")) {
                                 String serviceToken = tokenGenerator.generate();
                                 System.out.println("Generated ServiceToken is : " + serviceToken);
                                 LOG.error("Generated ServiceToken is : " + serviceToken);
-                                requestTemplate.header(SERVICE_AUTHORIZATION, serviceToken);
+                                requestTemplate.header("serviceauthorization", serviceToken);
                             } else {
                                 requestTemplate.header(name, value);
                             }
                         }
 
                     }
-                    /*String serviceToken = tokenGenerator.generate();
-                    System.out.println("Generated ServiceToken is : " + serviceToken);
-                    LOG.error("Generated ServiceToken is : " + serviceToken);
-                    requestTemplate.header(SERVICE_AUTHORIZATION, serviceToken);*/
-
                 } else {
                     log.warn("FeignHeadConfiguration", "Failed to get request header!");
                 }
