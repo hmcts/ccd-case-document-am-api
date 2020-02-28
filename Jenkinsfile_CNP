@@ -35,6 +35,7 @@ def secrets = [
     ],
     's2s-${env}': [
         secret('microservicekey-ccd-gw', 'CCD_GW_SERVICE_SECRET'),
+        secret('microservicekey-ccd-gw', 'BEFTA_S2S_CLIENT_SECRET'),
         secret('microservicekey-ccd-case-document-am-api', 'CCD_DOCUMENT_API_IDAM_KEY')
     ]
 ]
