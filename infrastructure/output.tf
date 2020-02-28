@@ -21,7 +21,3 @@ output "OAUTH2_REDIRECT_URI" {
 output "DEFINITION_STORE_HOST" {
   value = "${local.definition_store_host}"
 }
-
-output "DOCUMENT_STORE_URL" {
-  value = "${local.document_store_url}"
-}
