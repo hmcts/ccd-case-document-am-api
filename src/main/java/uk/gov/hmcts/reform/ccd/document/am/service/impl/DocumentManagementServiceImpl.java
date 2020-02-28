@@ -4,21 +4,24 @@ import java.util.Map;
 import java.util.UUID;
 
 import feign.FeignException;
-import feign.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.ErrorResponse;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.InvalidRequest;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
+import uk.gov.hmcts.reform.authorisation.exceptions.ServiceException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.feign.DocumentStoreFeignClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
-import uk.gov.hmcts.reform.ccd.document.am.util.JsonFeignResponseHelper;
+import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
 
 @Slf4j
@@ -26,7 +29,16 @@ import uk.gov.hmcts.reform.ccd.document.am.util.JsonFeignResponseHelper;
 public class DocumentManagementServiceImpl implements DocumentManagementService {
 
     private transient DocumentStoreFeignClient documentStoreFeignClient;
+    private static final int RESOURCE_NOT_FOUND = 404;
 
+    @Value("${documentStoreUrl}")
+    private transient String dmStoreURL;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
+    private SecurityUtils securityUtils;
 
     @Autowired
     public DocumentManagementServiceImpl(DocumentStoreFeignClient documentStoreFeignClient) {
@@ -38,22 +50,26 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public ResponseEntity getDocumentMetadata(UUID documentId) {
         log.error("Getting Metadata for " + documentId);
 
-        try (Response response = documentStoreFeignClient.getMetadataForDocument(documentId)) {
-            log.error("Response from Document Store Feign Client: " + response.status());
-            Class clazz = response.status() > 300 ? ErrorResponse.class : StoredDocumentHalResource.class;
-            return JsonFeignResponseHelper.toResponseEntity(response, clazz, documentId);
-        } catch (FeignException ex) {
-            log.error("Document Store api failed:: status code ::" + ex.status());
-            log.error("Document Store error message::" + ex.getMessage());
+        try {
+            final HttpEntity requestEntity = new HttpEntity(securityUtils.authorizationHeaders());
+            ResponseEntity responseEntity = restTemplate.exchange("url", HttpMethod.GET, requestEntity, StoredDocumentHalResource.class);
+            log.error("Response from Document Store Client: " + responseEntity.getStatusCode());
 
-            throw new InvalidRequest("Document Store api failed!!");
+            return responseEntity;
+        } catch (Exception ex) {
+            if (ex instanceof HttpClientErrorException
+                && ((HttpClientErrorException) ex).getRawStatusCode() == RESOURCE_NOT_FOUND) {
+                throw new ResourceNotFoundException("Resource not found ");
+            } else {
+                throw new ServiceException("Document Store error message::", ex);
+            }
         }
     }
 
     @Override
     public String extractCaseIdFromMetadata(Object storedDocument) {
         if (storedDocument instanceof StoredDocumentHalResource) {
-            Map<String,String> metadata = ((StoredDocumentHalResource) storedDocument).getMetadata();
+            Map<String, String> metadata = ((StoredDocumentHalResource) storedDocument).getMetadata();
             return metadata.get("caseId");
         }
         return null;
@@ -62,7 +78,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Override
     public ResponseEntity<Resource> getDocumentBinaryContent(UUID documentId) {
 
-        try  {
+        try {
             return documentStoreFeignClient.getDocumentBinary(documentId);
 
         } catch (FeignException ex) {
@@ -75,8 +91,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public StoredDocumentHalResourceCollection uploadDocumentsContent(UploadDocumentsCommand uploadDocumentsContent) {
         return null;
     }
-
-
 
 
 }
