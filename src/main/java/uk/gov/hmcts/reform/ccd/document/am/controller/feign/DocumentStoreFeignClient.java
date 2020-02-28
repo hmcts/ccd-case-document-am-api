@@ -19,7 +19,7 @@ import java.util.UUID;
 public interface DocumentStoreFeignClient {
 
     @RequestMapping(method = RequestMethod.GET, value = "/{documentId}")
-    @Headers({ "ServiceAuthorization: {ServiceAuthorization}", "user-roles: {user-roles}", "user-id: {user-id}", "Content-Type: application/json"})
+    @Headers({"Authorization: {authorization}", "ServiceAuthorization: {serviceAuthorization}", "Content-Type: application/json"})
     Response getMetadataForDocument(@PathVariable("documentId") UUID documentId);
 
     @RequestMapping(method = RequestMethod.GET, value = "/{documentId}/binary")

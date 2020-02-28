@@ -37,7 +37,7 @@ security:
     - "/error"
     - "/favicon.ico"
   ### Update list with service id of any service going to interact with casse document api
-  authorisedServices: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_gw,xui_webapp}
+  authorisedServices: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_case_document_am_api,ccd_gw,xui_webapp}
 
   authorisedRoles:
     - caseworker
@@ -47,7 +47,7 @@ security:
 auth.provider.service.client.baseUrl: ${IDAM_S2S_URL:http://localhost:4502}
 idam:
   s2s-auth:
-    totp_secret: ${IDAM_KEY_CASE_DOCUMENT:AAAAAAAAAAAAAAAA}
+    totp_secret: ${S2S_SECRET:AAAAAAAAAAAAAAAA}
     microservice: ccd_case_document_am_api  # test checkin only. else refert to - instead of _
     url: ${IDAM_S2S_URL:http://localhost:4502}
 
@@ -68,8 +68,8 @@ feign:
         loggerLevel: basic
   allow:
     headers:
-      - Authorization
-      - ServiceAuthorization
+      - authorization
+      - serviceauthorization
       - user-roles
       - user-id
 
