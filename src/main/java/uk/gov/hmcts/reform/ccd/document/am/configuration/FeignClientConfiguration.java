@@ -45,15 +45,17 @@ public class FeignClientConfiguration {
                         if (config.getHeaders().contains(name.toLowerCase(Locale.ENGLISH))) {
                             System.out.println("Config headers has the name " + name);
                             if (name.equals("serviceauthorization")) {
-                                String serviceToken = tokenGenerator.generate();
-                                System.out.println("Generated ServiceToken is : " + serviceToken);
-                                LOG.error("Generated ServiceToken is : " + serviceToken);
-                                requestTemplate.header("serviceauthorization", serviceToken);
+                                System.out.println("Inside  serviceauthorization:");
+                                LOG.error("Inside  serviceauthorization:");
                             } else {
                                 requestTemplate.header(name, value);
                             }
-                        }
 
+                        }
+                        String serviceToken = tokenGenerator.generate();
+                        System.out.println("Generated ServiceToken is : " + serviceToken);
+                        LOG.error("Generated ServiceToken is : " + serviceToken);
+                        requestTemplate.header("serviceauthorization", serviceToken);
                     }
                 } else {
                     log.warn("FeignHeadConfiguration", "Failed to get request header!");
