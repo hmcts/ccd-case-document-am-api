@@ -1,0 +1,17 @@
+{
+	"_guid_": "S-000-Base-Root",
+
+  "users": {
+    "invokingUser": {
+      "username": "befta.caseworker.2@gmail.com",
+      "password": "Pa55word11"
+    }
+  },
+  "request": {
+		"headers": {
+			"Authorization": "[[DYNAMIC]]",
+			"ServiceAuthorization": "[[DYNAMIC]]",
+			"Content-Type": "application/json"
+		}
+	}
+}
