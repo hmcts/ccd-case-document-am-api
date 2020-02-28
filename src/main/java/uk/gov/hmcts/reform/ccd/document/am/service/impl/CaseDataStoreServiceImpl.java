@@ -14,10 +14,11 @@ import java.util.UUID;
 @Slf4j
 @Service
 public class CaseDataStoreServiceImpl implements CaseDataStoreService {
+
     @Override
-    public CaseDocumentMetadata getCaseDocumentMetadata(String caseReference, UUID documentId) {
+    public CaseDocumentMetadata getCaseDocumentMetadata(String caseId, UUID documentId) {
         Document document = Document.builder().permissions(Arrays.asList(Permission.CREATE,Permission.READ)).id(documentId.toString()).build();
-        return  CaseDocumentMetadata.builder().caseId(caseReference).documents(Optional.of(Arrays.asList(document))).build();
+        return  CaseDocumentMetadata.builder().caseId(caseId).document(Optional.of(document)).build();
 
     }
 }
