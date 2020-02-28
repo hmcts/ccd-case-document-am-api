@@ -50,7 +50,6 @@ public class FeignClientConfiguration {
                             } else {
                                 requestTemplate.header(name, value);
                             }
-
                         }
                         String serviceToken = tokenGenerator.generate();
                         System.out.println("Generated ServiceToken is : " + serviceToken);
