@@ -7,9 +7,6 @@
     "contains the metadata for the document uploaded above"
   ],
   "request": {
-    "headers": {
-      "Content-Type": "application/json"
-    },
     "pathVariables": {
       "documentId": "e1cb63af-3a73-45b6-8eee-a7af34e02f81"
     }
@@ -33,10 +30,10 @@
     "body" : {
       "links" : [ {
         "rel" : "self",
-        "href" : "http://localhost:4455/cases/documents/e1cb63af-3a73-45b6-8eee-a7af34e02f81"
+        "href" : "[[ANYTHING_PRESENT]]"
       }, {
         "rel" : "self",
-        "href" : "http://localhost:4455/cases/documents/e1cb63af-3a73-45b6-8eee-a7af34e02f81/binary"
+        "href" : "[[ANYTHING_PRESENT]]"
       } ],
       "_embedded" : {
         "allDocumentVersions" : {
@@ -44,11 +41,11 @@
         }
       },
       "classification" : "PUBLIC",
-      "createdBy" : "5ba5d987-df28-482c-b877-3f244f7c27cf",
+      "createdBy" : "[[ANYTHING_PRESENT]]",
       "createdOn" : "[[ANYTHING_PRESENT]]",
-      "lastModifiedBy" : "5ba5d987-df28-482c-b877-3f244f7c27cf",
+      "lastModifiedBy" : "[[ANYTHING_PRESENT]]",
       "metadata" : { },
-      "mimeType" : "image/png",
+      "mimeType" : "[[ANYTHING_PRESENT]]",
       "modifiedOn" : "[[ANYTHING_PRESENT]]",
       "originalDocumentName" : "SampleImage.png",
       "roles" : [ "caseworker" ],
