@@ -10,6 +10,10 @@ output "CCD_GW_SERVICE_NAME" {
   value = "ccd_gw"
 }
 
+output "BEFTA_S2S_CLIENT_ID" {
+  value = "ccd_gw"
+}
+
 output "OAUTH2_CLIENT_ID" {
   value = "ccd_gateway"
 }
