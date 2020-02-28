@@ -13,14 +13,9 @@ import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -43,9 +38,9 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     private transient HttpServletRequest request;
     private transient DocumentManagementService  documentManagementService;
 
-    private RestTemplate restTemplate;
+    private transient RestTemplate restTemplate;
 
-    private String uploadFilesUrl = "http://localhost:4506/documents";
+    private transient String uploadFilesUrl = "http://localhost:4506/documents";
 
     @Autowired
     public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request,
@@ -123,22 +118,6 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "User-Id", required = false) String userId,
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
-
-        LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-        map.add("files", new ClassPathResource("file.png"));
-        map.set("classification", "PUBLIC");
-        map.set("roles", "caseworker");
-        map.set("user-id", "auto.test.cnp@gmail.com");
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        headers.set("ServiceAuthorization", serviceAuthorization);
-
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity
-            = new HttpEntity<LinkedMultiValueMap<String, Object>>(
-            map, headers);
-
-        ResponseEntity<String> responseEntity1 = restTemplate.postForEntity(uploadFilesUrl, requestEntity, String.class);
 
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
 

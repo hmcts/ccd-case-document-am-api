@@ -7,7 +7,7 @@ import uk.gov.hmcts.befta.util.ReflectionUtils;
 
 public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAdapter {
 
-    private TestDataLoaderToDefinitionStore loader = new TestDataLoaderToDefinitionStore(this);
+    private transient TestDataLoaderToDefinitionStore loader = new TestDataLoaderToDefinitionStore(this);
 
     @Override
     public void doLoadTestData() {
