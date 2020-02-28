@@ -30,7 +30,6 @@ public class FeignClientConfiguration {
         this.tokenGenerator = tokenGenerator;
     }
 
-
     @Bean
     public RequestInterceptor requestInterceptor(FeignHeaderConfig config) {
         return requestTemplate -> {
@@ -46,7 +45,7 @@ public class FeignClientConfiguration {
                         String value = request.getHeader(name);
                         System.out.println("Header Name :" + name + "     Value : " + value);
                         if (config.getHeaders().contains(name.toLowerCase(Locale.ENGLISH))) {
-                            System.out.println("Config headers has the name " + name );
+                            System.out.println("Config headers has the name " + name);
                             if (name.equals(SERVICE_AUTHORIZATION)) {
                                 requestTemplate.header(name, tokenGenerator.generate());
                             } else {
