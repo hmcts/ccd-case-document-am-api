@@ -14,6 +14,7 @@ Feature: F-001: Get Document Metadata by Document ID
     And   the response [contains the metadata for the document uploaded above]
     And   the response has all other details as expected
 
+
   @S-002
   Scenario: must get an error response for a non-existing document ID
     Given a user with [an active caseworker profile in CCD with full permissions on a document field]
@@ -35,13 +36,14 @@ Feature: F-001: Get Document Metadata by Document ID
   @S-004
   Scenario: must get an error response for a document id which is not associated
     Given a user with [an active caseworker profile in CCD with full permissions on a document field]
-    And a successful call [by this user to upload a document with mandatory metadata] as in [Default_Document_Upload]
+#    And a successful call [by this user to upload a document with mandatory metadata] as in [Default_Document_Upload]
     And a user with [an active citizen profile in CCD with full permission on the document field but not to the particular document just created]
     When a request is prepared with appropriate values
     And the request [contains the id of the document just uploaded above]
     And it is submitted to call the [Get Document Metadata by Document ID] operation of [CCD Case Document AM API]
     Then a negative response is received
     And the response has all the details as expected
+
 
   @S-005
   Scenario: generic scenario for Unauthorized

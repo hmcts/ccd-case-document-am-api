@@ -7,6 +7,6 @@
     "an active caseworker profile in CCD with full permissions on a document field"
   ],
   "method": "GET",
-  "uri": "/cases/documents/{documentId}"
+  "uri": "http://localhost:4455/cases/documents/{documentId}/binary"
 
 }

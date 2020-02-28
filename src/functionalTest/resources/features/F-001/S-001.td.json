@@ -7,14 +7,47 @@
     "contains the metadata for the document uploaded above"
   ],
   "request": {
-    "headers": {
-      "Content-Type": "application/json"
-    },
     "pathVariables": {
       "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
     }
   },
   "expectedResponse": {
-
+    "responseCode": 200,
+    "responseMessage": "OK",
+    "headers" : {
+      "Cache-Control" : "no-cache, no-store, max-age=0, must-revalidate",
+      "Connection" : "keep-alive",
+      "Content-Type" : "application/json",
+      "Date" : "[[ANYTHING_PRESENT]]",
+      "Expires" : "0",
+      "Keep-Alive" : "[[ANYTHING_PRESENT]]",
+      "Pragma" : "no-cache",
+      "Transfer-Encoding" : "chunked",
+      "X-Content-Type-Options" : "nosniff",
+      "X-Frame-Options" : "DENY",
+      "X-XSS-Protection" : "1; mode=block"
+    },
+    "body" : {
+      "links" : [ {
+        "rel" : "self",
+        "href" : "http://localhost:4455/cases/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+      }, {
+        "rel" : "self",
+        "href" : "http://localhost:4455/cases/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}/binary"
+      } ],
+      "_embedded" : {
+        "allDocumentVersions" : {
+          "links" : [ ]
+        }
+      },
+      "classification" : "PUBLIC",
+      "createdOn" : "[[ANYTHING_PRESENT]]",
+      "metadata" : { },
+      "mimeType" : "[[ANYTHING_PRESENT]]",
+      "modifiedOn" : "[[ANYTHING_PRESENT]]",
+      "originalDocumentName" : "[[ANYTHING_PRESENT]]",
+      "roles" : [ "caseworker" ],
+      "size" : "[[ANYTHING_PRESENT]]"
+    }
   }
 }

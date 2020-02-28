@@ -4,26 +4,39 @@
   "_guid_": "S-003",
   "specs": [
     "an active caseworker profile in CCD with full permissions on a document field",
-    "contains the metadata for the document uploaded above"
+    "contains the metadata for the document uploaded above",
+    "for a malformed document ID"
   ],
   "user": {
     "username": "befta.caseworker.2.solicitor.3@gmail.com",
     "password": "Pa55word11"
   },
   "request": {
-    "headers": {
-      "_extends_": "Common_Request_Headers"
-    },
     "pathVariables": {
-      "documentId": "¡€#¢∞§¶•-ºª•¶-∞§¶•-#¢∞§-ºª•¶§∞¢#€¡€#"
+      "documentId": "e1cb63af-3a73-45b6-$£@!-a7af34e02f81"
     }
   },
   "expectedResponse": {
-    "responseCode": 404,
-    "responseMessage": "Not Found",
-    "headers": {
-      "_extends_": "Common_Response_Headers",
-      "Transfer-Encoding" : "chunked"
+    "responseCode" : 400,
+    "responseMessage" : "Bad Request",
+    "headers" : {
+      "Cache-Control" : "no-cache, no-store, max-age=0, must-revalidate",
+      "Connection" : "close",
+      "Content-Type" : "application/json",
+      "Date" : "[[ANYTHING_PRESENT]]",
+      "Expires" : "0",
+      "Pragma" : "no-cache",
+      "Transfer-Encoding" : "chunked",
+      "X-Content-Type-Options" : "nosniff",
+      "X-Frame-Options" : "DENY",
+      "X-XSS-Protection" : "1; mode=block"
+    },
+    "body" : {
+      "timestamp" : "[[ANYTHING_PRESENT]]",
+      "status" : 400,
+      "error" : "Bad Request",
+      "message" : "Failed to convert value of type 'java.lang.String' to required type 'java.util.UUID'; nested exception is java.lang.NumberFormatException: For input string: \"$£@!\"",
+      "path" : "[[ANYTHING_PRESENT]]"
     }
 }
 }

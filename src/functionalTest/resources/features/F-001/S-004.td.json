@@ -1,0 +1,25 @@
+{
+  "title": "must successfully get document metadata by document ID",
+  "_extends_": "F-001_Test_Base_data",
+  "_guid_": "S-004",
+  "specs": [
+    "an active caseworker profile in CCD with full permissions on a document field",
+    "an active citizen profile in CCD with full permission on the document field but not to the particular document just created",
+    "contains the id of the document just uploaded above"
+  ],
+  "users": {
+    "invokingUser": {
+      "username": "befta.citizen.2@gmail.com",
+      "password": "Pa55word11"
+    }
+  },
+  "request": {
+    "pathVariables": {
+      "documentId": "e1cb63af-3a73-45b6-8eee-a7af34e02f81"
+    }
+  },
+  "expectedResponse": {
+    "responseCode": 403,
+    "responseMessage": "Unauthorized"
+  }
+}

@@ -4,18 +4,16 @@
   "_guid_": "S-002",
   "specs": [
     "an active caseworker profile in CCD with full permissions on a document field",
-    "contains the metadata for the document uploaded above"
+    "contains the metadata for the document uploaded above",
+    "for a non-existing document ID"
   ],
   "user": {
     "username": "befta.caseworker.2.solicitor.3@gmail.com",
     "password": "Pa55word11"
   },
   "request": {
-    "headers": {
-      "_extends_": "Common_Request_Headers"
-    },
     "pathVariables": {
-      "documentId": "non-existing document ID"
+      "documentId": "non0exis-ting-docu-ment-idaf34e02f81"
     }
   },
   "expectedResponse": {
