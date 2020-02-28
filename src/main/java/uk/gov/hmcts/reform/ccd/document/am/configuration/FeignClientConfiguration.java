@@ -14,6 +14,12 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Enumeration;
+import java.util.Locale;
+
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
+
 @Configuration
 @Slf4j
 public class FeignClientConfiguration {
@@ -34,15 +40,18 @@ public class FeignClientConfiguration {
             if (attrs != null) {
                 HttpServletRequest request = attrs.getRequest();
                 Enumeration<String> headerNames = request.getHeaderNames();
-                System.out.println("Header Names" + headerNames);
                 if (headerNames != null) {
                     while (headerNames.hasMoreElements()) {
                         String name = headerNames.nextElement();
                         String value = request.getHeader(name);
-                        System.out.println("Header Name :" + name + "     Value : " + value);
-                        String serviceToken = tokenGenerator.generate();
-                        System.out.println("Generated Service Token for " + name + "  is: " + serviceToken);
-                        requestTemplate.header(SERVICE_AUTHORIZATION, serviceToken);
+                        if (config.getHeaders().contains(name.toLowerCase(Locale.ENGLISH))) {
+                            if (name.equals(SERVICE_AUTHORIZATION)) {
+                                requestTemplate.header(name, tokenGenerator.generate());
+                            } else {
+                                requestTemplate.header(name, value);
+                            }
+                        }
+
                     }
 
                 } else {

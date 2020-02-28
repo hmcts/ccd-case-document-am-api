@@ -39,6 +39,12 @@ import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DATA_SOURCE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
+
 @Controller
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class CaseDocumentAmController implements CaseDocumentAm {
@@ -126,14 +132,14 @@ public class CaseDocumentAmController implements CaseDocumentAm {
                     if (document.getId() != null && document.getId().equals(documentId.toString()) && document.getPermissions().contains(Permission.READ)) {
                         ResponseEntity<Resource> response = documentManagementService.getDocumentBinaryContent(documentId);
                         HttpHeaders headers = new HttpHeaders();
-                        headers.add(Constants.ORIGINAL_FILE_NAME, response.getHeaders().get(Constants.ORIGINAL_FILE_NAME).get(0));
-                        headers.add(HttpHeaders.CONTENT_DISPOSITION, response.getHeaders().get(HttpHeaders.CONTENT_DISPOSITION).get(0));
-                        headers.add(Constants.DATA_SOURCE, response.getHeaders().get(Constants.DATA_SOURCE).get(0));
+                        headers.add(ORIGINAL_FILE_NAME, response.getHeaders().get(ORIGINAL_FILE_NAME).get(0));
+                        headers.add(CONTENT_DISPOSITION, response.getHeaders().get(CONTENT_DISPOSITION).get(0));
+                        headers.add(DATA_SOURCE, response.getHeaders().get(DATA_SOURCE).get(0));
                         if (HttpStatus.OK.equals(response.getStatusCode())) {
                             LOG.debug("Successfully received the actual file for requested documentid " + response.getStatusCode());
                             return ResponseEntity.ok().headers(headers).contentLength(Integer.parseInt(response.getHeaders().get(
-                              HttpHeaders.CONTENT_LENGTH).get(0)))
-                              .contentType(MediaType.parseMediaType(response.getHeaders().get(HttpHeaders.CONTENT_TYPE).get(0))).body(
+                              CONTENT_LENGTH).get(0)))
+                              .contentType(MediaType.parseMediaType(response.getHeaders().get(CONTENT_TYPE).get(0))).body(
                                   (ByteArrayResource) response.getBody());
                         } else {
                             LOG.debug("There are some error to received actual file for requested documentid " + response.getStatusCode());

@@ -15,15 +15,15 @@ import java.util.UUID;
 @FeignClient(name = "DocumentStoreClient",
              url = "${documentStoreUrl}",
              configuration = FeignClientConfiguration.class
-)
+             )
 public interface DocumentStoreFeignClient {
 
     @RequestMapping(method = RequestMethod.GET, value = "/{documentId}")
-    @Headers({"Authorization: {authorization}", "ServiceAuthorization: {serviceAuthorization}", "Content-Type: application/json"})
+    @Headers({ "ServiceAuthorization: {serviceAuthorization}", "user-roles: {user-roles}", "user-id: {user-id}", "Content-Type: application/json"})
     Response getMetadataForDocument(@PathVariable("documentId") UUID documentId);
 
     @RequestMapping(method = RequestMethod.GET, value = "/{documentId}/binary")
-    @Headers({"ServiceAuthorization: {ServiceAuthorization}", "user-roles: {user-roles}", "user-id: {user-id}", "Content-Type: application/json"})
+    @Headers({"ServiceAuthorization: {serviceAuthorization}", "user-roles: {user-roles}", "user-id: {user-id}", "Content-Type: application/json"})
     ResponseEntity<Resource> getDocumentBinary(@PathVariable("documentId") UUID documentId);
 
 

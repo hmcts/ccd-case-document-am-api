@@ -17,7 +17,7 @@ import java.util.UUID;
 public interface CaseDataStoreFeignClient {
 
     @RequestMapping(method = RequestMethod.GET, value = "/{caseid}/{documentId}")
-    @Headers({"Authorization: {Authorization}", "ServiceAuthorization: {ServiceAuthorization}", "Content-Type: application/json"})
+    @Headers({"Authorization: {authorization}", "ServiceAuthorization: {serviceAuthorization}", "Content-Type: application/json"})
     Response getCaseDocumentMetadata(@PathVariable("caseID") String caseID,@PathVariable("documentId") UUID documentId);
 
 
