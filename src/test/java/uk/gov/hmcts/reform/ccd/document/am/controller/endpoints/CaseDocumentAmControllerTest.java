@@ -31,7 +31,7 @@ public class CaseDocumentAmControllerTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    @Test
+    /*@Test
     public void shouldGetValidMetaDataResponse() {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
 
@@ -55,7 +55,7 @@ public class CaseDocumentAmControllerTest {
         resource.setCreatedBy("test");
         resource.setOriginalDocumentName("test.png");
         return new ResponseEntity<StoredDocumentHalResource>(resource, HttpStatus.ACCEPTED);
-    }
+    }*/
 
     private UUID getUuid() {
         return UUID.fromString("41334a2b-79ce-44eb-9168-2d49a744be9c");

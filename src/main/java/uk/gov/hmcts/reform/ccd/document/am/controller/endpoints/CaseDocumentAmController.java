@@ -48,7 +48,8 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     private String uploadFilesUrl = "http://localhost:4506/documents";
 
     @Autowired
-    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService  documentManagementService,RestTemplate restTemplate) {
+    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request,
+                                    DocumentManagementService  documentManagementService,RestTemplate restTemplate) {
         this.objectMapper = objectMapper;
         this.request = request;
         this.documentManagementService = documentManagementService;
@@ -118,7 +119,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @PathVariable("documentId") UUID documentId,
 
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-                          + " and will be used for authorisation.")
+                  + " and will be used for authorisation.")
         @RequestHeader(value = "User-Id", required = false) String userId,
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
@@ -129,19 +130,19 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         map.set("roles", "caseworker");
         map.set("user-id", "auto.test.cnp@gmail.com");
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-            headers.set("ServiceAuthorization", serviceAuthorization);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.set("ServiceAuthorization", serviceAuthorization);
 
-            HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity
-                = new HttpEntity<LinkedMultiValueMap<String, Object>>(
-                map, headers);
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity
+            = new HttpEntity<LinkedMultiValueMap<String, Object>>(
+            map, headers);
 
         ResponseEntity<String> responseEntity1 = restTemplate.postForEntity(uploadFilesUrl, requestEntity, String.class);
 
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
 
-        return  ResponseEntity
+        return ResponseEntity
             .status(HttpStatus.OK)
             .body(responseEntity.getBody());
     }

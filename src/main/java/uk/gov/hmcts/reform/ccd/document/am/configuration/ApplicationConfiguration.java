@@ -37,6 +37,7 @@ public class ApplicationConfiguration {
     public String getS2sUrl() {
         return s2sUrl;
     }
+
     @Bean
     public RestTemplate restTemplate() {
         RestTemplate restTemplate = new RestTemplate();
