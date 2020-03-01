@@ -47,14 +47,17 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ResponseEntity getDocumentMetadata(UUID documentId) {
+        //logging with Log.error for development purpose.
         log.error("Getting Metadata for " + documentId);
-
         try {
+            String documentURL = dmStoreURL + "/" + documentId;
+            log.error("Getting Metadata using the URL : " + documentURL);
             final HttpEntity requestEntity = new HttpEntity(securityUtils.authorizationHeaders());
-            ResponseEntity responseEntity = restTemplate.exchange("url", HttpMethod.GET, requestEntity, StoredDocumentHalResource.class);
+            ResponseEntity responseEntity = restTemplate.exchange(documentURL, HttpMethod.GET,
+                                                                  requestEntity, StoredDocumentHalResource.class);
             log.error("Response from Document Store Client: " + responseEntity.getStatusCode());
-
             return responseEntity;
         } catch (Exception ex) {
             if (ex instanceof HttpClientErrorException

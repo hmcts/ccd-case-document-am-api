@@ -1,18 +1,10 @@
 package uk.gov.hmcts.reform.ccd.document.am.configuration;
 
-import java.util.Enumeration;
-import java.util.Locale;
-import javax.servlet.http.HttpServletRequest;
-
-import feign.RequestInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 
 @Configuration
@@ -28,7 +20,7 @@ public class FeignClientConfiguration {
         this.tokenGenerator = tokenGenerator;
     }
 
-    @Bean
+    /*@Bean
     public RequestInterceptor requestInterceptor(FeignHeaderConfig config) {
         return requestTemplate -> {
             ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
@@ -63,5 +55,5 @@ public class FeignClientConfiguration {
                 }
             }
         };
-    }
+    }*/
 }

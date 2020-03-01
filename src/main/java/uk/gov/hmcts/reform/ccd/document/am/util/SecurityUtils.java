@@ -7,30 +7,31 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
 import uk.gov.hmcts.reform.auth.checker.spring.serviceanduser.ServiceAndUserDetails;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 
 @Service
 public class SecurityUtils {
-    private final AuthTokenGenerator authTokenGenerator;
+    private final ServiceAuthTokenGenerator serviceAuthTokenGenerator;
 
     @Autowired
-    public SecurityUtils(final AuthTokenGenerator authTokenGenerator) {
-        this.authTokenGenerator = authTokenGenerator;
+    public SecurityUtils(final ServiceAuthTokenGenerator serviceAuthTokenGenerator) {
+        this.serviceAuthTokenGenerator = serviceAuthTokenGenerator;
     }
 
-    public HttpHeaders authorizationHeaders() {
+    public MultiValueMap<String, String> authorizationHeaders() {
         final HttpHeaders headers = new HttpHeaders();
-        headers.add("ServiceAuthorization", authTokenGenerator.generate());
-        headers.add("user-id", getUserId());
-        headers.add("user-roles", getUserRolesHeader());
+        headers.add("ServiceAuthorization", serviceAuthTokenGenerator.generate());
+        // headers.add("user-id", getUserId());
+        headers.add("user-roles", "caseworker");
 
-        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+      /*  if (SecurityContextHolder.getContext().getAuthentication() != null) {
             final ServiceAndUserDetails serviceAndUser = (ServiceAndUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (serviceAndUser.getPassword() != null) {
                 headers.add(HttpHeaders.AUTHORIZATION, serviceAndUser.getPassword());
             }
-        }
+        }*/
         return headers;
     }
 
