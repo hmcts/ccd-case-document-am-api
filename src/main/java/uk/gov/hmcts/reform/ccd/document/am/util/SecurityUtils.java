@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 
 @Service
 public class SecurityUtils {
-    private transient final ServiceAuthTokenGenerator serviceAuthTokenGenerator;
+    private transient ServiceAuthTokenGenerator serviceAuthTokenGenerator;
 
     @Autowired
     public SecurityUtils(final ServiceAuthTokenGenerator serviceAuthTokenGenerator) {
