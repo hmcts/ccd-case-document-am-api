@@ -16,8 +16,8 @@ public class WelcomeTest {
         ResponseEntity<String> caseDocumentControllerResponse = caseDocumentAmController.welcome();
         assertNotNull(caseDocumentControllerResponse, "No Response from WelcomeController");
         assertEquals(HttpStatus.OK, caseDocumentControllerResponse.getStatusCode(), "Status code is NOT OK");
-        assertEquals(caseDocumentControllerResponse.getBody(),
-            "Welcome to CCD Case Document AM Controller",
+        assertEquals("Welcome to CCD Case Document AM Controller",
+                     caseDocumentControllerResponse.getBody(),
             "Response body does not have expected value");
     }
 }
