@@ -13,4 +13,4 @@ Feature: [SAMPLE] Upload case document to DM Store
     And it is submitted to call the [Get Document Metadata by Document ID] operation of [CCD Case Document AM API]
     Then a positive response is received
     And the response has all the details as expected
-  
+

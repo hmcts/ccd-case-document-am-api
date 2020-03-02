@@ -47,8 +47,8 @@ security:
 auth.provider.service.client.baseUrl: ${IDAM_S2S_URL:http://localhost:4502}
 idam:
   s2s-auth:
-    totp_secret: ${CCD_DOCUMENT_API_IDAM_KEY:AAAAAAAAAAAAAAAC}
-    microservice: ccd_gw
+    totp_secret: ${CCD_DOCUMENT_API_IDAM_KEY:AAAAAAAAAAAAAAAA}
+    microservice: ccd_case_document_am_api
     url: ${IDAM_S2S_URL:http://localhost:4502}
 
 auth.idam.client.baseUrl: ${IDAM_USER_URL:http://localhost:4501}

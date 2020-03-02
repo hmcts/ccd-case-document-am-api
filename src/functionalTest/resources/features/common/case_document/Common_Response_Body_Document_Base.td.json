@@ -1,13 +1,12 @@
 {
   "_guid_": "Common_Response_Body_Document_Base",
-
   "size": "[[ANYTHING_PRESENT]]",
   "mimeType": "[[ANYTHING_PRESENT]]",
   "originalDocumentName": "[[ANYTHING_PRESENT]]",
-  "createdBy": "[[ANYTHING_PRESENT]]",
-  "lastModifiedBy": "[[ANYTHING_PRESENT]]",
   "modifiedOn": "[[ANYTHING_PRESENT]]",
+  "createdBy" : "[[ANYTHING_PRESENT]]",
   "createdOn": "[[ANYTHING_PRESENT]]",
+  "lastModifiedBy" : "[[ANYTHING_PRESENT]]",
   "classification": "PUBLIC",
   "roles": [
     "caseworker"
@@ -53,4 +52,3 @@
     }
   }
 }
-

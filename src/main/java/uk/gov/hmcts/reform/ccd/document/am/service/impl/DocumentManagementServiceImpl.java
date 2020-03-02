@@ -55,8 +55,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             String documentURL = dmStoreURL + "/" + documentId;
             log.error("Getting Metadata using the URL : " + documentURL);
             final HttpEntity requestEntity = new HttpEntity(securityUtils.authorizationHeaders());
-            ResponseEntity responseEntity = restTemplate.exchange(documentURL, HttpMethod.GET,
+            ResponseEntity<StoredDocumentHalResource> responseEntity = restTemplate.exchange(documentURL, HttpMethod.GET,
                                                                   requestEntity, StoredDocumentHalResource.class);
+
+            responseEntity.getBody().addLinks(documentId);
             log.error("Response from Document Store Client: " + responseEntity.getStatusCode());
             return responseEntity;
         } catch (Exception ex) {
