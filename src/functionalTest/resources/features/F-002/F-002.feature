@@ -14,7 +14,7 @@ Feature: F-002: Get Document Binary Content by Document ID
       And the response [contains the binary content for the uploaded document]
       And the response has all other details as expected
 
-    @S-021 @Ignore
+    @S-021
     Scenario: must receive an error response for a non existing document id
       Given a user with [an active caseworker profile in CCD with full permissions on a document field]
       When a request is prepared with appropriate values
@@ -23,7 +23,7 @@ Feature: F-002: Get Document Binary Content by Document ID
       Then a negative response is received
       And the response has all other details as expected
 
-    @S-022 @Ignore
+    @S-022 @Ignore #will test this scenario after AM-450 implementation
     Scenario: must receive an error response for an active caseworker who does not have document access
       Given a user with [an active caseworker profile in CCD with limited permissions on a document field]
       And a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data]
