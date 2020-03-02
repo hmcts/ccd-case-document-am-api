@@ -1,0 +1,27 @@
+{
+  "title": "must get an error response for a non-existing document ID",
+  "_extends_": "F-003_Test_Base_data",
+  "_guid_": "S-032",
+  "specs": [
+    "an active caseworker profile in CCD with full permissions on a document field",
+    "contains the metadata for the document uploaded above",
+    "for a non-existing document ID"
+  ],
+  "user": {
+    "username": "befta.caseworker.2.solicitor.3@gmail.com",
+    "password": "Pa55word11"
+  },
+  "request": {
+    "pathVariables": {
+      "documentId": "non0exis-ting-docu-ment-idaf34e02f81"
+    }
+  },
+  "expectedResponse": {
+    "responseCode": 404,
+    "responseMessage": "Not Found",
+    "headers": {
+      "_extends_": "Common_Response_Headers",
+      "Transfer-Encoding" : "chunked"
+    }
+  }
+}

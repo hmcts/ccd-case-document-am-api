@@ -2,10 +2,8 @@
   "_guid_": "Common_Response_Body_Document_Base",
 
   "size": "[[ANYTHING_PRESENT]]",
-  "mimeType": "[[ANYTHING_PRESENT]]",
+  "mimeType": "multipart/form-data",
   "originalDocumentName": "[[ANYTHING_PRESENT]]",
-  "createdBy": "[[ANYTHING_PRESENT]]",
-  "lastModifiedBy": "[[ANYTHING_PRESENT]]",
   "modifiedOn": "[[ANYTHING_PRESENT]]",
   "createdOn": "[[ANYTHING_PRESENT]]",
   "classification": "PUBLIC",
@@ -29,9 +27,9 @@
         "documentVersions": [
           {
             "size": "[[ANYTHING_PRESENT]]",
-            "mimeType": "[[ANYTHING_PRESENT]]",
+            "mimeType": "multipart/form-data",
             "originalDocumentName": "[[ANYTHING_PRESENT]]",
-            "createdBy": "[[ANYTHING_PRESENT]]",
+            "createdBy": null,
             "createdOn": "[[ANYTHING_PRESENT]]",
             "_links": {
               "document": {

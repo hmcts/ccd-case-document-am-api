@@ -1,0 +1,16 @@
+{
+  "_guid_": "F-002_Test_Data_Base",
+  "_extends_": "F-002-Base-Root",
+  "productName": "CCD Case Document AM API",
+  "operationName": "Get Binary Content by Document ID",
+  "method": "GET",
+  "uri": "http://localhost:4455/cases/documents/{documentId}/binary",
+  "specs": [
+    "an active caseworker profile in CCD with full permissions on a document field"
+  ],
+  "request": {
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  }
+}
