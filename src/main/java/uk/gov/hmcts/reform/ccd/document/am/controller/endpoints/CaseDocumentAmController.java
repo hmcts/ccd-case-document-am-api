@@ -13,17 +13,16 @@ import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.CaseNotFoundException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.UnauthorizedException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
@@ -34,11 +33,7 @@ import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DATA_SOURCE;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
 
 @Controller
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -104,61 +99,25 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
 
-
-        CaseDocumentMetadata caseDocumentMetadata;
         ResponseEntity documentMetadata = documentManagementService.getDocumentMetadata(documentId);
-        if (HttpStatus.OK.equals(documentMetadata.getStatusCode())) {
-            String caseId = documentManagementService.extractCaseIdFromMetadata(documentMetadata.getBody());
-            if (caseId != null && validationService.validate(caseId)) {
-                caseDocumentMetadata = caseDataStoreService.getCaseDocumentMetadata(
-                    caseId,
-                    documentId
-                );
-            } else {
-                if (caseId == null) {
-                    LOG.error("Case Id is missing in document meta data " + HttpStatus.NOT_FOUND);
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
-                        "Insufficient permission on requested case document");
-                } else {
-                    LOG.error("Case Id is not valid " + HttpStatus.BAD_REQUEST);
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
-                        "Insufficient permission on requested case document");
-                }
-            }
+        String caseId = documentManagementService.extractCaseIdFromMetadata(documentMetadata.getBody());
 
-            if (caseDocumentMetadata.getDocument().isPresent()) {
-                if (caseDocumentMetadata.getDocument().get().getId() != null && caseDocumentMetadata.getDocument().get().getId().equals(documentId.toString())
-                    && caseDocumentMetadata.getDocument().get().getPermissions().contains(Permission.READ)) {
-                    ResponseEntity<Resource> response = documentManagementService.getDocumentBinaryContent(documentId);
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.add(ORIGINAL_FILE_NAME, response.getHeaders().get(ORIGINAL_FILE_NAME).get(0));
-                    headers.add(CONTENT_DISPOSITION, response.getHeaders().get(CONTENT_DISPOSITION).get(0));
-                    headers.add(DATA_SOURCE, response.getHeaders().get(DATA_SOURCE).get(0));
-                    if (HttpStatus.OK.equals(response.getStatusCode())) {
-                        LOG.debug("Successfully received the actual file for requested document Id " + response.getStatusCode());
-                        return ResponseEntity.ok().headers(headers).contentLength(Integer.parseInt(response.getHeaders().get(
-                              CONTENT_LENGTH).get(0)))
-                              .contentType(MediaType.parseMediaType(response.getHeaders().get(CONTENT_TYPE).get(0))).body(
-                                  (ByteArrayResource) response.getBody());
-                    } else {
-                        LOG.error("There are some error while receiving actual file for requested documentId " + response.getStatusCode());
-                        return ResponseEntity
-                              .status(response.getStatusCode())
-                           .body(response.getBody());
-                    }
-                }
+        if (!validationService.validate(caseId)) {
+            LOG.error(CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(CASE_ID_INVALID);
 
-            } else {
-                LOG.error("Document doesn't exist for requested documentd id at CCD Data Store API Side " + HttpStatus.NOT_FOUND);
-                return  ResponseEntity.status(HttpStatus.FORBIDDEN).body("Insufficient permission on requested case document");
-            }
         } else {
-            LOG.error("Document doesn't exist for requested documetd id at Document Store API Side " + documentMetadata.getStatusCode());
-            return  ResponseEntity.status(documentMetadata.getStatusCode()).body("Insufficient permission on requested case document");
-        }
+            CaseDocumentMetadata  caseDocumentMetadata = caseDataStoreService.getCaseDocumentMetadata(caseId, documentId)
+                    .orElseThrow(() -> new CaseNotFoundException(caseId));
+            if (caseDocumentMetadata.getDocument().get().getId().equals(documentId.toString())
+                    && caseDocumentMetadata.getDocument().get().getPermissions().contains(Permission.READ)) {
+                return documentManagementService.getDocumentBinaryContent(documentId);
 
-        LOG.error("User don't have read permission on requested document " + HttpStatus.FORBIDDEN);
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Insufficient permission on requested case document");
+            }
+
+        }
+        LOG.error("User don't have read permission on requested document " + HttpStatus.UNAUTHORIZED);
+        throw new UnauthorizedException(documentId.toString());
     }
 
     @Override

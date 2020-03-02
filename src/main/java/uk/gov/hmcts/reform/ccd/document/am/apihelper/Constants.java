@@ -18,4 +18,6 @@ public class Constants {
     public static final String DATA_SOURCE = "data-source";
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String CONTENT_LENGTH = "Content-Length";
+    public static final String CASE_ID_INVALID = "Case ID is not valid";
+    public static final String INSUFFICIENT_PERMISSION = "Insufficient permission on requested  document";
 }
