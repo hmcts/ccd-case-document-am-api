@@ -15,7 +15,7 @@
     "caseId" : "1111122222333334",
     "jurisdictionId" : "BEFTA_JURISDICTION_2"
   },
-  "links": {
+  "_links": {
     "self": {
       "href": "[[ANYTHING_PRESENT]]"
     },

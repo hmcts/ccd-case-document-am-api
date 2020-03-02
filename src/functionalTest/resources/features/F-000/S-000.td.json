@@ -36,10 +36,10 @@
     "body": {
       "links" : [ {
         "rel" : "self",
-        "href" : "http://localhost:4455/cases/documents/02028c92-8366-4be0-aa06-f2882d1b131c"
+        "href" : "[[ANYTHING_PRESENT]]"
       }, {
         "rel" : "binary",
-        "href" : "http://localhost:4455/cases/documents/02028c92-8366-4be0-aa06-f2882d1b131c/binary"
+        "href" : "[[ANYTHING_PRESENT]]"
       } ],
       "_embedded" : {
         "allDocumentVersions" : {
