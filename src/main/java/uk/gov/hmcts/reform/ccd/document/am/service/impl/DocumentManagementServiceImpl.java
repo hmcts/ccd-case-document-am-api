@@ -39,10 +39,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private transient String dmStoreURL;
 
     @Autowired
-    private RestTemplate restTemplate;
+    private transient RestTemplate restTemplate;
 
     @Autowired
-    private SecurityUtils securityUtils;
+    private transient SecurityUtils securityUtils;
 
     @Autowired
     public DocumentManagementServiceImpl(DocumentStoreFeignClient documentStoreFeignClient) {
@@ -70,14 +70,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
             log.error("Response from Document Store Client: " + responseEntity.getStatusCode());
             return responseEntity;
+        } catch (HttpClientErrorException ex) {
+            throw new ResourceNotFoundException("Resource not found ");
         } catch (Exception ex) {
-            if (ex instanceof HttpClientErrorException
-                && ((HttpClientErrorException) ex).getRawStatusCode() == RESOURCE_NOT_FOUND) {
-                throw new ResourceNotFoundException("Resource not found ");
-            } else {
-                throw new ServiceException("Document Store error message::", ex);
-            }
+            throw new ServiceException("Document Store error message::", ex);
         }
+
     }
 
     @Override

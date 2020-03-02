@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 
 @Service
 public class SecurityUtils {
-    private final ServiceAuthTokenGenerator serviceAuthTokenGenerator;
+    private transient final ServiceAuthTokenGenerator serviceAuthTokenGenerator;
 
     @Autowired
     public SecurityUtils(final ServiceAuthTokenGenerator serviceAuthTokenGenerator) {
@@ -26,7 +26,7 @@ public class SecurityUtils {
         // headers.add("user-id", getUserId());
         headers.add("user-roles", "caseworker");
 
-      /*  if (SecurityContextHolder.getContext().getAuthentication() != null) {
+        /*  if (SecurityContextHolder.getContext().getAuthentication() != null) {
             final ServiceAndUserDetails serviceAndUser = (ServiceAndUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (serviceAndUser.getPassword() != null) {
                 headers.add(HttpHeaders.AUTHORIZATION, serviceAndUser.getPassword());
