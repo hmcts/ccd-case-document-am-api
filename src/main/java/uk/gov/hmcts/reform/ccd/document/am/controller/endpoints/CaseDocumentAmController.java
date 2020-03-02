@@ -300,21 +300,23 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
+        //This code is a temporaty implementation of the API. The actual implementation will follow in next sprints.
+
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
         map.add("files", new ClassPathResource("SampleImage.png"));
         map.set("classification", "PUBLIC");
         map.set("roles", "caseworker");
         map.set("user-id", "5ba5d987-df28-482c-b877-3f244f7c27cf");
-        map.set("caseTypeId", "BEFTA_CASETYPE_2_2");
-        map.set("jurisdictionId", "BEFTA_JURISDICTION_2");
-
+        map.set("metadata[caseId]", "1111122222333334");
+        map.set("metadata[jurisdictionId]", jurisdictionId);
+        map.set("caseTypeId", caseTypeId);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         headers.set("ServiceAuthorization", serviceAuthorization);
         headers.set("Authorization", "5ba5d987-df28-482c-b877-3f244f7c27cf");
 
-        headers.set("caseTypeId", "BEFTA_CASETYPE_2_2");
+        headers.set("caseTypeId", caseTypeId);
         headers.set("jurisdictionId", "BEFTA_JURISDICTION_2");
         headers.set("roles", "caseworker");
         headers.set("user-id", "5ba5d987-df28-482c-b877-3f244f7c27cf");

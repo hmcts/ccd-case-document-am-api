@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+
 import java.util.Map;
 import java.util.UUID;
 
@@ -16,6 +19,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.authorisation.exceptions.ServiceException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.endpoints.CaseDocumentAmController;
 import uk.gov.hmcts.reform.ccd.document.am.controller.feign.DocumentStoreFeignClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
@@ -55,10 +59,15 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             String documentURL = dmStoreURL + "/" + documentId;
             log.error("Getting Metadata using the URL : " + documentURL);
             final HttpEntity requestEntity = new HttpEntity(securityUtils.authorizationHeaders());
-            ResponseEntity<StoredDocumentHalResource> responseEntity = restTemplate.exchange(documentURL, HttpMethod.GET,
-                                                                  requestEntity, StoredDocumentHalResource.class);
+            ResponseEntity<StoredDocumentHalResource> responseEntity =
+                restTemplate.exchange(documentURL, HttpMethod.GET, requestEntity, StoredDocumentHalResource.class);
 
-            responseEntity.getBody().addLinks(documentId);
+            responseEntity.getBody().add(
+                linkTo(methodOn(CaseDocumentAmController.class).getDocumentbyDocumentId("dsds", documentId, "323", "caseworker-1")).withSelfRel());
+            responseEntity.getBody().add(
+                linkTo(methodOn(CaseDocumentAmController.class).getDocumentBinaryContentbyDocumentId("dsds", documentId, "323", "caseworker-1"))
+                    .withRel("binary"));
+
             log.error("Response from Document Store Client: " + responseEntity.getStatusCode());
             return responseEntity;
         } catch (Exception ex) {

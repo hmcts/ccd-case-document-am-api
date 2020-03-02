@@ -1,13 +1,13 @@
 {
-	"_guid_": "S-000",
-	"_extends_": "S-000-Test-Base-data",
+  "_guid_": "S-000",
+  "_extends_": "S-000-Test-Base-data",
   "users": {
     "invokingUser": {
       "username": "befta.caseworker.2.solicitor.1@gmail.com",
       "password": "Pa55word11"
     }
   },
-	"title": "Get Document Metadata by Document ID",
+  "title": "Get Document Metadata by Document ID",
   "request": {
     "headers": {
       "Content-Type": "application/json",
@@ -23,10 +23,42 @@
       "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
     }
   },
-
-	"specs": [
-		"an active caseworker profile in CCD with full permissions on a document field",
+  "specs": [
+    "an active caseworker profile in CCD with full permissions on a document field",
     "uses a uid that exists in IDAM",
     "to retrieve the metadata by document id"
-	]
+  ],
+  "expectedResponse": {
+    "headers": {
+      "_extends_": "Common_Response_Header_Base",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "links" : [ {
+        "rel" : "self",
+        "href" : "http://localhost:4455/cases/documents/02028c92-8366-4be0-aa06-f2882d1b131c"
+      }, {
+        "rel" : "binary",
+        "href" : "http://localhost:4455/cases/documents/02028c92-8366-4be0-aa06-f2882d1b131c/binary"
+      } ],
+      "_embedded" : {
+        "allDocumentVersions" : {
+          "links" : [ ]
+        }
+      },
+      "classification" : "PUBLIC",
+      "createdBy" : "[[ANYTHING_PRESENT]]",
+      "createdOn" : "[[ANYTHING_PRESENT]]",
+      "lastModifiedBy" : "[[ANYTHING_PRESENT]]",
+      "metadata" : {
+        "caseId" : "[[ANYTHING_PRESENT]]",
+        "jurisdictionId" : "BEFTA_JURISDICTION_2"
+      },
+      "mimeType" : "image/png",
+      "modifiedOn" : "[[ANYTHING_PRESENT]]",
+      "originalDocumentName" : "SampleImage.png",
+      "roles" : [ "caseworker" ],
+      "size" : 679361
+    }
+  }
 }

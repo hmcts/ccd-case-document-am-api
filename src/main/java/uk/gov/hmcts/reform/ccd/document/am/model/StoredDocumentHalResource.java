@@ -1,10 +1,11 @@
 package uk.gov.hmcts.reform.ccd.document.am.model;
 
-import java.util.Date;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import java.util.UUID;
 import javax.validation.Valid;
 
@@ -19,9 +20,6 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.validation.annotation.Validated;
 import uk.gov.hmcts.reform.ccd.document.am.controller.endpoints.CaseDocumentAmController;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
-
 
 /**
  * StoredDocumentHalResource.
@@ -30,7 +28,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Validated
-@JsonIgnoreProperties(value = { "_links" })
+@JsonIgnoreProperties(value = {"_links"})
 public class StoredDocumentHalResource extends ResourceSupport {
 
     @JsonProperty("_embedded")
@@ -63,7 +61,8 @@ public class StoredDocumentHalResource extends ResourceSupport {
 
     public void addLinks(UUID documentId) {
         add(linkTo(methodOn(CaseDocumentAmController.class).getDocumentbyDocumentId("dsds", documentId, "323", "caseworker-1")).withSelfRel());
-        add(linkTo(methodOn(CaseDocumentAmController.class).getDocumentBinaryContentbyDocumentId("dsds", documentId, "323", "caseworker-1")).withSelfRel());
+        add(linkTo(methodOn(CaseDocumentAmController.class).getDocumentBinaryContentbyDocumentId("dsds", documentId, "323", "caseworker-1"))
+                .withRel("binary"));
     }
 
     /**
