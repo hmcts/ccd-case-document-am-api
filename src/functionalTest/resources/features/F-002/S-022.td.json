@@ -1,30 +1,23 @@
 {
-  "title": "must successfully receive a document's binary content for a wrong user id",
+  "title": "must receive an error response for an active caseworker who does not have document access",
 
   "_guid_": "S-022",
   "_extends_": "F-002_Test_Data_Base",
 
   "specs": [
-    "an active caseworker profile in CCD with full permissions on a document field",
-    "contains a wrong user id",
+    "an active caseworker profile in CCD with limited permissions on a document field",
+    "contains an active caseworker who does not have document access",
     "contains the binary content for the uploaded document"
   ],
 
   "request": {
-    "headers": {
-      "user-id": "dummyNonExistingUserId"
+    "user": {
+      "username": "befta.caseworker.2.solicitor.2@gmail.com",
+      "password": "Pa55word11"
     }
   },
 
   "expectedResponse": {
-    "_extends_": "Common_200_Response",
-    "body": {
-      "ResponseCode": "200",
-      "status": "OK",
-      "timeStamp": "[[ANYTHING_PRESENT]]",
-      "ResponseBody": {
-
-      }
-    }
+    "_extends_": "Common_404_Response"
   }
 }

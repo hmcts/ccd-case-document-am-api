@@ -10,9 +10,7 @@
   ],
 
   "request": {
-    "headers": {
-      "Content-Type": "application/json"
-    },
+
     "pathVariables": {
       "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
     }

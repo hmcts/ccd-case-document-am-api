@@ -3,7 +3,7 @@
   "productName": "DM Store",
   "operationName": "Upload a case document",
   "method": "POST",
-  "uri": "/documents",
+  "uri": "http://localhost:4506/documents",
   "request": {
     "headers": {
       "Authorization": "[[DYNAMIC]]",

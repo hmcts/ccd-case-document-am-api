@@ -1,30 +1,21 @@
 {
-  "title": "must successfully receive a document's binary content for a null user id",
+  "title": "must receive an error response for a non existing document id",
 
   "_guid_": "S-021",
   "_extends_": "F-002_Test_Data_Base",
 
   "specs": [
     "an active caseworker profile in CCD with full permissions on a document field",
-    "contains a null user id",
-    "contains the binary content for the uploaded document"
+    "contains a non existing document id"
   ],
 
   "request": {
     "headers": {
-      "user-id": ""
+      "documentId": "8de9957b-d7a6-40a1-7777-6aac30d33644"
     }
   },
 
   "expectedResponse": {
-    "_extends_": "Common_200_Response",
-    "body": {
-      "ResponseCode": "200",
-      "status": "OK",
-      "timeStamp": "[[ANYTHING_PRESENT]]",
-      "ResponseBody": {
-
-      }
-    }
+    "_extends_": "Common_404_Response"
   }
 }
