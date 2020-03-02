@@ -10,7 +10,7 @@
   ],
 
   "request": {
-    "headers": {
+    "pathVariables": {
       "documentId": "8de9957b-d7a6-40a1-7777-6aac30d33644"
     }
   },
