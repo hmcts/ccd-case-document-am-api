@@ -33,13 +33,22 @@ Feature: F-002: Get Document Binary Content by Document ID
       Then a negative response is received
       And the response has all other details as expected
 
+    @S-023
+    Scenario: must receive an error response for a malformed document ID
+      Given a user with [an active caseworker profile in CCD with full permissions on a document field]
+      When a request is prepared with appropriate values
+      And the request [contains a malformed document ID]
+      And it is submitted to call the [Get Binary Content by Document ID] operation of [CCD Case Document AM API]
+      Then a negative response is received
+      And the response has all the details as expected
+
 
     #Generic Scenarios for Security
-    @S-023 @Ignore
+    @S-024 @Ignore
     Scenario: generic scenario for Unauthorized
 
-    @S-024 @Ignore
+    @S-025 @Ignore
     Scenario: generic scenario for Forbidden
 
-    @S-025 @Ignore
+    @S-026 @Ignore
     Scenario: generic scenario for Unsupported Media Type
