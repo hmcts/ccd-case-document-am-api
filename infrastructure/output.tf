@@ -11,7 +11,7 @@ output "CCD_GW_SERVICE_NAME" {
 }
 
 output "BEFTA_S2S_CLIENT_ID" {
-  value = "ccd_gw"
+  value = "ccd_case_document_am_api"
 }
 
 output "OAUTH2_CLIENT_ID" {
