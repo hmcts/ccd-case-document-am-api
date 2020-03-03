@@ -28,6 +28,9 @@ public class SecurityUtils {
     private static String s2sUrl;
 
     private ServiceAuthTokenGenerator getServiceAuthTokenGenerator() {
+        System.out.println("Microservice: " + microService);
+        System.out.println("Microservice: " + secret);
+        System.out.println("Microservice: " + s2sUrl);
         ServiceAuthorisationApi serviceAuthorisationApi = Feign.builder()
                                                                .encoder(new JacksonEncoder())
                                                                .contract(new SpringMvcContract())
