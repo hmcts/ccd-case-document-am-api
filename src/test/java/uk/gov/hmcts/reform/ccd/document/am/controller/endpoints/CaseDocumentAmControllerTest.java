@@ -25,10 +25,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.UnauthorizedException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
@@ -42,6 +44,9 @@ import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 public class CaseDocumentAmControllerTest {
     @InjectMocks
     private transient CaseDocumentAmController testee;
+
+    @Autowired
+    private ServiceAuthTokenGenerator serviceAuthTokenGenerator;
 
     @Mock
     private transient DocumentManagementService documentManagementService;
@@ -61,6 +66,9 @@ public class CaseDocumentAmControllerTest {
 
     @BeforeEach
     public void setUp() {
+        System.out.println("Test class");
+        System.out.println("Test class token generation");
+        System.out.println("Test class token generation" + serviceAuthTokenGenerator.generate());
         MockitoAnnotations.initMocks(this);
         when(validationService.validate(any(String.class))).thenReturn(TRUE);
     }

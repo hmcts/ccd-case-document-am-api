@@ -34,9 +34,8 @@ public class Application {
     public ServiceAuthTokenGenerator authTokenGenerator(
         @Value("${idam.s2s-auth.totp_secret}") final String secret,
         @Value("${idam.s2s-auth.microservice}") final String microService,
-        final ServiceAuthorisationApi serviceAuthorisationApi
+        final ServiceAuthorisationApi serviceAuthorisationApi) {
 
-    ) {
         System.out.println("Microservice: " + microService);
         System.out.println("Microservice: " + secret);
         System.out.println("Microservice: " + serviceAuthorisationApi);
