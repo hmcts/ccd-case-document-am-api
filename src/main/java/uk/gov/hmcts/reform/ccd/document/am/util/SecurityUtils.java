@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 import feign.Feign;
 import feign.jackson.JacksonEncoder;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.http.HttpHeaders;
@@ -28,7 +28,7 @@ public class SecurityUtils {
     @Value("${idam.s2s-auth.url}")
     private static String s2sUrl;
 
-    @Autowired
+    @Qualifier("serviceAuthTokenGenerator")
     private transient ServiceAuthTokenGenerator serviceAuthTokenGeneratorAutowired;
 
     private ServiceAuthTokenGenerator getServiceAuthTokenGenerator() {
