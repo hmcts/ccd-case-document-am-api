@@ -12,8 +12,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -40,8 +38,6 @@ import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 @Slf4j
 @Service
 public class DocumentManagementServiceImpl implements DocumentManagementService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(DocumentManagementServiceImpl.class);
 
     private transient DocumentStoreFeignClient documentStoreFeignClient;
     private static final int RESOURCE_NOT_FOUND = 404;

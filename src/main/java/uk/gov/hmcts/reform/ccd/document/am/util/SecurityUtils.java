@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.ccd.document.am.util;
 
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.reform.auth.checker.spring.serviceanduser.ServiceAndUserDeta
 import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 
 @Service
+@Slf4j
 public class SecurityUtils {
     private transient ServiceAuthTokenGenerator serviceAuthTokenGenerator;
 
@@ -21,11 +23,18 @@ public class SecurityUtils {
     }
 
     public MultiValueMap<String, String> authorizationHeaders() {
+        log.error("Generating the service Token");
+        String serviceAuthToken = serviceAuthTokenGenerator.generate();
+        log.error("Generated the service token : " + serviceAuthToken);
         final HttpHeaders headers = new HttpHeaders();
-        headers.add("ServiceAuthorization", serviceAuthTokenGenerator.generate());
+        headers.add("ServiceAuthorization", serviceAuthToken);
         // headers.add("user-id", getUserId());
         headers.add("user-roles", "caseworker");
-
+        log.error("Headers: " + headers.keySet());
+        for (String key : headers.keySet()) {
+            log.error("Key : " + key);
+            log.error("value : " + headers.get(key));
+        }
         /*  if (SecurityContextHolder.getContext().getAuthentication() != null) {
             final ServiceAndUserDetails serviceAndUser = (ServiceAndUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (serviceAndUser.getPassword() != null) {
