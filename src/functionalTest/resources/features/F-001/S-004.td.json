@@ -10,7 +10,7 @@
   "users": {
     "invokingUser": {
       "username": "befta.citizen.2@gmail.com",
-      "password": "Pa55word11"
+      "password": "[[$CCD_CASEWORKER_AUTOTEST_PASSWORD]]"
     }
   },
   "request": {
@@ -19,7 +19,5 @@
     }
   },
   "expectedResponse": {
-    "responseCode": 403,
-    "responseMessage": "Unauthorized"
-  }
+    "_extends_": "Common_403_Response"
 }

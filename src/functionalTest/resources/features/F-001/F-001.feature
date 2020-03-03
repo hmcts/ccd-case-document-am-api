@@ -7,7 +7,7 @@ Feature: F-001: Get Document Metadata by Document ID
   @S-001
   Scenario: must successfully get document metadata by document ID
     Given a user with [an active caseworker profile in CCD with full permissions on a document field]
-#    And   a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data]
+    And   a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data]
     When  a request is prepared with appropriate values
     And   it is submitted to call the [Get Document Metadata by Document ID] operation of [CCD Case Document AM API]
     Then  a positive response is received

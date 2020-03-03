@@ -9,7 +9,7 @@
   ],
   "user": {
     "username": "befta.caseworker.2.solicitor.3@gmail.com",
-    "password": "Pa55word11"
+    "password": "[[$CCD_CASEWORKER_AUTOTEST_PASSWORD]]"
   },
   "request": {
     "pathVariables": {
@@ -17,11 +17,6 @@
     }
   },
   "expectedResponse": {
-    "responseCode": 404,
-    "responseMessage": "Not Found",
-    "headers": {
-      "_extends_": "Common_Response_Headers",
-      "Transfer-Encoding" : "chunked"
-    }
+    "_extends_": "Common_404_Response"
   }
 }
