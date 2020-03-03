@@ -20,12 +20,20 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.CaseNotFoundException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.UnauthorizedException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
+import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
+import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
+
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
 
 @Controller
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -36,12 +44,17 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     private transient ObjectMapper objectMapper;
     private transient HttpServletRequest request;
     private transient DocumentManagementService  documentManagementService;
+    private transient CaseDataStoreService caseDataStoreService;
+    private transient ValidationService validationService;
 
     @Autowired
-    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService  documentManagementService) {
+    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService documentManagementService,
+                                    CaseDataStoreService caseDataStoreService, ValidationService validationService) {
         this.objectMapper = objectMapper;
         this.request = request;
         this.documentManagementService = documentManagementService;
+        this.caseDataStoreService = caseDataStoreService;
+        this.validationService = validationService;
     }
 
     @Override
@@ -85,17 +98,26 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "User-Id", required = false) String userId,
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<Object>(objectMapper.readValue("{ }", Object.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                LOG.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<Object>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
 
-        return new ResponseEntity<Object>(HttpStatus.NOT_IMPLEMENTED);
+        ResponseEntity documentMetadata = documentManagementService.getDocumentMetadata(documentId);
+        String caseId = documentManagementService.extractCaseIdFromMetadata(documentMetadata.getBody());
+
+        if (!validationService.validate(caseId)) {
+            LOG.error(CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(CASE_ID_INVALID);
+
+        } else {
+            CaseDocumentMetadata  caseDocumentMetadata = caseDataStoreService.getCaseDocumentMetadata(caseId, documentId)
+                    .orElseThrow(() -> new CaseNotFoundException(caseId));
+            if (caseDocumentMetadata.getDocument().get().getId().equals(documentId.toString())
+                    && caseDocumentMetadata.getDocument().get().getPermissions().contains(Permission.READ)) {
+                return documentManagementService.getDocumentBinaryContent(documentId);
+
+            }
+
+        }
+        LOG.error("User don't have read permission on requested document " + HttpStatus.UNAUTHORIZED);
+        throw new UnauthorizedException(documentId.toString());
     }
 
     @Override
