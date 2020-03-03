@@ -273,7 +273,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
-        //This code is a temporaty implementation of the API. The actual implementation will follow in next sprints.
+        //This code is a temporary implementation of the API. The actual implementation will follow in next sprints.
 
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
         map.add("files", new ClassPathResource("SampleImage.png"));
