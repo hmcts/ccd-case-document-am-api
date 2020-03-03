@@ -5,7 +5,6 @@
   "_extends_": "F-002_Test_Data_Base",
 
   "specs": [
-    "an active caseworker profile in CCD with full permissions on a document field",
     "contains a non existing document id"
   ],
 

@@ -5,14 +5,12 @@
   "_extends_": "F-002_Test_Data_Base",
 
   "specs": [
-    "an active caseworker profile in CCD with limited permissions on a document field",
     "contains an active caseworker who does not have document access"
   ],
 
   "request": {
     "user": {
-      "username": "befta.caseworker.2.solicitor.2@gmail.com",
-      "password": "Pa55word11"
+      "username": "befta.caseworker.2.solicitor.2@gmail.com"
     },
     "pathVariables": {
       "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
