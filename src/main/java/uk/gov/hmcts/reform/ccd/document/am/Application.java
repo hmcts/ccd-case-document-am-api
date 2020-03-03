@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
@@ -31,6 +32,7 @@ public class Application {
     }
 
     @Bean
+    @Primary
     public ServiceAuthTokenGenerator authTokenGenerator(
         @Value("${idam.s2s-auth.totp_secret}") final String secret,
         @Value("${idam.s2s-auth.microservice}") final String microService,
