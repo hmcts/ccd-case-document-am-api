@@ -55,11 +55,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Autowired
     private transient SecurityUtils securityUtils;
 
-    @Autowired
+    /*   @Autowired
     public DocumentManagementServiceImpl(DocumentStoreFeignClient documentStoreFeignClient) {
         this.documentStoreFeignClient = documentStoreFeignClient;
 
-    }
+    }*/
 
     @Override
     @SuppressWarnings("unchecked")
