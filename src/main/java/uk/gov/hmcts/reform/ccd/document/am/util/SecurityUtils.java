@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import feign.Feign;
 import feign.jackson.JacksonEncoder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.http.HttpHeaders;
@@ -27,6 +28,9 @@ public class SecurityUtils {
     @Value("${idam.s2s-auth.url}")
     private static String s2sUrl;
 
+    @Autowired
+    private transient ServiceAuthTokenGenerator serviceAuthTokenGeneratorAutowired;
+
     private ServiceAuthTokenGenerator getServiceAuthTokenGenerator() {
         System.out.println("Microservice: " + microService);
         System.out.println("Microservice: " + secret);
@@ -40,10 +44,20 @@ public class SecurityUtils {
 
     public MultiValueMap<String, String> authorizationHeaders() {
         log.error("Generating the service Token");
-        String serviceAuthToken = getServiceAuthTokenGenerator().generate();
+        String serviceAuthToken = "value";
+        try {
+            log.error("Generating the service Token inside try method");
+            log.error("Generating the service Token by properties file");
+            getServiceAuthTokenGenerator().generate();
+            log.error("Generating the service Token by autowired bean");
+            serviceAuthTokenGeneratorAutowired.generate();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+
         log.error("Generated the service token : " + serviceAuthToken);
         final HttpHeaders headers = new HttpHeaders();
-        headers.add("ServiceAuthorization", serviceAuthToken);
+        headers.add("ServiceAuthorization", serviceAuthTokenGeneratorAutowired.generate());
         // headers.add("user-id", getUserId());
         headers.add("user-roles", "caseworker");
         log.error("Headers: " + headers.keySet());
