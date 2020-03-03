@@ -39,7 +39,7 @@ def versions = [
   sonarPitest        : '0.5',
   springBoot         : '2.1.4.RELEASE',
   springHystrix      : '2.1.1.RELEASE',
-  springfoxSwagger   : '2.9.2',
+  swagger2Version    : '2.9.2',
   pact_version       : '3.5.24',
   rest_assured       : '3.3.0',
   cucumber           : '5.0.0',
@@ -257,7 +257,8 @@ dependencies {
 
   }
   compile group: 'javax.inject', name: 'javax.inject', version: '1'
-  compile group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
+  compile group: 'io.springfox', name: 'springfox-swagger2', version: versions.swagger2Version
+  compile group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.swagger2Version
 
   compile group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformLogging
   compile group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
