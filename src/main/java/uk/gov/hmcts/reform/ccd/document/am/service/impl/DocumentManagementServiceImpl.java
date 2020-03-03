@@ -11,7 +11,6 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_F
 import java.util.Map;
 import java.util.UUID;
 
-import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,7 +102,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public ResponseEntity<Object> getDocumentBinaryContent(UUID documentId) {
 
         try  {
-            ResponseEntity<Resource> response = documentStoreFeignClient.getDocumentBinary(documentId);
+            ResponseEntity<Resource> response = null;
+            /*documentStoreFeignClient.getDocumentBinary(documentId);*/
 
             if (HttpStatus.OK.equals(response.getStatusCode())) {
                 return ResponseEntity.ok().headers(getHeaders(response))
@@ -114,7 +114,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                     .body(response.getBody());
             }
 
-        } catch (FeignException ex) {
+        } catch (Exception ex) {
             log.error("Requested document could not be downloaded, DM Store Response Code ::" + ex.getMessage());
             throw new ResourceNotFoundException("Cannot download document that is stored");
         }
