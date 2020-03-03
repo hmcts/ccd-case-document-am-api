@@ -2,29 +2,45 @@ package uk.gov.hmcts.reform.ccd.document.am.util;
 
 import java.util.stream.Collectors;
 
+import feign.Feign;
+import feign.jackson.JacksonEncoder;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 import uk.gov.hmcts.reform.auth.checker.spring.serviceanduser.ServiceAndUserDetails;
+import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 
 @Service
 @Slf4j
 public class SecurityUtils {
-    private transient ServiceAuthTokenGenerator serviceAuthTokenGenerator;
 
-    @Autowired
-    public SecurityUtils(final ServiceAuthTokenGenerator serviceAuthTokenGenerator) {
-        this.serviceAuthTokenGenerator = serviceAuthTokenGenerator;
+    @Value("${idam.s2s-auth.totp_secret}")
+    private static String secret;
+    @Value("${idam.s2s-auth.microservice}")
+    private static String microService;
+    @Value("${idam.s2s-auth.url}")
+    private static String s2sUrl;
+
+    private ServiceAuthTokenGenerator getServiceAuthTokenGenerator() {
+        ServiceAuthorisationApi serviceAuthorisationApi = Feign.builder()
+                                                               .encoder(new JacksonEncoder())
+                                                               .contract(new SpringMvcContract())
+                                                               .target(ServiceAuthorisationApi.class, s2sUrl);
+        System.out.println("Microservice: " + microService);
+        System.out.println("Microservice: " + secret);
+        System.out.println("Microservice: " + serviceAuthorisationApi);
+        return new ServiceAuthTokenGenerator(secret, microService, serviceAuthorisationApi);
     }
 
     public MultiValueMap<String, String> authorizationHeaders() {
         log.error("Generating the service Token");
-        String serviceAuthToken = serviceAuthTokenGenerator.generate();
+        String serviceAuthToken = getServiceAuthTokenGenerator().generate();
         log.error("Generated the service token : " + serviceAuthToken);
         final HttpHeaders headers = new HttpHeaders();
         headers.add("ServiceAuthorization", serviceAuthToken);
