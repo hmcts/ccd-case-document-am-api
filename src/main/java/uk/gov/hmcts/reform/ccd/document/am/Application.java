@@ -39,10 +39,6 @@ public class Application {
         System.out.println("Microservice: " + microService);
         System.out.println("Microservice: " + secret);
         System.out.println("Microservice: " + serviceAuthorisationApi);
-        ServiceAuthTokenGenerator generator = new ServiceAuthTokenGenerator(secret, microService, serviceAuthorisationApi);
-        System.out.println("generator object is : " + generator);
-        System.out.println("asijasiodjiojdasojdojdadsi" + generator.generate());
-        generator.generate();
         return new ServiceAuthTokenGenerator(secret, microService, serviceAuthorisationApi);
     }
 }
