@@ -37,6 +37,9 @@ public class Application {
         final ServiceAuthorisationApi serviceAuthorisationApi
 
     ) {
+        System.out.println("Microservice: " + microService);
+        System.out.println("Microservice: " + secret);
+        System.out.println("Microservice: " + serviceAuthorisationApi);
         return new ServiceAuthTokenGenerator(secret, microService, serviceAuthorisationApi);
     }
 }
