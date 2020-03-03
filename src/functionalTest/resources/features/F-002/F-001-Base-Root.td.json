@@ -1,10 +1,10 @@
 {
-	"_guid_": "S-000-Base-Root",
+	"_guid_": "F-001-Base-Root",
 
   "users": {
     "invokingUser": {
       "username": "befta.caseworker.2@gmail.com",
-      "password": "Pa55word11"
+      "password": "[[$CCD_CASEWORKER_AUTOTEST_PASSWORD]]"
     }
   },
   "request": {

@@ -1,0 +1,27 @@
+{
+  "title": "must get an error response for a malformed document ID",
+  "_extends_": "F-001_Test_Base_data",
+  "_guid_": "S-003",
+  "specs": [
+    "for a malformed document ID"
+  ],
+  "user": {
+    "username": "befta.caseworker.2.solicitor.3@gmail.com",
+    "password": "[[$CCD_CASEWORKER_AUTOTEST_PASSWORD]]"
+  },
+  "request": {
+    "pathVariables": {
+      "documentId": "e1cb63af-3a73-45b6-$£@!-a7af34e02f81"
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_400_Response",
+    "body": {
+      "timestamp": "[[ANYTHING_PRESENT]]",
+      "status": 400,
+      "error": "Bad Request",
+      "message": "Failed to convert value of type 'java.lang.String' to required type 'java.util.UUID'; nested exception is java.lang.NumberFormatException: For input string: \"$£@!\"",
+      "path": "[[ANYTHING_PRESENT]]"
+    }
+  }
+}
