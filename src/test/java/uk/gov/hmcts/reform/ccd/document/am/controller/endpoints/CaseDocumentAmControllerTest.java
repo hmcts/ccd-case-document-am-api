@@ -68,7 +68,7 @@ public class CaseDocumentAmControllerTest {
     public void setUp() {
         System.out.println("Test class");
         System.out.println("Test class token generation");
-       // System.out.println("Test class token generation" + serviceAuthTokenGenerator.generate());
+        // System.out.println("Test class token generation" + serviceAuthTokenGenerator.generate());
         MockitoAnnotations.initMocks(this);
         when(validationService.validate(any(String.class))).thenReturn(TRUE);
     }
