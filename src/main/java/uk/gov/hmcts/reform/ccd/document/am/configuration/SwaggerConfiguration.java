@@ -13,7 +13,7 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import uk.gov.hmcts.reform.ccd.document.am.Application;
-import uk.gov.hmcts.reform.ccd.document.am.controller.endpoints.CaseDocumentAm;
+import uk.gov.hmcts.reform.ccd.document.am.controller.endpoints.CaseDocumentAmController;
 
 import java.util.Arrays;
 
@@ -36,7 +36,7 @@ public class SwaggerConfiguration {
         return new Docket(DocumentationType.SWAGGER_2)
             .groupName("v2")
             .select()
-            .apis(RequestHandlerSelectors.basePackage(CaseDocumentAm.class.getPackage().getName()))
+            .apis(RequestHandlerSelectors.basePackage(CaseDocumentAmController.class.getPackage().getName()))
             .build()
             .useDefaultResponseMessages(false)
             .apiInfo(apiV2Info())
