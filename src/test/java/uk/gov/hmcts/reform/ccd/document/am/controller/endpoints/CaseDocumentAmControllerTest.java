@@ -45,9 +45,6 @@ public class CaseDocumentAmControllerTest {
     @InjectMocks
     private transient CaseDocumentAmController testee;
 
-    @Autowired
-    private transient ServiceAuthTokenGenerator serviceAuthTokenGenerator;
-
     @Mock
     private transient DocumentManagementService documentManagementService;
 
@@ -66,9 +63,6 @@ public class CaseDocumentAmControllerTest {
 
     @BeforeEach
     public void setUp() {
-        System.out.println("Test class");
-        System.out.println("Test class token generation");
-        // System.out.println("Test class token generation" + serviceAuthTokenGenerator.generate());
         MockitoAnnotations.initMocks(this);
         when(validationService.validate(any(String.class))).thenReturn(TRUE);
     }
