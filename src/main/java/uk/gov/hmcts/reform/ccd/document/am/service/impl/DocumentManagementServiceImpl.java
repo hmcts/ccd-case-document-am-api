@@ -2,17 +2,27 @@ package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DATA_SOURCE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
 
 import java.util.Map;
 import java.util.UUID;
 
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -31,6 +41,8 @@ import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 @Slf4j
 @Service
 public class DocumentManagementServiceImpl implements DocumentManagementService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DocumentManagementServiceImpl.class);
 
     private transient DocumentStoreFeignClient documentStoreFeignClient;
     private static final int RESOURCE_NOT_FOUND = 404;
@@ -88,10 +100,19 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public ResponseEntity<Resource> getDocumentBinaryContent(UUID documentId) {
+    public ResponseEntity<Object> getDocumentBinaryContent(UUID documentId) {
 
-        try {
-            return documentStoreFeignClient.getDocumentBinary(documentId);
+        try  {
+            ResponseEntity<Resource> response = documentStoreFeignClient.getDocumentBinary(documentId);
+
+            if (HttpStatus.OK.equals(response.getStatusCode())) {
+                return ResponseEntity.ok().headers(getHeaders(response))
+                    .body((ByteArrayResource) response.getBody());
+            } else {
+                return ResponseEntity
+                    .status(response.getStatusCode())
+                    .body(response.getBody());
+            }
 
         } catch (FeignException ex) {
             log.error("Requested document could not be downloaded, DM Store Response Code ::" + ex.getMessage());
@@ -104,5 +125,15 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return null;
     }
 
+    private HttpHeaders getHeaders(ResponseEntity<Resource> response) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(ORIGINAL_FILE_NAME,response.getHeaders().get(ORIGINAL_FILE_NAME).get(0));
+        headers.add(CONTENT_DISPOSITION,response.getHeaders().get(CONTENT_DISPOSITION).get(0));
+        headers.add(DATA_SOURCE,response.getHeaders().get(DATA_SOURCE).get(0));
+        headers.add(CONTENT_TYPE, response.getHeaders().get(CONTENT_TYPE).get(0));
+        headers.add(CONTENT_LENGTH,response.getHeaders().get(CONTENT_LENGTH).get(0));
+        return headers;
+
+    }
 
 }

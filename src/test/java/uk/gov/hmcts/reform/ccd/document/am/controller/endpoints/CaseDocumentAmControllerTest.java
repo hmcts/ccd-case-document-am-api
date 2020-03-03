@@ -1,20 +1,24 @@
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
+import static java.lang.Boolean.TRUE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,12 +29,14 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.UnauthorizedException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
+import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 
 @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
 public class CaseDocumentAmControllerTest {
@@ -39,6 +45,9 @@ public class CaseDocumentAmControllerTest {
 
     @Mock
     private transient DocumentManagementService documentManagementService;
+
+    @Mock
+    private transient ValidationService validationService;
 
     @Mock
     private transient CaseDataStoreService caseDataStoreService;
@@ -53,6 +62,7 @@ public class CaseDocumentAmControllerTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(validationService.validate(any(String.class))).thenReturn(TRUE);
     }
 
     @Test
@@ -81,13 +91,11 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("should get 200 document binary content")
     public void shouldGetDocumentBinaryContent() {
-        CaseDocumentMetadata caseDocumentMetadata = getCaseDocumentMetadata(
+        Optional<CaseDocumentMetadata> caseDocumentMetadata = Optional.ofNullable(getCaseDocumentMetadata(
             MATCHED_DOCUMENT_ID,
             Arrays.asList(
                 Permission.CREATE,
-                Permission.READ
-                         )
-                                                                           );
+                Permission.READ)));
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
         doReturn(caseDocumentMetadata).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
@@ -109,82 +117,53 @@ public class CaseDocumentAmControllerTest {
     }
 
     @Test
-    @DisplayName("should throw 403 forbidden when the requested document does not have read permission")
+    @DisplayName("should throw 401 unauthorized  when the requested document does not have read permission")
     public void shouldThrowForbiddenWhenDocumentDoesNotHaveReadPermission() {
-        CaseDocumentMetadata caseDocumentMetadata = getCaseDocumentMetadata(
+        Optional<CaseDocumentMetadata> caseDocumentMetadata = Optional.ofNullable(getCaseDocumentMetadata(
             MATCHED_DOCUMENT_ID,
-            Arrays.asList(Permission.CREATE)
-                                                                           );
+            Arrays.asList(Permission.CREATE)));
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
         doReturn(caseDocumentMetadata).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
-        doReturn(setDocumentBinaryContent("FORBIDDEN")).when(documentManagementService).getDocumentBinaryContent(getUuid());
+        doReturn(setDocumentBinaryContent("unauthorized")).when(documentManagementService).getDocumentBinaryContent(getUuid());
 
-        ResponseEntity<Object> response = testee.getDocumentBinaryContentbyDocumentId(
-            serviceAuthorization,
-            getUuid(),
-            "",
-            ""
-                                                                                     );
 
-        assertAll(
-            () -> verify(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid()),
-            () -> assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN)),
-            () -> assertNotNull(response.getBody()),
-            () -> assertThat(response.getBody(), is("User don't have read permission on requested document")));
+        Assertions.assertThrows(UnauthorizedException.class, () -> {
+            testee.getDocumentBinaryContentbyDocumentId(
+                serviceAuthorization,
+                getUuid(),
+                "",
+                "");
+        });
+
+
     }
 
-    @Test
-    @DisplayName("should throw 404 not found when the requested document does not exist")
-    public void shouldThrowNotFoundWhenDocumentDoesNotExist() {
-        CaseDocumentMetadata caseDocumentMetadata = CaseDocumentMetadata.builder().caseId("").build();
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
-        doReturn(caseDocumentMetadata).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
-        doReturn(setDocumentBinaryContent("FORBIDDEN")).when(documentManagementService).getDocumentBinaryContent(getUuid());
-
-        ResponseEntity<Object> response = testee.getDocumentBinaryContentbyDocumentId(
-            serviceAuthorization,
-            getUuid(),
-            "",
-            ""
-                                                                                     );
-
-        assertAll(
-            () -> verify(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid()),
-            () -> assertThat(response.getStatusCode(), is(HttpStatus.NOT_FOUND)),
-            () -> assertNotNull(response.getBody()),
-            () -> assertThat(
-                response.getBody(),
-                is("Document doesn't exist for requested documetd id at CCD Data Store API Side")));
-    }
 
     @Test
-    @DisplayName("should throw 403 forbidden when the requested document does not match with available doc")
+    @DisplayName("should throw 401 unauthorized when the requested document does not match with available doc")
     public void shouldThrowForbiddenWhenDocumentDoesNotMatch() {
-        CaseDocumentMetadata caseDocumentMetadata = getCaseDocumentMetadata(
+        Optional<CaseDocumentMetadata> caseDocumentMetadata = Optional.ofNullable(getCaseDocumentMetadata(
             UNMATCHED_DOCUMENT_ID,
             Arrays.asList(
                 Permission.CREATE,
                 Permission.READ
                          )
-                                                                           );
+                                                                                                         ));
+
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
         doReturn(caseDocumentMetadata).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
-        doReturn(setDocumentBinaryContent("FORBIDDEN")).when(documentManagementService).getDocumentBinaryContent(getUuid());
+        doReturn(setDocumentBinaryContent("unauthorized")).when(documentManagementService).getDocumentBinaryContent(getUuid());
 
-        ResponseEntity<Object> response = testee.getDocumentBinaryContentbyDocumentId(
-            serviceAuthorization,
-            getUuid(),
-            "",
-            "");
+        Assertions.assertThrows(UnauthorizedException.class, () -> {
+            testee.getDocumentBinaryContentbyDocumentId(
+                serviceAuthorization,
+                getUuid(),
+                "",
+                "");
+        });
 
-        assertAll(
-            () -> verify(documentManagementService).getDocumentMetadata(getUuid()),
-            () -> assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN)),
-            () -> assertNotNull(response.getBody()),
-            () -> assertThat(response.getBody(), is("User don't have read permission on requested document")));
     }
 
     private ResponseEntity<StoredDocumentHalResource> setDocumentMetaData() {
@@ -200,7 +179,7 @@ public class CaseDocumentAmControllerTest {
 
     private CaseDocumentMetadata getCaseDocumentMetadata(String docId, List<Permission> permission) {
         Document document = Document.builder().permissions(permission).id(docId).build();
-        return CaseDocumentMetadata.builder().caseId(CASE_ID).documents(Optional.of(Arrays.asList(document))).build();
+        return CaseDocumentMetadata.builder().caseId(CASE_ID).document(Optional.of(document)).build();
     }
 
     private ResponseEntity<ByteArrayResource> setDocumentBinaryContent(String responseType) {
@@ -210,12 +189,11 @@ public class CaseDocumentAmControllerTest {
                 getHttpHeaders(),
                 HttpStatus.OK
             );
-        } else if (responseType.equals("forbidden")) {
+        } else if (responseType.equals("unauthorized")) {
             return new ResponseEntity<ByteArrayResource>(
                 new ByteArrayResource("".getBytes()),
                 getHttpHeaders(),
-                HttpStatus.FORBIDDEN
-            );
+                HttpStatus.UNAUTHORIZED);
         }
 
         return new ResponseEntity<ByteArrayResource>(new ByteArrayResource("".getBytes()), HttpStatus.OK);

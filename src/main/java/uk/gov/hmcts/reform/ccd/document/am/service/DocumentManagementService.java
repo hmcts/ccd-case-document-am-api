@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.ccd.document.am.service;
 
-import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadDocumentsCommand;
@@ -31,7 +30,7 @@ public interface DocumentManagementService {
      * @param documentId Document Id for which binary content to be downloaded
      * @return OutputStream object containing binary content of document
      **/
-    ResponseEntity<Resource> getDocumentBinaryContent(final UUID documentId);
+    ResponseEntity<Object> getDocumentBinaryContent(final UUID documentId);
 
     /**
      * Root GET endpoint.
