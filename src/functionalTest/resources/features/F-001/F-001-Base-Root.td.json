@@ -9,9 +9,8 @@
   },
   "request": {
 		"headers": {
-			"Authorization": "[[DYNAMIC]]",
 			"ServiceAuthorization": "[[DYNAMIC]]",
-			"Content-Type": "application/json"
+      "user-roles": "caseworker"
 		}
 	}
 }

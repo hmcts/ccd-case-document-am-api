@@ -13,6 +13,9 @@
     }
   },
   "request": {
+    "headers": {
+      "user-roles": "citi"
+    },
     "pathVariables": {
       "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
     }
