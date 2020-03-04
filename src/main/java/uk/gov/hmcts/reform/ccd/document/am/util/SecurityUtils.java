@@ -5,7 +5,9 @@ import java.util.stream.Collectors;
 import feign.Feign;
 import feign.jackson.JacksonEncoder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,20 +22,18 @@ import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 @Slf4j
 public class SecurityUtils {
 
-    //@Value("${idam.s2s-auth.totp_secret}")
-    private static String secret = "L5VAT7MQHB67FHB4";
-    //@Value("${idam.s2s-auth.microservice}")
-    private static String microService = "ccd_case_document_am_api";
-    //@Value("${idam.s2s-auth.url}")
-    private static String s2sUrl = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal";
+    @Value("${idam.s2s-auth.totp_secret}")
+    private static String secret;
+    @Value("${idam.s2s-auth.microservice}")
+    private static String microService;
+    @Value("${idam.s2s-auth.url}")
+    private static String s2sUrl;
 
+    @Autowired
     @Qualifier("serviceAuthTokenGenerator")
     private transient ServiceAuthTokenGenerator serviceAuthTokenGeneratorAutowired;
 
     private ServiceAuthTokenGenerator getServiceAuthTokenGenerator() {
-        System.out.println("Microservice: " + microService);
-        System.out.println("Microservice: " + secret);
-        System.out.println("Microservice: " + s2sUrl);
         ServiceAuthorisationApi serviceAuthorisationApi = Feign.builder()
                                                                .encoder(new JacksonEncoder())
                                                                .contract(new SpringMvcContract())
@@ -45,17 +45,17 @@ public class SecurityUtils {
         log.error("Generating the service Token");
         String serviceAuthToken = "value";
         try {
-            log.error("Generating the service Token by properties file");
+            log.error("Generating the service Token inside try method");
             getServiceAuthTokenGenerator().generate();
             log.error("Generating the service Token by autowired bean");
-            //serviceAuthTokenGeneratorAutowired.generate();
+            serviceAuthTokenGeneratorAutowired.generate();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
 
         log.error("Generated the service token : " + serviceAuthToken);
         final HttpHeaders headers = new HttpHeaders();
-        headers.add("ServiceAuthorization", getServiceAuthTokenGenerator().generate());
+        headers.add("ServiceAuthorization", serviceAuthTokenGeneratorAutowired.generate());
         // headers.add("user-id", getUserId());
         headers.add("user-roles", "caseworker");
         log.error("Headers: " + headers.keySet());
