@@ -21,7 +21,6 @@
     "responseMessage": "OK",
     "headers": {
       "_extends_": "Common_Response_Header_Base",
-      "Request-Context" : "appId=cid-v1:59871fc9-bac4-41d8-ad63-e64e5ce709d4",
       "content-type": "application/vnd.uk.gov.hmcts.dm.document-collection.v1+hal+json;charset=UTF-8"
     },
     "body": {
