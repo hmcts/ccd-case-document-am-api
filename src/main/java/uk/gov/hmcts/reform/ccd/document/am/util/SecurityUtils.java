@@ -25,7 +25,7 @@ public class SecurityUtils {
     private static String secret = "L5VAT7MQHB67FHB4";
     //@Value("${idam.s2s-auth.microservice}")
     private static String microService = "ccd_case_document_am_api";
-    @Value("${idam.s2s-auth.url}")
+    //@Value("${idam.s2s-auth.url}")
     private static String s2sUrl = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal";
 
     @Qualifier("serviceAuthTokenGenerator")
@@ -46,7 +46,6 @@ public class SecurityUtils {
         log.error("Generating the service Token");
         String serviceAuthToken = "value";
         try {
-            log.error("Generating the service Token inside try method");
             log.error("Generating the service Token by properties file");
             getServiceAuthTokenGenerator().generate();
             log.error("Generating the service Token by autowired bean");
