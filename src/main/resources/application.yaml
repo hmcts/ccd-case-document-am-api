@@ -74,3 +74,4 @@ ccd:
 
 documentStoreUrl: ${DOCUMENT_STORE_URL:http://localhost:4506/documents}
 caseDataStoreUrl: ${CASE_DATA_STORE_URL:http://localhost:3453/data}
+swaggerUrl: ${CASE_DOCUMENT_AM_URL:localhost:4455}
