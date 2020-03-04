@@ -21,12 +21,12 @@ import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 @Slf4j
 public class SecurityUtils {
 
-    @Value("${idam.s2s-auth.totp_secret}")
-    private static String secret;
-    @Value("${idam.s2s-auth.microservice}")
-    private static String microService;
+    //@Value("${idam.s2s-auth.totp_secret}")
+    private static String secret = "L5VAT7MQHB67FHB4";
+    //@Value("${idam.s2s-auth.microservice}")
+    private static String microService = "ccd_case_document_am_api";
     @Value("${idam.s2s-auth.url}")
-    private static String s2sUrl;
+    private static String s2sUrl = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal";
 
     @Qualifier("serviceAuthTokenGenerator")
     private transient ServiceAuthTokenGenerator serviceAuthTokenGeneratorAutowired;
@@ -50,14 +50,14 @@ public class SecurityUtils {
             log.error("Generating the service Token by properties file");
             getServiceAuthTokenGenerator().generate();
             log.error("Generating the service Token by autowired bean");
-            serviceAuthTokenGeneratorAutowired.generate();
+            //serviceAuthTokenGeneratorAutowired.generate();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
 
         log.error("Generated the service token : " + serviceAuthToken);
         final HttpHeaders headers = new HttpHeaders();
-        headers.add("ServiceAuthorization", serviceAuthTokenGeneratorAutowired.generate());
+        headers.add("ServiceAuthorization", getServiceAuthTokenGenerator().generate());
         // headers.add("user-id", getUserId());
         headers.add("user-roles", "caseworker");
         log.error("Headers: " + headers.keySet());
