@@ -1,30 +1,34 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
-import java.util.Map;
-import java.util.UUID;
-
 import feign.FeignException;
 import feign.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.ErrorResponse;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.InvalidRequest;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
-import uk.gov.hmcts.reform.ccd.document.am.controller.feign.DocumentStoreFeignClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.document.am.util.JsonFeignResponseHelper;
+import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
+import java.util.Map;
+import java.util.UUID;
+
+import static org.springframework.http.HttpMethod.GET;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
@@ -38,21 +42,29 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private static final Logger LOG = LoggerFactory.getLogger(DocumentManagementServiceImpl.class);
 
-    private transient DocumentStoreFeignClient documentStoreFeignClient;
+    private transient RestTemplate restTemplate;
+
+    private transient SecurityUtils securityUtils;
+
+    @Value("${documentStoreUrl}") String documentURL;
 
 
     @Autowired
-    public DocumentManagementServiceImpl(DocumentStoreFeignClient documentStoreFeignClient) {
-        this.documentStoreFeignClient = documentStoreFeignClient;
+    public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils) {
+        this.restTemplate = restTemplate;
 
+        this.securityUtils = securityUtils;
     }
 
     @Override
     public ResponseEntity getDocumentMetadata(UUID documentId) {
 
-        try (Response response = documentStoreFeignClient.getMetadataForDocument(documentId)) {
-            Class clazz = response.status() > 300 ? ErrorResponse.class : StoredDocumentHalResource.class;
-            ResponseEntity responseEntity = JsonFeignResponseHelper.toResponseEntity(response, clazz, documentId);
+        try {
+            final HttpEntity requestEntity = new HttpEntity(securityUtils.authorizationHeaders());
+            String documentMetadataUrl = String.format("%s/%s", documentURL, documentId);
+            ResponseEntity<StoredDocumentHalResource> responseEntity = restTemplate.exchange(documentMetadataUrl, GET, requestEntity, StoredDocumentHalResource.class);
+            Class clazz = responseEntity.getStatusCode().value() > 300 ? ErrorResponse.class : StoredDocumentHalResource.class;
+            ResponseEntity responseEntity = JsonFeignResponseHelper.toResponseEntity(responseEntity, clazz, documentId);
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
                 return responseEntity;
             } else {

@@ -22,15 +22,15 @@ public class JsonFeignResponseHelper {
     private JsonFeignResponseHelper() {
     }
 
-    public static Optional decode(Response response, Class clazz) {
+    public static Optional decode(ResponseEntity response, Class clazz) {
         try {
-            return Optional.of(json.readValue(response.body().asReader(), clazz));
+            return Optional.of(json.readValue(response.getBody(), clazz));
         } catch (Exception e) {
             return Optional.empty();
         }
     }
 
-    public static ResponseEntity toResponseEntity(Response response, Class clazz, UUID documentId) {
+    public static ResponseEntity toResponseEntity(ResponseEntity response, Class clazz, UUID documentId) {
         Optional payload = decode(response, clazz);
         addHateoasLinks(payload,documentId);
 
