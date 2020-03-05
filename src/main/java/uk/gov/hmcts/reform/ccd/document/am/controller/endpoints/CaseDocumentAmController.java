@@ -13,18 +13,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.CaseNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
-import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
-import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
-import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -32,8 +27,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
 
 @Controller
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -44,17 +37,13 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     private transient ObjectMapper objectMapper;
     private transient HttpServletRequest request;
     private transient DocumentManagementService documentManagementService;
-    private transient CaseDataStoreService caseDataStoreService;
-    private transient ValidationService validationService;
+
 
     @Autowired
-    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService documentManagementService,
-                                    CaseDataStoreService caseDataStoreService, ValidationService validationService) {
+    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService documentManagementService) {
         this.objectMapper = objectMapper;
         this.request = request;
         this.documentManagementService = documentManagementService;
-        this.caseDataStoreService = caseDataStoreService;
-        this.validationService = validationService;
     }
 
     @Override
@@ -103,7 +92,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
 
         ResponseEntity documentMetadata = documentManagementService.getDocumentMetadata(documentId);
-        if (checkUserPermission(documentMetadata, documentId)) {
+        if (documentManagementService.checkUserPermission(documentMetadata, documentId)) {
             return documentManagementService.getDocumentBinaryContent(documentId);
 
         }
@@ -126,7 +115,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
 
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
-        if (checkUserPermission(responseEntity, documentId)) {
+        if (documentManagementService.checkUserPermission(responseEntity, documentId)) {
             return  ResponseEntity
                  .status(HttpStatus.OK)
                  .body(responseEntity.getBody());
@@ -268,23 +257,5 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         return new ResponseEntity<StoredDocumentHalResourceCollection>(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    private boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId) {
-        String caseId = documentManagementService.extractCaseIdFromMetadata(responseEntity.getBody());
 
-        if (!validationService.validate(caseId)) {
-            LOG.error(CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
-            throw new BadRequestException(CASE_ID_INVALID);
-
-        } else {
-            CaseDocumentMetadata caseDocumentMetadata = caseDataStoreService.getCaseDocumentMetadata(caseId, documentId)
-                .orElseThrow(() -> new CaseNotFoundException(caseId));
-            if (caseDocumentMetadata.getDocument().get().getId().equals(documentId.toString())
-                && caseDocumentMetadata.getDocument().get().getPermissions().contains(Permission.READ)) {
-                return true;
-
-            }
-
-        }
-        return false;
-    }
 }

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -74,8 +75,8 @@ public class CaseDocumentAmControllerTest {
             )
         ));
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
-        doReturn(caseDocumentMetadata).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
+        doReturn(TRUE).when(documentManagementService).checkUserPermission(setDocumentMetaData(),getUuid());
+
 
         ResponseEntity response = testee.getDocumentbyDocumentId(serviceAuthorization, getUuid(), "", "");
 
@@ -96,8 +97,7 @@ public class CaseDocumentAmControllerTest {
             )
         ));
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
-        doReturn(caseDocumentMetadata).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
+        doReturn(FALSE).when(documentManagementService).checkUserPermission(setDocumentMetaData(),getUuid());
 
 
         Assertions.assertThrows(ForbiddenException.class, () -> {
@@ -116,8 +116,7 @@ public class CaseDocumentAmControllerTest {
            )
         ));
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
-        doReturn(caseDocumentMetadata).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
+        doReturn(TRUE).when(documentManagementService).checkUserPermission(setDocumentMetaData(),getUuid());
         doReturn(setDocumentBinaryContent("OK")).when(documentManagementService).getDocumentBinaryContent(getUuid());
 
         ResponseEntity<Object> response = testee.getDocumentBinaryContentbyDocumentId(
@@ -129,7 +128,6 @@ public class CaseDocumentAmControllerTest {
 
         assertAll(
             () -> verify(documentManagementService).getDocumentMetadata(getUuid()),
-            () -> verify(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid()),
             () -> verify(documentManagementService, times(1)).getDocumentBinaryContent(getUuid()),
             () -> assertThat(response.getStatusCode(), is(HttpStatus.OK)),
             () -> assertNotNull(response.getBody())
@@ -144,8 +142,6 @@ public class CaseDocumentAmControllerTest {
             Arrays.asList(Permission.CREATE)
         ));
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
-        doReturn(caseDocumentMetadata).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
         doReturn(setDocumentBinaryContent("forbidden")).when(documentManagementService).getDocumentBinaryContent(getUuid());
 
 
