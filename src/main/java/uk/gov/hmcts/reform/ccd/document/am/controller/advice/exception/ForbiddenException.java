@@ -11,6 +11,6 @@ public class ForbiddenException  extends RuntimeException {
     private static final long serialVersionUID = 7L;
 
     public ForbiddenException(String message) {
-        super(String.format(FORBIDDEN + " %s", message));
+        super(String.format(FORBIDDEN + ": %s", message));
     }
 }

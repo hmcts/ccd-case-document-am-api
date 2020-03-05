@@ -28,7 +28,7 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
         Optional<CaseDocumentMetadata> caseDocumentMetadata = Optional.of(CaseDocumentMetadata.builder().caseId(caseId).document(Optional.of(document))
                                                               .build());
         if (!caseDocumentMetadata.get().getDocument().isPresent()) {
-            LOG.error("Document didn't map with any case at CCD data store side " + HttpStatus.FORBIDDEN);
+            LOG.error("Document couldn't be found on case reference : " + caseId + ", response code from CCD : " + HttpStatus.FORBIDDEN);
             throw new ForbiddenException(documentId.toString());
         } else {
             return caseDocumentMetadata;
