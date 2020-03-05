@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.ErrorResponse;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.InvalidRequest;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.UnauthorizedException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.feign.DocumentStoreFeignClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
@@ -58,7 +57,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 return responseEntity;
             } else {
                 LOG.error("Document doesn't exist for requested document id at Document Store API Side " + responseEntity.getStatusCode());
-                throw new UnauthorizedException(documentId.toString());
+                throw new ResourceNotFoundException(documentId.toString());
             }
         } catch (FeignException ex) {
             log.error("Document Store api failed:: status code ::" + ex.status());
