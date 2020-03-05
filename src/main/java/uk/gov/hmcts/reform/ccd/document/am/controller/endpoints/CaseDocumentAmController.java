@@ -263,8 +263,8 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
         try {
-           return documentManagementService.uploadDocuments(files, classification, roles,
-                                                            serviceAuthorization, caseTypeId, jurisdictionId, userId);
+            return documentManagementService.uploadDocuments(files, classification, roles,
+                                                             serviceAuthorization, caseTypeId, jurisdictionId, userId);
         } catch (Exception e) {
             LOG.error(e.getMessage());
         }

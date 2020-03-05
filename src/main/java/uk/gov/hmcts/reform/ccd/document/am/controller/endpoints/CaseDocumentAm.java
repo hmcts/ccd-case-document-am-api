@@ -9,7 +9,6 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AU
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.TAG;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.UNAUTHORIZED;
 
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import javax.validation.Valid;
