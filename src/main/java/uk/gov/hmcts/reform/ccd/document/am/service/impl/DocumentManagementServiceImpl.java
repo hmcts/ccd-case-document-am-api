@@ -147,7 +147,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         bodyMap.set(ROLES, roles);
         bodyMap.set("metadata[jurisdictionId]", jurisdictionId);
         bodyMap.set("metadata[caseTypeId]", caseTypeId);
-        bodyMap.set("ttl", getEffectiveTTL());
+        //bodyMap.set("ttl", getEffectiveTTL());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);

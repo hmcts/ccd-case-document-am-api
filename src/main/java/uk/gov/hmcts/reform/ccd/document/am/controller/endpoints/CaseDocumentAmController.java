@@ -238,9 +238,14 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
     @Override
     public ResponseEntity<Object> uploadDocuments(
-        @ApiParam(value = "", required = true) @RequestParam(value = "files", required = true) List<MultipartFile> files,
-        @ApiParam(value = "", required = true) @RequestParam(value = "classification", required = true) String classification,
-        @ApiParam(value = "", required = false) @RequestParam(value = "roles", required = false) List<String> roles,
+        @ApiParam(value = "", required = true)
+        @RequestParam(value = "files", required = true) List<MultipartFile> files,
+
+        @ApiParam(value = "", required = true)
+        @RequestParam(value = "classification", required = true) String classification,
+
+        @ApiParam(value = "", required = false)
+        @RequestParam(value = "roles", required = false) List<String> roles,
 
         @ApiParam(value = Constants.S2S_API_PARAM, required = true)
         @RequestHeader(value = Constants.SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
