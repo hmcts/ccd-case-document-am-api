@@ -20,4 +20,9 @@ public class Constants {
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String CASE_ID_INVALID = "Case ID is not valid";
     public static final String INSUFFICIENT_PERMISSION = "Insufficient permission on requested  document";
+    public static final String CLASSIFICATION = "classification";
+    public static final String ROLES = "roles";
+    public static final String USERID = "user-id";
+    public static final String FILES = "files";
+
 }

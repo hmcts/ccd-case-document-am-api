@@ -4,15 +4,9 @@ package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.FieldPosition;
-import java.text.ParsePosition;
-import java.util.Date;
-import java.util.Formatter;
 import java.util.List;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
-import javax.swing.text.DateFormatter;
 import javax.validation.Valid;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,19 +14,13 @@ import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
@@ -57,22 +45,18 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     private transient ObjectMapper objectMapper;
     private transient HttpServletRequest request;
     private transient DocumentManagementService  documentManagementService;
-    private transient RestTemplate restTemplate;
     private transient CaseDataStoreService caseDataStoreService;
     private transient ValidationService validationService;
 
-    @Value("${documentStoreUrl}")
-    private transient String dmStoreURL;
 
     @Autowired
     public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService documentManagementService,
-                                    CaseDataStoreService caseDataStoreService, ValidationService validationService,  RestTemplate restTemplate) {
+                                    CaseDataStoreService caseDataStoreService, ValidationService validationService) {
         this.objectMapper = objectMapper;
         this.request = request;
         this.documentManagementService = documentManagementService;
         this.caseDataStoreService = caseDataStoreService;
         this.validationService = validationService;
-        this.restTemplate = restTemplate;
     }
 
     @Override
@@ -274,30 +258,9 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
         try {
-            LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-            for (MultipartFile file : files) {
-                if (!file.isEmpty()) {
-                    map.add("files", file.getResource());
-                }
-            }
-
-            map.set("classification", classification);
-            map.set("roles", roles);
-            map.set("metadata[jurisdictionId]", jurisdictionId);
-            map.set("metadata[caseTypeId]", caseTypeId);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-            headers.set("ServiceAuthorization", serviceAuthorization);
-            headers.set("user-id", "5ba5d987-df28-482c-b877-3f244f7c27cf");
-
-            HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(map, headers);
-
-            LOG.error("Document Store URL is : " + dmStoreURL);
-            ResponseEntity<Object> responseEntity1 = restTemplate.postForEntity(dmStoreURL, requestEntity, Object.class);
-            return responseEntity1;
-        }
-        catch (Exception e) {
+           return documentManagementService.uploadDocuments(files, classification, roles,
+                                                            serviceAuthorization, caseTypeId, jurisdictionId, userId);
+        } catch (Exception e) {
             LOG.error(e.getMessage());
         }
         return null;

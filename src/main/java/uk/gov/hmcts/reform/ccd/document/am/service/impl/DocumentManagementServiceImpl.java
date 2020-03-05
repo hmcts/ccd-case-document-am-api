@@ -1,5 +1,19 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DATA_SOURCE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FILES;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ROLES;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
+
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -9,28 +23,26 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.ErrorResponse;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.InvalidRequest;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.UnauthorizedException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.feign.DocumentStoreFeignClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
-import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
-import uk.gov.hmcts.reform.ccd.document.am.model.UploadDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.document.am.util.JsonFeignResponseHelper;
-
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DATA_SOURCE;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
 
 
 @Slf4j
@@ -39,12 +51,19 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private static final Logger LOG = LoggerFactory.getLogger(DocumentManagementServiceImpl.class);
 
-    private transient DocumentStoreFeignClient documentStoreFeignClient;
+    @Value("${documentStoreUrl}")
+    private transient String dmStoreURL;
 
+    @Value("${documentTTL}")
+    private transient String documentTtl;
+
+    private transient DocumentStoreFeignClient documentStoreFeignClient;
+    private transient RestTemplate restTemplate;
 
     @Autowired
-    public DocumentManagementServiceImpl(DocumentStoreFeignClient documentStoreFeignClient) {
+    public DocumentManagementServiceImpl(DocumentStoreFeignClient documentStoreFeignClient, RestTemplate restTemplate) {
         this.documentStoreFeignClient = documentStoreFeignClient;
+        this.restTemplate = restTemplate;
 
     }
 
@@ -97,8 +116,48 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public StoredDocumentHalResourceCollection uploadDocumentsContent(UploadDocumentsCommand uploadDocumentsContent) {
-        return null;
+    public ResponseEntity<Object> uploadDocuments(List<MultipartFile> files, String classification, List<String> roles,
+                                                  String serviceAuthorization, String caseTypeId, String jurisdictionId,
+                                                  String userId) {
+
+        LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
+        HttpHeaders headers = prepareRequestForUpload(files, classification, roles, serviceAuthorization, caseTypeId, jurisdictionId, userId, bodyMap);
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
+
+        ResponseEntity<Object> uploadedDocumentResponse = restTemplate.postForEntity(dmStoreURL, requestEntity, Object.class);
+
+        if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode())) {
+            return uploadedDocumentResponse;
+        } else {
+            return ResponseEntity
+                .status(uploadedDocumentResponse.getStatusCode())
+                .body(uploadedDocumentResponse.getBody());
+        }
+    }
+
+    private HttpHeaders prepareRequestForUpload(List<MultipartFile> files, String classification, List<String> roles, String serviceAuthorization,
+                                                String caseTypeId, String jurisdictionId, String userId, LinkedMultiValueMap<String, Object> bodyMap) {
+        for (MultipartFile file : files) {
+            if (!file.isEmpty()) {
+                bodyMap.add(FILES, file.getResource());
+            }
+        }
+
+        bodyMap.set(CLASSIFICATION, classification);
+        bodyMap.set(ROLES, roles);
+        bodyMap.set("metadata[jurisdictionId]", jurisdictionId);
+        bodyMap.set("metadata[caseTypeId]", caseTypeId);
+        bodyMap.set("ttl", getEffectiveTTL());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.set(SERVICE_AUTHORIZATION, serviceAuthorization);
+        headers.set(USERID, userId);
+        return headers;
+    }
+
+    private Date getEffectiveTTL() {
+        return new Timestamp(new Date().getTime() + Long.parseLong(documentTtl));
     }
 
     private HttpHeaders getHeaders(ResponseEntity<Resource> response) {
@@ -111,7 +170,5 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return headers;
 
     }
-
-
 
 }
