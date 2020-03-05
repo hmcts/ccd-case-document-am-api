@@ -1,5 +1,19 @@
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BAD_REQUEST;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FORBIDDEN;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.RESOURCE_NOT_FOUND;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.S2S_API_PARAM;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.TAG;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.UNAUTHORIZED;
+
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import javax.validation.Valid;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -12,26 +26,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.ErrorMap;
 import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
-
-import javax.validation.Valid;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BAD_REQUEST;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FORBIDDEN;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.RESOURCE_NOT_FOUND;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.S2S_API_PARAM;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.TAG;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.UNAUTHORIZED;
 
 @Api(value = "cases", description = "the cases API")
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -111,10 +112,10 @@ public interface CaseDocumentAm {
         @ApiParam(value = "documentId", required = true) @PathVariable("documentId") UUID documentId,
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
                           + " and will be used for authorisation.")
-        @RequestHeader(value = "User-Id", required = false) String userId,
+        @RequestHeader(value = "user-id", required = false) String userId,
 
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
-        @RequestHeader(value = "User-Roles", required = false) String userRoles);
+        @RequestHeader(value = "user-roles", required = false) String userRoles);
 
 
     @ApiOperation(value = "Updates document instance (ex. ttl).", nickname = "patchDocumentbyDocumentId",
@@ -210,7 +211,7 @@ public interface CaseDocumentAm {
         @ApiParam("") @Valid @RequestParam(value = "unpaged", required = false) Boolean unpaged);
 
 
-    @ApiOperation(value = "Creates a list of Stored Documents by uploading a list of binary/text files", nickname = "postDocumentsWithBinaryFile",
+    @ApiOperation(value = "Creates a list of Stored Documents by uploading a list of binary/text files", nickname = "uploadDocuments",
                   notes = "This API will be the single point of reference for uploading any case related documents to doc-store. It will return the document"
                           + " URL along with generated hashed-token. The hashed-token would be valid only for case creation purpose and discarded once "
                           + "document is attached with its case.",
@@ -226,21 +227,25 @@ public interface CaseDocumentAm {
                     produces = {APPLICATION_JSON},
                     consumes = {"multipart/form-data"},
                     method = RequestMethod.POST)
-    ResponseEntity<StoredDocumentHalResourceCollection> postDocumentsWithBinaryFile(
+    ResponseEntity<Object> uploadDocuments(
+        @ApiParam(value = "", required = true) @RequestParam(value = "files", required = true) List<MultipartFile> files,
         @ApiParam(value = "", required = true) @RequestParam(value = "classification", required = true) String classification,
-        @ApiParam(value = "", required = true) @RequestParam(value = "ttl", required = true) Date ttl,
-        @ApiParam(value = "", required = true) @RequestParam(value = "roles", required = true) List<String> roles,
-        @ApiParam(value = "", required = true) @RequestParam(value = "files", required = true) List<java.io.File> files,
+        @ApiParam(value = "", required = false) @RequestParam(value = "roles", required = false) List<String> roles,
+
         @ApiParam(value = S2S_API_PARAM, required = true)
         @RequestHeader(value = SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
+
         @ApiParam(value = "CaseType identifier for the case document.", required = true)
         @RequestHeader(value = "caseTypeId", required = true) String caseTypeId,
+
         @ApiParam(value = "Jurisdiction identifier for the case document.", required = true)
         @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId,
+
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
                           + " and will be used for authorisation.")
-        @RequestHeader("User-Id") String userId,
+        @RequestHeader("user-id") String userId,
+
         @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
-        @RequestHeader(value = "User-Roles", required = false) String userRoles);
+        @RequestHeader(value = "user-roles", required = false) String userRoles);
 
 }

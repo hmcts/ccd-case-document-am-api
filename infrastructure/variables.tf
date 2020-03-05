@@ -99,4 +99,3 @@ variable "authorised-services" {
 }
 
 variable "deployment_namespace" {}
-

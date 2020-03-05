@@ -1,17 +1,20 @@
 {
   "_guid_": "Common_Response_Body_Document_Base",
-
   "size": "[[ANYTHING_PRESENT]]",
-  "mimeType": "multipart/form-data",
+  "mimeType": "[[ANYTHING_PRESENT]]",
   "originalDocumentName": "[[ANYTHING_PRESENT]]",
-  "createdBy": "[[ANYTHING_PRESENT]]",
-  "lastModifiedBy": "[[ANYTHING_PRESENT]]",
   "modifiedOn": "[[ANYTHING_PRESENT]]",
+  "createdBy" : "[[ANYTHING_PRESENT]]",
   "createdOn": "[[ANYTHING_PRESENT]]",
+  "lastModifiedBy" : "[[ANYTHING_PRESENT]]",
   "classification": "PUBLIC",
   "roles": [
     "caseworker"
   ],
+  "metadata" : {
+    "caseId" : "1111122222333334",
+    "jurisdictionId" : "BEFTA_JURISDICTION_2"
+  },
   "_links": {
     "self": {
       "href": "[[ANYTHING_PRESENT]]"
@@ -29,7 +32,7 @@
         "documentVersions": [
           {
             "size": "[[ANYTHING_PRESENT]]",
-            "mimeType": "multipart/form-data",
+            "mimeType": "[[ANYTHING_PRESENT]]",
             "originalDocumentName": "[[ANYTHING_PRESENT]]",
             "createdBy": "[[ANYTHING_PRESENT]]",
             "createdOn": "[[ANYTHING_PRESENT]]",
@@ -53,4 +56,3 @@
     }
   }
 }
-
