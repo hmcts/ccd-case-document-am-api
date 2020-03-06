@@ -7,13 +7,14 @@
   ],
   "request": {
     "pathVariables": {
-      "documentId": "non0exis-ting-docu-ment-idaf34e02f81"
+      "documentId": "00000000-0000-0000-0000-000000000000"
     }
   },
   "expectedResponse": {
     "_extends_": "Common_404_Response",
-    "headers": {
-      "Transfer-Encoding" : "chunked"
+    "body" : {
+      "message" : "Resource not found 00000000-0000-0000-0000-000000000000",
+      "path" : "/cases/documents/00000000-0000-0000-0000-000000000000"
     }
   }
 }
