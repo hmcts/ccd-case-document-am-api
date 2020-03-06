@@ -1,17 +1,19 @@
 package uk.gov.hmcts.reform.ccd.document.am.controller;
 
-import static org.springframework.http.ResponseEntity.ok;
-
-import java.util.UUID;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.*;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
+
+import java.util.UUID;
+
+import static org.springframework.http.ResponseEntity.ok;
 
 /**
  * Default endpoints per application.
@@ -48,4 +50,22 @@ public class WelcomeController {
             .body(null);
     }
 
+    @GetMapping("/exception/{type}")
+    public ResponseEntity<String> getException(@PathVariable String type) {
+        if (type.equals("requiredFieldMissingException")) {
+            throw new RequiredFieldMissingException("Required field is missing");
+        } else if (type.equals("invalidRequest")) {
+            throw new InvalidRequest("Invalid Request");
+        } else if (type.equals("resourceNotFoundException")) {
+            throw new ResourceNotFoundException("Resource Not Found Exception");
+        } else if (type.equals("httpMessageConversionException")) {
+            throw new HttpMessageConversionException("Http Message Conversion Exception");
+        } else if (type.equals("badRequestException")) {
+            throw new BadRequestException("Bad Request Exception");
+        } else if (type.equals("caseNotFoundException")) {
+            throw new CaseNotFoundException("Case Not Found Exception");
+        }
+
+        return null;
+    }
 }
