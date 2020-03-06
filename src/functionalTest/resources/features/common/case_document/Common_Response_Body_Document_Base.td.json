@@ -9,6 +9,9 @@
   "roles": [
     "caseworker"
   ],
+  "metadata" : {
+    "caseId" : "1111122222333334"
+  },
   "_links": {
     "self": {
       "href": "[[ANYTHING_PRESENT]]"
