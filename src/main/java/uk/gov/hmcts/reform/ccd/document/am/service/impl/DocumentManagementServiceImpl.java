@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import feign.FeignException;
@@ -43,7 +44,9 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceN
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.UnauthorizedException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.feign.DocumentStoreFeignClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
+import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
+import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.document.am.util.JsonFeignResponseHelper;
 
 
@@ -126,7 +129,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         HttpHeaders headers = prepareRequestForUpload(files, classification, roles, serviceAuthorization, caseTypeId, jurisdictionId, userId, bodyMap);
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
 
-        ResponseEntity<Object> uploadedDocumentResponse = restTemplate.postForEntity(dmStoreURL, requestEntity, Object.class);
+        ResponseEntity<StoredDocumentHalResourceCollection> uploadedDocumentResponse = restTemplate.postForEntity
+            (dmStoreURL, requestEntity, StoredDocumentHalResourceCollection.class);
+
+
+        ApplicationUtils.generateHashCode("");
 
         if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode())) {
             return ResponseEntity
@@ -166,6 +173,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return format.format(new Timestamp(new Date().getTime() + Long.parseLong(documentTtl)));
     }
 
+   /* private ResponseEntity<StoredDocumentHalResourceCollection> injectHashCode(ResponseEntity<StoredDocumentHalResourceCollection> uploadedDocumentResponse) {
+        List<StoredDocumentHalResource> uploadedDocuments = Optional.of(uploadedDocumentResponse.getBody().getContent());
+    }
+*/
     private HttpHeaders getHeaders(ResponseEntity<Resource> response) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(ORIGINAL_FILE_NAME,response.getHeaders().get(ORIGINAL_FILE_NAME).get(0));

@@ -248,7 +248,6 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
         @ApiParam(value = "", required = true)
         @NotNull(message = "Please provide classification")
-
         @RequestParam(value = "classification", required = true) String classification,
 
         @ApiParam(value = "", required = false)
@@ -278,5 +277,4 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             return new ResponseEntity<Object>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 }
