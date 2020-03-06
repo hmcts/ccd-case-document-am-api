@@ -258,13 +258,15 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = Constants.SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
 
         @ApiParam(value = "CaseType identifier for the case document.", required = true)
+        @NotNull(message = "Provide the Case Type ID ")
         @RequestHeader(value = "caseTypeId", required = true) String caseTypeId,
 
         @ApiParam(value = "Jurisdiction identifier for the case document.", required = true)
+        @NotNull(message = "Provide the Jurisdiction ID ")
         @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId,
 
-        @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-                  + " and will be used for authorisation.")
+        @ApiParam(value = "User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
+                  + " and will be used for authorisation.", required = false)
         @RequestHeader("user-id") String userId,
 
         @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
