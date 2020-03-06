@@ -14,14 +14,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.ErrorResponse;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.CaseNotFoundException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.InvalidRequest;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadDocumentsCommand;
+import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
+import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.document.am.util.ResponseHelper;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
+import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 
 import java.util.Map;
 import java.util.UUID;
@@ -47,12 +53,15 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Value("${documentStoreUrl}")
     private transient String documentURL;
 
-
+    private transient CaseDataStoreService caseDataStoreService;
+    private transient ValidationService validationService;
     @Autowired
-    public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils) {
+    public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils,CaseDataStoreService caseDataStoreService,ValidationService validationService) {
         this.restTemplate = restTemplate;
 
         this.securityUtils = securityUtils;
+        this.caseDataStoreService = caseDataStoreService;
+        this.validationService = validationService;
     }
 
     @Override
@@ -154,6 +163,24 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     }
 
+    public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId) {
+        String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
 
+        if (!validationService.validate(caseId)) {
+            LOG.error(CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(CASE_ID_INVALID);
+
+        } else {
+            CaseDocumentMetadata caseDocumentMetadata = caseDataStoreService.getCaseDocumentMetadata(caseId, documentId)
+                .orElseThrow(() -> new CaseNotFoundException(caseId));
+            if (caseDocumentMetadata.getDocument().get().getId().equals(documentId.toString())
+                && caseDocumentMetadata.getDocument().get().getPermissions().contains(Permission.READ)) {
+                return true;
+
+            }
+
+        }
+        return false;
+    }
 
 }

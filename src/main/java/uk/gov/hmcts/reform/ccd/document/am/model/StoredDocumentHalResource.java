@@ -28,12 +28,9 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Validated
-@JsonIgnoreProperties(value = { "_links" })
+@JsonIgnoreProperties(value = { "_links,_embedded" })
 public class StoredDocumentHalResource extends ResourceSupport {
 
-    @JsonProperty("_embedded")
-    @Valid
-    private Map<String, ResourceSupport> embedded = null;
     @JsonProperty("classification")
     private ClassificationEnum classification = ClassificationEnum.PRIVATE;
     @JsonProperty("createdBy")
