@@ -13,7 +13,9 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -22,6 +24,7 @@ import java.util.UUID;
 import feign.FeignException;
 import feign.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +49,7 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.feign.DocumentStoreFeignCl
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
+import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.document.am.util.JsonFeignResponseHelper;
 
 
@@ -131,21 +135,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         ResponseEntity<Object> uploadedDocumentResponse = restTemplate.postForEntity(dmStoreURL, requestEntity, Object.class);
 
         if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode())) {
-            /*if (null != uploadedDocumentResponse.getBody()) {
-
-                LinkedHashMap documents= (LinkedHashMap)((((LinkedHashMap)uploadedDocumentResponse.getBody()).get("_embedded")));
-                ArrayList<Object> documentList = (ArrayList)(documents.get("documents"));
-
-                for (Object document : documentList) {
-                    if(document instanceof LinkedHashMap){
-                        LinkedHashMap hashmap = ((LinkedHashMap)(document));
-
-                        hashmap.put("hashcode", hashmap.get(""));
-
-                    }
-                }
-                injectHashCode((StoredDocumentHalResourceCollection) uploadedDocumentResponse.getBody());
-            }*/
+            if (null != uploadedDocumentResponse.getBody()) {
+                formatUploadDocumentResponse(caseTypeId, jurisdictionId, uploadedDocumentResponse);
+            }
             return ResponseEntity
                 .status(uploadedDocumentResponse.getStatusCode())
                 .body(uploadedDocumentResponse.getBody());
@@ -154,6 +146,23 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 .status(uploadedDocumentResponse.getStatusCode())
                 .body(uploadedDocumentResponse.getBody());
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void formatUploadDocumentResponse(String caseTypeId, String jurisdictionId, ResponseEntity<Object> uploadedDocumentResponse) {
+        LinkedHashMap documents = (LinkedHashMap) ((((LinkedHashMap) uploadedDocumentResponse.getBody()).get("_embedded")));
+        ArrayList<Object> documentList = (ArrayList<Object>) (documents.get("documents"));
+
+        for (Object document : documentList) {
+            if (document instanceof LinkedHashMap) {
+                LinkedHashMap<String, Object> hashmap = ((LinkedHashMap<String, Object>) (document));
+                hashmap.remove("_embedded");
+                JSONObject object = new JSONObject(hashmap);
+                String documentURL = (String) object.getJSONObject("_links").getJSONObject("self").get("href");
+                hashmap.put("hashcode", ApplicationUtils.generateHashCode(documentURL.concat(jurisdictionId).concat(caseTypeId)));
+            }
+        }
+        //injectHashCode((StoredDocumentHalResourceCollection) uploadedDocumentResponse.getBody());
     }
 
     private void injectHashCode(StoredDocumentHalResourceCollection resourceCollection) {
