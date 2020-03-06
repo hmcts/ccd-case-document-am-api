@@ -12,8 +12,10 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AU
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -41,7 +43,6 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceN
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.UnauthorizedException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.feign.DocumentStoreFeignClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
-import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.document.am.util.JsonFeignResponseHelper;
 
@@ -125,7 +126,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         HttpHeaders headers = prepareRequestForUpload(files, classification, roles, serviceAuthorization, caseTypeId, jurisdictionId, userId, bodyMap);
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
 
-        ResponseEntity<StoredDocumentHalResourceCollection> uploadedDocumentResponse = restTemplate.postForEntity(dmStoreURL, requestEntity, StoredDocumentHalResourceCollection.class);
+        ResponseEntity<Object> uploadedDocumentResponse = restTemplate.postForEntity(dmStoreURL, requestEntity, Object.class);
 
         if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode())) {
             return ResponseEntity
@@ -150,8 +151,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         bodyMap.set(ROLES, roles);
         bodyMap.set("metadata[jurisdictionId]", jurisdictionId);
         bodyMap.set("metadata[caseTypeId]", caseTypeId);
-        //bodyMap.set("ttl", getEffectiveTTL());
-        //2020-02-15T15:18:00+0000
+        //Format of date : yyyy-MM-dd'T'HH:mm:ssZ  2020-02-15T15:18:00+0000
+        bodyMap.set("ttl", getEffectiveTTL());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -160,8 +161,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return headers;
     }
 
-    private Date getEffectiveTTL() {
-        return new Timestamp(new Date().getTime() + Long.parseLong(documentTtl));
+    private String getEffectiveTTL() {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
+        return format.format(new Timestamp(new Date().getTime() + Long.parseLong(documentTtl)));
     }
 
     private HttpHeaders getHeaders(ResponseEntity<Resource> response) {
