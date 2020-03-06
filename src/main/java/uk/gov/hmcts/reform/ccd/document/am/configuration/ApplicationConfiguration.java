@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.ccd.document.am.configuration;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;

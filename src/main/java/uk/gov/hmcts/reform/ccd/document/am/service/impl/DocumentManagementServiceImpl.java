@@ -1,28 +1,26 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
-import feign.FeignException;
-import feign.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.ErrorResponse;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.InvalidRequest;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
-import uk.gov.hmcts.reform.ccd.document.am.util.JsonFeignResponseHelper;
+import uk.gov.hmcts.reform.ccd.document.am.util.ResponseHelper;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
 import java.util.Map;
@@ -46,7 +44,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private transient SecurityUtils securityUtils;
 
-    @Value("${documentStoreUrl}") String documentURL;
+    @Value("${documentStoreUrl}")
+    private transient String documentURL;
 
 
     @Autowired
@@ -57,24 +56,40 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ResponseEntity getDocumentMetadata(UUID documentId) {
 
         try {
             final HttpEntity requestEntity = new HttpEntity(securityUtils.authorizationHeaders());
             String documentMetadataUrl = String.format("%s/%s", documentURL, documentId);
-            ResponseEntity<StoredDocumentHalResource> responseEntity = restTemplate.exchange(documentMetadataUrl, GET, requestEntity, StoredDocumentHalResource.class);
-            Class clazz = responseEntity.getStatusCode().value() > 300 ? ErrorResponse.class : StoredDocumentHalResource.class;
-            ResponseEntity responseEntity = JsonFeignResponseHelper.toResponseEntity(responseEntity, clazz, documentId);
+            ResponseEntity<StoredDocumentHalResource> response = restTemplate.exchange(
+                documentMetadataUrl,
+                GET,
+                requestEntity,
+                StoredDocumentHalResource.class
+            );
+            Class clazz = response.getStatusCode().value() > 300 ? ErrorResponse.class : StoredDocumentHalResource.class;
+            ResponseEntity responseEntity = ResponseHelper.toResponseEntity(response, clazz, documentId);
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
                 return responseEntity;
             } else {
                 LOG.error("Document doesn't exist for requested document id at Document Store API Side " + responseEntity.getStatusCode());
                 throw new ResourceNotFoundException(documentId.toString());
             }
-        } catch (FeignException ex) {
-            log.error("Document Store api failed:: status code ::" + ex.status());
-            throw new InvalidRequest("Document Store api failed!!");
+        } catch (HttpClientErrorException ex) {
+            log.error(ex.getMessage());
+            if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
+                throw new ResourceNotFoundException(documentId.toString());
+            } else {
+                throw new ServiceException(String.format(
+                    "Problem  fetching the document for document id: %s because of %s",
+                    documentId,
+                    ex.getMessage()
+                ));
+            }
+
         }
+
     }
 
     @Override
@@ -87,24 +102,40 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ResponseEntity<Object> getDocumentBinaryContent(UUID documentId) {
-
-        try  {
-            ResponseEntity<Resource> response = documentStoreFeignClient.getDocumentBinary(documentId);
-
+        try {
+            final HttpEntity requestEntity = new HttpEntity(securityUtils.authorizationHeaders());
+            String documentBinaryUrl = String.format("%s/%s/binary", documentURL, documentId);
+            ResponseEntity<ByteArrayResource> response = restTemplate.exchange(
+                documentBinaryUrl,
+                GET,
+                requestEntity,
+                ByteArrayResource.class
+            );
             if (HttpStatus.OK.equals(response.getStatusCode())) {
                 return ResponseEntity.ok().headers(getHeaders(response))
-                    .body((ByteArrayResource) response.getBody());
+                    .body(response.getBody());
             } else {
                 return ResponseEntity
                     .status(response.getStatusCode())
                     .body(response.getBody());
             }
 
-        } catch (FeignException ex) {
-            log.error("Requested document could not be downloaded, DM Store Response Code ::" + ex.getMessage());
-            throw new ResourceNotFoundException("Cannot download document that is stored");
+        } catch (HttpClientErrorException ex) {
+            log.error(ex.getMessage());
+            if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
+                throw new ResourceNotFoundException(documentId.toString());
+            } else {
+                throw new ServiceException(String.format(
+                    "Problem  fetching the document binary for document id: %s because of %s",
+                    documentId,
+                    ex.getMessage()
+                ));
+            }
+
         }
+
     }
 
     @Override
@@ -112,7 +143,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return null;
     }
 
-    private HttpHeaders getHeaders(ResponseEntity<Resource> response) {
+    private HttpHeaders getHeaders(ResponseEntity<ByteArrayResource> response) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(ORIGINAL_FILE_NAME,response.getHeaders().get(ORIGINAL_FILE_NAME).get(0));
         headers.add(CONTENT_DISPOSITION,response.getHeaders().get(CONTENT_DISPOSITION).get(0));
