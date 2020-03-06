@@ -17,7 +17,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import feign.FeignException;
@@ -29,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.hateoas.ResourceSupport;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -46,7 +46,6 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.feign.DocumentStoreFeignCl
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
-import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.document.am.util.JsonFeignResponseHelper;
 
 
@@ -93,7 +92,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Override
     public String extractCaseIdFromMetadata(Object storedDocument) {
         if (storedDocument instanceof StoredDocumentHalResource) {
-            Map<String,String> metadata = ((StoredDocumentHalResource) storedDocument).getMetadata();
+            Map<String, String> metadata = ((StoredDocumentHalResource) storedDocument).getMetadata();
             return metadata.get("caseId");
         }
         return null;
@@ -102,12 +101,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Override
     public ResponseEntity<Object> getDocumentBinaryContent(UUID documentId) {
 
-        try  {
+        try {
             ResponseEntity<Resource> response = documentStoreFeignClient.getDocumentBinary(documentId);
 
             if (HttpStatus.OK.equals(response.getStatusCode())) {
                 return ResponseEntity.ok().headers(getHeaders(response))
-                    .body((ByteArrayResource) response.getBody());
+                                     .body((ByteArrayResource) response.getBody());
             } else {
                 return ResponseEntity
                     .status(response.getStatusCode())
@@ -129,13 +128,24 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         HttpHeaders headers = prepareRequestForUpload(files, classification, roles, serviceAuthorization, caseTypeId, jurisdictionId, userId, bodyMap);
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
 
-        ResponseEntity<Object> uploadedDocumentResponse = restTemplate.postForEntity
-            (dmStoreURL, requestEntity, Object.class);
-
-
-        ApplicationUtils.generateHashCode("");
+        ResponseEntity<Object> uploadedDocumentResponse = restTemplate.postForEntity(dmStoreURL, requestEntity, Object.class);
 
         if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode())) {
+            /*if (null != uploadedDocumentResponse.getBody()) {
+
+                LinkedHashMap documents= (LinkedHashMap)((((LinkedHashMap)uploadedDocumentResponse.getBody()).get("_embedded")));
+                ArrayList<Object> documentList = (ArrayList)(documents.get("documents"));
+
+                for (Object document : documentList) {
+                    if(document instanceof LinkedHashMap){
+                        LinkedHashMap hashmap = ((LinkedHashMap)(document));
+
+                        hashmap.put("hashcode", hashmap.get(""));
+
+                    }
+                }
+                injectHashCode((StoredDocumentHalResourceCollection) uploadedDocumentResponse.getBody());
+            }*/
             return ResponseEntity
                 .status(uploadedDocumentResponse.getStatusCode())
                 .body(uploadedDocumentResponse.getBody());
@@ -144,6 +154,18 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 .status(uploadedDocumentResponse.getStatusCode())
                 .body(uploadedDocumentResponse.getBody());
         }
+    }
+
+    private void injectHashCode(StoredDocumentHalResourceCollection resourceCollection) {
+        /*for (StoredDocumentHalResource resource: resourceCollection.getContent()) {
+            resource.setHashCode(ApplicationUtils.generateHashCode(extractDocumentId(resource)));
+        }*/
+    }
+
+    private String extractDocumentId(StoredDocumentHalResource storedDocumentHalResource) {
+        Map<String, ResourceSupport> embedded = storedDocumentHalResource.getEmbedded();
+        ResourceSupport resourceSupport = embedded.get("_links");
+        return resourceSupport.getId().getHref();
     }
 
     private HttpHeaders prepareRequestForUpload(List<MultipartFile> files, String classification, List<String> roles, String serviceAuthorization,
@@ -173,17 +195,18 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return format.format(new Timestamp(new Date().getTime() + Long.parseLong(documentTtl)));
     }
 
-   /* private ResponseEntity<StoredDocumentHalResourceCollection> injectHashCode(ResponseEntity<StoredDocumentHalResourceCollection> uploadedDocumentResponse) {
-        List<StoredDocumentHalResource> uploadedDocuments = Optional.of(uploadedDocumentResponse.getBody().getContent());
-    }
-*/
+    /* private ResponseEntity<StoredDocumentHalResourceCollection> injectHashCode(ResponseEntity<StoredDocumentHalResourceCollection>
+    uploadedDocumentResponse) {
+         List<StoredDocumentHalResource> uploadedDocuments = Optional.of(uploadedDocumentResponse.getBody().getContent());
+     }
+ */
     private HttpHeaders getHeaders(ResponseEntity<Resource> response) {
         HttpHeaders headers = new HttpHeaders();
-        headers.add(ORIGINAL_FILE_NAME,response.getHeaders().get(ORIGINAL_FILE_NAME).get(0));
-        headers.add(CONTENT_DISPOSITION,response.getHeaders().get(CONTENT_DISPOSITION).get(0));
-        headers.add(DATA_SOURCE,response.getHeaders().get(DATA_SOURCE).get(0));
+        headers.add(ORIGINAL_FILE_NAME, response.getHeaders().get(ORIGINAL_FILE_NAME).get(0));
+        headers.add(CONTENT_DISPOSITION, response.getHeaders().get(CONTENT_DISPOSITION).get(0));
+        headers.add(DATA_SOURCE, response.getHeaders().get(DATA_SOURCE).get(0));
         headers.add(CONTENT_TYPE, response.getHeaders().get(CONTENT_TYPE).get(0));
-        headers.add(CONTENT_LENGTH,response.getHeaders().get(CONTENT_LENGTH).get(0));
+        headers.add(CONTENT_LENGTH, response.getHeaders().get(CONTENT_LENGTH).get(0));
         return headers;
 
     }

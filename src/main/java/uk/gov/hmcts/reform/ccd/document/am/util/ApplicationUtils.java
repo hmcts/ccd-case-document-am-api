@@ -6,9 +6,11 @@ import java.security.NoSuchAlgorithmException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.hmcts.reform.ccd.document.am.service.impl.DocumentManagementServiceImpl;
 
 public class ApplicationUtils {
+
+    private ApplicationUtils() {
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationUtils.class);
 
@@ -35,11 +37,8 @@ public class ApplicationUtils {
 
             // return the HashText
             return hashtext;
-        }
-
-        // For specifying wrong message digest algorithms
-        catch (NoSuchAlgorithmException e) {
-            LOG.error("Error while generating the hashcode :"  + e.getMessage());
+        } catch (NoSuchAlgorithmException e) {
+            LOG.error("Error while generating the hashcode :" + e.getMessage());
         }
         return null;
     }

@@ -28,7 +28,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Validated
-@JsonIgnoreProperties(value = {"_links", "_embedded"})
+@JsonIgnoreProperties(value = {"_links"})
 public class StoredDocumentHalResource extends ResourceSupport {
 
     @JsonProperty("_embedded")
