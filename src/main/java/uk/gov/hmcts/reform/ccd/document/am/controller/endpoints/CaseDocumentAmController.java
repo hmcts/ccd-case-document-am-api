@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiParam;
@@ -239,9 +241,14 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     @Override
     public ResponseEntity<Object> uploadDocuments(
         @ApiParam(value = "", required = true)
+
+        @NotNull(message = "Provide some files to be uploaded.")
+        @Size(min = 1, message = "Please provide at least one file to be uploaded.")
         @RequestParam(value = "files", required = true) List<MultipartFile> files,
 
         @ApiParam(value = "", required = true)
+        @NotNull(message = "Please provide classification")
+
         @RequestParam(value = "classification", required = true) String classification,
 
         @ApiParam(value = "", required = false)
@@ -266,9 +273,8 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             return documentManagementService.uploadDocuments(files, classification, roles,
                                                              serviceAuthorization, caseTypeId, jurisdictionId, userId);
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+            return new ResponseEntity<Object>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return null;
     }
 
 }

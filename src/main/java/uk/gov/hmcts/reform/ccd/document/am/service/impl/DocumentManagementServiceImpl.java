@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceN
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.UnauthorizedException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.feign.DocumentStoreFeignClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
+import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.document.am.util.JsonFeignResponseHelper;
 
@@ -124,10 +125,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         HttpHeaders headers = prepareRequestForUpload(files, classification, roles, serviceAuthorization, caseTypeId, jurisdictionId, userId, bodyMap);
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
 
-        ResponseEntity<Object> uploadedDocumentResponse = restTemplate.postForEntity(dmStoreURL, requestEntity, Object.class);
+        ResponseEntity<StoredDocumentHalResourceCollection> uploadedDocumentResponse = restTemplate.postForEntity(dmStoreURL, requestEntity, StoredDocumentHalResourceCollection.class);
 
         if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode())) {
-            return uploadedDocumentResponse;
+            return ResponseEntity
+                .status(uploadedDocumentResponse.getStatusCode())
+                .body(uploadedDocumentResponse.getBody());
         } else {
             return ResponseEntity
                 .status(uploadedDocumentResponse.getStatusCode())
@@ -148,6 +151,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         bodyMap.set("metadata[jurisdictionId]", jurisdictionId);
         bodyMap.set("metadata[caseTypeId]", caseTypeId);
         //bodyMap.set("ttl", getEffectiveTTL());
+        //2020-02-15T15:18:00+0000
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);

@@ -28,7 +28,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Validated
-@JsonIgnoreProperties(value = { "_links" })
+@JsonIgnoreProperties(value = {"_links", "_embedded"})
 public class StoredDocumentHalResource extends ResourceSupport {
 
     @JsonProperty("_embedded")
@@ -61,7 +61,8 @@ public class StoredDocumentHalResource extends ResourceSupport {
 
     public void addLinks(UUID documentId) {
         add(linkTo(methodOn(CaseDocumentAmController.class).getDocumentbyDocumentId("dsds", documentId, "323", "caseworker-1")).withSelfRel());
-        add(linkTo(methodOn(CaseDocumentAmController.class).getDocumentBinaryContentbyDocumentId("dsds", documentId, "323", "caseworker-1")).withRel("binary"));
+        add(linkTo(methodOn(CaseDocumentAmController.class).getDocumentBinaryContentbyDocumentId("dsds", documentId, "323", "caseworker-1"))
+                .withRel("binary"));
     }
 
     /**
