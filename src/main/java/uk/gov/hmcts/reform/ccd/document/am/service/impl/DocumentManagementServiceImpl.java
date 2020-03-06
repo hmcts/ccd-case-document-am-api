@@ -129,8 +129,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         HttpHeaders headers = prepareRequestForUpload(files, classification, roles, serviceAuthorization, caseTypeId, jurisdictionId, userId, bodyMap);
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
 
-        ResponseEntity<StoredDocumentHalResourceCollection> uploadedDocumentResponse = restTemplate.postForEntity
-            (dmStoreURL, requestEntity, StoredDocumentHalResourceCollection.class);
+        ResponseEntity<Object> uploadedDocumentResponse = restTemplate.postForEntity
+            (dmStoreURL, requestEntity, Object.class);
 
 
         ApplicationUtils.generateHashCode("");

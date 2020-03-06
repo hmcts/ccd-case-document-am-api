@@ -1,0 +1,23 @@
+{
+  "title": "must receive an error response for an active caseworker who does not have document access",
+
+  "_guid_": "S-022",
+  "_extends_": "F-002_Test_Data_Base",
+
+  "specs": [
+    "contains an active caseworker who does not have document access"
+  ],
+
+  "request": {
+    "user": {
+      "username": "befta.caseworker.2.solicitor.2@gmail.com"
+    },
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  },
+
+  "expectedResponse": {
+    "_extends_": "Common_404_Response"
+  }
+}

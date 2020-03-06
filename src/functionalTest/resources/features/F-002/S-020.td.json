@@ -1,0 +1,27 @@
+{
+  "title": "must successfully receive a document's binary content",
+
+  "_guid_": "S-020",
+  "_extends_": "F-002_Test_Data_Base",
+
+  "specs": [
+    "contains the binary content for the uploaded document"
+  ],
+
+  "request": {
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  },
+
+  "expectedResponse": {
+    "_extends_": "Common_200_Response",
+    "body": {
+     "__fileInBody__" : {
+       "fullPath" : "file",
+       "size" : "679345",
+       "contentHash" : "hash"
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "_guid_": "F-002_Test_Data_Base",
+  "productName": "CCD Case Document AM API",
+  "operationName": "Get Binary Content by Document ID",
+
+  "specs": [
+    "an active caseworker profile in CCD with full permissions on a document field"
+  ],
+
+  "method": "GET",
+  "uri": "http://localhost:4455/cases/documents/{documentId}/binary",
+  "user": {
+    "username": "befta.caseworker.2.solicitor.1@gmail.com",
+    "password": "[[$CCD_CASEWORKER_AUTOTEST_PASSWORD]]"
+  },
+
+  "request": {
+    "headers": {
+      "_extends_": "Common_Request_Headers"
+    }
+  }
+
+}
