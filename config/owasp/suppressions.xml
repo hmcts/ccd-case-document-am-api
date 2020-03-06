@@ -274,6 +274,26 @@
   </suppress>
   <suppress>
     <notes><![CDATA[
+   relates to pkg:maven/org.apache.tomcat.embed/tomcat-embed-websocket@9.0.29
+   ]]></notes>
+    <cpe>cpe:2.3:a:apache:tomcat:9.0.29:*:*:*:*:*:*:*</cpe>
+    <cpe>cpe:2.3:a:apache_software_foundation:tomcat:9.0.29:*:*:*:*:*:*:*</cpe>
+    <cpe>cpe:2.3:a:apache_tomcat:apache_tomcat:9.0.29:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2019-17569</cve>
+    <cve>CVE-2020-1935</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to pkg:maven/org.apache.tomcat.embed/tomcat-embed-core@9.0.29
+   ]]></notes>
+    <cpe>cpe:2.3:a:apache:tomcat:9.0.29:*:*:*:*:*:*:*</cpe>
+    <cpe>cpe:2.3:a:apache_software_foundation:tomcat:9.0.29:*:*:*:*:*:*:*</cpe>
+    <cpe>cpe:2.3:a:apache_tomcat:apache_tomcat:9.0.29:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2019-17569</cve>
+    <cve>CVE-2020-1935</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
    relates to bouncycastle
    ]]></notes>
     <cpe>cpe:2.3:a:bouncycastle:legion-of-the-bouncy-castle-java-crytography-api:1.54:*:*:*:*:*:*:*</cpe>
