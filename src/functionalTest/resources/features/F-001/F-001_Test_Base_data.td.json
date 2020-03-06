@@ -1,0 +1,11 @@
+{
+  "_guid_": "F-001_Test_Base_data",
+  "_extends_": "F-001-Base-Root",
+  "productName": "CCD Case Document AM API",
+  "operationName": "Get Document Metadata by Document ID",
+  "specs": [
+    "an active caseworker profile in CCD with full permissions on a document field"
+  ],
+  "method": "GET",
+  "uri": "/cases/documents/{documentId}"
+}

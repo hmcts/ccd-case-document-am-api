@@ -1,0 +1,19 @@
+{
+  "title": "must get an error response for a non-existing document ID",
+  "_extends_": "F-001_Test_Base_data",
+  "_guid_": "S-002",
+  "specs": [
+    "for a non-existing document ID"
+  ],
+  "request": {
+    "pathVariables": {
+      "documentId": "non0exis-ting-docu-ment-idaf34e02f81"
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_404_Response",
+    "headers": {
+      "Transfer-Encoding" : "chunked"
+    }
+  }
+}

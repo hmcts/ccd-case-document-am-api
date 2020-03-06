@@ -1,0 +1,45 @@
+{
+  "title": "must successfully get document metadata by document ID",
+  "_extends_": "F-001_Test_Base_data",
+  "_guid_": "S-001",
+  "specs": [
+    "contains the metadata for the document uploaded above"
+  ],
+  "request": {
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_200_Response",
+    "headers" : {
+      "Connection" : "[[ANY_STRING_PRESENT]]",
+      "Content-Type" : "[[ANYTHING_PRESENT]]",
+      "Keep-Alive" : "[[ANYTHING_PRESENT]]"
+    },
+    "body" : {
+      "links" : [ {
+        "rel" : "self",
+        "href" : "{{CASE_DOC_AM_URL}}/cases/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+      }, {
+        "rel" : "self",
+        "href" : "{{CASE_DOC_AM_URL}}/cases/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}/binary"
+      } ],
+      "_embedded" : {
+        "allDocumentVersions" : {
+          "links" : [ ]
+        }
+      },
+      "classification" : "PUBLIC",
+      "createdBy" : "[[ANYTHING_PRESENT]]",
+      "createdOn" : "[[ANYTHING_PRESENT]]",
+      "lastModifiedBy" : "[[ANYTHING_PRESENT]]",
+      "metadata" : { },
+      "mimeType" : "[[ANYTHING_PRESENT]]",
+      "modifiedOn" : "[[ANYTHING_PRESENT]]",
+      "originalDocumentName" : "[[ANYTHING_PRESENT]]",
+      "roles" : [ "caseworker" ],
+      "size" : "[[ANYTHING_PRESENT]]"
+    }
+  }
+}
