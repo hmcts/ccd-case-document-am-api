@@ -20,7 +20,7 @@ public class ResponseHelper {
     }
 
 
-    public static ResponseEntity toResponseEntity(ResponseEntity response, Class clazz, UUID documentId) {
+    public static ResponseEntity toResponseEntity(ResponseEntity response, UUID documentId) {
         Optional payload = Optional.of(response.getBody());
         addHateoasLinks(payload,documentId);
 

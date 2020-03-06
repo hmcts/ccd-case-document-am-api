@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.ErrorResponse;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.CaseNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
@@ -80,8 +79,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 requestEntity,
                 StoredDocumentHalResource.class
             );
-            Class clazz = response.getStatusCode().value() > 300 ? ErrorResponse.class : StoredDocumentHalResource.class;
-            ResponseEntity responseEntity = ResponseHelper.toResponseEntity(response, clazz, documentId);
+            ResponseEntity responseEntity = ResponseHelper.toResponseEntity(response, documentId);
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
                 return responseEntity;
             } else {
