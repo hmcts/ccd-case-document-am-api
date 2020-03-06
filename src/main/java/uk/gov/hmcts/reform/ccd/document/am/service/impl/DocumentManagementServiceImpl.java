@@ -1,8 +1,5 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
-import java.util.Map;
-import java.util.UUID;
-
 import feign.FeignException;
 import feign.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -16,15 +13,25 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.ErrorResponse;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.CaseNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.InvalidRequest;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.feign.DocumentStoreFeignClient;
+import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadDocumentsCommand;
+import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
+import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
+import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 import uk.gov.hmcts.reform.ccd.document.am.util.JsonFeignResponseHelper;
 
+import java.util.Map;
+import java.util.UUID;
+
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
@@ -40,11 +47,17 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private transient DocumentStoreFeignClient documentStoreFeignClient;
 
+    private transient CaseDataStoreService caseDataStoreService;
+    private transient ValidationService validationService;
+
 
     @Autowired
-    public DocumentManagementServiceImpl(DocumentStoreFeignClient documentStoreFeignClient) {
+    public DocumentManagementServiceImpl(DocumentStoreFeignClient documentStoreFeignClient, CaseDataStoreService caseDataStoreService,
+                                         ValidationService validationService) {
         this.documentStoreFeignClient = documentStoreFeignClient;
 
+        this.caseDataStoreService = caseDataStoreService;
+        this.validationService = validationService;
     }
 
     @Override
@@ -111,6 +124,24 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     }
 
+    public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId) {
+        String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
 
+        if (!validationService.validate(caseId)) {
+            LOG.error(CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(CASE_ID_INVALID);
+
+        } else {
+            CaseDocumentMetadata caseDocumentMetadata = caseDataStoreService.getCaseDocumentMetadata(caseId, documentId)
+                .orElseThrow(() -> new CaseNotFoundException(caseId));
+            if (caseDocumentMetadata.getDocument().get().getId().equals(documentId.toString())
+                && caseDocumentMetadata.getDocument().get().getPermissions().contains(Permission.READ)) {
+                return true;
+
+            }
+
+        }
+        return false;
+    }
 
 }
