@@ -278,7 +278,8 @@ public class CaseDocumentAmController implements CaseDocumentAm {
                                                              serviceAuthorization, caseTypeId, jurisdictionId, userId);
         } catch (Exception e) {
             return ResponseEntity
-                .status(HttpStatus.OK).body(e.getMessage());
+                .status(HttpStatus.OK)
+                .body(e.getMessage());
         }
     }
 }
