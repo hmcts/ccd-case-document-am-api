@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.common;
 
+import java.util.regex.Pattern;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
@@ -7,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.SecurityClassification;
-import uk.gov.hmcts.reform.ccd.document.am.service.impl.CaseDataStoreServiceImpl;
 
 @Named
 @Singleton
@@ -15,6 +15,10 @@ import uk.gov.hmcts.reform.ccd.document.am.service.impl.CaseDataStoreServiceImpl
 public class ValidationService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ValidationService.class);
+
+    private ValidationService() {
+    }
+
     /**
      * Validate a number string using  algorithm.
      *
@@ -29,13 +33,23 @@ public class ValidationService {
         return true;
     }
 
-    public static boolean isValidSecurityClassification(String securityClassification) throws IllegalArgumentException{
+    public static boolean isValidSecurityClassification(String securityClassification) throws IllegalArgumentException {
         try {
             Enum.valueOf(SecurityClassification.class, securityClassification);
             return true;
         } catch (final IllegalArgumentException ex) {
-            LOG.info("The security classification %s is not valid" , securityClassification );
+            LOG.info("The security classification is not valid");
             throw ex;
         }
+    }
+
+    public static boolean validateInputs(String pattern, String... inputString) {
+        for (String input : inputString) {
+            if (!Pattern.matches(pattern, input)) {
+                throw new IllegalArgumentException("The input parameter "
+                                                   + input + " does not matches with the required pattern");
+            }
+        }
+        return true;
     }
 }

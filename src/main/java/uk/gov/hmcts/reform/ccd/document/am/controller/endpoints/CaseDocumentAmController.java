@@ -50,6 +50,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     private transient DocumentManagementService  documentManagementService;
     private transient CaseDataStoreService caseDataStoreService;
     private transient ValidationService validationService;
+    private transient String inputStringPattern = "^[a-zA-Z0-9_-]*$";
 
 
     @Autowired
@@ -248,6 +249,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestParam(value = "files", required = true) List<MultipartFile> files,
 
         @ApiParam(value = "", required = true)
+        @Valid
         @NotNull(message = "Please provide classification")
         @RequestParam(value = "classification", required = true) String classification,
 
@@ -273,12 +275,15 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
         try {
+            ValidationService.validateInputs(inputStringPattern, caseTypeId, jurisdictionId, classification);
             ValidationService.isValidSecurityClassification(classification);
+
             return documentManagementService.uploadDocuments(files, classification, roles,
                                                              serviceAuthorization, caseTypeId, jurisdictionId, userId);
         } catch (Exception e) {
             return ResponseEntity
-                .status(HttpStatus.OK).body(e.getMessage());
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(e.getMessage());
         }
     }
 }
