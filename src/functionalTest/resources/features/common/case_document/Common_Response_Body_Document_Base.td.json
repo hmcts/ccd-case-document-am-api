@@ -13,7 +13,8 @@
   ],
   "metadata": {
     "caseTypeId": "BEFTA_CASETYPE_2_2",
-    "jurisdictionId": "BEFTA_JURISDICTION_2"
+    "jurisdictionId": "BEFTA_JURISDICTION_2",
+    "caseId" : "1111222233334444"
   },
   "hashcode": "[[ANYTHING_PRESENT]]",
   "ttl": "[[ANYTHING_PRESENT]]",

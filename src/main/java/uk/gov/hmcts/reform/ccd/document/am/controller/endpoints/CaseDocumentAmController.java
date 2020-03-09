@@ -9,6 +9,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -258,6 +259,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
         @ApiParam(value = "CaseType identifier for the case document.", required = true)
         @NotNull(message = "Provide the Case Type ID ")
+        @Pattern(regexp = "")
         @RequestHeader(value = "caseTypeId", required = true) String caseTypeId,
 
         @ApiParam(value = "Jurisdiction identifier for the case document.", required = true)

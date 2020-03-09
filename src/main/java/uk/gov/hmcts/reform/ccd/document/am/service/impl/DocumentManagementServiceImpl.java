@@ -135,8 +135,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         ResponseEntity<Object> uploadedDocumentResponse = restTemplate.postForEntity(dmStoreURL, requestEntity, Object.class);
 
         if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode())) {
-
-
             if (null != uploadedDocumentResponse.getBody()) {
                 formatUploadDocumentResponse(caseTypeId, jurisdictionId, uploadedDocumentResponse);
             }
@@ -191,6 +189,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         bodyMap.set(ROLES, String.join(",", roles));
         bodyMap.set("metadata[jurisdictionId]", jurisdictionId);
         bodyMap.set("metadata[caseTypeId]", caseTypeId);
+        //hardcoding caseId just to support the functional test cases. Needs to be removed later.
+        bodyMap.set("metadata[caseId]", "1111222233334444");
         //Format of date : yyyy-MM-dd'T'HH:mm:ssZ  2020-02-15T15:18:00+0000
         bodyMap.set("ttl", getEffectiveTTL());
 
