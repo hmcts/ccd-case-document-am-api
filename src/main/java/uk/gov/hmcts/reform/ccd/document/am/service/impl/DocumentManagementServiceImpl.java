@@ -186,7 +186,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
 
         bodyMap.set(CLASSIFICATION, classification);
-        bodyMap.set(ROLES, roles);
+        bodyMap.set(ROLES, String.join(",", roles));
         bodyMap.set("metadata[jurisdictionId]", jurisdictionId);
         bodyMap.set("metadata[caseTypeId]", caseTypeId);
         //Format of date : yyyy-MM-dd'T'HH:mm:ssZ  2020-02-15T15:18:00+0000
