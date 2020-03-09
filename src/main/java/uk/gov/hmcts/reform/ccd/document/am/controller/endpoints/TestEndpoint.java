@@ -6,26 +6,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 
 import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
-public class S2SAuthentication {
+public class TestEndpoint {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestEndpoint.class);
-    private transient AuthTokenGenerator authTokenGenerator;
 
-    public S2SAuthentication(AuthTokenGenerator authTokenGenerator) {
-        this.authTokenGenerator = authTokenGenerator;
-    }
 
-    @RequestMapping(value = "/testS2SAuthorization", method = RequestMethod.GET)
+    @RequestMapping(value = "/testPREnv", method = RequestMethod.GET)
     public ResponseEntity<String> testS2SAuthorization() {
 
-        LOG.info("Token Generation " + authTokenGenerator.generate());
+        LOG.info("Token Generation");
 
-        return ok("S2S Authentication is successful !!" + authTokenGenerator.generate());
+        return ok("Test  at PR env !!");
     }
 }
 
