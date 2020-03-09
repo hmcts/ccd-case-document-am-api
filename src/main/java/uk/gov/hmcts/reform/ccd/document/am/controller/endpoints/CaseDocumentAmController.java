@@ -266,7 +266,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
         @ApiParam(value = "User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
                   + " and will be used for authorisation.", required = false)
-        @RequestHeader("user-id") String userId,
+        @RequestHeader(value = "user-id", required = true) String userId,
 
         @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "user-roles", required = false) String userRoles) {

@@ -242,7 +242,7 @@ public interface CaseDocumentAm {
 
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
                           + " and will be used for authorisation.")
-        @RequestHeader(value = "user-id", required = false) String userId,
+        @RequestHeader(value = "user-id", required = true) String userId,
 
         @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "user-roles", required = false) String userRoles);
