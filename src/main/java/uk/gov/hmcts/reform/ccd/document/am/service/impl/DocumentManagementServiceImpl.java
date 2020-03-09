@@ -135,6 +135,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         ResponseEntity<Object> uploadedDocumentResponse = restTemplate.postForEntity(dmStoreURL, requestEntity, Object.class);
 
         if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode())) {
+
+
             if (null != uploadedDocumentResponse.getBody()) {
                 formatUploadDocumentResponse(caseTypeId, jurisdictionId, uploadedDocumentResponse);
             }
