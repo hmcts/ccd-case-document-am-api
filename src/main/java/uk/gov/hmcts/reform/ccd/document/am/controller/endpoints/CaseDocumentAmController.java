@@ -240,8 +240,8 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
     @Override
     public ResponseEntity<Object> uploadDocuments(
-        @ApiParam(value = "", required = true)
 
+        @ApiParam(value = "", required = true)
         @NotNull(message = "Provide some files to be uploaded.")
         @Size(min = 1, message = "Please provide at least one file to be uploaded.")
         @RequestParam(value = "files", required = true) List<MultipartFile> files,
@@ -271,9 +271,11 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
         try {
+            ValidationService.isValidSecurityClassification(classification);
             return documentManagementService.uploadDocuments(files, classification, roles,
                                                              serviceAuthorization, caseTypeId, jurisdictionId, userId);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             return new ResponseEntity<Object>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
