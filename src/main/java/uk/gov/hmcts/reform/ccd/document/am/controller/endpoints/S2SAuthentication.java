@@ -19,9 +19,9 @@ public class S2SAuthentication {
     @RequestMapping(value = "/testS2SAuthorization", method = RequestMethod.GET)
     public ResponseEntity<String> testS2SAuthorization() {
 
-        LOG.info("Token Generation ", authTokenGenerator.generate());
+        LOG.info("Token Generation " + authTokenGenerator.generate());
 
-        return ok("S2S Authentication is successful !!"+authTokenGenerator.generate());
+        return ok("S2S Authentication is successful !!" + authTokenGenerator.generate());
     }
 }
 
