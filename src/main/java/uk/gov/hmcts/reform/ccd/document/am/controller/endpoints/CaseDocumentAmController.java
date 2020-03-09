@@ -267,7 +267,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId,
 
         @ApiParam(value = "User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-                  + " and will be used for authorisation.", required = false)
+                          + " and will be used for authorisation.", required = false)
         @RequestHeader(value = "user-id", required = true) String userId,
 
         @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
@@ -276,9 +276,9 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             ValidationService.isValidSecurityClassification(classification);
             return documentManagementService.uploadDocuments(files, classification, roles,
                                                              serviceAuthorization, caseTypeId, jurisdictionId, userId);
-        }
-        catch (Exception e) {
-            return new ResponseEntity<Object>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            return ResponseEntity
+                .status(HttpStatus.OK).body(e.getMessage());
         }
     }
 }

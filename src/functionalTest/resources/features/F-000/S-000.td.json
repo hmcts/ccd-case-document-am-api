@@ -34,31 +34,36 @@
       "Content-Type": "application/json"
     },
     "body": {
-      "links" : [ {
-        "rel" : "self",
-        "href" : "[[ANYTHING_PRESENT]]"
-      }, {
-        "rel" : "binary",
-        "href" : "[[ANYTHING_PRESENT]]"
-      } ],
-      "_embedded" : {
-        "allDocumentVersions" : {
-          "links" : [ ]
+      "links": [
+        {
+          "rel": "self",
+          "href": "[[ANYTHING_PRESENT]]"
+        },
+        {
+          "rel": "binary",
+          "href": "[[ANYTHING_PRESENT]]"
+        }
+      ],
+      "_embedded": {
+        "allDocumentVersions": {
+          "links": []
         }
       },
-      "classification" : "PUBLIC",
-      "createdBy" : "[[ANYTHING_PRESENT]]",
-      "createdOn" : "[[ANYTHING_PRESENT]]",
-      "lastModifiedBy" : "[[ANYTHING_PRESENT]]",
-      "metadata" : {
-        "caseId" : "[[ANYTHING_PRESENT]]",
-        "jurisdictionId" : "BEFTA_JURISDICTION_2"
+      "classification": "PUBLIC",
+      "createdBy": "[[ANYTHING_PRESENT]]",
+      "createdOn": "[[ANYTHING_PRESENT]]",
+      "lastModifiedBy": "[[ANYTHING_PRESENT]]",
+      "metadata": {
+        "caseId": "[[ANYTHING_PRESENT]]",
+        "jurisdictionId": "BEFTA_JURISDICTION_2"
       },
-      "mimeType" : "image/png",
-      "modifiedOn" : "[[ANYTHING_PRESENT]]",
-      "originalDocumentName" : "SampleImage.png",
-      "roles" : [ "caseworker" ],
-      "size" : 679361
+      "mimeType": "image/png",
+      "modifiedOn": "[[ANYTHING_PRESENT]]",
+      "originalDocumentName": "SampleImage.png",
+      "roles": [
+        "caseworker"
+      ],
+      "size": 679361
     }
   }
 }
