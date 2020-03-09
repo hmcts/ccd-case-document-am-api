@@ -39,4 +39,12 @@ public interface DocumentManagementService {
      * @return StoredDocumentHalResourceCollection object containing stored document details
      */
     StoredDocumentHalResourceCollection uploadDocumentsContent(UploadDocumentsCommand uploadDocumentsContent);
+
+    /**
+     * Root GET endpoint.
+     * @param responseEntity which has document meta data response
+     * @param documentId Document Id for which binary content to be downloaded
+     * @return Boolen object to check user permission
+     **/
+    boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId);
 }

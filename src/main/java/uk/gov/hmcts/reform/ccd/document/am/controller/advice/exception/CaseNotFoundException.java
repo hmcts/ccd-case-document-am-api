@@ -9,6 +9,6 @@ public class CaseNotFoundException extends ResourceNotFoundException {
     private static final long serialVersionUID = 7L;
 
     public CaseNotFoundException(String caseReference) {
-        super(String.format("No case found for reference: %s", caseReference));
+        super(String.format("case reference %s not found for requested document.", caseReference));
     }
 }
