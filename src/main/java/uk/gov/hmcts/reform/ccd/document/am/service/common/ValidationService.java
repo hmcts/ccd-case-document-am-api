@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.common;
 
+import java.util.regex.Pattern;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
@@ -40,5 +41,15 @@ public class ValidationService {
             LOG.info("The security classification is not valid");
             throw ex;
         }
+    }
+
+    public static boolean validateInputs(String pattern, String... inputString) {
+        for (String input : inputString) {
+            if (!Pattern.matches(pattern, input)) {
+                throw new IllegalArgumentException("The input parameter "
+                                                   + input + " does not matches with the required pattern");
+            }
+        }
+        return true;
     }
 }
