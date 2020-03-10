@@ -2,6 +2,7 @@
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
 
 import java.io.IOException;
 import java.util.List;
@@ -49,8 +50,6 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     private transient DocumentManagementService  documentManagementService;
     private transient CaseDataStoreService caseDataStoreService;
     private transient ValidationService validationService;
-    private transient String inputStringPattern = "^[a-zA-Z0-9_-]*$";
-
 
     @Autowired
     public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService documentManagementService,
@@ -274,7 +273,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
         try {
-            ValidationService.validateInputs(inputStringPattern, caseTypeId, jurisdictionId, classification);
+            ValidationService.validateInputs(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification);
             ValidationService.isValidSecurityClassification(classification);
 
             return documentManagementService.uploadDocuments(files, classification, roles,
