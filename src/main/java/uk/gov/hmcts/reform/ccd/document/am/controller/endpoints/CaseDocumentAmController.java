@@ -9,7 +9,6 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -261,7 +260,6 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
         @ApiParam(value = "CaseType identifier for the case document.", required = true)
         @NotNull(message = "Provide the Case Type ID ")
-        @Pattern(regexp = "")
         @RequestHeader(value = "caseTypeId", required = true) String caseTypeId,
 
         @ApiParam(value = "Jurisdiction identifier for the case document.", required = true)
@@ -274,6 +272,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
         @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
+
         try {
             ValidationService.validateInputs(inputStringPattern, caseTypeId, jurisdictionId, classification);
             ValidationService.isValidSecurityClassification(classification);

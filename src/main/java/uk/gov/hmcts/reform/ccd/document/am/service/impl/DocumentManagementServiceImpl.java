@@ -1,14 +1,21 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DATA_SOURCE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EMBEDDED;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FILES;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHCODE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HREF;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LINKS;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ROLES;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.TEST_URL;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
 
 import java.sql.Timestamp;
@@ -31,7 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.hateoas.ResourceSupport;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -47,7 +53,6 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceN
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.UnauthorizedException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.feign.DocumentStoreFeignClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
-import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.document.am.util.JsonFeignResponseHelper;
@@ -150,31 +155,37 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @SuppressWarnings("unchecked")
     private void formatUploadDocumentResponse(String caseTypeId, String jurisdictionId, ResponseEntity<Object> uploadedDocumentResponse) {
-        LinkedHashMap documents = (LinkedHashMap) ((((LinkedHashMap) uploadedDocumentResponse.getBody()).get("_embedded")));
+        LinkedHashMap documents = (LinkedHashMap) ((((LinkedHashMap) uploadedDocumentResponse.getBody()).get(EMBEDDED)));
         ArrayList<Object> documentList = (ArrayList<Object>) (documents.get("documents"));
 
         for (Object document : documentList) {
             if (document instanceof LinkedHashMap) {
                 LinkedHashMap<String, Object> hashmap = ((LinkedHashMap<String, Object>) (document));
-                hashmap.remove("_embedded");
-                JSONObject object = new JSONObject(hashmap);
-                String documentURL = (String) object.getJSONObject("_links").getJSONObject("self").get("href");
-                hashmap.put("hashcode", ApplicationUtils.generateHashCode(documentURL.concat(jurisdictionId).concat(caseTypeId)));
+                hashmap.remove(EMBEDDED);
+                ((LinkedHashMap) (hashmap.get(LINKS))).remove("thumbnail");
+                updateDomainForLinks(hashmap, jurisdictionId, caseTypeId);
             }
         }
-        //injectHashCode((StoredDocumentHalResourceCollection) uploadedDocumentResponse.getBody());
     }
 
-    private void injectHashCode(StoredDocumentHalResourceCollection resourceCollection) {
-        /*for (StoredDocumentHalResource resource: resourceCollection.getContent()) {
-            resource.setHashCode(ApplicationUtils.generateHashCode(extractDocumentId(resource)));
-        }*/
+    private void updateDomainForLinks(LinkedHashMap<String, Object> hashmap, String jurisdictionId, String caseTypeId) {
+        JSONObject object = new JSONObject(hashmap).getJSONObject(LINKS);
+        String href = (String) object.getJSONObject(SELF).get(HREF);
+        object.getJSONObject(SELF).put(HREF, buildDocumentURL(href, 36));
+        hashmap.put(HASHCODE, ApplicationUtils.generateHashCode(
+            href.substring(href.length() - 36)
+                .concat(jurisdictionId)
+                .concat(caseTypeId)));
+
+        href = (String) object.getJSONObject(BINARY).get(HREF);
+        object.getJSONObject(BINARY).put(HREF, buildDocumentURL(href, 43));
+        hashmap.put(LINKS, object.toMap());
+
     }
 
-    private String extractDocumentId(StoredDocumentHalResource storedDocumentHalResource) {
-        Map<String, ResourceSupport> embedded = storedDocumentHalResource.getEmbedded();
-        ResourceSupport resourceSupport = embedded.get("_links");
-        return resourceSupport.getId().getHref();
+    private String buildDocumentURL(String documentUrl, int length) {
+        documentUrl = documentUrl.substring(documentUrl.length() - length);
+        return (System.getenv(TEST_URL)).concat("/cases/documents/" + documentUrl);
     }
 
     private HttpHeaders prepareRequestForUpload(List<MultipartFile> files, String classification, List<String> roles, String serviceAuthorization,
@@ -196,6 +207,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        //S2S token needs to be generated by our microservice.
         headers.set(SERVICE_AUTHORIZATION, serviceAuthorization);
         headers.set(USERID, userId);
         return headers;

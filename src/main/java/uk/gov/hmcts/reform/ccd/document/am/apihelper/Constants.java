@@ -24,5 +24,12 @@ public class Constants {
     public static final String ROLES = "roles";
     public static final String USERID = "user-id";
     public static final String FILES = "files";
+    public static final String LINKS = "_links";
+    public static final String HREF = "href";
+    public static final String SELF = "self";
+    public static final String BINARY = "binary";
+    public static final String HASHCODE = "hashcode";
+    public static final String TEST_URL = "TEST_URL";
+    public static final String EMBEDDED = "_embedded";
 
 }
