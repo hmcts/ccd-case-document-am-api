@@ -2,7 +2,7 @@ java:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   keyVaults:
-    ccd:
+    s2s:
       resourceGroup: ccd-shared
       secrets:
         - ccd-case-document-am-api-s2s-secret
