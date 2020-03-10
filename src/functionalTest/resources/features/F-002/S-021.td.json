@@ -22,10 +22,10 @@
     },
     "body" : {
       "timestamp" : "[[ANYTHING_PRESENT]]",
-      "status" : 404,
-      "error" : "RESOURCE_NOT_FOUND",
-      "message" : "Resource Not found",
-      "path" : "The request document is not found"
+      "status": 404,
+      "error": "Not Found",
+      "message": "Resource not found 00000000-0000-0000-0000-000000000000",
+      "path": "/cases/documents/00000000-0000-0000-0000-000000000000/binary"
     }
   }
 }
