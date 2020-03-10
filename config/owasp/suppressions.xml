@@ -318,7 +318,7 @@
     <notes><![CDATA[
    relates to flexmark-ext-gitlab-0.34.30.jar
    ]]></notes>
-    <cpe>cpe:2.3:a:gitlab:gitlab:0.34.30:*:*:*:*:*:*:*</cpe>
+    <cpe>^pkg:maven/com.vladsch.flexmark/flexmark-ext-gitlab@0.34.30</cpe>
     <cve>CVE-2013-4580</cve>
     <cve>CVE-2013-4581</cve>
     <cve>CVE-2017-0919</cve>
