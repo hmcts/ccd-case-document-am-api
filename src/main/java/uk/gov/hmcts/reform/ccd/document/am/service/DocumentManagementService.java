@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.ccd.document.am.service;
 
+import org.springframework.http.ResponseEntity;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -32,13 +34,15 @@ public interface DocumentManagementService {
      **/
     ResponseEntity<Object> getDocumentBinaryContent(final UUID documentId);
 
-    /**
-     * Root GET endpoint.
-     *
-     * @param  files The uploaded document content sent by service UI
-     * @return StoredDocumentHalResourceCollection object containing stored document details
-     */
     ResponseEntity<Object> uploadDocuments(List<MultipartFile> files, String classification, List<String> roles,
                                            String serviceAuthorization, String caseTypeId,
                                            String jurisdictionId, String userId);
+
+    /**
+     * Root GET endpoint.
+     * @param responseEntity which has document meta data response
+     * @param documentId Document Id for which binary content to be downloaded
+     * @return Boolen object to check user permission
+     **/
+    boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId);
 }
