@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.document.am.configuration;
 
+import com.warrenstrange.googleauth.GoogleAuthenticator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -10,6 +11,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
+import static java.lang.String.format;
+
 @Configuration
 @Slf4j
 public class ApplicationConfiguration {
@@ -17,6 +20,8 @@ public class ApplicationConfiguration {
     private final String s2sSecret;
     private final String s2sMicroService;
     private final String s2sUrl;
+    private transient GoogleAuthenticator googleAuthenticator;
+
 
     public ApplicationConfiguration(@Value("${idam.s2s-auth.totp_secret}") String s2sSecret,
                                     @Value("${idam.s2s-auth.microservice}") String s2sMicroService,
@@ -24,6 +29,7 @@ public class ApplicationConfiguration {
         this.s2sSecret = s2sSecret;
         this.s2sMicroService = s2sMicroService;
         this.s2sUrl = s2sUrl;
+        this.googleAuthenticator = new GoogleAuthenticator();
     }
 
     public String getS2sSecret() {
@@ -58,6 +64,16 @@ public class ApplicationConfiguration {
             .useSystemProperties()
             .setDefaultRequestConfig(config)
             .build();
+
+    }
+
+
+    public String generate() {
+        final String oneTimePassword = format("%06d", googleAuthenticator.getTotpPassword(s2sSecret));
+        System.out.println("s2sSecret key :: " + s2sSecret);
+        System.out.print("One Time Password  " + oneTimePassword);
+        return oneTimePassword;
+
 
     }
 }
