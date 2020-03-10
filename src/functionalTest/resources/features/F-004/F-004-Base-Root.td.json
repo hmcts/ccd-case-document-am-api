@@ -1,16 +1,23 @@
 {
-  "_guid_": "Default_Document_Upload_Data",
-  "_extends_": "Default_Document_Upload_Data_Base",
+	"_guid_": "F-004-Base-Root",
+
   "users": {
     "invokingUser": {
       "username": "befta.caseworker.2.solicitor.2@gmail.com",
       "password": "[[$CCD_BEFTA_CASEWORKER_2_SOLICITOR_2_PWD]]"
     }
   },
-  "specs": [
-    "by another privileged user to upload a document with mandatory metadata"
-  ],
   "request": {
+    "headers": {
+      "Authorization": "[[DYNAMIC]]",
+      "ServiceAuthorization": "[[DYNAMIC]]",
+      "Content-Type": "multipart/form-data",
+      "caseTypeId": "BEFTA_CASETYPE_2_2",
+      "jurisdictionId": "BEFTA_JURISDICTION_2",
+      "uid": "[[DYNAMIC]]",
+      "user-id": "[someUserId]",
+      "user-roles": "caseworker"
+    },
     "body": {
       "arrayInMap": [
         {
