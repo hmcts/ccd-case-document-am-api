@@ -74,8 +74,8 @@ Feature: F-004: Post Upload Document with Binary Content
   @S-048
   Scenario: generic scenario for Unauthorized
 
-  @S-048
+  @S-049
   Scenario: generic scenario for Forbidden
 
-  @S-049
+  @S-050
   Scenario: generic scenario for Unsupported Media Type
