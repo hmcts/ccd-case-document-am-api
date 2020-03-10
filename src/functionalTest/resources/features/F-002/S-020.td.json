@@ -15,7 +15,7 @@
   },
 
   "expectedResponse": {
-    "_extends_": "Common_200_Response",
+    "responseCode": 200,
     "body": {
      "__fileInBody__" : {
        "fullPath" : "file",

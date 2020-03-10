@@ -2,6 +2,7 @@
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
 
 import java.io.IOException;
 import java.util.List;
@@ -9,7 +10,6 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,7 +50,6 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     private transient DocumentManagementService  documentManagementService;
     private transient CaseDataStoreService caseDataStoreService;
     private transient ValidationService validationService;
-
 
     @Autowired
     public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService documentManagementService,
@@ -248,6 +247,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestParam(value = "files", required = true) List<MultipartFile> files,
 
         @ApiParam(value = "", required = true)
+        @Valid
         @NotNull(message = "Please provide classification")
         @RequestParam(value = "classification", required = true) String classification,
 
@@ -259,7 +259,6 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
         @ApiParam(value = "CaseType identifier for the case document.", required = true)
         @NotNull(message = "Provide the Case Type ID ")
-        @Pattern(regexp = "")
         @RequestHeader(value = "caseTypeId", required = true) String caseTypeId,
 
         @ApiParam(value = "Jurisdiction identifier for the case document.", required = true)
@@ -267,18 +266,26 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId,
 
         @ApiParam(value = "User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-                  + " and will be used for authorisation.", required = false)
+                          + " and will be used for authorisation.", required = false)
         @RequestHeader(value = "user-id", required = true) String userId,
 
         @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
+
         try {
+            ValidationService.validateInputs(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification);
             ValidationService.isValidSecurityClassification(classification);
+
             return documentManagementService.uploadDocuments(files, classification, roles,
                                                              serviceAuthorization, caseTypeId, jurisdictionId, userId);
-        }
-        catch (Exception e) {
-            return new ResponseEntity<Object>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(e.getMessage());
         }
     }
 }
