@@ -58,7 +58,7 @@ Feature: F-004: Post Upload Document with Binary Content
     Then  a negative response is received
     And   the response has all the details as expected
 
-  @S-047 # This is the test need to be done manually
+  @S-047 @Ignore # This is the test need to be done manually
   Scenario: must get an error response for a upload document with unauthorised user id after 10 minuts
     Given a user with [an active caseworker profile in CCD with full permissions on a document field]
     When  a request is prepared with appropriate values
