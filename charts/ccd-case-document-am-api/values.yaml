@@ -4,7 +4,8 @@ java:
   applicationPort: 4455
   aadIdentityName: ccd
   keyVaults:
-    s2s:
+    "s2s":
+      resourceGroup: rpe-service-auth-provider
       secrets:
         - ccd-case-document-am-api-s2s-secret
         - AppInsightsInstrumentationKey
