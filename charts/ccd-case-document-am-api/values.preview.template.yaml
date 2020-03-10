@@ -11,4 +11,5 @@ java:
     DOCUMENT_STORE_URL: http://dm-store-pr-529.service.core-compute-preview.internal/documents
     CASE_DOCUMENT_S2S_AUTHORISED_SERVICES: ccd_case_document_am_api,ccd_gw,xui_webapp
     IDAM_S2S_URL: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
+    CCD_DOCUMENT_API_IDAM_KEY :
 
