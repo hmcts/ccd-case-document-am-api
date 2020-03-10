@@ -66,6 +66,7 @@ Feature: F-004: Post Upload Document with Binary Content
     And   it is submitted to call the [Post Upload Document with Binary Content] operation of [CCD Case Document AM API]
     Then  a positive response is received
     And   the response has all the details as expected
+    And   the request [contains the id of the document just uploaded above and wait for 10 minuts]
     And   it is submitted to call the [Get Document Metadata by Document ID] operation of [CCD Case Document AM API]
     Then  a negative response is received
     And   the response has all the details as expected
