@@ -31,5 +31,9 @@ public class Constants {
     public static final String HASHCODE = "hashcode";
     public static final String TEST_URL = "TEST_URL";
     public static final String EMBEDDED = "_embedded";
+    public static final String THUMBNAIL = "thumbnail";
+    public static final String DOCUMENTS = "documents";
+
+
 
 }

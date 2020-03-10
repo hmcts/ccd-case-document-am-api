@@ -6,6 +6,7 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DI
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DATA_SOURCE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DOCUMENTS;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EMBEDDED;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FILES;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHCODE;
@@ -16,6 +17,7 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ROLES;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.TEST_URL;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.THUMBNAIL;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
 
 import java.sql.Timestamp;
@@ -50,6 +52,7 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.ErrorResponse;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.InvalidRequest;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.UnauthorizedException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.feign.DocumentStoreFeignClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
@@ -139,47 +142,46 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
         ResponseEntity<Object> uploadedDocumentResponse = restTemplate.postForEntity(dmStoreURL, requestEntity, Object.class);
 
-        if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode())) {
-            if (null != uploadedDocumentResponse.getBody()) {
-                formatUploadDocumentResponse(caseTypeId, jurisdictionId, uploadedDocumentResponse);
-            }
-            return ResponseEntity
-                .status(uploadedDocumentResponse.getStatusCode())
-                .body(uploadedDocumentResponse.getBody());
-        } else {
-            return ResponseEntity
-                .status(uploadedDocumentResponse.getStatusCode())
-                .body(uploadedDocumentResponse.getBody());
+        if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode()) && null != uploadedDocumentResponse.getBody()) {
+            formatUploadDocumentResponse(caseTypeId, jurisdictionId, uploadedDocumentResponse);
         }
+        return ResponseEntity
+            .status(uploadedDocumentResponse.getStatusCode())
+            .body(uploadedDocumentResponse.getBody());
     }
 
     @SuppressWarnings("unchecked")
     private void formatUploadDocumentResponse(String caseTypeId, String jurisdictionId, ResponseEntity<Object> uploadedDocumentResponse) {
-        LinkedHashMap documents = (LinkedHashMap) ((((LinkedHashMap) uploadedDocumentResponse.getBody()).get(EMBEDDED)));
-        ArrayList<Object> documentList = (ArrayList<Object>) (documents.get("documents"));
+        try {
+            LinkedHashMap documents = (LinkedHashMap) ((((LinkedHashMap) uploadedDocumentResponse.getBody()).get(EMBEDDED)));
+            ArrayList<Object> documentList = (ArrayList<Object>) (documents.get(DOCUMENTS));
 
-        for (Object document : documentList) {
-            if (document instanceof LinkedHashMap) {
-                LinkedHashMap<String, Object> hashmap = ((LinkedHashMap<String, Object>) (document));
-                hashmap.remove(EMBEDDED);
-                ((LinkedHashMap) (hashmap.get(LINKS))).remove("thumbnail");
-                updateDomainForLinks(hashmap, jurisdictionId, caseTypeId);
+            for (Object document : documentList) {
+                if (document instanceof LinkedHashMap) {
+                    LinkedHashMap<String, Object> hashmap = ((LinkedHashMap<String, Object>) (document));
+                    hashmap.remove(EMBEDDED);
+                    updateDomainForLinks(hashmap, jurisdictionId, caseTypeId);
+                }
             }
+        } catch (Exception exception) {
+            LOG.error("Error while formatting the uploaded document response :" + exception.getMessage());
+            throw new ResponseFormatException("Error while formatting the uploaded document response ");
         }
     }
 
     private void updateDomainForLinks(LinkedHashMap<String, Object> hashmap, String jurisdictionId, String caseTypeId) {
-        JSONObject object = new JSONObject(hashmap).getJSONObject(LINKS);
-        String href = (String) object.getJSONObject(SELF).get(HREF);
-        object.getJSONObject(SELF).put(HREF, buildDocumentURL(href, 36));
+        JSONObject links = new JSONObject(hashmap).getJSONObject(LINKS);
+        links.remove(THUMBNAIL);
+
+        String href = (String) links.getJSONObject(SELF).get(HREF);
+        links.getJSONObject(SELF).put(HREF, buildDocumentURL(href, 36));
         hashmap.put(HASHCODE, ApplicationUtils.generateHashCode(
             href.substring(href.length() - 36)
                 .concat(jurisdictionId)
                 .concat(caseTypeId)));
 
-        href = (String) object.getJSONObject(BINARY).get(HREF);
-        object.getJSONObject(BINARY).put(HREF, buildDocumentURL(href, 43));
-        hashmap.put(LINKS, object.toMap());
+        links.getJSONObject(BINARY).put(HREF, buildDocumentURL((String) links.getJSONObject(BINARY).get(HREF), 43));
+        hashmap.put(LINKS, links.toMap());
 
     }
 

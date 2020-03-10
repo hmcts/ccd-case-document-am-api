@@ -33,23 +33,21 @@ public class ValidationService {
         return true;
     }
 
-    public static boolean isValidSecurityClassification(String securityClassification) throws IllegalArgumentException {
+    public static void isValidSecurityClassification(String securityClassification) throws IllegalArgumentException {
         try {
             Enum.valueOf(SecurityClassification.class, securityClassification);
-            return true;
         } catch (final IllegalArgumentException ex) {
             LOG.info("The security classification is not valid");
-            throw ex;
+            throw new IllegalArgumentException("The security classification" + securityClassification + " is not valid");
         }
     }
 
-    public static boolean validateInputs(String pattern, String... inputString) {
+    public static void validateInputs(String pattern, String... inputString) {
         for (String input : inputString) {
             if (!Pattern.matches(pattern, input)) {
                 throw new IllegalArgumentException("The input parameter "
-                                                   + input + " does not matches with the required pattern");
+                                                   + input + " does not complies with the required pattern");
             }
         }
-        return true;
     }
 }

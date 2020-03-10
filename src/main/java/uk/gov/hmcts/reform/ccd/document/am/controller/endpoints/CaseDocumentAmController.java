@@ -279,6 +279,10 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
             return documentManagementService.uploadDocuments(files, classification, roles,
                                                              serviceAuthorization, caseTypeId, jurisdictionId, userId);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
