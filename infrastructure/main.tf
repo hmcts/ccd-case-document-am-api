@@ -1,5 +1,5 @@
 provider "azurerm" {
-  version = "1.27"
+  version = "1.22.1"
 }
 
 locals {
@@ -25,7 +25,6 @@ locals {
 
   // S2S
   s2s_url = "http://rpe-service-auth-provider-${local.env_ase_url}"
-  idam_url = "${var.env == "prod" ? "https://idam-api.platform.hmcts.net" : "https://idam-api.${local.local_env}.platform.hmcts.net" }"
 
   custom_redirect_uri = "${var.frontend_url}/oauth2redirect"
   default_redirect_uri = "https://ccd-case-management-web-${local.env_ase_url}/oauth2redirect"
