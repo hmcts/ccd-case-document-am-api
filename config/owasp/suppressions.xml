@@ -326,4 +326,12 @@
     <cpe>cpe:2.3:a:checkstyle:checkstyle:8.18:*:*:*:*:*:*:*</cpe>
     <cve>CVE-2019-10782</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to tomcat-embed-websocket-9.0.29.jar
+   ]]></notes>
+    <cpe>cpe:2.3:a:apache:tomcat:9.0.29:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2019-17569</cve>
+    <cve>CVE-2020-1935</cve>
+  </suppress>
 </suppressions>
