@@ -63,6 +63,10 @@ public class CaseDocumentAmControllerTest {
     private static final String UNMATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9d";
     private static final String CASE_ID = "1582550122096256";
     private static final String DUMMY_ROLE = "dummyRole";
+    private static final String BEFTA_CASETYPE_2 =  "BEFTA_CASETYPE_2";
+    private static final String BEFTA_JURISDICTION_2 =  "BEFTA_JURISDICTION_2";
+    private static final String USER_ID =  "userId";
+
 
     @BeforeEach
     public void setUp() {
@@ -196,8 +200,8 @@ public class CaseDocumentAmControllerTest {
     @DisplayName("Should throw 400 when the uploaded file is empty")
     public void shouldThrowBadRequestExceptionWhenUploadedFilesIsNull() {
         Assertions.assertThrows(BadRequestException.class, () -> {
-            testee.uploadDocuments(null, Classifications.PUBLIC.name(), Arrays.asList("dummyRole"), "sampleServiceAuthToken",
-                                   "BEFTA_CASETYPE_2", "BEFTA_JURISDICTION_2", "userId", "dummyrole");
+            testee.uploadDocuments(null, Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE), serviceAuthorization,
+                                   BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2, USER_ID, DUMMY_ROLE);
         });
     }
 
@@ -206,8 +210,8 @@ public class CaseDocumentAmControllerTest {
     public void shouldThrowBadRequestExceptionWhenUserRolesAreEmpty() {
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
-                                   Classifications.PUBLIC.name(), Arrays.asList("dummyRole"), "sampleServiceAuthToken",
-                                   "BEFTA_CASETYPE_2", "BEFTA@JURISDICTION_2$$$$", "userId", null);
+                                   Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE), serviceAuthorization,
+                                   BEFTA_CASETYPE_2, "BEFTA@JURISDICTION_2$$$$", USER_ID, null);
         });
     }
 
@@ -216,8 +220,8 @@ public class CaseDocumentAmControllerTest {
     public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsNull() {
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
-                                   Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE), "sampleServiceAuthToken",
-                                   null, "BEFTA_JURISDICTION_2", "userId", "dummyrole");
+                                   Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE), serviceAuthorization,
+                                   null, BEFTA_JURISDICTION_2, USER_ID, DUMMY_ROLE);
         });
     }
 
@@ -226,8 +230,8 @@ public class CaseDocumentAmControllerTest {
     public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsMalformed() {
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
-                                   Classifications.PUBLIC.name(), null, "sampleServiceAuthToken",
-                                   "BEFTA_CASETYPE_2&&&&&&&&&", "BEFTA_JURISDICTION_2", "userId", "dummyrole");
+                                   Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE), serviceAuthorization,
+                                   "BEFTA_CASETYPE_2&&&&&&&&&", "BEFTA_JURISDICTION_2", USER_ID, DUMMY_ROLE);
         });
     }
 
@@ -236,8 +240,8 @@ public class CaseDocumentAmControllerTest {
     public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsNull() {
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
-                                   Classifications.PUBLIC.name(), null, "sampleServiceAuthToken",
-                                   "BEFTA_CASETYPE_2", null, "userId", "dummyrole");
+                                   Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE), serviceAuthorization,
+                                   BEFTA_CASETYPE_2, null, USER_ID, DUMMY_ROLE);
         });
     }
 
@@ -246,8 +250,8 @@ public class CaseDocumentAmControllerTest {
     public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsMalformed() {
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
-                                   Classifications.PUBLIC.name(), null, "sampleServiceAuthToken",
-                                   "BEFTA_CASETYPE_2", "BEFTA@JURISDICTION_2$$$$", "userId", "dummyrole");
+                                   Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE), serviceAuthorization,
+                                   BEFTA_CASETYPE_2, "BEFTA@JURISDICTION_2$$$$", USER_ID, DUMMY_ROLE);
         });
     }
 
