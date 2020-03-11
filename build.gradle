@@ -56,6 +56,7 @@ def jarName = 'ccd-case-document-am-api.jar'
 
 pmd {
   toolVersion = '6.21.0'
+  sourceSets = []
 }
 
 group = 'uk.gov.hmcts.reform.ccd.document.am'
