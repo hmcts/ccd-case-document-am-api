@@ -4,7 +4,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.converter.HttpMessageConversionException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.WelcomeController;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.*;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.RequiredFieldMissingException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.InvalidRequest;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.CaseNotFoundException;
 
 class CaseDocumentControllerAdviceTest {
 

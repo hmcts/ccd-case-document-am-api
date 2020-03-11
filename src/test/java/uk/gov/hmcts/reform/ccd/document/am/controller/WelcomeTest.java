@@ -32,7 +32,7 @@ public class WelcomeTest {
     }
 
     @Test
-    public void shouldGetReturnIndex1() {
+    public void shouldGetMetaData() {
         UUID doc = UUID.fromString("41334a2b-79ce-44eb-9168-2d49a744be9c");
         ResponseEntity<StoredDocumentHalResource>  response = caseDocumentAmController.getMetaData(doc);
         assertNotNull(response, "Valid Response from WelcomeController");
