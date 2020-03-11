@@ -12,14 +12,19 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
@@ -53,6 +58,9 @@ class DocumentManagementServiceImplTest {
     @InjectMocks
     private DocumentManagementServiceImpl sut = new DocumentManagementServiceImpl(restTemplateMock,securityUtils,caseDataStoreService,validationService);
 
+    @Value("${documentStoreUrl}")
+    private transient String documentURL;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -65,7 +73,7 @@ class DocumentManagementServiceImplTest {
     }
 
     @Test
-    void getDocumentMetadata() {
+    void getDocumentMetadata_HappyPath() {
     StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
         //storedDocumentHalResource.setCreatedBy("CONOR");
         //storedDocumentHalResource.setClassification(StoredDocumentHalResource.ClassificationEnum.PRIVATE);
@@ -78,15 +86,43 @@ class DocumentManagementServiceImplTest {
         HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
         //Mockito.when(restTemplateMock.exchange("url", HttpMethod.GET, HttpEntity.class, StoredDocumentHalResource.class).getBody()).thenReturn(new ResponseEntity<StoredDocumentHalResource>(storedDocumentHalResource,HttpStatus.OK));
         //Mockito.when(String.format(anyString(),anyString(),anyString())).thenReturn("http://document/41334a2b-79ce-44eb-9168-2d49a744be9");
-        Mockito.when(restTemplateMock.exchange("null/41334a2b-79ce-44eb-9168-2d49a744be9c", HttpMethod.GET,requestEntity, StoredDocumentHalResource.class)).thenReturn(new ResponseEntity<StoredDocumentHalResource>(storedDocumentHalResource,HttpStatus.OK));
+        Mockito.when(restTemplateMock.exchange(documentURL+"/41334a2b-79ce-44eb-9168-2d49a744be9c", HttpMethod.GET,requestEntity, StoredDocumentHalResource.class)).thenReturn(new ResponseEntity<StoredDocumentHalResource>(storedDocumentHalResource,HttpStatus.OK));
         //when(String.format(any(),any(),any()))
-        sut.getDocumentMetadata(getUuid(MATCHED_DOCUMENT_ID));
+        ResponseEntity responseEntity = sut.getDocumentMetadata(getUuid(MATCHED_DOCUMENT_ID));
+        assertEquals(responseEntity.getStatusCode(),HttpStatus.OK);
     }
 
     @Test
-    void get() {
-        Assertions.assertThrows(NumberFormatException.class, () -> {
-            Integer.parseInt("One");
+    void getDocumentMetadataThrows_ResourceNotFoundException() {
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
+        Mockito.when(restTemplateMock.exchange(documentURL+"/41334a2b-79ce-44eb-9168-2d49a744be9c", HttpMethod.GET,requestEntity, StoredDocumentHalResource.class)).thenReturn(new ResponseEntity<StoredDocumentHalResource>(storedDocumentHalResource,HttpStatus.BAD_REQUEST));
+
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+            sut.getDocumentMetadata(getUuid(MATCHED_DOCUMENT_ID));
+        });
+    }
+
+    @Test
+    void getDocumentMetadataThrows_HttpClientErrorException_ResourceNotFoundException() {
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
+        HttpClientErrorException httpClientErrorException = HttpClientErrorException.create(HttpStatus.NOT_FOUND,"woopsie", new HttpHeaders(),null,null);
+        Mockito.when(restTemplateMock.exchange(documentURL+"/41334a2b-79ce-44eb-9168-2d49a744be9c", HttpMethod.GET,requestEntity, StoredDocumentHalResource.class)).thenThrow(httpClientErrorException);
+
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+            sut.getDocumentMetadata(getUuid(MATCHED_DOCUMENT_ID));
+        });
+    }
+
+    @Test
+    void getDocumentMetadataThrows_HttpClientErrorException_ServiceException() {
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
+        Mockito.when(restTemplateMock.exchange(documentURL+"/41334a2b-79ce-44eb-9168-2d49a744be9c", HttpMethod.GET,requestEntity, StoredDocumentHalResource.class)).thenThrow(HttpClientErrorException.class);
+
+        Assertions.assertThrows(ServiceException.class, () -> {
+            sut.getDocumentMetadata(getUuid(MATCHED_DOCUMENT_ID));
         });
     }
 
