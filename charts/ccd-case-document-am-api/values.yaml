@@ -2,11 +2,12 @@ java:
   image: 'hmctspublic.azurecr.io/ccd/case-document-am-api:latest'
   ingressHost: ccd-case-document-am-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
   applicationPort: 4455
-  aadIdentityName: ccd
+  aadIdentityName: rpe
   keyVaults:
-    ccd:
+    s2s:
+      resourceGroup: rpe-service-auth-provider
       secrets:
-        - ccd-case-document-am-api-s2s-secret
+        - microservicekey-ccd-case-document-am-api
         - AppInsightsInstrumentationKey
   environment:
     IDAM_S2S_URL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
