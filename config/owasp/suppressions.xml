@@ -316,8 +316,16 @@
   </suppress>
   <suppress>
     <notes><![CDATA[
-   relates to flexmark-ext-gitlab-0.34.30.jar
-   ]]></notes>
-    <cpe>cpe:2.3:a:gitlab:gitlab:0.34.30:*:*:*:*:*:*:*</cpe>
+ file name: flexmark-ext-gitlab-0.34.30.jar
+ ]]></notes>
+    <packageUrl regex="true">^pkg:maven/com\.vladsch\.flexmark/flexmark\-ext\-gitlab@.*$</packageUrl>
+    <cpe>cpe:/a:gitlab:gitlab</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+ file name: flexmark-ext-gitlab-0.34.30.jar
+ ]]></notes>
+    <packageUrl regex="true">^pkg:maven/com\.vladsch\.flexmark/flexmark\-ext\-gitlab@.*$</packageUrl>
+    <cve>CVE-2019-9177</cve>
   </suppress>
 </suppressions>
