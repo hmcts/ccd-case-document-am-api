@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.Forbidden
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
+import uk.gov.hmcts.reform.ccd.document.am.model.enums.Classifications;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
@@ -179,6 +180,17 @@ public class CaseDocumentAmControllerTest {
                 "",
                 ""
             );
+        });
+
+    }
+
+    //Tests for UploadDocuments controller.
+    @Test
+    @DisplayName("Should throw 400 when caseTypeId input is malformed")
+    public void shouldThrowIllegalArgumentExceptionWhenCaseTypeIdIsMalformed() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            testee.uploadDocuments(null, Classifications.PUBLIC.name(), null, "sampleServiceAuthToken"
+                , "BEFTA_CASETYPE_2&&&&&&&&&", "BEFTA_JURISDICTION_2", "userId", "dummyrole");
         });
 
     }

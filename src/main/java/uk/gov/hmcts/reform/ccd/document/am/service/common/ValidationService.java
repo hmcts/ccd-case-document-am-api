@@ -5,6 +5,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.SecurityClassification;
@@ -44,7 +45,7 @@ public class ValidationService {
 
     public static void validateInputs(String pattern, String... inputString) {
         for (String input : inputString) {
-            if (!Pattern.matches(pattern, input)) {
+            if (StringUtils.isNotEmpty(input) && !Pattern.matches(pattern, input)) {
                 throw new IllegalArgumentException("The input parameter "
                                                    + input + " does not complies with the required pattern");
             }

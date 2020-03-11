@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
@@ -268,19 +269,19 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
         try {
-            ValidationService.validateInputs(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification);
+            ValidationService.validateInputs(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification, userRoles);
             ValidationService.isValidSecurityClassification(classification);
 
             return documentManagementService.uploadDocuments(files, classification, roles,
                                                              serviceAuthorization, caseTypeId, jurisdictionId, userId);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(e.getMessage());
+        }
+        catch (IllegalArgumentException e) {
+            LOG.error("Exception while uploading the documents :" + e.getMessage());
+            throw new IllegalArgumentException("Exception while uploading the documents :" + e.getMessage());
+        }
+        catch (Exception e) {
+            LOG.error("Exception while uploading the documents :" + e.getMessage());
+            throw new ResponseFormatException("Exception while uploading the documents :" + e.getMessage());
         }
     }
 }
