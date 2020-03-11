@@ -2,7 +2,7 @@ java:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   keyVaults:
-    "s2s":
+    s2s:
       resourceGroup: rpe-service-auth-provider
       secrets:
         - ccd-case-document-am-api-s2s-secret
