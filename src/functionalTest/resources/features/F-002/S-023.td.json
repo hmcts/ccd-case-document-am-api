@@ -21,8 +21,6 @@
     },
     "body" : {
       "timestamp" : "[[ANYTHING_PRESENT]]",
-      "status" : 400,
-      "error" : "Bad Request",
       "message" : "Failed to convert value of type 'java.lang.String' to required type 'java.util.UUID'; nested exception is java.lang.NumberFormatException: For input string: \"@£$&\"",
       "path" : "/cases/documents/8de9957b-d7a6-40a1-%40%C2%A3%24%26-6aac30d33644/binary"
     }

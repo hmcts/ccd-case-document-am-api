@@ -26,8 +26,6 @@
     },
     "body" : {
       "timestamp" : "[[ANYTHING_PRESENT]]",
-      "status" : 401,
-      "error" : "Unauthorized",
       "message" : "Insufficient permission on requested  document TO BE UPDATED AFTER AM450",
       "path" : "/cases/documents/8de9957b-d7a6-40a1-7777-6aac30d33644/binary"
     }
