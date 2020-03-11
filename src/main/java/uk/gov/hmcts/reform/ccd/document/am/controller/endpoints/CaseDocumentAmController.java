@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
@@ -269,17 +270,16 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
         try {
-            ValidationService.validateInputs(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification, userRoles);
+            ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification, userRoles);
             ValidationService.isValidSecurityClassification(classification);
+            ValidationService.validateLists(files, roles);
 
             return documentManagementService.uploadDocuments(files, classification, roles,
                                                              serviceAuthorization, caseTypeId, jurisdictionId, userId);
-        }
-        catch (IllegalArgumentException e) {
+        } catch (BadRequestException | IllegalArgumentException e) {
             LOG.error("Exception while uploading the documents :" + e.getMessage());
-            throw new IllegalArgumentException("Exception while uploading the documents :" + e.getMessage());
-        }
-        catch (Exception e) {
+            throw new BadRequestException("Exception while uploading the documents :" + e.getMessage());
+        } catch (Exception e) {
             LOG.error("Exception while uploading the documents :" + e.getMessage());
             throw new ResponseFormatException("Exception while uploading the documents :" + e.getMessage());
         }

@@ -1,13 +1,16 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.common;
 
+import java.util.List;
 import java.util.regex.Pattern;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.SecurityClassification;
 
 @Named
@@ -39,15 +42,22 @@ public class ValidationService {
             Enum.valueOf(SecurityClassification.class, securityClassification);
         } catch (final IllegalArgumentException ex) {
             LOG.info("The security classification is not valid");
-            throw new IllegalArgumentException("The security classification" + securityClassification + " is not valid");
+            throw new BadRequestException("The security classification" + securityClassification + " is not valid");
         }
     }
 
-    public static void validateInputs(String pattern, String... inputString) {
+    public static void validateInputParams(String pattern, String... inputString) {
         for (String input : inputString) {
-            if (StringUtils.isNotEmpty(input) && !Pattern.matches(pattern, input)) {
-                throw new IllegalArgumentException("The input parameter "
-                                                   + input + " does not complies with the required pattern");
+            if (StringUtils.isEmpty(input) || !Pattern.matches(pattern, input)) {
+                throw new IllegalArgumentException("The input parameter does not complies with the required pattern");
+            }
+        }
+    }
+
+    public static void validateLists(List<?>... inputList) {
+        for (List list : inputList) {
+            if (CollectionUtils.isEmpty(list)) {
+                throw new BadRequestException("The List is empty");
             }
         }
     }

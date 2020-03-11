@@ -11,6 +11,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +28,9 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
@@ -37,7 +41,8 @@ import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 
-@SuppressWarnings("PMD.DataflowAnomalyAnalysis")
+@SuppressWarnings({"PMD.DataflowAnomalyAnalysis", "PMD.AvoidDuplicateLiteralsRule"})
+
 public class CaseDocumentAmControllerTest {
     @InjectMocks
     private transient CaseDocumentAmController testee;
@@ -57,6 +62,7 @@ public class CaseDocumentAmControllerTest {
     private static final String MATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9c";
     private static final String UNMATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9d";
     private static final String CASE_ID = "1582550122096256";
+    private static final String DUMMY_ROLE = "dummyRole";
 
     @BeforeEach
     public void setUp() {
@@ -185,15 +191,66 @@ public class CaseDocumentAmControllerTest {
     }
 
     //Tests for UploadDocuments controller.
+
+    @Test
+    @DisplayName("Should throw 400 when the uploaded file is empty")
+    public void shouldThrowBadRequestExceptionWhenUploadedFilesIsNull() {
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            testee.uploadDocuments(null, Classifications.PUBLIC.name(), Arrays.asList("dummyRole"), "sampleServiceAuthToken",
+                                   "BEFTA_CASETYPE_2", "BEFTA_JURISDICTION_2", "userId", "dummyrole");
+        });
+    }
+
+    @Test
+    @DisplayName("Should throw 400 when user-roles are empty")
+    public void shouldThrowBadRequestExceptionWhenUserRolesAreEmpty() {
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            testee.uploadDocuments(generateMultipartList(),
+                                   Classifications.PUBLIC.name(), Arrays.asList("dummyRole"), "sampleServiceAuthToken",
+                                   "BEFTA_CASETYPE_2", "BEFTA@JURISDICTION_2$$$$", "userId", null);
+        });
+    }
+
+    @Test
+    @DisplayName("Should throw 400 when caseTypeId input is null")
+    public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsNull() {
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            testee.uploadDocuments(generateMultipartList(),
+                                   Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE), "sampleServiceAuthToken",
+                                   null, "BEFTA_JURISDICTION_2", "userId", "dummyrole");
+        });
+    }
+
     @Test
     @DisplayName("Should throw 400 when caseTypeId input is malformed")
-    public void shouldThrowIllegalArgumentExceptionWhenCaseTypeIdIsMalformed() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            testee.uploadDocuments(null, Classifications.PUBLIC.name(), null, "sampleServiceAuthToken"
-                , "BEFTA_CASETYPE_2&&&&&&&&&", "BEFTA_JURISDICTION_2", "userId", "dummyrole");
+    public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsMalformed() {
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            testee.uploadDocuments(generateMultipartList(),
+                                   Classifications.PUBLIC.name(), null, "sampleServiceAuthToken",
+                                   "BEFTA_CASETYPE_2&&&&&&&&&", "BEFTA_JURISDICTION_2", "userId", "dummyrole");
         });
-
     }
+
+    @Test
+    @DisplayName("Should throw 400 when jurisdictionId input is null")
+    public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsNull() {
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            testee.uploadDocuments(generateMultipartList(),
+                                   Classifications.PUBLIC.name(), null, "sampleServiceAuthToken",
+                                   "BEFTA_CASETYPE_2", null, "userId", "dummyrole");
+        });
+    }
+
+    @Test
+    @DisplayName("Should throw 400 when jurisdictionId input is malformed")
+    public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsMalformed() {
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            testee.uploadDocuments(generateMultipartList(),
+                                   Classifications.PUBLIC.name(), null, "sampleServiceAuthToken",
+                                   "BEFTA_CASETYPE_2", "BEFTA@JURISDICTION_2$$$$", "userId", "dummyrole");
+        });
+    }
+
 
     private ResponseEntity<StoredDocumentHalResource> setDocumentMetaData() {
         StoredDocumentHalResource resource = new StoredDocumentHalResource();
@@ -237,5 +294,14 @@ public class CaseDocumentAmControllerTest {
         headers.set("Content-Length", "25");
         headers.set("Content-Type", "application/json");
         return headers;
+    }
+
+    private List<MultipartFile> generateMultipartList() {
+        ArrayList<MultipartFile> listFiles = new ArrayList<>();
+        listFiles.add(new MockMultipartFile("file1", "test1.jpg",
+                                            "image/jpeg", "HelloString".getBytes()));
+        listFiles.add(new MockMultipartFile("file2", "test2.jpg",
+                                            "image/jpeg", "HelloString2".getBytes()));
+        return listFiles;
     }
 }
