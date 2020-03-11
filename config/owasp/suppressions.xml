@@ -314,4 +314,10 @@
     <cve>CVE-2019-17569</cve>
     <cve>CVE-2020-1935</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to flexmark-ext-gitlab-0.34.30.jar
+   ]]></notes>
+    <cpe>cpe:2.3:a:gitlab:gitlab:0.34.30:*:*:*:*:*:*:*</cpe>
+  </suppress>
 </suppressions>

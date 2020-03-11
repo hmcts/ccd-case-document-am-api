@@ -67,7 +67,6 @@ public class CaseDocumentAmControllerTest {
     private static final String BEFTA_JURISDICTION_2 =  "BEFTA_JURISDICTION_2";
     private static final String USER_ID =  "userId";
 
-
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
