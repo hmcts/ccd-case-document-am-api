@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.ccd.document.am.controller.advice;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
@@ -20,17 +18,18 @@ import java.util.Date;
 import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 
-@RunWith(MockitoJUnitRunner.class)
 public class CaseDocumentControllerAdviceTest {
 
-    private CaseDocumentControllerAdvice csda = new CaseDocumentControllerAdvice();
-    private HttpServletRequest servletRequestMock = mock(HttpServletRequest.class);
+    private transient CaseDocumentControllerAdvice csda = new CaseDocumentControllerAdvice();
+
+    private transient HttpServletRequest servletRequestMock = mock(HttpServletRequest.class);
 
     @Test
     public void handleUnautorizedExceptionException() {
         UnauthorizedException unauthorizedException = mock(UnauthorizedException.class);
         ResponseEntity<Object> responseEntity = csda.handleUnautorizedExceptionException(servletRequestMock, unauthorizedException);
         assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.UNAUTHORIZED.value(),responseEntity.getStatusCodeValue());
     }
 
     @Test
@@ -38,6 +37,7 @@ public class CaseDocumentControllerAdviceTest {
         RequiredFieldMissingException requiredFieldMissingException = mock(RequiredFieldMissingException.class);
         ResponseEntity<Object> responseEntity = csda.handleRequiredFieldMissingException(servletRequestMock, requiredFieldMissingException);
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
     }
 
     @Test
@@ -45,6 +45,7 @@ public class CaseDocumentControllerAdviceTest {
         InvalidRequest invalidRequestException = mock(InvalidRequest.class);
         ResponseEntity<Object> responseEntity = csda.customValidationError(invalidRequestException);
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
     }
 
     @Test
@@ -52,6 +53,7 @@ public class CaseDocumentControllerAdviceTest {
         MethodArgumentNotValidException methodArgumentNotValidException = mock(MethodArgumentNotValidException.class);
         ResponseEntity<Object> responseEntity = csda.handleMethodArgumentNotValidException(servletRequestMock, methodArgumentNotValidException);
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
     }
 
     @Test
@@ -59,6 +61,7 @@ public class CaseDocumentControllerAdviceTest {
         ResourceNotFoundException resourceNotFoundException = mock(ResourceNotFoundException.class);
         ResponseEntity<Object> responseEntity = csda.handleResourceNotFoundException(servletRequestMock,resourceNotFoundException);
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND.value(), responseEntity.getStatusCodeValue());
     }
 
     @Test
@@ -66,6 +69,7 @@ public class CaseDocumentControllerAdviceTest {
         HttpMessageConversionException httpMessageConversionException = mock(HttpMessageConversionException.class);
         ResponseEntity<Object> responseEntity = csda.handleHttpMessageConversionException(servletRequestMock, httpMessageConversionException);
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
     }
 
     @Test
@@ -73,6 +77,8 @@ public class CaseDocumentControllerAdviceTest {
         Exception exception = mock(Exception.class);
         ResponseEntity<Object> responseEntity = csda.handleUnknownException(servletRequestMock, exception);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
+
     }
 
     @Test

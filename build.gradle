@@ -1,9 +1,13 @@
 buildscript {
   repositories {
     jcenter()
+    mavenCentral()
   }
+  configurations.maybeCreate("pitest")
   dependencies {
     classpath("net.serenity-bdd:serenity-gradle-plugin:2.0.82")
+    classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.4.5'
+    pitest 'org.pitest:pitest-junit5-plugin:0.10'
   }
 }
 
@@ -13,7 +17,7 @@ plugins {
   id 'pmd'
   id 'jacoco'
   id 'io.spring.dependency-management' version '1.0.8.RELEASE'
-  id 'info.solidsoft.pitest' version '1.3.0'
+  id 'info.solidsoft.pitest' version '1.4.5'
   id 'org.springframework.boot' version '2.2.2.RELEASE'
   id 'org.owasp.dependencycheck' version '5.2.4'
   id 'com.github.ben-manes.versions' version '0.27.0'
@@ -21,6 +25,7 @@ plugins {
   id 'com.github.spacialcircumstances.gradle-cucumber-reporting' version '0.1.15'
 }
 
+apply plugin: "info.solidsoft.pitest"
 apply plugin: 'java'
 apply plugin: 'net.serenity-bdd.aggregator'
 apply plugin: 'project-report'
@@ -163,14 +168,14 @@ jacoco {
 }
 
 pitest {
+  pitestVersion = "1.4.9"
+  testPlugin = "junit5"
   targetClasses = ['uk.gov.hmcts.reform.ccd.document.am.*']
-  excludedClasses = [
-
-  ]
-  threads = 10
+  excludedClasses = ['uk.gov.hmcts.reform.ccd.document.am.configuration.*']
+  threads = 15
   outputFormats = ['XML', 'HTML']
-  timestampedReports = false
-  mutationThreshold = 80
+  timestampedReports = true
+  mutationThreshold = 10
 }
 
 project.tasks['pitest'].group="verification"
