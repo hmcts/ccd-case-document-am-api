@@ -61,6 +61,7 @@ env.OAUTH2_CLIENT_ID = "ccd_gateway"
 env.OAUTH2_REDIRECT_URI = "https://www-ccd.aat.platform.hmcts.net/oauth2redirect"
 env.DOCUMENT_STORE_URL = "http://dm-store-pr-529.service.core-compute-preview.internal/documents"
 env.DEFINITION_STORE_HOST = "http://ccd-definition-store-api-pr-469.service.core-compute-preview.internal"
+env.CCD_DATA_STORE_URL = "http://ccd-data-store-api-pr-842.service.core-compute-preview.internal"
 
 withPipeline(type, product, component) {
   onMaster {
