@@ -219,23 +219,6 @@ class DocumentManagementServiceImplTest {
         assertNull(collection);
     }
 
-    //@Test
-    void checkUserPermission() {
-        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
-        HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
-        Mockito.when(restTemplateMock.exchange(
-        documentURL + "/" + MATCHED_DOCUMENT_ID,
-            HttpMethod.GET,
-            requestEntity,
-            StoredDocumentHalResource.class))
-            .thenReturn(new ResponseEntity<StoredDocumentHalResource>(storedDocumentHalResource,HttpStatus.OK));
-        ResponseEntity responseEntity = sut.getDocumentMetadata(getUuid(MATCHED_DOCUMENT_ID));
-        assertEquals(HttpStatus.OK,responseEntity.getStatusCode());
-
-        Boolean bool = sut.checkUserPermission(responseEntity, getUuid(MATCHED_DOCUMENT_ID));
-        assertEquals(true, bool);
-    }
-
     private UUID getUuid(String id) {
         return UUID.fromString(id);
     }
