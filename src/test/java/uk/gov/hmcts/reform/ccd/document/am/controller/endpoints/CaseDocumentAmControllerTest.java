@@ -12,31 +12,28 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
-import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
-import uk.gov.hmcts.reform.ccd.document.am.model.Document;
-import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
+import uk.gov.hmcts.reform.ccd.document.am.model.*;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
-
-import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Arrays;
 import java.util.UUID;
+import java.util.Date;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.any;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
 public class CaseDocumentAmControllerTest {
@@ -58,6 +55,8 @@ public class CaseDocumentAmControllerTest {
     private static final String MATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9c";
     private static final String UNMATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9d";
     private static final String CASE_ID = "1582550122096256";
+    private static final String VALID_RESPONSE = "Valid Response from API";
+    private static final String RESPONSE_CODE = "Status code is OK";
 
     @BeforeEach
     public void setUp() {
@@ -183,6 +182,67 @@ public class CaseDocumentAmControllerTest {
             );
         });
 
+    }
+
+    @Test
+    public void shouldDeleteDocumentbyDocumentId() {
+        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        ResponseEntity response = testee.deleteDocumentbyDocumentId("", getUuid(), TRUE, "", "");
+
+        assertAll(
+            () ->  assertNotNull(response, VALID_RESPONSE),
+            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE)
+        );
+    }
+
+    @Test
+    public void shouldPatchDocumentbyDocumentId() {
+        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        UpdateDocumentCommand body = null;
+        ResponseEntity response = testee.patchDocumentbyDocumentId(body,"", getUuid(), "", "");
+
+        assertAll(
+            () ->  assertNotNull(response, "Valid Response from API"),
+            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE)
+        );
+    }
+
+    @Test
+    public void shouldPostDocumentsSearchCommand() {
+        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        MetadataSearchCommand body = null;
+        ResponseEntity response = testee.postDocumentsSearchCommand(body,"", "", "", 10L, 10, 10, TRUE, TRUE, TRUE, TRUE);
+
+        assertAll(
+            () ->  assertNotNull(response, VALID_RESPONSE),
+            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE)
+        );
+    }
+
+    @Test
+    public void shouldPostDocumentsWithBinaryFile() {
+        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        MetadataSearchCommand body = null;
+        ResponseEntity response = testee.postDocumentsWithBinaryFile("", new Date(), new ArrayList<>(), new ArrayList<>(), "", "", "", "", "");
+
+        assertAll(
+            () ->  assertNotNull(response, VALID_RESPONSE),
+            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE)
+        );
+    }
+
+
+
+    @Test
+    public void shouldPatchMetaDataOnDocuments() {
+        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        CaseDocumentMetadata body = null;
+        ResponseEntity response = testee.patchMetaDataOnDocuments(body,"", "", "");
+
+        assertAll(
+            () ->  assertNotNull(response, VALID_RESPONSE),
+            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE)
+        );
     }
 
     private ResponseEntity<StoredDocumentHalResource> setDocumentMetaData() {
