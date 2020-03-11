@@ -31,7 +31,7 @@ locals {
   oauth2_redirect_uri = "${var.frontend_url != "" ? local.custom_redirect_uri : local.default_redirect_uri}"
   definition_store_host = "http://ccd-definition-store-api-${local.env_ase_url}"
   document_store_url = "http://dm-store-${local.env_ase_url}"
-
+  ccd_data_store_url = "http://ccd-data-store-api-${local.env_ase_url}"
  }
 
 data "azurerm_key_vault" "ccd_shared_key_vault" {
@@ -102,6 +102,7 @@ module "ccd-case-document-am-api" {
     CCD_DRAFT_ENCRYPTION_KEY            = "${random_string.draft_encryption_key.result}"
     DEFINITION_STORE_HOST               = "${local.definition_store_host}"
     DOCUMENT_STORE_URL                   = "${local.document_store_url}"
+    CCD_DATA_STORE_URL                   = "${local.ccd_data_store_url}"
 
     HTTP_CLIENT_CONNECTION_TIMEOUT        = "${var.http_client_connection_timeout}"
     HTTP_CLIENT_READ_TIMEOUT              = "${var.http_client_read_timeout}"
