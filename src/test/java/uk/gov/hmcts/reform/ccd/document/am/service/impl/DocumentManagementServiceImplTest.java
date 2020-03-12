@@ -69,7 +69,7 @@ class DocumentManagementServiceImplTest {
                                                                                   caseDataStoreServiceMock, validationService);
 
     @Value("${documentStoreUrl}")
-    private transient String documentURL;
+    protected String documentURL;
 
     @Test
     void documentMetadataInstantiation() {
