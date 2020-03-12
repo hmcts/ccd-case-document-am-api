@@ -14,7 +14,9 @@ variable "raw_product" {
   default = "ccd" // jenkins-library overrides product for PRs and adds e.g. pr-118-ccd
 }
 
-variable "env" {}
+variable "env" {
+  type = "string"
+}
 
 variable "subscription" {}
 

@@ -1,14 +1,7 @@
+
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiParam;
@@ -34,6 +27,13 @@ import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollec
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.List;
+import java.util.UUID;
 import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 
 @Controller
@@ -75,20 +75,8 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<String>(
-                    objectMapper.readValue("\"\"", String.class),
-                    HttpStatus.NOT_IMPLEMENTED
-                );
-            } catch (IOException e) {
-                LOG.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
 
-        return new ResponseEntity<String>(HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<String>(HttpStatus.OK);
     }
 
     @Override
@@ -154,20 +142,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
 
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<StoredDocumentHalResource>(objectMapper.readValue(
-                    "",
-                    StoredDocumentHalResource.class
-                ), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                LOG.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
-
-        return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.OK);
     }
 
     @Override
@@ -185,20 +160,8 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<StoredDocumentHalResource>(objectMapper.readValue(
-                    "",
-                    StoredDocumentHalResource.class
-                ), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                LOG.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
 
-        return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.OK);
     }
 
     @Override
@@ -219,20 +182,8 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam("") @Valid @RequestParam(value = "sort.sorted", required = false) Boolean sortSorted,
         @ApiParam("") @Valid @RequestParam(value = "sort.unsorted", required = false) Boolean sortUnsorted,
         @ApiParam("") @Valid @RequestParam(value = "unpaged", required = false) Boolean unpaged) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<StoredDocumentHalResourceCollection>(objectMapper.readValue(
-                    "",
-                    StoredDocumentHalResourceCollection.class
-                ), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                LOG.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<StoredDocumentHalResourceCollection>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
 
-        return new ResponseEntity<StoredDocumentHalResourceCollection>(HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<StoredDocumentHalResourceCollection>(HttpStatus.OK);
     }
 
     @Override
@@ -284,4 +235,6 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             throw new ResponseFormatException("Exception while uploading the documents :" + e.getMessage());
         }
     }
+
+
 }
