@@ -60,6 +60,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils,CaseDataStoreService caseDataStoreService,
                                          ValidationService validationService) {
         this.restTemplate = restTemplate;
+
         this.securityUtils = securityUtils;
         this.caseDataStoreService = caseDataStoreService;
         this.validationService = validationService;
