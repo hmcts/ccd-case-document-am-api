@@ -15,12 +15,22 @@
   },
 
   "expectedResponse": {
-    "responseCode": 200,
-    "body": {
-     "__fileInBody__" : {
-       "fullPath" : "file",
-       "size" : "679361",
-       "contentHash" : "hash"
+    "_extends_": "Common_200_Response",
+    "headers" : {
+      "Accept-Ranges" : "bytes",
+      "Connection" : "keep-alive",
+      "Content-Disposition" : "[[ANYTHING_PRESENT]]",
+      "Content-Length" : "679361",
+      "Content-Type" : "image/png",
+      "data-source" : "contentURI",
+      "Keep-Alive" :"[[ANYTHING_PRESENT]]",
+      "OriginalFileName" : "[[ANYTHING_PRESENT]]"
+    },
+    "body" : {
+      "__fileInBody__" : {
+        "fullPath" : "file",
+        "size" : "679361",
+        "contentHash" : "hash"
       }
     }
   }
