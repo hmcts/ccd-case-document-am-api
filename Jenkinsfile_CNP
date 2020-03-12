@@ -34,7 +34,6 @@ def secrets = [
         secret('ccd-api-gateway-oauth2-client-secret', 'OAUTH2_CLIENT_SECRET')
     ],
     's2s-${env}': [
-        secret('microservicekey-ccd-gw', 'CCD_GW_SERVICE_SECRET'),
         secret('microservicekey-ccd-case-document-am-api', 'BEFTA_S2S_CLIENT_SECRET')
     ]
 ]
@@ -57,11 +56,10 @@ def vaultOverrides = [
 env.IDAM_URL = "https://idam-api.aat.platform.hmcts.net"
 env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
 env.BEFTA_S2S_CLIENT_ID = "ccd_case_document_am_api"
-env.CCD_GW_SERVICE_NAME = "ccd_gw"
 env.OAUTH2_CLIENT_ID = "ccd_gateway"
 env.OAUTH2_REDIRECT_URI = "https://www-ccd.aat.platform.hmcts.net/oauth2redirect"
 env.DOCUMENT_STORE_URL = "http://dm-store-pr-529.service.core-compute-preview.internal/documents"
-env.DEFINITION_STORE_HOST = "http://ccd-definition-store-api-pr-469.service.core-compute-preview.internal"
+env.DEFINITION_STORE_HOST = "http://ccd-definition-store-api-pr-552.service.core-compute-preview.internal"
 env.CCD_DATA_STORE_URL = "http://ccd-data-store-api-pr-842.service.core-compute-preview.internal"
 
 withPipeline(type, product, component) {
