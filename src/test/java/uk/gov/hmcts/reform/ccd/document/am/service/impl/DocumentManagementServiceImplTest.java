@@ -326,7 +326,8 @@ class DocumentManagementServiceImplTest {
             sut.checkUserPermission(responseEntity, getUuid(MATCHED_DOCUMENT_ID));
         });
 
-        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID,HttpMethod.GET,requestEntity, StoredDocumentHalResource.class); }
+        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID,HttpMethod.GET,requestEntity, StoredDocumentHalResource.class);
+    }
 
     @Test
     void checkUserPermission_ReturnsFalse_Scenario1() {
