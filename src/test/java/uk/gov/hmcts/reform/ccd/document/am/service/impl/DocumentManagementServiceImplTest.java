@@ -271,6 +271,9 @@ class DocumentManagementServiceImplTest {
 
         Boolean result = sut.checkUserPermission(responseEntity, getUuid(MATCHED_DOCUMENT_ID));
         assertEquals(Boolean.TRUE, result);
+
+        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID,HttpMethod.GET,requestEntity, StoredDocumentHalResource.class);
+        verify(caseDataStoreServiceMock, times(1)).getCaseDocumentMetadata(anyString(),any(UUID.class));
     }
 
     @Test
@@ -299,6 +302,9 @@ class DocumentManagementServiceImplTest {
         Assertions.assertThrows(Exception.class, () -> {
             sut.checkUserPermission(responseEntity, getUuid(MATCHED_DOCUMENT_ID));
         });
+
+        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID,HttpMethod.GET,requestEntity, StoredDocumentHalResource.class);
+        verify(caseDataStoreServiceMock, times(1)).getCaseDocumentMetadata(anyString(),any(UUID.class));
     }
 
     @Test
@@ -319,7 +325,8 @@ class DocumentManagementServiceImplTest {
         Assertions.assertThrows(BadRequestException.class, () -> {
             sut.checkUserPermission(responseEntity, getUuid(MATCHED_DOCUMENT_ID));
         });
-    }
+
+        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID,HttpMethod.GET,requestEntity, StoredDocumentHalResource.class); }
 
     @Test
     void checkUserPermission_ReturnsFalse_Scenario1() {
@@ -345,6 +352,9 @@ class DocumentManagementServiceImplTest {
 
         Boolean result = sut.checkUserPermission(responseEntity, getUuid(MATCHED_DOCUMENT_ID));
         assertEquals(Boolean.FALSE, result);
+
+        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID,HttpMethod.GET,requestEntity, StoredDocumentHalResource.class);
+        verify(caseDataStoreServiceMock, times(1)).getCaseDocumentMetadata(anyString(),any(UUID.class));
     }
 
     @Test
@@ -371,6 +381,9 @@ class DocumentManagementServiceImplTest {
 
         Boolean result = sut.checkUserPermission(responseEntity, getUuid(MATCHED_DOCUMENT_ID));
         assertEquals(Boolean.FALSE, result);
+
+        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID,HttpMethod.GET,requestEntity, StoredDocumentHalResource.class);
+        verify(caseDataStoreServiceMock, times(1)).getCaseDocumentMetadata(anyString(),any(UUID.class));
     }
 
     private UUID getUuid(String id) {
