@@ -1,12 +1,10 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
-import org.junit.Before;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -55,16 +53,16 @@ import java.util.UUID;
 @RunWith(MockitoJUnitRunner.class)
 class DocumentManagementServiceImplTest {
 
-    private static final String CASE_ID = "1582550122096256";
     private static final String MATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9c";
 
     private AuthTokenGenerator authTokenGenerator = mock(AuthTokenGenerator.class);
-
     private RestTemplate restTemplateMock = Mockito.mock(RestTemplate.class);
+    private SecurityUtils securityUtils = new SecurityUtils(authTokenGenerator);
+    private CaseDataStoreService caseDataStoreServiceMock = mock(CaseDataStoreService.class);
+    private ValidationService validationService = new ValidationService();
 
-    private transient SecurityUtils securityUtils = new SecurityUtils(authTokenGenerator);
-    private transient CaseDataStoreService caseDataStoreServiceMock = mock(CaseDataStoreService.class);
-    private transient ValidationService validationService = new ValidationService();
+    private HttpEntity<?> requestEntityGlobal  = new HttpEntity<>(securityUtils.authorizationHeaders());
+    private UUID matchedDocUUID = UUID.fromString(MATCHED_DOCUMENT_ID);
 
     @InjectMocks
     private DocumentManagementServiceImpl sut = new DocumentManagementServiceImpl(restTemplateMock, securityUtils,
@@ -72,11 +70,6 @@ class DocumentManagementServiceImplTest {
 
     @Value("${documentStoreUrl}")
     private transient String documentURL;
-
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     void documentMetadataInstantiation() {
@@ -86,80 +79,64 @@ class DocumentManagementServiceImplTest {
     @Test
     void getDocumentMetadata_HappyPath() {
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
-        HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
-        Mockito.when(restTemplateMock.exchange(
-            documentURL + "/" + MATCHED_DOCUMENT_ID,
-            HttpMethod.GET,requestEntity,
-            StoredDocumentHalResource.class))
-            .thenReturn(new ResponseEntity<StoredDocumentHalResource>(storedDocumentHalResource,HttpStatus.OK));
-        ResponseEntity responseEntity = sut.getDocumentMetadata(getUuid(MATCHED_DOCUMENT_ID));
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
+        ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
         assertEquals(HttpStatus.OK,responseEntity.getStatusCode());
-        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID,HttpMethod.GET,requestEntity, StoredDocumentHalResource.class);
+
+        verifyRestExchangeOnStoredDoc();
     }
 
     @Test
     void getDocumentMetadata_Throws_ResourceNotFoundException() {
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
-        HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
-        Mockito.when(restTemplateMock.exchange(
-            documentURL + "/" + MATCHED_DOCUMENT_ID,
-            HttpMethod.GET,requestEntity,
-            StoredDocumentHalResource.class))
-            .thenReturn(new ResponseEntity<StoredDocumentHalResource>(storedDocumentHalResource,HttpStatus.BAD_REQUEST));
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.BAD_REQUEST);
         Assertions.assertThrows(ResourceNotFoundException.class, () -> {
-            sut.getDocumentMetadata(getUuid(MATCHED_DOCUMENT_ID));
+            sut.getDocumentMetadata(matchedDocUUID);
         });
-        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID,HttpMethod.GET,requestEntity, StoredDocumentHalResource.class);
+        verifyRestExchangeOnStoredDoc();
     }
 
     @Test
     void getDocumentMetadata_Throws_HttpClientErrorException_ResourceNotFoundException() {
-        HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
         HttpClientErrorException httpClientErrorException = HttpClientErrorException.create(HttpStatus.NOT_FOUND,"woopsie", new HttpHeaders(),null,null);
         Mockito.when(restTemplateMock.exchange(
             documentURL + "/" + MATCHED_DOCUMENT_ID,
-            HttpMethod.GET,requestEntity,
+            HttpMethod.GET,requestEntityGlobal,
             StoredDocumentHalResource.class))
             .thenThrow(httpClientErrorException);
         Assertions.assertThrows(ResourceNotFoundException.class, () -> {
-            sut.getDocumentMetadata(getUuid(MATCHED_DOCUMENT_ID));
+            sut.getDocumentMetadata(matchedDocUUID);
         });
-        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID,HttpMethod.GET,requestEntity, StoredDocumentHalResource.class);
+        verifyRestExchangeOnStoredDoc();
     }
 
     @Test
     void getDocumentMetadata_Throws_HttpClientErrorException_ServiceException() {
-        HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
         Mockito.when(restTemplateMock.exchange(
             documentURL + "/" + MATCHED_DOCUMENT_ID,
-            HttpMethod.GET,requestEntity,
+            HttpMethod.GET,requestEntityGlobal,
             StoredDocumentHalResource.class))
             .thenThrow(HttpClientErrorException.class);
 
         Assertions.assertThrows(ServiceException.class, () -> {
-            sut.getDocumentMetadata(getUuid(MATCHED_DOCUMENT_ID));
+            sut.getDocumentMetadata(matchedDocUUID);
         });
-        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID,HttpMethod.GET,requestEntity, StoredDocumentHalResource.class);
+        verifyRestExchangeOnStoredDoc();
     }
 
     @Test
     void extractCaseIdFromMetadata_HappyPath() {
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
         Map<String, String> myMap = new HashMap<>();
-        myMap.put("caseId","1234qwer");
+        myMap.put("caseId","1234qwer1234qwer");
         storedDocumentHalResource.setMetadata(myMap);
-        HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
-        Mockito.when(restTemplateMock.exchange(
-            documentURL + "/" + MATCHED_DOCUMENT_ID,
-            HttpMethod.GET,requestEntity,
-            StoredDocumentHalResource.class))
-            .thenReturn(new ResponseEntity<StoredDocumentHalResource>(storedDocumentHalResource,HttpStatus.OK));
-        ResponseEntity responseEntity = sut.getDocumentMetadata(getUuid(MATCHED_DOCUMENT_ID));
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
+        ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
         assertEquals(responseEntity.getStatusCode(),HttpStatus.OK);
 
         String caseId = sut.extractCaseIdFromMetadata(responseEntity.getBody());
-        assertEquals("1234qwer", caseId);
-        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID,HttpMethod.GET,requestEntity, StoredDocumentHalResource.class);
+        assertEquals("1234qwer1234qwer", caseId);
+        verifyRestExchangeOnStoredDoc();
     }
 
     @Test
@@ -177,66 +154,66 @@ class DocumentManagementServiceImplTest {
         headers.add(CONTENT_TYPE, "type");
         headers.add(CONTENT_LENGTH, "length");
 
-        HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
         Mockito.when(restTemplateMock.exchange(
             documentURL + "/" + MATCHED_DOCUMENT_ID + "/binary",
             HttpMethod.GET,
-            requestEntity,
+            requestEntityGlobal,
             ByteArrayResource.class
         )).thenReturn(new ResponseEntity<ByteArrayResource>(headers, HttpStatus.OK));
-        ResponseEntity responseEntity = sut.getDocumentBinaryContent(getUuid(MATCHED_DOCUMENT_ID));
+        ResponseEntity responseEntity = sut.getDocumentBinaryContent(matchedDocUUID);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
         assertEquals(responseEntity.getHeaders(),headers);
 
-        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID + "/binary",HttpMethod.GET,requestEntity, ByteArrayResource.class);
+        verifyRestExchangeByteArray();
     }
 
     @Test
     void getDocumentBinaryContent_Try_ResponseNotOK() {
         ByteArrayResource byteArrayResource = mock(ByteArrayResource.class);
-        HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
         Mockito.when(restTemplateMock.exchange(
             documentURL + "/" + MATCHED_DOCUMENT_ID + "/binary",
-            HttpMethod.GET,requestEntity, ByteArrayResource.class))
+            HttpMethod.GET,requestEntityGlobal, ByteArrayResource.class))
             .thenReturn(new ResponseEntity<ByteArrayResource>(byteArrayResource,HttpStatus.BAD_REQUEST));
-        ResponseEntity responseEntity = sut.getDocumentBinaryContent(getUuid(MATCHED_DOCUMENT_ID));
+        ResponseEntity responseEntity = sut.getDocumentBinaryContent(matchedDocUUID);
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
 
-        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID + "/binary",HttpMethod.GET,requestEntity, ByteArrayResource.class);
+        verifyRestExchangeByteArray();
     }
 
     @Test
     void getDocumentBinaryContent_Throws_HttpClientErrorException_ResourceNotFoundException() {
-        HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
         HttpClientErrorException httpClientErrorException = HttpClientErrorException.create(HttpStatus.NOT_FOUND,"woopsie", new HttpHeaders(),null,null);
-        Mockito.when(restTemplateMock.exchange(
-            documentURL + "/" + MATCHED_DOCUMENT_ID + "/binary",
-            HttpMethod.GET,requestEntity,
-            ByteArrayResource.class))
-            .thenThrow(httpClientErrorException);
+        mockitoWhenRestExchangeByteArrayThenThrow(httpClientErrorException);
 
         Assertions.assertThrows(ResourceNotFoundException.class, () -> {
-            sut.getDocumentBinaryContent(getUuid(MATCHED_DOCUMENT_ID));
+            sut.getDocumentBinaryContent(matchedDocUUID);
         });
 
-        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID + "/binary",HttpMethod.GET,requestEntity, ByteArrayResource.class);
+        verifyRestExchangeByteArray();
+    }
+
+    private void mockitoWhenRestExchangeByteArrayThenThrow(HttpClientErrorException httpClientErrorException) {
+        Mockito.when(restTemplateMock.exchange(
+            documentURL + "/" + MATCHED_DOCUMENT_ID + "/binary",
+            HttpMethod.GET,requestEntityGlobal,
+            ByteArrayResource.class))
+            .thenThrow(httpClientErrorException);
     }
 
     @Test
     void getDocumentBinaryContent_Throws_HttpClientErrorException_ServiceException() {
-        HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
         Mockito.when(restTemplateMock.exchange(
             documentURL + "/" + MATCHED_DOCUMENT_ID + "/binary",
-            HttpMethod.GET,requestEntity,
+            HttpMethod.GET,requestEntityGlobal,
             ByteArrayResource.class))
             .thenThrow(HttpClientErrorException.class);
 
         Assertions.assertThrows(ServiceException.class, () -> {
-            sut.getDocumentBinaryContent(getUuid(MATCHED_DOCUMENT_ID));
+            sut.getDocumentBinaryContent(matchedDocUUID);
         });
 
-        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID + "/binary",HttpMethod.GET,requestEntity, ByteArrayResource.class);
+        verifyRestExchangeByteArray();
     }
 
     @Test
@@ -252,14 +229,9 @@ class DocumentManagementServiceImplTest {
         Map<String, String> myMap = new HashMap<>();
         myMap.put("caseId","1234qwer1234qwer");
         storedDocumentHalResource.setMetadata(myMap);
-        HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
 
-        Mockito.when(restTemplateMock.exchange(
-            documentURL + "/" + MATCHED_DOCUMENT_ID,
-            HttpMethod.GET,requestEntity,
-            StoredDocumentHalResource.class))
-            .thenReturn(new ResponseEntity<StoredDocumentHalResource>(storedDocumentHalResource,HttpStatus.OK));
-        ResponseEntity responseEntity = sut.getDocumentMetadata(getUuid(MATCHED_DOCUMENT_ID));
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
+        ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
         assertEquals(responseEntity.getStatusCode(),HttpStatus.OK);
         List<Permission> permissionsList = new ArrayList<>();
         permissionsList.add(Permission.READ);
@@ -269,11 +241,11 @@ class DocumentManagementServiceImplTest {
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class)))
             .thenReturn(Optional.ofNullable(cdm));
 
-        Boolean result = sut.checkUserPermission(responseEntity, getUuid(MATCHED_DOCUMENT_ID));
+        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID);
         assertEquals(Boolean.TRUE, result);
 
-        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID,HttpMethod.GET,requestEntity, StoredDocumentHalResource.class);
-        verify(caseDataStoreServiceMock, times(1)).getCaseDocumentMetadata(anyString(),any(UUID.class));
+        verifyRestExchangeOnStoredDoc();
+        verifyCaseDataServiceGetDocMetadata();
     }
 
     @Test
@@ -282,14 +254,9 @@ class DocumentManagementServiceImplTest {
         Map<String, String> myMap = new HashMap<>();
         myMap.put("caseId","1234qwer1234qwe5");
         storedDocumentHalResource.setMetadata(myMap);
-        HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
 
-        Mockito.when(restTemplateMock.exchange(
-            documentURL + "/" + MATCHED_DOCUMENT_ID,
-            HttpMethod.GET,requestEntity,
-            StoredDocumentHalResource.class))
-            .thenReturn(new ResponseEntity<StoredDocumentHalResource>(storedDocumentHalResource,HttpStatus.OK));
-        ResponseEntity responseEntity = sut.getDocumentMetadata(getUuid(MATCHED_DOCUMENT_ID));
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
+        ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
         assertEquals(responseEntity.getStatusCode(),HttpStatus.OK);
         List<Permission> permissionsList = new ArrayList<>();
         permissionsList.add(Permission.READ);
@@ -300,11 +267,11 @@ class DocumentManagementServiceImplTest {
             .thenReturn(null);
 
         Assertions.assertThrows(Exception.class, () -> {
-            sut.checkUserPermission(responseEntity, getUuid(MATCHED_DOCUMENT_ID));
+            sut.checkUserPermission(responseEntity, matchedDocUUID);
         });
 
-        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID,HttpMethod.GET,requestEntity, StoredDocumentHalResource.class);
-        verify(caseDataStoreServiceMock, times(1)).getCaseDocumentMetadata(anyString(),any(UUID.class));
+        verifyRestExchangeOnStoredDoc();
+        verifyCaseDataServiceGetDocMetadata();
     }
 
     @Test
@@ -313,20 +280,15 @@ class DocumentManagementServiceImplTest {
         Map<String, String> myMap = new HashMap<>();
         myMap.put("caseId","1234qwer");
         storedDocumentHalResource.setMetadata(myMap);
-        HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
-        Mockito.when(restTemplateMock.exchange(
-            documentURL + "/" + MATCHED_DOCUMENT_ID,
-            HttpMethod.GET,requestEntity,
-            StoredDocumentHalResource.class))
-            .thenReturn(new ResponseEntity<StoredDocumentHalResource>(storedDocumentHalResource,HttpStatus.OK));
-        ResponseEntity responseEntity = sut.getDocumentMetadata(getUuid(MATCHED_DOCUMENT_ID));
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
+        ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
         assertEquals(responseEntity.getStatusCode(),HttpStatus.OK);
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            sut.checkUserPermission(responseEntity, getUuid(MATCHED_DOCUMENT_ID));
+            sut.checkUserPermission(responseEntity, matchedDocUUID);
         });
 
-        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID,HttpMethod.GET,requestEntity, StoredDocumentHalResource.class);
+        verifyRestExchangeOnStoredDoc();
     }
 
     @Test
@@ -335,14 +297,9 @@ class DocumentManagementServiceImplTest {
         Map<String, String> myMap = new HashMap<>();
         myMap.put("caseId","1234qwer1234qwer");
         storedDocumentHalResource.setMetadata(myMap);
-        HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
 
-        Mockito.when(restTemplateMock.exchange(
-            documentURL + "/" + MATCHED_DOCUMENT_ID,
-            HttpMethod.GET,requestEntity,
-            StoredDocumentHalResource.class))
-            .thenReturn(new ResponseEntity<StoredDocumentHalResource>(storedDocumentHalResource,HttpStatus.OK));
-        ResponseEntity responseEntity = sut.getDocumentMetadata(getUuid(MATCHED_DOCUMENT_ID));
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
+        ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
         assertEquals(responseEntity.getStatusCode(),HttpStatus.OK);
         List<Permission> permissionsList = new ArrayList<>();
         Optional<Document> doc;
@@ -351,11 +308,11 @@ class DocumentManagementServiceImplTest {
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class)))
             .thenReturn(Optional.ofNullable(cdm));
 
-        Boolean result = sut.checkUserPermission(responseEntity, getUuid(MATCHED_DOCUMENT_ID));
+        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID);
         assertEquals(Boolean.FALSE, result);
 
-        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID,HttpMethod.GET,requestEntity, StoredDocumentHalResource.class);
-        verify(caseDataStoreServiceMock, times(1)).getCaseDocumentMetadata(anyString(),any(UUID.class));
+        verifyRestExchangeOnStoredDoc();
+        verifyCaseDataServiceGetDocMetadata();
     }
 
     @Test
@@ -364,14 +321,9 @@ class DocumentManagementServiceImplTest {
         Map<String, String> myMap = new HashMap<>();
         myMap.put("caseId","1234qwer1234qwer");
         storedDocumentHalResource.setMetadata(myMap);
-        HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
 
-        Mockito.when(restTemplateMock.exchange(
-            documentURL + "/" + MATCHED_DOCUMENT_ID,
-            HttpMethod.GET,requestEntity,
-            StoredDocumentHalResource.class))
-            .thenReturn(new ResponseEntity<StoredDocumentHalResource>(storedDocumentHalResource,HttpStatus.OK));
-        ResponseEntity responseEntity = sut.getDocumentMetadata(getUuid(MATCHED_DOCUMENT_ID));
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
+        ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
         assertEquals(responseEntity.getStatusCode(),HttpStatus.OK);
         List<Permission> permissionsList = new ArrayList<>();
         Optional<Document> doc;
@@ -380,14 +332,33 @@ class DocumentManagementServiceImplTest {
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class)))
             .thenReturn(Optional.ofNullable(cdm));
 
-        Boolean result = sut.checkUserPermission(responseEntity, getUuid(MATCHED_DOCUMENT_ID));
+        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID);
         assertEquals(Boolean.FALSE, result);
 
-        verify(restTemplateMock, times(1)).exchange(documentURL + "/" + MATCHED_DOCUMENT_ID,HttpMethod.GET,requestEntity, StoredDocumentHalResource.class);
-        verify(caseDataStoreServiceMock, times(1)).getCaseDocumentMetadata(anyString(),any(UUID.class));
+        verifyRestExchangeOnStoredDoc();
+        verifyCaseDataServiceGetDocMetadata();
     }
 
-    private UUID getUuid(String id) {
-        return UUID.fromString(id);
+    private void mockitoWhenRestExchangeThenThrow(StoredDocumentHalResource storedDocumentHalResource, HttpStatus httpStatus) {
+        Mockito.when(restTemplateMock.exchange(
+            documentURL + "/" + MATCHED_DOCUMENT_ID,
+            HttpMethod.GET,requestEntityGlobal,
+            StoredDocumentHalResource.class))
+            .thenReturn(new ResponseEntity<>(storedDocumentHalResource,httpStatus));
+    }
+
+    private void verifyRestExchangeOnStoredDoc() {
+        verify(restTemplateMock, times(1))
+            .exchange(documentURL + "/" + MATCHED_DOCUMENT_ID,HttpMethod.GET,requestEntityGlobal, StoredDocumentHalResource.class);
+    }
+
+    private void verifyRestExchangeByteArray() {
+        verify(restTemplateMock, times(1))
+            .exchange(documentURL + "/" + MATCHED_DOCUMENT_ID + "/binary",HttpMethod.GET,requestEntityGlobal, ByteArrayResource.class);
+    }
+
+    private void verifyCaseDataServiceGetDocMetadata() {
+        verify(caseDataStoreServiceMock, times(1))
+            .getCaseDocumentMetadata(anyString(),any(UUID.class));
     }
 }
