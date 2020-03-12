@@ -302,7 +302,27 @@ class DocumentManagementServiceImplTest {
     }
 
     @Test
-    void checkUserPermission_ReturnsFalse() {
+    void checkUserPermission_Throws_InvalidCaseId_BadRequestException() {
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        Map<String, String> myMap = new HashMap<>();
+        myMap.put("caseId","1234qwer");
+        storedDocumentHalResource.setMetadata(myMap);
+        HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
+        Mockito.when(restTemplateMock.exchange(
+            documentURL + "/" + MATCHED_DOCUMENT_ID,
+            HttpMethod.GET,requestEntity,
+            StoredDocumentHalResource.class))
+            .thenReturn(new ResponseEntity<StoredDocumentHalResource>(storedDocumentHalResource,HttpStatus.OK));
+        ResponseEntity responseEntity = sut.getDocumentMetadata(getUuid(MATCHED_DOCUMENT_ID));
+        assertEquals(responseEntity.getStatusCode(),HttpStatus.OK);
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            sut.checkUserPermission(responseEntity, getUuid(MATCHED_DOCUMENT_ID));
+        });
+    }
+
+    @Test
+    void checkUserPermission_ReturnsFalse_Scenario1() {
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
         Map<String, String> myMap = new HashMap<>();
         myMap.put("caseId","1234qwer1234qwer");
@@ -328,12 +348,13 @@ class DocumentManagementServiceImplTest {
     }
 
     @Test
-    void checkUserPermission_Throws_InvalidCaseId_BadRequestException() {
+    void checkUserPermission_ReturnsFalse_Scenario2() {
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
         Map<String, String> myMap = new HashMap<>();
-        myMap.put("caseId","1234qwer");
+        myMap.put("caseId","1234qwer1234qwer");
         storedDocumentHalResource.setMetadata(myMap);
         HttpEntity<?> requestEntity = new HttpEntity<>(securityUtils.authorizationHeaders());
+
         Mockito.when(restTemplateMock.exchange(
             documentURL + "/" + MATCHED_DOCUMENT_ID,
             HttpMethod.GET,requestEntity,
@@ -341,10 +362,15 @@ class DocumentManagementServiceImplTest {
             .thenReturn(new ResponseEntity<StoredDocumentHalResource>(storedDocumentHalResource,HttpStatus.OK));
         ResponseEntity responseEntity = sut.getDocumentMetadata(getUuid(MATCHED_DOCUMENT_ID));
         assertEquals(responseEntity.getStatusCode(),HttpStatus.OK);
+        List<Permission> permissionsList = new ArrayList<>();
+        Optional<Document> doc;
+        doc = Optional.of(Document.builder().id("40000a2b-00ce-00eb-0068-2d00a700be9c").permissions(permissionsList).build());
+        CaseDocumentMetadata cdm = CaseDocumentMetadata.builder().caseId("1234qwer1234qwer").document(doc).build();
+        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class)))
+            .thenReturn(Optional.ofNullable(cdm));
 
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            sut.checkUserPermission(responseEntity, getUuid(MATCHED_DOCUMENT_ID));
-        });
+        Boolean result = sut.checkUserPermission(responseEntity, getUuid(MATCHED_DOCUMENT_ID));
+        assertEquals(Boolean.FALSE, result);
     }
 
     private UUID getUuid(String id) {
