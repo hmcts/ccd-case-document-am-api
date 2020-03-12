@@ -254,6 +254,19 @@ public class CaseDocumentAmControllerTest {
         });
     }
 
+    /*
+    @Test
+    @DisplayName("Should return a positive response when a document is uploaded")
+    public void shouldUploadAFileSuccessfully() {
+        ResponseEntity<Object> responseEntity = testee.uploadDocuments(generateMultipartList(),
+                                                                       Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE), serviceAuthorization,
+                                                                       BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2, USER_ID, DUMMY_ROLE);
+        assertAll(
+            () -> assertNotNull(responseEntity, "Upload response is Null")
+                 );
+    }
+    */
+
 
     private ResponseEntity<StoredDocumentHalResource> setDocumentMetaData() {
         StoredDocumentHalResource resource = new StoredDocumentHalResource();
