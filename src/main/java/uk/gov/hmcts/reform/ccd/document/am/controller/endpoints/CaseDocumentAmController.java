@@ -46,16 +46,14 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     private transient HttpServletRequest request;
     private transient DocumentManagementService  documentManagementService;
     private transient CaseDataStoreService caseDataStoreService;
-    private transient ValidationService validationService;
 
     @Autowired
     public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService documentManagementService,
-                                    CaseDataStoreService caseDataStoreService, ValidationService validationService) {
+                                    CaseDataStoreService caseDataStoreService) {
         this.objectMapper = objectMapper;
         this.request = request;
         this.documentManagementService = documentManagementService;
         this.caseDataStoreService = caseDataStoreService;
-        this.validationService = validationService;
     }
 
     @Override
@@ -85,6 +83,8 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
         @ApiParam("documentId")
         @PathVariable("documentId") UUID documentId,
+        @ApiParam("Authorization header of the currently authenticated user")
+        @RequestHeader(value = "Authorization", required = true) String authorization,
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
             + " and will be used for authorisation.")
         @RequestHeader(value = "User-Id", required = false) String userId,
@@ -92,7 +92,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
 
         ResponseEntity documentMetadata = documentManagementService.getDocumentMetadata(documentId);
-        if (documentManagementService.checkUserPermission(documentMetadata, documentId)) {
+        if (documentManagementService.checkUserPermission(documentMetadata, documentId, authorization)) {
             return documentManagementService.getDocumentBinaryContent(documentId);
 
         }
@@ -108,14 +108,18 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam("documentId")
         @PathVariable("documentId") UUID documentId,
 
+        @ApiParam("Authorization header of the currently authenticated user")
+        @RequestHeader(value = "Authorization", required = true) String authorization,
+
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
                           + " and will be used for authorisation.")
         @RequestHeader(value = "user-id", required = false) String userId,
+
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
-        if (documentManagementService.checkUserPermission(responseEntity, documentId)) {
+        if (documentManagementService.checkUserPermission(responseEntity, documentId, authorization)) {
             return  ResponseEntity
                  .status(HttpStatus.OK)
                  .body(responseEntity.getBody());
@@ -235,6 +239,4 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             throw new ResponseFormatException("Exception while uploading the documents :" + e.getMessage());
         }
     }
-
-
 }

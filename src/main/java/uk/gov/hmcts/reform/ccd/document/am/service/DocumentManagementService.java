@@ -44,5 +44,5 @@ public interface DocumentManagementService {
      * @param documentId Document Id for which binary content to be downloaded
      * @return Boolen object to check user permission
      **/
-    boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId);
+    boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization);
 }

@@ -13,8 +13,9 @@ import java.util.Optional;
  */
 
 @Data
-@Builder
 public class CaseDocumentMetadata {
+    public CaseDocumentMetadata() {
+    }
 
     @JsonProperty
     private String caseId;
@@ -26,7 +27,5 @@ public class CaseDocumentMetadata {
     private String jurisdictionId;
 
     @JsonProperty
-    @Valid
-    @Builder.Default
-    private Optional<Document>  document = Optional.empty();
+    private Document document;
 }

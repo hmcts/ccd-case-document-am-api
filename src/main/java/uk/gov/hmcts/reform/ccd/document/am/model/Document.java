@@ -13,8 +13,11 @@ import java.util.List;
  */
 @Validated
 @Data
-@Builder
 public class Document {
+
+    public Document() {
+    }
+
     @JsonProperty("id")
     private String id;
 
@@ -29,9 +32,11 @@ public class Document {
 
     @JsonProperty("description")
     private String description;
+/*
 
     @JsonProperty("hashToken")
     private String hashToken;
+*/
 
     @JsonProperty("permissions")
     private List<Permission> permissions;

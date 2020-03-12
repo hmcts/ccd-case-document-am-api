@@ -276,24 +276,19 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     }
 
-    public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId) {
+    public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization) {
         String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
 
-        if (!validationService.validate(caseId)) {
+        if (!ValidationService.validate(caseId)) {
             LOG.error(CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
             throw new BadRequestException(CASE_ID_INVALID);
 
         } else {
-            CaseDocumentMetadata caseDocumentMetadata = caseDataStoreService.getCaseDocumentMetadata(caseId, documentId)
+            CaseDocumentMetadata caseDocumentMetadata = caseDataStoreService.getCaseDocumentMetadata(caseId, documentId, authorization)
                                                                             .orElseThrow(() -> new CaseNotFoundException(caseId));
-            if (caseDocumentMetadata.getDocument().get().getId().equals(documentId.toString())
-                && caseDocumentMetadata.getDocument().get().getPermissions().contains(Permission.READ)) {
-                return true;
 
-            }
-
+            return (caseDocumentMetadata.getDocument().getId().equals(documentId.toString())
+                    && caseDocumentMetadata.getDocument().getPermissions().contains(Permission.READ));
         }
-        return false;
     }
-
 }

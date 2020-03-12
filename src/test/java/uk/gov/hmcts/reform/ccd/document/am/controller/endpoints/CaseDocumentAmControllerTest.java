@@ -164,8 +164,6 @@ public class CaseDocumentAmControllerTest {
                 ""
             );
         });
-
-
     }
 
 
@@ -302,19 +300,18 @@ public class CaseDocumentAmControllerTest {
         });
     }
 
-    /*
     @Test
     @DisplayName("Should return a positive response when a document is uploaded")
     public void shouldUploadAFileSuccessfully() {
+        doReturn(setDocumentMetaData()).when(documentManagementService).uploadDocuments(generateMultipartList(),
+                                                                                        Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE), serviceAuthorization,
+                                                                                        BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2, USER_ID);
         ResponseEntity<Object> responseEntity = testee.uploadDocuments(generateMultipartList(),
                                                                        Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE), serviceAuthorization,
                                                                        BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2, USER_ID, DUMMY_ROLE);
         assertAll(
-            () -> assertNotNull(responseEntity, "Upload response is Null")
-                 );
+            () -> assertNotNull(responseEntity, "Upload response is Null"));
     }
-    */
-
 
     private ResponseEntity<StoredDocumentHalResource> setDocumentMetaData() {
         StoredDocumentHalResource resource = new StoredDocumentHalResource();
@@ -348,6 +345,24 @@ public class CaseDocumentAmControllerTest {
         }
 
         return new ResponseEntity<ByteArrayResource>(new ByteArrayResource("".getBytes()), HttpStatus.OK);
+    }
+
+    private ResponseEntity<Object> getUploadResponse(String responseType) {
+        if (responseType.equals("OK")) {
+            return new ResponseEntity<Object>(
+                new ByteArrayResource("test document content".getBytes()),
+                getHttpHeaders(),
+                HttpStatus.OK
+            );
+        } else if (responseType.equals("forbidden")) {
+            return new ResponseEntity<Object>(
+                new ByteArrayResource("".getBytes()),
+                getHttpHeaders(),
+                HttpStatus.FORBIDDEN
+            );
+        }
+
+        return new ResponseEntity<Object>(new ByteArrayResource("".getBytes()), HttpStatus.OK);
     }
 
     private HttpHeaders getHttpHeaders() {
