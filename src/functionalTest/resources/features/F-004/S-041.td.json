@@ -5,11 +5,7 @@
   "specs": [
     "contains the metadata for the document uploaded above"
   ],
-  "request": {
-    "pathVariables": {
-      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
-    }
-  },
+
   "expectedResponse": {
     "_extends_": "Common_200_Response",
     "body": {
