@@ -59,7 +59,7 @@ class DocumentManagementServiceImplTest {
     private RestTemplate restTemplateMock = Mockito.mock(RestTemplate.class);
     private SecurityUtils securityUtils = new SecurityUtils(authTokenGenerator);
     private CaseDataStoreService caseDataStoreServiceMock = mock(CaseDataStoreService.class);
-    private ValidationService validationService = new ValidationService();
+    ValidationService validationService = new ValidationService();
 
     private HttpEntity<?> requestEntityGlobal  = new HttpEntity<>(securityUtils.authorizationHeaders());
     private UUID matchedDocUUID = UUID.fromString(MATCHED_DOCUMENT_ID);
