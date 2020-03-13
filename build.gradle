@@ -42,7 +42,7 @@ def versions = [
   swagger2Version    : '2.9.2',
   pact_version       : '3.5.24',
   rest_assured       : '3.3.0',
-  cucumber           : '5.0.0',
+  cucumber           : '5.5.0',
   feign_jackson      : '9.7.0'
 ]
 
