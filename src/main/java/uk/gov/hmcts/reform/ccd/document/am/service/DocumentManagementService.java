@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.ccd.document.am.service;
 
 import org.springframework.http.ResponseEntity;
-import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
-import uk.gov.hmcts.reform.ccd.document.am.model.UploadDocumentsCommand;
 
+import java.util.List;
 import java.util.UUID;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface DocumentManagementService {
 
@@ -32,13 +34,9 @@ public interface DocumentManagementService {
      **/
     ResponseEntity<Object> getDocumentBinaryContent(final UUID documentId);
 
-    /**
-     * Root GET endpoint.
-     *
-     * @param uploadDocumentsContent The uploaded document content sent by service UI
-     * @return StoredDocumentHalResourceCollection object containing stored document details
-     */
-    StoredDocumentHalResourceCollection uploadDocumentsContent(UploadDocumentsCommand uploadDocumentsContent);
+    ResponseEntity<Object> uploadDocuments(List<MultipartFile> files, String classification, List<String> roles,
+                                           String serviceAuthorization, String caseTypeId,
+                                           String jurisdictionId, String userId);
 
     /**
      * Root GET endpoint.

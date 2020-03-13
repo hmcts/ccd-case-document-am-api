@@ -1,5 +1,22 @@
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,29 +28,20 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
-import uk.gov.hmcts.reform.ccd.document.am.model.*;
+import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.Document;
+import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
+import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
+import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.document.am.model.enums.Classifications;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.Arrays;
-import java.util.UUID;
-import java.util.Date;
-
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
 
 @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
 public class CaseDocumentAmControllerTest {
@@ -55,13 +63,17 @@ public class CaseDocumentAmControllerTest {
     private static final String MATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9c";
     private static final String UNMATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9d";
     private static final String CASE_ID = "1582550122096256";
+    private static final String DUMMY_ROLE = "dummyRole";
+    private static final String BEFTA_CASETYPE_2 =  "BEFTA_CASETYPE_2";
+    private static final String BEFTA_JURISDICTION_2 =  "BEFTA_JURISDICTION_2";
+    private static final String USER_ID =  "userId";
     private static final String VALID_RESPONSE = "Valid Response from API";
     private static final String RESPONSE_CODE = "Status code is OK";
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(validationService.validate(any(String.class))).thenReturn(TRUE);
+        //when(ValidationService.validate("")).thenReturn(TRUE);
     }
 
     @Test
@@ -220,30 +232,89 @@ public class CaseDocumentAmControllerTest {
     }
 
     @Test
-    public void shouldPostDocumentsWithBinaryFile() {
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        MetadataSearchCommand body = null;
-        ResponseEntity response = testee.postDocumentsWithBinaryFile("", new Date(), new ArrayList<>(), new ArrayList<>(), "", "", "", "", "");
-
-        assertAll(
-            () ->  assertNotNull(response, VALID_RESPONSE),
-            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE)
-        );
-    }
-
-
-
-    @Test
     public void shouldPatchMetaDataOnDocuments() {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         CaseDocumentMetadata body = null;
-        ResponseEntity response = testee.patchMetaDataOnDocuments(body,"", "", "");
+        ResponseEntity response = testee.patchMetaDataOnDocuments(body, "", "", "");
 
         assertAll(
-            () ->  assertNotNull(response, VALID_RESPONSE),
-            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE)
-        );
+            () -> assertNotNull(response, VALID_RESPONSE),
+            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE));
     }
+
+    //Tests for UploadDocuments controller.
+    @Test
+    @DisplayName("Should throw 400 when the uploaded file is empty")
+    public void shouldThrowBadRequestExceptionWhenUploadedFilesIsNull() {
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            testee.uploadDocuments(null, Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE), serviceAuthorization,
+                                   BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2, USER_ID, DUMMY_ROLE);
+        });
+    }
+
+    @Test
+    @DisplayName("Should throw 400 when user-roles are empty")
+    public void shouldThrowBadRequestExceptionWhenUserRolesAreEmpty() {
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            testee.uploadDocuments(generateMultipartList(),
+                                   Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE), serviceAuthorization,
+                                   BEFTA_CASETYPE_2, "BEFTA@JURISDICTION_2$$$$", USER_ID, null);
+        });
+    }
+
+    @Test
+    @DisplayName("Should throw 400 when caseTypeId input is null")
+    public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsNull() {
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            testee.uploadDocuments(generateMultipartList(),
+                                   Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE), serviceAuthorization,
+                                   null, BEFTA_JURISDICTION_2, USER_ID, DUMMY_ROLE);
+        });
+    }
+
+    @Test
+    @DisplayName("Should throw 400 when caseTypeId input is malformed")
+    public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsMalformed() {
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            testee.uploadDocuments(generateMultipartList(),
+                                   Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE), serviceAuthorization,
+                                   "BEFTA_CASETYPE_2&&&&&&&&&", "BEFTA_JURISDICTION_2", USER_ID, DUMMY_ROLE);
+        });
+    }
+
+    @Test
+    @DisplayName("Should throw 400 when jurisdictionId input is null")
+    public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsNull() {
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            testee.uploadDocuments(generateMultipartList(),
+                                   Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE), serviceAuthorization,
+                                   BEFTA_CASETYPE_2, null, USER_ID, DUMMY_ROLE);
+        });
+    }
+
+    @Test
+    @DisplayName("Should throw 400 when jurisdictionId input is malformed")
+    public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsMalformed() {
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            testee.uploadDocuments(generateMultipartList(),
+                                   Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE), serviceAuthorization,
+                                   BEFTA_CASETYPE_2, "BEFTA@JURISDICTION_2$$$$", USER_ID, DUMMY_ROLE);
+        });
+    }
+
+    /*
+    @Test
+    @DisplayName("Should return a positive response when a document is uploaded")
+    public void shouldUploadAFileSuccessfully() {
+        ResponseEntity<Object> responseEntity = testee.uploadDocuments(generateMultipartList(),
+                                                                       Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE), serviceAuthorization,
+                                                                       BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2, USER_ID, DUMMY_ROLE);
+        assertAll(
+            () -> assertNotNull(responseEntity, "Upload response is Null")
+                 );
+    }
+    */
+
 
     private ResponseEntity<StoredDocumentHalResource> setDocumentMetaData() {
         StoredDocumentHalResource resource = new StoredDocumentHalResource();
@@ -287,5 +358,14 @@ public class CaseDocumentAmControllerTest {
         headers.set("Content-Length", "25");
         headers.set("Content-Type", "application/json");
         return headers;
+    }
+
+    private List<MultipartFile> generateMultipartList() {
+        ArrayList<MultipartFile> listFiles = new ArrayList<>();
+        listFiles.add(new MockMultipartFile("file1", "test1.jpg",
+                                            "image/jpeg", "HelloString".getBytes()));
+        listFiles.add(new MockMultipartFile("file2", "test2.jpg",
+                                            "image/jpeg", "HelloString2".getBytes()));
+        return listFiles;
     }
 }

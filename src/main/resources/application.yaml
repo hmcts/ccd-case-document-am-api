@@ -15,6 +15,11 @@ management:
 spring:
   application:
     name: CCD Case Document AM API
+  servlet:
+    multipart:
+      maxFileSize: 122594820
+      maxRequestSize: 122594820
+      enabled: true
   jackson:
     default-property-inclusion: NON_NULL
 security:
@@ -71,6 +76,8 @@ feign:
 ccd:
   case-definition:
     host: ${DEFINITION_STORE_HOST:http://localhost:4451}
+
+documentTTL: ${DOCUMENT_TTL:600000}
 
 documentStoreUrl: ${DOCUMENT_STORE_URL:http://localhost:4506/documents}
 caseDataStoreUrl: ${CASE_DATA_STORE_URL:http://localhost:4452}

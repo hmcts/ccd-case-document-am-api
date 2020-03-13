@@ -1,6 +1,8 @@
 
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
@@ -13,15 +15,26 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
-import uk.gov.hmcts.reform.ccd.document.am.model.*;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
+import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
+import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
+import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
+import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.Date;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.List;
 import java.util.UUID;
+import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 
 @Controller
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -31,14 +44,18 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
     private transient ObjectMapper objectMapper;
     private transient HttpServletRequest request;
-    private transient DocumentManagementService documentManagementService;
-
+    private transient DocumentManagementService  documentManagementService;
+    private transient CaseDataStoreService caseDataStoreService;
+    private transient ValidationService validationService;
 
     @Autowired
-    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService documentManagementService) {
+    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService documentManagementService,
+                                    CaseDataStoreService caseDataStoreService, ValidationService validationService) {
         this.objectMapper = objectMapper;
         this.request = request;
         this.documentManagementService = documentManagementService;
+        this.caseDataStoreService = caseDataStoreService;
+        this.validationService = validationService;
     }
 
     @Override
@@ -92,10 +109,10 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @PathVariable("documentId") UUID documentId,
 
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-            + " and will be used for authorisation.")
-        @RequestHeader(value = "User-Id", required = false) String userId,
+                          + " and will be used for authorisation.")
+        @RequestHeader(value = "user-id", required = false) String userId,
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
-        @RequestHeader(value = "User-Roles", required = false) String userRoles) {
+        @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkUserPermission(responseEntity, documentId)) {
@@ -170,24 +187,53 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     }
 
     @Override
-    public ResponseEntity<StoredDocumentHalResourceCollection> postDocumentsWithBinaryFile(
-        @ApiParam(value = "", required = true) @RequestParam(value = "classification", required = true) String classification,
-        @ApiParam(value = "", required = true) @RequestParam(value = "ttl", required = true) Date ttl,
-        @ApiParam(value = "", required = true) @RequestParam(value = "roles", required = true) List<String> roles,
-        @ApiParam(value = "", required = true) @RequestParam(value = "files", required = true) List<java.io.File> files,
-        @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
-        @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
-        @ApiParam(value = "CaseType identifier for the case document.", required = true)
-        @RequestHeader(value = "caseTypeId", required = true) String caseTypeId,
-        @ApiParam(value = "Jurisdiction identifier for the case document.", required = true)
-        @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId,
-        @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-            + " and will be used for authorisation.")
-        @RequestHeader(value = "User-Id", required = false) String userId,
-        @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
-        @RequestHeader(value = "User-Roles", required = false) String userRoles) {
+    public ResponseEntity<Object> uploadDocuments(
 
-        return new ResponseEntity<StoredDocumentHalResourceCollection>(HttpStatus.OK);
+        @ApiParam(value = "", required = true)
+        @NotNull(message = "Provide some files to be uploaded.")
+        @Size(min = 1, message = "Please provide at least one file to be uploaded.")
+        @RequestParam(value = "files", required = true) List<MultipartFile> files,
+
+        @ApiParam(value = "", required = true)
+        @Valid
+        @NotNull(message = "Please provide classification")
+        @RequestParam(value = "classification", required = true) String classification,
+
+        @ApiParam(value = "", required = false)
+        @RequestParam(value = "roles", required = false) List<String> roles,
+
+        @ApiParam(value = Constants.S2S_API_PARAM, required = true)
+        @RequestHeader(value = Constants.SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
+
+        @ApiParam(value = "CaseType identifier for the case document.", required = true)
+        @NotNull(message = "Provide the Case Type ID ")
+        @RequestHeader(value = "caseTypeId", required = true) String caseTypeId,
+
+        @ApiParam(value = "Jurisdiction identifier for the case document.", required = true)
+        @NotNull(message = "Provide the Jurisdiction ID ")
+        @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId,
+
+        @ApiParam(value = "User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
+                          + " and will be used for authorisation.", required = false)
+        @RequestHeader(value = "user-id", required = true) String userId,
+
+        @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
+        @RequestHeader(value = "user-roles", required = false) String userRoles) {
+
+        try {
+            ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification, userRoles);
+            ValidationService.isValidSecurityClassification(classification);
+            ValidationService.validateLists(files, roles);
+
+            return documentManagementService.uploadDocuments(files, classification, roles,
+                                                             serviceAuthorization, caseTypeId, jurisdictionId, userId);
+        } catch (BadRequestException | IllegalArgumentException e) {
+            LOG.error("Exception while uploading the documents :" + e.getMessage());
+            throw new BadRequestException("Exception while uploading the documents :" + e.getMessage());
+        } catch (Exception e) {
+            LOG.error("Exception while uploading the documents :" + e.getMessage());
+            throw new ResponseFormatException("Exception while uploading the documents :" + e.getMessage());
+        }
     }
 
 

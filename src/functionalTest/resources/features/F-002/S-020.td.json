@@ -1,5 +1,6 @@
 {
   "title": "must successfully receive a document's binary content",
+
   "_guid_": "S-020",
   "_extends_": "F-002_Test_Data_Base",
 
