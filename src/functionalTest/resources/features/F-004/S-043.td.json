@@ -6,6 +6,14 @@
     "for a malformed document ID"
   ],
   "request": {
+    "headers": {
+      "Authorization": "[[DYNAMIC]]",
+      "ServiceAuthorization": "[[DYNAMIC]]",
+      "Content-Type": "multipart/form-data",
+      "uid": "[[DYNAMIC]]",
+      "user-id": "[someUserId]",
+      "user-roles": "caseworker"
+    },
     "pathVariables": {
       "documentId": "e1cb63af-3a73-45b6-$£@!-a7af34e02f81"
     }
