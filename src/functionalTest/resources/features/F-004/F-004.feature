@@ -49,7 +49,7 @@ Feature: F-004: Post Upload Document with Binary Content
     Then  a negative response is received
     And   the response has all the details as expected
 
-  @S-047
+  @S-045
   Scenario: must get an error response for a non-existing classification
     Given a user with [an active caseworker profile in CCD with full permissions on a document field]
     When  a request is prepared with appropriate values
@@ -58,7 +58,7 @@ Feature: F-004: Post Upload Document with Binary Content
     Then  a negative response is received
     And   the response has all the details as expected
 
-  @S-045
+  @S-046
   Scenario: must get an error response for a malformed classification
     Given a user with [an active caseworker profile in CCD with full permissions on a document field]
     When  a request is prepared with appropriate values
@@ -67,7 +67,7 @@ Feature: F-004: Post Upload Document with Binary Content
     Then  a negative response is received
     And   the response has all the details as expected
 
-  @S-046
+  @S-047
   Scenario: must get an error response for a malformed roles
     Given a user with [an active caseworker profile in CCD with full permissions on a document field]
     When  a request is prepared with appropriate values
@@ -76,7 +76,7 @@ Feature: F-004: Post Upload Document with Binary Content
     Then  a negative response is received
     And   the response has all the details as expected
 
-  @S-047 @Ignore # This is the test need to be done manually
+  @S-048 @Ignore # This is the test need to be done manually
   Scenario: must get an error response for a upload document with unauthorised user id after 10 minuts
     Given a user with [an active caseworker profile in CCD with full permissions on a document field]
     When  a request is prepared with appropriate values
@@ -89,7 +89,7 @@ Feature: F-004: Post Upload Document with Binary Content
     Then  a negative response is received
     And   the response has all the details as expected
 
-  @S-048
+  @S-049
   Scenario: must successfully Post Upload multiple Document with Binary Content
     Given a user with [an active caseworker profile in CCD with full permissions on a document field]
     When  a request is prepared with appropriate values
@@ -99,7 +99,7 @@ Feature: F-004: Post Upload Document with Binary Content
     And   the response [contains the metadata for the document uploaded above]
     And   the response has all other details as expected
 
-  @S-049
+  @S-050
   Scenario: must get an error response for a above max allowed size of a document
     Given a user with [an active caseworker profile in CCD with full permissions on a document field]
     When  a request is prepared with appropriate values
@@ -108,11 +108,11 @@ Feature: F-004: Post Upload Document with Binary Content
     Then  a negative response is received
     And   the response has all the details as expected
 
-  @S-050
+  @S-051
   Scenario: generic scenario for Unauthorized
 
-  @S-051
+  @S-052
   Scenario: generic scenario for Forbidden
 
-  @S-052
+  @S-053
   Scenario: generic scenario for Unsupported Media Type
