@@ -4,17 +4,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 
-import javax.validation.Valid;
-
-import java.util.Optional;
-
 /**
  * CaseDocumentMetadata.
  */
 
 @Data
+@Builder
 public class CaseDocumentMetadata {
     public CaseDocumentMetadata() {
+    }
+
+    public CaseDocumentMetadata(String caseId, String caseTypeId, String jurisdictionId, Document document) {
+        this.caseId = caseId;
+        this.caseTypeId = caseTypeId;
+        this.jurisdictionId = jurisdictionId;
+        this.document = document;
     }
 
     @JsonProperty

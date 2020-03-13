@@ -13,7 +13,19 @@ import java.util.List;
  */
 @Validated
 @Data
+@Builder
 public class Document {
+
+    public Document(String id, String url, String name, String type, String description, String hashToken,
+                    List<Permission> permissions) {
+        this.id = id;
+        this.url = url;
+        this.name = name;
+        this.type = type;
+        this.description = description;
+        this.hashToken = hashToken;
+        this.permissions = permissions;
+    }
 
     public Document() {
     }

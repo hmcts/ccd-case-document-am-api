@@ -32,7 +32,7 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
 
     @Value("${caseDataStoreUrl}")
     private transient String caseDataStoreUrl;
-    private RestTemplate restTemplate;
+    private transient RestTemplate restTemplate;
     private transient SecurityUtils securityUtils;
 
 
@@ -43,6 +43,7 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Optional<CaseDocumentMetadata> getCaseDocumentMetadata(String caseId, UUID documentId, String authorization) {
         HttpHeaders headers = prepareRequestForUpload(authorization);
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
@@ -57,7 +58,7 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
 
         if (responseEntity.getStatusCode() == HttpStatus.OK
             && responseEntity.getBody() instanceof LinkedHashMap) {
-            LinkedHashMap<String, Object> responseObject = (LinkedHashMap) responseEntity.getBody();
+            LinkedHashMap<String, Object> responseObject = (LinkedHashMap<String, Object>) responseEntity.getBody();
             CaseDocumentMetadata caseDocumentMetadata = new ObjectMapper().convertValue(responseObject.get("documentMetadata"),
                                                                                         CaseDocumentMetadata.class);
             if (null == caseDocumentMetadata.getDocument()) {
