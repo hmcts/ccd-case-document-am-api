@@ -1,37 +1,5 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
-import static org.springframework.http.HttpMethod.GET;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DATA_SOURCE;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DOCUMENTS;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EMBEDDED;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FILES;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHCODE;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HREF;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LINKS;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ROLES;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.TEST_URL;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.THUMBNAIL;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
-
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
-
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -63,6 +31,19 @@ import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.document.am.util.ResponseHelper;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
+
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.springframework.http.HttpMethod.GET;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.*;
 
 
 @Slf4j
@@ -100,7 +81,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
         try {
             final HttpEntity requestEntity = new HttpEntity(securityUtils.authorizationHeaders());
-            String documentMetadataUrl = String.format("%s/%s", documentURL, documentId);
+            String documentMetadataUrl = String.format("%s/documents/%s", documentURL, documentId);
             ResponseEntity<StoredDocumentHalResource> response = restTemplate.exchange(
                 documentMetadataUrl,
                 GET,
@@ -144,7 +125,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public ResponseEntity<Object> getDocumentBinaryContent(UUID documentId) {
         try {
             final HttpEntity requestEntity = new HttpEntity(securityUtils.authorizationHeaders());
-            String documentBinaryUrl = String.format("%s/%s/binary", documentURL, documentId);
+            String documentBinaryUrl = String.format("%s/documents/%s/binary", documentURL, documentId);
             ResponseEntity<ByteArrayResource> response = restTemplate.exchange(
                 documentBinaryUrl,
                 GET,
