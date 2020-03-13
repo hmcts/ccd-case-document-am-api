@@ -7,7 +7,7 @@ output "s2s_url" {
 }
 
 output "BEFTA_S2S_CLIENT_ID" {
-  value = "ccd_case_document_am_api"
+  value = "ccd_gw"
 }
 
 output "OAUTH2_CLIENT_ID" {
