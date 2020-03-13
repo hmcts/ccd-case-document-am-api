@@ -45,27 +45,32 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
     @Override
     @SuppressWarnings("unchecked")
     public Optional<CaseDocumentMetadata> getCaseDocumentMetadata(String caseId, UUID documentId, String authorization) {
-        HttpHeaders headers = prepareRequestForUpload(authorization);
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
+        try {
+            HttpHeaders headers = prepareRequestForUpload(authorization);
+            HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
 
-        ResponseEntity<Object> responseEntity =
-            restTemplate.exchange(caseDataStoreUrl
-                                      .concat("/cases/")
-                                      .concat(caseId)
-                                      .concat("/documents/")
-                                      .concat(documentId.toString()),
-                                  HttpMethod.GET, requestEntity, Object.class);
+            ResponseEntity<Object> responseEntity =
+                restTemplate.exchange(caseDataStoreUrl
+                                          .concat("/cases/")
+                                          .concat(caseId)
+                                          .concat("/documents/")
+                                          .concat(documentId.toString()),
+                                      HttpMethod.GET, requestEntity, Object.class);
 
-        if (responseEntity.getStatusCode() == HttpStatus.OK
-            && responseEntity.getBody() instanceof LinkedHashMap) {
-            LinkedHashMap<String, Object> responseObject = (LinkedHashMap<String, Object>) responseEntity.getBody();
-            CaseDocumentMetadata caseDocumentMetadata = new ObjectMapper().convertValue(responseObject.get("documentMetadata"),
-                                                                                        CaseDocumentMetadata.class);
-            if (null == caseDocumentMetadata.getDocument()) {
-                LOG.error("Could't find document for case  : " + caseId + ", response code from CCD : " + HttpStatus.FORBIDDEN);
-                throw new ForbiddenException("Could't find document for case  : " + caseId);
+            if (responseEntity.getStatusCode() == HttpStatus.OK
+                && responseEntity.getBody() instanceof LinkedHashMap) {
+                LinkedHashMap<String, Object> responseObject = (LinkedHashMap<String, Object>) responseEntity.getBody();
+                CaseDocumentMetadata caseDocumentMetadata = new ObjectMapper().convertValue(responseObject.get("documentMetadata"),
+                                                                                            CaseDocumentMetadata.class);
+                if (null == caseDocumentMetadata.getDocument()) {
+                    LOG.error("Could't find document for case  : " + caseId + ", response code from CCD : " + HttpStatus.FORBIDDEN);
+                    throw new ForbiddenException("Could't find document for case  : " + caseId);
+                }
+                return Optional.of(caseDocumentMetadata);
             }
-            return Optional.of(caseDocumentMetadata);
+        } catch (Exception exception) {
+            LOG.error("Exception occured while getting document permissions from Data store : " + exception.getMessage());
+            throw exception;
         }
 
         return Optional.empty();
