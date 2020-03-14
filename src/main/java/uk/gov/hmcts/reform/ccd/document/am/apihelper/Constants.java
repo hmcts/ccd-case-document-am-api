@@ -20,4 +20,18 @@ public class Constants {
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String CASE_ID_INVALID = "The case reference for requested document is not valid";
     public static final String INSUFFICIENT_PERMISSION = "Insufficient permission on requested  document";
+    public static final String CLASSIFICATION = "classification";
+    public static final String ROLES = "roles";
+    public static final String USERID = "user-id";
+    public static final String FILES = "files";
+    public static final String LINKS = "_links";
+    public static final String HREF = "href";
+    public static final String SELF = "self";
+    public static final String BINARY = "binary";
+    public static final String HASHCODE = "hashcode";
+    public static final String TEST_URL = "TEST_URL";
+    public static final String EMBEDDED = "_embedded";
+    public static final String THUMBNAIL = "thumbnail";
+    public static final String DOCUMENTS = "documents";
+    public static final String INPUT_STRING_PATTERN = "^[a-zA-Z0-9_-]*$";
 }

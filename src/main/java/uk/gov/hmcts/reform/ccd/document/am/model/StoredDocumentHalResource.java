@@ -55,10 +55,13 @@ public class StoredDocumentHalResource extends ResourceSupport {
     private Long size = null;
     @JsonProperty("ttl")
     private Date ttl = null;
+    private String hashCode;
 
     public void addLinks(UUID documentId) {
-        add(linkTo(methodOn(CaseDocumentAmController.class).getDocumentbyDocumentId("dsds", documentId, "323", "caseworker-1")).withSelfRel());
-        add(linkTo(methodOn(CaseDocumentAmController.class).getDocumentBinaryContentbyDocumentId("dsds", documentId, "323", "caseworker-1")).withRel("binary"));
+        add(linkTo(methodOn(CaseDocumentAmController.class).getDocumentbyDocumentId("dsds", documentId,
+                                                                                    "DummyAuthorization", "323", "caseworker-1")).withSelfRel());
+        add(linkTo(methodOn(CaseDocumentAmController.class).getDocumentBinaryContentbyDocumentId(
+            "dsds", documentId, "DummyAuthorization","323", "caseworker-1")).withRel("binary"));
     }
 
     /**

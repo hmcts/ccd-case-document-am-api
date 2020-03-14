@@ -5,7 +5,7 @@
   "productName": "CCD Case Document AM API",
   "operationName": "Get Document Metadata by Document ID",
   "method": "GET",
-  "uri": "/documents/{documentId}",
+  "uri": "/cases/documents/{documentId}",
 
   "expectedResponse": {
     "headers": {
@@ -13,8 +13,6 @@
       "content-type": "application/vnd.uk.gov.hmcts.dm.document.v1+hal+json;charset=UTF-8"
     },
     "body": {
-      "_extends_": "Common_Response_Body_Document_Base",
-      "metadata": {}
     }
   }
 }

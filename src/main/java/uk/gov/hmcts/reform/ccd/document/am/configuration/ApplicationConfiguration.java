@@ -58,6 +58,5 @@ public class ApplicationConfiguration {
             .useSystemProperties()
             .setDefaultRequestConfig(config)
             .build();
-
     }
 }

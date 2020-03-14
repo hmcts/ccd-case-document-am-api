@@ -6,7 +6,7 @@ output "s2s_url" {
   value = "${local.s2s_url}"
 }
 
-output "CCD_GW_SERVICE_NAME" {
+output "BEFTA_S2S_CLIENT_ID" {
   value = "ccd_gw"
 }
 
@@ -20,4 +20,8 @@ output "OAUTH2_REDIRECT_URI" {
 
 output "DEFINITION_STORE_HOST" {
   value = "${local.definition_store_host}"
+}
+
+output "DOCUMENT_STORE_URL" {
+  value = "${local.document_store_url}"
 }
