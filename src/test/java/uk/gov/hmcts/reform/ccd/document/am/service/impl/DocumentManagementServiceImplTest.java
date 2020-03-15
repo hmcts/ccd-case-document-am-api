@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceEx
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
-import uk.gov.hmcts.reform.ccd.document.am.model.UploadDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
