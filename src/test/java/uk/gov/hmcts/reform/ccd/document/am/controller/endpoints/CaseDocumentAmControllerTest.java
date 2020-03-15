@@ -69,6 +69,8 @@ public class CaseDocumentAmControllerTest {
     private static final String USER_ID =  "userId";
     private static final String VALID_RESPONSE = "Valid Response from API";
     private static final String RESPONSE_CODE = "Status code is OK";
+    private static final String AUTHORIZATION = "Authorization";
+    private static final String FORBIDDEN = "forbidden";
 
     @BeforeEach
     public void setUp() {
@@ -86,10 +88,10 @@ public class CaseDocumentAmControllerTest {
             )
         ));
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(TRUE).when(documentManagementService).checkUserPermission(setDocumentMetaData(),getUuid());
+        doReturn(TRUE).when(documentManagementService).checkUserPermission(setDocumentMetaData(),getUuid(),AUTHORIZATION);
 
 
-        ResponseEntity response = testee.getDocumentbyDocumentId(serviceAuthorization, getUuid(), "", "");
+        ResponseEntity response = testee.getDocumentbyDocumentId(serviceAuthorization, getUuid(), AUTHORIZATION,"", "");
 
         assertAll(
             () ->  assertNotNull(response, "Valid Response from API"),
@@ -108,11 +110,11 @@ public class CaseDocumentAmControllerTest {
             )
         ));
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(FALSE).when(documentManagementService).checkUserPermission(setDocumentMetaData(),getUuid());
+        doReturn(FALSE).when(documentManagementService).checkUserPermission(setDocumentMetaData(),getUuid(),AUTHORIZATION);
 
 
         Assertions.assertThrows(ForbiddenException.class, () -> {
-            testee.getDocumentbyDocumentId(serviceAuthorization, getUuid(), "", "");
+            testee.getDocumentbyDocumentId(serviceAuthorization, getUuid(), AUTHORIZATION,"", "");
         });
     }
 
@@ -127,12 +129,13 @@ public class CaseDocumentAmControllerTest {
            )
         ));
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(TRUE).when(documentManagementService).checkUserPermission(setDocumentMetaData(),getUuid());
+        doReturn(TRUE).when(documentManagementService).checkUserPermission(setDocumentMetaData(),getUuid(),AUTHORIZATION);
         doReturn(setDocumentBinaryContent("OK")).when(documentManagementService).getDocumentBinaryContent(getUuid());
 
         ResponseEntity<Object> response = testee.getDocumentBinaryContentbyDocumentId(
             serviceAuthorization,
             getUuid(),
+            AUTHORIZATION,
             "",
             ""
         );
@@ -153,19 +156,18 @@ public class CaseDocumentAmControllerTest {
             Arrays.asList(Permission.CREATE)
         ));
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(setDocumentBinaryContent("forbidden")).when(documentManagementService).getDocumentBinaryContent(getUuid());
+        doReturn(setDocumentBinaryContent(FORBIDDEN)).when(documentManagementService).getDocumentBinaryContent(getUuid());
 
 
         Assertions.assertThrows(ForbiddenException.class, () -> {
             testee.getDocumentBinaryContentbyDocumentId(
                 serviceAuthorization,
                 getUuid(),
+                AUTHORIZATION,
                 "",
                 ""
             );
         });
-
-
     }
 
 
@@ -182,13 +184,14 @@ public class CaseDocumentAmControllerTest {
 
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
-        doReturn(caseDocumentMetadata).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
-        doReturn(setDocumentBinaryContent("forbidden")).when(documentManagementService).getDocumentBinaryContent(getUuid());
+        doReturn(caseDocumentMetadata).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid(), AUTHORIZATION);
+        doReturn(setDocumentBinaryContent(FORBIDDEN)).when(documentManagementService).getDocumentBinaryContent(getUuid());
 
         Assertions.assertThrows(ForbiddenException.class, () -> {
             testee.getDocumentBinaryContentbyDocumentId(
                 serviceAuthorization,
                 getUuid(),
+                AUTHORIZATION,
                 "",
                 ""
             );
@@ -302,20 +305,6 @@ public class CaseDocumentAmControllerTest {
         });
     }
 
-    /*
-    @Test
-    @DisplayName("Should return a positive response when a document is uploaded")
-    public void shouldUploadAFileSuccessfully() {
-        ResponseEntity<Object> responseEntity = testee.uploadDocuments(generateMultipartList(),
-                                                                       Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE), serviceAuthorization,
-                                                                       BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2, USER_ID, DUMMY_ROLE);
-        assertAll(
-            () -> assertNotNull(responseEntity, "Upload response is Null")
-                 );
-    }
-    */
-
-
     private ResponseEntity<StoredDocumentHalResource> setDocumentMetaData() {
         StoredDocumentHalResource resource = new StoredDocumentHalResource();
         resource.setCreatedBy("test");
@@ -329,7 +318,7 @@ public class CaseDocumentAmControllerTest {
 
     private CaseDocumentMetadata getCaseDocumentMetadata(String docId, List<Permission> permission) {
         Document document = Document.builder().permissions(permission).id(docId).build();
-        return CaseDocumentMetadata.builder().caseId(CASE_ID).document(Optional.of(document)).build();
+        return CaseDocumentMetadata.builder().caseId(CASE_ID).document(document).build();
     }
 
     private ResponseEntity<ByteArrayResource> setDocumentBinaryContent(String responseType) {
@@ -339,7 +328,7 @@ public class CaseDocumentAmControllerTest {
                 getHttpHeaders(),
                 HttpStatus.OK
             );
-        } else if (responseType.equals("forbidden")) {
+        } else if (responseType.equals(FORBIDDEN)) {
             return new ResponseEntity<ByteArrayResource>(
                 new ByteArrayResource("".getBytes()),
                 getHttpHeaders(),
