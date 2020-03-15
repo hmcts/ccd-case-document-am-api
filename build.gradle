@@ -2,8 +2,11 @@ buildscript {
   repositories {
     jcenter()
   }
+  configurations.maybeCreate("pitest")
   dependencies {
     classpath("net.serenity-bdd:serenity-gradle-plugin:2.0.82")
+    classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.4.5'
+    pitest 'org.pitest:pitest-junit5-plugin:0.10'
   }
 }
 
@@ -21,6 +24,7 @@ plugins {
   id 'com.github.spacialcircumstances.gradle-cucumber-reporting' version '0.1.15'
 }
 
+apply plugin: "info.solidsoft.pitest"
 apply plugin: 'java'
 apply plugin: 'net.serenity-bdd.aggregator'
 apply plugin: 'project-report'
@@ -166,14 +170,14 @@ jacoco {
 }
 
 pitest {
+  pitestVersion = "1.4.9"
+  testPlugin = "junit5"
   targetClasses = ['uk.gov.hmcts.reform.ccd.document.am.*']
-  excludedClasses = [
-
-  ]
-  threads = 10
+  excludedClasses = ['uk.gov.hmcts.reform.ccd.document.am.configuration.*','uk.gov.hmcts.reform.ccd.document.am.apihelper.*']
+  threads = 15
   outputFormats = ['XML', 'HTML']
-  timestampedReports = false
-  mutationThreshold = 80
+  timestampedReports = true
+  mutationThreshold = 40
 }
 
 project.tasks['pitest'].group="verification"
@@ -185,7 +189,7 @@ sonarqube {
     property "sonar.coverage.jacoco.xmlReportPaths", "${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml"
     property "sonar.pitest.mode", "reuseReport"
     property "sonar.pitest.reportsDirectory", "build/reports/pitest"
-    property "sonar.exclusions", "src/main/java/uk/gov/hmcts/reform/ccd/document/am/**,"
+    property "sonar.exclusions", "src/main/java/uk/gov/hmcts/reform/ccd/document/am/configuration/**," + "src/main/java/uk/gov/hmcts/reform/ccd/document/am/apihelper/**"
     property "sonar.junit.reportPaths", "${project.buildDir}/test-results/junit-platform"
     property "sonar.projectName", "ccd-case-document-am-api"
     property "sonar.projectKey", "ccd-case-document-am-api"
