@@ -251,9 +251,6 @@ class DocumentManagementServiceImplTest {
         assertEquals(responseEntity.getStatusCode(),HttpStatus.OK);
         List<Permission> permissionsList = new ArrayList<>();
         permissionsList.add(Permission.READ);
-        Optional<Document> doc;
-        doc = Optional.of(Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList).build());
-        CaseDocumentMetadata cdm = CaseDocumentMetadata.builder().caseId("1234qwer1234qwer").document(doc).build();
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class)))
             .thenReturn(null);
 
