@@ -14,5 +14,5 @@ public interface CaseDataStoreService {
      * @param documentId Document Id
      * @return Optional containing Case Metadata when found; empty optional otherwise
      */
-    Optional<CaseDocumentMetadata> getCaseDocumentMetadata(final String caseReference, UUID documentId);
+    Optional<CaseDocumentMetadata> getCaseDocumentMetadata(final String caseReference, UUID documentId, String authorization);
 }

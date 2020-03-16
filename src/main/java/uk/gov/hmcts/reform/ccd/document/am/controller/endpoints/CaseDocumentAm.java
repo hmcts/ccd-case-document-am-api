@@ -89,6 +89,9 @@ public interface CaseDocumentAm {
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
                           + " and will be used for authorisation.")
         @RequestHeader(value = "User-Id", required = false) String userId,
+        @ApiParam("Authorization header of the currently authenticated user")
+        @RequestHeader(value = "Authorization", required = true) String authorization,
+
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles);
 
@@ -109,6 +112,9 @@ public interface CaseDocumentAm {
         @RequestHeader(value = SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
 
         @ApiParam(value = "documentId", required = true) @PathVariable("documentId") UUID documentId,
+        @ApiParam("Authorization header of the currently authenticated user")
+        @RequestHeader(value = "Authorization", required = true) String authorization,
+
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
                           + " and will be used for authorisation.")
         @RequestHeader(value = "user-id", required = false) String userId,

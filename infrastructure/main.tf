@@ -1,5 +1,5 @@
 provider "azurerm" {
-  version = "1.27"
+  version = "1.22.1"
 }
 
 locals {
@@ -25,14 +25,13 @@ locals {
 
   // S2S
   s2s_url = "http://rpe-service-auth-provider-${local.env_ase_url}"
-  idam_url = "${var.env == "prod" ? "https://idam-api.platform.hmcts.net" : "https://idam-api.${local.local_env}.platform.hmcts.net" }"
 
   custom_redirect_uri = "${var.frontend_url}/oauth2redirect"
   default_redirect_uri = "https://ccd-case-management-web-${local.env_ase_url}/oauth2redirect"
   oauth2_redirect_uri = "${var.frontend_url != "" ? local.custom_redirect_uri : local.default_redirect_uri}"
   definition_store_host = "http://ccd-definition-store-api-${local.env_ase_url}"
   document_store_url = "http://dm-store-${local.env_ase_url}"
-
+  ccd_data_store_url = "http://ccd-data-store-api-${local.env_ase_url}"
  }
 
 data "azurerm_key_vault" "ccd_shared_key_vault" {
@@ -103,6 +102,7 @@ module "ccd-case-document-am-api" {
     CCD_DRAFT_ENCRYPTION_KEY            = "${random_string.draft_encryption_key.result}"
     DEFINITION_STORE_HOST               = "${local.definition_store_host}"
     DOCUMENT_STORE_URL                   = "${local.document_store_url}"
+    CCD_DATA_STORE_URL                   = "${local.ccd_data_store_url}"
 
     HTTP_CLIENT_CONNECTION_TIMEOUT        = "${var.http_client_connection_timeout}"
     HTTP_CLIENT_READ_TIMEOUT              = "${var.http_client_read_timeout}"

@@ -1,16 +1,7 @@
 
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiParam;
@@ -27,16 +18,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.CaseNotFoundException;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.UnauthorizedException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
-import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.List;
+import java.util.UUID;
 import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 
 @Controller
@@ -49,16 +46,14 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     private transient HttpServletRequest request;
     private transient DocumentManagementService  documentManagementService;
     private transient CaseDataStoreService caseDataStoreService;
-    private transient ValidationService validationService;
 
     @Autowired
     public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService documentManagementService,
-                                    CaseDataStoreService caseDataStoreService, ValidationService validationService) {
+                                    CaseDataStoreService caseDataStoreService) {
         this.objectMapper = objectMapper;
         this.request = request;
         this.documentManagementService = documentManagementService;
         this.caseDataStoreService = caseDataStoreService;
-        this.validationService = validationService;
     }
 
     @Override
@@ -73,22 +68,13 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @Valid @RequestParam(value = "permanent", required = false) Boolean permanent,
 
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-                          + " and will be used for authorisation.")
+            + " and will be used for authorisation.")
         @RequestHeader(value = "User-Id", required = false) String userId,
 
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<String>(objectMapper.readValue("\"\"", String.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                LOG.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
 
-        return new ResponseEntity<String>(HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<String>(HttpStatus.OK);
     }
 
     @Override
@@ -97,31 +83,21 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
         @ApiParam("documentId")
         @PathVariable("documentId") UUID documentId,
+        @ApiParam("Authorization header of the currently authenticated user")
+        @RequestHeader(value = "Authorization", required = true) String authorization,
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-                          + " and will be used for authorisation.")
+            + " and will be used for authorisation.")
         @RequestHeader(value = "User-Id", required = false) String userId,
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
 
         ResponseEntity documentMetadata = documentManagementService.getDocumentMetadata(documentId);
-        String caseId = documentManagementService.extractCaseIdFromMetadata(documentMetadata.getBody());
-
-        if (!validationService.validate(caseId)) {
-            LOG.error(CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
-            throw new BadRequestException(CASE_ID_INVALID);
-
-        } else {
-            CaseDocumentMetadata  caseDocumentMetadata = caseDataStoreService.getCaseDocumentMetadata(caseId, documentId)
-                    .orElseThrow(() -> new CaseNotFoundException(caseId));
-            if (caseDocumentMetadata.getDocument().get().getId().equals(documentId.toString())
-                    && caseDocumentMetadata.getDocument().get().getPermissions().contains(Permission.READ)) {
-                return documentManagementService.getDocumentBinaryContent(documentId);
-
-            }
+        if (documentManagementService.checkUserPermission(documentMetadata, documentId, authorization)) {
+            return documentManagementService.getDocumentBinaryContent(documentId);
 
         }
-        LOG.error("User don't have read permission on requested document " + HttpStatus.UNAUTHORIZED);
-        throw new UnauthorizedException(documentId.toString());
+        LOG.error("User don't have read permission on requested document " + HttpStatus.FORBIDDEN);
+        throw new ForbiddenException(documentId.toString());
     }
 
     @Override
@@ -132,17 +108,24 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam("documentId")
         @PathVariable("documentId") UUID documentId,
 
+        @ApiParam("Authorization header of the currently authenticated user")
+        @RequestHeader(value = "Authorization", required = true) String authorization,
+
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
                           + " and will be used for authorisation.")
         @RequestHeader(value = "user-id", required = false) String userId,
+
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
-
-        return  ResponseEntity
-            .status(HttpStatus.OK)
-            .body(responseEntity.getBody());
+        if (documentManagementService.checkUserPermission(responseEntity, documentId, authorization)) {
+            return  ResponseEntity
+                 .status(HttpStatus.OK)
+                 .body(responseEntity.getBody());
+        }
+        LOG.error("User don't have read permission on requested document " + HttpStatus.FORBIDDEN);
+        throw new ForbiddenException(documentId.toString());
     }
 
     @Override
@@ -157,24 +140,13 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @PathVariable("documentId") UUID documentId,
 
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-                          + " and will be used for authorisation.")
+            + " and will be used for authorisation.")
         @RequestHeader(value = "User-Id", required = false) String userId,
 
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
 
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<StoredDocumentHalResource>(objectMapper.readValue("",
-                    StoredDocumentHalResource.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                LOG.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
-
-        return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.OK);
     }
 
     @Override
@@ -187,23 +159,13 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
 
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-                          + " and will be used for authorisation.")
+            + " and will be used for authorisation.")
         @RequestHeader(value = "User-Id", required = false) String userId,
 
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<StoredDocumentHalResource>(objectMapper.readValue("",
-                    StoredDocumentHalResource.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                LOG.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
 
-        return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.OK);
     }
 
     @Override
@@ -212,9 +174,9 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
         @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-                          + " and will be used for authorisation.")
+            + " and will be used for authorisation.")
         @RequestHeader(
-        value = "User-Id", required = false) String userId,
+            value = "User-Id", required = false) String userId,
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "User-Roles", required = false) String userRoles,
         @ApiParam("") @Valid @RequestParam(value = "offset", required = false) Long offset,
@@ -224,18 +186,8 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam("") @Valid @RequestParam(value = "sort.sorted", required = false) Boolean sortSorted,
         @ApiParam("") @Valid @RequestParam(value = "sort.unsorted", required = false) Boolean sortUnsorted,
         @ApiParam("") @Valid @RequestParam(value = "unpaged", required = false) Boolean unpaged) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<StoredDocumentHalResourceCollection>(objectMapper.readValue("",
-                    StoredDocumentHalResourceCollection.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                LOG.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<StoredDocumentHalResourceCollection>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
 
-        return new ResponseEntity<StoredDocumentHalResourceCollection>(HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<StoredDocumentHalResourceCollection>(HttpStatus.OK);
     }
 
     @Override
@@ -273,19 +225,18 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
         try {
-            ValidationService.validateInputs(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification);
+            ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification, userRoles);
             ValidationService.isValidSecurityClassification(classification);
+            ValidationService.validateLists(files, roles);
 
             return documentManagementService.uploadDocuments(files, classification, roles,
                                                              serviceAuthorization, caseTypeId, jurisdictionId, userId);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(e.getMessage());
+        } catch (BadRequestException | IllegalArgumentException e) {
+            LOG.error("Exception while uploading the documents :" + e.getMessage());
+            throw new BadRequestException("Exception while uploading the documents :" + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(e.getMessage());
+            LOG.error("Exception while uploading the documents :" + e.getMessage());
+            throw new ResponseFormatException("Exception while uploading the documents :" + e.getMessage());
         }
     }
 }
