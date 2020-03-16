@@ -232,11 +232,11 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             return documentManagementService.uploadDocuments(files, classification, roles,
                                                              serviceAuthorization, caseTypeId, jurisdictionId, userId);
         } catch (BadRequestException | IllegalArgumentException e) {
-            LOG.error("Exception while uploading the documents :" + e.getMessage());
-            throw new BadRequestException("Exception while uploading the documents :" + e.getMessage());
+            LOG.error("Exception while uploading the documents :" + e);
+            throw new BadRequestException("Exception while uploading the documents :" + e);
         } catch (Exception e) {
-            LOG.error("Exception while uploading the documents :" + e.getMessage());
-            throw new ResponseFormatException("Exception while uploading the documents :" + e.getMessage());
+            LOG.error("Exception while uploading the documents :" + e);
+            throw new ResponseFormatException("Exception while uploading the documents :" + e);
         }
     }
 }
