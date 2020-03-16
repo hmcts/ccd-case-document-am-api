@@ -57,10 +57,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private transient SecurityUtils securityUtils;
 
     @Value("${documentStoreUrl}")
-    private transient String documentURL;
+    protected transient String documentURL;
 
     @Value("${documentTTL}")
-    private transient String documentTtl;
+    protected transient String documentTtl;
 
     private transient CaseDataStoreService caseDataStoreService;
     private transient ValidationService validationService;
