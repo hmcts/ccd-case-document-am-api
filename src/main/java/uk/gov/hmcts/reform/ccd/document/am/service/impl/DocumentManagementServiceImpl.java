@@ -18,7 +18,6 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_F
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ROLES;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.TEST_URL;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.THUMBNAIL;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
 
@@ -31,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import javax.servlet.http.HttpServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
@@ -48,6 +48,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.CaseNotFoundException;
@@ -263,7 +265,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private String buildDocumentURL(String documentUrl, int length) {
         documentUrl = documentUrl.substring(documentUrl.length() - length);
-        return (System.getenv(TEST_URL)).concat("/cases/documents/" + documentUrl);
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+            .getRequest();
+        return (request.getRequestURI()).concat("/cases/documents/" + documentUrl);
     }
 
     private HttpHeaders prepareRequestForUpload(List<MultipartFile> files, String classification, List<String> roles,
