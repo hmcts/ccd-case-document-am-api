@@ -3,12 +3,17 @@
   "productName": "DM Store",
   "operationName": "Upload a case document",
   "method": "POST",
-  "uri": "{{DM_STORE_URL}}/documents",
+  "uri": "/cases/documents",
   "request": {
     "headers": {
       "Authorization": "[[DYNAMIC]]",
       "ServiceAuthorization": "[[DYNAMIC]]",
-      "Content-Type": "multipart/form-data"
+      "Content-Type": "multipart/form-data",
+      "caseTypeId": "BEFTA_CASETYPE_2_2",
+      "jurisdictionId": "BEFTA_JURISDICTION_2",
+      "uid": "[[DYNAMIC]]",
+      "user-id": "[someUserId]",
+      "user-roles": "caseworker"
     }
   },
   "expectedResponse": {
