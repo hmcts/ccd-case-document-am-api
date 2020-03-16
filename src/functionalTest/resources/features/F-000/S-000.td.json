@@ -1,6 +1,5 @@
 {
   "_guid_": "S-000",
-  "_extends_": "S-000-Test-Base-data",
   "users": {
     "invokingUser": {
       "username": "befta.caseworker.2.solicitor.1@gmail.com",
@@ -8,62 +7,67 @@
     }
   },
   "title": "Get Document Metadata by Document ID",
+  "productName": "DM Store",
+  "operationName": "upload a document with mandatory metadata",
+  "method": "POST",
+  "uri": "/cases/documents",
+  "specs": [
+    "an active caseworker profile in CCD with full permissions on a document field",
+    "uses a uid that exists in IDAM"
+  ],
   "request": {
     "headers": {
-      "Content-Type": "application/json",
       "Authorization": "[[DYNAMIC]]",
       "ServiceAuthorization": "[[DYNAMIC]]",
+      "Content-Type": "multipart/form-data",
       "caseTypeId": "BEFTA_CASETYPE_2_2",
       "jurisdictionId": "BEFTA_JURISDICTION_2",
       "uid": "[[DYNAMIC]]",
       "user-id": "[someUserId]",
       "user-roles": "caseworker"
     },
-    "pathVariables": {
-      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
-    }
-  },
-  "specs": [
-    "an active caseworker profile in CCD with full permissions on a document field",
-    "uses a uid that exists in IDAM",
-    "to retrieve the metadata by document id"
-  ],
-  "expectedResponse": {
-    "headers": {
-      "_extends_": "Common_Response_Header_Base",
-      "Content-Type": "application/json"
-    },
     "body": {
-      "links": [
+      "arrayInMap": [
         {
-          "rel": "self",
-          "href": "[[ANYTHING_PRESENT]]"
+          "key": "classification",
+          "value": "PUBLIC"
         },
         {
-          "rel": "binary",
-          "href": "[[ANYTHING_PRESENT]]"
+          "key": "roles",
+          "value": "caseworker"
+        },
+        {
+          "key": "files",
+          "filePath": "SampleImage.png"
         }
-      ],
+      ]
+    }
+  },
+  "expectedResponse": {
+    "responseCode": 200,
+    "responseMessage": "OK",
+    "headers": {
+      "Cache-Control" : "[[ANYTHING_PRESENT]]",
+      "Content-Encoding" : "gzip",
+      "Content-Length" : "[[ANYTHING_PRESENT]]",
+      "Content-Type" : "application/json",
+      "Date" : "[[ANYTHING_PRESENT]]",
+      "Expires" : "0",
+      "Pragma" : "no-cache",
+      "Strict-Transport-Security" : "[[ANYTHING_PRESENT]]",
+      "Vary" : "Accept-Encoding",
+      "X-Content-Type-Options" : "nosniff",
+      "X-Frame-Options" : "DENY",
+      "X-Xss-Protection" : "1; mode=block"
+    },
+    "body": {
       "_embedded": {
-        "allDocumentVersions": {
-          "links": []
-        }
-      },
-      "classification": "PUBLIC",
-      "createdBy": "[[ANYTHING_PRESENT]]",
-      "createdOn": "[[ANYTHING_PRESENT]]",
-      "lastModifiedBy": "[[ANYTHING_PRESENT]]",
-      "metadata": {
-        "caseId": "[[ANYTHING_PRESENT]]",
-        "jurisdictionId": "BEFTA_JURISDICTION_2"
-      },
-      "mimeType": "image/png",
-      "modifiedOn": "[[ANYTHING_PRESENT]]",
-      "originalDocumentName": "SampleImage.png",
-      "roles": [
-        "caseworker"
-      ],
-      "size": 679361
+        "documents": [
+          {
+            "_extends_": "Common_Response_Body_Document_Base"
+          }
+        ]
+      }
     }
   }
 }

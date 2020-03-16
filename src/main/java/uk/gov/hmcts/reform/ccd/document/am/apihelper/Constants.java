@@ -34,4 +34,5 @@ public class Constants {
     public static final String THUMBNAIL = "thumbnail";
     public static final String DOCUMENTS = "documents";
     public static final String INPUT_STRING_PATTERN = "^[a-zA-Z0-9_-]*$";
+
 }
