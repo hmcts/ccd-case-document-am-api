@@ -31,7 +31,8 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
     private static final Logger LOG = LoggerFactory.getLogger(CaseDataStoreServiceImpl.class);
 
     @Value("${caseDataStoreUrl}")
-    private transient String caseDataStoreUrl;
+    protected transient String caseDataStoreUrl;
+
     private transient RestTemplate restTemplate;
     private transient SecurityUtils securityUtils;
 
