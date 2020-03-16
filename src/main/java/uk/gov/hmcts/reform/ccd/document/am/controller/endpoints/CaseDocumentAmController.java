@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
@@ -236,7 +235,8 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             throw new BadRequestException("Exception while uploading the documents :" + e.getMessage());
         } catch (Exception e) {
             LOG.error("Exception while uploading the documents :" + e.getMessage());
-            throw new ResponseFormatException("Exception while uploading the documents :" + e.getMessage());
+            throw e;
+            //throw new ResponseFormatException("Exception while uploading the documents :" + e.getMessage());
         }
     }
 }

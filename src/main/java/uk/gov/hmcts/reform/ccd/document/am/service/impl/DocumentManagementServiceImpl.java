@@ -52,7 +52,6 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.CaseNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
@@ -232,7 +231,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             }
         } catch (Exception exception) {
             LOG.error("Error while formatting the uploaded document response :" + exception);
-            throw new ResponseFormatException("Error while formatting the uploaded document response ");
+            throw exception;
+            //throw new ResponseFormatException("Error while formatting the uploaded document response ");
         }
     }
 
@@ -246,6 +246,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             String href = (String) links.getJSONObject(SELF).get(HREF);
             LOG.error("href :" + href);
             links.getJSONObject(SELF).put(HREF, buildDocumentURL(href, 36));
+            LOG.error("Built the link :" + href);
             hashmap.put(HASHCODE, ApplicationUtils.generateHashCode(
                 href.substring(href.length() - 36)
                     .concat(jurisdictionId)
@@ -256,6 +257,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             LOG.error(hashmap.values().toString());
         } catch (Exception e) {
             LOG.error("Exception within UpdateDomainForLinks :" + e);
+            throw e;
         }
     }
 
