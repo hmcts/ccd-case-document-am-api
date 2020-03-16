@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
@@ -231,12 +232,11 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             return documentManagementService.uploadDocuments(files, classification, roles,
                                                              serviceAuthorization, caseTypeId, jurisdictionId, userId);
         } catch (BadRequestException | IllegalArgumentException e) {
-            LOG.error("Exception while uploading the documents :" + e.getMessage());
-            throw new BadRequestException("Exception while uploading the documents :" + e.getMessage());
+            LOG.error("Exception while uploading the documents :" + e);
+            throw new BadRequestException("Exception while uploading the documents :" + e);
         } catch (Exception e) {
-            LOG.error("Exception while uploading the documents :" + e.getMessage());
-            throw e;
-            //throw new ResponseFormatException("Exception while uploading the documents :" + e.getMessage());
+            LOG.error("Exception while uploading the documents :" + e);
+            throw new ResponseFormatException("Exception while uploading the documents :" + e);
         }
     }
 }

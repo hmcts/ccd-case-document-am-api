@@ -54,6 +54,7 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.CaseNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
@@ -196,11 +197,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             bodyMap
                                                      );
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
-        LOG.error("documentURL :" + documentURL);
         ResponseEntity<Object> uploadedDocumentResponse = restTemplate
             .postForEntity(documentURL, requestEntity, Object.class);
-        LOG.error("uploadedDocumentResponse code:" + uploadedDocumentResponse.getStatusCode());
-        LOG.error("uploadedDocumentResponse body:" + uploadedDocumentResponse.getBody());
+
         if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode()) && null != uploadedDocumentResponse
             .getBody()) {
             formatUploadDocumentResponse(caseTypeId, jurisdictionId, uploadedDocumentResponse);
@@ -216,39 +215,32 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         try {
             LinkedHashMap documents = (LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse.getBody())
                 .get(EMBEDDED);
-            LOG.error("documents :" + documents);
+            //LOG.error("Documents in response :" + documents);
 
             ArrayList<Object> documentList = (ArrayList<Object>) (documents.get(DOCUMENTS));
             LOG.error("documentList :" + documentList);
 
             for (Object document : documentList) {
                 if (document instanceof LinkedHashMap) {
-                    LOG.error("Individual document :" + ((LinkedHashMap) document).entrySet());
+                    //LOG.error("Individual document :" + ((LinkedHashMap) document).entrySet());
                     LinkedHashMap<String, Object> hashmap = ((LinkedHashMap<String, Object>) (document));
-                    LOG.error("hashmap  :" + hashmap.entrySet());
-                    LOG.error("hashmap  :" + hashmap);
                     hashmap.remove(EMBEDDED);
                     updateDomainForLinks(hashmap, jurisdictionId, caseTypeId);
                 }
             }
         } catch (Exception exception) {
             LOG.error("Error while formatting the uploaded document response :" + exception);
-            throw exception;
-            //throw new ResponseFormatException("Error while formatting the uploaded document response ");
+            throw new ResponseFormatException("Error while formatting the uploaded document response " + exception);
         }
     }
 
     private void updateDomainForLinks(LinkedHashMap<String, Object> hashmap, String jurisdictionId, String caseTypeId) {
         try {
-            LOG.error("Entering JSON Links");
             JSONObject links = new JSONObject(hashmap).getJSONObject(LINKS);
-            LOG.error("Entering JSON Links :" + links);
             links.remove(THUMBNAIL);
 
             String href = (String) links.getJSONObject(SELF).get(HREF);
-            LOG.error("href :" + href);
             links.getJSONObject(SELF).put(HREF, buildDocumentURL(href, 36));
-            LOG.error("Built the link :" + href);
             hashmap.put(HASHCODE, ApplicationUtils.generateHashCode(
                 href.substring(href.length() - 36)
                     .concat(jurisdictionId)
@@ -267,7 +259,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         documentUrl = documentUrl.substring(documentUrl.length() - length);
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
             .getRequest();
-        LOG.error("URL from request is: " + request.getRequestURL());
+        LOG.info("URL from request is: " + request.getRequestURL());
         return request.getRequestURL().append("/").append(documentUrl).toString();
     }
 
