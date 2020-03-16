@@ -280,7 +280,8 @@
     <cve>CVE-2018-1000613</cve>
     <cve>CVE-2017-13098</cve>
     <cve>CVE-2018-1000180</cve>
-    <cve>CVE-2016-1000352</cve><cve>CVE-2016-2427</cve>
+    <cve>CVE-2016-1000352</cve>
+    <cve>CVE-2016-2427</cve>
     <cve>CVE-2016-1000346</cve>
     <cve>CVE-2016-1000345</cve>
     <cve>CVE-2016-1000344</cve>
@@ -305,5 +306,27 @@
    ]]></notes>
     <cpe>cpe:2.3:a:checkstyle:checkstyle:8.18:*:*:*:*:*:*:*</cpe>
     <cve>CVE-2019-10782</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   relates to tomcat-embed-websocket-9.0.29.jar
+   ]]></notes>
+    <cpe>cpe:2.3:a:apache:tomcat:9.0.29:*:*:*:*:*:*:*</cpe>
+    <cve>CVE-2019-17569</cve>
+    <cve>CVE-2020-1935</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+ file name: flexmark-ext-gitlab-0.34.30.jar
+ ]]></notes>
+    <packageUrl regex="true">^pkg:maven/com\.vladsch\.flexmark/flexmark\-ext\-gitlab@.*$</packageUrl>
+    <cpe>cpe:/a:gitlab:gitlab</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+ file name: flexmark-ext-gitlab-0.34.30.jar
+ ]]></notes>
+    <packageUrl regex="true">^pkg:maven/com\.vladsch\.flexmark/flexmark\-ext\-gitlab@.*$</packageUrl>
+    <cve>CVE-2019-9177</cve>
   </suppress>
 </suppressions>

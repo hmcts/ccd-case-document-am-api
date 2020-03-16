@@ -1,0 +1,34 @@
+{
+  "title": "must receive an error response for an active caseworker who does not have document access",
+
+  "_guid_": "S-022",
+  "_extends_": "F-002_Test_Data_Base",
+
+  "specs": [
+    "contains an active caseworker who does not have document access"
+  ],
+
+  "request": {
+    "user": {
+      "username": "befta.caseworker.2.solicitor.1@gmail.com",
+      "password": "[[$CCD_BEFTA_CASEWORKER_2_SOLICITOR_1_PWD]]"
+    },
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  },
+
+  "expectedResponse": {
+    "_extends_": "Common_401_Response",
+    "headers": {
+      "Connection" : "keep-alive",
+      "Content-Type" : "application/json",
+      "Keep-Alive" : "[[ANYTHING_PRESENT]]"
+    },
+    "body" : {
+      "timestamp" : "[[ANYTHING_PRESENT]]",
+      "message" : "Insufficient permission on requested  document TO BE UPDATED AFTER AM450",
+      "path" : "/cases/documents/8de9957b-d7a6-40a1-7777-6aac30d33644/binary"
+    }
+  }
+}
