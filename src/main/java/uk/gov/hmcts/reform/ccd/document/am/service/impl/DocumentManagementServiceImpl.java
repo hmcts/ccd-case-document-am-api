@@ -198,7 +198,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
 
         ResponseEntity<Object> uploadedDocumentResponse = restTemplate
-            .postForEntity(documentURL, requestEntity, Object.class);
+            .postForEntity(documentURL.concat("/documents"), requestEntity, Object.class);
         LOG.error("uploadedDocumentResponse code:" + uploadedDocumentResponse.getStatusCode());
         LOG.error("uploadedDocumentResponse body:" + uploadedDocumentResponse.getBody());
         if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode()) && null != uploadedDocumentResponse
@@ -267,7 +267,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         documentUrl = documentUrl.substring(documentUrl.length() - length);
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
             .getRequest();
-        return (request.getRequestURI()).concat("/cases/documents/" + documentUrl);
+        return request.getRequestURL().append("/").append(documentUrl).toString();
     }
 
     private HttpHeaders prepareRequestForUpload(List<MultipartFile> files, String classification, List<String> roles,
