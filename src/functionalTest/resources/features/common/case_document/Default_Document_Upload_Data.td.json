@@ -3,8 +3,8 @@
   "_extends_": "Default_Document_Upload_Data_Base",
   "users": {
     "invokingUser": {
-      "username": "befta.caseworker.2.solicitor.1@gmail.com",
-      "password": "Pa55word11"
+      "username": "befta.caseworker.2.solicitor.2@gmail.com",
+      "password": "[[$CCD_BEFTA_CASEWORKER_2_SOLICITOR_2_PWD]]"
     }
   },
   "specs": [
@@ -24,7 +24,12 @@
         {
           "key": "files",
           "filePath": "SampleImage.png"
+        },
+        {
+          "key": "metadata[caseId]",
+          "value": "1111122222333334"
         }
+
       ]
     }
   }
