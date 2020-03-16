@@ -1,5 +1,37 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
+import static org.springframework.http.HttpMethod.GET;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DATA_SOURCE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DOCUMENTS;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EMBEDDED;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FILES;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHCODE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HREF;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LINKS;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ROLES;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.TEST_URL;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.THUMBNAIL;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
+
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -32,19 +64,6 @@ import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.document.am.util.ResponseHelper;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.springframework.http.HttpMethod.GET;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.*;
-
 
 @Slf4j
 @Service
@@ -66,7 +85,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private transient ValidationService validationService;
 
     @Autowired
-    public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils,CaseDataStoreService caseDataStoreService,
+    public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils,
+                                         CaseDataStoreService caseDataStoreService,
                                          ValidationService validationService) {
         this.restTemplate = restTemplate;
 
@@ -92,7 +112,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
                 return responseEntity;
             } else {
-                LOG.error("Document doesn't exist for requested document id at Document Store API Side " + responseEntity.getStatusCode());
+                LOG.error("Document doesn't exist for requested document id at Document Store API Side " + responseEntity
+                    .getStatusCode());
                 throw new ResourceNotFoundException(documentId.toString());
             }
         } catch (HttpClientErrorException ex) {
@@ -114,7 +135,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Override
     public String extractCaseIdFromMetadata(Object storedDocument) {
         if (storedDocument instanceof StoredDocumentHalResource) {
-            Map<String,String> metadata = ((StoredDocumentHalResource) storedDocument).getMetadata();
+            Map<String, String> metadata = ((StoredDocumentHalResource) storedDocument).getMetadata();
             return metadata.get("caseId");
         }
         return null;
@@ -163,12 +184,24 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                                   String userId) {
 
         LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
-        HttpHeaders headers = prepareRequestForUpload(files, classification, roles, serviceAuthorization, caseTypeId, jurisdictionId, userId, bodyMap);
+        HttpHeaders headers = prepareRequestForUpload(
+            files,
+            classification,
+            roles,
+            serviceAuthorization,
+            caseTypeId,
+            jurisdictionId,
+            userId,
+            bodyMap
+                                                     );
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
 
-        ResponseEntity<Object> uploadedDocumentResponse = restTemplate.postForEntity(documentURL, requestEntity, Object.class);
-
-        if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode()) && null != uploadedDocumentResponse.getBody()) {
+        ResponseEntity<Object> uploadedDocumentResponse = restTemplate
+            .postForEntity(documentURL, requestEntity, Object.class);
+        LOG.error("uploadedDocumentResponse code:" + uploadedDocumentResponse.getStatusCode());
+        LOG.error("uploadedDocumentResponse body:" + uploadedDocumentResponse.getBody());
+        if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode()) && null != uploadedDocumentResponse
+            .getBody()) {
             formatUploadDocumentResponse(caseTypeId, jurisdictionId, uploadedDocumentResponse);
         }
         return ResponseEntity
@@ -177,38 +210,53 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @SuppressWarnings("unchecked")
-    private void formatUploadDocumentResponse(String caseTypeId, String jurisdictionId, ResponseEntity<Object> uploadedDocumentResponse) {
+    private void formatUploadDocumentResponse(String caseTypeId, String jurisdictionId,
+                                              ResponseEntity<Object> uploadedDocumentResponse) {
         try {
-            LinkedHashMap documents = (LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse.getBody()).get(EMBEDDED);
+            LinkedHashMap documents = (LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse.getBody())
+                .get(EMBEDDED);
+            LOG.error("documents :" + documents);
+
             ArrayList<Object> documentList = (ArrayList<Object>) (documents.get(DOCUMENTS));
+            LOG.error("documentList :" + documentList);
 
             for (Object document : documentList) {
                 if (document instanceof LinkedHashMap) {
+                    LOG.error("Individual document :" + ((LinkedHashMap) document).entrySet());
                     LinkedHashMap<String, Object> hashmap = ((LinkedHashMap<String, Object>) (document));
+                    LOG.error("hashmap  :" + hashmap.entrySet());
+                    LOG.error("hashmap  :" + hashmap);
                     hashmap.remove(EMBEDDED);
                     updateDomainForLinks(hashmap, jurisdictionId, caseTypeId);
                 }
             }
         } catch (Exception exception) {
-            LOG.error("Error while formatting the uploaded document response :" + exception.getMessage());
+            LOG.error("Error while formatting the uploaded document response :" + exception);
             throw new ResponseFormatException("Error while formatting the uploaded document response ");
         }
     }
 
     private void updateDomainForLinks(LinkedHashMap<String, Object> hashmap, String jurisdictionId, String caseTypeId) {
-        JSONObject links = new JSONObject(hashmap).getJSONObject(LINKS);
-        links.remove(THUMBNAIL);
+        try {
+            LOG.error("Entering JSON Links");
+            JSONObject links = new JSONObject(hashmap).getJSONObject(LINKS);
+            LOG.error("Entering JSON Links :" + links);
+            links.remove(THUMBNAIL);
 
-        String href = (String) links.getJSONObject(SELF).get(HREF);
-        links.getJSONObject(SELF).put(HREF, buildDocumentURL(href, 36));
-        hashmap.put(HASHCODE, ApplicationUtils.generateHashCode(
-            href.substring(href.length() - 36)
-                .concat(jurisdictionId)
-                .concat(caseTypeId)));
+            String href = (String) links.getJSONObject(SELF).get(HREF);
+            LOG.error("href :" + href);
+            links.getJSONObject(SELF).put(HREF, buildDocumentURL(href, 36));
+            hashmap.put(HASHCODE, ApplicationUtils.generateHashCode(
+                href.substring(href.length() - 36)
+                    .concat(jurisdictionId)
+                    .concat(caseTypeId)));
 
-        links.getJSONObject(BINARY).put(HREF, buildDocumentURL((String) links.getJSONObject(BINARY).get(HREF), 43));
-        hashmap.put(LINKS, links.toMap());
-
+            links.getJSONObject(BINARY).put(HREF, buildDocumentURL((String) links.getJSONObject(BINARY).get(HREF), 43));
+            hashmap.put(LINKS, links.toMap());
+            LOG.error(hashmap.values().toString());
+        } catch (Exception e) {
+            LOG.error("Exception within UpdateDomainForLinks :" + e);
+        }
     }
 
     private String buildDocumentURL(String documentUrl, int length) {
@@ -216,8 +264,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return (System.getenv(TEST_URL)).concat("/cases/documents/" + documentUrl);
     }
 
-    private HttpHeaders prepareRequestForUpload(List<MultipartFile> files, String classification, List<String> roles, String serviceAuthorization,
-                                                String caseTypeId, String jurisdictionId, String userId, LinkedMultiValueMap<String, Object> bodyMap) {
+    private HttpHeaders prepareRequestForUpload(List<MultipartFile> files, String classification, List<String> roles,
+                                                String serviceAuthorization,
+                                                String caseTypeId, String jurisdictionId, String userId,
+                                                LinkedMultiValueMap<String, Object> bodyMap) {
         for (MultipartFile file : files) {
             if (!file.isEmpty()) {
                 bodyMap.add(FILES, file.getResource());
@@ -248,11 +298,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private HttpHeaders getHeaders(ResponseEntity<ByteArrayResource> response) {
         HttpHeaders headers = new HttpHeaders();
-        headers.add(ORIGINAL_FILE_NAME,response.getHeaders().get(ORIGINAL_FILE_NAME).get(0));
-        headers.add(CONTENT_DISPOSITION,response.getHeaders().get(CONTENT_DISPOSITION).get(0));
-        headers.add(DATA_SOURCE,response.getHeaders().get(DATA_SOURCE).get(0));
+        headers.add(ORIGINAL_FILE_NAME, response.getHeaders().get(ORIGINAL_FILE_NAME).get(0));
+        headers.add(CONTENT_DISPOSITION, response.getHeaders().get(CONTENT_DISPOSITION).get(0));
+        headers.add(DATA_SOURCE, response.getHeaders().get(DATA_SOURCE).get(0));
         headers.add(CONTENT_TYPE, response.getHeaders().get(CONTENT_TYPE).get(0));
-        headers.add(CONTENT_LENGTH,response.getHeaders().get(CONTENT_LENGTH).get(0));
+        headers.add(CONTENT_LENGTH, response.getHeaders().get(CONTENT_LENGTH).get(0));
         return headers;
 
     }
@@ -265,8 +315,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             throw new BadRequestException(CASE_ID_INVALID);
 
         } else {
-            CaseDocumentMetadata caseDocumentMetadata = caseDataStoreService.getCaseDocumentMetadata(caseId, documentId, authorization)
-                                                                            .orElseThrow(() -> new CaseNotFoundException(caseId));
+            CaseDocumentMetadata caseDocumentMetadata = caseDataStoreService
+                .getCaseDocumentMetadata(caseId, documentId, authorization)
+                .orElseThrow(() -> new CaseNotFoundException(caseId));
 
             return (caseDocumentMetadata.getDocument().getId().equals(documentId.toString())
                     && caseDocumentMetadata.getDocument().getPermissions().contains(Permission.READ));
