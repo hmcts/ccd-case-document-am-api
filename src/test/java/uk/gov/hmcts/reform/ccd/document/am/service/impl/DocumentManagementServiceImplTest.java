@@ -130,7 +130,7 @@ class DocumentManagementServiceImplTest {
         storedDocumentHalResource.setMetadata(myMap);
         mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
         ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
-        assertEquals(responseEntity.getStatusCode(),HttpStatus.OK);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
         String caseId = sut.extractCaseIdFromMetadata(responseEntity.getBody());
         assertEquals("1234qwer1234qwer", caseId);
@@ -223,7 +223,7 @@ class DocumentManagementServiceImplTest {
 
         mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
         ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
-        assertEquals(responseEntity.getStatusCode(),HttpStatus.OK);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         List<Permission> permissionsList = new ArrayList<>();
         permissionsList.add(Permission.READ);
         Document doc;
