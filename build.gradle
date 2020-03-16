@@ -4,7 +4,7 @@ buildscript {
   }
   configurations.maybeCreate("pitest")
   dependencies {
-    classpath("net.serenity-bdd:serenity-gradle-plugin:2.0.82")
+    classpath("net.serenity-bdd:serenity-gradle-plugin:2.1.13")
     classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.4.5'
     pitest 'org.pitest:pitest-junit5-plugin:0.10'
   }
