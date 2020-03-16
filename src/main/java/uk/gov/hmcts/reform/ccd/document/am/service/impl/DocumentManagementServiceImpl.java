@@ -196,9 +196,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             bodyMap
                                                      );
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
-
+        LOG.error("documentURL :" + documentURL);
         ResponseEntity<Object> uploadedDocumentResponse = restTemplate
-            .postForEntity(documentURL.concat("/documents"), requestEntity, Object.class);
+            .postForEntity(documentURL, requestEntity, Object.class);
         LOG.error("uploadedDocumentResponse code:" + uploadedDocumentResponse.getStatusCode());
         LOG.error("uploadedDocumentResponse body:" + uploadedDocumentResponse.getBody());
         if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode()) && null != uploadedDocumentResponse
