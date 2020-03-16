@@ -49,7 +49,7 @@
     "responseMessage": "OK",
     "headers": {
       "_extends_": "Common_Response_Header_Base",
-      "content-type": "application/vnd.uk.gov.hmcts.dm.document-collection.v1+hal+json;charset=UTF-8"
+      "content-type": "application/json"
     },
     "body": {
       "_embedded": {
