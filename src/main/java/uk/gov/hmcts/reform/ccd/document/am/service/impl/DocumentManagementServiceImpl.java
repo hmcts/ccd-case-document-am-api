@@ -84,17 +84,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     protected transient String documentTtl;
 
     private transient CaseDataStoreService caseDataStoreService;
-    private transient ValidationService validationService;
 
     @Autowired
     public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils,
-                                         CaseDataStoreService caseDataStoreService,
-                                         ValidationService validationService) {
+                                         CaseDataStoreService caseDataStoreService) {
         this.restTemplate = restTemplate;
 
         this.securityUtils = securityUtils;
         this.caseDataStoreService = caseDataStoreService;
-        this.validationService = validationService;
     }
 
     @Override
@@ -198,7 +195,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                                      );
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
         ResponseEntity<Object> uploadedDocumentResponse = restTemplate
-            .postForEntity(documentURL, requestEntity, Object.class);
+            .postForEntity(documentURL.concat("/documents"), requestEntity, Object.class);
 
         if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode()) && null != uploadedDocumentResponse
             .getBody()) {
