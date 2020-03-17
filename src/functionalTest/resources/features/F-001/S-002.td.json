@@ -3,27 +3,18 @@
   "_extends_": "F-001_Test_Base_data",
   "_guid_": "S-002",
   "specs": [
-    "an active caseworker profile in CCD with full permissions on a document field",
-    "contains the metadata for the document uploaded above"
+    "for a non-existing document ID"
   ],
-  "user": {
-    "username": "befta.caseworker.2.solicitor.3@gmail.com",
-    "password": "Pa55word11"
-  },
   "request": {
-    "headers": {
-      "_extends_": "Common_Request_Headers"
-    },
     "pathVariables": {
-      "documentId": "non-existing document ID"
+      "documentId": "00000000-0000-0000-0000-000000000000"
     }
   },
   "expectedResponse": {
-    "responseCode": 404,
-    "responseMessage": "Not Found",
-    "headers": {
-      "_extends_": "Common_Response_Headers",
-      "Transfer-Encoding" : "chunked"
+    "_extends_": "Common_404_Response",
+    "body" : {
+      "message" : "Resource not found 00000000-0000-0000-0000-000000000000",
+      "path" : "/cases/documents/00000000-0000-0000-0000-000000000000"
     }
   }
 }
