@@ -1,0 +1,23 @@
+{
+  "_guid_": "S-044",
+  "_extends_": "F-004_Test_Base_data",
+  "title": "must successfully get document metadata by document ID",
+  "specs": [
+    "an active citizen profile in CCD with full permission on the document field but not to the particular document just created",
+    "contains the id of the document just uploaded above"
+  ],
+  "users": {
+    "invokingUser": {
+      "username": "befta.citizen.2@gmail.com",
+      "password": "[[$CCD_BEFTA_CITIZEN_2_PWD]]"
+    }
+  },
+  "request": {
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_403_Response"
+  }
+}
