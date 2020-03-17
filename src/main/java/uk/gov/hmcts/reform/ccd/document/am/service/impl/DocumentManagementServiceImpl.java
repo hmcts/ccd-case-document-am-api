@@ -100,20 +100,20 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
         try {
             final HttpEntity requestEntity = new HttpEntity(securityUtils.authorizationHeaders());
-            LOG.error("Document Store URL is : " + documentURL);
+            LOG.info("Document Store URL is : " + documentURL);
             String documentMetadataUrl = String.format("%s/documents/%s", documentURL, documentId);
-            LOG.error("documentMetadataUrl : " + documentMetadataUrl);
+            LOG.info("documentMetadataUrl : " + documentMetadataUrl);
             ResponseEntity<StoredDocumentHalResource> response = restTemplate.exchange(
                 documentMetadataUrl,
                 GET,
                 requestEntity,
                 StoredDocumentHalResource.class
                                                                                       );
-            LOG.error("response : " + response.getStatusCode());
+            LOG.info("response : " + response.getStatusCode());
             LOG.error("response : " + response.getBody());
             ResponseEntity responseEntity = ResponseHelper.toResponseEntity(response, documentId);
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
-                LOG.error("Positive response");
+                LOG.info("Positive response");
                 return responseEntity;
             } else {
                 LOG.error("Document doesn't exist for requested document id at Document Store API Side " + responseEntity
