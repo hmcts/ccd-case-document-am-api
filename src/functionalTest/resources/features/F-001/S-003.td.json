@@ -1,0 +1,29 @@
+{
+  "title": "must get an error response for a malformed document ID",
+  "_extends_": "F-001_Test_Base_data",
+  "_guid_": "S-003",
+  "specs": [
+    "an active caseworker profile in CCD with full permissions on a document field",
+    "contains the metadata for the document uploaded above"
+  ],
+  "user": {
+    "username": "befta.caseworker.2.solicitor.3@gmail.com",
+    "password": "Pa55word11"
+  },
+  "request": {
+    "headers": {
+      "_extends_": "Common_Request_Headers"
+    },
+    "pathVariables": {
+      "documentId": "¡€#¢∞§¶•-ºª•¶-∞§¶•-#¢∞§-ºª•¶§∞¢#€¡€#"
+    }
+  },
+  "expectedResponse": {
+    "responseCode": 404,
+    "responseMessage": "Not Found",
+    "headers": {
+      "_extends_": "Common_Response_Headers",
+      "Transfer-Encoding" : "chunked"
+    }
+}
+}

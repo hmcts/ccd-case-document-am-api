@@ -1,0 +1,20 @@
+{
+  "title": "must successfully get document metadata by document ID",
+  "_extends_": "F-001_Test_Base_data",
+  "_guid_": "S-001",
+  "specs": [
+    "an active caseworker profile in CCD with full permissions on a document field",
+    "contains the metadata for the document uploaded above"
+  ],
+  "request": {
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  },
+  "expectedResponse": {
+
+  }
+}
