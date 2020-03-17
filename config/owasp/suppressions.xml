@@ -329,4 +329,11 @@
     <packageUrl regex="true">^pkg:maven/com\.vladsch\.flexmark/flexmark\-ext\-gitlab@.*$</packageUrl>
     <cve>CVE-2019-9177</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: gradle-pitest-plugin-1.4.7.jar
+   ]]></notes>
+    <sha1>7d9c946cafac70ed91848ca8d3a0df4e57077231</sha1>
+    <cpe>cpe:/a:gradle:gradle</cpe>
+  </suppress>
 </suppressions>
