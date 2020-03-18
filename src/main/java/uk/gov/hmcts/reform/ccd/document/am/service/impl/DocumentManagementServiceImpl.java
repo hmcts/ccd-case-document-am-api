@@ -66,7 +66,6 @@ import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.document.am.util.ResponseHelper;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
-
 @Slf4j
 @Service
 public class DocumentManagementServiceImpl implements DocumentManagementService {
