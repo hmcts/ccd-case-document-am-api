@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
-import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -57,14 +56,13 @@ class DocumentManagementServiceImplTest {
     private RestTemplate restTemplateMock = Mockito.mock(RestTemplate.class);
     private SecurityUtils securityUtils = new SecurityUtils(authTokenGenerator);
     private CaseDataStoreService caseDataStoreServiceMock = mock(CaseDataStoreService.class);
-    private ValidationService validationService = mock(ValidationService.class);
 
     private HttpEntity<?> requestEntityGlobal  = new HttpEntity<>(securityUtils.authorizationHeaders());
     private UUID matchedDocUUID = UUID.fromString(MATCHED_DOCUMENT_ID);
 
     @InjectMocks
     private DocumentManagementServiceImpl sut = new DocumentManagementServiceImpl(restTemplateMock, securityUtils,
-                                                                                  caseDataStoreServiceMock, validationService);
+                                                                                  caseDataStoreServiceMock);
 
     @Value("${documentStoreUrl}")
     String documentURL;
