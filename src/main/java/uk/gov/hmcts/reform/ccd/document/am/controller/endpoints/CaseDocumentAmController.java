@@ -241,7 +241,21 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     }
 
     @Override
-    public ResponseEntity<Object> generateHashCode(String serviceAuthorization, UUID documentId, String caseTypeId, String jurisdictionId) {
+    public ResponseEntity<Object> generateHashCode(
+        @ApiParam(value = Constants.S2S_API_PARAM, required = true)
+        @RequestHeader(value = Constants.SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
+
+        @ApiParam("documentId")
+        @PathVariable("documentId") UUID documentId,
+
+        @ApiParam(value = "CaseType identifier for the case document.", required = true)
+        @NotNull(message = "Provide the Case Type ID ")
+        @RequestHeader(value = "caseTypeId", required = true) String caseTypeId,
+
+        @ApiParam(value = "Jurisdiction identifier for the case document.", required = true)
+        @NotNull(message = "Provide the Jurisdiction ID ")
+        @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId) {
+
         return null;
     }
 }
