@@ -1,5 +1,5 @@
 @F-006
-Feature: F-003: Get hashtoken by Document ID
+Feature: F-006: Get hashtoken by Document ID
 
   Background: Load test data for the scenario
     Given an appropriate test context as detailed in the test data source
