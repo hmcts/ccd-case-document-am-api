@@ -239,4 +239,9 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             throw new ResponseFormatException("Exception while uploading the documents :" + e);
         }
     }
+
+    @Override
+    public ResponseEntity<Object> generateHashCode(String serviceAuthorization, UUID documentId, String caseTypeId, String jurisdictionId) {
+        return null;
+    }
 }
