@@ -103,3 +103,9 @@ Feature: F-007: Attach Documents to Case
     And it is submitted to call the [Attach Document To Case] operation of [CCD Case Document AM API]
     Then a negative response is received
     And the response has all the details as expected
+
+  @S-080 @Ignore
+  Scenario: generic scenario for Unauthorised
+
+  @S-081 @Ignore
+  Scenario: generic scenario for Forbidden
