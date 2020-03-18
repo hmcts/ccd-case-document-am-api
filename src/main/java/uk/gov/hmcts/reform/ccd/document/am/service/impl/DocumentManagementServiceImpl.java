@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +58,7 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceN
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
@@ -108,7 +110,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 requestEntity,
                 StoredDocumentHalResource.class
                                                                                       );
-            LOG.info("response : " + response.getStatusCode());
+            LOG.error("response : " + response.getStatusCode());
             LOG.error("response : " + response.getBody());
             ResponseEntity responseEntity = ResponseHelper.toResponseEntity(response, documentId);
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
@@ -166,7 +168,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             }
 
         } catch (HttpClientErrorException ex) {
-            log.error(ex.getMessage());
+            LOG.error(ex.getMessage());
             if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
                 throw new ResourceNotFoundException(documentId.toString());
             } else {
@@ -319,8 +321,13 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 .getCaseDocumentMetadata(caseId, documentId, authorization)
                 .orElseThrow(() -> new CaseNotFoundException(caseId));
 
-            return (caseDocumentMetadata.getDocument().getId().equals(documentId.toString())
-                    && caseDocumentMetadata.getDocument().getPermissions().contains(Permission.READ));
+            List<Document> matchingDocuments =
+                caseDocumentMetadata.getDocuments().stream()
+                                    .filter(document -> document.getId().equals(documentId.toString()))
+                                    .filter(document -> document.getPermissions().contains(Permission.READ))
+                                    .collect(Collectors.toList());
+
+            return matchingDocuments.size() > 0;
         }
     }
 }

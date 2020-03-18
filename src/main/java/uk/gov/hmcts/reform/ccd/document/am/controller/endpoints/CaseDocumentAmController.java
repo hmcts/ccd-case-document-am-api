@@ -3,7 +3,12 @@ package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+import java.util.UUID;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,15 +30,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
-import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.List;
-import java.util.UUID;
 import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 
 @Controller
@@ -42,18 +39,11 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
     private static final Logger LOG = LoggerFactory.getLogger(CaseDocumentAmController.class);
 
-    private transient ObjectMapper objectMapper;
-    private transient HttpServletRequest request;
     private transient DocumentManagementService  documentManagementService;
-    private transient CaseDataStoreService caseDataStoreService;
 
     @Autowired
-    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService documentManagementService,
-                                    CaseDataStoreService caseDataStoreService) {
-        this.objectMapper = objectMapper;
-        this.request = request;
+    public CaseDocumentAmController(DocumentManagementService documentManagementService) {
         this.documentManagementService = documentManagementService;
-        this.caseDataStoreService = caseDataStoreService;
     }
 
     @Override
