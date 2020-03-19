@@ -51,6 +51,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -184,17 +185,28 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public boolean patchDocumentMetadata(CaseDocumentMetadata caseDocumentMetadata, String serviceAuthorization, String userId,
+    public boolean patchDocumentMetadata(CaseDocumentMetadata caseDocumentMetadata, String serviceAuthorization,
+                                         String userId,
                                          String userRoles) {
-        LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
-        HttpHeaders headers = new HttpHeaders();
+        try {
+            LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
+            HttpHeaders headers = new HttpHeaders();
 
-        prepareRequestForAttachingDocumentToCase(caseDocumentMetadata, serviceAuthorization, userId, bodyMap, headers);
+            prepareRequestForAttachingDocumentToCase(
+                caseDocumentMetadata,
+                serviceAuthorization,
+                userId,
+                bodyMap,
+                headers
+                                                    );
 
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
-        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
-        restTemplate.exchange(documentURL.concat("/documents"), HttpMethod.PATCH, requestEntity, Void.class);
-
+            HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
+            restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+            restTemplate.exchange(documentURL.concat("/documents"), HttpMethod.PATCH, requestEntity, Void.class);
+        } catch (RestClientException ex) {
+            LOG.error("Exception while attaching a document to case : " + ex);
+            throw ex;
+        }
         return true;
     }
 

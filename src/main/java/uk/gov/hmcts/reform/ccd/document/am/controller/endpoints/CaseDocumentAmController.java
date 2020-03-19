@@ -140,7 +140,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     }
 
     @Override
-    public ResponseEntity<StoredDocumentHalResource> patchMetaDataOnDocuments(
+    public ResponseEntity<Object> patchMetaDataOnDocuments(
 
         @ApiParam(value = "", required = true)
         @Valid @RequestBody CaseDocumentMetadata caseDocumentMetadata,
@@ -155,9 +155,14 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
-        documentManagementService.patchDocumentMetadata(caseDocumentMetadata, serviceAuthorization, userId, userRoles);
-
-        return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.OK);
+        try {
+            documentManagementService
+                .patchDocumentMetadata(caseDocumentMetadata, serviceAuthorization, userId, userRoles);
+        } catch (Exception e) {
+            LOG.error("Exception while attaching the documents to a case :" + e);
+            throw e;
+        }
+        return new ResponseEntity<Object>(HttpStatus.OK);
     }
 
     @Override

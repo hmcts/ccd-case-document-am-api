@@ -168,7 +168,7 @@ public interface CaseDocumentAm {
                     produces = {APPLICATION_JSON},
                     consumes = {APPLICATION_JSON},
                     method = RequestMethod.PATCH)
-    ResponseEntity<StoredDocumentHalResource> patchMetaDataOnDocuments(
+    ResponseEntity<Object> patchMetaDataOnDocuments(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody CaseDocumentMetadata body,
 
