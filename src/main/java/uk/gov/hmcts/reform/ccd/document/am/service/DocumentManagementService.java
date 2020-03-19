@@ -5,8 +5,8 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 
 public interface DocumentManagementService {
 
@@ -45,4 +45,12 @@ public interface DocumentManagementService {
      * @return Boolen object to check user permission
      **/
     boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization);
+
+    /**
+     * Root GET endpoint.
+     * @param responseEntity which has document meta data response
+     * @param documentId Document Id for which binary content to be downloaded
+     * @return Boolen object to check user permission
+     **/
+    boolean patchDocumentMetadata(CaseDocumentMetadata body, String serviceAuthorization, String userId, String userRoles);
 }

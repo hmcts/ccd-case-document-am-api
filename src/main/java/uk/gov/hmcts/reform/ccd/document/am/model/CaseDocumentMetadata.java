@@ -14,8 +14,6 @@ import lombok.Setter;
 
 @Data
 @Builder
-@Setter
-@Getter
 public class CaseDocumentMetadata {
     public CaseDocumentMetadata() {
     }

@@ -143,17 +143,19 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     public ResponseEntity<StoredDocumentHalResource> patchMetaDataOnDocuments(
 
         @ApiParam(value = "", required = true)
-        @Valid @RequestBody CaseDocumentMetadata body,
+        @Valid @RequestBody CaseDocumentMetadata caseDocumentMetadata,
 
         @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
         @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
 
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
             + " and will be used for authorisation.")
-        @RequestHeader(value = "User-Id", required = false) String userId,
+        @RequestHeader(value = "user-id", required = false) String userId,
 
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
-        @RequestHeader(value = "User-Roles", required = false) String userRoles) {
+        @RequestHeader(value = "user-roles", required = false) String userRoles) {
+
+        documentManagementService.patchDocumentMetadata(caseDocumentMetadata, serviceAuthorization, userId, userRoles);
 
         return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.OK);
     }

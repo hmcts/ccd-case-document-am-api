@@ -177,10 +177,10 @@ public interface CaseDocumentAm {
 
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
                           + " and will be used for authorisation.")
-        @RequestHeader(value = "User-Id", required = false) String userId,
+        @RequestHeader(value = "user-ud", required = false) String userId,
 
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
-        @RequestHeader(value = "User-Roles", required = false) String userRoles);
+        @RequestHeader(value = "user-roles", required = false) String userRoles);
 
 
     @ApiOperation(value = "Search Case Documents using metadata.", nickname = "postDocumentsSearchCommand",
