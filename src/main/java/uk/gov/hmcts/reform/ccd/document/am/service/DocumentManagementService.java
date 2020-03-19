@@ -42,17 +42,17 @@ public interface DocumentManagementService {
      * Root GET endpoint.
      * @param responseEntity which has document meta data response
      * @param documentId Document Id for which binary content to be downloaded
-     * @return Boolen object to check user permission
+     * @return Boolean object to check user permission
      **/
     boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization);
 
     /**
      * Root GET endpoint.
-     * @param caseDocumentMetadata which has document meta data response
-     * @param documentId Document Id for which binary content to be downloaded
-     * @param documentId Document Id for which binary content to be downloaded
-     * @return Boolen object to check user permission
+     * @param caseDocumentMetadata which has document meta data
+     * @param serviceAuthorization Service authorization token
+     * @param userId User ID which is invoking the metadata update
+     * @return Boolean object to check user permission
      **/
     boolean patchDocumentMetadata(CaseDocumentMetadata caseDocumentMetadata,
-                                  String serviceAuthorization, String userId, String userRoles);
+                                  String serviceAuthorization, String userId);
 }

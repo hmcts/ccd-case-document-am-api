@@ -156,8 +156,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
         try {
-            documentManagementService
-                .patchDocumentMetadata(caseDocumentMetadata, serviceAuthorization, userId, userRoles);
+            documentManagementService.patchDocumentMetadata(caseDocumentMetadata, serviceAuthorization, userId);
         } catch (Exception e) {
             LOG.error("Exception while attaching the documents to a case :" + e);
             throw e;

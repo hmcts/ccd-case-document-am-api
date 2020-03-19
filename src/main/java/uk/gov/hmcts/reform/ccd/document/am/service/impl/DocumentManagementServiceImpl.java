@@ -185,9 +185,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public boolean patchDocumentMetadata(CaseDocumentMetadata caseDocumentMetadata, String serviceAuthorization,
-                                         String userId,
-                                         String userRoles) {
+    public boolean patchDocumentMetadata(CaseDocumentMetadata caseDocumentMetadata, String serviceAuthorization, String userId) {
         try {
             LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
             HttpHeaders headers = new HttpHeaders();
