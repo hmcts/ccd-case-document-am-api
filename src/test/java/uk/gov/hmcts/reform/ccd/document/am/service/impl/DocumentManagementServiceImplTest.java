@@ -229,7 +229,7 @@ class DocumentManagementServiceImplTest {
         CaseDocumentMetadata cdm = CaseDocumentMetadata.builder().caseId("1234qwer1234qwer").document(doc).build();
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class),anyString())).thenReturn(Optional.of(cdm));
 
-        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID,"auth");
+        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID,"auth", Permission.READ);
         assertEquals(Boolean.TRUE, result);
 
         verifyRestExchangeOnStoredDoc();
@@ -252,7 +252,7 @@ class DocumentManagementServiceImplTest {
             .thenReturn(null);
 
         Assertions.assertThrows(Exception.class, () -> {
-            sut.checkUserPermission(responseEntity, matchedDocUUID,"auth");
+            sut.checkUserPermission(responseEntity, matchedDocUUID,"auth", Permission.READ);
         });
 
         verifyRestExchangeOnStoredDoc();
@@ -270,7 +270,7 @@ class DocumentManagementServiceImplTest {
         assertEquals(responseEntity.getStatusCode(),HttpStatus.OK);
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            sut.checkUserPermission(responseEntity, matchedDocUUID,"auth");
+            sut.checkUserPermission(responseEntity, matchedDocUUID,"auth", Permission.READ);
         });
 
         verifyRestExchangeOnStoredDoc();
@@ -293,7 +293,7 @@ class DocumentManagementServiceImplTest {
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class),anyString()))
             .thenReturn(Optional.ofNullable(cdm));
 
-        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID,"auth");
+        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID,"auth", Permission.READ);
         assertEquals(Boolean.FALSE, result);
 
         verifyRestExchangeOnStoredDoc();
@@ -317,7 +317,7 @@ class DocumentManagementServiceImplTest {
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class),anyString()))
             .thenReturn(Optional.ofNullable(cdm));
 
-        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID,"auth");
+        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID,"auth", Permission.READ);
         assertEquals(Boolean.FALSE, result);
 
         verifyRestExchangeOnStoredDoc();

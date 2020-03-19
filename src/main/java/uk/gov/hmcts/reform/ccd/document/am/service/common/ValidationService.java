@@ -1,6 +1,10 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.common;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -59,6 +63,21 @@ public class ValidationService {
             if (CollectionUtils.isEmpty(list)) {
                 throw new BadRequestException("The List is empty");
             }
+        }
+    }
+
+    public static boolean validateTTL(String strDate) {
+        if (strDate.trim().equals("")) {
+            return false;
+        } else {
+            SimpleDateFormat sdfrmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
+            sdfrmt.setLenient(false);
+            try {
+                Date javaDate = sdfrmt.parse(strDate);
+            } catch (ParseException e) {
+                return false;
+            }
+            return true;
         }
     }
 }

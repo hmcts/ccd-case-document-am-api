@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 
 public interface DocumentManagementService {
 
@@ -39,10 +41,18 @@ public interface DocumentManagementService {
                                            String jurisdictionId, String userId);
 
     /**
+     * Root PATCH endpoint.
+     *
+     * @param documentId Document Id
+     * @return updateDocumentCommand UpdateDocumentCommand
+     */
+    ResponseEntity patchDocumentbyDocumentId(final UUID documentId, UpdateDocumentCommand updateDocumentCommand);
+
+    /**
      * Root GET endpoint.
      * @param responseEntity which has document meta data response
      * @param documentId Document Id for which binary content to be downloaded
      * @return Boolen object to check user permission
      **/
-    boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization);
+    boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization, Permission permissionToCheck);
 }

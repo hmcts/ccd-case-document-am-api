@@ -88,7 +88,7 @@ public class CaseDocumentAmControllerTest {
             )
         ));
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(TRUE).when(documentManagementService).checkUserPermission(setDocumentMetaData(),getUuid(),AUTHORIZATION);
+        doReturn(TRUE).when(documentManagementService).checkUserPermission(setDocumentMetaData(),getUuid(),AUTHORIZATION, Permission.READ);
 
 
         ResponseEntity response = testee.getDocumentbyDocumentId(serviceAuthorization, getUuid(), AUTHORIZATION,"", "");
@@ -110,7 +110,7 @@ public class CaseDocumentAmControllerTest {
             )
         ));
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(FALSE).when(documentManagementService).checkUserPermission(setDocumentMetaData(),getUuid(),AUTHORIZATION);
+        doReturn(FALSE).when(documentManagementService).checkUserPermission(setDocumentMetaData(),getUuid(),AUTHORIZATION, Permission.READ);
 
 
         Assertions.assertThrows(ForbiddenException.class, () -> {
@@ -129,7 +129,7 @@ public class CaseDocumentAmControllerTest {
            )
         ));
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(TRUE).when(documentManagementService).checkUserPermission(setDocumentMetaData(),getUuid(),AUTHORIZATION);
+        doReturn(TRUE).when(documentManagementService).checkUserPermission(setDocumentMetaData(),getUuid(),AUTHORIZATION, Permission.READ);
         doReturn(setDocumentBinaryContent("OK")).when(documentManagementService).getDocumentBinaryContent(getUuid());
 
         ResponseEntity<Object> response = testee.getDocumentBinaryContentbyDocumentId(
@@ -203,23 +203,16 @@ public class CaseDocumentAmControllerTest {
     public void shouldDeleteDocumentbyDocumentId() {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         ResponseEntity response = testee.deleteDocumentbyDocumentId("", getUuid(), TRUE, "", "");
-
-        assertAll(
-            () ->  assertNotNull(response, VALID_RESPONSE),
-            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE)
-        );
+        assertNotNull(response, VALID_RESPONSE);
     }
 
     @Test
     public void shouldPatchDocumentbyDocumentId() {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         UpdateDocumentCommand body = null;
-        ResponseEntity response = testee.patchDocumentbyDocumentId(body,"", getUuid(), "", "");
-
-        assertAll(
-            () ->  assertNotNull(response, "Valid Response from API"),
-            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE)
-        );
+        Assertions.assertThrows(ForbiddenException.class, () -> {
+           ResponseEntity response = testee.patchDocumentbyDocumentId(body, "", "", getUuid());
+       });
     }
 
     @Test

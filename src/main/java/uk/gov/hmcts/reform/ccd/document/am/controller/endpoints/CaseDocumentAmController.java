@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 
@@ -92,7 +93,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
 
         ResponseEntity documentMetadata = documentManagementService.getDocumentMetadata(documentId);
-        if (documentManagementService.checkUserPermission(documentMetadata, documentId, authorization)) {
+        if (documentManagementService.checkUserPermission(documentMetadata, documentId, authorization, Permission.READ)) {
             return documentManagementService.getDocumentBinaryContent(documentId);
 
         }
@@ -119,7 +120,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
-        if (documentManagementService.checkUserPermission(responseEntity, documentId, authorization)) {
+        if (documentManagementService.checkUserPermission(responseEntity, documentId, authorization, Permission.READ)) {
             return  ResponseEntity
                  .status(HttpStatus.OK)
                  .body(responseEntity.getBody());
@@ -129,24 +130,29 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     }
 
     @Override
-    public ResponseEntity<StoredDocumentHalResource> patchDocumentbyDocumentId(
+    public ResponseEntity<Object> patchDocumentbyDocumentId(
+
         @ApiParam(value = "", required = true)
-        @Valid @RequestBody UpdateDocumentCommand body,
+        @Valid UpdateDocumentCommand body,
+
+        @ApiParam("Authorization header of the currently authenticated user")
+        @RequestHeader(value = "ServiceAuthorization", required = true) String authorization,
 
         @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
         @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
 
         @ApiParam("documentId")
-        @PathVariable("documentId") UUID documentId,
+        @PathVariable("documentId") UUID documentId) {
 
-        @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-            + " and will be used for authorisation.")
-        @RequestHeader(value = "User-Id", required = false) String userId,
+        ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
+        if (documentManagementService.checkUserPermission(responseEntity, documentId, authorization, Permission.UPDATE)) {
+            ResponseEntity response = documentManagementService.patchDocumentbyDocumentId(documentId, body);
+            return  ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response.getBody());
 
-        @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
-        @RequestHeader(value = "User-Roles", required = false) String userRoles) {
-
-        return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.OK);
+        }
+        throw new ForbiddenException(documentId.toString());
     }
 
     @Override
