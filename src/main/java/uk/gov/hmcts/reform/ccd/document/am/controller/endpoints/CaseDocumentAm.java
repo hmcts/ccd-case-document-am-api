@@ -41,7 +41,6 @@ public interface CaseDocumentAm {
                   notes = "This API will be the single point of reference for deleting any case related documents from doc-store.",
                   response = String.class, tags = {TAG})
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK", response = String.class),
         @ApiResponse(code = 204, message = "No Content"),
         @ApiResponse(code = 400, message = BAD_REQUEST, response = ErrorMap.class),
         @ApiResponse(code = 401, message = UNAUTHORIZED, response = ErrorMap.class),
@@ -50,22 +49,18 @@ public interface CaseDocumentAm {
     @RequestMapping(value = "/cases/documents/{documentId}",
                     produces = {APPLICATION_JSON},
                     method = RequestMethod.DELETE)
-    ResponseEntity<String> deleteDocumentbyDocumentId(
+    ResponseEntity<Object> deleteDocumentbyDocumentId(
         @ApiParam(value = S2S_API_PARAM, required = true)
         @RequestHeader(value = SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
+
+        @ApiParam("Authorization header of the currently authenticated user")
+        @RequestHeader(value = "Authorization", required = true) String authorization,
 
         @ApiParam(value = "documentId", required = true)
         @PathVariable("documentId") UUID documentId,
 
         @ApiParam("permanent delete flag")
-        @Valid @RequestParam("permanent") Boolean permanent,
-
-        @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-                          + " and will be used for authorisation.")
-        @RequestHeader(value = "User-Id", required = false) String userId,
-
-        @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
-        @RequestHeader(value = "User-Roles", required = false) String userRoles);
+        @Valid @RequestParam("permanent") Boolean permanent);
 
 
     @ApiOperation(value = "Streams contents of the most recent Document Content Version associated with the Case Document.",

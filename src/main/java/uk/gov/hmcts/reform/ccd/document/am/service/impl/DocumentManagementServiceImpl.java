@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
+import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
@@ -116,7 +117,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 LOG.info("Positive response");
                 return responseEntity;
             } else {
-                LOG.error("Document doesn't exist for requested document id at Document Store API Side " + responseEntity
+                LOG.error("Document doesn't exist for requested document id at Document Store" + responseEntity
                     .getStatusCode());
                 throw new ResourceNotFoundException(documentId.toString());
             }
@@ -308,7 +309,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     }
 
-    public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization) {
+    public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization, Permission permissionToCheck) {
         String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
 
         if (!ValidationService.validate(caseId)) {
@@ -321,7 +322,47 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 .orElseThrow(() -> new CaseNotFoundException(caseId));
 
             return (caseDocumentMetadata.getDocument().getId().equals(documentId.toString())
-                    && caseDocumentMetadata.getDocument().getPermissions().contains(Permission.READ));
+                    && caseDocumentMetadata.getDocument().getPermissions().contains(permissionToCheck));
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public ResponseEntity<Object> deleteDocument(UUID documentId) {
+
+        try {
+            final HttpEntity requestEntity = new HttpEntity(securityUtils.authorizationHeaders());
+            LOG.info("Document Store URL is : " + documentURL);
+            String documentDeleteUrl = String.format("%s/documents/%s", documentURL, documentId);
+            LOG.info("documentMetadataUrl : " + documentDeleteUrl);
+            ResponseEntity response = restTemplate.exchange(
+                documentDeleteUrl,
+                DELETE,
+                requestEntity,
+                ResponseEntity.class
+            );
+            LOG.info("response : " + response.getStatusCode());
+            LOG.error("response : " + response.getBody());
+            if (HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
+                LOG.info("Positive response");
+                return response;
+            } else {
+                LOG.error("Document doesn't exist for requested document id at Document Store" + response
+                    .getStatusCode());
+                throw new ResourceNotFoundException(documentId.toString());
+            }
+        } catch (HttpClientErrorException ex) {
+            LOG.error("Exception while deleting the document:" + ex);
+            if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
+                throw new ResourceNotFoundException(documentId.toString());
+            } else {
+                throw new ServiceException(String.format(
+                    "Problem  deleting the document with document id: %s because of %s",
+                    documentId,
+                    ex.getMessage()
+                ));
+            }
+
         }
     }
 }
