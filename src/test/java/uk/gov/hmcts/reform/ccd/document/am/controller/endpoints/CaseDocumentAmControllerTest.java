@@ -359,8 +359,8 @@ public class CaseDocumentAmControllerTest {
     }
 
     @Test
-    void generateHashCode() {
-        ResponseEntity<Object> responseEntity = testee.generateHashCode("", UUID.fromString(""), BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
+    void generateHashCode_HappyPath() {
+        ResponseEntity<Object> responseEntity = testee.generateHashCode("", UUID.fromString(MATCHED_DOCUMENT_ID), BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 }
