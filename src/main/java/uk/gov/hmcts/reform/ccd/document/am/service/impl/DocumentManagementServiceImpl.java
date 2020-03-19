@@ -131,7 +131,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
                 throw new ResourceNotFoundException(documentId.toString());
             } else {
-                throw new ServiceException(String.format("Problem  fetching the document for document id: %s because of %s", ex.getMessage()));
+                throw new ServiceException(String.format("Problem fetching the document for document id: %s because of %s", documentId, ex.getMessage()));
             }
 
         }
@@ -192,13 +192,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
             HttpHeaders headers = new HttpHeaders();
 
-            prepareRequestForAttachingDocumentToCase(
-                caseDocumentMetadata,
-                serviceAuthorization,
-                userId,
-                bodyMap,
-                headers
-                                                    );
+            prepareRequestForAttachingDocumentToCase(caseDocumentMetadata, serviceAuthorization, userId, bodyMap, headers);
 
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
             restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());

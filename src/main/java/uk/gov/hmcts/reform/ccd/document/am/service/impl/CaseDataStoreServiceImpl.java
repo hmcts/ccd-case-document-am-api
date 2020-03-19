@@ -67,9 +67,10 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
                 LinkedHashMap<String, Object> responseObject = (LinkedHashMap<String, Object>) responseEntity.getBody();
                 CaseDocumentMetadata caseDocumentMetadata =
                     new ObjectMapper().convertValue(responseObject.get("documentMetadata"), CaseDocumentMetadata.class);
-                List<Document> documents = caseDocumentMetadata.getDocuments().stream().
-                    filter(document -> document.getId().equals(documentId.toString()))
-                                                               .collect(Collectors.toList());
+                List<Document> documents = caseDocumentMetadata
+                    .getDocuments().stream()
+                    .filter(document -> document.getId().equals(documentId.toString()))
+                    .collect(Collectors.toList());
 
                 if (documents.size() == 0) {
                     LOG.error("Could't find document for case  : " + caseId + ", response code from CCD : " + HttpStatus.FORBIDDEN);
