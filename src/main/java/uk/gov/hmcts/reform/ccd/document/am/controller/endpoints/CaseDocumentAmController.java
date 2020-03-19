@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
@@ -33,10 +32,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.nio.charset.MalformedInputException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;

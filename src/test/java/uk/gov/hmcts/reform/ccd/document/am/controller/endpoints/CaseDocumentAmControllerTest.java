@@ -17,8 +17,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import io.restassured.path.json.JsonPath;
-import io.restassured.response.Response;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,7 +29,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
