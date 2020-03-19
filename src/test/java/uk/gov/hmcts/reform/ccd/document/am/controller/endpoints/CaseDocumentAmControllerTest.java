@@ -211,8 +211,8 @@ public class CaseDocumentAmControllerTest {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         UpdateDocumentCommand body = null;
         Assertions.assertThrows(ForbiddenException.class, () -> {
-           ResponseEntity response = testee.patchDocumentbyDocumentId(body, "", "", getUuid());
-       });
+            ResponseEntity response = testee.patchDocumentbyDocumentId(body, "", "", getUuid());
+        });
     }
 
     @Test

@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
