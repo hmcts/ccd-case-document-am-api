@@ -218,7 +218,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                                        .concat(resource.getMetadata().get("jurisdictionId"))
                                                        .concat(resource.getMetadata().get("caseTypeId")));
                 if (!hashcodeFromStoredDocument.equals(document.getHashToken())) {
-                    throw new ResourceNotFoundException(String.format("Document %s does not exists in Doc Store"));
+                    throw new ResourceNotFoundException(String.format(": Document %s does not exists in DM Store", document.getId()));
                 }
             }
 
