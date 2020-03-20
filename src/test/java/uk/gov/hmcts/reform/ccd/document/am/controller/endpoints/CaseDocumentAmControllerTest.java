@@ -363,4 +363,23 @@ public class CaseDocumentAmControllerTest {
         ResponseEntity<Object> responseEntity = testee.generateHashCode("", UUID.fromString(MATCHED_DOCUMENT_ID), BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
+
+    @Test //this test returns an illegal argument exception because UUID.fromString() contains a throw for illegal arguments
+    void generateHashCode_BadRequest() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            testee.generateHashCode("", UUID.fromString("A.A"), BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
+        });
+    }
+    @Test //this test and the next return Bad Request because the exception handler seems to be made in a way that it trys to return the actual exception thrown, this doesn't hit the UUID.fromString() method
+    void generateHashCode_BadRequest2() {
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            testee.generateHashCode("", UUID.fromString(MATCHED_DOCUMENT_ID), "A.A", BEFTA_JURISDICTION_2);
+        });
+    }
+    @Test
+    void generateHashCode_BadRequest3() {
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            testee.generateHashCode("", UUID.fromString(MATCHED_DOCUMENT_ID), BEFTA_CASETYPE_2, "A.A");
+        });
+    }
 }
