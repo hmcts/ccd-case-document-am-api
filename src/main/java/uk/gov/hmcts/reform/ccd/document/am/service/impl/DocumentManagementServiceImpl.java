@@ -191,10 +191,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             HttpHeaders headers = new HttpHeaders();
 
             prepareRequestForAttachingDocumentToCase(caseDocumentMetadata, serviceAuthorization, userId, bodyMap, headers);
-
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
+
             restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
             restTemplate.exchange(documentURL.concat("/documents"), HttpMethod.PATCH, requestEntity, Void.class);
+
         } catch (RestClientException ex) {
             LOG.error("Exception while attaching a document to case : " + ex);
             throw ex;
@@ -209,6 +210,18 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                                       HttpHeaders headers) {
 
         for (Document document : caseDocumentMetadata.getDocuments()) {
+            ResponseEntity responseEntity = getDocumentMetadata(UUID.fromString(document.getId()));
+            if (responseEntity.getStatusCode().equals(HttpStatus.OK) && null != responseEntity.getBody()) {
+                StoredDocumentHalResource resource = (StoredDocumentHalResource) responseEntity.getBody();
+
+                String hashcodeFromStoredDocument = ApplicationUtils.generateHashCode(document.getId()
+                                                       .concat(resource.getMetadata().get("jurisdictionId"))
+                                                       .concat(resource.getMetadata().get("caseTypeId")));
+                if (!hashcodeFromStoredDocument.equals(document.getHashToken())) {
+                    throw new ResourceNotFoundException(String.format("Document %s does not exists in Doc Store"));
+                }
+            }
+
             Map<String, String> metadataMap = new HashMap<>();
             metadataMap.put("jurisdictionId", caseDocumentMetadata.getJurisdictionId());
             metadataMap.put("caseId", caseDocumentMetadata.getCaseId());

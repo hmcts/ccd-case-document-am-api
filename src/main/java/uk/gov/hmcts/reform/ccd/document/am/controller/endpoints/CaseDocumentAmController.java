@@ -229,7 +229,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
                                                              serviceAuthorization, caseTypeId, jurisdictionId, userId);
         } catch (BadRequestException | IllegalArgumentException e) {
             LOG.error("Exception while uploading the documents :" + e);
-            throw new BadRequestException("Exception while uploading the documents :" + e);
+            throw e;
         } catch (Exception e) {
             LOG.error("Exception while uploading the documents :" + e);
             throw new ResponseFormatException("Exception while uploading the documents :" + e);
