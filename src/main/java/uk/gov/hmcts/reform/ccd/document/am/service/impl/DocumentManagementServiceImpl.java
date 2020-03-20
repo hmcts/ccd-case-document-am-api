@@ -354,9 +354,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization, Permission permissionToCheck) {
         String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
-        if (permissionToCheck.equals(Permission.UPDATE)) {
-            return true;
-        }
         if (!ValidationService.validate(caseId)) {
             LOG.error(CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
             throw new BadRequestException(CASE_ID_INVALID);

@@ -136,7 +136,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @Valid UpdateDocumentCommand body,
 
         @ApiParam("Authorization header of the currently authenticated user")
-        @RequestHeader(value = "ServiceAuthorization", required = true) String authorization,
+        @RequestHeader(value = "Authorization", required = true) String authorization,
 
         @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
         @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
