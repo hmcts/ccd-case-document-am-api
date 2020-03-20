@@ -203,17 +203,23 @@ public class CaseDocumentAmControllerTest {
 
     }
 
-//    @Test
-//    public void shouldDeleteDocumentbyDocumentId() {
-//        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-//        ResponseEntity response = testee
-//            .deleteDocumentbyDocumentId("", AUTHORIZATION, getUuid(), true);
-//
-//        assertAll(
-//            () ->  assertNotNull(response, VALID_RESPONSE),
-//            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE)
-//        );
-//    }
+    @Test
+    public void shouldDeleteDocumentbyDocumentId() {
+        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(TRUE).when(documentManagementService)
+            .checkUserPermission(setDocumentMetaData(), getUuid(), AUTHORIZATION, Permission.UPDATE);
+        doReturn(getResponseEntity()).when(documentManagementService).deleteDocument(getUuid(), "", "", true);
+        ResponseEntity response = testee
+            .deleteDocumentbyDocumentId("", AUTHORIZATION, getUuid(), "", "", true);
+
+        assertAll(
+            () -> assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode(), RESPONSE_CODE)
+        );
+    }
+
+    private ResponseEntity getResponseEntity() {
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
     @Test
     public void shouldPatchDocumentbyDocumentId() {

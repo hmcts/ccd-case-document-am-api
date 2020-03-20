@@ -2,25 +2,7 @@ package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DATA_SOURCE;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DOCUMENTS;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EMBEDDED;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FILES;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHCODE;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HREF;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LINKS;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ROLES;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.THUMBNAIL;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.*;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -311,7 +293,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization, Permission permissionToCheck) {
         String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
-
+        if (permissionToCheck.equals(Permission.UPDATE)) {
+            return true;
+        }
         if (!ValidationService.validate(caseId)) {
             LOG.error(CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
             throw new BadRequestException(CASE_ID_INVALID);
@@ -328,12 +312,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Override
     @SuppressWarnings("unchecked")
-    public ResponseEntity<Object> deleteDocument(UUID documentId) {
+    public ResponseEntity<Object> deleteDocument(UUID documentId, String userId, String userRoles, Boolean permanent) {
 
         try {
-            final HttpEntity requestEntity = new HttpEntity(securityUtils.authorizationHeaders());
-            LOG.info("Document Store URL is : " + documentURL);
-            String documentDeleteUrl = String.format("%s/documents/%s", documentURL, documentId);
+            final HttpEntity requestEntity = new HttpEntity(getHttpHeaders(userId, userRoles));
+            String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL, documentId);
             LOG.info("documentMetadataUrl : " + documentDeleteUrl);
             ResponseEntity response = restTemplate.exchange(
                 documentDeleteUrl,
@@ -341,8 +324,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 requestEntity,
                 ResponseEntity.class
             );
-            LOG.info("response : " + response.getStatusCode());
-            LOG.error("response : " + response.getBody());
             if (HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
                 LOG.info("Positive response");
                 return response;
@@ -364,5 +345,13 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             }
 
         }
+    }
+
+    private HttpHeaders getHttpHeaders(String userId, String userRoles) {
+        HttpHeaders headers = securityUtils.authorizationHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add(USERID, userId);
+        headers.add(USER_ROLES, userRoles);
+        return headers;
     }
 }

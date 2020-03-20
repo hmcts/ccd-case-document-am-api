@@ -23,6 +23,7 @@ public class Constants {
     public static final String CLASSIFICATION = "classification";
     public static final String ROLES = "roles";
     public static final String USERID = "user-id";
+    public static final String USER_ROLES = "user-roles";
     public static final String FILES = "files";
     public static final String LINKS = "_links";
     public static final String HREF = "href";
@@ -34,4 +35,5 @@ public class Constants {
     public static final String THUMBNAIL = "thumbnail";
     public static final String DOCUMENTS = "documents";
     public static final String INPUT_STRING_PATTERN = "^[a-zA-Z0-9_-]*$";
+
 }
