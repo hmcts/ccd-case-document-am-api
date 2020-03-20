@@ -370,12 +370,15 @@ public class CaseDocumentAmControllerTest {
             testee.generateHashCode("", UUID.fromString("A.A"), BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
         });
     }
-    @Test //this test and the next return Bad Request because the exception handler seems to be made in a way that it trys to return the actual exception thrown, this doesn't hit the UUID.fromString() method
+
+    //this test and the next return Bad Request because the exception handler seems to be made in a way that it trys to return the actual exception thrown
+    @Test
     void generateHashCode_BadRequest2() {
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.generateHashCode("", UUID.fromString(MATCHED_DOCUMENT_ID), "A.A", BEFTA_JURISDICTION_2);
         });
     }
+
     @Test
     void generateHashCode_BadRequest3() {
         Assertions.assertThrows(BadRequestException.class, () -> {
