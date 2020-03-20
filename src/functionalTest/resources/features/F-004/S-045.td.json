@@ -1,19 +1,20 @@
 {
-  "_guid_": "S-044",
+  "_guid_": "S-045",
   "_extends_": "F-004_Test_Base_data",
-  "title": "must get an error response for without jurisdictionId parameter in request",
+  "title": "must get an error response for a non-existing classification",
   "specs": [
-    "without jurisdictionId parameter"
+    "for a non-existing classification"
   ],
   "request": {
     "headers": {
-      "caseTypeId": "BEFTA_CASETYPE_2_2"
+      "caseTypeId": "BEFTA_CASETYPE_2_2",
+      "jurisdictionId": "BEFTA_JURISDICTION_2"
     },
     "body": {
       "arrayInMap": [
         {
           "key": "classification",
-          "value": "PUBLIC"
+          "value": "NONEXISTING"
         },
         {
           "key": "roles",
@@ -27,7 +28,7 @@
     }
   },
   "expectedResponse": {
-    "_extends_": "Common_400_Response",
+    "_extends_": "Common_404_Response",
     "body" : {
       "message" : "Exception while uploading the documents :java.lang.IllegalArgumentException: The input parameter does not complies with the required pattern",
       "path" : "/cases/documents"

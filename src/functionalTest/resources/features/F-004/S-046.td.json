@@ -1,19 +1,20 @@
 {
-  "_guid_": "S-044",
+  "_guid_": "S-046",
   "_extends_": "F-004_Test_Base_data",
-  "title": "must get an error response for without jurisdictionId parameter in request",
+  "title": "must get an error response for a malformed classification",
   "specs": [
-    "without jurisdictionId parameter"
+    "for a malformed classification"
   ],
   "request": {
     "headers": {
-      "caseTypeId": "BEFTA_CASETYPE_2_2"
+      "caseTypeId": "BEFTA_CASETYPE_2_2",
+      "jurisdictionId": "BEFTA_JURISDICTION_2"
     },
     "body": {
       "arrayInMap": [
         {
           "key": "classification",
-          "value": "PUBLIC"
+          "value": "PUB@£$%%^&LIC"
         },
         {
           "key": "roles",

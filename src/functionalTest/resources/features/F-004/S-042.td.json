@@ -1,20 +1,39 @@
 {
   "_guid_": "S-042",
   "_extends_": "F-004_Test_Base_data",
-  "title": "must get an error response for a non-existing document ID",
+  "title": "must get an error response for a without caseTypeId parameter in request",
   "specs": [
-    "for a non-existing document ID"
+    "for a malformed caseTypeId"
   ],
   "request": {
-    "pathVariables": {
-      "documentId": "00000000-0000-0000-0000-000000000000"
+    "headers": {
+      "caseTypeId": "BEFTA_@£$%^&_CASETYPE_2_2",
+      "jurisdictionId": "BEFTA_JURISDICTION_2"
+    },
+    "body": {
+      "arrayInMap": [
+        {
+          "key": "classification",
+          "value": "PUBLIC"
+        },
+        {
+          "key": "roles",
+          "value": "caseworker"
+        },
+        {
+          "key": "files",
+          "filePath": "SampleImage.png"
+        }
+      ]
     }
   },
   "expectedResponse": {
-    "_extends_": "Common_404_Response",
+    "_extends_": "Common_400_Response",
     "body" : {
-      "message" : "Resource not found 00000000-0000-0000-0000-000000000000",
-      "path" : "/cases/documents/00000000-0000-0000-0000-000000000000"
+      "message" : "Exception while uploading the documents :java.lang.IllegalArgumentException: The input parameter does not complies with the required pattern",
+      "path" : "/cases/documents"
     }
   }
 }
+
+

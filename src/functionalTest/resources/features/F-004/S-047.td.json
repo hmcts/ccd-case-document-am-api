@@ -1,13 +1,14 @@
 {
-  "_guid_": "S-044",
+  "_guid_": "S-047",
   "_extends_": "F-004_Test_Base_data",
-  "title": "must get an error response for without jurisdictionId parameter in request",
+  "title": "must get an error response for a malformed roles",
   "specs": [
-    "without jurisdictionId parameter"
+    "for a malformed roles"
   ],
   "request": {
     "headers": {
-      "caseTypeId": "BEFTA_CASETYPE_2_2"
+      "caseTypeId": "BEFTA_CASETYPE_2_2",
+      "jurisdictionId": "BEFTA_JURISDICTION_2"
     },
     "body": {
       "arrayInMap": [
@@ -17,7 +18,7 @@
         },
         {
           "key": "roles",
-          "value": "caseworker"
+          "value": "case£$$%^&worker"
         },
         {
           "key": "files",

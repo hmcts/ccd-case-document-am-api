@@ -12,27 +12,9 @@
       "Authorization": "[[DYNAMIC]]",
       "ServiceAuthorization": "[[DYNAMIC]]",
       "Content-Type": "multipart/form-data",
-      "caseTypeId": "BEFTA_CASETYPE_2_2",
-      "jurisdictionId": "BEFTA_JURISDICTION_2",
       "uid": "[[DYNAMIC]]",
       "user-id": "[someUserId]",
       "user-roles": "caseworker"
-    },
-    "body": {
-      "arrayInMap": [
-        {
-          "key": "classification",
-          "value": "PUBLIC"
-        },
-        {
-          "key": "roles",
-          "value": "caseworker"
-        },
-        {
-          "key": "files",
-          "filePath": "SampleImage.png"
-        }
-      ]
     }
   }
 }

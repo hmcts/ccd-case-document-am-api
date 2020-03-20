@@ -1,0 +1,298 @@
+{
+  "_guid_": "S-048",
+  "_extends_": "F-004_Test_Base_data",
+  "title": "must successfully Post Upload multiple Document with Binary Content",
+  "specs": [
+    "contain multiple document with binary content",
+    "contains the metadata for the document uploaded above"
+  ],
+  "request": {
+    "headers": {
+      "caseTypeId": "BEFTA_CASETYPE_2_2",
+      "jurisdictionId": "BEFTA_JURISDICTION_2"
+    },
+    "body": {
+      "arrayInMap": [
+        {
+          "key": "classification",
+          "value": "PUBLIC"
+        },
+        {
+          "key": "roles",
+          "value": "caseworker"
+        },
+        {
+          "key": "files",
+          "filePath": "SampleImage.png"
+        },
+        {
+          "key": "files",
+          "filePath": "SampleImage.png"
+        },
+        {
+          "key": "files",
+          "filePath": "SampleImage.png"
+        },
+        {
+          "key": "files",
+          "filePath": "SampleImage.png"
+        },
+        {
+          "key": "files",
+          "filePath": "SampleImage.png"
+        },
+        {
+          "key": "files",
+          "filePath": "SampleImage.png"
+        },
+        {
+          "key": "files",
+          "filePath": "SampleImage.png"
+        }
+      ]
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_200_Response",
+    "body": {
+      "_embedded": {
+        "documents": [
+          {
+            "size": "[[ANYTHING_PRESENT]]",
+            "mimeType": "[[ANYTHING_PRESENT]]",
+            "originalDocumentName": "[[ANYTHING_PRESENT]]",
+            "createdBy": "[someUserId]",
+            "lastModifiedBy": "[someUserId]",
+            "modifiedOn": "[[ANYTHING_PRESENT]]",
+            "createdOn": "[[ANYTHING_PRESENT]]",
+            "classification": "PUBLIC",
+            "roles": [
+              "caseworker"
+            ],
+            "metadata": {
+              "caseId": "1111222233334444",
+              "caseTypeId": "BEFTA_CASETYPE_2_2",
+              "jurisdictionId": "BEFTA_JURISDICTION_2"
+            },
+            "ttl": "[[ANYTHING_PRESENT]]",
+            "_links": {
+              "self": {
+                "href": "[[ANYTHING_PRESENT]]"
+              },
+              "binary": {
+                "href": "[[ANYTHING_PRESENT]]"
+              }
+            },
+            "hashcode": "[[ANYTHING_PRESENT]]"
+          }
+        ]
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+
+{
+  "responseCode" : 200,
+  "responseMessage" : "OK",
+  "headers" : {
+    "Cache-Control" : "no-cache, no-store, max-age=0, must-revalidate",
+    "Connection" : "keep-alive",
+    "Content-Type" : "application/json",
+    "Date" : "Fri, 20 Mar 2020 13:08:30 GMT",
+    "Expires" : "0",
+    "Keep-Alive" : "timeout=60",
+    "Pragma" : "no-cache",
+    "Transfer-Encoding" : "chunked",
+    "X-Content-Type-Options" : "nosniff",
+    "X-Frame-Options" : "DENY",
+    "X-XSS-Protection" : "1; mode=block"
+  },
+  "body" : {
+    "_embedded" : {
+      "documents" : [ {
+        "size" : 679361,
+        "mimeType" : "image/png",
+        "originalDocumentName" : "_temp_1584709709516_SampleImage.png",
+        "createdBy" : "[someUserId]",
+        "lastModifiedBy" : "[someUserId]",
+        "modifiedOn" : "2020-03-20T13:08:30+0000",
+        "createdOn" : "2020-03-20T13:08:30+0000",
+        "classification" : "PUBLIC",
+        "roles" : [ "caseworker" ],
+        "metadata" : {
+          "caseId" : "1111222233334444",
+          "caseTypeId" : "BEFTA_CASETYPE_2_2",
+          "jurisdictionId" : "BEFTA_JURISDICTION_2"
+        },
+        "ttl" : "2020-03-20T13:18:29+0000",
+        "_links" : {
+          "binary" : {
+            "href" : "http://localhost:4455/cases/documents/121b5b6f-916c-423b-9e7e-6be9cb59c0f0/binary"
+          },
+          "self" : {
+            "href" : "http://localhost:4455/cases/documents/121b5b6f-916c-423b-9e7e-6be9cb59c0f0"
+          }
+        },
+        "hashcode" : "25f1f37a336180487b14d5ac35b277defe6032726c9be45eaff2e13e5af488b2"
+      }, {
+        "size" : 679361,
+        "mimeType" : "image/png",
+        "originalDocumentName" : "_temp_1584709709517_SampleImage.png",
+        "createdBy" : "[someUserId]",
+        "lastModifiedBy" : "[someUserId]",
+        "modifiedOn" : "2020-03-20T13:08:30+0000",
+        "createdOn" : "2020-03-20T13:08:30+0000",
+        "classification" : "PUBLIC",
+        "roles" : [ "caseworker" ],
+        "metadata" : {
+          "caseId" : "1111222233334444",
+          "caseTypeId" : "BEFTA_CASETYPE_2_2",
+          "jurisdictionId" : "BEFTA_JURISDICTION_2"
+        },
+        "ttl" : "2020-03-20T13:18:29+0000",
+        "_links" : {
+          "binary" : {
+            "href" : "http://localhost:4455/cases/documents/b443c474-d0a7-4d08-9028-a3487e7cacbc/binary"
+          },
+          "self" : {
+            "href" : "http://localhost:4455/cases/documents/b443c474-d0a7-4d08-9028-a3487e7cacbc"
+          }
+        },
+        "hashcode" : "67f1af39e7a03374c925e1f682adf404fcc2003ff0e32146a2743d53bf120073"
+      }, {
+        "size" : 679361,
+        "mimeType" : "image/png",
+        "originalDocumentName" : "_temp_1584709709519_SampleImage.png",
+        "createdBy" : "[someUserId]",
+        "lastModifiedBy" : "[someUserId]",
+        "modifiedOn" : "2020-03-20T13:08:30+0000",
+        "createdOn" : "2020-03-20T13:08:30+0000",
+        "classification" : "PUBLIC",
+        "roles" : [ "caseworker" ],
+        "metadata" : {
+          "caseId" : "1111222233334444",
+          "caseTypeId" : "BEFTA_CASETYPE_2_2",
+          "jurisdictionId" : "BEFTA_JURISDICTION_2"
+        },
+        "ttl" : "2020-03-20T13:18:29+0000",
+        "_links" : {
+          "binary" : {
+            "href" : "http://localhost:4455/cases/documents/78a740f8-c45d-4761-a62f-95f58c244345/binary"
+          },
+          "self" : {
+            "href" : "http://localhost:4455/cases/documents/78a740f8-c45d-4761-a62f-95f58c244345"
+          }
+        },
+        "hashcode" : "e001d5404398d52e2597a0e43480807a4664ddce8ffbc02d712657f950e5298f"
+      }, {
+        "size" : 679361,
+        "mimeType" : "image/png",
+        "originalDocumentName" : "_temp_1584709709523_SampleImage.png",
+        "createdBy" : "[someUserId]",
+        "lastModifiedBy" : "[someUserId]",
+        "modifiedOn" : "2020-03-20T13:08:30+0000",
+        "createdOn" : "2020-03-20T13:08:30+0000",
+        "classification" : "PUBLIC",
+        "roles" : [ "caseworker" ],
+        "metadata" : {
+          "caseId" : "1111222233334444",
+          "caseTypeId" : "BEFTA_CASETYPE_2_2",
+          "jurisdictionId" : "BEFTA_JURISDICTION_2"
+        },
+        "ttl" : "2020-03-20T13:18:29+0000",
+        "_links" : {
+          "binary" : {
+            "href" : "http://localhost:4455/cases/documents/5026ca72-0eb8-4c42-8700-07e047537e9a/binary"
+          },
+          "self" : {
+            "href" : "http://localhost:4455/cases/documents/5026ca72-0eb8-4c42-8700-07e047537e9a"
+          }
+        },
+        "hashcode" : "f229a71dae3ca3967c50d0bbf2bec83744b39936ec4181bea97f25ab1745e282"
+      }, {
+        "size" : 679361,
+        "mimeType" : "image/png",
+        "originalDocumentName" : "_temp_1584709709531_SampleImage.png",
+        "createdBy" : "[someUserId]",
+        "lastModifiedBy" : "[someUserId]",
+        "modifiedOn" : "2020-03-20T13:08:30+0000",
+        "createdOn" : "2020-03-20T13:08:30+0000",
+        "classification" : "PUBLIC",
+        "roles" : [ "caseworker" ],
+        "metadata" : {
+          "caseId" : "1111222233334444",
+          "caseTypeId" : "BEFTA_CASETYPE_2_2",
+          "jurisdictionId" : "BEFTA_JURISDICTION_2"
+        },
+        "ttl" : "2020-03-20T13:18:29+0000",
+        "_links" : {
+          "binary" : {
+            "href" : "http://localhost:4455/cases/documents/6a9a77cb-5973-4d2f-9365-3c83e8d7f8f6/binary"
+          },
+          "self" : {
+            "href" : "http://localhost:4455/cases/documents/6a9a77cb-5973-4d2f-9365-3c83e8d7f8f6"
+          }
+        },
+        "hashcode" : "304b54760432b906bca09f6cf94c11b82b0052608944446312702ff7da75d9a8"
+      }, {
+        "size" : 679361,
+        "mimeType" : "image/png",
+        "originalDocumentName" : "_temp_1584709709535_SampleImage.png",
+        "createdBy" : "[someUserId]",
+        "lastModifiedBy" : "[someUserId]",
+        "modifiedOn" : "2020-03-20T13:08:30+0000",
+        "createdOn" : "2020-03-20T13:08:30+0000",
+        "classification" : "PUBLIC",
+        "roles" : [ "caseworker" ],
+        "metadata" : {
+          "caseId" : "1111222233334444",
+          "caseTypeId" : "BEFTA_CASETYPE_2_2",
+          "jurisdictionId" : "BEFTA_JURISDICTION_2"
+        },
+        "ttl" : "2020-03-20T13:18:29+0000",
+        "_links" : {
+          "binary" : {
+            "href" : "http://localhost:4455/cases/documents/fdd26302-3fd9-4885-82ca-22681d2db957/binary"
+          },
+          "self" : {
+            "href" : "http://localhost:4455/cases/documents/fdd26302-3fd9-4885-82ca-22681d2db957"
+          }
+        },
+        "hashcode" : "82ceeb85fab5ac18b9327a6e6bf125f39a645f87dcd7c091d8aabfaf1ec411ca"
+      },
+        {
+        "size" : 679361,
+        "mimeType" : "image/png",
+        "originalDocumentName" : "_temp_1584709709537_SampleImage.png",
+        "createdBy" : "[someUserId]",
+        "lastModifiedBy" : "[someUserId]",
+        "modifiedOn" : "2020-03-20T13:08:30+0000",
+        "createdOn" : "2020-03-20T13:08:30+0000",
+        "classification" : "PUBLIC",
+        "roles" : [ "caseworker" ],
+        "metadata" : {
+          "caseId" : "1111222233334444",
+          "caseTypeId" : "BEFTA_CASETYPE_2_2",
+          "jurisdictionId" : "BEFTA_JURISDICTION_2"
+        },
+        "ttl" : "2020-03-20T13:18:29+0000",
+        "_links" : {
+          "binary" : {
+            "href" : "http://localhost:4455/cases/documents/f5a70def-b663-45ee-9eba-37da7bca2985/binary"
+          },
+          "self" : {
+            "href" : "http://localhost:4455/cases/documents/f5a70def-b663-45ee-9eba-37da7bca2985"
+          }
+        },
+        "hashcode" : "bcb80f3efcd46c8b24360cefc395045850404a1b942e2851005ba4312d4c6a32"
+      } ]
+    }
+  }
+}

@@ -1,34 +1,39 @@
 {
   "_guid_": "S-041",
   "_extends_": "F-004_Test_Base_data",
-  "title": "must successfully get document metadata by document ID",
+  "title": "must get an error response for a malformed caseTypeId",
   "specs": [
-    "contains the metadata for the document uploaded above"
+    "for a malformed caseTypeId"
   ],
-
-  "expectedResponse": {
-    "_extends_": "Common_200_Response",
+  "request": {
+    "headers": {
+      "caseTypeId": "BEFTA_@£$%^&_CASETYPE_2_2",
+      "jurisdictionId": "BEFTA_JURISDICTION_2"
+    },
     "body": {
-      "links": {
-        "self": {
-          "href": "{{CASE_DOC_AM_URL}}/cases/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+      "arrayInMap": [
+        {
+          "key": "classification",
+          "value": "PUBLIC"
         },
-        "binary": {
-          "href": "{{CASE_DOC_AM_URL}}/cases/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}/binary"
+        {
+          "key": "roles",
+          "value": "caseworker"
+        },
+        {
+          "key": "files",
+          "filePath": "SampleImage.png"
         }
-      },
-        "classification": "PUBLIC",
-        "createdOn": "[[ANYTHING_PRESENT]]",
-        "metadata": {
-          "caseId": "1111122222333334"
-        },
-        "mimeType": "multipart/form-data",
-        "modifiedOn": "[[ANYTHING_PRESENT]]",
-        "originalDocumentName": "[[ANYTHING_PRESENT]]",
-        "roles": [
-          "caseworker"
-        ],
-        "size": "[[ANYTHING_PRESENT]]"
-      }
+      ]
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_400_Response",
+    "body" : {
+      "message" : "Exception while uploading the documents :java.lang.IllegalArgumentException: The input parameter does not complies with the required pattern",
+      "path" : "/cases/documents"
     }
   }
+}
+
+
