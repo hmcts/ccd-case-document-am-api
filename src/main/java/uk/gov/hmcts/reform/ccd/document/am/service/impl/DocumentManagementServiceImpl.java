@@ -342,7 +342,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 ResponseEntity.class
             );
             LOG.info("response : " + response.getStatusCode());
-            LOG.error("response : " + response.getBody());
+            LOG.info("response : " + response.getBody());
             if (HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
                 LOG.info("Positive response");
                 return response;

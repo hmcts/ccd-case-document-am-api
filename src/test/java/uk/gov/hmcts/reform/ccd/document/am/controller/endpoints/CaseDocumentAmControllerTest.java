@@ -69,6 +69,7 @@ public class CaseDocumentAmControllerTest {
     private static final String USER_ID =  "userId";
     private static final String VALID_RESPONSE = "Valid Response from API";
     private static final String RESPONSE_CODE = "Status code is OK";
+    private static final String NO_CONTENT_RESPONSE_CODE = "Status code is No Content";
     private static final String AUTHORIZATION = "Authorization";
     private static final String FORBIDDEN = "forbidden";
 
@@ -203,17 +204,39 @@ public class CaseDocumentAmControllerTest {
 
     }
 
-//    @Test
-//    public void shouldDeleteDocumentbyDocumentId() {
-//        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-//        ResponseEntity response = testee
-//            .deleteDocumentbyDocumentId("", AUTHORIZATION, getUuid(), true);
-//
-//        assertAll(
-//            () ->  assertNotNull(response, VALID_RESPONSE),
-//            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE)
-//        );
-//    }
+    @Test
+    @DisplayName("should get 204 when document delete is successful")
+    public void shouldDeleteDocumentbyDocumentId() {
+        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(TRUE).when(documentManagementService)
+            .checkUserPermission(setDocumentMetaData(),getUuid(),AUTHORIZATION, Permission.UPDATE);
+        doReturn(ResponseEntity.status(HttpStatus.NO_CONTENT).build()).when(documentManagementService).deleteDocument(getUuid());
+
+        ResponseEntity response = testee
+            .deleteDocumentbyDocumentId("", AUTHORIZATION, getUuid(), true);
+
+        assertAll(
+            () ->  assertNotNull(response, VALID_RESPONSE),
+            () -> assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode(), NO_CONTENT_RESPONSE_CODE)
+        );
+    }
+
+    @Test
+    @DisplayName("should throw 403 forbidden when user doesn't have UPDATE permission on requested document")
+    public void shouldNotDeleteDocumentbyDocumentId() {
+        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(FALSE).when(documentManagementService)
+            .checkUserPermission(setDocumentMetaData(),getUuid(),AUTHORIZATION, Permission.UPDATE);
+
+        Assertions.assertThrows(ForbiddenException.class, () -> {
+            testee.deleteDocumentbyDocumentId(
+                serviceAuthorization,
+                AUTHORIZATION,
+                getUuid(),
+                true
+            );
+        });
+    }
 
     @Test
     public void shouldPatchDocumentbyDocumentId() {

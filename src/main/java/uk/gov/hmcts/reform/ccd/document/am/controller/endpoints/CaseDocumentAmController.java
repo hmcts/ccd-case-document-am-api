@@ -76,7 +76,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             return  documentManagementService.deleteDocument(documentId);
 
         }
-        LOG.error("User don't have read permission on requested document " + HttpStatus.FORBIDDEN);
+        LOG.error("User don't have update permission on requested document " + HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
