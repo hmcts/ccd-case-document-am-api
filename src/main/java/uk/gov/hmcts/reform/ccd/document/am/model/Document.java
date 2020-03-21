@@ -1,12 +1,12 @@
 package uk.gov.hmcts.reform.ccd.document.am.model;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
+
+import java.util.List;
 
 /**
  * Document.

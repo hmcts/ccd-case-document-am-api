@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.ErrorMap;
 import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
@@ -170,7 +170,7 @@ public interface CaseDocumentAm {
                     method = RequestMethod.PATCH)
     ResponseEntity<Object> patchMetaDataOnDocuments(
         @ApiParam(value = "", required = true)
-        @Valid @RequestBody CaseDocumentMetadata body,
+        @Valid @RequestBody DocumentMetadata body,
 
         @ApiParam(value = S2S_API_PARAM, required = true)
         @RequestHeader(value = SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,

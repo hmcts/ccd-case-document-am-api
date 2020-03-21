@@ -1,10 +1,8 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +21,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
-import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
@@ -59,20 +56,14 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
                                           .concat(caseId)
                                           .concat("/documents/")
                                           .concat(documentId.toString()),
-                                      HttpMethod.GET, requestEntity, Object.class
-                                     );
+                                      HttpMethod.GET, requestEntity, Object.class);
 
             if (responseEntity.getStatusCode() == HttpStatus.OK
                 && responseEntity.getBody() instanceof LinkedHashMap) {
                 LinkedHashMap<String, Object> responseObject = (LinkedHashMap<String, Object>) responseEntity.getBody();
-                CaseDocumentMetadata caseDocumentMetadata =
-                    new ObjectMapper().convertValue(responseObject.get("documentMetadata"), CaseDocumentMetadata.class);
-                List<Document> documents = caseDocumentMetadata
-                    .getDocuments().stream()
-                    .filter(document -> document.getId().equals(documentId.toString()))
-                    .collect(Collectors.toList());
-
-                if (documents.size() == 0) {
+                CaseDocumentMetadata caseDocumentMetadata = new ObjectMapper().convertValue(responseObject.get("documentMetadata"),
+                                                                                            CaseDocumentMetadata.class);
+                if (null == caseDocumentMetadata.getDocument()) {
                     LOG.error("Could't find document for case  : " + caseId + ", response code from CCD : " + HttpStatus.FORBIDDEN);
                     throw new ForbiddenException("Could't find document for case  : " + caseId);
                 }

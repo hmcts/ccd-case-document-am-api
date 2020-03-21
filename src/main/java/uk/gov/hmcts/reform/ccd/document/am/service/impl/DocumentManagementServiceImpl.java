@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +62,7 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseF
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentUpdate;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
@@ -185,12 +185,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public boolean patchDocumentMetadata(CaseDocumentMetadata caseDocumentMetadata, String serviceAuthorization, String userId) {
+    public boolean patchDocumentMetadata(DocumentMetadata documentMetadata, String serviceAuthorization, String userId) {
         try {
             LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
             HttpHeaders headers = new HttpHeaders();
 
-            prepareRequestForAttachingDocumentToCase(caseDocumentMetadata, serviceAuthorization, userId, bodyMap, headers);
+            prepareRequestForAttachingDocumentToCase(documentMetadata, serviceAuthorization, userId, bodyMap, headers);
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
 
             restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
@@ -203,13 +203,13 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return true;
     }
 
-    private void prepareRequestForAttachingDocumentToCase(CaseDocumentMetadata caseDocumentMetadata,
+    private void prepareRequestForAttachingDocumentToCase(DocumentMetadata documentMetadata,
                                                       String serviceAuthorization,
                                                       String userId,
                                                       LinkedMultiValueMap<String, Object> bodyMap,
                                                       HttpHeaders headers) {
 
-        for (Document document : caseDocumentMetadata.getDocuments()) {
+        for (Document document : documentMetadata.getDocuments()) {
             ResponseEntity responseEntity = getDocumentMetadata(UUID.fromString(document.getId()));
             if (responseEntity.getStatusCode().equals(HttpStatus.OK) && null != responseEntity.getBody()) {
                 StoredDocumentHalResource resource = (StoredDocumentHalResource) responseEntity.getBody();
@@ -223,9 +223,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             }
 
             Map<String, String> metadataMap = new HashMap<>();
-            metadataMap.put("jurisdictionId", caseDocumentMetadata.getJurisdictionId());
-            metadataMap.put("caseId", caseDocumentMetadata.getCaseId());
-            metadataMap.put("caseTypeId", caseDocumentMetadata.getCaseTypeId());
+            metadataMap.put("jurisdictionId", documentMetadata.getJurisdictionId());
+            metadataMap.put("caseId", documentMetadata.getCaseId());
+            metadataMap.put("caseTypeId", documentMetadata.getCaseTypeId());
 
             DocumentUpdate documentUpdate = new DocumentUpdate();
             documentUpdate.setDocumentId(UUID.fromString(document.getId()));
@@ -378,13 +378,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 .getCaseDocumentMetadata(caseId, documentId, authorization)
                 .orElseThrow(() -> new CaseNotFoundException(caseId));
 
-            List<Document> matchingDocuments =
-                caseDocumentMetadata.getDocuments().stream()
-                                    .filter(document -> document.getId().equals(documentId.toString()))
-                                    .filter(document -> document.getPermissions().contains(Permission.READ))
-                                    .collect(Collectors.toList());
-
-            return matchingDocuments.size() > 0;
+            return (caseDocumentMetadata.getDocument().getId().equals(documentId.toString())
+                    && caseDocumentMetadata.getDocument().getPermissions().contains(Permission.READ));
         }
     }
 }

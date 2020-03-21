@@ -25,7 +25,7 @@ import uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
-import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
@@ -143,7 +143,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     public ResponseEntity<Object> patchMetaDataOnDocuments(
 
         @ApiParam(value = "", required = true)
-        @Valid @RequestBody CaseDocumentMetadata caseDocumentMetadata,
+        @Valid @RequestBody DocumentMetadata caseDocumentMetadata,
 
         @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
         @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,

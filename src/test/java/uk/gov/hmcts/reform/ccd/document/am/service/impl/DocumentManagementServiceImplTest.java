@@ -41,7 +41,6 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DATA_SOURC
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -227,7 +226,7 @@ class DocumentManagementServiceImplTest {
         permissionsList.add(Permission.READ);
         Document doc;
         doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList).build();
-        CaseDocumentMetadata cdm = CaseDocumentMetadata.builder().caseId("1234qwer1234qwer").documents(Arrays.asList(doc)).build();
+        CaseDocumentMetadata cdm = CaseDocumentMetadata.builder().caseId("1234qwer1234qwer").document(doc).build();
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class),anyString())).thenReturn(Optional.of(cdm));
 
         Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID,"auth");
@@ -290,7 +289,7 @@ class DocumentManagementServiceImplTest {
         List<Permission> permissionsList = new ArrayList<>();
         Document doc;
         doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList).build();
-        CaseDocumentMetadata cdm = CaseDocumentMetadata.builder().caseId("1234qwer1234qwer").documents(Arrays.asList(doc)).build();
+        CaseDocumentMetadata cdm = CaseDocumentMetadata.builder().caseId("1234qwer1234qwer").document(doc).build();
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class),anyString()))
             .thenReturn(Optional.ofNullable(cdm));
 
@@ -314,7 +313,7 @@ class DocumentManagementServiceImplTest {
         List<Permission> permissionsList = new ArrayList<>();
         Document doc;
         doc = Document.builder().id("40000a2b-00ce-00eb-0068-2d00a700be9c").permissions(permissionsList).build();
-        CaseDocumentMetadata cdm = CaseDocumentMetadata.builder().caseId("1234qwer1234qwer").documents(Arrays.asList(doc)).build();
+        CaseDocumentMetadata cdm = CaseDocumentMetadata.builder().caseId("1234qwer1234qwer").document(doc).build();
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class),anyString()))
             .thenReturn(Optional.ofNullable(cdm));
 
