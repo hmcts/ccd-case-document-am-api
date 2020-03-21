@@ -32,5 +32,4 @@ public class CaseDocumentMetadata {
 
     @JsonProperty
     private Document document;
-
 }
