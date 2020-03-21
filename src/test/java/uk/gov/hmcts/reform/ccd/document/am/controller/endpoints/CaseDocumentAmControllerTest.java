@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadReques
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
@@ -180,7 +181,7 @@ public class CaseDocumentAmControllerTest {
                 Permission.CREATE,
                 Permission.READ
             )
-        ));
+                                                                                                         ));
 
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
@@ -237,7 +238,7 @@ public class CaseDocumentAmControllerTest {
     @Test
     public void shouldPatchMetaDataOnDocuments() {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        CaseDocumentMetadata body = null;
+        DocumentMetadata body = null;
         ResponseEntity response = testee.patchMetaDataOnDocuments(body, "", "", "");
 
         assertAll(

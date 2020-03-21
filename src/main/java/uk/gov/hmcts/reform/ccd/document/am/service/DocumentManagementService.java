@@ -1,12 +1,11 @@
 package uk.gov.hmcts.reform.ccd.document.am.service;
 
-import org.springframework.http.ResponseEntity;
-
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
 
 public interface DocumentManagementService {
 
@@ -42,7 +41,17 @@ public interface DocumentManagementService {
      * Root GET endpoint.
      * @param responseEntity which has document meta data response
      * @param documentId Document Id for which binary content to be downloaded
-     * @return Boolen object to check user permission
+     * @return Boolean object to check user permission
      **/
     boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization);
+
+    /**
+     * Root GET endpoint.
+     * @param caseDocumentMetadata which has document meta data
+     * @param serviceAuthorization Service authorization token
+     * @param userId User ID which is invoking the metadata update
+     * @return Boolean object to check user permission
+     **/
+    boolean patchDocumentMetadata(DocumentMetadata caseDocumentMetadata,
+                                  String serviceAuthorization, String userId);
 }

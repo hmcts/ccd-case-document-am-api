@@ -25,6 +25,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -41,12 +42,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -57,6 +61,9 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceN
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.Document;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentUpdate;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
@@ -65,7 +72,6 @@ import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.document.am.util.ResponseHelper;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
-
 
 @Slf4j
 @Service
@@ -109,7 +115,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 requestEntity,
                 StoredDocumentHalResource.class
                                                                                       );
-            LOG.info("response : " + response.getStatusCode());
+            LOG.error("response : " + response.getStatusCode());
             LOG.error("response : " + response.getBody());
             ResponseEntity responseEntity = ResponseHelper.toResponseEntity(response, documentId);
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
@@ -125,11 +131,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
                 throw new ResourceNotFoundException(documentId.toString());
             } else {
-                throw new ServiceException(String.format(
-                    "Problem  fetching the document for document id: %s because of %s",
-                    documentId,
-                    ex.getMessage()
-                                                        ));
+                throw new ServiceException(String.format("Problem fetching the document for document id: %s because of %s", documentId, ex.getMessage()));
             }
 
         }
@@ -167,7 +169,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             }
 
         } catch (HttpClientErrorException ex) {
-            log.error(ex.getMessage());
+            LOG.error(ex.getMessage());
             if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
                 throw new ResourceNotFoundException(documentId.toString());
             } else {
@@ -180,6 +182,62 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
         }
 
+    }
+
+    @Override
+    public boolean patchDocumentMetadata(DocumentMetadata documentMetadata, String serviceAuthorization, String userId) {
+        try {
+            LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
+            HttpHeaders headers = new HttpHeaders();
+
+            prepareRequestForAttachingDocumentToCase(documentMetadata, serviceAuthorization, userId, bodyMap, headers);
+            HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
+
+            restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+            restTemplate.exchange(documentURL.concat("/documents"), HttpMethod.PATCH, requestEntity, Void.class);
+
+        } catch (RestClientException ex) {
+            LOG.error("Exception while attaching a document to case : " + ex);
+            throw ex;
+        }
+        return true;
+    }
+
+    private void prepareRequestForAttachingDocumentToCase(DocumentMetadata documentMetadata,
+                                                      String serviceAuthorization,
+                                                      String userId,
+                                                      LinkedMultiValueMap<String, Object> bodyMap,
+                                                      HttpHeaders headers) {
+
+        for (Document document : documentMetadata.getDocuments()) {
+            ResponseEntity responseEntity = getDocumentMetadata(UUID.fromString(document.getId()));
+            if (responseEntity.getStatusCode().equals(HttpStatus.OK) && null != responseEntity.getBody()) {
+                StoredDocumentHalResource resource = (StoredDocumentHalResource) responseEntity.getBody();
+
+                String hashcodeFromStoredDocument = ApplicationUtils.generateHashCode(document.getId()
+                                                       .concat(resource.getMetadata().get("jurisdictionId"))
+                                                       .concat(resource.getMetadata().get("caseTypeId")));
+                if (!hashcodeFromStoredDocument.equals(document.getHashToken())) {
+                    throw new ResourceNotFoundException(String.format(": Document %s does not exists in DM Store", document.getId()));
+                }
+            }
+
+            Map<String, String> metadataMap = new HashMap<>();
+            metadataMap.put("jurisdictionId", documentMetadata.getJurisdictionId());
+            metadataMap.put("caseId", documentMetadata.getCaseId());
+            metadataMap.put("caseTypeId", documentMetadata.getCaseTypeId());
+
+            DocumentUpdate documentUpdate = new DocumentUpdate();
+            documentUpdate.setDocumentId(UUID.fromString(document.getId()));
+
+            documentUpdate.setMetadata(metadataMap);
+            bodyMap.add("documents", documentUpdate);
+        }
+
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        headers.set(SERVICE_AUTHORIZATION, serviceAuthorization);
+        headers.set(USERID, userId);
     }
 
     @Override
