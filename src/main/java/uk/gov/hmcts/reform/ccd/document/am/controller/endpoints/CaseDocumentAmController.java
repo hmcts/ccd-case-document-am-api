@@ -57,7 +57,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     }
 
     @Override
-    public ResponseEntity<String> deleteDocumentbyDocumentId(
+    public ResponseEntity<Object> deleteDocumentbyDocumentId(
         @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
         @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
 
