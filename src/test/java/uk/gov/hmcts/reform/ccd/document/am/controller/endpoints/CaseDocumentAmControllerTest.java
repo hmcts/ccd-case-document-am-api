@@ -210,10 +210,11 @@ public class CaseDocumentAmControllerTest {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(TRUE).when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),getUuid(),AUTHORIZATION, Permission.UPDATE);
-        doReturn(ResponseEntity.status(HttpStatus.NO_CONTENT).build()).when(documentManagementService).deleteDocument(getUuid());
+        doReturn(ResponseEntity.status(HttpStatus.NO_CONTENT).build()).when(documentManagementService)
+            .deleteDocument(getUuid(),"","",true);
 
         ResponseEntity response = testee
-            .deleteDocumentbyDocumentId("", AUTHORIZATION, getUuid(), true);
+            .deleteDocumentbyDocumentId("", AUTHORIZATION, getUuid(),"","", true);
 
         assertAll(
             () ->  assertNotNull(response, VALID_RESPONSE),
@@ -233,9 +234,12 @@ public class CaseDocumentAmControllerTest {
                 serviceAuthorization,
                 AUTHORIZATION,
                 getUuid(),
+                "",
+                "",
                 true
             );
         });
+
     }
 
     @Test

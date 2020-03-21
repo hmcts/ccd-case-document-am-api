@@ -21,6 +21,7 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.THUMBNAIL;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USER_ROLES;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -328,12 +329,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Override
     @SuppressWarnings("unchecked")
-    public ResponseEntity<Object> deleteDocument(UUID documentId) {
+    public ResponseEntity<Object> deleteDocument(UUID documentId, String userId, String userRoles, Boolean permanent) {
 
         try {
-            final HttpEntity requestEntity = new HttpEntity(securityUtils.authorizationHeaders());
-            LOG.info("Document Store URL is : " + documentURL);
-            String documentDeleteUrl = String.format("%s/documents/%s", documentURL, documentId);
+            final HttpEntity requestEntity = new HttpEntity(getHttpHeaders(userId, userRoles));
+            String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL, documentId);
             LOG.info("documentMetadataUrl : " + documentDeleteUrl);
             ResponseEntity response = restTemplate.exchange(
                 documentDeleteUrl,
@@ -341,8 +341,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 requestEntity,
                 ResponseEntity.class
             );
-            LOG.info("response : " + response.getStatusCode());
-            LOG.info("response : " + response.getBody());
             if (HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
                 LOG.info("Positive response");
                 return response;
@@ -364,5 +362,13 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             }
 
         }
+    }
+
+    private HttpHeaders getHttpHeaders(String userId, String userRoles) {
+        HttpHeaders headers = securityUtils.authorizationHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add(USERID, userId);
+        headers.add(USER_ROLES, userRoles);
+        return headers;
     }
 }

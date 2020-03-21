@@ -23,5 +23,5 @@ public interface DocumentManagementService {
 
     boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization, Permission permissionToCheck);
 
-    ResponseEntity<Object> deleteDocument(final UUID documentId);
+    ResponseEntity<Object> deleteDocument(final UUID documentId, String userId, String userRoles, Boolean permanent);
 }
