@@ -1,6 +1,7 @@
 
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHCODE;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,9 +34,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
+import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 
 @Controller
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -247,6 +250,44 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         } catch (Exception e) {
             LOG.error("Exception while uploading the documents :" + e);
             throw new ResponseFormatException("Exception while uploading the documents :" + e);
+        }
+    }
+
+    @Override
+    public ResponseEntity<Object> generateHashCode(
+        @ApiParam(value = Constants.S2S_API_PARAM, required = true)
+        @RequestHeader(value = Constants.SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
+
+        @ApiParam("Authorization header of the currently authenticated user")
+        @RequestHeader(value = "Authorization", required = true) String authorization,
+
+        @ApiParam("documentId")
+        @PathVariable("documentId") UUID documentId,
+
+        @ApiParam(value = "CaseType identifier for the case document.", required = true)
+        @NotNull(message = "Provide the Case Type ID ")
+        @RequestHeader(value = "caseTypeId", required = true) String caseTypeId,
+
+        @ApiParam(value = "Jurisdiction identifier for the case document.", required = true)
+        @NotNull(message = "Provide the Jurisdiction ID ")
+        @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId) {
+
+        try {
+            ValidationService.validateInputParams(INPUT_STRING_PATTERN, documentId.toString(), caseTypeId, jurisdictionId);
+
+            HashMap<String, String> responseBody = new HashMap<>();
+
+            String hashedToken = ApplicationUtils.generateHashCode(documentId.toString().concat(jurisdictionId).concat(caseTypeId));
+            responseBody.put(HASHCODE, hashedToken);
+
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+        } catch (BadRequestException | IllegalArgumentException e) {
+            LOG.error("Illegal argument exception: " + e);
+            throw new BadRequestException("Illegal argument exception:" + e);
+        } catch (Exception e) {
+            LOG.error("Exception :" + e);
+            throw new ResponseFormatException("Exception :" + e);
         }
     }
 }

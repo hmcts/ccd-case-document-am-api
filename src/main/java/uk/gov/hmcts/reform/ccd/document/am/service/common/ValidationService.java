@@ -49,7 +49,7 @@ public class ValidationService {
     public static void validateInputParams(String pattern, String... inputString) {
         for (String input : inputString) {
             if (StringUtils.isEmpty(input) || !Pattern.matches(pattern, input)) {
-                throw new IllegalArgumentException("The input parameter does not complies with the required pattern");
+                throw new IllegalArgumentException("The input parameter: " + input +  ", does not comply with the required pattern");
             }
         }
     }

@@ -256,4 +256,31 @@ public interface CaseDocumentAm {
         @ApiParam(value = "Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "user-roles", required = false) String userRoles);
 
+
+    @ApiOperation(value = "Retrieves the hashcode for document Id", nickname = "generateHashCode",
+        notes = "This API will return the hashed token required for document upload functionality.",
+        response = String.class, tags = {TAG})
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Success", response = StoredDocumentHalResource.class),
+        @ApiResponse(code = 401, message = UNAUTHORIZED, response = String.class),
+        @ApiResponse(code = 403, message = FORBIDDEN, response = ErrorMap.class, responseContainer = "List"),
+        @ApiResponse(code = 400, message = "Bad Request", response = String.class)})
+    @RequestMapping(value = "/cases/documents/{documentId}/token", produces = {APPLICATION_JSON}, method = RequestMethod.GET)
+    ResponseEntity<Object> generateHashCode(
+
+        @ApiParam(value = S2S_API_PARAM, required = true)
+        @RequestHeader(value = SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
+
+        @ApiParam("Authorization header of the currently authenticated user")
+        @RequestHeader(value = "Authorization", required = true) String authorization,
+
+        @ApiParam(value = "documentId", required = true) @PathVariable("documentId") UUID documentId,
+
+        @ApiParam(value = "CaseType identifier for the case document.", required = true)
+        @RequestHeader(value = "caseTypeId", required = true) String caseTypeId,
+
+        @ApiParam(value = "Jurisdiction identifier for the case document.", required = true)
+        @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId);
+
+
 }
