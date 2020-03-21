@@ -1,6 +1,7 @@
 
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHCODE;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -247,6 +248,9 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam(value = Constants.S2S_API_PARAM, required = true)
         @RequestHeader(value = Constants.SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
 
+        @ApiParam("Authorization header of the currently authenticated user")
+        @RequestHeader(value = "Authorization", required = true) String authorization,
+
         @ApiParam("documentId")
         @PathVariable("documentId") UUID documentId,
 
@@ -264,7 +268,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             HashMap<String, String> responseBody = new HashMap<>();
 
             String hashedToken = ApplicationUtils.generateHashCode(documentId.toString().concat(jurisdictionId).concat(caseTypeId));
-            responseBody.put("hashed-token", hashedToken);
+            responseBody.put(HASHCODE, hashedToken);
 
             return new ResponseEntity<>(responseBody, HttpStatus.OK);
 

@@ -267,6 +267,9 @@ public interface CaseDocumentAm {
         @ApiParam(value = S2S_API_PARAM, required = true)
         @RequestHeader(value = SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
 
+        @ApiParam("Authorization header of the currently authenticated user")
+        @RequestHeader(value = "Authorization", required = true) String authorization,
+
         @ApiParam(value = "documentId", required = true) @PathVariable("documentId") UUID documentId,
 
         @ApiParam(value = "CaseType identifier for the case document.", required = true)
