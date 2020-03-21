@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 
 public interface DocumentManagementService {
@@ -24,4 +25,7 @@ public interface DocumentManagementService {
     boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization, Permission permissionToCheck);
 
     ResponseEntity<Object> deleteDocument(final UUID documentId, String userId, String userRoles, Boolean permanent);
+
+    boolean patchDocumentMetadata(DocumentMetadata caseDocumentMetadata,
+                                  String serviceAuthorization, String userId);
 }

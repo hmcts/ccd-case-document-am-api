@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.ccd.document.am.service;
 
-import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
-
 import java.util.Optional;
 import java.util.UUID;
+
+import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 
 public interface CaseDataStoreService {
 
