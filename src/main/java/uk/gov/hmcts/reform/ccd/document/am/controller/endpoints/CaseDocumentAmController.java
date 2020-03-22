@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
@@ -50,24 +51,33 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     }
 
     @Override
-    public ResponseEntity<String> deleteDocumentbyDocumentId(
+    public ResponseEntity<Object> deleteDocumentbyDocumentId(
         @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
         @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
+
+        @ApiParam("Authorization header of the currently authenticated user")
+        @RequestHeader(value = "Authorization", required = true) String authorization,
 
         @ApiParam("documentId")
         @PathVariable("documentId") UUID documentId,
 
-        @ApiParam("permanent delete flag")
-        @Valid @RequestParam(value = "permanent", required = false) Boolean permanent,
-
-        @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
+        @ApiParam("user-id of the currently authenticated user. If provided will be used to populate the creator field of a document"
             + " and will be used for authorisation.")
-        @RequestHeader(value = "User-Id", required = false) String userId,
+        @RequestHeader(value = "user-id", required = false) String userId,
 
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
-        @RequestHeader(value = "User-Roles", required = false) String userRoles) {
+        @RequestHeader(value = "user-roles", required = false) String userRoles,
 
-        return new ResponseEntity<String>(HttpStatus.OK);
+        @ApiParam("permanent delete flag")
+        @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false") Boolean permanent) {
+
+        ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
+        if (documentManagementService.checkUserPermission(responseEntity, documentId, authorization, Permission.UPDATE)) {
+            return  documentManagementService.deleteDocument(documentId, userId, userRoles, permanent);
+
+        }
+        LOG.error("User don't have update permission on requested document " + HttpStatus.FORBIDDEN);
+        throw new ForbiddenException(documentId.toString());
     }
 
     @Override
@@ -85,7 +95,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "User-Roles", required = false) String userRoles) {
 
         ResponseEntity documentMetadata = documentManagementService.getDocumentMetadata(documentId);
-        if (documentManagementService.checkUserPermission(documentMetadata, documentId, authorization)) {
+        if (documentManagementService.checkUserPermission(documentMetadata, documentId, authorization, Permission.READ)) {
             return documentManagementService.getDocumentBinaryContent(documentId);
 
         }
@@ -112,7 +122,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
-        if (documentManagementService.checkUserPermission(responseEntity, documentId, authorization)) {
+        if (documentManagementService.checkUserPermission(responseEntity, documentId, authorization, Permission.READ)) {
             return  ResponseEntity
                  .status(HttpStatus.OK)
                  .body(responseEntity.getBody());

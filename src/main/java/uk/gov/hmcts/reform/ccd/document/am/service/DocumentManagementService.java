@@ -1,57 +1,31 @@
 package uk.gov.hmcts.reform.ccd.document.am.service;
 
+import org.springframework.http.ResponseEntity;
+
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 
 public interface DocumentManagementService {
 
-    /**
-     * Root GET endpoint.
-     *
-     * @param documentId Document Id
-     * @return Optional containing document details including metadata when found; empty optional otherwise
-     */
     ResponseEntity getDocumentMetadata(final UUID documentId);
 
-    /**
-     * Root GET endpoint.
-     *
-     * @param storedDocument This is the storedDocument response object returned by DM-store
-     * @return String containing case id extracted from document metadata
-     **/
     String extractCaseIdFromMetadata(Object storedDocument);
 
-    /**
-     * Root GET endpoint.
-     *
-     * @param documentId Document Id for which binary content to be downloaded
-     * @return OutputStream object containing binary content of document
-     **/
     ResponseEntity<Object> getDocumentBinaryContent(final UUID documentId);
 
     ResponseEntity<Object> uploadDocuments(List<MultipartFile> files, String classification, List<String> roles,
                                            String serviceAuthorization, String caseTypeId,
                                            String jurisdictionId, String userId);
 
-    /**
-     * Root GET endpoint.
-     * @param responseEntity which has document meta data response
-     * @param documentId Document Id for which binary content to be downloaded
-     * @return Boolean object to check user permission
-     **/
-    boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization);
+    boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization, Permission permissionToCheck);
 
-    /**
-     * Root GET endpoint.
-     * @param caseDocumentMetadata which has document meta data
-     * @param serviceAuthorization Service authorization token
-     * @param userId User ID which is invoking the metadata update
-     * @return Boolean object to check user permission
-     **/
+    ResponseEntity<Object> deleteDocument(final UUID documentId, String userId, String userRoles, Boolean permanent);
+
     boolean patchDocumentMetadata(DocumentMetadata caseDocumentMetadata,
                                   String serviceAuthorization, String userId);
 }
