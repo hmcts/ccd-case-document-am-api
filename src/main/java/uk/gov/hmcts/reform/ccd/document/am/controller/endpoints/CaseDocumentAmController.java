@@ -18,9 +18,6 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadReques
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
-import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
-import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
-import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
@@ -76,7 +73,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             return  documentManagementService.deleteDocument(documentId, userId, userRoles, permanent);
 
         }
-        LOG.error("User don't have update permission on requested document " + HttpStatus.FORBIDDEN);
+        LOG.error("User doesn't have update permission on requested document " + HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -90,16 +87,17 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "Authorization", required = true) String authorization,
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
             + " and will be used for authorisation.")
-        @RequestHeader(value = "User-Id", required = false) String userId,
+        @RequestHeader(value = "user-id", required = false) String userId,
+
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
-        @RequestHeader(value = "User-Roles", required = false) String userRoles) {
+        @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
         ResponseEntity documentMetadata = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkUserPermission(documentMetadata, documentId, authorization, Permission.READ)) {
             return documentManagementService.getDocumentBinaryContent(documentId);
 
         }
-        LOG.error("User don't have read permission on requested document " + HttpStatus.FORBIDDEN);
+        LOG.error("User doesn't have read permission on requested document " + HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -127,29 +125,39 @@ public class CaseDocumentAmController implements CaseDocumentAm {
                  .status(HttpStatus.OK)
                  .body(responseEntity.getBody());
         }
-        LOG.error("User don't have read permission on requested document " + HttpStatus.FORBIDDEN);
+        LOG.error("User doesn't have read permission on requested document " + HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
     @Override
-    public ResponseEntity<StoredDocumentHalResource> patchDocumentbyDocumentId(
+    public ResponseEntity<Object> patchDocumentbyDocumentId(
+
         @ApiParam(value = "", required = true)
-        @Valid @RequestBody UpdateDocumentCommand body,
+        @Valid UpdateDocumentCommand body,
 
         @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
         @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
 
+        @ApiParam("Authorization header of the currently authenticated user")
+        @RequestHeader(value = "Authorization", required = true) String authorization,
+
         @ApiParam("documentId")
         @PathVariable("documentId") UUID documentId,
 
-        @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
+        @ApiParam("user-id of the currently authenticated user. If provided will be used to populate the creator field of a document"
             + " and will be used for authorisation.")
-        @RequestHeader(value = "User-Id", required = false) String userId,
+        @RequestHeader(value = "user-id", required = false) String userId,
 
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
-        @RequestHeader(value = "User-Roles", required = false) String userRoles) {
+        @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
-        return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.OK);
+        ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
+        if (documentManagementService.checkUserPermission(responseEntity, documentId, authorization, Permission.UPDATE)) {
+            ResponseEntity response =   documentManagementService.patchDocument(documentId, body, userId, userRoles);
+            return  ResponseEntity.status(HttpStatus.OK).body(response.getBody());
+        }
+        LOG.error("User doesn't have update permission on requested document " + HttpStatus.FORBIDDEN);
+        throw new ForbiddenException(documentId.toString());
     }
 
     @Override
@@ -175,28 +183,6 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             throw e;
         }
         return new ResponseEntity<Object>(HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<StoredDocumentHalResourceCollection> postDocumentsSearchCommand(
-        @ApiParam(value = "", required = true) @Valid @RequestBody MetadataSearchCommand body,
-        @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
-        @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
-        @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-            + " and will be used for authorisation.")
-        @RequestHeader(
-            value = "User-Id", required = false) String userId,
-        @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
-        @RequestHeader(value = "User-Roles", required = false) String userRoles,
-        @ApiParam("") @Valid @RequestParam(value = "offset", required = false) Long offset,
-        @ApiParam("") @Valid @RequestParam(value = "pageNumber", required = false) Integer pageNumber,
-        @ApiParam("") @Valid @RequestParam(value = "pageSize", required = false) Integer pageSize,
-        @ApiParam("") @Valid @RequestParam(value = "paged", required = false) Boolean paged,
-        @ApiParam("") @Valid @RequestParam(value = "sort.sorted", required = false) Boolean sortSorted,
-        @ApiParam("") @Valid @RequestParam(value = "sort.unsorted", required = false) Boolean sortUnsorted,
-        @ApiParam("") @Valid @RequestParam(value = "unpaged", required = false) Boolean unpaged) {
-
-        return new ResponseEntity<StoredDocumentHalResourceCollection>(HttpStatus.OK);
     }
 
     @Override

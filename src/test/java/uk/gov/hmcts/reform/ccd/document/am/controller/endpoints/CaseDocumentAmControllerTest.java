@@ -1,22 +1,5 @@
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,7 +18,6 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.Forbidden
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
-import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Classifications;
@@ -43,6 +25,23 @@ import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
 public class CaseDocumentAmControllerTest {
@@ -207,7 +206,7 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     @DisplayName("should get 204 when document delete is successful")
-    public void shouldDeleteDocumentbyDocumentId() {
+    public void shouldDeleteDocumentByDocumentId() {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(TRUE).when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),getUuid(),AUTHORIZATION, Permission.UPDATE);
@@ -225,7 +224,7 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     @DisplayName("should throw 403 forbidden when user doesn't have UPDATE permission on requested document")
-    public void shouldNotDeleteDocumentbyDocumentId() {
+    public void shouldNotDeleteDocumentByDocumentId() {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(FALSE).when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),getUuid(),AUTHORIZATION, Permission.UPDATE);
@@ -240,31 +239,42 @@ public class CaseDocumentAmControllerTest {
                 true
             );
         });
-
     }
 
     @Test
-    public void shouldPatchDocumentbyDocumentId() {
+    public void shouldPatchDocumentByDocumentId() {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(TRUE).when(documentManagementService)
+            .checkUserPermission(setDocumentMetaData(),getUuid(), AUTHORIZATION, Permission.UPDATE);
         UpdateDocumentCommand body = null;
-        ResponseEntity response = testee.patchDocumentbyDocumentId(body,"", getUuid(), "", "");
+        doReturn(setDocumentMetaData()).when(documentManagementService).patchDocument(getUuid(), body,
+                                                                                      "", "");
 
-        assertAll(
-            () ->  assertNotNull(response, "Valid Response from API"),
-            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE)
-        );
-    }
-
-    @Test
-    public void shouldPostDocumentsSearchCommand() {
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        MetadataSearchCommand body = null;
-        ResponseEntity response = testee.postDocumentsSearchCommand(body,"", "", "", 10L, 10, 10, TRUE, TRUE, TRUE, TRUE);
-
+        ResponseEntity response = testee.patchDocumentbyDocumentId(body,"",
+                                                                   AUTHORIZATION, getUuid(), "", "");
         assertAll(
             () ->  assertNotNull(response, VALID_RESPONSE),
             () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE)
         );
+    }
+
+    @Test
+    @DisplayName("should throw 403 forbidden when user doesn't have UPDATE permission on requested document")
+    public void shouldNotPatchDocumentByDocumentId() {
+        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(FALSE).when(documentManagementService)
+            .checkUserPermission(setDocumentMetaData(),getUuid(),AUTHORIZATION, Permission.UPDATE);
+        UpdateDocumentCommand body = null;
+        Assertions.assertThrows(ForbiddenException.class, () -> {
+            testee.patchDocumentbyDocumentId(
+                body,
+                serviceAuthorization,
+                AUTHORIZATION,
+                getUuid(),
+                "",
+                ""
+            );
+        });
     }
 
     @Test

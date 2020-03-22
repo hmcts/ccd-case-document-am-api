@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiModelProperty;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
-import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -14,7 +13,7 @@ import java.util.Objects;
 @Validated
 public class UpdateDocumentCommand {
     @JsonProperty("ttl")
-    private Date ttl = null;
+    private String ttl = null;
 
     /**
      * Get ttl.
@@ -24,11 +23,11 @@ public class UpdateDocumentCommand {
     @ApiModelProperty(value = "")
 
     @Valid
-    public Date getTtl() {
+    public String getTtl() {
         return ttl;
     }
 
-    public void setTtl(Date ttl) {
+    public void setTtl(String ttl) {
         this.ttl = ttl;
     }
 

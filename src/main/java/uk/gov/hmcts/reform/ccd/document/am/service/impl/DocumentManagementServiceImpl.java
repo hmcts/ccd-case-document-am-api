@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.PATCH;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION;
@@ -67,6 +68,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentUpdate;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
+import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
@@ -271,6 +273,45 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             .body(uploadedDocumentResponse.getBody());
     }
 
+    @Override
+    public ResponseEntity patchDocument(UUID documentId, UpdateDocumentCommand ttl, String userId, String userRoles) {
+        if (!ValidationService.validateTTL(ttl.getTtl())) {
+            throw new BadRequestException(String.format(
+                "Incorrect date format %s",
+                ttl.getTtl()));
+        }
+        try {
+            final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(ttl, getHttpHeaders(userId, userRoles));
+            String patchTTLUrl = String.format("%s/documents/%s", documentURL, documentId);
+            ResponseEntity<StoredDocumentHalResource> response = restTemplate.exchange(
+                patchTTLUrl,
+                PATCH,
+                requestEntity,
+                StoredDocumentHalResource.class
+            );
+            ResponseEntity responseEntity = ResponseHelper.toResponseEntity(response, documentId);
+            if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
+                return responseEntity;
+            } else {
+                LOG.error("Document doesn't exist for requested document id at Document Store API Side " + response
+                    .getStatusCode());
+                throw new ResourceNotFoundException(documentId.toString());
+            }
+        } catch (HttpClientErrorException ex) {
+            log.error(ex.getMessage());
+            if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
+                throw new ResourceNotFoundException(documentId.toString());
+            } else {
+                throw new ServiceException(String.format(
+                    "Problem  fetching the document for document id: %s because of %s",
+                    documentId,
+                    ex.getMessage()
+                ));
+            }
+
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private void formatUploadDocumentResponse(String caseTypeId, String jurisdictionId,
                                               ResponseEntity<Object> uploadedDocumentResponse) {
@@ -370,7 +411,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization, Permission permissionToCheck) {
         String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
-
         if (!ValidationService.validate(caseId)) {
             LOG.error(CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
             throw new BadRequestException(CASE_ID_INVALID);
