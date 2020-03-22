@@ -61,7 +61,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam("documentId")
         @PathVariable("documentId") UUID documentId,
 
-        @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
+        @ApiParam("user-id of the currently authenticated user. If provided will be used to populate the creator field of a document"
             + " and will be used for authorisation.")
         @RequestHeader(value = "user-id", required = false) String userId,
 
@@ -69,7 +69,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "user-roles", required = false) String userRoles,
 
         @ApiParam("permanent delete flag")
-        @Valid @RequestParam(value = "permanent", required = false) Boolean permanent) {
+        @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false") Boolean permanent) {
 
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkUserPermission(responseEntity, documentId, authorization, Permission.UPDATE)) {

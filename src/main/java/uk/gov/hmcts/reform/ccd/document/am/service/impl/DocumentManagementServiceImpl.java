@@ -117,8 +117,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 requestEntity,
                 StoredDocumentHalResource.class
                                                                                       );
-            LOG.error("response : " + response.getStatusCode());
-            LOG.error("response : " + response.getBody());
+            LOG.info("response : " + response.getStatusCode());
+            LOG.info("response : " + response.getBody());
             ResponseEntity responseEntity = ResponseHelper.toResponseEntity(response, documentId);
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
                 LOG.info("Positive response");
@@ -392,7 +392,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         try {
             final HttpEntity requestEntity = new HttpEntity(getHttpHeaders(userId, userRoles));
             String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL, documentId);
-            LOG.info("documentMetadataUrl : " + documentDeleteUrl);
+            LOG.info("documentDeleteUrl : " + documentDeleteUrl);
             ResponseEntity response = restTemplate.exchange(
                 documentDeleteUrl,
                 DELETE,
