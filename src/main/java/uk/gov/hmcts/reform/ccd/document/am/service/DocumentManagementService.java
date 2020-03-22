@@ -27,7 +27,8 @@ public interface DocumentManagementService {
 
     ResponseEntity<Object> deleteDocument(final UUID documentId, String userId, String userRoles, Boolean permanent);
 
-    ResponseEntity patchDocumentbyDocumentId(final UUID documentId, UpdateDocumentCommand updateDocumentCommand);
+    ResponseEntity patchDocument(final UUID documentId, UpdateDocumentCommand updateDocumentCommand,
+                                             String userId, String userRoles);
 
     boolean patchDocumentMetadata(DocumentMetadata caseDocumentMetadata,
                                   String serviceAuthorization, String userId);

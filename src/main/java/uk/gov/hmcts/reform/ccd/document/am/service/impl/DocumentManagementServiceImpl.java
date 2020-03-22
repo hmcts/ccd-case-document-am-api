@@ -274,17 +274,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public ResponseEntity patchDocumentbyDocumentId(UUID documentId, UpdateDocumentCommand ttl) {
+    public ResponseEntity patchDocument(UUID documentId, UpdateDocumentCommand ttl, String userId, String userRoles) {
         if (!ValidationService.validateTTL(ttl.getTtl())) {
             throw new BadRequestException(String.format(
-                "Inconnect date format %s",
-                ttl.getTtl()
-            ));
+                "Incorrect date format %s",
+                ttl.getTtl()));
         }
         try {
-            HttpHeaders headers = securityUtils.authorizationHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(ttl, headers);
+            final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(ttl, getHttpHeaders(userId, userRoles));
             String patchTTLUrl = String.format("%s/documents/%s", documentURL, documentId);
             ResponseEntity<StoredDocumentHalResource> response = restTemplate.exchange(
                 patchTTLUrl,
