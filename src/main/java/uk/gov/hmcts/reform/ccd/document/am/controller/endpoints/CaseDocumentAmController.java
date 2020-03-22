@@ -1,9 +1,6 @@
 
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,22 +17,25 @@ import uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
-import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.MetadataSearchCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
-import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
+import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
+import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
+
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHCODE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
 
 @Controller
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -43,39 +43,41 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
     private static final Logger LOG = LoggerFactory.getLogger(CaseDocumentAmController.class);
 
-    private transient ObjectMapper objectMapper;
-    private transient HttpServletRequest request;
     private transient DocumentManagementService  documentManagementService;
-    private transient CaseDataStoreService caseDataStoreService;
 
     @Autowired
-    public CaseDocumentAmController(ObjectMapper objectMapper, HttpServletRequest request, DocumentManagementService documentManagementService,
-                                    CaseDataStoreService caseDataStoreService) {
-        this.objectMapper = objectMapper;
-        this.request = request;
+    public CaseDocumentAmController(DocumentManagementService documentManagementService) {
         this.documentManagementService = documentManagementService;
-        this.caseDataStoreService = caseDataStoreService;
     }
 
     @Override
-    public ResponseEntity<String> deleteDocumentbyDocumentId(
+    public ResponseEntity<Object> deleteDocumentbyDocumentId(
         @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
         @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
+
+        @ApiParam("Authorization header of the currently authenticated user")
+        @RequestHeader(value = "Authorization", required = true) String authorization,
 
         @ApiParam("documentId")
         @PathVariable("documentId") UUID documentId,
 
-        @ApiParam("permanent delete flag")
-        @Valid @RequestParam(value = "permanent", required = false) Boolean permanent,
-
-        @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
+        @ApiParam("user-id of the currently authenticated user. If provided will be used to populate the creator field of a document"
             + " and will be used for authorisation.")
-        @RequestHeader(value = "User-Id", required = false) String userId,
+        @RequestHeader(value = "user-id", required = false) String userId,
 
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
-        @RequestHeader(value = "User-Roles", required = false) String userRoles) {
+        @RequestHeader(value = "user-roles", required = false) String userRoles,
 
-        return new ResponseEntity<String>(HttpStatus.OK);
+        @ApiParam("permanent delete flag")
+        @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false") Boolean permanent) {
+
+        ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
+        if (documentManagementService.checkUserPermission(responseEntity, documentId, authorization, Permission.UPDATE)) {
+            return  documentManagementService.deleteDocument(documentId, userId, userRoles, permanent);
+
+        }
+        LOG.error("User don't have update permission on requested document " + HttpStatus.FORBIDDEN);
+        throw new ForbiddenException(documentId.toString());
     }
 
     @Override
@@ -156,22 +158,28 @@ public class CaseDocumentAmController implements CaseDocumentAm {
     }
 
     @Override
-    public ResponseEntity<StoredDocumentHalResource> patchMetaDataOnDocuments(
+    public ResponseEntity<Object> patchMetaDataOnDocuments(
 
         @ApiParam(value = "", required = true)
-        @Valid @RequestBody CaseDocumentMetadata body,
+        @Valid @RequestBody DocumentMetadata caseDocumentMetadata,
 
         @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
         @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
 
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
             + " and will be used for authorisation.")
-        @RequestHeader(value = "User-Id", required = false) String userId,
+        @RequestHeader(value = "user-id", required = false) String userId,
 
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
-        @RequestHeader(value = "User-Roles", required = false) String userRoles) {
+        @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
-        return new ResponseEntity<StoredDocumentHalResource>(HttpStatus.OK);
+        try {
+            documentManagementService.patchDocumentMetadata(caseDocumentMetadata, serviceAuthorization, userId);
+        } catch (Exception e) {
+            LOG.error("Exception while attaching the documents to a case :" + e);
+            throw e;
+        }
+        return new ResponseEntity<Object>(HttpStatus.OK);
     }
 
     @Override
@@ -243,6 +251,44 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         } catch (Exception e) {
             LOG.error("Exception while uploading the documents :" + e);
             throw new ResponseFormatException("Exception while uploading the documents :" + e);
+        }
+    }
+
+    @Override
+    public ResponseEntity<Object> generateHashCode(
+        @ApiParam(value = Constants.S2S_API_PARAM, required = true)
+        @RequestHeader(value = Constants.SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
+
+        @ApiParam("Authorization header of the currently authenticated user")
+        @RequestHeader(value = "Authorization", required = true) String authorization,
+
+        @ApiParam("documentId")
+        @PathVariable("documentId") UUID documentId,
+
+        @ApiParam(value = "CaseType identifier for the case document.", required = true)
+        @NotNull(message = "Provide the Case Type ID ")
+        @RequestHeader(value = "caseTypeId", required = true) String caseTypeId,
+
+        @ApiParam(value = "Jurisdiction identifier for the case document.", required = true)
+        @NotNull(message = "Provide the Jurisdiction ID ")
+        @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId) {
+
+        try {
+            ValidationService.validateInputParams(INPUT_STRING_PATTERN, documentId.toString(), caseTypeId, jurisdictionId);
+
+            HashMap<String, String> responseBody = new HashMap<>();
+
+            String hashedToken = ApplicationUtils.generateHashCode(documentId.toString().concat(jurisdictionId).concat(caseTypeId));
+            responseBody.put(HASHCODE, hashedToken);
+
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+        } catch (BadRequestException | IllegalArgumentException e) {
+            LOG.error("Illegal argument exception: " + e);
+            throw new BadRequestException("Illegal argument exception:" + e);
+        } catch (Exception e) {
+            LOG.error("Exception :" + e);
+            throw new ResponseFormatException("Exception :" + e);
         }
     }
 }
