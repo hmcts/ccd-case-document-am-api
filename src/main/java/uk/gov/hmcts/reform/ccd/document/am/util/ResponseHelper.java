@@ -2,13 +2,18 @@ package uk.gov.hmcts.reform.ccd.document.am.util;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.Response;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -50,5 +55,31 @@ public class ResponseHelper {
 
         }
 
+    }
+    public static Optional decode(Response response, Class clazz) {
+        try {
+            return Optional.of(json.readValue(response.body().asReader(), clazz));
+        } catch (IOException e) {
+            return Optional.empty();
+        }
+    }
+
+    public static ResponseEntity toResponseEntityByFeignClient(Response response, Class clazz, UUID documentId) {
+        Optional payload = decode(response, clazz);
+        return new ResponseEntity(
+            payload.orElse(null),
+            convertHeaders(response.headers()),
+            HttpStatus.valueOf(response.status()));
+    }
+    public static MultiValueMap<String, String> convertHeaders(Map<String, Collection<String>> responseHeaders) {
+        MultiValueMap<String, String> responseEntityHeaders = new LinkedMultiValueMap<>();
+        responseHeaders.entrySet().stream().forEach(e -> {
+            if (!(e.getKey().equalsIgnoreCase("request-context") || e.getKey().equalsIgnoreCase("x-powered-by"))) {
+                responseEntityHeaders.put(e.getKey(), new ArrayList<>(e.getValue()));
+            }
+        });
+
+
+        return responseEntityHeaders;
     }
 }

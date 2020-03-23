@@ -85,3 +85,4 @@ swaggerUrl: ${CASE_DOCUMENT_AM_URL:localhost:4455}
 
 case_document_am:
   url: ${CASE_DOCUMENT_AM_URL:http://localhost:4455}
+
