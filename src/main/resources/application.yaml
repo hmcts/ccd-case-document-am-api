@@ -82,3 +82,6 @@ documentTTL: ${DOCUMENT_TTL:600000}
 documentStoreUrl: ${DOCUMENT_STORE_URL:http://localhost:4506/documents}
 caseDataStoreUrl: ${CASE_DATA_STORE_URL:http://localhost:4452}
 swaggerUrl: ${CASE_DOCUMENT_AM_URL:localhost:4455}
+
+case_document_am:
+  url: ${CASE_DOCUMENT_AM_URL:http://localhost:4455}

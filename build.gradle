@@ -269,6 +269,7 @@ dependencies {
   compile group: 'org.springframework.hateoas', name: 'spring-hateoas', version: '0.25.1.RELEASE'
   compile group: 'org.springframework', name: 'spring-tx', version: '5.2.3.RELEASE'
 
+
   testCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
 
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit
