@@ -42,7 +42,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
                             "testData.actualResponse.body.links.self.href");
             if(self!=null && self.startsWith(docAmUrl+"/cases/documents/"))
                 return self;
-            return "docAmUrl"+"/cases/documents/<a document id>";
+            return docAmUrl+"/cases/documents/<a document id>";
             
         }
         else if(key.equals(key.equals("S_040_validBinaryLink"))) {
@@ -51,7 +51,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
                             "testData.actualResponse.body.links.binary.href");
             if(binary!=null && binary.startsWith(docAmUrl+"/cases/documents/") && binary.endsWith("/binary"))
                 return binary;
-            return "docAmUrl"+"/cases/documents/<a document id>/binary";
+            return docAmUrl+"/cases/documents/<a document id>/binary";
             
         }
         return super.calculateCustomValue(scenarioContext, key);
