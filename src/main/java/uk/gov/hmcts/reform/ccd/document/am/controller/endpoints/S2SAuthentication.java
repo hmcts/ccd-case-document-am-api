@@ -26,7 +26,6 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TY
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DATA_SOURCE;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
 
-
 import java.util.UUID;
 
 import static org.springframework.http.ResponseEntity.ok;
@@ -94,6 +93,7 @@ public class S2SAuthentication {
         }
 
     }
+
     private HttpHeaders getHeaders(ResponseEntity<Resource> response) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(ORIGINAL_FILE_NAME,response.getHeaders().get(ORIGINAL_FILE_NAME).get(0));

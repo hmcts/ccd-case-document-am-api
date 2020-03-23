@@ -46,6 +46,18 @@ public class ResponseHelper {
         return responseEntityHeaders;
     }
 
+    public static MultiValueMap<String, String> convertHeaders(Map<String, Collection<String>> responseHeaders) {
+        MultiValueMap<String, String> responseEntityHeaders = new LinkedMultiValueMap<>();
+        responseHeaders.entrySet().stream().forEach(e -> {
+            if (!(e.getKey().equalsIgnoreCase("request-context") || e.getKey().equalsIgnoreCase("x-powered-by"))) {
+                responseEntityHeaders.put(e.getKey(), new ArrayList<>(e.getValue()));
+            }
+        });
+
+
+        return responseEntityHeaders;
+    }
+
     public static void addHateoasLinks(Optional payload,UUID documentId) {
         if (payload.isPresent()) {
             Object obj = payload.get();
@@ -56,6 +68,7 @@ public class ResponseHelper {
         }
 
     }
+
     public static Optional decode(Response response, Class clazz) {
         try {
             return Optional.of(json.readValue(response.body().asReader(), clazz));
@@ -71,15 +84,6 @@ public class ResponseHelper {
             convertHeaders(response.headers()),
             HttpStatus.valueOf(response.status()));
     }
-    public static MultiValueMap<String, String> convertHeaders(Map<String, Collection<String>> responseHeaders) {
-        MultiValueMap<String, String> responseEntityHeaders = new LinkedMultiValueMap<>();
-        responseHeaders.entrySet().stream().forEach(e -> {
-            if (!(e.getKey().equalsIgnoreCase("request-context") || e.getKey().equalsIgnoreCase("x-powered-by"))) {
-                responseEntityHeaders.put(e.getKey(), new ArrayList<>(e.getValue()));
-            }
-        });
 
 
-        return responseEntityHeaders;
-    }
 }
