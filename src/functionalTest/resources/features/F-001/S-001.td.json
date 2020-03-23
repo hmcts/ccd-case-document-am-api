@@ -15,10 +15,10 @@
     "body": {
       "links": {
         "self": {
-          "href": "${[scenarioContext][customValues][S_001_validSelfLink]}"
+          "href": "{{CASE_DOC_AM_URL}}/cases/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
         },
         "binary": {
-          "href": "${[scenarioContext][customValues][S_001_validBinaryLink]}"
+          "href": "{{CASE_DOC_AM_URL}}/cases/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}/binary"
         }
       },
         "classification": "PUBLIC",
