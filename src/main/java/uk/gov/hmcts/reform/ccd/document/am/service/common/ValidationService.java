@@ -67,7 +67,10 @@ public class ValidationService {
     }
 
     public static boolean validateTTL(String strDate) {
-        if (strDate.trim().equals("")) {
+
+        String pattern = "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\+|\\-)\\d{4}";
+
+        if (strDate.trim().equals("") || !Pattern.matches(pattern, strDate)) {
             return false;
         } else {
             SimpleDateFormat sdfrmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
