@@ -10,10 +10,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.InvalidRequest;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.feign.CaseDocumentBinaryDownloadClientApi;
+import uk.gov.hmcts.reform.ccd.document.am.controller.feign.CaseDocumentDeleteApi;
 import uk.gov.hmcts.reform.ccd.document.am.controller.feign.CaseDocumentMetadataDownloadClientApi;
 import org.springframework.core.io.Resource;
 import uk.gov.hmcts.reform.ccd.document.am.model.Documents;
@@ -33,12 +35,14 @@ public class S2SAuthentication {
 
     private transient CaseDocumentMetadataDownloadClientApi caseDocumentMetadataDownloadClientApi;
     private transient CaseDocumentBinaryDownloadClientApi caseDocumentBinaryDownloadClientApi;
+    private transient CaseDocumentDeleteApi caseDocumentDeleteApi;
 
     @Autowired
     public S2SAuthentication(CaseDocumentMetadataDownloadClientApi caseDocumentMetadataDownloadClientApi,
-                             CaseDocumentBinaryDownloadClientApi caseDocumentBinaryDownloadClientApi) {
+                             CaseDocumentBinaryDownloadClientApi caseDocumentBinaryDownloadClientApi, CaseDocumentDeleteApi caseDocumentDeleteApi) {
         this.caseDocumentMetadataDownloadClientApi = caseDocumentMetadataDownloadClientApi;
         this.caseDocumentBinaryDownloadClientApi = caseDocumentBinaryDownloadClientApi;
+        this.caseDocumentDeleteApi = caseDocumentDeleteApi;
     }
 
     @RequestMapping(value = "/testS2SAuthorization", method = RequestMethod.GET)
@@ -66,6 +70,23 @@ public class S2SAuthentication {
 
     }
 
+    @RequestMapping(value = "/testClientLibrary/{documentId}", method = RequestMethod.DELETE)
+    public ResponseEntity clientLibraryForDeleteApi(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                             @RequestHeader("ServiceAuthorization") String serviceAuth,
+                                                             @RequestHeader("user-roles") String userRoles,
+                                                             @PathVariable("documentId") UUID documentId,
+                                                             @RequestParam("permanent") boolean permanent) {
+        ResponseEntity response = caseDocumentDeleteApi.deleteDocument(authorisation,serviceAuth,userRoles,documentId,permanent);
+        if (HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
+            //LOG.info("Positive response");
+            return response;
+        } else {
+            throw new ResourceNotFoundException(documentId.toString());
+        }
+
+
+    }
+
     @RequestMapping(value = "/testClientLibrary/{documentId}/binary", method = RequestMethod.GET)
     public ResponseEntity<Object> clientLibraryForBinaryContent(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                                       @RequestHeader("ServiceAuthorization") String serviceAuth,
@@ -89,6 +110,8 @@ public class S2SAuthentication {
         }
 
     }
+
+
 
     private HttpHeaders getHeaders(ResponseEntity<Resource> response) {
         HttpHeaders headers = new HttpHeaders();
