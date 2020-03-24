@@ -85,7 +85,7 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
                 LOG.error("Could't find document for case  : " + caseId + ", response code from CCD : " + HttpStatus.BAD_REQUEST);
                 throw new BadRequestException(INPUT_INVALID);
             } else {
-                LOG.error("Exception occurred while getting document permissions from CCD Data store:" + exception.getMessage());
+                LOG.error("Exception occurred while getting document permissions from CCD Data store: {}", exception.getMessage());
                 throw new ServiceException(String.format(
                     "Problem  fetching the document for document id: %s because of %s",
                     documentId,

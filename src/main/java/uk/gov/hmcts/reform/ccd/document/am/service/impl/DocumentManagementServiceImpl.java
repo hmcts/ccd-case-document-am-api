@@ -83,17 +83,17 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private static final Logger LOG = LoggerFactory.getLogger(DocumentManagementServiceImpl.class);
 
-    private transient RestTemplate restTemplate;
+    private RestTemplate restTemplate;
 
-    private transient SecurityUtils securityUtils;
+    private SecurityUtils securityUtils;
 
     @Value("${documentStoreUrl}")
-    protected transient String documentURL;
+    protected String documentURL;
 
     @Value("${documentTTL}")
-    protected transient String documentTtl;
+    protected String documentTtl;
 
-    private transient CaseDataStoreService caseDataStoreService;
+    private CaseDataStoreService caseDataStoreService;
 
     @Autowired
     public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils,

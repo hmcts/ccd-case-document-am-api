@@ -12,7 +12,7 @@ class ErrorMapTest {
     void shouldGetCode() {
         errorMap.setCode("NOT_FOUND");
         String code = errorMap.getCode();
-        assertEquals(code, "NOT_FOUND");
+        assertEquals("NOT_FOUND", code);
     }
 
     @Test
