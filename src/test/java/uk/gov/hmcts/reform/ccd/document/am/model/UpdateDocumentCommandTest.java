@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,9 +16,8 @@ class UpdateDocumentCommandTest {
     @Test
     void shouldGetTtl() {
         DateFormat dateFormat = new SimpleDateFormat("MM/dd/YYYY", Locale.ENGLISH);
-        Date date = new Date("01/01/1970");
-        updateDocumentCommand.setTtl(date);
-        assertEquals("01/01/1970", dateFormat.format(updateDocumentCommand.getTtl()));
+        updateDocumentCommand.setTtl("01/01/1970");
+        assertEquals("01/01/1970", updateDocumentCommand.getTtl());
     }
 
     @Test

@@ -17,8 +17,8 @@ spring:
     name: CCD Case Document AM API
   servlet:
     multipart:
-      maxFileSize: 122594820
-      maxRequestSize: 122594820
+      maxFileSize: 4GB
+      maxRequestSize: 4GB
       enabled: true
   jackson:
     default-property-inclusion: NON_NULL
@@ -38,7 +38,7 @@ security:
     - "/error"
     - "/favicon.ico"
   ### Update list with service id of any service going to interact with casse document api
-  authorisedServices: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_gw,xui_webapp}
+  authorisedServices: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_gw,xui_webapp,ccd_case_document_am_api}
 
   authorisedRoles:
     - caseworker
@@ -48,8 +48,9 @@ security:
 auth.provider.service.client.baseUrl: ${IDAM_S2S_URL:http://localhost:4502}
 idam:
   s2s-auth:
+    # AAAAAAAAAAAAAAAA
     totp_secret: ${CCD_DOCUMENT_API_IDAM_KEY:CNTOE7D2NX6XHBKT}
-    microservice: ccd_case_document_am_api  # test checkin only. else refert to - instead of _
+    microservice: ccd_case_document_am_api
     url: ${IDAM_S2S_URL:http://localhost:4502}
 
 auth.idam.client.baseUrl: ${IDAM_USER_URL:http://localhost:4501}
@@ -79,8 +80,8 @@ ccd:
 
 documentTTL: ${DOCUMENT_TTL:600000}
 
-documentStoreUrl: ${DOCUMENT_STORE_URL:http://localhost:4506/documents}
-caseDataStoreUrl: ${CASE_DATA_STORE_URL:http://localhost:4452}
+documentStoreUrl: ${DOCUMENT_STORE_URL:http://localhost:4506}
+caseDataStoreUrl: ${CCD_DATA_STORE_URL:http://localhost:4452}
 swaggerUrl: ${CASE_DOCUMENT_AM_URL:localhost:4455}
 
 case_document_am:
