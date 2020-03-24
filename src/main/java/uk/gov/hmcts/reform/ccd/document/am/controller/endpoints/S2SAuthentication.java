@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
 import feign.FeignException;
-import feign.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -12,14 +11,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.ErrorResponse;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.InvalidRequest;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.feign.CaseDocumentBinaryDownloadClientApi;
 import uk.gov.hmcts.reform.ccd.document.am.controller.feign.CaseDocumentMetadataDownloadClientApi;
-import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
-import uk.gov.hmcts.reform.ccd.document.am.util.ResponseHelper;
 import org.springframework.core.io.Resource;
+import uk.gov.hmcts.reform.ccd.document.am.model.Documents;
+
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
@@ -55,19 +53,17 @@ public class S2SAuthentication {
                                                                       @PathVariable("documentId") UUID documentId) {
 
 
-        try (Response response = caseDocumentMetadataDownloadClientApi.getMetadataForDocument(authorisation, serviceAuth, documentId)) {
-            Class clazz = response.status() > 300 ? ErrorResponse.class : StoredDocumentHalResource.class;
-            ResponseEntity responseEntity = ResponseHelper.toResponseEntityByFeignClient(response,clazz, documentId);
-            if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
-                return responseEntity;
-            } else {
-                //LOG.error("Document doesn't exist for requested document id at Document Store API Side " + responseEntity.getStatusCode());
-                throw new ResourceNotFoundException(documentId.toString());
-            }
+        try  {
+            Documents response = caseDocumentMetadataDownloadClientApi.getMetadataForDocument(authorisation, serviceAuth, documentId);
+            return  ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+
         } catch (FeignException ex) {
             //log.error("Document Store api failed:: status code ::" + ex.status());
             throw new InvalidRequest("Document Store api failed!!");
         }
+
     }
 
     @RequestMapping(value = "/testClientLibrary/{documentId}/binary", method = RequestMethod.GET)
