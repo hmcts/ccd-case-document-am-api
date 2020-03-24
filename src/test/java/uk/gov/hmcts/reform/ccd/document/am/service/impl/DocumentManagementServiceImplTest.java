@@ -12,18 +12,24 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentUpdate;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
+import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -34,15 +40,24 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DATA_SOURCE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FILES;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ROLES;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -51,6 +66,13 @@ import java.util.UUID;
 class DocumentManagementServiceImplTest {
 
     private static final String MATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9c";
+    private static final String UNMATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9d";
+
+    private transient String serviceAuthorization = "auth";
+    private static final String CASE_ID = "1582550122096256";
+    private static final String BEFTA_CASETYPE_2 =  "BEFTA_CASETYPE_2";
+    private static final String BEFTA_JURISDICTION_2 =  "BEFTA_JURISDICTION_2";
+    private static final String USER_ID =  "userId";
 
     private AuthTokenGenerator authTokenGenerator = mock(AuthTokenGenerator.class);
     private RestTemplate restTemplateMock = Mockito.mock(RestTemplate.class);
@@ -65,7 +87,10 @@ class DocumentManagementServiceImplTest {
                                                                                   caseDataStoreServiceMock);
 
     @Value("${documentStoreUrl}")
-    String documentURL;
+    String documentURL = "http://localhost:4506";
+
+    @Value("${documentTTL}")
+    protected String documentTTL = "600000"; //TODO this @Value annotation is not working so I have to set the value to test.
 
     @Test
     void documentMetadataInstantiation() {
@@ -345,5 +370,127 @@ class DocumentManagementServiceImplTest {
     private void verifyCaseDataServiceGetDocMetadata() {
         verify(caseDataStoreServiceMock, times(1))
             .getCaseDocumentMetadata(anyString(),any(UUID.class),anyString());
+    }
+
+    @Test
+    void patchDocumentMetadata_HappyPath() {
+        List<Permission> permissionsList = new ArrayList<>();
+        permissionsList.add(Permission.UPDATE);
+        Document doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList)
+            .hashToken(ApplicationUtils.generateHashCode(MATCHED_DOCUMENT_ID.concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
+        List<Document> documentList = new ArrayList<>();
+        documentList.add(doc);
+
+
+        Map<String, String> myMetadata = new HashMap<>();
+        myMetadata.put("caseId",CASE_ID);
+        myMetadata.put("jurisdictionId", BEFTA_JURISDICTION_2);
+        myMetadata.put("caseTypeId", BEFTA_CASETYPE_2);
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        storedDocumentHalResource.setMetadata(myMetadata);
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
+
+        DocumentUpdate documentUpdate = new DocumentUpdate();
+        documentUpdate.setDocumentId(UUID.fromString(MATCHED_DOCUMENT_ID));
+        documentUpdate.setMetadata(myMetadata);
+        LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
+        bodyMap.add("documents", documentUpdate);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set(SERVICE_AUTHORIZATION, serviceAuthorization);
+        headers.set(USERID, "userId");
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
+        String documentUrl = String.format("%s/documents", documentURL);
+
+        Mockito.when(restTemplateMock.exchange(
+            documentUrl,
+            HttpMethod.PATCH,requestEntity,
+            Void.class))
+            .thenReturn(new ResponseEntity<>(HttpStatus.ACCEPTED));
+
+        DocumentMetadata documentMetadata = DocumentMetadata.builder()
+            .caseId(CASE_ID)
+            .caseTypeId(BEFTA_CASETYPE_2)
+            .jurisdictionId(BEFTA_JURISDICTION_2)
+            .documents(documentList)
+            .build();
+
+        Boolean response = sut.patchDocumentMetadata(documentMetadata,"auth","userId");
+        assertEquals(Boolean.TRUE, response);
+
+    }
+
+    @Test
+    void uploadDocuments_HappyPath() {
+        List<MultipartFile> files = new ArrayList<>();
+        List<String> roles = new ArrayList<>();
+        roles.add("Role");
+
+        String documentUrl = String.format("%s/documents", documentURL);
+
+        LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
+        HttpHeaders headers = prepareRequestForUpload(
+            files,
+            "classification",
+            roles,
+            serviceAuthorization,
+            BEFTA_CASETYPE_2,
+            BEFTA_JURISDICTION_2,
+            "userId",
+            bodyMap
+        );
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
+
+        Mockito.when(restTemplateMock.postForEntity(
+            documentUrl,
+            requestEntity,
+            Object.class))
+            .thenReturn(new ResponseEntity<Object>(HttpStatus.OK));
+
+        ResponseEntity<Object> responseEntity = sut.uploadDocuments(files,"classification", roles,
+                                                                    serviceAuthorization, BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2,"userId");
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    }
+
+    private String getEffectiveTTL() {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
+        return format.format(new Timestamp(new Date().getTime() + Long.parseLong(documentTTL)));
+    }
+
+    private HttpHeaders prepareRequestForUpload(List<MultipartFile> files, String classification, List<String> roles,
+                                                String serviceAuthorization,
+                                                String caseTypeId, String jurisdictionId, String userId,
+                                                LinkedMultiValueMap<String, Object> bodyMap) {
+        for (MultipartFile file : files) {
+            if (!file.isEmpty()) {
+                bodyMap.add(FILES, file.getResource());
+            }
+        }
+
+        bodyMap.set(CLASSIFICATION, classification);
+        bodyMap.set(ROLES, String.join(",", roles));
+        bodyMap.set("metadata[jurisdictionId]", jurisdictionId);
+        bodyMap.set("metadata[caseTypeId]", caseTypeId);
+        //hardcoding caseId just to support the functional test cases. Needs to be removed later.
+        bodyMap.set("metadata[caseId]", "1111222233334444");
+        //Format of date : yyyy-MM-dd'T'HH:mm:ssZ  2020-02-15T15:18:00+0000
+        bodyMap.set("ttl", getEffectiveTTL());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        //S2S token needs to be generated by our microservice.
+        headers.set(SERVICE_AUTHORIZATION, serviceAuthorization);
+        headers.set(USERID, userId);
+        return headers;
+    }
+
+    @Test
+    void patchDocument_HappyPath() {
+
+    }
+
+    @Test
+    void deleteDocument_HappyPath() {
+
     }
 }

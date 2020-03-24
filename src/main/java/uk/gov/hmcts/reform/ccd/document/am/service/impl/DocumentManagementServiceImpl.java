@@ -83,17 +83,17 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private static final Logger LOG = LoggerFactory.getLogger(DocumentManagementServiceImpl.class);
 
-    private transient RestTemplate restTemplate;
+    private RestTemplate restTemplate;
 
-    private transient SecurityUtils securityUtils;
+    private SecurityUtils securityUtils;
 
     @Value("${documentStoreUrl}")
-    protected transient String documentURL;
+    protected String documentURL = "http://localhost:4506";
 
     @Value("${documentTTL}")
-    protected transient String documentTtl;
+    protected String documentTTL = "600000"; //TODO this @Value annotation is not working so I have to set the value to test.
 
-    private transient CaseDataStoreService caseDataStoreService;
+    private CaseDataStoreService caseDataStoreService;
 
     @Autowired
     public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils,
@@ -198,7 +198,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
 
             restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
-            restTemplate.exchange(documentURL.concat("/documents"), HttpMethod.PATCH, requestEntity, Void.class);
+            String documentUrl = String.format("%s/documents", documentURL);
+            restTemplate.exchange(documentUrl, HttpMethod.PATCH, requestEntity, Void.class);
 
         } catch (RestClientException ex) {
             LOG.error("Exception while attaching a document to case : " + ex);
@@ -261,8 +262,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             bodyMap
                                                      );
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
+        String documentUrl = String.format("%s/documents", documentURL);
         ResponseEntity<Object> uploadedDocumentResponse = restTemplate
-            .postForEntity(documentURL.concat("/documents"), requestEntity, Object.class);
+            .postForEntity(documentUrl, requestEntity, Object.class);
 
         if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode()) && null != uploadedDocumentResponse
             .getBody()) {
@@ -395,7 +397,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private String getEffectiveTTL() {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
-        return format.format(new Timestamp(new Date().getTime() + Long.parseLong(documentTtl)));
+        return format.format(new Timestamp(new Date().getTime() + Long.parseLong(documentTTL)));
     }
 
     private HttpHeaders getHeaders(ResponseEntity<ByteArrayResource> response) {
