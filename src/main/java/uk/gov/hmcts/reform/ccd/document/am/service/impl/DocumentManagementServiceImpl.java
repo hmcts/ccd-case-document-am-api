@@ -227,9 +227,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             }
 
             Map<String, String> metadataMap = new HashMap<>();
-            metadataMap.put("jurisdictionId", documentMetadata.getJurisdictionId());
             metadataMap.put("caseId", documentMetadata.getCaseId());
-            metadataMap.put("caseTypeId", documentMetadata.getCaseTypeId());
 
             DocumentUpdate documentUpdate = new DocumentUpdate();
             documentUpdate.setDocumentId(UUID.fromString(document.getId()));
