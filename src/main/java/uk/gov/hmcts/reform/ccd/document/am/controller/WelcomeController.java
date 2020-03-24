@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMethod;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.RequiredFieldMissingException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.InvalidRequest;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
@@ -43,7 +44,7 @@ public class WelcomeController {
         return ok("Welcome to CCD Case Document AM Controller");
     }
 
-    @RequestMapping("/swagger")
+    @RequestMapping(value = "/swagger", method = RequestMethod.GET)
     public String index() {
         return "redirect:swagger-ui.html";
     }

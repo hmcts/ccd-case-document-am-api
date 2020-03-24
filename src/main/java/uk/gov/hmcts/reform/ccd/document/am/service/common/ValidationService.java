@@ -74,6 +74,7 @@ public class ValidationService {
             sdfrmt.setLenient(false);
             try {
                 Date javaDate = sdfrmt.parse(strDate);
+                LOG.info("TTL {}", javaDate);
             } catch (ParseException e) {
                 return false;
             }
