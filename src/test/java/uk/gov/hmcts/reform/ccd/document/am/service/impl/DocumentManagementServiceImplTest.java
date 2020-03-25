@@ -42,6 +42,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.PATCH;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
@@ -583,10 +584,7 @@ class DocumentManagementServiceImplTest {
         updateDocumentCommand.setTtl(effectiveTTL);
         final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand, getHttpHeaders(USER_ID, USER_ROLES));
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
-        String s = "s";
 
-
-        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
         when(restTemplateMock.exchange(
             patchTTLUrl,
             PATCH,
@@ -612,7 +610,89 @@ class DocumentManagementServiceImplTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void deleteDocument_HappyPath() {
+        Boolean permanent = true;
 
+        HttpEntity requestEntity = new HttpEntity(getHttpHeaders(USER_ID, USER_ROLES));
+        String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL, MATCHED_DOCUMENT_ID);
+
+        ResponseEntity responseEntity = new ResponseEntity<>(HttpStatus.ACCEPTED);
+        when(restTemplateMock.exchange(
+            documentDeleteUrl,
+            DELETE,
+            requestEntity,
+            ResponseEntity.class
+        )).thenReturn(new ResponseEntity<>(responseEntity, HttpStatus.NO_CONTENT));
+
+        responseEntity = sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID),USER_ID,USER_ROLES,permanent);
+        assertEquals(HttpStatus.NO_CONTENT,responseEntity.getStatusCode());
+    }
+
+
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void deleteDocument_HttpClientErrorException() {
+        Boolean permanent = true;
+
+        HttpEntity requestEntity = new HttpEntity(getHttpHeaders(USER_ID, USER_ROLES));
+        String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL, MATCHED_DOCUMENT_ID);
+
+        ResponseEntity responseEntity = new ResponseEntity<>(HttpStatus.ACCEPTED);
+        when(restTemplateMock.exchange(
+            documentDeleteUrl,
+            DELETE,
+            requestEntity,
+            ResponseEntity.class
+        )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.NOT_FOUND, "404", new HttpHeaders(), new byte[1],
+                                                              Charset.defaultCharset()));
+
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+            sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), USER_ID, USER_ROLES, permanent);
+        });
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void deleteDocument_ServiceException() {
+        Boolean permanent = true;
+
+        HttpEntity requestEntity = new HttpEntity(getHttpHeaders(USER_ID, USER_ROLES));
+        String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL, MATCHED_DOCUMENT_ID);
+
+        ResponseEntity responseEntity = new ResponseEntity<>(HttpStatus.ACCEPTED);
+        when(restTemplateMock.exchange(
+            documentDeleteUrl,
+            DELETE,
+            requestEntity,
+            ResponseEntity.class
+        )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.FORBIDDEN, "404", new HttpHeaders(), new byte[1],
+                                                              Charset.defaultCharset()));
+
+        Assertions.assertThrows(ServiceException.class, () -> {
+            sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), USER_ID, USER_ROLES, permanent);
+        });
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void deleteDocument_ResourceNotFound() {
+        Boolean permanent = true;
+
+        HttpEntity requestEntity = new HttpEntity(getHttpHeaders(USER_ID, USER_ROLES));
+        String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL, MATCHED_DOCUMENT_ID);
+
+        ResponseEntity responseEntity = new ResponseEntity<>(HttpStatus.ACCEPTED);
+        when(restTemplateMock.exchange(
+            documentDeleteUrl,
+            DELETE,
+            requestEntity,
+            ResponseEntity.class
+        )).thenReturn(new ResponseEntity<>(responseEntity, HttpStatus.NOT_FOUND));
+
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+            sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), USER_ID, USER_ROLES, permanent);
+        });
     }
 }
