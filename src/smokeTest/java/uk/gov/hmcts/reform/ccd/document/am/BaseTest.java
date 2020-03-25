@@ -4,7 +4,6 @@ import feign.Feign;
 import feign.jackson.JacksonEncoder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
@@ -22,8 +21,7 @@ public class BaseTest {
     public ServiceAuthTokenGenerator authTokenGenerator(
         @Value("${idam.s2s-auth.totp_secret}") final String secret,
         @Value("${idam.s2s-auth.microservice}") final String microService,
-        final ServiceAuthorisationApi serviceAuthorisationApi
-                                                       ) {
+        final ServiceAuthorisationApi serviceAuthorisationApi) {
         return new ServiceAuthTokenGenerator(secret, microService, serviceAuthorisationApi);
     }
 

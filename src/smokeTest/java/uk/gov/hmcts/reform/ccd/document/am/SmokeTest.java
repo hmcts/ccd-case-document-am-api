@@ -12,10 +12,8 @@ import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.junit4.SpringRunner;
 
 @SpringBootTest
 @RunWith(SpringIntegrationSerenityRunner.class)
@@ -47,11 +45,11 @@ public class SmokeTest extends BaseTest {
             .relaxedHTTPSValidation()
             .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
             .header("user-roles", "caseworker")
-            .header( "ServiceAuthorization", "Bearer " + serviceAuth)
+            .header("ServiceAuthorization", "Bearer " + serviceAuth)
             .when()
             .get("/")
             .andReturn();
-        response.then().assertThat().statusCode( HttpStatus.NOT_FOUND.value())
+        response.then().assertThat().statusCode(HttpStatus.NOT_FOUND.value())
             .body("message", Matchers.equalTo("Resource not found 00000000-0000-0000-0000-000000000000"));
     }
 
@@ -68,11 +66,12 @@ public class SmokeTest extends BaseTest {
             .relaxedHTTPSValidation()
             .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
             .header("user-roles", "caseworker")
-            .header( "ServiceAuthorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJjY2RfZ3ciLCJleHAiOjE1ODQ2Mjg1ODl9.FFxdkaELH1Hip7qaLQaDqQj_gFYTZuU5SnQTT7s2Od4Fz2d9K4Qj2TaxMEMKx0eK8PMSO0IscSpLKUAGjJ4-tw")
+            .header("ServiceAuthorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJjY2RfZ3ciLCJleHAiOjE1ODQ2Mjg1ODl9."
+                + "FFxdkaELH1Hip7qaLQaDqQj_gFYTZuU5SnQTT7s2Od4Fz2d9K4Qj2TaxMEMKx0eK8PMSO0IscSpLKUAGjJ4-tw")
             .when()
             .get("/")
             .andReturn();
-        response.then().assertThat().statusCode( HttpStatus.NOT_FOUND.value())
+        response.then().assertThat().statusCode(HttpStatus.NOT_FOUND.value())
             .body("message", Matchers.equalTo("Resource not found 00000000-0000-0000-0000-000000000000"));
     }
 }
