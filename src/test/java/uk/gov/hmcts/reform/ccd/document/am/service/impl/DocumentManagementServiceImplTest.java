@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentUpdate;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
+import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
@@ -426,6 +427,7 @@ class DocumentManagementServiceImplTest {
         List<String> roles = new ArrayList<>();
         roles.add("Role");
 
+        String userId = "userId";
         String documentUrl = String.format("%s/documents", documentURL);
 
         LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
@@ -436,16 +438,21 @@ class DocumentManagementServiceImplTest {
             serviceAuthorization,
             BEFTA_CASETYPE_2,
             BEFTA_JURISDICTION_2,
-            "userId",
+            userId,
             bodyMap
         );
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
+
+        assertEquals(userId, headers.get(USERID).get(0));
+        assertEquals(serviceAuthorization, headers.get(SERVICE_AUTHORIZATION).get(0));
+        assertEquals(MediaType.MULTIPART_FORM_DATA,headers.getContentType());
+        assertNotNull(bodyMap);
 
         Mockito.when(restTemplateMock.postForEntity(
             documentUrl,
             requestEntity,
             Object.class))
-            .thenReturn(new ResponseEntity<Object>(HttpStatus.OK));
+            .thenReturn(new ResponseEntity<Object>(HttpStatus.OK)); //TODO return body response to fully test
 
         ResponseEntity<Object> responseEntity = sut.uploadDocuments(files,"classification", roles,
                                                                     serviceAuthorization, BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2,"userId");
@@ -486,7 +493,11 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void patchDocument_HappyPath() {
-
+        List<String> roles = new ArrayList<>();
+        roles.add("Role");
+        UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
+        updateDocumentCommand.setTtl("600000");
+        sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID),updateDocumentCommand,"userId","Role");
     }
 
     @Test
