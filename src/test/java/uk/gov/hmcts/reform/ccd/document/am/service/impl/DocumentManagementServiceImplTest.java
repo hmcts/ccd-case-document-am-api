@@ -31,7 +31,6 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
-import uk.gov.hmcts.reform.ccd.document.am.util.ResponseHelper;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -433,8 +432,6 @@ class DocumentManagementServiceImplTest {
         List<String> roles = new ArrayList<>();
         roles.add("Role");
 
-        String documentUrl = String.format("%s/documents", documentURL);
-
         LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
         HttpHeaders headers = prepareRequestForUpload(
             files,
@@ -446,12 +443,14 @@ class DocumentManagementServiceImplTest {
             USER_ID,
             bodyMap
         );
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
 
         assertEquals(USER_ID, headers.get(USERID).get(0));
         assertEquals(serviceAuthorization, headers.get(SERVICE_AUTHORIZATION).get(0));
         assertEquals(MediaType.MULTIPART_FORM_DATA,headers.getContentType());
         assertNotNull(bodyMap);
+
+        String documentUrl = String.format("%s/documents", documentURL);
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
 
         Mockito.when(restTemplateMock.postForEntity(
             documentUrl,
@@ -545,7 +544,7 @@ class DocumentManagementServiceImplTest {
         )).thenReturn(new ResponseEntity<>(storedDocumentHalResource, HttpStatus.NOT_FOUND));
 
         Assertions.assertThrows(ResourceNotFoundException.class, () -> {
-        sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID),updateDocumentCommand,USER_ID,USER_ROLES);
+            sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID),updateDocumentCommand,USER_ID,USER_ROLES);
         });
     }
 
