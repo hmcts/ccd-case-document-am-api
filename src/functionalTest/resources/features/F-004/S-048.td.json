@@ -7,10 +7,6 @@
     "contains the metadata for each of the documents uploaded above"
   ],
   "request": {
-    "headers": {
-      "caseTypeId": "BEFTA_CASETYPE_2_2",
-      "jurisdictionId": "BEFTA_JURISDICTION_2"
-    },
     "body": {
       "arrayInMap": [
         {
@@ -20,6 +16,14 @@
         {
           "key": "roles",
           "value": "caseworker"
+        },
+        {
+          "key": "caseTypeId",
+          "value": "BEFTA_CASETYPE_2_2"
+        },
+        {
+          "key": "jurisdictionId",
+          "value": "BEFTA_JURISDICTION_2"
         },
         {
           "key": "files",
@@ -78,10 +82,10 @@
             "hashcode": "[[ANYTHING_PRESENT]]",
             "_links": {
               "binary": {
-                "href": "[[ANYTHING_PRESENT]]"
+                "href": "${[scenarioContext][customValues][validBinaryLink]}"
               },
               "self": {
-                "href": "[[ANYTHING_PRESENT]]"
+                "href": "${[scenarioContext][customValues][validSelfLink]}"
               }
             }
           },
@@ -103,15 +107,15 @@
               "jurisdictionId": "BEFTA_JURISDICTION_2"
             },
             "ttl": "[[ANYTHING_PRESENT]]",
+            "hashcode": "[[ANYTHING_PRESENT]]",
             "_links": {
               "binary": {
-                "href": "[[ANYTHING_PRESENT]]"
+                "href": "${[scenarioContext][customValues][validBinaryLink]}"
               },
               "self": {
-                "href": "[[ANYTHING_PRESENT]]"
+                "href": "${[scenarioContext][customValues][validSelfLink]}"
               }
-            },
-            "hashcode": "[[ANYTHING_PRESENT]]"
+            }
           },
           {
             "size": "[[ANYTHING_PRESENT]]",
@@ -131,15 +135,15 @@
               "jurisdictionId": "BEFTA_JURISDICTION_2"
             },
             "ttl": "[[ANYTHING_PRESENT]]",
+            "hashcode": "[[ANYTHING_PRESENT]]",
             "_links": {
               "binary": {
-                "href": "[[ANYTHING_PRESENT]]"
+                "href": "${[scenarioContext][customValues][validBinaryLink]}"
               },
               "self": {
-                "href": "[[ANYTHING_PRESENT]]"
+                "href": "${[scenarioContext][customValues][validSelfLink]}"
               }
-            },
-            "hashcode": "[[ANYTHING_PRESENT]]"
+            }
           },
           {
             "size": "[[ANYTHING_PRESENT]]",
@@ -159,15 +163,15 @@
               "jurisdictionId": "BEFTA_JURISDICTION_2"
             },
             "ttl": "[[ANYTHING_PRESENT]]",
+            "hashcode": "[[ANYTHING_PRESENT]]",
             "_links": {
               "binary": {
-                "href": "[[ANYTHING_PRESENT]]"
+                "href": "${[scenarioContext][customValues][validBinaryLink]}"
               },
               "self": {
-                "href": "[[ANYTHING_PRESENT]]"
+                "href": "${[scenarioContext][customValues][validSelfLink]}"
               }
-            },
-            "hashcode": "[[ANYTHING_PRESENT]]"
+            }
           },
           {
             "size": "[[ANYTHING_PRESENT]]",
@@ -187,15 +191,15 @@
               "jurisdictionId": "BEFTA_JURISDICTION_2"
             },
             "ttl": "[[ANYTHING_PRESENT]]",
+            "hashcode": "[[ANYTHING_PRESENT]]",
             "_links": {
               "binary": {
-                "href": "[[ANYTHING_PRESENT]]"
+                "href": "${[scenarioContext][customValues][validBinaryLink]}"
               },
               "self": {
-                "href": "[[ANYTHING_PRESENT]]"
+                "href": "${[scenarioContext][customValues][validSelfLink]}"
               }
-            },
-            "hashcode": "[[ANYTHING_PRESENT]]"
+            }
           },
           {
             "size": "[[ANYTHING_PRESENT]]",
@@ -215,15 +219,15 @@
               "jurisdictionId": "BEFTA_JURISDICTION_2"
             },
             "ttl": "[[ANYTHING_PRESENT]]",
+            "hashcode": "[[ANYTHING_PRESENT]]",
             "_links": {
               "binary": {
-                "href": "[[ANYTHING_PRESENT]]"
+                "href": "${[scenarioContext][customValues][validBinaryLink]}"
               },
               "self": {
-                "href": "[[ANYTHING_PRESENT]]"
+                "href": "${[scenarioContext][customValues][validSelfLink]}"
               }
-            },
-            "hashcode": "[[ANYTHING_PRESENT]]"
+            }
           },
           {
             "size": "[[ANYTHING_PRESENT]]",
@@ -243,15 +247,15 @@
               "jurisdictionId": "BEFTA_JURISDICTION_2"
             },
             "ttl": "[[ANYTHING_PRESENT]]",
+            "hashcode": "[[ANYTHING_PRESENT]]",
             "_links": {
               "binary": {
-                "href": "[[ANYTHING_PRESENT]]"
+                "href": "${[scenarioContext][customValues][validBinaryLink]}"
               },
               "self": {
-                "href": "[[ANYTHING_PRESENT]]"
+                "href": "${[scenarioContext][customValues][validSelfLink]}"
               }
-            },
-            "hashcode": "[[ANYTHING_PRESENT]]"
+            }
           }
         ]
       }
