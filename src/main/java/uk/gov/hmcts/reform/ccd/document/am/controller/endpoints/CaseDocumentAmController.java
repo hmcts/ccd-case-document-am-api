@@ -179,9 +179,10 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         try {
             documentManagementService.patchDocumentMetadata(caseDocumentMetadata, serviceAuthorization, userId);
         } catch (Exception e) {
+            LOG.error("Exception in controller for patch MetaData Documents API");
             throw e;
         }
-        return new ResponseEntity<Object>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override

@@ -201,6 +201,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             restTemplate.exchange(documentURL.concat("/documents"), HttpMethod.PATCH, requestEntity, Void.class);
 
         } catch (RestClientException ex) {
+            LOG.error("Exception occurred");
             throw ex;
         }
         return true;
@@ -345,8 +346,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
             links.getJSONObject(BINARY).put(HREF, buildDocumentURL((String) links.getJSONObject(BINARY).get(HREF), 43));
             hashmap.put(LINKS, links.toMap());
-            LOG.error(hashmap.values().toString());
+            String message = hashmap.values().toString();
+            LOG.error(message);
         } catch (Exception e) {
+            LOG.error("Exception occurred");
             throw e;
         }
     }
@@ -424,7 +427,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
         try {
             final HttpEntity requestEntity = new HttpEntity(getHttpHeaders(userId, userRoles));
-            String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL, documentId);
+            String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, documentId, permanent);
             LOG.info("documentDeleteUrl : {}", documentDeleteUrl);
             ResponseEntity response = restTemplate.exchange(
                 documentDeleteUrl,

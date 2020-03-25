@@ -19,7 +19,7 @@ class ErrorMapTest {
     void shouldGetMessage() {
         errorMap.setMessage("ERROR_MESSAGE");
         String message = errorMap.getMessage();
-        assertEquals(message, "ERROR_MESSAGE");
+        assertEquals("ERROR_MESSAGE", message);
     }
 
     @Test
