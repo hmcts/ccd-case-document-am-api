@@ -423,6 +423,13 @@ public class CaseDocumentAmControllerTest {
     }
 
     @Test
+    void generateHashCode_BadRequestNullArgument() {
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            testee.generateHashCode("", "", UUID.fromString(MATCHED_DOCUMENT_ID), null, BEFTA_JURISDICTION_2);
+        });
+    }
+
+    @Test
     void generateHashCode_BadRequest3() {
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.generateHashCode("","", UUID.fromString(MATCHED_DOCUMENT_ID), BEFTA_CASETYPE_2, "A.A");
