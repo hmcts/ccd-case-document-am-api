@@ -557,10 +557,7 @@ class DocumentManagementServiceImplTest {
         updateDocumentCommand.setTtl(effectiveTTL);
         final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand, getHttpHeaders(USER_ID, USER_ROLES));
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
-        String s = "s";
 
-
-        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
         when(restTemplateMock.exchange(
             patchTTLUrl,
             PATCH,
@@ -638,7 +635,6 @@ class DocumentManagementServiceImplTest {
         HttpEntity requestEntity = new HttpEntity(getHttpHeaders(USER_ID, USER_ROLES));
         String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL, MATCHED_DOCUMENT_ID);
 
-        ResponseEntity responseEntity = new ResponseEntity<>(HttpStatus.ACCEPTED);
         when(restTemplateMock.exchange(
             documentDeleteUrl,
             DELETE,
@@ -660,7 +656,6 @@ class DocumentManagementServiceImplTest {
         HttpEntity requestEntity = new HttpEntity(getHttpHeaders(USER_ID, USER_ROLES));
         String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL, MATCHED_DOCUMENT_ID);
 
-        ResponseEntity responseEntity = new ResponseEntity<>(HttpStatus.ACCEPTED);
         when(restTemplateMock.exchange(
             documentDeleteUrl,
             DELETE,
