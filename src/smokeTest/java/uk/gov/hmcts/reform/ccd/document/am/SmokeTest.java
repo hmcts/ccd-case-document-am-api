@@ -36,7 +36,6 @@ public class SmokeTest extends BaseTest {
     public void should_receive_response_for_a_get_document_meta_data() {
 
         String serviceAuth = new BaseTest().authTokenGenerator(secret, microService, generateServiceAuthorisationApi(s2sUrl)).generate();
-
         String targetInstance = baseURI + "/cases/documents/00000000-0000-0000-0000-000000000000";
 
         RestAssured.baseURI = targetInstance;
@@ -48,6 +47,7 @@ public class SmokeTest extends BaseTest {
             .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
             .header("user-roles", "caseworker")
             .header( "ServiceAuthorization", "Bearer " + serviceAuth)
+            .header( "Authorization", "Bearer " + "Authorization")
             .when()
             .get("/")
             .andReturn();
@@ -59,6 +59,7 @@ public class SmokeTest extends BaseTest {
     public void should_receive_response_for_a_get_document_binary() {
 
         String targetInstance = baseURI + "/cases/documents/00000000-0000-0000-0000-000000000000/binary";
+        String serviceAuth = new BaseTest().authTokenGenerator(secret, microService, generateServiceAuthorisationApi(s2sUrl)).generate();
 
         RestAssured.baseURI = targetInstance;
         RestAssured.useRelaxedHTTPSValidation();
@@ -67,8 +68,8 @@ public class SmokeTest extends BaseTest {
             .given()
             .relaxedHTTPSValidation()
             .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-            .header("user-roles", "caseworker")
-            .header( "ServiceAuthorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJjY2RfZ3ciLCJleHAiOjE1ODQ2Mjg1ODl9.FFxdkaELH1Hip7qaLQaDqQj_gFYTZuU5SnQTT7s2Od4Fz2d9K4Qj2TaxMEMKx0eK8PMSO0IscSpLKUAGjJ4-tw")
+            .header( "ServiceAuthorization", "Bearer " + serviceAuth)
+            .header( "Authorization", "Bearer " + "Authorization")
             .when()
             .get("/")
             .andReturn();
