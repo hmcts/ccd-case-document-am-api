@@ -36,26 +36,24 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
                 return "Error extracting the Document Id";
             }
         }
-        else if(key.equals(key.equals("S_040_validSelfLink"))) {
+        else if(key.equals(key.equals("validSelfLink"))) {
             String self = (String) ReflectionUtils
                     .deepGetFieldInObject(scenarioContext,
                             "testData.actualResponse.body.links.self.href");
             if(self!=null && self.startsWith(docAmUrl+"/cases/documents/"))
                 return self;
             return docAmUrl+"/cases/documents/<a document id>";
-            
+
         }
-        else if(key.equals(key.equals("S_040_validBinaryLink"))) {
+        else if(key.equals(key.equals("validBinaryLink"))) {
             String binary = (String) ReflectionUtils
                     .deepGetFieldInObject(scenarioContext,
                             "testData.actualResponse.body.links.binary.href");
             if(binary!=null && binary.startsWith(docAmUrl+"/cases/documents/") && binary.endsWith("/binary"))
                 return binary;
             return docAmUrl+"/cases/documents/<a document id>/binary";
-            
+
         }
         return super.calculateCustomValue(scenarioContext, key);
     }
 }
-
-"href":"{{CASE_DOC_AM_URL}}/cases/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"},"binary":{"href":"{{CASE_DOC_AM_URL}}/cases/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}/binary"
