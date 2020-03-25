@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
+import uk.gov.hmcts.reform.ccd.document.am.util.ResponseHelper;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -41,6 +42,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpMethod.PATCH;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
@@ -51,6 +54,7 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_F
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ROLES;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USER_ROLES;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -86,6 +90,7 @@ class DocumentManagementServiceImplTest {
     @InjectMocks
     private DocumentManagementServiceImpl sut = new DocumentManagementServiceImpl(restTemplateMock, securityUtils,
                                                                                   caseDataStoreServiceMock);
+
 
     @Value("${documentStoreUrl}")
     String documentURL = "http://localhost:4506";
@@ -399,7 +404,7 @@ class DocumentManagementServiceImplTest {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set(SERVICE_AUTHORIZATION, serviceAuthorization);
-        headers.set(USERID, "userId");
+        headers.set(USERID, USER_ID);
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
         String documentUrl = String.format("%s/documents", documentURL);
 
@@ -416,7 +421,7 @@ class DocumentManagementServiceImplTest {
             .documents(documentList)
             .build();
 
-        Boolean response = sut.patchDocumentMetadata(documentMetadata,"auth","userId");
+        Boolean response = sut.patchDocumentMetadata(documentMetadata,"auth",USER_ID);
         assertEquals(Boolean.TRUE, response);
 
     }
@@ -427,7 +432,6 @@ class DocumentManagementServiceImplTest {
         List<String> roles = new ArrayList<>();
         roles.add("Role");
 
-        String userId = "userId";
         String documentUrl = String.format("%s/documents", documentURL);
 
         LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
@@ -438,12 +442,12 @@ class DocumentManagementServiceImplTest {
             serviceAuthorization,
             BEFTA_CASETYPE_2,
             BEFTA_JURISDICTION_2,
-            userId,
+            USER_ID,
             bodyMap
         );
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
 
-        assertEquals(userId, headers.get(USERID).get(0));
+        assertEquals(USER_ID, headers.get(USERID).get(0));
         assertEquals(serviceAuthorization, headers.get(SERVICE_AUTHORIZATION).get(0));
         assertEquals(MediaType.MULTIPART_FORM_DATA,headers.getContentType());
         assertNotNull(bodyMap);
@@ -455,7 +459,7 @@ class DocumentManagementServiceImplTest {
             .thenReturn(new ResponseEntity<Object>(HttpStatus.OK)); //TODO return body response to fully test
 
         ResponseEntity<Object> responseEntity = sut.uploadDocuments(files,"classification", roles,
-                                                                    serviceAuthorization, BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2,"userId");
+                                                                    serviceAuthorization, BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2,USER_ID);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
@@ -496,8 +500,40 @@ class DocumentManagementServiceImplTest {
         List<String> roles = new ArrayList<>();
         roles.add("Role");
         UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
+        String effectiveTTL = getEffectiveTTL();
+        updateDocumentCommand.setTtl(effectiveTTL);
+        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand, getHttpHeaders(USER_ID, USER_ROLES));
+        String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
+
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        when(restTemplateMock.exchange(
+            patchTTLUrl,
+            PATCH,
+            requestEntity,
+            StoredDocumentHalResource.class
+        )).thenReturn(new ResponseEntity<>(storedDocumentHalResource, HttpStatus.OK));
+
+        ResponseEntity responseEntity = sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID),updateDocumentCommand,USER_ID,USER_ROLES);
+        assertEquals(HttpStatus.OK,responseEntity.getStatusCode());
+    }
+
+    private HttpHeaders getHttpHeaders(String userId, String userRoles) {
+        HttpHeaders headers = securityUtils.authorizationHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add(USERID, userId);
+        headers.add(USER_ROLES, userRoles);
+        return headers;
+    }
+
+    @Test
+    void patchDocument_BadRequestTTL() {
+        List<String> roles = new ArrayList<>();
+        roles.add("Role");
+        UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
         updateDocumentCommand.setTtl("600000");
-        sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID),updateDocumentCommand,"userId","Role");
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID),updateDocumentCommand, USER_ID,"Role");
+        });
     }
 
     @Test
