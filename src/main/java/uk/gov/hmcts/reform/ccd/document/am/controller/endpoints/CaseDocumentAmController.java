@@ -70,6 +70,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false") Boolean permanent) {
 
         if (authorization.equals("")) {
+
             throw new UnauthorizedException(authorization);
         }
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
