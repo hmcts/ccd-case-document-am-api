@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.UnauthorizedException;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
@@ -68,6 +69,9 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam("permanent delete flag")
         @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false") Boolean permanent) {
 
+        if (authorization.equals("")) {
+            throw new UnauthorizedException(authorization);
+        }
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkUserPermission(responseEntity, documentId, authorization, Permission.UPDATE)) {
             return  documentManagementService.deleteDocument(documentId, userId, userRoles, permanent);
