@@ -56,6 +56,7 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AU
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USER_ROLES;
 
+import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -523,6 +524,81 @@ class DocumentManagementServiceImplTest {
         headers.add(USERID, userId);
         headers.add(USER_ROLES, userRoles);
         return headers;
+    }
+
+    @Test
+    void patchDocument_ResourceNotFound() {
+        List<String> roles = new ArrayList<>();
+        roles.add("Role");
+        UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
+        String effectiveTTL = getEffectiveTTL();
+        updateDocumentCommand.setTtl(effectiveTTL);
+        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand, getHttpHeaders(USER_ID, USER_ROLES));
+        String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
+
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        when(restTemplateMock.exchange(
+            patchTTLUrl,
+            PATCH,
+            requestEntity,
+            StoredDocumentHalResource.class
+        )).thenReturn(new ResponseEntity<>(storedDocumentHalResource, HttpStatus.NOT_FOUND));
+
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+        sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID),updateDocumentCommand,USER_ID,USER_ROLES);
+        });
+    }
+
+    @Test
+    void patchDocument_HttpClientErrorException() {
+        List<String> roles = new ArrayList<>();
+        roles.add("Role");
+        UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
+        String effectiveTTL = getEffectiveTTL();
+        updateDocumentCommand.setTtl(effectiveTTL);
+        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand, getHttpHeaders(USER_ID, USER_ROLES));
+        String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
+        String s = "s";
+
+
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        when(restTemplateMock.exchange(
+            patchTTLUrl,
+            PATCH,
+            requestEntity,
+            StoredDocumentHalResource.class
+        )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.NOT_FOUND, "404", new HttpHeaders(), new byte[1],
+                                                              Charset.defaultCharset()));
+
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+            sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID),updateDocumentCommand,USER_ID,USER_ROLES);
+        });
+    }
+
+    @Test
+    void patchDocument_ServiceException() {
+        List<String> roles = new ArrayList<>();
+        roles.add("Role");
+        UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
+        String effectiveTTL = getEffectiveTTL();
+        updateDocumentCommand.setTtl(effectiveTTL);
+        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand, getHttpHeaders(USER_ID, USER_ROLES));
+        String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
+        String s = "s";
+
+
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        when(restTemplateMock.exchange(
+            patchTTLUrl,
+            PATCH,
+            requestEntity,
+            StoredDocumentHalResource.class
+        )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.FORBIDDEN, "404", new HttpHeaders(), new byte[1],
+                                                              Charset.defaultCharset()));
+
+        Assertions.assertThrows(ServiceException.class, () -> {
+            sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID),updateDocumentCommand,USER_ID,USER_ROLES);
+        });
     }
 
     @Test
