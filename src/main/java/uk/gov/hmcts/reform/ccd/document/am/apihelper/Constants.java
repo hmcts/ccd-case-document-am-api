@@ -13,16 +13,20 @@ public class Constants {
     public static final String APPLICATION_JSON = "application/json";
     public static final String SERVICE_AUTHORIZATION = "serviceauthorization";
     public static final String S2S_API_PARAM = "Service Auth (S2S). Use it when accessing the API on App Tier level.";
+    public static final String AUTHORIZATION = "Authorization";
+    public static final String AUTHORIZATION_DESCRIPTION = "Authorization (user-token) of the IDAM user.";
     public static final String ORIGINAL_FILE_NAME = "OriginalFileName";
     public static final String CONTENT_DISPOSITION = "Content-Disposition";
     public static final String DATA_SOURCE = "data-source";
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String CASE_ID_INVALID = "The case reference for requested document is not valid";
+    public static final String INPUT_INVALID = "The case reference or document id is not valid";
     public static final String INSUFFICIENT_PERMISSION = "Insufficient permission on requested  document";
     public static final String CLASSIFICATION = "classification";
     public static final String ROLES = "roles";
     public static final String USERID = "user-id";
+    public static final String USER_ROLES = "user-roles";
     public static final String FILES = "files";
     public static final String LINKS = "_links";
     public static final String HREF = "href";
@@ -34,4 +38,5 @@ public class Constants {
     public static final String THUMBNAIL = "thumbnail";
     public static final String DOCUMENTS = "documents";
     public static final String INPUT_STRING_PATTERN = "^[a-zA-Z0-9_-]*$";
+
 }

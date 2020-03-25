@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
-import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -57,14 +56,13 @@ class DocumentManagementServiceImplTest {
     private RestTemplate restTemplateMock = Mockito.mock(RestTemplate.class);
     private SecurityUtils securityUtils = new SecurityUtils(authTokenGenerator);
     private CaseDataStoreService caseDataStoreServiceMock = mock(CaseDataStoreService.class);
-    private ValidationService validationService = mock(ValidationService.class);
 
     private HttpEntity<?> requestEntityGlobal  = new HttpEntity<>(securityUtils.authorizationHeaders());
     private UUID matchedDocUUID = UUID.fromString(MATCHED_DOCUMENT_ID);
 
     @InjectMocks
     private DocumentManagementServiceImpl sut = new DocumentManagementServiceImpl(restTemplateMock, securityUtils,
-                                                                                  caseDataStoreServiceMock, validationService);
+                                                                                  caseDataStoreServiceMock);
 
     @Value("${documentStoreUrl}")
     String documentURL;
@@ -231,7 +229,7 @@ class DocumentManagementServiceImplTest {
         CaseDocumentMetadata cdm = CaseDocumentMetadata.builder().caseId("1234qwer1234qwer").document(doc).build();
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class),anyString())).thenReturn(Optional.of(cdm));
 
-        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID,"auth");
+        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID,"auth", Permission.READ);
         assertEquals(Boolean.TRUE, result);
 
         verifyRestExchangeOnStoredDoc();
@@ -254,7 +252,7 @@ class DocumentManagementServiceImplTest {
             .thenReturn(null);
 
         Assertions.assertThrows(Exception.class, () -> {
-            sut.checkUserPermission(responseEntity, matchedDocUUID,"auth");
+            sut.checkUserPermission(responseEntity, matchedDocUUID,"auth", Permission.READ);
         });
 
         verifyRestExchangeOnStoredDoc();
@@ -272,7 +270,7 @@ class DocumentManagementServiceImplTest {
         assertEquals(responseEntity.getStatusCode(),HttpStatus.OK);
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            sut.checkUserPermission(responseEntity, matchedDocUUID,"auth");
+            sut.checkUserPermission(responseEntity, matchedDocUUID,"auth", Permission.READ);
         });
 
         verifyRestExchangeOnStoredDoc();
@@ -295,7 +293,7 @@ class DocumentManagementServiceImplTest {
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class),anyString()))
             .thenReturn(Optional.ofNullable(cdm));
 
-        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID,"auth");
+        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID,"auth", Permission.READ);
         assertEquals(Boolean.FALSE, result);
 
         verifyRestExchangeOnStoredDoc();
@@ -319,7 +317,7 @@ class DocumentManagementServiceImplTest {
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class),anyString()))
             .thenReturn(Optional.ofNullable(cdm));
 
-        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID,"auth");
+        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID,"auth", Permission.READ);
         assertEquals(Boolean.FALSE, result);
 
         verifyRestExchangeOnStoredDoc();
