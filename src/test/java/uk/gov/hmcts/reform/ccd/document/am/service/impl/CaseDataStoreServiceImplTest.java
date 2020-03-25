@@ -16,11 +16,9 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
-import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
@@ -29,7 +27,6 @@ import static org.mockito.Mockito.mock;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,11 +54,6 @@ class CaseDataStoreServiceImplTest {
     @Test
     void getCaseDocumentMetadata_HappyPath() {
 
-        HttpHeaders headers = prepareRequestForUpload(authorization);
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
-
-        String documentUrl = String.format("%s/cases/%s/documents/%s", caseDataStoreUrl, CASE_ID, MATCHED_DOCUMENT_ID);
-
         List<Permission> permissionsList = new ArrayList<>();
         permissionsList.add(Permission.READ);
         Document doc;
@@ -73,6 +65,10 @@ class CaseDataStoreServiceImplTest {
 
         Map<String,CaseDocumentMetadata> linkedHashMap = new LinkedHashMap<>();
         linkedHashMap.put("documentMetadata",caseDocMetaData);
+        HttpHeaders headers = prepareRequestForUpload(authorization);
+
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
+        String documentUrl = String.format("%s/cases/%s/documents/%s", caseDataStoreUrl, CASE_ID, MATCHED_DOCUMENT_ID);
 
         Mockito.when(restTemplate.exchange(documentUrl, HttpMethod.GET, requestEntity, Object.class))
             .thenReturn(new ResponseEntity<>(linkedHashMap, HttpStatus.OK));
