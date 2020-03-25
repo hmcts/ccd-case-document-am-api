@@ -1,6 +1,10 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.common;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -48,8 +52,10 @@ public class ValidationService {
 
     public static void validateInputParams(String pattern, String... inputString) {
         for (String input : inputString) {
-            if (StringUtils.isEmpty(input) || !Pattern.matches(pattern, input)) {
-                throw new IllegalArgumentException("The input parameter does not complies with the required pattern");
+            if (StringUtils.isEmpty(input)) {
+                throw new IllegalArgumentException("The input parameter is Null/Empty");
+            } else if (!Pattern.matches(pattern, input)) {
+                throw new IllegalArgumentException("The input parameter: \"" + input +  "\", does not comply with the required pattern");
             }
         }
     }
@@ -59,6 +65,24 @@ public class ValidationService {
             if (CollectionUtils.isEmpty(list)) {
                 throw new BadRequestException("The List is empty");
             }
+        }
+    }
+
+    public static boolean validateTTL(String strDate) {
+
+        String pattern = "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\+|\\-)\\d{4}";
+
+        if (strDate.trim().equals("") || !Pattern.matches(pattern, strDate)) {
+            return false;
+        } else {
+            SimpleDateFormat sdfrmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
+            sdfrmt.setLenient(false);
+            try {
+                Date javaDate = sdfrmt.parse(strDate);
+            } catch (ParseException e) {
+                return false;
+            }
+            return true;
         }
     }
 }
