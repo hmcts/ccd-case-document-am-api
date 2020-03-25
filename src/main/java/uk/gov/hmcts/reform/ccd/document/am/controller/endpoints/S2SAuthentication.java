@@ -1,8 +1,7 @@
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.springframework.http.ResponseEntity.ok;
@@ -10,7 +9,7 @@ import static org.springframework.http.ResponseEntity.ok;
 @RestController
 public class S2SAuthentication {
 
-    @RequestMapping(value = "/testS2SAuthorization", method = RequestMethod.GET)
+    @GetMapping(value = "/testS2SAuthorization")
     public ResponseEntity<String> testS2SAuthorization() {
 
         return ok("S2S Authentication is successful !!");

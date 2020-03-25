@@ -201,7 +201,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             restTemplate.exchange(documentURL.concat("/documents"), HttpMethod.PATCH, requestEntity, Void.class);
 
         } catch (RestClientException ex) {
-            LOG.error("Exception while attaching a document to case : {}", ex.getMessage());
             throw ex;
         }
         return true;
@@ -328,7 +327,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 }
             }
         } catch (Exception exception) {
-            LOG.error("Error while formatting the uploaded document response :{}", exception.getMessage());
             throw new ResponseFormatException("Error while formatting the uploaded document response " + exception);
         }
     }
@@ -349,7 +347,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             hashmap.put(LINKS, links.toMap());
             LOG.error(hashmap.values().toString());
         } catch (Exception e) {
-            LOG.error("Exception within UpdateDomainForLinks :{}", e.getMessage());
             throw e;
         }
     }
@@ -408,7 +405,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization, Permission permissionToCheck) {
         String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
         if (!ValidationService.validate(caseId)) {
-            LOG.error("Bad Request Exception {}", CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
+            LOG.error("Bad Request Exception {} ", CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
             throw new BadRequestException(CASE_ID_INVALID);
 
         } else {

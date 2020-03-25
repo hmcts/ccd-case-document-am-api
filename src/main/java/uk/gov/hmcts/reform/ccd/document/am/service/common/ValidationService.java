@@ -34,14 +34,10 @@ public class ValidationService {
      * @return
      */
     public static boolean validate(String numberString) {
-        if (numberString == null || numberString.length() != 16) {
-            return false;
-        }
-
-        return true;
+        return (numberString != null && numberString.length() == 16);
     }
 
-    public static void isValidSecurityClassification(String securityClassification) throws IllegalArgumentException {
+    public static void isValidSecurityClassification(String securityClassification) {
         try {
             Enum.valueOf(SecurityClassification.class, securityClassification);
         } catch (final IllegalArgumentException ex) {

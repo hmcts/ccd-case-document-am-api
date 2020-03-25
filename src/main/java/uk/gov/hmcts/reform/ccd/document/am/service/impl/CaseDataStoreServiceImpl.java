@@ -34,6 +34,8 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_INVA
 public class CaseDataStoreServiceImpl implements CaseDataStoreService {
 
     private static final Logger LOG = LoggerFactory.getLogger(CaseDataStoreServiceImpl.class);
+    private static final String ERROR_MESSAGE = "Could't find document for case  : {}, response code from CCD : {}";
+    private static final String CASE_ERROR_MESSAGE = "Could't find document for case  : ";
 
     @Value("${caseDataStoreUrl}")
     protected String caseDataStoreUrl;
@@ -69,20 +71,20 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
                 CaseDocumentMetadata caseDocumentMetadata = new ObjectMapper().convertValue(responseObject.get("documentMetadata"),
                                                                                             CaseDocumentMetadata.class);
                 if (null == caseDocumentMetadata.getDocument()) {
-                    LOG.error("Could't find document for case  : " + caseId + ", response code from CCD : " + HttpStatus.FORBIDDEN);
-                    throw new ForbiddenException("Could't find document for case  : " + caseId);
+                    LOG.error(ERROR_MESSAGE, caseId, HttpStatus.FORBIDDEN);
+                    throw new ForbiddenException(CASE_ERROR_MESSAGE + caseId);
                 }
                 return Optional.of(caseDocumentMetadata);
             }
         } catch (HttpClientErrorException exception) {
             if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-                LOG.error("Could't find document for case  : " + caseId + ", response code from CCD : " + HttpStatus.NOT_FOUND);
-                throw new ForbiddenException("Could't find document for case  : " + caseId);
+                LOG.error(ERROR_MESSAGE, caseId, HttpStatus.NOT_FOUND);
+                throw new ForbiddenException(CASE_ERROR_MESSAGE + caseId);
             } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
-                LOG.error("Could't find document for case  : " + caseId + ", response code from CCD : " + HttpStatus.FORBIDDEN);
-                throw new ForbiddenException("Could't find document for case  : " + caseId);
+                LOG.error(ERROR_MESSAGE,caseId, HttpStatus.FORBIDDEN);
+                throw new ForbiddenException(CASE_ERROR_MESSAGE + caseId);
             } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
-                LOG.error("Could't find document for case  : " + caseId + ", response code from CCD : " + HttpStatus.BAD_REQUEST);
+                LOG.error(ERROR_MESSAGE, caseId, HttpStatus.BAD_REQUEST);
                 throw new BadRequestException(INPUT_INVALID);
             } else {
                 LOG.error("Exception occurred while getting document permissions from CCD Data store: {}", exception.getMessage());
