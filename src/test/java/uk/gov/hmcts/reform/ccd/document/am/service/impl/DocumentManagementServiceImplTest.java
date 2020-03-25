@@ -92,7 +92,6 @@ class DocumentManagementServiceImplTest {
     private DocumentManagementServiceImpl sut = new DocumentManagementServiceImpl(restTemplateMock, securityUtils,
                                                                                   caseDataStoreServiceMock);
 
-
     @Value("${documentStoreUrl}")
     String documentURL = "http://localhost:4506";
 

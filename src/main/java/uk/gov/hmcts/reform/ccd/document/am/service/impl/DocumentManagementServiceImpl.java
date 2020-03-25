@@ -83,17 +83,17 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private static final Logger LOG = LoggerFactory.getLogger(DocumentManagementServiceImpl.class);
 
-    private RestTemplate restTemplate;
+    private transient RestTemplate restTemplate;
 
-    private SecurityUtils securityUtils;
+    private transient SecurityUtils securityUtils;
 
     @Value("${documentStoreUrl}")
-    protected String documentURL = "http://localhost:4506";
+    protected transient String documentURL = "http://localhost:4506";
 
     @Value("${documentTTL}")
-    protected String documentTTL = "600000"; //TODO this @Value annotation is not working so I have to set the value to test.
+    protected transient String documentTtl = "600000"; //TODO this @Value annotation is not working so I have to set the value to test.
 
-    private CaseDataStoreService caseDataStoreService;
+    private transient CaseDataStoreService caseDataStoreService;
 
     @Autowired
     public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils,
@@ -262,9 +262,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             bodyMap
                                                      );
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
-        String documentUrl = String.format("%s/documents", documentURL);
         ResponseEntity<Object> uploadedDocumentResponse = restTemplate
-            .postForEntity(documentUrl, requestEntity, Object.class);
+            .postForEntity(documentURL.concat("/documents"), requestEntity, Object.class);
 
         if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode()) && null != uploadedDocumentResponse
             .getBody()) {
@@ -397,7 +396,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private String getEffectiveTTL() {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
-        return format.format(new Timestamp(new Date().getTime() + Long.parseLong(documentTTL)));
+        return format.format(new Timestamp(new Date().getTime() + Long.parseLong(documentTtl)));
     }
 
     private HttpHeaders getHeaders(ResponseEntity<ByteArrayResource> response) {
