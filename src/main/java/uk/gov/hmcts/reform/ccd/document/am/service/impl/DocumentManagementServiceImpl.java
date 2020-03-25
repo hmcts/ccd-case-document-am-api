@@ -131,7 +131,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 throw new ResourceNotFoundException(documentId.toString());
             }
         } catch (HttpClientErrorException ex) {
-            LOG.error("Exception while getting the metadata: {}", ex);
+            LOG.error("Exception while getting the metadata: {}", ex.getMessage());
             if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
                 throw new ResourceNotFoundException(documentId.toString());
             } else {
@@ -201,7 +201,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             restTemplate.exchange(documentURL.concat("/documents"), HttpMethod.PATCH, requestEntity, Void.class);
 
         } catch (RestClientException ex) {
-            LOG.error("Exception while attaching a document to case : {}", ex);
+            LOG.error("Exception while attaching a document to case : {}", ex.getMessage());
             throw ex;
         }
         return true;
@@ -316,21 +316,19 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         try {
             LinkedHashMap documents = (LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse.getBody())
                 .get(EMBEDDED);
-            //LOG.error("Documents in response :" + documents);
 
             ArrayList<Object> documentList = (ArrayList<Object>) (documents.get(DOCUMENTS));
             LOG.error("documentList :{}", documentList);
 
             for (Object document : documentList) {
                 if (document instanceof LinkedHashMap) {
-                    //LOG.error("Individual document :" + ((LinkedHashMap) document).entrySet());
                     LinkedHashMap<String, Object> hashmap = ((LinkedHashMap<String, Object>) (document));
                     hashmap.remove(EMBEDDED);
                     updateDomainForLinks(hashmap, jurisdictionId, caseTypeId);
                 }
             }
         } catch (Exception exception) {
-            LOG.error("Error while formatting the uploaded document response :{}", exception);
+            LOG.error("Error while formatting the uploaded document response :{}", exception.getMessage());
             throw new ResponseFormatException("Error while formatting the uploaded document response " + exception);
         }
     }
@@ -351,7 +349,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             hashmap.put(LINKS, links.toMap());
             LOG.error(hashmap.values().toString());
         } catch (Exception e) {
-            LOG.error("Exception within UpdateDomainForLinks :{}", e);
+            LOG.error("Exception within UpdateDomainForLinks :{}", e.getMessage());
             throw e;
         }
     }
@@ -410,7 +408,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization, Permission permissionToCheck) {
         String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
         if (!ValidationService.validate(caseId)) {
-            LOG.error(CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
+            LOG.error("Bad Request Exception {}", CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
             throw new BadRequestException(CASE_ID_INVALID);
 
         } else {
@@ -446,7 +444,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 throw new ResourceNotFoundException(documentId.toString());
             }
         } catch (HttpClientErrorException ex) {
-            LOG.error("Exception while deleting the document: {}", ex);
+            LOG.error("Exception while deleting the document: {}", ex.getMessage());
             if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
                 throw new ResourceNotFoundException(documentId.toString());
             } else {

@@ -179,7 +179,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         try {
             documentManagementService.patchDocumentMetadata(caseDocumentMetadata, serviceAuthorization, userId);
         } catch (Exception e) {
-            LOG.error(String.format("Exception while attaching the documents to a case :{}", e));
+            LOG.error("Exception while attaching the documents to a case :{}", e.getMessage());
             throw e;
         }
         return new ResponseEntity<Object>(HttpStatus.OK);
@@ -227,10 +227,10 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             return documentManagementService.uploadDocuments(files, classification, roles,
                                                              serviceAuthorization, caseTypeId, jurisdictionId, userId);
         } catch (BadRequestException | IllegalArgumentException e) {
-            LOG.error(String.format("Exception while uploading the documents :{}",  e));
+            LOG.error("Exception while uploading the documents :{}",  e.getMessage());
             throw new BadRequestException("Exception while uploading the documents :" + e);
         } catch (Exception e) {
-            LOG.error(String.format("Exception while uploading the documents :{}", e));
+            LOG.error("Exception while uploading the documents :{}", e.getMessage());
             throw new ResponseFormatException("Exception while uploading the documents :" + e);
         }
     }
@@ -265,10 +265,10 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             return new ResponseEntity<>(responseBody, HttpStatus.OK);
 
         } catch (BadRequestException | IllegalArgumentException e) {
-            LOG.error(String.format("Illegal argument exception: {}",  e));
+            LOG.error("Illegal argument exception: {}",  e.getMessage());
             throw new BadRequestException("Illegal argument exception:" + e);
         } catch (Exception e) {
-            LOG.error(String.format("Exception :{}",  e));
+            LOG.error("Exception :{}",  e.getMessage());
             throw new ResponseFormatException("Exception :" + e);
         }
     }
