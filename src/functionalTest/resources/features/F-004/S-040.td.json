@@ -1,15 +1,11 @@
 {
 	"_guid_": "S-040",
 	"_extends_": "F-004_Test_Base_data",
-	"title": "must successfully get document metadata by document ID",
+	"title": "must successfully upload document with binary content",
 	"specs": [
 		"contains the metadata for the document uploaded above"
 	],
 	"request": {
-		"headers": {
-			"caseTypeId": "BEFTA_CASETYPE_2_2",
-			"jurisdictionId": "BEFTA_JURISDICTION_2"
-		},
 		"body": {
 			"arrayInMap": [
 				{
@@ -20,9 +16,17 @@
 					"key": "roles",
 					"value": "caseworker"
 				},
+        {
+          "key": "caseTypeId",
+          "value": "BEFTA_CASETYPE_2_2"
+        },
+        {
+          "key": "jurisdictionId",
+          "value": "BEFTA_JURISDICTION_2"
+        },
 				{
 					"key": "files",
-					"filePath": "SampleImage.png"
+					"filePath": "CCD_BEFTA_JURISDICTION2.xlsx"
 				}
 			]
 		}

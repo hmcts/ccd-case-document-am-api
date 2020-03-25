@@ -3,13 +3,9 @@
   "_extends_": "F-004_Test_Base_data",
   "title": "must get an error response for a malformed roles",
   "specs": [
-    "for a malformed roles"
+    "contains a malformed roles"
   ],
   "request": {
-    "headers": {
-      "caseTypeId": "BEFTA_CASETYPE_2_2",
-      "jurisdictionId": "BEFTA_JURISDICTION_2"
-    },
     "body": {
       "arrayInMap": [
         {
@@ -18,11 +14,19 @@
         },
         {
           "key": "roles",
-          "value": "case£$$%^&worker"
+          "value": "case$%^&worker"
+        },
+        {
+          "key": "caseTypeId",
+          "value": "BEFTA_CASETYPE_2_2"
+        },
+        {
+          "key": "jurisdictionId",
+          "value": "BEFTA_JURISDICTION_2"
         },
         {
           "key": "files",
-          "filePath": "SampleImage.png"
+          "filePath": "Sample.pdf"
         }
       ]
     }

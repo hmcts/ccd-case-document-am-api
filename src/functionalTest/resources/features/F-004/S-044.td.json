@@ -1,14 +1,11 @@
 {
   "_guid_": "S-044",
   "_extends_": "F-004_Test_Base_data",
-  "title": "must get an error response for without jurisdictionId parameter in request",
+  "title": "must get an error response for without jurisdiction Id parameter in request",
   "specs": [
-    "without jurisdictionId parameter"
+    "contains without jurisdiction Id parameter"
   ],
   "request": {
-    "headers": {
-      "caseTypeId": "BEFTA_CASETYPE_2_2"
-    },
     "body": {
       "arrayInMap": [
         {
@@ -20,8 +17,12 @@
           "value": "caseworker"
         },
         {
+          "key": "caseTypeId",
+          "value": "BEFTA_CASETYPE_2_2"
+        },
+        {
           "key": "files",
-          "filePath": "SampleImage.png"
+          "filePath": "CCD_BEFTA_JURISDICTION2.xlsx"
         }
       ]
     }

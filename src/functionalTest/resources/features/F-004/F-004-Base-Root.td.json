@@ -11,10 +11,7 @@
     "headers": {
       "Authorization": "[[DYNAMIC]]",
       "ServiceAuthorization": "[[DYNAMIC]]",
-      "Content-Type": "multipart/form-data",
-      "uid": "[[DYNAMIC]]",
-      "user-id": "[someUserId]",
-      "user-roles": "caseworker"
+      "Content-Type": "multipart/form-data"
     }
   }
 }

@@ -1,15 +1,11 @@
 {
   "_guid_": "S-041",
   "_extends_": "F-004_Test_Base_data",
-  "title": "must get an error response for a malformed caseTypeId",
+  "title": "must get an error response for a malformed case type id",
   "specs": [
-    "for a malformed caseTypeId"
+    "contains a malformed case type id"
   ],
   "request": {
-    "headers": {
-      "caseTypeId": "BEFTA_@£$%^&_CASETYPE_2_2",
-      "jurisdictionId": "BEFTA_JURISDICTION_2"
-    },
     "body": {
       "arrayInMap": [
         {
@@ -21,8 +17,16 @@
           "value": "caseworker"
         },
         {
+          "key": "caseTypeId",
+          "value": "BEFTA_@£$%^&_CASETYPE_2_2"
+        },
+        {
+          "key": "jurisdictionId",
+          "value": "BEFTA_JURISDICTION_2"
+        },
+        {
           "key": "files",
-          "filePath": "SampleImage.png"
+          "filePath": "CCD_BEFTA_JURISDICTION2.xlsx"
         }
       ]
     }
