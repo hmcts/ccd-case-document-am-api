@@ -15,6 +15,7 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EMBEDDED;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FILES;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHCODE;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HREF;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LINKS;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ROLES;
@@ -228,6 +229,15 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
             Map<String, String> metadataMap = new HashMap<>();
             metadataMap.put("caseId", documentMetadata.getCaseId());
+
+            if (null != documentMetadata.getCaseTypeId()) {
+                ValidationService.validateInputParams(INPUT_STRING_PATTERN, documentMetadata.getCaseTypeId());
+                metadataMap.put("caseTypeId", documentMetadata.getCaseTypeId());
+            }
+            if (null != documentMetadata.getJurisdictionId()) {
+                ValidationService.validateInputParams(INPUT_STRING_PATTERN, documentMetadata.getJurisdictionId());
+                metadataMap.put("jurisdictionId", documentMetadata.getJurisdictionId());
+            }
 
             DocumentUpdate documentUpdate = new DocumentUpdate();
             documentUpdate.setDocumentId(UUID.fromString(document.getId()));

@@ -38,5 +38,6 @@ public class Constants {
     public static final String THUMBNAIL = "thumbnail";
     public static final String DOCUMENTS = "documents";
     public static final String INPUT_STRING_PATTERN = "^[a-zA-Z0-9_-]*$";
+    public static final String INPUT_CASE_ID_PATTERN = "^[0-9]*$";
 
 }
