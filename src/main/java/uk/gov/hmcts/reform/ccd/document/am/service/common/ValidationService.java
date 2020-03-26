@@ -87,6 +87,7 @@ public class ValidationService {
     public static void validateDocumentId(String documentId) {
         try {
             UUID uuid = UUID.fromString(documentId);
+            LOG.info("UUID {}", uuid);
         } catch (IllegalArgumentException exception) {
             throw new IllegalArgumentException(String.format("The input parameter: %s is not a valid UUID", documentId));
         }
