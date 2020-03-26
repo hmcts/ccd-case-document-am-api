@@ -69,8 +69,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam("permanent delete flag")
         @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false") Boolean permanent) {
 
-        if (authorization.equals("")) {
-
+        if (authorization.equals("") || userId.equals("") || userRoles.equals("")) {
             throw new UnauthorizedException(authorization);
         }
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
@@ -155,6 +154,10 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
         @ApiParam("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
+
+        if (authorization.equals("") || userId.equals("") || userRoles.equals("")) {
+            throw new UnauthorizedException(authorization);
+        }
 
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkUserPermission(responseEntity, documentId, authorization, Permission.UPDATE)) {
