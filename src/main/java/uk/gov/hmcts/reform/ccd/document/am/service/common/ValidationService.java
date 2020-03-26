@@ -48,8 +48,10 @@ public class ValidationService {
 
     public static void validateInputParams(String pattern, String... inputString) {
         for (String input : inputString) {
-            if (StringUtils.isEmpty(input) || !Pattern.matches(pattern, input)) {
-                throw new IllegalArgumentException("The input parameter: " + input +  ", does not comply with the required pattern");
+            if (StringUtils.isEmpty(input)) {
+                throw new IllegalArgumentException("The input parameter is Null/Empty");
+            } else if (!Pattern.matches(pattern, input)) {
+                throw new IllegalArgumentException("The input parameter: \"" + input +  "\", does not comply with the required pattern");
             }
         }
     }

@@ -249,13 +249,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
         LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
         HttpHeaders headers = prepareRequestForUpload(classification, roles, serviceAuthorization, caseTypeId, jurisdictionId,
-                                                      userId, bodyMap);
+            userId, bodyMap);
 
         for (MultipartFile file : files) {
             if (!file.isEmpty()) {
                 bodyMap.add(FILES, file.getResource());
             }
         }
+
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
         ResponseEntity<Object> uploadedDocumentResponse = restTemplate
             .postForEntity(documentURL.concat("/documents"), requestEntity, Object.class);
@@ -264,6 +265,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             .getBody()) {
             formatUploadDocumentResponse(caseTypeId, jurisdictionId, uploadedDocumentResponse);
         }
+
         return ResponseEntity
             .status(uploadedDocumentResponse.getStatusCode())
             .body(uploadedDocumentResponse.getBody());
@@ -356,7 +358,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         documentUrl = documentUrl.substring(documentUrl.length() - length);
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
             .getRequest();
-        LOG.info("URL from request is: {}", request.getRequestURL());
+        LOG.info("URL from request is: " + request.getRequestURL());
         return request.getRequestURL().append("/").append(documentUrl).toString();
     }
 
@@ -402,7 +404,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization, Permission permissionToCheck) {
         String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
         if (!ValidationService.validate(caseId)) {
-            LOG.error("Bad Request Exception {} ", CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
+            LOG.error(CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
             throw new BadRequestException(CASE_ID_INVALID);
 
         } else {
@@ -421,8 +423,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
         try {
             final HttpEntity requestEntity = new HttpEntity(getHttpHeaders(userId, userRoles));
-            String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, documentId, permanent);
-            LOG.info("documentDeleteUrl : {}", documentDeleteUrl);
+            String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL, documentId);
+            LOG.info("documentDeleteUrl : " + documentDeleteUrl);
             ResponseEntity response = restTemplate.exchange(
                 documentDeleteUrl,
                 DELETE,
@@ -433,12 +435,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 LOG.info("Positive response");
                 return response;
             } else {
-                LOG.error("Document doesn't exist for requested document id at Document Store {}", response
+                LOG.error("Document doesn't exist for requested document id at Document Store" + response
                     .getStatusCode());
                 throw new ResourceNotFoundException(documentId.toString());
             }
         } catch (HttpClientErrorException ex) {
-            LOG.error("Exception while deleting the document: {}", ex.getMessage());
+            LOG.error("Exception while deleting the document:" + ex);
             if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
                 throw new ResourceNotFoundException(documentId.toString());
             } else {
