@@ -248,16 +248,15 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                                   String userId) {
 
         LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
-        HttpHeaders headers = prepareRequestForUpload(
-            files,
-            classification,
-            roles,
-            serviceAuthorization,
-            caseTypeId,
-            jurisdictionId,
-            userId,
-            bodyMap
-                                                     );
+        HttpHeaders headers = prepareRequestForUpload(classification, roles, serviceAuthorization, caseTypeId, jurisdictionId,
+            userId, bodyMap);
+
+        for (MultipartFile file : files) {
+            if (!file.isEmpty()) {
+                bodyMap.add(FILES, file.getResource());
+            }
+        }
+
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
         ResponseEntity<Object> uploadedDocumentResponse = restTemplate
             .postForEntity(documentURL.concat("/documents"), requestEntity, Object.class);
@@ -266,6 +265,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             .getBody()) {
             formatUploadDocumentResponse(caseTypeId, jurisdictionId, uploadedDocumentResponse);
         }
+
         return ResponseEntity
             .status(uploadedDocumentResponse.getStatusCode())
             .body(uploadedDocumentResponse.getBody());
@@ -364,15 +364,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return request.getRequestURL().append("/").append(documentUrl).toString();
     }
 
-    private HttpHeaders prepareRequestForUpload(List<MultipartFile> files, String classification, List<String> roles,
+    private HttpHeaders prepareRequestForUpload(String classification, List<String> roles,
                                                 String serviceAuthorization,
                                                 String caseTypeId, String jurisdictionId, String userId,
                                                 LinkedMultiValueMap<String, Object> bodyMap) {
-        for (MultipartFile file : files) {
-            if (!file.isEmpty()) {
-                bodyMap.add(FILES, file.getResource());
-            }
-        }
+
 
         bodyMap.set(CLASSIFICATION, classification);
         bodyMap.set(ROLES, String.join(",", roles));
