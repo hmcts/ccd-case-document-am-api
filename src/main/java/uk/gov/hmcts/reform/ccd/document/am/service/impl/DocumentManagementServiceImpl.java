@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
+import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.PATCH;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION;
@@ -20,11 +22,13 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.THUMBNAIL;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USER_ROLES;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -41,12 +45,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -57,7 +64,11 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceN
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.Document;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentUpdate;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
+import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
@@ -65,7 +76,6 @@ import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.document.am.util.ResponseHelper;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
-
 
 @Slf4j
 @Service
@@ -84,17 +94,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     protected transient String documentTtl;
 
     private transient CaseDataStoreService caseDataStoreService;
-    private transient ValidationService validationService;
 
     @Autowired
     public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils,
-                                         CaseDataStoreService caseDataStoreService,
-                                         ValidationService validationService) {
+                                         CaseDataStoreService caseDataStoreService) {
         this.restTemplate = restTemplate;
 
         this.securityUtils = securityUtils;
         this.caseDataStoreService = caseDataStoreService;
-        this.validationService = validationService;
     }
 
     @Override
@@ -103,31 +110,32 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
         try {
             final HttpEntity requestEntity = new HttpEntity(securityUtils.authorizationHeaders());
+            LOG.info("Document Store URL is : " + documentURL);
             String documentMetadataUrl = String.format("%s/documents/%s", documentURL, documentId);
+            LOG.info("documentMetadataUrl : " + documentMetadataUrl);
             ResponseEntity<StoredDocumentHalResource> response = restTemplate.exchange(
                 documentMetadataUrl,
                 GET,
                 requestEntity,
                 StoredDocumentHalResource.class
                                                                                       );
+            LOG.info("response : " + response.getStatusCode());
+            LOG.info("response : " + response.getBody());
             ResponseEntity responseEntity = ResponseHelper.toResponseEntity(response, documentId);
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
+                LOG.info("Positive response");
                 return responseEntity;
             } else {
-                LOG.error("Document doesn't exist for requested document id at Document Store API Side " + responseEntity
+                LOG.error("Document doesn't exist for requested document id at Document Store" + responseEntity
                     .getStatusCode());
                 throw new ResourceNotFoundException(documentId.toString());
             }
         } catch (HttpClientErrorException ex) {
-            log.error(ex.getMessage());
+            LOG.error("Exception while getting the metadata:" + ex);
             if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
                 throw new ResourceNotFoundException(documentId.toString());
             } else {
-                throw new ServiceException(String.format(
-                    "Problem  fetching the document for document id: %s because of %s",
-                    documentId,
-                    ex.getMessage()
-                                                        ));
+                throw new ServiceException(String.format("Problem fetching the document for document id: %s because of %s", documentId, ex.getMessage()));
             }
 
         }
@@ -165,7 +173,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             }
 
         } catch (HttpClientErrorException ex) {
-            log.error(ex.getMessage());
+            LOG.error(ex.getMessage());
             if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
                 throw new ResourceNotFoundException(documentId.toString());
             } else {
@@ -178,6 +186,60 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
         }
 
+    }
+
+    @Override
+    public boolean patchDocumentMetadata(DocumentMetadata documentMetadata, String serviceAuthorization, String userId) {
+        try {
+            LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
+            HttpHeaders headers = new HttpHeaders();
+
+            prepareRequestForAttachingDocumentToCase(documentMetadata, serviceAuthorization, userId, bodyMap, headers);
+            HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
+
+            restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+            restTemplate.exchange(documentURL.concat("/documents"), HttpMethod.PATCH, requestEntity, Void.class);
+
+        } catch (RestClientException ex) {
+            LOG.error("Exception while attaching a document to case : " + ex);
+            throw ex;
+        }
+        return true;
+    }
+
+    private void prepareRequestForAttachingDocumentToCase(DocumentMetadata documentMetadata,
+                                                      String serviceAuthorization,
+                                                      String userId,
+                                                      LinkedMultiValueMap<String, Object> bodyMap,
+                                                      HttpHeaders headers) {
+
+        for (Document document : documentMetadata.getDocuments()) {
+            ResponseEntity responseEntity = getDocumentMetadata(UUID.fromString(document.getId()));
+            if (responseEntity.getStatusCode().equals(HttpStatus.OK) && null != responseEntity.getBody()) {
+                StoredDocumentHalResource resource = (StoredDocumentHalResource) responseEntity.getBody();
+
+                String hashcodeFromStoredDocument = ApplicationUtils.generateHashCode(document.getId()
+                                                       .concat(resource.getMetadata().get("jurisdictionId"))
+                                                       .concat(resource.getMetadata().get("caseTypeId")));
+                if (!hashcodeFromStoredDocument.equals(document.getHashToken())) {
+                    throw new ResourceNotFoundException(String.format(": Document %s does not exists in DM Store", document.getId()));
+                }
+            }
+
+            Map<String, String> metadataMap = new HashMap<>();
+            metadataMap.put("caseId", documentMetadata.getCaseId());
+
+            DocumentUpdate documentUpdate = new DocumentUpdate();
+            documentUpdate.setDocumentId(UUID.fromString(document.getId()));
+
+            documentUpdate.setMetadata(metadataMap);
+            bodyMap.add("documents", documentUpdate);
+        }
+
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        headers.set(SERVICE_AUTHORIZATION, serviceAuthorization);
+        headers.set(USERID, userId);
     }
 
     @Override
@@ -198,7 +260,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                                      );
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
         ResponseEntity<Object> uploadedDocumentResponse = restTemplate
-            .postForEntity(documentURL, requestEntity, Object.class);
+            .postForEntity(documentURL.concat("/documents"), requestEntity, Object.class);
 
         if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode()) && null != uploadedDocumentResponse
             .getBody()) {
@@ -207,6 +269,45 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return ResponseEntity
             .status(uploadedDocumentResponse.getStatusCode())
             .body(uploadedDocumentResponse.getBody());
+    }
+
+    @Override
+    public ResponseEntity patchDocument(UUID documentId, UpdateDocumentCommand ttl, String userId, String userRoles) {
+        if (!ValidationService.validateTTL(ttl.getTtl())) {
+            throw new BadRequestException(String.format(
+                "Incorrect date format %s",
+                ttl.getTtl()));
+        }
+        try {
+            final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(ttl, getHttpHeaders(userId, userRoles));
+            String patchTTLUrl = String.format("%s/documents/%s", documentURL, documentId);
+            ResponseEntity<StoredDocumentHalResource> response = restTemplate.exchange(
+                patchTTLUrl,
+                PATCH,
+                requestEntity,
+                StoredDocumentHalResource.class
+            );
+            ResponseEntity responseEntity = ResponseHelper.toResponseEntity(response, documentId);
+            if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
+                return responseEntity;
+            } else {
+                LOG.error("Document doesn't exist for requested document id at Document Store API Side " + response
+                    .getStatusCode());
+                throw new ResourceNotFoundException(documentId.toString());
+            }
+        } catch (HttpClientErrorException ex) {
+            log.error(ex.getMessage());
+            if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
+                throw new ResourceNotFoundException(documentId.toString());
+            } else {
+                throw new ServiceException(String.format(
+                    "Problem  fetching the document for document id: %s because of %s",
+                    documentId,
+                    ex.getMessage()
+                ));
+            }
+
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -306,9 +407,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     }
 
-    public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization) {
+    public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization, Permission permissionToCheck) {
         String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
-
         if (!ValidationService.validate(caseId)) {
             LOG.error(CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
             throw new BadRequestException(CASE_ID_INVALID);
@@ -319,7 +419,52 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 .orElseThrow(() -> new CaseNotFoundException(caseId));
 
             return (caseDocumentMetadata.getDocument().getId().equals(documentId.toString())
-                    && caseDocumentMetadata.getDocument().getPermissions().contains(Permission.READ));
+                    && caseDocumentMetadata.getDocument().getPermissions().contains(permissionToCheck));
         }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public ResponseEntity<Object> deleteDocument(UUID documentId, String userId, String userRoles, Boolean permanent) {
+
+        try {
+            final HttpEntity requestEntity = new HttpEntity(getHttpHeaders(userId, userRoles));
+            String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL, documentId);
+            LOG.info("documentDeleteUrl : " + documentDeleteUrl);
+            ResponseEntity response = restTemplate.exchange(
+                documentDeleteUrl,
+                DELETE,
+                requestEntity,
+                ResponseEntity.class
+            );
+            if (HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
+                LOG.info("Positive response");
+                return response;
+            } else {
+                LOG.error("Document doesn't exist for requested document id at Document Store" + response
+                    .getStatusCode());
+                throw new ResourceNotFoundException(documentId.toString());
+            }
+        } catch (HttpClientErrorException ex) {
+            LOG.error("Exception while deleting the document:" + ex);
+            if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
+                throw new ResourceNotFoundException(documentId.toString());
+            } else {
+                throw new ServiceException(String.format(
+                    "Problem  deleting the document with document id: %s because of %s",
+                    documentId,
+                    ex.getMessage()
+                ));
+            }
+
+        }
+    }
+
+    private HttpHeaders getHttpHeaders(String userId, String userRoles) {
+        HttpHeaders headers = securityUtils.authorizationHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add(USERID, userId);
+        headers.add(USER_ROLES, userRoles);
+        return headers;
     }
 }
