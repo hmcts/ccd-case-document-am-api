@@ -280,7 +280,11 @@ public class CaseDocumentAmControllerTest {
     @Test
     public void shouldPatchMetaDataOnDocuments() {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        DocumentMetadata body = null;
+        Document document = Document.builder().id("cab18c21-8b7c-452b-937c-091225e0cc12").build();
+        DocumentMetadata body = DocumentMetadata.builder()
+                                                .caseId("1111122222333334")
+                                                .documents(Arrays.asList(document))
+                                                .build();
         ResponseEntity response = testee.patchMetaDataOnDocuments(body, "", "", "");
 
         assertAll(
