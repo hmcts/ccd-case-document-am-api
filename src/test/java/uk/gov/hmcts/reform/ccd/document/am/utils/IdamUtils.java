@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.ccd.document.am;
+package uk.gov.hmcts.reform.ccd.document.am.utils;
 
 import feign.Feign;
 import feign.jackson.JacksonDecoder;
