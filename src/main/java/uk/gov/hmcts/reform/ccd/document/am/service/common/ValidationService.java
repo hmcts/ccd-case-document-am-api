@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -83,6 +84,14 @@ public class ValidationService {
                 return false;
             }
             return true;
+        }
+    }
+
+    public static void validateDocumentId(String documentId) {
+        try {
+            UUID uuid = UUID.fromString(documentId);
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException(String.format("The input parameter: %s is not a valid UUID", documentId));
         }
     }
 }
