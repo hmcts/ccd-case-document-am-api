@@ -9,7 +9,7 @@ class ErrorConstantsTest {
 
     @Test
     void getErrorCode() {
-        assertEquals(MALFORMED_JSON.getErrorCode(),1);
+        assertEquals(1, MALFORMED_JSON.getErrorCode());
         assertEquals(UNSUPPORTED_MEDIA_TYPES.getErrorCode(),2);
         assertEquals(INVALID_REQUEST.getErrorCode(),3);
         assertEquals(RESOURCE_NOT_FOUND.getErrorCode(),4);
