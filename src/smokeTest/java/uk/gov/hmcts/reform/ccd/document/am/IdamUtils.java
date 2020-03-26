@@ -1,8 +1,9 @@
-package uk.gov.hmcts.reform.ccd.document.am.util;
+package uk.gov.hmcts.reform.ccd.document.am;
 
 import feign.Feign;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.Base64;
 
@@ -19,6 +20,7 @@ public class IdamUtils {
 
     private final AuthApi idamApi;
 
+    @Autowired
     public IdamUtils() {
         idamApi = Feign.builder().encoder(new JacksonEncoder()).decoder(new JacksonDecoder()).target(AuthApi.class, BeftaMain.getConfig().getIdamURL());
 
