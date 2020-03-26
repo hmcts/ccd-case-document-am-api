@@ -211,10 +211,10 @@ public class CaseDocumentAmControllerTest {
         doReturn(TRUE).when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),getUuid(),AUTHORIZATION, Permission.UPDATE);
         doReturn(ResponseEntity.status(HttpStatus.NO_CONTENT).build()).when(documentManagementService)
-            .deleteDocument(getUuid(),"","",true);
+            .deleteDocument(getUuid(),"test","test",true);
 
         ResponseEntity response = testee
-            .deleteDocumentbyDocumentId("", AUTHORIZATION, getUuid(),"","", true);
+            .deleteDocumentbyDocumentId("", AUTHORIZATION, getUuid(),"test","test", true);
 
         assertAll(
             () ->  assertNotNull(response, VALID_RESPONSE),
@@ -234,8 +234,8 @@ public class CaseDocumentAmControllerTest {
                 serviceAuthorization,
                 AUTHORIZATION,
                 getUuid(),
-                "",
-                "",
+                "test",
+                "test",
                 true
             );
         });
@@ -248,10 +248,10 @@ public class CaseDocumentAmControllerTest {
             .checkUserPermission(setDocumentMetaData(),getUuid(), AUTHORIZATION, Permission.UPDATE);
         UpdateDocumentCommand body = null;
         doReturn(setDocumentMetaData()).when(documentManagementService).patchDocument(getUuid(), body,
-                                                                                      "", "");
+                                                                                      "test", "test");
 
         ResponseEntity response = testee.patchDocumentbyDocumentId(body,"",
-                                                                   AUTHORIZATION, getUuid(), "", "");
+                                                                   AUTHORIZATION, getUuid(), "test", "test");
         assertAll(
             () ->  assertNotNull(response, VALID_RESPONSE),
             () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE)
@@ -271,8 +271,8 @@ public class CaseDocumentAmControllerTest {
                 serviceAuthorization,
                 AUTHORIZATION,
                 getUuid(),
-                "",
-                ""
+                "test",
+                "test"
             );
         });
     }
