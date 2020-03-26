@@ -6,6 +6,9 @@
     "contains without jurisdiction Id parameter"
   ],
   "request": {
+    "headers": {
+      "caseTypeId": "BEFTA_CASETYPE_2_2"
+    },
     "body": {
       "arrayInMap": [
         {
@@ -15,10 +18,6 @@
         {
           "key": "roles",
           "value": "caseworker"
-        },
-        {
-          "key": "caseTypeId",
-          "value": "BEFTA_CASETYPE_2_2"
         },
         {
           "key": "files",

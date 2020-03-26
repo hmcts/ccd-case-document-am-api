@@ -6,6 +6,10 @@
     "contains a malformed jurisdiction Id"
   ],
   "request": {
+    "headers": {
+      "caseTypeId": "BEFTA_CASETYPE_2_2",
+      "jurisdictionId": "BEFTA_@£$%^&_JURISDICTION_2"
+    },
     "body": {
       "arrayInMap": [
         {
@@ -15,14 +19,6 @@
         {
           "key": "roles",
           "value": "caseworker"
-        },
-        {
-          "key": "caseTypeId",
-          "value": "BEFTA_CASETYPE_2_2"
-        },
-        {
-          "key": "jurisdictionId",
-          "value": "BEFTA_@£$%^&_JURISDICTION_2"
         },
         {
           "key": "files",
