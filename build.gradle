@@ -4,7 +4,7 @@ buildscript {
   }
   configurations.maybeCreate("pitest")
   dependencies {
-    classpath("net.serenity-bdd:serenity-gradle-plugin:2.1.13")
+    classpath("net.serenity-bdd:serenity-gradle-plugin:2.2.0")
     classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.4.7'
     pitest 'org.pitest:pitest-junit5-plugin:0.12'
   }
@@ -272,7 +272,7 @@ dependencies {
   compile group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
   compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.2.RELEASE'
   compile group: 'org.springframework.hateoas', name: 'spring-hateoas', version: '0.25.1.RELEASE'
-  compile group: 'org.springframework', name: 'spring-tx', version: '5.2.4.RELEASE'
+  compile group: 'org.springframework', name: 'spring-tx', version: '5.2.5.RELEASE'
 
   testCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
 
@@ -287,7 +287,7 @@ dependencies {
   testCompile (group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot) {
     exclude group: 'junit', module: 'junit'
   }
-  testCompile group: 'uk.gov.hmcts', name: 'befta-fw', version: '1.2.3'
+  testCompile group: 'uk.gov.hmcts', name: 'befta-fw', version: '1.2.6-accept_none_json.2'
   compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.2.2.RELEASE'
 
   compile group: 'io.cucumber', name: 'cucumber-java', version: versions.cucumber

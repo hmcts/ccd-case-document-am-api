@@ -1,6 +1,17 @@
 
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHCODE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_CASE_ID_PATTERN;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,16 +35,6 @@ import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
-
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHCODE;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
 
 @Controller
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
@@ -178,7 +179,20 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
         try {
+            if (!ValidationService.validate(caseDocumentMetadata.getCaseId())) {
+                throw new BadRequestException("The Case Id is invalid");
+            }
+            ValidationService.validateInputParams(INPUT_CASE_ID_PATTERN, caseDocumentMetadata.getCaseId());
+            caseDocumentMetadata.getDocuments()
+                                .forEach(document -> {
+                                    ValidationService.validateInputParams(INPUT_STRING_PATTERN, document.getId());
+                                    ValidationService.validateDocumentId(document.getId());
+                                });
+
             documentManagementService.patchDocumentMetadata(caseDocumentMetadata, serviceAuthorization, userId);
+        } catch (BadRequestException | IllegalArgumentException e) {
+            LOG.error("Exception while attaching the documents to a case :" + e);
+            throw new BadRequestException("Exception while attaching the documents to a case :" + e);
         } catch (Exception e) {
             LOG.error("Exception while attaching the documents to a case :" + e);
             throw e;
