@@ -10,7 +10,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import uk.gov.hmcts.reform.auth.checker.core.RequestAuthorizer;
 import uk.gov.hmcts.reform.auth.checker.core.service.Service;
-import uk.gov.hmcts.reform.auth.checker.spring.serviceonly.AuthCheckerServiceOnlyFilter;
+import uk.gov.hmcts.reform.auth.checker.core.user.User;
+import uk.gov.hmcts.reform.auth.checker.spring.serviceanduser.AuthCheckerServiceAndUserFilter;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
@@ -18,30 +19,30 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    private transient AuthCheckerServiceOnlyFilter serviceOnlyFilter;
+    private final AuthCheckerServiceAndUserFilter authCheckerFilter;
 
     @Autowired
-    public SecurityConfiguration(
-                                 final RequestAuthorizer<Service> serviceRequestAuthorizer,
-                                 final AuthenticationManager authenticationManager) {
+    public SecurityConfiguration(final  RequestAuthorizer<User> userRequestAuthorizer,
+                                       final RequestAuthorizer<Service> serviceRequestAuthorizer,
+                                       final AuthenticationManager authenticationManager) {
         super();
 
-        this.serviceOnlyFilter = new AuthCheckerServiceOnlyFilter(serviceRequestAuthorizer);
+        this.authCheckerFilter = new AuthCheckerServiceAndUserFilter(serviceRequestAuthorizer, userRequestAuthorizer);
 
-        this.serviceOnlyFilter.setAuthenticationManager(authenticationManager);
+        this.authCheckerFilter.setAuthenticationManager(authenticationManager);
     }
 
     @Override
     public void configure(WebSecurity web) {
         web.ignoring().antMatchers("/swagger-ui.html",
-            "/webjars/springfox-swagger-ui/**",
-            "/swagger-resources/**",
-            "/v2/**",
-            "/health",
-            "/health/liveness",
-            "/status/health",
-            "/loggers/**",
-            "/");
+                                   "/webjars/springfox-swagger-ui/**",
+                                   "/swagger-resources/**",
+                                   "/v2/**",
+                                   "/health",
+                                   "/health/liveness",
+                                   "/status/health",
+                                   "/loggers/**",
+                                   "/");
     }
 
     @Override
@@ -49,10 +50,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         // Don't erase user credentials as this is needed for the user profile
         final ProviderManager authenticationManager = (ProviderManager) authenticationManager();
         authenticationManager.setEraseCredentialsAfterAuthentication(false);
-        serviceOnlyFilter.setAuthenticationManager(authenticationManager());
+        authCheckerFilter.setAuthenticationManager(authenticationManager());
 
         http
-            .addFilter(serviceOnlyFilter)
+            .addFilter(authCheckerFilter)
             .sessionManagement().sessionCreationPolicy(STATELESS).and()
             .csrf().disable()
             .formLogin().disable()

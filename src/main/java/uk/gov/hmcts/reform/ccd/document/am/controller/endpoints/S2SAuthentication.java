@@ -12,7 +12,6 @@ public class S2SAuthentication {
 
     @RequestMapping(value = "/testS2SAuthorization", method = RequestMethod.GET)
     public ResponseEntity<String> testS2SAuthorization() {
-
         return ok("S2S Authentication is successful !!");
     }
 }
