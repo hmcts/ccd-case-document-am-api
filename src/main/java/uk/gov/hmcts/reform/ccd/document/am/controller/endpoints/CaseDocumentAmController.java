@@ -234,9 +234,11 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
         try {
-            ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification, userRoles);
+            ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification,
+                                                  userRoles, userId);
             ValidationService.isValidSecurityClassification(classification);
             ValidationService.validateLists(files, roles);
+            roles.forEach(role -> ValidationService.validateInputParams(INPUT_STRING_PATTERN, role));
 
             return documentManagementService.uploadDocuments(files, classification, roles,
                                                              serviceAuthorization, caseTypeId, jurisdictionId, userId);
