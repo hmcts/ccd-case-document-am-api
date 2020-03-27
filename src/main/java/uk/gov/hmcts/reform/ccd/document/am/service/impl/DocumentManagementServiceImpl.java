@@ -195,7 +195,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
             HttpHeaders headers = new HttpHeaders(securityUtils.authorizationHeaders());
 
-            prepareRequestForAttachingDocumentToCase(documentMetadata, serviceAuthorization, userId, bodyMap, headers);
+            prepareRequestForAttachingDocumentToCase(documentMetadata, userId, bodyMap, headers);
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
 
             restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
@@ -209,7 +209,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     private void prepareRequestForAttachingDocumentToCase(DocumentMetadata documentMetadata,
-                                                      String serviceAuthorization,
                                                       String userId,
                                                       LinkedMultiValueMap<String, Object> bodyMap,
                                                       HttpHeaders headers) {
@@ -247,8 +246,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
 
         headers.setContentType(MediaType.APPLICATION_JSON);
-
-        headers.set(SERVICE_AUTHORIZATION, serviceAuthorization);
         headers.set(USERID, userId);
     }
 
