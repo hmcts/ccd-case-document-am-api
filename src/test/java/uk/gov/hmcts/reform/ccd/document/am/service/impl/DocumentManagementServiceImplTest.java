@@ -14,13 +14,18 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
@@ -430,7 +435,7 @@ class DocumentManagementServiceImplTest {
 
     }
 
-    //@Test
+    @Test
     @SuppressWarnings("unchecked")
     void uploadDocuments_HappyPath() {
 
@@ -461,8 +466,54 @@ class DocumentManagementServiceImplTest {
         List<String> roles = new ArrayList<>();
         roles.add("Role");
 
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
         ResponseEntity<Object> responseEntity = sut.uploadDocuments(files,"classification", roles,
                                                                     serviceAuthorization, BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2,USER_ID);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void uploadDocuments_NoLinksExceptionThrow() {
+
+        HashMap<String, String> binaryHash = new HashMap<>();
+        HashMap<String, String> selfHash = new HashMap<>();
+        selfHash.put(HREF, "http://localhost:4455/cases/documents/35471d43-0dad-42c1-b05a-4821028f50a2");
+        binaryHash.put(HREF, "http://localhost:4455/cases/documents/35471d43-0dad-42c1-b05a-4821028f50a2/binary");
+
+        LinkedHashMap<String, Object> linksLinkedHashMap = new LinkedHashMap<>();
+        LinkedHashMap<String, Object> binarySelfLinkedHashMap = new LinkedHashMap<>();
+
+        ArrayList arrayList = new ArrayList();
+        arrayList.add(linksLinkedHashMap);
+
+        LinkedHashMap<String, Object> documentsLinkedHashMap = new LinkedHashMap<>();
+        documentsLinkedHashMap.put(DOCUMENTS,arrayList);
+
+        LinkedHashMap<String, Object> embeddedLinkedHashMap = new LinkedHashMap<>();
+        embeddedLinkedHashMap.put(EMBEDDED,documentsLinkedHashMap);
+
+        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any())).thenReturn(new ResponseEntity<>(embeddedLinkedHashMap, HttpStatus.OK));
+
+        List<MultipartFile> files = new ArrayList<>();
+        List<String> roles = new ArrayList<>();
+        roles.add("Role");
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+        Assertions.assertThrows(ResponseFormatException.class, () -> {
+            ResponseEntity<Object> responseEntity = sut.uploadDocuments(files,
+                                                                        "classification",
+                                                                        roles,
+                                                                        serviceAuthorization,
+                                                                        BEFTA_CASETYPE_2,
+                                                                        BEFTA_JURISDICTION_2,
+                                                                        USER_ID
+            );
+        });
     }
 
     private String getEffectiveTTL() {
