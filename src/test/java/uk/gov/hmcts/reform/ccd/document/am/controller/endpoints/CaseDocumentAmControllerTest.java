@@ -288,7 +288,7 @@ public class CaseDocumentAmControllerTest {
                                                 .caseId("1111122222333334")
                                                 .documents(Arrays.asList(document))
                                                 .build();
-        ResponseEntity response = testee.patchMetaDataOnDocuments(body, "", "", "");
+        ResponseEntity response = testee.patchMetaDataOnDocuments(body, "", "", "", "");
 
         assertAll(
             () -> assertNotNull(response, VALID_RESPONSE),

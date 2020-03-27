@@ -174,6 +174,9 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @ApiParam(value = "Service Auth (S2S). Use it when accessing the API on App Tier level.", required = true)
         @RequestHeader(value = "ServiceAuthorization", required = true) String serviceAuthorization,
 
+        @ApiParam("Authorization header of the currently authenticated user")
+        @RequestHeader(value = "Authorization", required = true) String authorization,
+
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
             + " and will be used for authorisation.")
         @RequestHeader(value = "user-id", required = false) String userId,
