@@ -244,13 +244,6 @@ public interface CaseDocumentAm {
         @ApiParam("Authorization header of the currently authenticated user")
         @RequestHeader(value = "Authorization", required = true) String authorization,
 
-        @ApiParam(value = "documentId", required = true) @PathVariable("documentId") UUID documentId,
-
-        @ApiParam(value = "CaseType identifier for the case document.", required = true)
-        @RequestHeader(value = "caseTypeId", required = true) String caseTypeId,
-
-        @ApiParam(value = "Jurisdiction identifier for the case document.", required = true)
-        @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId);
-
+        @ApiParam(value = "documentId", required = true) @PathVariable("documentId") UUID documentId);
 
 }

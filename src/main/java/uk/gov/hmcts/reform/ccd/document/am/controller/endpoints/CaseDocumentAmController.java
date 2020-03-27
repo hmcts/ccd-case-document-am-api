@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadReques
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
@@ -244,22 +245,22 @@ public class CaseDocumentAmController implements CaseDocumentAm {
         @RequestHeader(value = "Authorization", required = true) String authorization,
 
         @ApiParam("documentId")
-        @PathVariable("documentId") UUID documentId,
-
-        @ApiParam(value = "CaseType identifier for the case document.", required = true)
-        @NotNull(message = "Provide the Case Type ID ")
-        @RequestHeader(value = "caseTypeId", required = true) String caseTypeId,
-
-        @ApiParam(value = "Jurisdiction identifier for the case document.", required = true)
-        @NotNull(message = "Provide the Jurisdiction ID ")
-        @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId) {
+        @PathVariable("documentId") UUID documentId) {
 
         try {
-            ValidationService.validateInputParams(INPUT_STRING_PATTERN, documentId.toString(), caseTypeId, jurisdictionId);
+            StoredDocumentHalResource resource = new StoredDocumentHalResource();
+            ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
+            if (responseEntity.getStatusCode().equals(HttpStatus.OK) && null != responseEntity.getBody()) {
+                resource = (StoredDocumentHalResource) responseEntity.getBody();
+            }
+
+            ValidationService.validateInputParams(INPUT_STRING_PATTERN, documentId.toString(),
+                                                  resource.getMetadata().get("caseTypeId"), resource.getMetadata().get("jurisdictionId"));
 
             HashMap<String, String> responseBody = new HashMap<>();
 
-            String hashedToken = ApplicationUtils.generateHashCode(documentId.toString().concat(jurisdictionId).concat(caseTypeId));
+            String hashedToken = ApplicationUtils.generateHashCode(documentId.toString().concat(
+                resource.getMetadata().get("jurisdictionId")).concat(resource.getMetadata().get("caseTypeId")));
             responseBody.put(HASHCODE, hashedToken);
 
             return new ResponseEntity<>(responseBody, HttpStatus.OK);
