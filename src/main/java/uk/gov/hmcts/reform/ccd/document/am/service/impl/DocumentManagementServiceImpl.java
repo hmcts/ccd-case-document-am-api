@@ -193,7 +193,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public boolean patchDocumentMetadata(DocumentMetadata documentMetadata, String serviceAuthorization, String userId) {
         try {
             LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
-            HttpHeaders headers = new HttpHeaders();
+            HttpHeaders headers = new HttpHeaders(securityUtils.authorizationHeaders());
 
             prepareRequestForAttachingDocumentToCase(documentMetadata, serviceAuthorization, userId, bodyMap, headers);
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
