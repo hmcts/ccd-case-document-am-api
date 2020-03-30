@@ -43,7 +43,7 @@ public class ValidationService {
             Enum.valueOf(SecurityClassification.class, securityClassification);
         } catch (final IllegalArgumentException ex) {
             LOG.info("The security classification is not valid");
-            throw new BadRequestException("The security classification" + securityClassification + " is not valid");
+            throw new BadRequestException("The security classification " + securityClassification + " is not valid");
         }
     }
 
