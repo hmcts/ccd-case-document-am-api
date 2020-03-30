@@ -42,7 +42,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
     private static final Logger LOG = LoggerFactory.getLogger(CaseDocumentAmController.class);
 
-    private transient DocumentManagementService  documentManagementService;
+    private DocumentManagementService  documentManagementService;
 
     @Autowired
     public CaseDocumentAmController(DocumentManagementService documentManagementService) {
@@ -75,7 +75,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             return  documentManagementService.deleteDocument(documentId, userId, userRoles, permanent);
 
         }
-        LOG.error("User doesn't have update permission on requested document " + HttpStatus.FORBIDDEN);
+        LOG.error("User doesn't have update permission on requested document {}",  HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -99,7 +99,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             return documentManagementService.getDocumentBinaryContent(documentId);
 
         }
-        LOG.error("User doesn't have read permission on requested document " + HttpStatus.FORBIDDEN);
+        LOG.error("User doesn't have read permission on requested document {}", HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -130,7 +130,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
                  .status(HttpStatus.OK)
                  .body(responseEntity.getBody());
         }
-        LOG.error("User doesn't have read permission on requested document " + HttpStatus.FORBIDDEN);
+        LOG.error("User doesn't have read permission on requested document {}", HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -161,7 +161,7 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             ResponseEntity response =   documentManagementService.patchDocument(documentId, body, userId, userRoles);
             return  ResponseEntity.status(HttpStatus.OK).body(response.getBody());
         }
-        LOG.error("User doesn't have update permission on requested document " + HttpStatus.FORBIDDEN);
+        LOG.error("User doesn't have update permission on requested document {}", HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -197,13 +197,12 @@ public class CaseDocumentAmController implements CaseDocumentAm {
 
             documentManagementService.patchDocumentMetadata(caseDocumentMetadata, serviceAuthorization, userId);
         } catch (BadRequestException | IllegalArgumentException e) {
-            LOG.error("Exception while attaching the documents to a case :" + e);
             throw new BadRequestException("Exception while attaching the documents to a case :" + e);
         } catch (Exception e) {
-            LOG.error("Exception while attaching the documents to a case :" + e);
+            LOG.error("Exception in controller for patch MetaData Documents API");
             throw e;
         }
-        return new ResponseEntity<Object>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
@@ -250,10 +249,8 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             return documentManagementService.uploadDocuments(files, classification, roles,
                                                              serviceAuthorization, caseTypeId, jurisdictionId, userId);
         } catch (BadRequestException | IllegalArgumentException e) {
-            LOG.error("Exception while uploading the documents :" + e);
             throw new BadRequestException("Exception while uploading the documents :" + e);
         } catch (Exception e) {
-            LOG.error("Exception while uploading the documents :" + e);
             throw new ResponseFormatException("Exception while uploading the documents :" + e);
         }
     }
@@ -288,10 +285,8 @@ public class CaseDocumentAmController implements CaseDocumentAm {
             return new ResponseEntity<>(responseBody, HttpStatus.OK);
 
         } catch (BadRequestException | IllegalArgumentException e) {
-            LOG.error("Illegal argument exception: " + e);
             throw new BadRequestException("Illegal argument exception:" + e);
         } catch (Exception e) {
-            LOG.error("Exception :" + e);
             throw new ResponseFormatException("Exception :" + e);
         }
     }

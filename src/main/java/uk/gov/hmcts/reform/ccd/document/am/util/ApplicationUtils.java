@@ -28,17 +28,18 @@ public class ApplicationUtils {
             BigInteger no = new BigInteger(1, messageDigest);
 
             // Convert message digest into hex value
-            String hashtext = no.toString(16);
+            StringBuilder hashtext = new StringBuilder();
+            hashtext.append(no.toString(16));
 
             // Add preceding 0s to make it 32 bit
             while (hashtext.length() < 32) {
-                hashtext = "0" + hashtext;
+                hashtext.append("0").append(hashtext);
             }
 
             // return the HashText
-            return hashtext;
+            return hashtext.toString();
         } catch (NoSuchAlgorithmException e) {
-            LOG.error("Error while generating the hashcode :" + e.getMessage());
+            LOG.error("Error while generating the hashcode :{}", e.getMessage());
         }
         return null;
     }

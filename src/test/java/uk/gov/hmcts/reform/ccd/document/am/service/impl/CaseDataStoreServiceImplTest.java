@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import java.util.HashMap;
@@ -52,6 +53,7 @@ class CaseDataStoreServiceImplTest {
                          .concat("/documents/")
                          .concat(MATCHED_DOCUMENT_ID), HttpMethod.GET, requestEntityGlobal, StoredDocumentHalResource.class))
             .thenReturn(new ResponseEntity<>(storedDocumentHalResource, HttpStatus.OK));
+        assertEquals("1234qwer1234qwer", myMap.get("caseId"));
         /*caseDocumentMetadata = sut.getCaseDocumentMetadata(CASE_ID, getUuid(MATCHED_DOCUMENT_ID),"auth");
         assertNotNull(caseDocumentMetadata);
         assertEquals(CASE_ID,caseDocumentMetadata.get().getCaseId());

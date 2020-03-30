@@ -12,7 +12,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @ComponentScan(basePackages = {"uk.gov.hmcts.reform.ccd.document.am"})
 public class Swagger2SpringBoot implements CommandLineRunner {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         new SpringApplication(Swagger2SpringBoot.class).run(args);
     }
 
