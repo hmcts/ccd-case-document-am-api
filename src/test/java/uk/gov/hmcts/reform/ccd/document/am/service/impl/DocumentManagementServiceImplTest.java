@@ -227,9 +227,9 @@ class DocumentManagementServiceImplTest {
         Document doc;
         doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList).build();
         CaseDocumentMetadata cdm = CaseDocumentMetadata.builder().caseId("1234qwer1234qwer").document(doc).build();
-        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class),anyString())).thenReturn(Optional.of(cdm));
+        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class))).thenReturn(Optional.of(cdm));
 
-        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID,"auth", Permission.READ);
+        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID, Permission.READ);
         assertEquals(Boolean.TRUE, result);
 
         verifyRestExchangeOnStoredDoc();
@@ -248,11 +248,11 @@ class DocumentManagementServiceImplTest {
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         List<Permission> permissionsList = new ArrayList<>();
         permissionsList.add(Permission.READ);
-        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class),anyString()))
+        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class)))
             .thenReturn(null);
 
         Assertions.assertThrows(Exception.class, () -> {
-            sut.checkUserPermission(responseEntity, matchedDocUUID,"auth", Permission.READ);
+            sut.checkUserPermission(responseEntity, matchedDocUUID, Permission.READ);
         });
 
         verifyRestExchangeOnStoredDoc();
@@ -270,7 +270,7 @@ class DocumentManagementServiceImplTest {
         assertEquals(responseEntity.getStatusCode(),HttpStatus.OK);
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            sut.checkUserPermission(responseEntity, matchedDocUUID,"auth", Permission.READ);
+            sut.checkUserPermission(responseEntity, matchedDocUUID, Permission.READ);
         });
 
         verifyRestExchangeOnStoredDoc();
@@ -290,10 +290,10 @@ class DocumentManagementServiceImplTest {
         Document doc;
         doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList).build();
         CaseDocumentMetadata cdm = CaseDocumentMetadata.builder().caseId("1234qwer1234qwer").document(doc).build();
-        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class),anyString()))
+        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class)))
             .thenReturn(Optional.ofNullable(cdm));
 
-        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID,"auth", Permission.READ);
+        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID, Permission.READ);
         assertEquals(Boolean.FALSE, result);
 
         verifyRestExchangeOnStoredDoc();
@@ -314,10 +314,10 @@ class DocumentManagementServiceImplTest {
         Document doc;
         doc = Document.builder().id("40000a2b-00ce-00eb-0068-2d00a700be9c").permissions(permissionsList).build();
         CaseDocumentMetadata cdm = CaseDocumentMetadata.builder().caseId("1234qwer1234qwer").document(doc).build();
-        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class),anyString()))
+        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class)))
             .thenReturn(Optional.ofNullable(cdm));
 
-        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID,"auth", Permission.READ);
+        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID, Permission.READ);
         assertEquals(Boolean.FALSE, result);
 
         verifyRestExchangeOnStoredDoc();
@@ -344,6 +344,6 @@ class DocumentManagementServiceImplTest {
 
     private void verifyCaseDataServiceGetDocMetadata() {
         verify(caseDataStoreServiceMock, times(1))
-            .getCaseDocumentMetadata(anyString(),any(UUID.class),anyString());
+            .getCaseDocumentMetadata(anyString(),any(UUID.class));
     }
 }

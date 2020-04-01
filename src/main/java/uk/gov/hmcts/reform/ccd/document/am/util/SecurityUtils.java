@@ -2,7 +2,9 @@ package uk.gov.hmcts.reform.ccd.document.am.util;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.auth.checker.spring.serviceanduser.ServiceAndUserDetails;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
@@ -20,8 +22,24 @@ public class SecurityUtils {
     public HttpHeaders authorizationHeaders() {
         final HttpHeaders headers = new HttpHeaders();
         headers.add(SERVICE_AUTHORIZATION, authTokenGenerator.generate());
+
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            final ServiceAndUserDetails serviceAndUser = (ServiceAndUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (serviceAndUser.getPassword() != null) {
+                headers.add(HttpHeaders.AUTHORIZATION, serviceAndUser.getPassword());
+            }
+        }
         return headers;
+
     }
+
+    public HttpHeaders serviceAuthorizationHeaders() {
+        final HttpHeaders headers = new HttpHeaders();
+        headers.add(SERVICE_AUTHORIZATION, authTokenGenerator.generate());
+        return headers;
+
+    }
+
 
 
 }

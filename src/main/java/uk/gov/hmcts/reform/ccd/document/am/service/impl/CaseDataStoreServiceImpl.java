@@ -50,9 +50,9 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Optional<CaseDocumentMetadata> getCaseDocumentMetadata(String caseId, UUID documentId, String authorization) {
+    public Optional<CaseDocumentMetadata> getCaseDocumentMetadata(String caseId, UUID documentId) {
         try {
-            HttpHeaders headers = prepareRequestForUpload(authorization);
+            HttpHeaders headers = prepareRequestForUpload();
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
 
             ResponseEntity<Object> responseEntity =
@@ -96,13 +96,12 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
         return Optional.empty();
     }
 
-    private HttpHeaders prepareRequestForUpload(String authorization) {
+    private HttpHeaders prepareRequestForUpload() {
 
         HttpHeaders headers = new HttpHeaders();
         headers.addAll(securityUtils.authorizationHeaders());
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("experimental", "true");
-        headers.set("Authorization", authorization);
         return headers;
     }
 }

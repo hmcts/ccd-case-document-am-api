@@ -35,7 +35,8 @@ public class SwaggerConfiguration {
             .apiInfo(apiV2Info())
             .host(host)
             .globalOperationParameters(Arrays.asList(
-                headerServiceAuthorization()
+                headerServiceAuthorization(),
+                headerAuthorization()
             ));
     }
 
@@ -51,6 +52,16 @@ public class SwaggerConfiguration {
         return new ParameterBuilder()
             .name("ServiceAuthorization")
             .description("Valid Service-to-Service JWT token for a whitelisted micro-service")
+            .modelRef(new ModelRef("string"))
+            .parameterType("header")
+            .required(true)
+            .build();
+    }
+
+    private Parameter headerAuthorization() {
+        return new ParameterBuilder()
+            .name("Authorization")
+            .description("Keyword `Bearer` followed by a valid IDAM user token")
             .modelRef(new ModelRef("string"))
             .parameterType("header")
             .required(true)
