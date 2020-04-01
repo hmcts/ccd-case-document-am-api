@@ -181,6 +181,9 @@ public interface CaseDocumentAm {
         @ApiParam(value = S2S_API_PARAM, required = true)
         @RequestHeader(value = SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
 
+        @ApiParam("Authorization header of the currently authenticated user")
+        @RequestHeader(value = "Authorization", required = true) String authorization,
+
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
                           + " and will be used for authorisation.")
         @RequestHeader(value = "user-ud", required = false) String userId,
@@ -244,13 +247,6 @@ public interface CaseDocumentAm {
         @ApiParam("Authorization header of the currently authenticated user")
         @RequestHeader(value = "Authorization", required = true) String authorization,
 
-        @ApiParam(value = "documentId", required = true) @PathVariable("documentId") UUID documentId,
-
-        @ApiParam(value = "CaseType identifier for the case document.", required = true)
-        @RequestHeader(value = "caseTypeId", required = true) String caseTypeId,
-
-        @ApiParam(value = "Jurisdiction identifier for the case document.", required = true)
-        @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId);
-
+        @ApiParam(value = "documentId", required = true) @PathVariable("documentId") UUID documentId);
 
 }
