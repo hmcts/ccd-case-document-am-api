@@ -22,7 +22,7 @@ public class SwaggerConfiguration {
 
 
     @Value("${swaggerUrl}")
-    private transient String host;
+    private  String host;
 
     @Bean
     public Docket apiV2() {
@@ -35,7 +35,10 @@ public class SwaggerConfiguration {
             .apiInfo(apiV2Info())
             .host(host)
             .globalOperationParameters(Arrays.asList(
-                headerServiceAuthorization()
+                headerServiceAuthorization(),
+                headerAuthorization(),
+                headerUserId(),
+                headerUserRoles()
             ));
     }
 
@@ -56,4 +59,36 @@ public class SwaggerConfiguration {
             .required(true)
             .build();
     }
+
+    private Parameter headerAuthorization() {
+        return new ParameterBuilder()
+            .name("Authorization")
+            .description("Keyword `Bearer` followed by a valid IDAM user token")
+            .modelRef(new ModelRef("string"))
+            .parameterType("header")
+            .required(true)
+            .build();
+    }
+
+    private Parameter headerUserId() {
+        return new ParameterBuilder()
+            .name("user-id")
+            .description("User-id of the currently authenticated user. If provided will be used to populate the creator field of a document and"
+                             + " will be used for authorisation.")
+            .modelRef(new ModelRef("string"))
+            .parameterType("header")
+            .required(false)
+            .build();
+    }
+
+    private Parameter headerUserRoles() {
+        return new ParameterBuilder()
+            .name("user-roles")
+            .description("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
+            .modelRef(new ModelRef("string"))
+            .parameterType("header")
+            .required(false)
+            .build();
+    }
+
 }
