@@ -48,7 +48,7 @@ public class DocumentPayloadBody {
 
     public DocumentPayloadBody addRolesItem(String rolesItem) {
         if (this.roles == null) {
-            this.roles = new ArrayList<String>();
+            this.roles = new ArrayList<>();
         }
         this.roles.add(rolesItem);
         return this;
@@ -66,7 +66,7 @@ public class DocumentPayloadBody {
 
     public DocumentPayloadBody addFilesItem(java.io.File filesItem) {
         if (this.files == null) {
-            this.files = new ArrayList<java.io.File>();
+            this.files = new ArrayList<>();
         }
         this.files.add(filesItem);
         return this;

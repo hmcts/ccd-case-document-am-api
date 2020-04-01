@@ -12,14 +12,14 @@ class ErrorMapTest {
     void shouldGetCode() {
         errorMap.setCode("NOT_FOUND");
         String code = errorMap.getCode();
-        assertEquals(code, "NOT_FOUND");
+        assertEquals("NOT_FOUND", code);
     }
 
     @Test
     void shouldGetMessage() {
         errorMap.setMessage("ERROR_MESSAGE");
         String message = errorMap.getMessage();
-        assertEquals(message, "ERROR_MESSAGE");
+        assertEquals("ERROR_MESSAGE", message);
     }
 
     @Test

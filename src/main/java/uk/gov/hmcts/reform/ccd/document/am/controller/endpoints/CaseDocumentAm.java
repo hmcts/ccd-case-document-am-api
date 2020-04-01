@@ -8,9 +8,11 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
@@ -47,9 +49,8 @@ public interface CaseDocumentAm {
         @ApiResponse(code = 401, message = UNAUTHORIZED, response = ErrorMap.class),
         @ApiResponse(code = 403, message = FORBIDDEN, response = ErrorMap.class),
         @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND, response = ErrorMap.class)})
-    @RequestMapping(value = "/cases/documents/{documentId}",
-                    produces = {APPLICATION_JSON},
-                    method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/cases/documents/{documentId}",
+                    produces = {APPLICATION_JSON})
     ResponseEntity<Object> deleteDocumentbyDocumentId(
         @ApiParam(value = S2S_API_PARAM, required = true)
         @RequestHeader(value = SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
@@ -82,7 +83,7 @@ public interface CaseDocumentAm {
         @ApiResponse(code = 401, message = UNAUTHORIZED, response = ErrorMap.class),
         @ApiResponse(code = 403, message = FORBIDDEN, response = ErrorMap.class),
         @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND, response = ErrorMap.class)})
-    @RequestMapping(value = "/cases/documents/{documentId}/binary", produces = {APPLICATION_JSON}, method = RequestMethod.GET)
+    @GetMapping(value = "/cases/documents/{documentId}/binary", produces = {APPLICATION_JSON})
     ResponseEntity<Object> getDocumentBinaryContentbyDocumentId(
 
         @ApiParam(value = S2S_API_PARAM, required = true)
@@ -108,7 +109,7 @@ public interface CaseDocumentAm {
         @ApiResponse(code = 401, message = UNAUTHORIZED, response = String.class),
         @ApiResponse(code = 403, message = FORBIDDEN, response = ErrorMap.class, responseContainer = "List"),
         @ApiResponse(code = 404, message = "Not Found", response = String.class)})
-    @RequestMapping(value = "/cases/documents/{documentId}", produces = {APPLICATION_JSON}, method = RequestMethod.GET)
+    @GetMapping(value = "/cases/documents/{documentId}", produces = {APPLICATION_JSON})
     ResponseEntity<Object> getDocumentbyDocumentId(
 
         @ApiParam(value = S2S_API_PARAM, required = true)
@@ -134,10 +135,9 @@ public interface CaseDocumentAm {
         @ApiResponse(code = 401, message = UNAUTHORIZED, response = String.class),
         @ApiResponse(code = 403, message = FORBIDDEN, response = ErrorMap.class, responseContainer = "List"),
         @ApiResponse(code = 404, message = "Not Found", response = String.class)})
-    @RequestMapping(value = "/cases/documents/{documentId}",
+    @PatchMapping(value = "/cases/documents/{documentId}",
                     produces = {APPLICATION_JSON},
-                    consumes = {APPLICATION_JSON},
-                    method = RequestMethod.PATCH)
+                    consumes = {APPLICATION_JSON})
     ResponseEntity<Object> patchDocumentbyDocumentId(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody UpdateDocumentCommand body,
@@ -170,16 +170,18 @@ public interface CaseDocumentAm {
         @ApiResponse(code = 401, message = UNAUTHORIZED, response = ErrorMap.class),
         @ApiResponse(code = 403, message = FORBIDDEN, response = ErrorMap.class),
         @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND, response = ErrorMap.class)})
-    @RequestMapping(value = "/cases/documents/attachToCase",
+    @PatchMapping(value = "/cases/documents/attachToCase",
                     produces = {APPLICATION_JSON},
-                    consumes = {APPLICATION_JSON},
-                    method = RequestMethod.PATCH)
+                    consumes = {APPLICATION_JSON})
     ResponseEntity<Object> patchMetaDataOnDocuments(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody DocumentMetadata body,
 
         @ApiParam(value = S2S_API_PARAM, required = true)
         @RequestHeader(value = SERVICE_AUTHORIZATION, required = true) String serviceAuthorization,
+
+        @ApiParam("Authorization header of the currently authenticated user")
+        @RequestHeader(value = "Authorization", required = true) String authorization,
 
         @ApiParam("User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
                           + " and will be used for authorisation.")
@@ -201,10 +203,9 @@ public interface CaseDocumentAm {
         @ApiResponse(code = 401, message = UNAUTHORIZED, response = ErrorMap.class),
         @ApiResponse(code = 403, message = FORBIDDEN, response = ErrorMap.class),
         @ApiResponse(code = 404, message = RESOURCE_NOT_FOUND, response = ErrorMap.class)})
-    @RequestMapping(value = "/cases/documents",
+    @PostMapping(value = "/cases/documents",
                     produces = {APPLICATION_JSON},
-                    consumes = {"multipart/form-data"},
-                    method = RequestMethod.POST)
+                    consumes = {"multipart/form-data"})
     ResponseEntity<Object> uploadDocuments(
         @ApiParam(value = "", required = true) @RequestParam(value = "files", required = true) List<MultipartFile> files,
         @ApiParam(value = "", required = true) @RequestParam(value = "classification", required = true) String classification,
@@ -235,7 +236,7 @@ public interface CaseDocumentAm {
         @ApiResponse(code = 401, message = UNAUTHORIZED, response = String.class),
         @ApiResponse(code = 403, message = FORBIDDEN, response = ErrorMap.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Bad Request", response = String.class)})
-    @RequestMapping(value = "/cases/documents/{documentId}/token", produces = {APPLICATION_JSON}, method = RequestMethod.GET)
+    @GetMapping(value = "/cases/documents/{documentId}/token", produces = {APPLICATION_JSON})
     ResponseEntity<Object> generateHashCode(
 
         @ApiParam(value = S2S_API_PARAM, required = true)
@@ -244,13 +245,6 @@ public interface CaseDocumentAm {
         @ApiParam("Authorization header of the currently authenticated user")
         @RequestHeader(value = "Authorization", required = true) String authorization,
 
-        @ApiParam(value = "documentId", required = true) @PathVariable("documentId") UUID documentId,
-
-        @ApiParam(value = "CaseType identifier for the case document.", required = true)
-        @RequestHeader(value = "caseTypeId", required = true) String caseTypeId,
-
-        @ApiParam(value = "Jurisdiction identifier for the case document.", required = true)
-        @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId);
-
+        @ApiParam(value = "documentId", required = true) @PathVariable("documentId") UUID documentId);
 
 }
