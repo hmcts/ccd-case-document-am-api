@@ -414,7 +414,7 @@ public class CaseDocumentAmControllerTest {
     @Test //this test returns an illegal argument exception because UUID.fromString() contains a throw for illegal arguments
     void generateHashCode_BadRequest() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            testee.generateHashCode( UUID.fromString("A.A"),"","");
+            testee.generateHashCode(UUID.fromString("A.A"),"","");
         });
     }
 }
