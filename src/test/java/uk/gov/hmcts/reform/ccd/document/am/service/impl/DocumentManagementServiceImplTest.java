@@ -1,12 +1,12 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -100,15 +101,19 @@ class DocumentManagementServiceImplTest {
     private DocumentManagementServiceImpl sut = new DocumentManagementServiceImpl(restTemplateMock, securityUtils,
                                                                                   caseDataStoreServiceMock);
 
-    @Value("${documentStoreUrl}")
     String documentURL = "http://localhost:4506";
 
-    @Value("${documentTTL}")
-    protected String documentTTL = "600000"; //TODO this @Value annotation is not working so I have to set the value to test.
+    String documentTTL = "600000";
 
     @Test
     void documentMetadataInstantiation() {
         assertNotNull(sut);
+    }
+
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(sut, "documentTtl", "600000");
+        ReflectionTestUtils.setField(sut, "documentURL", "http://localhost:4506");
     }
 
     @Test

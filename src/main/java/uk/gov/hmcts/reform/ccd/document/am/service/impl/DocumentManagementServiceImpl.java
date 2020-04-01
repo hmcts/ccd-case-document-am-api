@@ -84,17 +84,17 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private static final Logger LOG = LoggerFactory.getLogger(DocumentManagementServiceImpl.class);
 
-    private transient RestTemplate restTemplate;
+    private RestTemplate restTemplate;
 
-    private transient SecurityUtils securityUtils;
+    private SecurityUtils securityUtils;
 
     @Value("${documentStoreUrl}")
-    protected transient String documentURL = "http://localhost:4506";
+    protected String documentURL;
 
     @Value("${documentTTL}")
-    protected transient String documentTtl = "600000"; //TODO this @Value annotation is not working so I have to set the value to test.
+    protected String documentTtl;
 
-    private transient CaseDataStoreService caseDataStoreService;
+    private CaseDataStoreService caseDataStoreService;
 
     @Autowired
     public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils,
