@@ -29,6 +29,8 @@ public class SmokeTest extends BaseTest {
     String microService;
     @Value("${idam.s2s-auth.url}")
     String s2sUrl;
+    @Value("${caseDocumentAmUrl}")
+    String caseDocumentAmUrl;
 
     IdamUtils idamUtils =  new IdamUtils();
 
@@ -37,14 +39,11 @@ public class SmokeTest extends BaseTest {
     String userToken = idamUtils.getIdamOauth2Token(username, password);
     String documentId = "00000000-0000-0000-0000-000000000000";
 
-    private static final String baseURI = StringUtils.defaultIfBlank(System.getenv("CASE_DOCUMENT_AM_URL"),
-        "http://localhost:4455");
-
 
     @Test
     public void should_receive_response_for_a_get_document_meta_data() {
 
-        RestAssured.baseURI = baseURI + "/cases/documents/" + documentId;
+        RestAssured.baseURI = caseDocumentAmUrl + "/cases/documents/" + documentId;
         RestAssured.useRelaxedHTTPSValidation();
 
         Response response = SerenityRest
@@ -64,7 +63,7 @@ public class SmokeTest extends BaseTest {
     @Test
     public void should_receive_response_for_a_get_document_binary() {
 
-        RestAssured.baseURI = baseURI + "/cases/documents/" + documentId + "/binary";
+        RestAssured.baseURI = caseDocumentAmUrl + "/cases/documents/" + documentId + "/binary";
         RestAssured.useRelaxedHTTPSValidation();
 
         Response response = SerenityRest
@@ -86,7 +85,7 @@ public class SmokeTest extends BaseTest {
         JSONObject requestBody = new JSONObject();
         requestBody.put("ttl", "2025-10-31T10:10:10+0000");
 
-        RestAssured.baseURI = baseURI + "/cases/documents/" + documentId;
+        RestAssured.baseURI = caseDocumentAmUrl + "/cases/documents/" + documentId;
         RestAssured.useRelaxedHTTPSValidation();
 
         Response response = SerenityRest
@@ -117,7 +116,7 @@ public class SmokeTest extends BaseTest {
         requestBody.put("caseId", "1234123412341234");
         requestBody.put("documents", documents);
 
-        RestAssured.baseURI = baseURI + "/cases/documents/" + documentId;
+        RestAssured.baseURI = caseDocumentAmUrl + "/cases/documents/" + documentId;
         RestAssured.useRelaxedHTTPSValidation();
 
         Response response = SerenityRest
