@@ -22,7 +22,7 @@ public class SwaggerConfiguration {
 
 
     @Value("${swaggerUrl}")
-    private transient String host;
+    private  String host;
 
     @Bean
     public Docket apiV2() {

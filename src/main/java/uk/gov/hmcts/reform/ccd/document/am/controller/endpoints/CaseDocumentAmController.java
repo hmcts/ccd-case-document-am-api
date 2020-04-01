@@ -11,11 +11,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,6 +43,7 @@ import java.util.UUID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.APPLICATION_JSON;
 
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHCODE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_CASE_ID_PATTERN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
 
 @Api(value = "cases")
@@ -50,7 +53,7 @@ public class CaseDocumentAmController  {
 
     private static final Logger LOG = LoggerFactory.getLogger(CaseDocumentAmController.class);
 
-    private transient DocumentManagementService  documentManagementService;
+    private DocumentManagementService  documentManagementService;
 
     @Autowired
     public CaseDocumentAmController(DocumentManagementService documentManagementService) {
@@ -62,9 +65,8 @@ public class CaseDocumentAmController  {
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "No Content")
        })
-    @RequestMapping(value = "/cases/documents/{documentId}",
-        produces = {APPLICATION_JSON},
-        method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/cases/documents/{documentId}",
+            produces = {APPLICATION_JSON})
     public ResponseEntity<Object> deleteDocumentbyDocumentId(
         @PathVariable("documentId") UUID documentId,
         @RequestHeader(value = "user-id", required = false) String userId,
@@ -76,7 +78,7 @@ public class CaseDocumentAmController  {
             return  documentManagementService.deleteDocument(documentId, userId, userRoles, permanent);
 
         }
-        LOG.error("User doesn't have update permission on requested document " + HttpStatus.FORBIDDEN);
+        LOG.error("User doesn't have update permission on requested document {}",  HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -87,7 +89,7 @@ public class CaseDocumentAmController  {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Returns contents of a file", response = Object.class),
        })
-    @RequestMapping(value = "/cases/documents/{documentId}/binary", produces = {APPLICATION_JSON}, method = RequestMethod.GET)
+    @GetMapping(value = "/cases/documents/{documentId}/binary", produces = {APPLICATION_JSON})
     public ResponseEntity<Object> getDocumentBinaryContentbyDocumentId(
         @PathVariable("documentId") UUID documentId) {
 
@@ -96,7 +98,7 @@ public class CaseDocumentAmController  {
             return documentManagementService.getDocumentBinaryContent(documentId);
 
         }
-        LOG.error("User doesn't have read permission on requested document " + HttpStatus.FORBIDDEN);
+        LOG.error("User doesn't have read permission on requested document {}", HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -106,15 +108,17 @@ public class CaseDocumentAmController  {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = StoredDocumentHalResource.class)
     })
-    @RequestMapping(value = "/cases/documents/{documentId}", produces = {APPLICATION_JSON}, method = RequestMethod.GET)
+    @GetMapping(value = "/cases/documents/{documentId}", produces = {APPLICATION_JSON})
     public ResponseEntity<Object> getDocumentbyDocumentId(@PathVariable("documentId") UUID documentId) {
+        ValidationService.validateInputParams(INPUT_STRING_PATTERN, documentId.toString());
+        ValidationService.validateDocumentId(documentId.toString());
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkUserPermission(responseEntity, documentId,  Permission.READ)) {
             return  ResponseEntity
                  .status(HttpStatus.OK)
                  .body(responseEntity.getBody());
         }
-        LOG.error("User doesn't have read permission on requested document " + HttpStatus.FORBIDDEN);
+        LOG.error("User doesn't have read permission on requested document {}", HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -123,10 +127,9 @@ public class CaseDocumentAmController  {
     @ApiOperation(value = "Updates document instance (ex. ttl).")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = StoredDocumentHalResource.class)})
-    @RequestMapping(value = "/cases/documents/{documentId}",
+    @PatchMapping(value = "/cases/documents/{documentId}",
         produces = {APPLICATION_JSON},
-        consumes = {APPLICATION_JSON},
-        method = RequestMethod.PATCH)
+        consumes = {APPLICATION_JSON})
     public ResponseEntity<Object> patchDocumentbyDocumentId(
         @ApiParam(value = "", required = true)
         @Valid UpdateDocumentCommand body,
@@ -138,7 +141,7 @@ public class CaseDocumentAmController  {
             ResponseEntity response =   documentManagementService.patchDocument(documentId, body, userId, userRoles);
             return  ResponseEntity.status(HttpStatus.OK).body(response.getBody());
         }
-        LOG.error("User doesn't have update permission on requested document " + HttpStatus.FORBIDDEN);
+        LOG.error("User doesn't have update permission on requested document {}", HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -149,22 +152,33 @@ public class CaseDocumentAmController  {
     @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Created", response = StoredDocumentHalResource.class),
         @ApiResponse(code = 204, message = "No Content")})
-    @RequestMapping(value = "/cases/documents/attachToCase",
+    @PatchMapping(value = "/cases/documents/attachToCase",
         produces = {APPLICATION_JSON},
-        consumes = {APPLICATION_JSON},
-        method = RequestMethod.PATCH)
+        consumes = {APPLICATION_JSON})
     public ResponseEntity<Object> patchMetaDataOnDocuments(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody DocumentMetadata caseDocumentMetadata,
         @RequestHeader(value = "user-id", required = false) String userId) {
 
         try {
-            documentManagementService.patchDocumentMetadata(caseDocumentMetadata, userId);
+            if (!ValidationService.validate(caseDocumentMetadata.getCaseId())) {
+                throw new BadRequestException("The Case Id is invalid");
+            }
+            ValidationService.validateInputParams(INPUT_CASE_ID_PATTERN, caseDocumentMetadata.getCaseId());
+            caseDocumentMetadata.getDocuments()
+                                .forEach(document -> {
+                                    ValidationService.validateInputParams(INPUT_STRING_PATTERN, document.getId());
+                                    ValidationService.validateDocumentId(document.getId());
+                                });
+
+            documentManagementService.patchDocumentMetadata(caseDocumentMetadata,  userId);
+        } catch (BadRequestException | IllegalArgumentException e) {
+            throw new BadRequestException("Exception while attaching the documents to a case :" + e);
         } catch (Exception e) {
-            LOG.error("Exception while attaching the documents to a case :" + e);
+            LOG.error("Exception in controller for patch MetaData Documents API");
             throw e;
         }
-        return new ResponseEntity<Object>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     //**************** Upload Documents  API ***************
@@ -173,10 +187,9 @@ public class CaseDocumentAmController  {
     @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Created", response = StoredDocumentHalResourceCollection.class),
         @ApiResponse(code = 204, message = "No Content")})
-    @RequestMapping(value = "/cases/documents",
+    @PostMapping(value = "/cases/documents",
         produces = {APPLICATION_JSON},
-        consumes = {"multipart/form-data"},
-        method = RequestMethod.POST)
+        consumes = {"multipart/form-data"})
     public ResponseEntity<Object> uploadDocuments(
 
         @ApiParam(value = "", required = true)
@@ -206,17 +219,17 @@ public class CaseDocumentAmController  {
         @RequestHeader(value = "user-roles", required = false) String userRoles) {
 
         try {
-            ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification, userRoles);
+            ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification,
+                                                  userRoles, userId);
             ValidationService.isValidSecurityClassification(classification);
             ValidationService.validateLists(files, roles);
+            roles.forEach(role -> ValidationService.validateInputParams(INPUT_STRING_PATTERN, role));
 
             return documentManagementService.uploadDocuments(files, classification, roles,
-                                                             caseTypeId, jurisdictionId, userId);
+                                                              caseTypeId, jurisdictionId, userId);
         } catch (BadRequestException | IllegalArgumentException e) {
-            LOG.error("Exception while uploading the documents :" + e);
             throw new BadRequestException("Exception while uploading the documents :" + e);
         } catch (Exception e) {
-            LOG.error("Exception while uploading the documents :" + e);
             throw new ResponseFormatException("Exception while uploading the documents :" + e);
         }
     }
@@ -226,7 +239,7 @@ public class CaseDocumentAmController  {
     @ApiOperation(value = "Retrieves the hashcode for document Id")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = StoredDocumentHalResource.class)})
-    @RequestMapping(value = "/cases/documents/{documentId}/token", produces = {APPLICATION_JSON}, method = RequestMethod.GET)
+    @GetMapping(value = "/cases/documents/{documentId}/token", produces = {APPLICATION_JSON})
     public ResponseEntity<Object> generateHashCode(
 
         @PathVariable("documentId") UUID documentId,
@@ -237,20 +250,26 @@ public class CaseDocumentAmController  {
         @NotNull(message = "Provide the Jurisdiction ID ")
         @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId) {
         try {
-            ValidationService.validateInputParams(INPUT_STRING_PATTERN, documentId.toString(), caseTypeId, jurisdictionId);
+            StoredDocumentHalResource resource = new StoredDocumentHalResource();
+            ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
+            if (responseEntity.getStatusCode().equals(HttpStatus.OK) && null != responseEntity.getBody()) {
+                resource = (StoredDocumentHalResource) responseEntity.getBody();
+            }
+
+            ValidationService.validateInputParams(INPUT_STRING_PATTERN, documentId.toString(),
+                                                  resource.getMetadata().get("caseTypeId"), resource.getMetadata().get("jurisdictionId"));
 
             HashMap<String, String> responseBody = new HashMap<>();
 
-            String hashedToken = ApplicationUtils.generateHashCode(documentId.toString().concat(jurisdictionId).concat(caseTypeId));
+            String hashedToken = ApplicationUtils.generateHashCode(documentId.toString().concat(
+                resource.getMetadata().get("jurisdictionId")).concat(resource.getMetadata().get("caseTypeId")));
             responseBody.put(HASHCODE, hashedToken);
 
             return new ResponseEntity<>(responseBody, HttpStatus.OK);
 
         } catch (BadRequestException | IllegalArgumentException e) {
-            LOG.error("Illegal argument exception: " + e);
             throw new BadRequestException("Illegal argument exception:" + e);
         } catch (Exception e) {
-            LOG.error("Exception :" + e);
             throw new ResponseFormatException("Exception :" + e);
         }
     }

@@ -28,7 +28,9 @@ import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -42,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
 public class CaseDocumentAmControllerTest {
@@ -201,10 +204,10 @@ public class CaseDocumentAmControllerTest {
         doReturn(TRUE).when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),getUuid(), Permission.UPDATE);
         doReturn(ResponseEntity.status(HttpStatus.NO_CONTENT).build()).when(documentManagementService)
-            .deleteDocument(getUuid(),"","",true);
+            .deleteDocument(getUuid(),"test","test",true);
 
         ResponseEntity response = testee
-            .deleteDocumentbyDocumentId(getUuid(),"","", true);
+            .deleteDocumentbyDocumentId(getUuid(),"test","test", true);
 
         assertAll(
             () ->  assertNotNull(response, VALID_RESPONSE),
@@ -222,8 +225,8 @@ public class CaseDocumentAmControllerTest {
         Assertions.assertThrows(ForbiddenException.class, () -> {
             testee.deleteDocumentbyDocumentId(
                 getUuid(),
-                "",
-                "",
+                "test",
+                "test",
                 true
             );
         });
@@ -236,10 +239,10 @@ public class CaseDocumentAmControllerTest {
             .checkUserPermission(setDocumentMetaData(),getUuid(), Permission.UPDATE);
         UpdateDocumentCommand body = null;
         doReturn(setDocumentMetaData()).when(documentManagementService).patchDocument(getUuid(), body,
-                                                                                      "", "");
+                                                                                      "test", "test");
 
         ResponseEntity response = testee.patchDocumentbyDocumentId(body,
-                                                                    getUuid(), "", "");
+                                                                    getUuid(), "test", "test");
         assertAll(
             () ->  assertNotNull(response, VALID_RESPONSE),
             () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE)
@@ -257,8 +260,8 @@ public class CaseDocumentAmControllerTest {
             testee.patchDocumentbyDocumentId(
                 body,
                 getUuid(),
-                "",
-                ""
+                "test",
+                "test"
             );
         });
     }
@@ -266,7 +269,11 @@ public class CaseDocumentAmControllerTest {
     @Test
     public void shouldPatchMetaDataOnDocuments() {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        DocumentMetadata body = null;
+        Document document = Document.builder().id("cab18c21-8b7c-452b-937c-091225e0cc12").build();
+        DocumentMetadata body = DocumentMetadata.builder()
+                                                .caseId("1111122222333334")
+                                                .documents(Arrays.asList(document))
+                                                .build();
         ResponseEntity response = testee.patchMetaDataOnDocuments(body, "");
 
         assertAll(
@@ -388,37 +395,26 @@ public class CaseDocumentAmControllerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void generateHashCode_HappyPath() {
-        ResponseEntity<Object> responseEntity = testee.generateHashCode(UUID.fromString(MATCHED_DOCUMENT_ID), BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
+        Map<String, String> myMap = new HashMap<>();
+        myMap.put("caseId",CASE_ID);
+        myMap.put("caseTypeId", BEFTA_CASETYPE_2);
+        myMap.put("jurisdictionId", BEFTA_JURISDICTION_2);
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        storedDocumentHalResource.setMetadata(myMap);
+
+        when(documentManagementService.getDocumentMetadata(UUID.fromString(MATCHED_DOCUMENT_ID)))
+            .thenReturn(new ResponseEntity(storedDocumentHalResource, HttpStatus.OK));
+
+        ResponseEntity<Object> responseEntity = testee.generateHashCode(UUID.fromString(MATCHED_DOCUMENT_ID),"","");
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
     @Test //this test returns an illegal argument exception because UUID.fromString() contains a throw for illegal arguments
     void generateHashCode_BadRequest() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            testee.generateHashCode(UUID.fromString("A.A"), BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
-        });
-    }
-
-    //this test and the next return Bad Request because the exception handler seems to be made in a way that it trys to return the actual exception thrown
-    @Test
-    void generateHashCode_BadRequest2() {
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            testee.generateHashCode(UUID.fromString(MATCHED_DOCUMENT_ID), "A.A", BEFTA_JURISDICTION_2);
-        });
-    }
-
-    @Test
-    void generateHashCode_BadRequestNullArgument() {
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            testee.generateHashCode(UUID.fromString(MATCHED_DOCUMENT_ID), null, BEFTA_JURISDICTION_2);
-        });
-    }
-
-    @Test
-    void generateHashCode_BadRequest3() {
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            testee.generateHashCode(UUID.fromString(MATCHED_DOCUMENT_ID), BEFTA_CASETYPE_2, "A.A");
+            testee.generateHashCode( UUID.fromString("A.A"),"","");
         });
     }
 }
