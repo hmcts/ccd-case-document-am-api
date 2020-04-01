@@ -1,12 +1,12 @@
 package uk.gov.hmcts.reform.ccd.document.am;
 
-import com.microsoft.applicationinsights.boot.dependencies.apachecommons.lang3.StringUtils;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
 import org.hamcrest.Matchers;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -80,7 +80,7 @@ public class SmokeTest extends BaseTest {
     }
 
     @Test
-    public void should_receive_response_for_patch_ttl() {
+    public void should_receive_response_for_patch_ttl() throws JSONException {
 
         JSONObject requestBody = new JSONObject();
         requestBody.put("ttl", "2025-10-31T10:10:10+0000");
@@ -103,7 +103,7 @@ public class SmokeTest extends BaseTest {
     }
 
     @Test
-    public void should_receive_response_for_patch_attach_to_document() {
+    public void should_receive_response_for_patch_attach_to_document() throws JSONException {
 
         JSONObject document1 = new JSONObject();
         document1.put("id", documentId);
