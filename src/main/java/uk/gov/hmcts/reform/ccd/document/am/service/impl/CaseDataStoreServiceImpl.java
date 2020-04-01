@@ -56,14 +56,10 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
         try {
             HttpHeaders headers = prepareRequestForUpload();
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
+            String documentUrl = String.format("%s/cases/%s/documents/%s", caseDataStoreUrl, caseId, documentId);
 
             ResponseEntity<Object> responseEntity =
-                restTemplate.exchange(caseDataStoreUrl
-                                          .concat("/cases/")
-                                          .concat(caseId)
-                                          .concat("/documents/")
-                                          .concat(documentId.toString()),
-                                      HttpMethod.GET, requestEntity, Object.class);
+                restTemplate.exchange(documentUrl, HttpMethod.GET, requestEntity, Object.class);
 
             if (responseEntity.getStatusCode() == HttpStatus.OK
                 && responseEntity.getBody() instanceof LinkedHashMap) {

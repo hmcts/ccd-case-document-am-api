@@ -199,7 +199,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
 
             restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
-            restTemplate.exchange(documentURL.concat("/documents"), HttpMethod.PATCH, requestEntity, Void.class);
+            String documentUrl = String.format("%s/documents", documentURL);
+            restTemplate.exchange(documentUrl, HttpMethod.PATCH, requestEntity, Void.class);
 
         } catch (RestClientException ex) {
             LOG.error("Exception occurred");
@@ -258,10 +259,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 bodyMap.add(FILES, file.getResource());
             }
         }
+        String docUrl = String.format("%s/documents", documentURL);
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
         ResponseEntity<Object> uploadedDocumentResponse = restTemplate
-            .postForEntity(documentURL.concat("/documents"), requestEntity, Object.class);
+            .postForEntity(docUrl, requestEntity, Object.class);
 
         if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode()) && null != uploadedDocumentResponse
             .getBody()) {

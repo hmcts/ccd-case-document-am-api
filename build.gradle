@@ -173,7 +173,7 @@ pitest {
   pitestVersion = "1.4.9"
   testPlugin = "junit5"
   targetClasses = ['uk.gov.hmcts.reform.ccd.document.am.*']
-  excludedClasses = ['uk.gov.hmcts.reform.ccd.document.am.configuration.*','uk.gov.hmcts.reform.ccd.document.am.apihelper.*']
+  excludedClasses = ['uk.gov.hmcts.reform.ccd.document.am.Application', 'uk.gov.hmcts.reform.ccd.document.am.controller.advice.ErrorConstants', 'uk.gov.hmcts.reform.ccd.document.am.configuration.*','uk.gov.hmcts.reform.ccd.document.am.apihelper.*', 'uk.gov.hmcts.reform.ccd.document.am.model.enums.*']
   threads = 15
   outputFormats = ['XML', 'HTML']
   timestampedReports = true
