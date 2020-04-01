@@ -69,13 +69,10 @@ public class CaseDocumentAmController  {
             produces = {APPLICATION_JSON})
     public ResponseEntity<Object> deleteDocumentbyDocumentId(
         @PathVariable("documentId") UUID documentId,
-        @RequestHeader(value = "user-id", required = false) String userId,
-        @RequestHeader(value = "user-roles", required = false) String userRoles,
         @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false") Boolean permanent) {
-
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkUserPermission(responseEntity, documentId, Permission.UPDATE)) {
-            return  documentManagementService.deleteDocument(documentId, userId, userRoles, permanent);
+            return  documentManagementService.deleteDocument(documentId, permanent);
 
         }
         LOG.error("User doesn't have update permission on requested document {}",  HttpStatus.FORBIDDEN);
@@ -133,12 +130,10 @@ public class CaseDocumentAmController  {
     public ResponseEntity<Object> patchDocumentbyDocumentId(
         @ApiParam(value = "", required = true)
         @Valid UpdateDocumentCommand body,
-        @PathVariable("documentId") UUID documentId,
-        @RequestHeader(value = "user-id", required = false) String userId,
-        @RequestHeader(value = "user-roles", required = false) String userRoles) {
+        @PathVariable("documentId") UUID documentId) {
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkUserPermission(responseEntity, documentId, Permission.UPDATE)) {
-            ResponseEntity response =   documentManagementService.patchDocument(documentId, body, userId, userRoles);
+            ResponseEntity response =   documentManagementService.patchDocument(documentId, body);
             return  ResponseEntity.status(HttpStatus.OK).body(response.getBody());
         }
         LOG.error("User doesn't have update permission on requested document {}", HttpStatus.FORBIDDEN);
@@ -157,8 +152,7 @@ public class CaseDocumentAmController  {
         consumes = {APPLICATION_JSON})
     public ResponseEntity<Object> patchMetaDataOnDocuments(
         @ApiParam(value = "", required = true)
-        @Valid @RequestBody DocumentMetadata caseDocumentMetadata,
-        @RequestHeader(value = "user-id", required = false) String userId) {
+        @Valid @RequestBody DocumentMetadata caseDocumentMetadata) {
 
         try {
             if (!ValidationService.validate(caseDocumentMetadata.getCaseId())) {
@@ -171,7 +165,7 @@ public class CaseDocumentAmController  {
                                     ValidationService.validateDocumentId(document.getId());
                                 });
 
-            documentManagementService.patchDocumentMetadata(caseDocumentMetadata,  userId);
+            documentManagementService.patchDocumentMetadata(caseDocumentMetadata);
         } catch (BadRequestException | IllegalArgumentException e) {
             throw new BadRequestException("Exception while attaching the documents to a case :" + e);
         } catch (Exception e) {
@@ -210,23 +204,16 @@ public class CaseDocumentAmController  {
 
         @ApiParam(value = "Jurisdiction identifier for the case document.", required = true)
         @NotNull(message = "Provide the Jurisdiction ID ")
-        @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId,
-
-        @ApiParam(value = "User-Id of the currently authenticated user. If provided will be used to populate the creator field of a document"
-                          + " and will be used for authorisation.", required = false)
-        @RequestHeader(value = "user-id", required = true) String userId,
-
-        @RequestHeader(value = "user-roles", required = false) String userRoles) {
+        @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId) {
 
         try {
-            ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification,
-                                                  userRoles, userId);
+            ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification);
             ValidationService.isValidSecurityClassification(classification);
             ValidationService.validateLists(files, roles);
             roles.forEach(role -> ValidationService.validateInputParams(INPUT_STRING_PATTERN, role));
 
             return documentManagementService.uploadDocuments(files, classification, roles,
-                                                              caseTypeId, jurisdictionId, userId);
+                                                              caseTypeId, jurisdictionId);
         } catch (BadRequestException | IllegalArgumentException e) {
             throw new BadRequestException("Exception while uploading the documents :" + e);
         } catch (Exception e) {
@@ -242,13 +229,7 @@ public class CaseDocumentAmController  {
     @GetMapping(value = "/cases/documents/{documentId}/token", produces = {APPLICATION_JSON})
     public ResponseEntity<Object> generateHashCode(
 
-        @PathVariable("documentId") UUID documentId,
-
-        @NotNull(message = "Provide the Case Type ID ")
-        @RequestHeader(value = "caseTypeId", required = true) String caseTypeId,
-
-        @NotNull(message = "Provide the Jurisdiction ID ")
-        @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId) {
+        @PathVariable("documentId") UUID documentId) {
         try {
             StoredDocumentHalResource resource = new StoredDocumentHalResource();
             ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);

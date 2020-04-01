@@ -20,14 +20,13 @@ public interface DocumentManagementService {
 
     ResponseEntity<Object> uploadDocuments(List<MultipartFile> files, String classification, List<String> roles,
                                             String caseTypeId,
-                                           String jurisdictionId, String userId);
+                                           String jurisdictionId);
 
     boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, Permission permissionToCheck);
 
-    ResponseEntity<Object> deleteDocument(final UUID documentId, String userId, String userRoles, Boolean permanent);
+    ResponseEntity<Object> deleteDocument(final UUID documentId,  Boolean permanent);
 
-    ResponseEntity patchDocument(final UUID documentId, UpdateDocumentCommand updateDocumentCommand,
-                                             String userId, String userRoles);
+    ResponseEntity patchDocument(final UUID documentId, UpdateDocumentCommand updateDocumentCommand);
 
-    boolean patchDocumentMetadata(DocumentMetadata caseDocumentMetadata, String userId);
+    boolean patchDocumentMetadata(DocumentMetadata caseDocumentMetadata);
 }

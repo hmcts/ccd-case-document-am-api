@@ -22,7 +22,6 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ROLES;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.THUMBNAIL;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USER_ROLES;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -189,12 +188,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public boolean patchDocumentMetadata(DocumentMetadata documentMetadata, String userId) {
+    public boolean patchDocumentMetadata(DocumentMetadata documentMetadata) {
         try {
-            LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
             HttpHeaders headers = new HttpHeaders();
-            headers.addAll(securityUtils.serviceAuthorizationHeaders());
-            prepareRequestForAttachingDocumentToCase(documentMetadata, userId, bodyMap, headers);
+            headers.addAll(securityUtils.authorizationHeaders());
+            headers.add(USERID,securityUtils.getUserId());
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
+            prepareRequestForAttachingDocumentToCase(documentMetadata,  bodyMap);
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
 
             restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
@@ -208,9 +209,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     private void prepareRequestForAttachingDocumentToCase(DocumentMetadata documentMetadata,
-                                                      String userId,
-                                                      LinkedMultiValueMap<String, Object> bodyMap,
-                                                      HttpHeaders headers) {
+
+                                                      LinkedMultiValueMap<String, Object> bodyMap) {
 
         for (Document document : documentMetadata.getDocuments()) {
             ResponseEntity responseEntity = getDocumentMetadata(UUID.fromString(document.getId()));
@@ -244,18 +244,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             bodyMap.add("documents", documentUpdate);
         }
 
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set(USERID, userId);
     }
 
     @Override
     public ResponseEntity<Object> uploadDocuments(List<MultipartFile> files, String classification, List<String> roles,
-                                                   String caseTypeId, String jurisdictionId,
-                                                  String userId) {
+                                                   String caseTypeId, String jurisdictionId) {
 
         LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
-        HttpHeaders headers = prepareRequestForUpload(classification, roles, caseTypeId, jurisdictionId,
-            userId, bodyMap);
+        HttpHeaders headers = prepareRequestForUpload(classification, roles, caseTypeId, jurisdictionId,bodyMap);
 
         for (MultipartFile file : files) {
             if (!file.isEmpty()) {
@@ -278,14 +274,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public ResponseEntity patchDocument(UUID documentId, UpdateDocumentCommand ttl, String userId, String userRoles) {
+    public ResponseEntity patchDocument(UUID documentId, UpdateDocumentCommand ttl) {
         if (!ValidationService.validateTTL(ttl.getTtl())) {
             throw new BadRequestException(String.format(
                 "Incorrect date format %s",
                 ttl.getTtl()));
         }
         try {
-            final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(ttl, getHttpHeaders(userId, userRoles));
+            final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(ttl, getHttpHeaders());
             String patchTTLUrl = String.format("%s/documents/%s", documentURL, documentId);
             ResponseEntity<StoredDocumentHalResource> response = restTemplate.exchange(
                 patchTTLUrl,
@@ -364,12 +360,13 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         documentUrl = documentUrl.substring(documentUrl.length() - length);
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
             .getRequest();
-        LOG.info("URL from request is: {}", request.getRequestURL());
+        StringBuffer  url = request.getRequestURL();
+        LOG.info("URL from request is: {}", url);
         return request.getRequestURL().append("/").append(documentUrl).toString();
     }
 
     private HttpHeaders prepareRequestForUpload(String classification, List<String> roles,
-                                                String caseTypeId, String jurisdictionId, String userId,
+                                                String caseTypeId, String jurisdictionId,
                                                 LinkedMultiValueMap<String, Object> bodyMap) {
 
 
@@ -386,7 +383,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         //S2S token needs to be generated by our microservice.
         headers.addAll(securityUtils.serviceAuthorizationHeaders());
-        headers.set(USERID, userId);
+        headers.set(USERID, securityUtils.getUserId());
         return headers;
     }
 
@@ -424,10 +421,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Override
     @SuppressWarnings("unchecked")
-    public ResponseEntity<Object> deleteDocument(UUID documentId, String userId, String userRoles, Boolean permanent) {
+    public ResponseEntity<Object> deleteDocument(UUID documentId,  Boolean permanent) {
 
         try {
-            final HttpEntity requestEntity = new HttpEntity(getHttpHeaders(userId, userRoles));
+            final HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
             String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, documentId, permanent);
             LOG.info("documentDeleteUrl : {}", documentDeleteUrl);
             ResponseEntity response = restTemplate.exchange(
@@ -459,11 +456,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
     }
 
-    private HttpHeaders getHttpHeaders(String userId, String userRoles) {
+    private HttpHeaders getHttpHeaders() {
         HttpHeaders headers = securityUtils.authorizationHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.add(USERID, userId);
-        headers.add(USER_ROLES, userRoles);
         return headers;
     }
 }

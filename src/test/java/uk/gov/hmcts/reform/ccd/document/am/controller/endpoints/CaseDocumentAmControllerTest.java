@@ -204,10 +204,10 @@ public class CaseDocumentAmControllerTest {
         doReturn(TRUE).when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),getUuid(), Permission.UPDATE);
         doReturn(ResponseEntity.status(HttpStatus.NO_CONTENT).build()).when(documentManagementService)
-            .deleteDocument(getUuid(),"test","test",true);
+            .deleteDocument(getUuid(),true);
 
         ResponseEntity response = testee
-            .deleteDocumentbyDocumentId(getUuid(),"test","test", true);
+            .deleteDocumentbyDocumentId(getUuid(), true);
 
         assertAll(
             () ->  assertNotNull(response, VALID_RESPONSE),
@@ -225,8 +225,6 @@ public class CaseDocumentAmControllerTest {
         Assertions.assertThrows(ForbiddenException.class, () -> {
             testee.deleteDocumentbyDocumentId(
                 getUuid(),
-                "test",
-                "test",
                 true
             );
         });
@@ -238,11 +236,10 @@ public class CaseDocumentAmControllerTest {
         doReturn(TRUE).when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),getUuid(), Permission.UPDATE);
         UpdateDocumentCommand body = null;
-        doReturn(setDocumentMetaData()).when(documentManagementService).patchDocument(getUuid(), body,
-                                                                                      "test", "test");
+        doReturn(setDocumentMetaData()).when(documentManagementService).patchDocument(getUuid(), body);
 
         ResponseEntity response = testee.patchDocumentbyDocumentId(body,
-                                                                    getUuid(), "test", "test");
+                                                                    getUuid());
         assertAll(
             () ->  assertNotNull(response, VALID_RESPONSE),
             () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE)
@@ -259,9 +256,7 @@ public class CaseDocumentAmControllerTest {
         Assertions.assertThrows(ForbiddenException.class, () -> {
             testee.patchDocumentbyDocumentId(
                 body,
-                getUuid(),
-                "test",
-                "test"
+                getUuid()
             );
         });
     }
@@ -274,7 +269,7 @@ public class CaseDocumentAmControllerTest {
                                                 .caseId("1111122222333334")
                                                 .documents(Arrays.asList(document))
                                                 .build();
-        ResponseEntity response = testee.patchMetaDataOnDocuments(body, "");
+        ResponseEntity response = testee.patchMetaDataOnDocuments(body);
 
         assertAll(
             () -> assertNotNull(response, VALID_RESPONSE),
@@ -287,7 +282,7 @@ public class CaseDocumentAmControllerTest {
     public void shouldThrowBadRequestExceptionWhenUploadedFilesIsNull() {
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(null, Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE),
-                                   BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2, USER_ID, DUMMY_ROLE);
+                                   BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
         });
     }
 
@@ -297,7 +292,7 @@ public class CaseDocumentAmControllerTest {
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
                                    Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE),
-                                   BEFTA_CASETYPE_2, "BEFTA@JURISDICTION_2$$$$", USER_ID, null);
+                                   BEFTA_CASETYPE_2, "BEFTA@JURISDICTION_2$$$$");
         });
     }
 
@@ -307,7 +302,7 @@ public class CaseDocumentAmControllerTest {
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
                                    Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE),
-                                   null, BEFTA_JURISDICTION_2, USER_ID, DUMMY_ROLE);
+                                   null, BEFTA_JURISDICTION_2);
         });
     }
 
@@ -317,7 +312,7 @@ public class CaseDocumentAmControllerTest {
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
                                    Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE),
-                                   "BEFTA_CASETYPE_2&&&&&&&&&", "BEFTA_JURISDICTION_2", USER_ID, DUMMY_ROLE);
+                                   "BEFTA_CASETYPE_2&&&&&&&&&", "BEFTA_JURISDICTION_2");
         });
     }
 
@@ -327,7 +322,7 @@ public class CaseDocumentAmControllerTest {
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
                                    Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE),
-                                   BEFTA_CASETYPE_2, null, USER_ID, DUMMY_ROLE);
+                                   BEFTA_CASETYPE_2, null);
         });
     }
 
@@ -337,7 +332,7 @@ public class CaseDocumentAmControllerTest {
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
                                    Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE),
-                                   BEFTA_CASETYPE_2, "BEFTA@JURISDICTION_2$$$$", USER_ID, DUMMY_ROLE);
+                                   BEFTA_CASETYPE_2, "BEFTA@JURISDICTION_2$$$$");
         });
     }
 
@@ -407,14 +402,14 @@ public class CaseDocumentAmControllerTest {
         when(documentManagementService.getDocumentMetadata(UUID.fromString(MATCHED_DOCUMENT_ID)))
             .thenReturn(new ResponseEntity(storedDocumentHalResource, HttpStatus.OK));
 
-        ResponseEntity<Object> responseEntity = testee.generateHashCode(UUID.fromString(MATCHED_DOCUMENT_ID),"","");
+        ResponseEntity<Object> responseEntity = testee.generateHashCode(UUID.fromString(MATCHED_DOCUMENT_ID));
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
     @Test //this test returns an illegal argument exception because UUID.fromString() contains a throw for illegal arguments
     void generateHashCode_BadRequest() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            testee.generateHashCode(UUID.fromString("A.A"),"","");
+            testee.generateHashCode(UUID.fromString("A.A"));
         });
     }
 }

@@ -36,7 +36,9 @@ public class SwaggerConfiguration {
             .host(host)
             .globalOperationParameters(Arrays.asList(
                 headerServiceAuthorization(),
-                headerAuthorization()
+                headerAuthorization(),
+                headerUserId(),
+                headerUserRoles()
             ));
     }
 
@@ -67,4 +69,26 @@ public class SwaggerConfiguration {
             .required(true)
             .build();
     }
+
+    private Parameter headerUserId() {
+        return new ParameterBuilder()
+            .name("user-id")
+            .description("User-id of the currently authenticated user. If provided will be used to populate the creator field of a document and"
+                             + " will be used for authorisation.")
+            .modelRef(new ModelRef("string"))
+            .parameterType("header")
+            .required(false)
+            .build();
+    }
+
+    private Parameter headerUserRoles() {
+        return new ParameterBuilder()
+            .name("user-roles")
+            .description("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
+            .modelRef(new ModelRef("string"))
+            .parameterType("header")
+            .required(false)
+            .build();
+    }
+
 }
