@@ -35,19 +35,15 @@ public class ValidationService {
      * @return
      */
     public static boolean validate(String numberString) {
-        if (numberString == null || numberString.length() != 16) {
-            return false;
-        }
-
-        return true;
+        return (numberString != null && numberString.length() == 16);
     }
 
-    public static void isValidSecurityClassification(String securityClassification) throws IllegalArgumentException {
+    public static void isValidSecurityClassification(String securityClassification) {
         try {
             Enum.valueOf(SecurityClassification.class, securityClassification);
         } catch (final IllegalArgumentException ex) {
             LOG.info("The security classification is not valid");
-            throw new BadRequestException("The security classification" + securityClassification + " is not valid");
+            throw new BadRequestException("The security classification " + securityClassification + " is not valid");
         }
     }
 
@@ -80,6 +76,7 @@ public class ValidationService {
             sdfrmt.setLenient(false);
             try {
                 Date javaDate = sdfrmt.parse(strDate);
+                LOG.info("TTL {}", javaDate);
             } catch (ParseException e) {
                 return false;
             }
@@ -90,6 +87,7 @@ public class ValidationService {
     public static void validateDocumentId(String documentId) {
         try {
             UUID uuid = UUID.fromString(documentId);
+            LOG.info("UUID {}", uuid);
         } catch (IllegalArgumentException exception) {
             throw new IllegalArgumentException(String.format("The input parameter: %s is not a valid UUID", documentId));
         }
