@@ -111,28 +111,28 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
         try {
             final HttpEntity requestEntity = new HttpEntity(securityUtils.authorizationHeaders());
-            LOG.info("Document Store URL is : " + documentURL);
+            LOG.info("Document Store URL is : {}", documentURL);
             String documentMetadataUrl = String.format("%s/documents/%s", documentURL, documentId);
-            LOG.info("documentMetadataUrl : " + documentMetadataUrl);
+            LOG.info("documentMetadataUrl : {}", documentMetadataUrl);
             ResponseEntity<StoredDocumentHalResource> response = restTemplate.exchange(
                 documentMetadataUrl,
                 GET,
                 requestEntity,
                 StoredDocumentHalResource.class
                                                                                       );
-            LOG.info("response : " + response.getStatusCode());
-            LOG.info("response : " + response.getBody());
+            LOG.info("response : {}", response.getStatusCode());
+            LOG.info("response : {}", response.getBody());
             ResponseEntity responseEntity = ResponseHelper.toResponseEntity(response, documentId);
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
                 LOG.info("Positive response");
                 return responseEntity;
             } else {
-                LOG.error("Document doesn't exist for requested document id at Document Store" + responseEntity
+                LOG.error("Document doesn't exist for requested document id at Document Store {}", responseEntity
                     .getStatusCode());
                 throw new ResourceNotFoundException(documentId.toString());
             }
         } catch (HttpClientErrorException ex) {
-            LOG.error("Exception while getting the metadata:" + ex);
+            LOG.error("Exception while getting the metadata: {}", ex.getMessage());
             if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
                 throw new ResourceNotFoundException(documentId.toString());
             } else {
@@ -203,7 +203,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             restTemplate.exchange(documentUrl, HttpMethod.PATCH, requestEntity, Void.class);
 
         } catch (RestClientException ex) {
-            LOG.error("Exception while attaching a document to case : " + ex);
+            LOG.error("Exception occurred");
             throw ex;
         }
         return true;
@@ -301,7 +301,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
                 return responseEntity;
             } else {
-                LOG.error("Document doesn't exist for requested document id at Document Store API Side " + response
+                LOG.error("Document doesn't exist for requested document id at Document Store API Side {}", response
                     .getStatusCode());
                 throw new ResourceNotFoundException(documentId.toString());
             }
@@ -326,21 +326,18 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         try {
             LinkedHashMap documents = (LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse.getBody())
                 .get(EMBEDDED);
-            //LOG.error("Documents in response :" + documents);
 
             ArrayList<Object> documentList = (ArrayList<Object>) (documents.get(DOCUMENTS));
-            LOG.error("documentList :" + documentList);
+            LOG.error("documentList :{}", documentList);
 
             for (Object document : documentList) {
                 if (document instanceof LinkedHashMap) {
-                    //LOG.error("Individual document :" + ((LinkedHashMap) document).entrySet());
                     LinkedHashMap<String, Object> hashmap = ((LinkedHashMap<String, Object>) (document));
                     hashmap.remove(EMBEDDED);
                     updateDomainForLinks(hashmap, jurisdictionId, caseTypeId);
                 }
             }
         } catch (Exception exception) {
-            LOG.error("Error while formatting the uploaded document response :" + exception);
             throw new ResponseFormatException("Error while formatting the uploaded document response " + exception);
         }
     }
@@ -359,9 +356,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
             links.getJSONObject(BINARY).put(HREF, buildDocumentURL((String) links.getJSONObject(BINARY).get(HREF), 43));
             hashmap.put(LINKS, links.toMap());
-            LOG.error(hashmap.values().toString());
+            String message = hashmap.values().toString();
+            LOG.error(message);
         } catch (Exception e) {
-            LOG.error("Exception within UpdateDomainForLinks :" + e);
+            LOG.error("Exception occurred");
             throw e;
         }
     }
@@ -370,7 +368,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         documentUrl = documentUrl.substring(documentUrl.length() - length);
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
             .getRequest();
-        LOG.info("URL from request is: " + request.getRequestURL());
+        LOG.info("URL from request is: {}", request.getRequestURL());
         return request.getRequestURL().append("/").append(documentUrl).toString();
     }
 
@@ -416,7 +414,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization, Permission permissionToCheck) {
         String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
         if (!ValidationService.validate(caseId)) {
-            LOG.error(CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
+            LOG.error("Bad Request Exception {}", CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
             throw new BadRequestException(CASE_ID_INVALID);
 
         } else {
@@ -435,8 +433,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
         try {
             final HttpEntity requestEntity = new HttpEntity(getHttpHeaders(userId, userRoles));
-            String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL, documentId);
-            LOG.info("documentDeleteUrl : " + documentDeleteUrl);
+            String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, documentId, permanent);
+            LOG.info("documentDeleteUrl : {}", documentDeleteUrl);
             ResponseEntity response = restTemplate.exchange(
                 documentDeleteUrl,
                 DELETE,
@@ -447,12 +445,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 LOG.info("Positive response");
                 return response;
             } else {
-                LOG.error("Document doesn't exist for requested document id at Document Store" + response
+                LOG.error("Document doesn't exist for requested document id at Document Store {}", response
                     .getStatusCode());
                 throw new ResourceNotFoundException(documentId.toString());
             }
         } catch (HttpClientErrorException ex) {
-            LOG.error("Exception while deleting the document:" + ex);
+            LOG.error("Exception while deleting the document: {}", ex.getMessage());
             if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
                 throw new ResourceNotFoundException(documentId.toString());
             } else {

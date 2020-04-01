@@ -311,7 +311,7 @@ class DocumentManagementServiceImplTest {
         storedDocumentHalResource.setMetadata(myMap);
         mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
         ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
-        assertEquals(responseEntity.getStatusCode(),HttpStatus.OK);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
         Assertions.assertThrows(BadRequestException.class, () -> {
             sut.checkUserPermission(responseEntity, matchedDocUUID,"auth", Permission.READ);
@@ -329,7 +329,7 @@ class DocumentManagementServiceImplTest {
 
         mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
         ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
-        assertEquals(responseEntity.getStatusCode(),HttpStatus.OK);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         List<Permission> permissionsList = new ArrayList<>();
         Document doc;
         doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList).build();
@@ -353,7 +353,7 @@ class DocumentManagementServiceImplTest {
 
         mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
         ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
-        assertEquals(responseEntity.getStatusCode(),HttpStatus.OK);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         List<Permission> permissionsList = new ArrayList<>();
         Document doc;
         doc = Document.builder().id("40000a2b-00ce-00eb-0068-2d00a700be9c").permissions(permissionsList).build();

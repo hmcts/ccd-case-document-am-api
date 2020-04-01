@@ -12,14 +12,14 @@ class MetadataSearchCommandTest {
     void shouldGetName() {
         metadataSearch.setName("METADATA");
         String name = metadataSearch.getName();
-        assertEquals(name, "METADATA");
+        assertEquals("METADATA", name);
     }
 
     @Test
     void shouldGetValue() {
         metadataSearch.setValue("DOCUMENT");
         String value = metadataSearch.getValue();
-        assertEquals(value, "DOCUMENT");
+        assertEquals("DOCUMENT", value);
     }
 
     @Test

@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import static org.mockito.Mockito.mock;
 
 import java.nio.charset.Charset;

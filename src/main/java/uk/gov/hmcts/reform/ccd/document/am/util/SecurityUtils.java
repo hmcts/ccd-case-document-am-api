@@ -10,7 +10,7 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AU
 @Service
 public class SecurityUtils {
 
-    private transient AuthTokenGenerator authTokenGenerator;
+    private AuthTokenGenerator authTokenGenerator;
 
     @Autowired
     public SecurityUtils(final AuthTokenGenerator authTokenGenerator) {

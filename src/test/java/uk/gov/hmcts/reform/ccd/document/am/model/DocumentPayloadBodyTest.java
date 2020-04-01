@@ -19,7 +19,7 @@ class DocumentPayloadBodyTest {
     void getClassification() {
         documentPayloadBody.setClassification("PUBLIC");
         String classification = documentPayloadBody.getClassification();
-        assertEquals(classification, "PUBLIC");
+        assertEquals("PUBLIC", classification);
     }
 
     @Test
