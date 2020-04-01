@@ -360,8 +360,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         documentUrl = documentUrl.substring(documentUrl.length() - length);
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
             .getRequest();
-        StringBuffer  url = request.getRequestURL();
-        LOG.info("URL from request is: {}", url);
+
         return request.getRequestURL().append("/").append(documentUrl).toString();
     }
 
