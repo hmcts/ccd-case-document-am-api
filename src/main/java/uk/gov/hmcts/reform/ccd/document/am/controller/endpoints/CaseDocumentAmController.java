@@ -228,30 +228,22 @@ public class CaseDocumentAmController  {
         @ApiResponse(code = 200, message = "Success", response = StoredDocumentHalResource.class)})
     @GetMapping(value = "/cases/documents/{documentId}/token", produces = {APPLICATION_JSON})
     public ResponseEntity<Object> generateHashCode(
-
         @PathVariable("documentId") UUID documentId) {
-        try {
-            StoredDocumentHalResource resource = new StoredDocumentHalResource();
-            ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
-            if (responseEntity.getStatusCode().equals(HttpStatus.OK) && null != responseEntity.getBody()) {
-                resource = (StoredDocumentHalResource) responseEntity.getBody();
-            }
-
-            ValidationService.validateInputParams(INPUT_STRING_PATTERN, documentId.toString(),
-                                                  resource.getMetadata().get("caseTypeId"), resource.getMetadata().get("jurisdictionId"));
-
-            HashMap<String, String> responseBody = new HashMap<>();
-
-            String hashedToken = ApplicationUtils.generateHashCode(documentId.toString().concat(
-                resource.getMetadata().get("jurisdictionId")).concat(resource.getMetadata().get("caseTypeId")));
-            responseBody.put(HASHCODE, hashedToken);
-
-            return new ResponseEntity<>(responseBody, HttpStatus.OK);
-
-        } catch (BadRequestException | IllegalArgumentException e) {
-            throw new BadRequestException("Illegal argument exception:" + e);
-        } catch (Exception e) {
-            throw new ResponseFormatException("Exception :" + e);
+        StoredDocumentHalResource resource = new StoredDocumentHalResource();
+        ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
+        if (responseEntity.getStatusCode().equals(HttpStatus.OK) && null != responseEntity.getBody()) {
+            resource = (StoredDocumentHalResource) responseEntity.getBody();
         }
+
+        ValidationService.validateInputParams(INPUT_STRING_PATTERN, documentId.toString(),
+                                              resource.getMetadata().get("caseTypeId"), resource.getMetadata().get("jurisdictionId"));
+
+        HashMap<String, String> responseBody = new HashMap<>();
+
+        String hashedToken = ApplicationUtils.generateHashCode(documentId.toString().concat(
+            resource.getMetadata().get("jurisdictionId")).concat(resource.getMetadata().get("caseTypeId")));
+        responseBody.put(HASHCODE, hashedToken);
+
+        return new ResponseEntity<>(responseBody, HttpStatus.OK);
     }
 }
