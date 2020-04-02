@@ -23,6 +23,8 @@ import uk.gov.hmcts.reform.ccd.document.am.model.enums.SecurityClassification;
 @Slf4j
 public class ValidationService {
 
+    private static final Pattern pattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\+|\\-)\\d{4}");
+
     private static final Logger LOG = LoggerFactory.getLogger(ValidationService.class);
 
     private ValidationService() {
@@ -67,9 +69,7 @@ public class ValidationService {
 
     public static boolean validateTTL(String strDate) {
 
-        String pattern = "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\+|\\-)\\d{4}";
-
-        if (strDate.trim().equals("") || !Pattern.matches(pattern, strDate)) {
+        if (strDate.trim().equals("") || !pattern.matcher(strDate).matches()) {
             return false;
         } else {
             SimpleDateFormat sdfrmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
