@@ -18,7 +18,7 @@ Feature: F-007: Attach Documents to Case
   @S-071
   Scenario: must get an error response for a wrong hash token
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
-    And a successful call [by same user to upload a document with mandatory metadata] as in [Default_Document_Upload],
+    And a successful call [by same user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
     When a request is prepared with appropriate values,
     And the request [contains a wrong hash token],
     And the request [is to be made on behalf of CCD Data Store API],
@@ -29,7 +29,7 @@ Feature: F-007: Attach Documents to Case
   @S-072
   Scenario: must get an error response for a non existing document Id
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
-    And a successful call [by same user to upload a document with mandatory metadata] as in [Default_Document_Upload],
+    And a successful call [by same user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
     When a request is prepared with appropriate values,
     And the request [contains a non existing document Id],
     And the request [is to be made on behalf of CCD Data Store API],
@@ -40,7 +40,7 @@ Feature: F-007: Attach Documents to Case
   @S-073
   Scenario: must get an error response for a malformed document Id
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
-    And a successful call [by same user to upload a document with mandatory metadata] as in [Default_Document_Upload],
+    And a successful call [by same user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
     When a request is prepared with appropriate values,
     And the request [contains a malformed document Id],
     And the request [is to be made on behalf of CCD Data Store API],
@@ -51,7 +51,7 @@ Feature: F-007: Attach Documents to Case
   @S-075
   Scenario: must get an error response for a malformed CaseType Id
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
-    And a successful call [by same user to upload a document with mandatory metadata] as in [Default_Document_Upload],
+    And a successful call [by same user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
     When a request is prepared with appropriate values,
     And the request [contains a malformed CaseType Id],
     And the request [is to be made on behalf of CCD Data Store API],
@@ -62,7 +62,7 @@ Feature: F-007: Attach Documents to Case
   @S-077
   Scenario: must get an error response for a malformed Jurisdiction Id
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
-    And a successful call [by same user to upload a document with mandatory metadata] as in [Default_Document_Upload],
+    And a successful call [by same user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
     When a request is prepared with appropriate values,
     And the request [contains a malformed Jurisdiction Id],
     And the request [is to be made on behalf of CCD Data Store API],
@@ -73,7 +73,7 @@ Feature: F-007: Attach Documents to Case
   @S-078
   Scenario: must get an error response for a malformed Case Id
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
-    And a successful call [by same user to upload a document with mandatory metadata] as in [Default_Document_Upload],
+    And a successful call [by same user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
     When a request is prepared with appropriate values,
     And the request [contains a malformed Case Id],
     And the request [is to be made on behalf of CCD Data Store API],
