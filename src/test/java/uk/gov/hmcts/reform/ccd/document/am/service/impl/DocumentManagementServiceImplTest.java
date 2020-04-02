@@ -1,29 +1,46 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.auth.checker.spring.serviceanduser.ServiceAndUserDetails;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentUpdate;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
+import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
+import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -34,15 +51,33 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.PATCH;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DATA_SOURCE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DOCUMENTS;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EMBEDDED;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HREF;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LINKS;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
 
+import java.nio.charset.Charset;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -51,10 +86,18 @@ import java.util.UUID;
 class DocumentManagementServiceImplTest {
 
     private static final String MATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9c";
+    private static final String UNMATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9d";
+
+    private transient String serviceAuthorization = "auth";
+    private static final String CASE_ID = "1582550122096256";
+    private static final String BEFTA_CASETYPE_2 =  "BEFTA_CASETYPE_2";
+    private static final String BEFTA_JURISDICTION_2 =  "BEFTA_JURISDICTION_2";
+    private static final String USER_ID =  "userId";
 
     private AuthTokenGenerator authTokenGenerator = mock(AuthTokenGenerator.class);
     private RestTemplate restTemplateMock = Mockito.mock(RestTemplate.class);
     private SecurityUtils securityUtils = new SecurityUtils(authTokenGenerator);
+    private SecurityUtils securityUtilsMock = mock(SecurityUtils.class);
     private CaseDataStoreService caseDataStoreServiceMock = mock(CaseDataStoreService.class);
 
     private HttpEntity<?> requestEntityGlobal  = new HttpEntity<>(securityUtils.authorizationHeaders());
@@ -62,14 +105,23 @@ class DocumentManagementServiceImplTest {
 
     @InjectMocks
     private DocumentManagementServiceImpl sut = new DocumentManagementServiceImpl(restTemplateMock, securityUtils,
-                                                                                  caseDataStoreServiceMock);
 
-    @Value("${documentStoreUrl}")
-    String documentURL;
+                                                                                  caseDataStoreServiceMock);
+    String documentMetaDataURL = "null";
+
+    String documentURL = "http://localhost:4506";
+
+    String documentTTL = "600000";
 
     @Test
     void documentMetadataInstantiation() {
         assertNotNull(sut);
+    }
+
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(sut, "documentTtl", "600000");
+        ReflectionTestUtils.setField(sut, "documentURL", "http://localhost:4506");
     }
 
     @Test
@@ -345,5 +397,365 @@ class DocumentManagementServiceImplTest {
     private void verifyCaseDataServiceGetDocMetadata() {
         verify(caseDataStoreServiceMock, times(1))
             .getCaseDocumentMetadata(anyString(),any(UUID.class));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void patchDocumentMetadata_HappyPath() {
+        List<Permission> permissionsList = new ArrayList<>();
+        permissionsList.add(Permission.UPDATE);
+        Document doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList)
+            .hashToken(ApplicationUtils.generateHashCode(MATCHED_DOCUMENT_ID.concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
+        List<Document> documentList = new ArrayList<>();
+        documentList.add(doc);
+
+
+        Map<String, String> myMetadata = new HashMap<>();
+        myMetadata.put("caseId",CASE_ID);
+        myMetadata.put("jurisdictionId", BEFTA_JURISDICTION_2);
+        myMetadata.put("caseTypeId", BEFTA_CASETYPE_2);
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        storedDocumentHalResource.setMetadata(myMetadata);
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
+
+        DocumentUpdate documentUpdate = new DocumentUpdate();
+        documentUpdate.setDocumentId(UUID.fromString(MATCHED_DOCUMENT_ID));
+        documentUpdate.setMetadata(myMetadata);
+        LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
+        bodyMap.add("documents", documentUpdate);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set(SERVICE_AUTHORIZATION, serviceAuthorization);
+        headers.set(USERID, USER_ID);
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
+        String documentUrl = String.format("%s/documents", documentURL);
+
+        Mockito.when(restTemplateMock.exchange(
+            documentUrl,
+            HttpMethod.PATCH,requestEntity,
+            Void.class))
+            .thenReturn(new ResponseEntity<>(HttpStatus.ACCEPTED));
+
+        List<String> collection = new ArrayList<String>();
+        collection.add("string");
+        ServiceAndUserDetails serviceAndUserDetails = new ServiceAndUserDetails(USER_ID,serviceAuthorization, collection,"servicename");
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(securityContext.getAuthentication().getPrincipal()).thenReturn(serviceAndUserDetails);
+
+        DocumentMetadata documentMetadata = DocumentMetadata.builder()
+            .caseId(CASE_ID)
+            .caseTypeId(BEFTA_CASETYPE_2)
+            .jurisdictionId(BEFTA_JURISDICTION_2)
+            .documents(documentList)
+            .build();
+
+        String documentMetadataUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
+        HttpEntity requestEntityMeta = new HttpEntity(securityUtils.authorizationHeaders());
+
+        Mockito.when(restTemplateMock.exchange(
+            documentMetadataUrl,
+            GET,
+            requestEntityMeta,
+            StoredDocumentHalResource.class)).thenReturn(new ResponseEntity<>(storedDocumentHalResource, HttpStatus.OK));
+
+        Boolean response = sut.patchDocumentMetadata(documentMetadata);
+        assertEquals(Boolean.TRUE, response);
+
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void uploadDocuments_HappyPath() {
+
+        HashMap<String, String> binaryHash = new HashMap<>();
+        HashMap<String, String> selfHash = new HashMap<>();
+        selfHash.put(HREF, "http://localhost:4455/cases/documents/35471d43-0dad-42c1-b05a-4821028f50a2");
+        binaryHash.put(HREF, "http://localhost:4455/cases/documents/35471d43-0dad-42c1-b05a-4821028f50a2/binary");
+
+        LinkedHashMap<String, Object> linksLinkedHashMap = new LinkedHashMap<>();
+        LinkedHashMap<String, Object> binarySelfLinkedHashMap = new LinkedHashMap<>();
+
+        binarySelfLinkedHashMap.put(BINARY, binaryHash);
+        binarySelfLinkedHashMap.put(SELF, selfHash);
+        linksLinkedHashMap.put(LINKS, binarySelfLinkedHashMap);
+
+        ArrayList arrayList = new ArrayList();
+        arrayList.add(linksLinkedHashMap);
+
+        LinkedHashMap<String, Object> documentsLinkedHashMap = new LinkedHashMap<>();
+        documentsLinkedHashMap.put(DOCUMENTS,arrayList);
+
+        LinkedHashMap<String, Object> embeddedLinkedHashMap = new LinkedHashMap<>();
+        embeddedLinkedHashMap.put(EMBEDDED,documentsLinkedHashMap);
+
+        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any())).thenReturn(new ResponseEntity<>(embeddedLinkedHashMap, HttpStatus.OK));
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+        List<String> collection = new ArrayList<String>();
+        collection.add("string");
+        ServiceAndUserDetails serviceAndUserDetails = new ServiceAndUserDetails(USER_ID,serviceAuthorization, collection,"servicename");
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(securityContext.getAuthentication().getPrincipal()).thenReturn(serviceAndUserDetails);
+
+        List<MultipartFile> files = new ArrayList<>();
+        List<String> roles = new ArrayList<>();
+        roles.add("Role");
+
+        SecurityContextHolder.getContext().setAuthentication(
+            new UsernamePasswordAuthenticationToken(USER_ID, "1234"));
+
+        ResponseEntity<Object> responseEntity = sut.uploadDocuments(files,"classification", roles, BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void uploadDocuments_NoLinksExceptionThrow() {
+
+        HashMap<String, String> binaryHash = new HashMap<>();
+        HashMap<String, String> selfHash = new HashMap<>();
+        selfHash.put(HREF, "http://localhost:4455/cases/documents/35471d43-0dad-42c1-b05a-4821028f50a2");
+        binaryHash.put(HREF, "http://localhost:4455/cases/documents/35471d43-0dad-42c1-b05a-4821028f50a2/binary");
+
+        LinkedHashMap<String, Object> linksLinkedHashMap = new LinkedHashMap<>();
+        LinkedHashMap<String, Object> binarySelfLinkedHashMap = new LinkedHashMap<>();
+
+        ArrayList arrayList = new ArrayList();
+        arrayList.add(linksLinkedHashMap);
+
+        LinkedHashMap<String, Object> documentsLinkedHashMap = new LinkedHashMap<>();
+        documentsLinkedHashMap.put(DOCUMENTS,arrayList);
+
+        LinkedHashMap<String, Object> embeddedLinkedHashMap = new LinkedHashMap<>();
+        embeddedLinkedHashMap.put(EMBEDDED,documentsLinkedHashMap);
+
+        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any())).thenReturn(new ResponseEntity<>(embeddedLinkedHashMap, HttpStatus.OK));
+
+        List<String> collection = new ArrayList<String>();
+        collection.add("string");
+        ServiceAndUserDetails serviceAndUserDetails = new ServiceAndUserDetails(USER_ID,serviceAuthorization, collection,"servicename");
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(securityContext.getAuthentication().getPrincipal()).thenReturn(serviceAndUserDetails);
+
+        List<MultipartFile> files = new ArrayList<>();
+        List<String> roles = new ArrayList<>();
+        roles.add("Role");
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+        Assertions.assertThrows(ResponseFormatException.class, () -> {
+            sut.uploadDocuments(files,"classification", roles, BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
+        });
+    }
+
+    private String getEffectiveTTL() {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
+        return format.format(new Timestamp(new Date().getTime() + Long.parseLong(documentTTL)));
+    }
+
+    @Test
+    void patchDocument_HappyPath() {
+        List<String> roles = new ArrayList<>();
+        roles.add("Role");
+        UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
+        String effectiveTTL = getEffectiveTTL();
+        updateDocumentCommand.setTtl(effectiveTTL);
+        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand, getHttpHeaders());
+        String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
+
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        when(restTemplateMock.exchange(
+            patchTTLUrl,
+            PATCH,
+            requestEntity,
+            StoredDocumentHalResource.class
+        )).thenReturn(new ResponseEntity<>(storedDocumentHalResource, HttpStatus.OK));
+
+        ResponseEntity responseEntity = sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID), updateDocumentCommand);
+        assertEquals(HttpStatus.OK,responseEntity.getStatusCode());
+    }
+
+    @Test
+    void patchDocument_ResourceNotFound() {
+        List<String> roles = new ArrayList<>();
+        roles.add("Role");
+        UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
+        String effectiveTTL = getEffectiveTTL();
+        updateDocumentCommand.setTtl(effectiveTTL);
+        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand, getHttpHeaders());
+        String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
+
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        when(restTemplateMock.exchange(
+            patchTTLUrl,
+            PATCH,
+            requestEntity,
+            StoredDocumentHalResource.class
+        )).thenReturn(new ResponseEntity<>(storedDocumentHalResource, HttpStatus.NOT_FOUND));
+
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+            sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID), updateDocumentCommand);
+        });
+    }
+
+    @Test
+    void patchDocument_HttpClientErrorException() {
+        List<String> roles = new ArrayList<>();
+        roles.add("Role");
+        UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
+        String effectiveTTL = getEffectiveTTL();
+        updateDocumentCommand.setTtl(effectiveTTL);
+        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand, getHttpHeaders());
+        String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
+
+        when(restTemplateMock.exchange(
+            patchTTLUrl,
+            PATCH,
+            requestEntity,
+            StoredDocumentHalResource.class
+        )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.NOT_FOUND, "404", new HttpHeaders(), new byte[1],
+                                                              Charset.defaultCharset()));
+
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+            sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID), updateDocumentCommand);
+        });
+    }
+
+    @Test
+    void patchDocument_ServiceException() {
+        List<String> roles = new ArrayList<>();
+        roles.add("Role");
+        UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
+        String effectiveTTL = getEffectiveTTL();
+        updateDocumentCommand.setTtl(effectiveTTL);
+        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand, getHttpHeaders());
+        String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
+
+        when(restTemplateMock.exchange(
+            patchTTLUrl,
+            PATCH,
+            requestEntity,
+            StoredDocumentHalResource.class
+        )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.FORBIDDEN, "404", new HttpHeaders(), new byte[1],
+                                                              Charset.defaultCharset()));
+
+        Assertions.assertThrows(ServiceException.class, () -> {
+            sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID), updateDocumentCommand);
+        });
+    }
+
+    private HttpHeaders getHttpHeaders() {
+        HttpHeaders headers = securityUtils.authorizationHeaders();
+        String id = securityUtils.getUserId();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return headers;
+    }
+
+    @Test
+    void patchDocument_BadRequestTTL() {
+        List<String> roles = new ArrayList<>();
+        roles.add("Role");
+        UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
+        updateDocumentCommand.setTtl("600000");
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID), updateDocumentCommand);
+        });
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void deleteDocument_HappyPath() {
+        Boolean permanent = true;
+
+        HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
+        String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, MATCHED_DOCUMENT_ID, permanent);
+
+        ResponseEntity responseEntity = new ResponseEntity<>(HttpStatus.ACCEPTED);
+        when(restTemplateMock.exchange(
+            documentDeleteUrl,
+            DELETE,
+            requestEntity,
+            ResponseEntity.class
+        )).thenReturn(new ResponseEntity<>(responseEntity, HttpStatus.NO_CONTENT));
+
+        responseEntity = sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), permanent);
+        assertEquals(HttpStatus.NO_CONTENT,responseEntity.getStatusCode());
+    }
+
+
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void deleteDocument_HttpClientErrorException() {
+        Boolean permanent = true;
+
+        HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
+        String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL, MATCHED_DOCUMENT_ID);
+
+        when(restTemplateMock.exchange(
+            documentDeleteUrl,
+            DELETE,
+            requestEntity,
+            ResponseEntity.class
+        )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.NOT_FOUND, "404", new HttpHeaders(), new byte[1],
+                                                              Charset.defaultCharset()));
+
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+            sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), permanent);
+        });
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void deleteDocument_ServiceException() {
+        Boolean permanent = true;
+
+        HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
+        String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL, MATCHED_DOCUMENT_ID);
+
+        when(restTemplateMock.exchange(
+            documentDeleteUrl,
+            DELETE,
+            requestEntity,
+            ResponseEntity.class
+        )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.FORBIDDEN, "404", new HttpHeaders(), new byte[1],
+                                                              Charset.defaultCharset()));
+
+        Assertions.assertThrows(ServiceException.class, () -> {
+            sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), permanent);
+        });
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void deleteDocument_ResourceNotFound() {
+        Boolean permanent = true;
+
+        HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
+        String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL, MATCHED_DOCUMENT_ID);
+
+        ResponseEntity responseEntity = new ResponseEntity<>(HttpStatus.ACCEPTED);
+        when(restTemplateMock.exchange(
+            documentDeleteUrl,
+            DELETE,
+            requestEntity,
+            ResponseEntity.class
+        )).thenReturn(new ResponseEntity<>(responseEntity, HttpStatus.NOT_FOUND));
+
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+            sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), permanent);
+        });
     }
 }
