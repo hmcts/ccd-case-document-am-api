@@ -1,0 +1,14 @@
+{
+  "_guid_": "F-007_Test_Data_Base",
+  "_extends_": "F-007-Base-Root",
+  "productName": "CCD Case Document AM API",
+  "operationName": "Attach Documents to Case",
+
+  "specs": [
+    "an active caseworker profile in CCD with full permissions on a document field"
+  ],
+
+  "method": "PATCH",
+  "uri": "/cases/documents/attachToCase"
+
+}

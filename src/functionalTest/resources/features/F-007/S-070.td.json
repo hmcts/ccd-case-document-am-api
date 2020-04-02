@@ -1,0 +1,28 @@
+{
+  "title": "must successfully attach a document to a case with hash token",
+
+  "_guid_": "S-070",
+  "_extends_": "F-007_Test_Data_Base",
+
+  "specs": [
+    "contains a Case Id",
+    "is to be made on behalf of CCD Data Store API"
+  ],
+
+  "request": {
+
+    "body": {
+      "caseId" : "1234567890099900",
+      "documents" : [
+        {
+          "id": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}",
+          "hashToken": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][hashcode]}"
+        }
+      ]
+    }
+  },
+
+  "expectedResponse": {
+    "_extends_": "Common_200_Response"
+  }
+}
