@@ -50,8 +50,6 @@ class CaseDataStoreServiceImplTest {
     @Value("${caseDataStoreUrl}")
     String caseDataStoreUrl;
 
-    private String authorization = "auth";
-
     @Test
     void getCaseDocumentMetadata_HappyPath() {
 

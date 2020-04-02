@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -51,6 +53,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PATCH;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
@@ -102,7 +105,9 @@ class DocumentManagementServiceImplTest {
 
     @InjectMocks
     private DocumentManagementServiceImpl sut = new DocumentManagementServiceImpl(restTemplateMock, securityUtils,
+
                                                                                   caseDataStoreServiceMock);
+    String documentMetaDataURL = "null";
 
     String documentURL = "http://localhost:4506";
 
@@ -394,7 +399,8 @@ class DocumentManagementServiceImplTest {
             .getCaseDocumentMetadata(anyString(),any(UUID.class));
     }
 
-    //@Test //TODO securityID
+    @Test
+    @SuppressWarnings("unchecked")
     void patchDocumentMetadata_HappyPath() {
         List<Permission> permissionsList = new ArrayList<>();
         permissionsList.add(Permission.UPDATE);
@@ -430,6 +436,15 @@ class DocumentManagementServiceImplTest {
             Void.class))
             .thenReturn(new ResponseEntity<>(HttpStatus.ACCEPTED));
 
+        List<String> collection = new ArrayList<String>();
+        collection.add("string");
+        ServiceAndUserDetails serviceAndUserDetails = new ServiceAndUserDetails(USER_ID,serviceAuthorization, collection,"servicename");
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(securityContext.getAuthentication().getPrincipal()).thenReturn(serviceAndUserDetails);
+
         DocumentMetadata documentMetadata = DocumentMetadata.builder()
             .caseId(CASE_ID)
             .caseTypeId(BEFTA_CASETYPE_2)
@@ -437,12 +452,21 @@ class DocumentManagementServiceImplTest {
             .documents(documentList)
             .build();
 
+        String documentMetadataUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
+        HttpEntity requestEntityMeta = new HttpEntity(securityUtils.authorizationHeaders());
+
+        Mockito.when(restTemplateMock.exchange(
+            documentMetadataUrl,
+            GET,
+            requestEntityMeta,
+            StoredDocumentHalResource.class)).thenReturn(new ResponseEntity<>(storedDocumentHalResource, HttpStatus.OK));
+
         Boolean response = sut.patchDocumentMetadata(documentMetadata);
         assertEquals(Boolean.TRUE, response);
 
     }
 
-    //@Test //TODO securityID
+    @Test
     @SuppressWarnings("unchecked")
     void uploadDocuments_HappyPath() {
 
@@ -472,22 +496,27 @@ class DocumentManagementServiceImplTest {
         MockHttpServletRequest request = new MockHttpServletRequest();
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
-        SecurityContext securityContext = mock(SecurityContext.class);
         List<String> collection = new ArrayList<String>();
         collection.add("string");
         ServiceAndUserDetails serviceAndUserDetails = new ServiceAndUserDetails(USER_ID,serviceAuthorization, collection,"servicename");
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
-        //when(securityUtilsMock.getUserId()).thenReturn(USER_ID);
+        when(securityContext.getAuthentication().getPrincipal()).thenReturn(serviceAndUserDetails);
 
         List<MultipartFile> files = new ArrayList<>();
         List<String> roles = new ArrayList<>();
         roles.add("Role");
 
+        SecurityContextHolder.getContext().setAuthentication(
+            new UsernamePasswordAuthenticationToken(USER_ID, "1234"));
+
         ResponseEntity<Object> responseEntity = sut.uploadDocuments(files,"classification", roles, BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
-    //@Test //TODO securityUtils Id
+    @Test
     @SuppressWarnings("unchecked")
     void uploadDocuments_NoLinksExceptionThrow() {
 
@@ -510,6 +539,15 @@ class DocumentManagementServiceImplTest {
 
         Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any())).thenReturn(new ResponseEntity<>(embeddedLinkedHashMap, HttpStatus.OK));
 
+        List<String> collection = new ArrayList<String>();
+        collection.add("string");
+        ServiceAndUserDetails serviceAndUserDetails = new ServiceAndUserDetails(USER_ID,serviceAuthorization, collection,"servicename");
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(securityContext.getAuthentication().getPrincipal()).thenReturn(serviceAndUserDetails);
+
         List<MultipartFile> files = new ArrayList<>();
         List<String> roles = new ArrayList<>();
         roles.add("Role");
@@ -518,12 +556,7 @@ class DocumentManagementServiceImplTest {
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
         Assertions.assertThrows(ResponseFormatException.class, () -> {
-            ResponseEntity<Object> responseEntity = sut.uploadDocuments(files,
-                                                                        "classification",
-                                                                        roles,
-                                                                        BEFTA_CASETYPE_2,
-                                                                        BEFTA_JURISDICTION_2
-            );
+            sut.uploadDocuments(files,"classification", roles, BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
         });
     }
 
@@ -625,6 +658,7 @@ class DocumentManagementServiceImplTest {
 
     private HttpHeaders getHttpHeaders() {
         HttpHeaders headers = securityUtils.authorizationHeaders();
+        String id = securityUtils.getUserId();
         headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
     }
