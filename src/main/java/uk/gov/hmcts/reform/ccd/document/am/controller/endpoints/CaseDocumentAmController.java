@@ -154,24 +154,18 @@ public class CaseDocumentAmController  {
         @ApiParam(value = "", required = true)
         @Valid @RequestBody DocumentMetadata caseDocumentMetadata) {
 
-        try {
-            if (!ValidationService.validate(caseDocumentMetadata.getCaseId())) {
-                throw new BadRequestException("The Case Id is invalid");
-            }
-            ValidationService.validateInputParams(INPUT_CASE_ID_PATTERN, caseDocumentMetadata.getCaseId());
-            caseDocumentMetadata.getDocuments()
-                                .forEach(document -> {
-                                    ValidationService.validateInputParams(INPUT_STRING_PATTERN, document.getId());
-                                    ValidationService.validateDocumentId(document.getId());
-                                });
-
-            documentManagementService.patchDocumentMetadata(caseDocumentMetadata);
-        } catch (BadRequestException | IllegalArgumentException e) {
-            throw new BadRequestException("Exception while attaching the documents to a case :" + e);
-        } catch (Exception e) {
-            LOG.error("Exception in controller for patch MetaData Documents API");
-            throw e;
+        if (!ValidationService.validate(caseDocumentMetadata.getCaseId())) {
+            throw new BadRequestException("The Case Id is invalid");
         }
+        ValidationService.validateInputParams(INPUT_CASE_ID_PATTERN, caseDocumentMetadata.getCaseId());
+        caseDocumentMetadata.getDocuments()
+                            .forEach(document -> {
+                                ValidationService.validateInputParams(INPUT_STRING_PATTERN, document.getId());
+                                ValidationService.validateDocumentId(document.getId());
+                            });
+
+        documentManagementService.patchDocumentMetadata(caseDocumentMetadata);
+
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -206,19 +200,13 @@ public class CaseDocumentAmController  {
         @NotNull(message = "Provide the Jurisdiction ID ")
         @RequestHeader(value = "jurisdictionId", required = true) String jurisdictionId) {
 
-        try {
-            ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification);
-            ValidationService.isValidSecurityClassification(classification);
-            ValidationService.validateLists(files, roles);
-            roles.forEach(role -> ValidationService.validateInputParams(INPUT_STRING_PATTERN, role));
+        ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification);
+        ValidationService.isValidSecurityClassification(classification);
+        ValidationService.validateLists(files, roles);
+        roles.forEach(role -> ValidationService.validateInputParams(INPUT_STRING_PATTERN, role));
 
-            return documentManagementService.uploadDocuments(files, classification, roles,
-                                                              caseTypeId, jurisdictionId);
-        } catch (BadRequestException | IllegalArgumentException e) {
-            throw new BadRequestException("Exception while uploading the documents :" + e);
-        } catch (Exception e) {
-            throw new ResponseFormatException("Exception while uploading the documents :" + e);
-        }
+        return documentManagementService.uploadDocuments(files, classification, roles,
+                                                          caseTypeId, jurisdictionId);
     }
 
     //**************** Generate Hash Token API  API ***************
