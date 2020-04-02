@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.ccd.document.am.utils.IdamUtils;
@@ -20,7 +21,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @SpringBootTest
 @RunWith(SpringIntegrationSerenityRunner.class)
-//@ConfigurationProperties
+@ConfigurationProperties(prefix = "idam")
 public class SmokeTest extends BaseTest {
 
     @Value("${idam.s2s-auth.totp_secret}")
@@ -134,6 +135,7 @@ public class SmokeTest extends BaseTest {
     }
 
     private String getServiceAuth() {
+        System.out.println("s2sUrl :  " + s2sUrl);
         return new BaseTest().authTokenGenerator(secret, microService, generateServiceAuthorisationApi(s2sUrl)).generate();
     }
 }
