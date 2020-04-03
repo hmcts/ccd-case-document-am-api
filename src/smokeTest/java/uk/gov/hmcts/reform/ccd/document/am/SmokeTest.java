@@ -134,6 +134,8 @@ public class SmokeTest extends BaseTest {
     }
 
     private String getServiceAuth() {
-        return new BaseTest().authTokenGenerator(secret, microService, generateServiceAuthorisationApi(s2sUrl)).generate();
+        return new BaseTest().authTokenGenerator(secret, microService,
+            generateServiceAuthorisationApi(
+                "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal")).generate();
     }
 }
