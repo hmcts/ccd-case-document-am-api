@@ -9,7 +9,9 @@
   },
   "request": {
 		"headers": {
-			"ServiceAuthorization": "[[DYNAMIC]]"
+      "Authorization": "[[DYNAMIC]]",
+      "ServiceAuthorization": "[[DYNAMIC]]",
+      "Content-Type": "application/json"
     }
 	}
 }

@@ -24,12 +24,7 @@
         {
           "key": "files",
           "filePath": "SampleImage.png"
-        },
-        {
-          "key": "metadata[caseId]",
-          "value": "1111122222333334"
         }
-
       ]
     }
   }
