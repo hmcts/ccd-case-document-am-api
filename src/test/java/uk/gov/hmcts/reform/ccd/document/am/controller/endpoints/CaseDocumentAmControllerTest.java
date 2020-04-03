@@ -288,8 +288,8 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     @DisplayName("Should throw 400 when user-roles are empty")
-    public void shouldThrowBadRequestExceptionWhenUserRolesAreEmpty() {
-        Assertions.assertThrows(BadRequestException.class, () -> {
+    public void shouldThrowIllegalArgumentExceptionWhenUserRolesAreEmpty() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
                                    Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE),
                                    BEFTA_CASETYPE_2, "BEFTA@JURISDICTION_2$$$$");
@@ -298,8 +298,8 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     @DisplayName("Should throw 400 when caseTypeId input is null")
-    public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsNull() {
-        Assertions.assertThrows(BadRequestException.class, () -> {
+    public void shouldThrowIllegalArgumentExceptionWhenCaseTypeIdIsNull() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
                                    Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE),
                                    null, BEFTA_JURISDICTION_2);
@@ -308,8 +308,8 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     @DisplayName("Should throw 400 when caseTypeId input is malformed")
-    public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsMalformed() {
-        Assertions.assertThrows(BadRequestException.class, () -> {
+    public void shouldThrowIllegalArgumentExceptionWhenCaseTypeIdIsMalformed() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
                                    Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE),
                                    "BEFTA_CASETYPE_2&&&&&&&&&", "BEFTA_JURISDICTION_2");
@@ -318,8 +318,8 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     @DisplayName("Should throw 400 when jurisdictionId input is null")
-    public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsNull() {
-        Assertions.assertThrows(BadRequestException.class, () -> {
+    public void shouldThrowIllegalArgumentExceptionWhenJurisdictionIdIsNull() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
                                    Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE),
                                    BEFTA_CASETYPE_2, null);
@@ -328,8 +328,8 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     @DisplayName("Should throw 400 when jurisdictionId input is malformed")
-    public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsMalformed() {
-        Assertions.assertThrows(BadRequestException.class, () -> {
+    public void shouldThrowIllegalArgumentExceptionWhenJurisdictionIdIsMalformed() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
                                    Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE),
                                    BEFTA_CASETYPE_2, "BEFTA@JURISDICTION_2$$$$");
