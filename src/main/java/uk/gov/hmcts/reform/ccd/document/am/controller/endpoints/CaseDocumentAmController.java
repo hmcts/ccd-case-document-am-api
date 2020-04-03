@@ -202,7 +202,6 @@ public class CaseDocumentAmController  {
         @ApiResponse(code = 200, message = "Success", response = StoredDocumentHalResource.class)})
     @GetMapping(value = "/cases/documents/{documentId}/token", produces = {APPLICATION_JSON})
     public ResponseEntity<Object> generateHashCode(
-
         @PathVariable("documentId") UUID documentId) {
         StoredDocumentHalResource resource = new StoredDocumentHalResource();
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
