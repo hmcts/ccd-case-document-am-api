@@ -1,10 +1,10 @@
 {
-  "title": "must successfully attach a document to a case with hash token",
-  "_guid_": "S-070",
+  "title": "must successfully validate hashed-token for multiple documents",
+  "_guid_": "S-079",
   "_extends_": "F-007_Test_Data_Base",
 
   "specs": [
-    "contains a Case Id",
+    "contains a Case Id along with ids of the documents uploaded above",
     "is to be made on behalf of CCD Data Store API"
   ],
 

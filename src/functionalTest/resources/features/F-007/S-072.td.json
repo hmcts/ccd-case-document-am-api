@@ -10,7 +10,7 @@
 
   "request": {
     "body": {
-      "caseId": "1234567890099900",
+      "caseId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][_embedded][documents][0][metadata][caseId]}",
       "documents": [
         {
           "id": "00000000-0000-0000-0000-000000000000",
