@@ -1,0 +1,30 @@
+{
+  "title": "must get an error response for a wrong hash token",
+  "_guid_": "S-071",
+  "_extends_": "F-007_Test_Data_Base",
+
+  "specs": [
+    "contains a wrong hash token",
+    "is to be made on behalf of CCD Data Store API"
+  ],
+
+  "request": {
+    "body": {
+      "caseId": "1234567890066600",
+      "documents": [
+        {
+          "id": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}",
+          "hashToken": "3a38541c0f372334196d1dd3b70d4449142aeb44589f00000000000000000000"
+        }
+      ]
+    }
+  },
+
+  "expectedResponse": {
+    "_extends_": "Common_404_Response",
+    "body" : {
+      "message" : "Resource not found : Document ${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]} does not exists in DM Store",
+      "path" : "/cases/documents/attachToCase"
+    }
+  }
+}

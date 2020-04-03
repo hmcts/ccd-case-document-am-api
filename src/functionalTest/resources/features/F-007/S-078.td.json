@@ -1,18 +1,16 @@
 {
-  "title": "must successfully attach a document to a case with hash token",
-  "_guid_": "S-070",
+  "title": "must get an error response for a malformed Case Id",
+  "_guid_": "S-078",
   "_extends_": "F-007_Test_Data_Base",
 
   "specs": [
-    "contains a Case Id",
+    "contains a malformed Case Id",
     "is to be made on behalf of CCD Data Store API"
   ],
 
   "request": {
     "body": {
-      "caseId": "1234567890099900",
-      "caseTypeId" : "BEFTA_CASETYPE_2_2",
-      "jurisdictionId" : "BEFTA_JURISDICTION_2",
+      "caseId": "12345678900£$@00",
       "documents": [
         {
           "id": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}",
@@ -23,6 +21,10 @@
   },
 
   "expectedResponse": {
-    "_extends_": "Common_200_Response"
+    "_extends_": "Common_400_Response",
+    "body" : {
+      "message" : "Exception while attaching the documents to a case :java.lang.IllegalArgumentException: The input parameter: \"12345678900£$@00\", does not comply with the required pattern",
+      "path" : "/cases/documents/attachToCase"
+    }
   }
 }

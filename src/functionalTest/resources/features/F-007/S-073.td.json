@@ -1,0 +1,30 @@
+{
+  "title": "must get an error response for a malformed document Id",
+  "_guid_": "S-073",
+  "_extends_": "F-007_Test_Data_Base",
+
+  "specs": [
+    "contains a malformed document Id",
+    "is to be made on behalf of CCD Data Store API"
+  ],
+
+  "request": {
+    "body": {
+      "caseId": "1234567890099900",
+      "documents": [
+        {
+          "id": "8de9957b-d7a6-40a1-@£$&-6aac30d33644",
+          "hashToken": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][_embedded][documents][0][hashcode]}"
+        }
+      ]
+    }
+  },
+
+  "expectedResponse": {
+    "_extends_": "Common_400_Response",
+    "body" : {
+      "message" : "Exception while attaching the documents to a case :java.lang.IllegalArgumentException: The input parameter: \"8de9957b-d7a6-40a1-@£$&-6aac30d33644\", does not comply with the required pattern",
+      "path" : "/cases/documents/attachToCase"
+    }
+  }
+}

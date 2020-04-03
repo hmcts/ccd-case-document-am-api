@@ -1,21 +1,19 @@
 {
-  "title": "must successfully attach a document to a case with hash token",
-  "_guid_": "S-070",
+  "title": "must get an error response for a non existing document Id",
+  "_guid_": "S-072",
   "_extends_": "F-007_Test_Data_Base",
 
   "specs": [
-    "contains a Case Id",
+    "contains a non existing document Id",
     "is to be made on behalf of CCD Data Store API"
   ],
 
   "request": {
     "body": {
       "caseId": "1234567890099900",
-      "caseTypeId" : "BEFTA_CASETYPE_2_2",
-      "jurisdictionId" : "BEFTA_JURISDICTION_2",
       "documents": [
         {
-          "id": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}",
+          "id": "00000000-0000-0000-0000-000000000000",
           "hashToken": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][_embedded][documents][0][hashcode]}"
         }
       ]
@@ -23,6 +21,10 @@
   },
 
   "expectedResponse": {
-    "_extends_": "Common_200_Response"
+    "_extends_": "Common_404_Response",
+    "body" : {
+      "message" : "Resource not found ${[scenarioContext][testData][request][body][documents][0][id]}",
+      "path" : "/cases/documents/attachToCase"
+    }
   }
 }
