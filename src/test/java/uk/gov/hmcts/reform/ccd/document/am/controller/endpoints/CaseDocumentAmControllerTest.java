@@ -197,6 +197,7 @@ public class CaseDocumentAmControllerTest {
 
     }
 
+
     @Test
     @DisplayName("should get 204 when document delete is successful")
     public void shouldDeleteDocumentByDocumentId() {
@@ -215,20 +216,6 @@ public class CaseDocumentAmControllerTest {
         );
     }
 
-    //    @Test
-    //    @DisplayName("should throw 403 forbidden when user doesn't have UPDATE permission on requested document")
-    //    public void shouldNotDeleteDocumentByDocumentId() {
-    //        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-    //        doReturn(FALSE).when(documentManagementService)
-    //            .checkUserPermission(setDocumentMetaData(),getUuid(), Permission.UPDATE);
-    //
-    //        Assertions.assertThrows(ForbiddenException.class, () -> {
-    //            testee.deleteDocumentbyDocumentId(
-    //                getUuid(),
-    //                true
-    //            );
-    //        });
-    //    }
 
     @Test
     public void shouldPatchDocumentByDocumentId() {
@@ -246,20 +233,6 @@ public class CaseDocumentAmControllerTest {
         );
     }
 
-    //    @Test
-    //    @DisplayName("should throw 403 forbidden when user doesn't have UPDATE permission on requested document")
-    //    public void shouldNotPatchDocumentByDocumentId() {
-    //        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-    //        doReturn(FALSE).when(documentManagementService)
-    //            .checkUserPermission(setDocumentMetaData(),getUuid(), Permission.UPDATE);
-    //        UpdateDocumentCommand body = null;
-    //        Assertions.assertThrows(ForbiddenException.class, () -> {
-    //            testee.patchDocumentbyDocumentId(
-    //                body,
-    //                getUuid()
-    //            );
-    //        });
-    //    }
 
     @Test
     public void shouldPatchMetaDataOnDocuments() {
@@ -276,7 +249,7 @@ public class CaseDocumentAmControllerTest {
             () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE));
     }
 
-    //Tests for UploadDocuments controller.
+
     @Test
     @DisplayName("Should throw 400 when the uploaded file is empty")
     public void shouldThrowBadRequestExceptionWhenUploadedFilesIsNull() {
