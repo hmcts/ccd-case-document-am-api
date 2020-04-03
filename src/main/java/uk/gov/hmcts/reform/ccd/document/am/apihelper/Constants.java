@@ -24,9 +24,7 @@ public class Constants {
     public static final String INPUT_INVALID = "The case reference or document id is not valid";
     public static final String INSUFFICIENT_PERMISSION = "Insufficient permission on requested  document";
     public static final String CLASSIFICATION = "classification";
-    public static final String ROLES = "roles";
     public static final String USERID = "user-id";
-    public static final String USER_ROLES = "user-roles";
     public static final String FILES = "files";
     public static final String LINKS = "_links";
     public static final String HREF = "href";

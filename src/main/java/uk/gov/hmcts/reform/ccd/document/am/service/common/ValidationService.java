@@ -50,9 +50,9 @@ public class ValidationService {
     public static void validateInputParams(String pattern, String... inputString) {
         for (String input : inputString) {
             if (StringUtils.isEmpty(input)) {
-                throw new IllegalArgumentException("The input parameter is Null/Empty");
+                throw new BadRequestException("The input parameter is Null/Empty");
             } else if (!Pattern.matches(pattern, input)) {
-                throw new IllegalArgumentException("The input parameter: \"" + input +  "\", does not comply with the required pattern");
+                throw new BadRequestException("The input parameter: \"" + input +  "\", does not comply with the required pattern");
             }
         }
     }
@@ -89,7 +89,7 @@ public class ValidationService {
             UUID uuid = UUID.fromString(documentId);
             LOG.info("UUID {}", uuid);
         } catch (IllegalArgumentException exception) {
-            throw new IllegalArgumentException(String.format("The input parameter: %s is not a valid UUID", documentId));
+            throw new BadRequestException(String.format("The input parameter: %s is not a valid UUID", documentId));
         }
     }
 }
