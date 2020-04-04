@@ -141,7 +141,6 @@ task integration(type: Test, description: 'Runs the integration tests.', group: 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
   testClassesDirs = sourceSets.smokeTest.output.classesDirs
   classpath = sourceSets.smokeTest.runtimeClasspath
-  finalizedBy aggregate
 }
 
 checkstyle {
