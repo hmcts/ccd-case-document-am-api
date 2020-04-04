@@ -91,10 +91,10 @@ withPipeline(type, product, component) {
   }
 
   after('smokeTest:preview') {
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/site/**/*'
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
   }
 
   after('smokeTest:aat') {
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/site/**/*'
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
   }
 }

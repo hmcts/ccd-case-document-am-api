@@ -134,8 +134,13 @@ public class SmokeTest extends BaseTest {
     }
 
     private String getServiceAuth() {
+        if (System.getProperty("os.name").toLowerCase().contains("mac")) {
+            s2sUrl = "http://localhost:4502";
+        } else {
+            s2sUrl = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal";
+        }
+
         return new BaseTest().authTokenGenerator(secret, microService,
-            generateServiceAuthorisationApi(
-                "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal")).generate();
+            generateServiceAuthorisationApi(s2sUrl)).generate();
     }
 }
