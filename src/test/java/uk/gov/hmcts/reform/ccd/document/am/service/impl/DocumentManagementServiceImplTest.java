@@ -107,11 +107,12 @@ class DocumentManagementServiceImplTest {
     private DocumentManagementServiceImpl sut = new DocumentManagementServiceImpl(restTemplateMock, securityUtils,
 
                                                                                   caseDataStoreServiceMock);
-    String documentMetaDataURL = "null";
 
-    String documentURL = "http://localhost:4506";
+    private String documentURL = "http://localhost:4506";
 
-    String documentTTL = "600000";
+    private String documentTTL = "600000";
+
+    private String salt = "AAAOA7A2AA6AAAA5";
 
     @Test
     void documentMetadataInstantiation() {
@@ -122,6 +123,7 @@ class DocumentManagementServiceImplTest {
     void setUp() {
         ReflectionTestUtils.setField(sut, "documentTtl", "600000");
         ReflectionTestUtils.setField(sut, "documentURL", "http://localhost:4506");
+        ReflectionTestUtils.setField(sut, "salt", "AAAOA7A2AA6AAAA5");
     }
 
     @Test
@@ -405,7 +407,7 @@ class DocumentManagementServiceImplTest {
         List<Permission> permissionsList = new ArrayList<>();
         permissionsList.add(Permission.UPDATE);
         Document doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList)
-            .hashToken(ApplicationUtils.generateHashCode(MATCHED_DOCUMENT_ID.concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
+            .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
         List<Document> documentList = new ArrayList<>();
         documentList.add(doc);
 
