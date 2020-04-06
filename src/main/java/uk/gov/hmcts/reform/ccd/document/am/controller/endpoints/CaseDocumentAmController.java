@@ -133,7 +133,7 @@ public class CaseDocumentAmController  {
         consumes = {APPLICATION_JSON})
     public ResponseEntity<Object> patchDocumentbyDocumentId(
         @ApiParam(value = "", required = true)
-        @Valid UpdateDocumentCommand body,
+        @Valid @RequestBody UpdateDocumentCommand body,
         @PathVariable("documentId") UUID documentId) {
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkUserPermission(responseEntity, documentId, Permission.UPDATE)) {
