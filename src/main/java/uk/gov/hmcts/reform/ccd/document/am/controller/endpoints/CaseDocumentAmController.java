@@ -245,9 +245,8 @@ public class CaseDocumentAmController  {
 
         HashMap<String, String> responseBody = new HashMap<>();
 
-        String hashedToken = ApplicationUtils.generateHashCode(documentId.toString().concat(
-            resource.getMetadata().get("jurisdictionId")).concat(resource.getMetadata().get("caseTypeId")));
-        hashedToken += salt;
+        String hashedToken = ApplicationUtils.generateHashCode(salt.concat(documentId.toString().concat(
+            resource.getMetadata().get("jurisdictionId")).concat(resource.getMetadata().get("caseTypeId"))));
         responseBody.put(HASHCODE, hashedToken);
 
         return new ResponseEntity<>(responseBody, HttpStatus.OK);

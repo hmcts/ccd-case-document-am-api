@@ -409,9 +409,7 @@ public class CaseDocumentAmControllerTest {
         ResponseEntity<Object> responseEntity = testee.generateHashCode(UUID.fromString(MATCHED_DOCUMENT_ID));
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
-        String salt = "CNTOE7D2NX6XHBKT";
-        assertEquals(String.format("{hashcode=6db468629a7bc771c1b2a0675568ae367acb79804ca24e3cca509279b0ebe3e9%s}",
-                                   salt), responseEntity.getBody().toString());
+        assertEquals("{hashcode=a68e9940e9d5a0fc1ef6ad976dc3449861ba00b55a5123c0534d6c0557a0f728}", responseEntity.getBody().toString());
     }
 
     @Test //this test returns an illegal argument exception because UUID.fromString() contains a throw for illegal arguments
