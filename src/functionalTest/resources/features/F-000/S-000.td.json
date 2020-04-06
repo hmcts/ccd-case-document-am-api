@@ -17,12 +17,12 @@
   ],
   "request": {
     "headers": {
-      "Authorization": "[[DYNAMIC]]",
-      "ServiceAuthorization": "[[DYNAMIC]]",
+      "Authorization": "[[DEFAULT_AUTO_VALUE]]",
+      "ServiceAuthorization": "[[DEFAULT_AUTO_VALUE]]",
       "Content-Type": "multipart/form-data",
       "caseTypeId": "BEFTA_CASETYPE_2_2",
       "jurisdictionId": "BEFTA_JURISDICTION_2",
-      "uid": "[[DYNAMIC]]",
+      "uid": "[[DEFAULT_AUTO_VALUE]]",
       "user-id": "29e430eb-7f1d-4bc1-96a2-904bb6493276",
       "user-roles": "caseworker"
     },
