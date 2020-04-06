@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -54,6 +55,9 @@ public class CaseDocumentAmController  {
     private static final Logger LOG = LoggerFactory.getLogger(CaseDocumentAmController.class);
 
     private DocumentManagementService  documentManagementService;
+
+    @Value("${idam.s2s-auth.totp_secret}")
+    protected String salt;
 
     @Autowired
     public CaseDocumentAmController(DocumentManagementService documentManagementService) {
@@ -235,6 +239,7 @@ public class CaseDocumentAmController  {
     @GetMapping(value = "/cases/documents/{documentId}/token", produces = {APPLICATION_JSON})
     public ResponseEntity<Object> generateHashCode(
         @PathVariable("documentId") UUID documentId) {
+
         StoredDocumentHalResource resource = new StoredDocumentHalResource();
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (responseEntity.getStatusCode().equals(HttpStatus.OK) && null != responseEntity.getBody()) {
@@ -246,8 +251,8 @@ public class CaseDocumentAmController  {
 
         HashMap<String, String> responseBody = new HashMap<>();
 
-        String hashedToken = ApplicationUtils.generateHashCode(documentId.toString().concat(
-            resource.getMetadata().get("jurisdictionId")).concat(resource.getMetadata().get("caseTypeId")));
+        String hashedToken = ApplicationUtils.generateHashCode(salt.concat(documentId.toString().concat(
+            resource.getMetadata().get("jurisdictionId")).concat(resource.getMetadata().get("caseTypeId"))));
         responseBody.put(HASHCODE, hashedToken);
 
         return new ResponseEntity<>(responseBody, HttpStatus.OK);
