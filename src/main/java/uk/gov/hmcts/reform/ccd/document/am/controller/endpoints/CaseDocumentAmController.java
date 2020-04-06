@@ -39,9 +39,11 @@ import java.util.List;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BAD_REQUEST;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHCODE;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_CASE_ID_PATTERN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.RESOURCE_NOT_FOUND;
 
 @Api(value = "cases")
 @RestController
@@ -58,26 +60,53 @@ public class CaseDocumentAmController  {
     }
 
     //******************** Delete API ************
-    @ApiOperation(value = "Deletes a Case Document.")
-    @ApiResponses(value = {
-        @ApiResponse(code = 204, message = "No Content")
+    @DeleteMapping(
+        path = "/cases/documents/{documentId}",
+        produces = {APPLICATION_JSON}
+        )
+    @ApiOperation(
+        value = "Deletes a case document with service authorization."
+    )
+    @ApiResponses({
+        @ApiResponse(
+            code = 204,
+            message = "No Content"
+        ),
+        @ApiResponse(
+            code = 400,
+            message = BAD_REQUEST
+
+        ),
+        @ApiResponse(
+            code = 404,
+            message = RESOURCE_NOT_FOUND
+        )
        })
-    @DeleteMapping(value = "/cases/documents/{documentId}",
-            produces = {APPLICATION_JSON})
-    public ResponseEntity<Object> deleteDocumentbyDocumentId(
-        @PathVariable("documentId") UUID documentId,
-        @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false") Boolean permanent) {
+
+    public ResponseEntity<Object> deleteDocumentbyDocumentId(@PathVariable("documentId") UUID documentId,
+                                                             @Valid @RequestParam(value = "permanent",
+                                                                 required = false, defaultValue = "false")
+                                                                 Boolean permanent) {
         return  documentManagementService.deleteDocument(documentId, permanent);
     }
 
 
     //**************** Binary content API ***********
-    @ApiOperation(value = "Streams contents of the most recent Document Content Version associated with the Case Document."
+    @GetMapping(
+        path = "/cases/documents/{documentId}/binary",
+        produces = {APPLICATION_JSON
+        })
+    @ApiOperation(
+        value = "Streams contents of the most recent Document associated with the Case Document."
          )
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Returns contents of a file", response = Object.class),
+    @ApiResponses({
+        @ApiResponse(
+            code = 200,
+            message = "Returns contents of a file",
+            response = Object.class
+        ),
        })
-    @GetMapping(value = "/cases/documents/{documentId}/binary", produces = {APPLICATION_JSON})
+
     public ResponseEntity<Object> getDocumentBinaryContentbyDocumentId(
         @PathVariable("documentId") UUID documentId) {
         ValidationService.validateDocumentId(documentId.toString());

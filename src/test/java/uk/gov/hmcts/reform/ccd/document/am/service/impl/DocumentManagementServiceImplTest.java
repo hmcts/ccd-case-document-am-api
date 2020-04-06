@@ -27,8 +27,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.auth.checker.spring.serviceanduser.ServiceAndUserDetails;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
@@ -43,11 +43,24 @@ import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
+import java.nio.charset.Charset;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -69,19 +82,6 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
 
-import java.nio.charset.Charset;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
 @RunWith(MockitoJUnitRunner.class)
 class DocumentManagementServiceImplTest {
 
@@ -94,17 +94,19 @@ class DocumentManagementServiceImplTest {
     private static final String BEFTA_JURISDICTION_2 =  "BEFTA_JURISDICTION_2";
     private static final String USER_ID =  "userId";
 
-    private AuthTokenGenerator authTokenGenerator = mock(AuthTokenGenerator.class);
+    //private AuthTokenGenerator authTokenGenerator = mock(AuthTokenGenerator.class);
     private RestTemplate restTemplateMock = Mockito.mock(RestTemplate.class);
-    private SecurityUtils securityUtils = new SecurityUtils(authTokenGenerator);
+    //private SecurityUtils securityUtils = new SecurityUtils(authTokenGenerator);
     private SecurityUtils securityUtilsMock = mock(SecurityUtils.class);
     private CaseDataStoreService caseDataStoreServiceMock = mock(CaseDataStoreService.class);
 
-    private HttpEntity<?> requestEntityGlobal  = new HttpEntity<>(securityUtils.authorizationHeaders());
+    private HttpHeaders headers = new HttpHeaders();
+    //headers = securityUtils
+    private HttpEntity<?> requestEntityGlobal  = new HttpEntity<>(getHttpHeaders());
     private UUID matchedDocUUID = UUID.fromString(MATCHED_DOCUMENT_ID);
 
     @InjectMocks
-    private DocumentManagementServiceImpl sut = new DocumentManagementServiceImpl(restTemplateMock, securityUtils,
+    private DocumentManagementServiceImpl sut = new DocumentManagementServiceImpl(restTemplateMock, securityUtilsMock,
 
                                                                                   caseDataStoreServiceMock);
     String documentMetaDataURL = "null";
@@ -122,6 +124,11 @@ class DocumentManagementServiceImplTest {
     void setUp() {
         ReflectionTestUtils.setField(sut, "documentTtl", "600000");
         ReflectionTestUtils.setField(sut, "documentURL", "http://localhost:4506");
+
+        final HttpHeaders headers = new HttpHeaders();
+        headers.add(SERVICE_AUTHORIZATION, "123");
+        when(securityUtilsMock.serviceAuthorizationHeaders()).thenReturn(headers);
+        when(securityUtilsMock.getUserId()).thenReturn("123");
     }
 
     @Test
@@ -147,6 +154,7 @@ class DocumentManagementServiceImplTest {
     @Test
     void getDocumentMetadata_Throws_HttpClientErrorException_ResourceNotFoundException() {
         HttpClientErrorException httpClientErrorException = HttpClientErrorException.create(HttpStatus.NOT_FOUND,"woopsie", new HttpHeaders(),null,null);
+
         Mockito.when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID,
             HttpMethod.GET,requestEntityGlobal,
@@ -453,7 +461,7 @@ class DocumentManagementServiceImplTest {
             .build();
 
         String documentMetadataUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
-        HttpEntity requestEntityMeta = new HttpEntity(securityUtils.authorizationHeaders());
+        HttpEntity requestEntityMeta = new HttpEntity(getHttpHeaders());
 
         Mockito.when(restTemplateMock.exchange(
             documentMetadataUrl,
@@ -512,7 +520,7 @@ class DocumentManagementServiceImplTest {
         SecurityContextHolder.getContext().setAuthentication(
             new UsernamePasswordAuthenticationToken(USER_ID, "1234"));
 
-        ResponseEntity<Object> responseEntity = sut.uploadDocuments(files,"classification", roles, BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
+        ResponseEntity<Object> responseEntity = sut.uploadDocuments(files,"classification", BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
@@ -556,7 +564,7 @@ class DocumentManagementServiceImplTest {
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
         Assertions.assertThrows(ResponseFormatException.class, () -> {
-            sut.uploadDocuments(files,"classification", roles, BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
+            sut.uploadDocuments(files,"classification", BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
         });
     }
 
@@ -635,8 +643,8 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void patchDocument_ServiceException() {
-        List<String> roles = new ArrayList<>();
-        roles.add("Role");
+        //List<String> roles = new ArrayList<>();
+        //roles.add("Role");
         UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
         String effectiveTTL = getEffectiveTTL();
         updateDocumentCommand.setTtl(effectiveTTL);
@@ -648,17 +656,18 @@ class DocumentManagementServiceImplTest {
             PATCH,
             requestEntity,
             StoredDocumentHalResource.class
-        )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.FORBIDDEN, "404", new HttpHeaders(), new byte[1],
+        )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.FORBIDDEN, "403", new HttpHeaders(), new byte[1],
                                                               Charset.defaultCharset()));
 
-        Assertions.assertThrows(ServiceException.class, () -> {
+        Assertions.assertThrows(ForbiddenException.class, () -> {
             sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID), updateDocumentCommand);
         });
     }
 
     private HttpHeaders getHttpHeaders() {
-        HttpHeaders headers = securityUtils.authorizationHeaders();
-        String id = securityUtils.getUserId();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(SERVICE_AUTHORIZATION, "123");
+        headers.set(USERID, "123");
         headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
     }
@@ -677,12 +686,17 @@ class DocumentManagementServiceImplTest {
     @Test
     @SuppressWarnings("unchecked")
     void deleteDocument_HappyPath() {
-        Boolean permanent = true;
+        final HttpHeaders headers = new HttpHeaders();
+        headers.add(SERVICE_AUTHORIZATION, "123");
 
+        when(securityUtilsMock.serviceAuthorizationHeaders()).thenReturn(headers);
+        when(securityUtilsMock.getUserId()).thenReturn("123");
+
+        Boolean permanent = true;
         HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
         String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, MATCHED_DOCUMENT_ID, permanent);
 
-        ResponseEntity responseEntity = new ResponseEntity<>(HttpStatus.ACCEPTED);
+        ResponseEntity responseEntity = new ResponseEntity<>(HttpStatus.NO_CONTENT);
         when(restTemplateMock.exchange(
             documentDeleteUrl,
             DELETE,
@@ -730,10 +744,10 @@ class DocumentManagementServiceImplTest {
             DELETE,
             requestEntity,
             ResponseEntity.class
-        )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.FORBIDDEN, "404", new HttpHeaders(), new byte[1],
+        )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.NOT_FOUND, "404", new HttpHeaders(), new byte[1],
                                                               Charset.defaultCharset()));
 
-        Assertions.assertThrows(ServiceException.class, () -> {
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
             sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), permanent);
         });
     }
