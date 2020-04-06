@@ -94,14 +94,10 @@ class DocumentManagementServiceImplTest {
     private static final String BEFTA_JURISDICTION_2 =  "BEFTA_JURISDICTION_2";
     private static final String USER_ID =  "userId";
 
-    //private AuthTokenGenerator authTokenGenerator = mock(AuthTokenGenerator.class);
     private RestTemplate restTemplateMock = Mockito.mock(RestTemplate.class);
-    //private SecurityUtils securityUtils = new SecurityUtils(authTokenGenerator);
     private SecurityUtils securityUtilsMock = mock(SecurityUtils.class);
     private CaseDataStoreService caseDataStoreServiceMock = mock(CaseDataStoreService.class);
 
-    private HttpHeaders headers = new HttpHeaders();
-    //headers = securityUtils
     private HttpEntity<?> requestEntityGlobal  = new HttpEntity<>(getHttpHeaders());
     private UUID matchedDocUUID = UUID.fromString(MATCHED_DOCUMENT_ID);
 
@@ -109,11 +105,10 @@ class DocumentManagementServiceImplTest {
     private DocumentManagementServiceImpl sut = new DocumentManagementServiceImpl(restTemplateMock, securityUtilsMock,
 
                                                                                   caseDataStoreServiceMock);
-    String documentMetaDataURL = "null";
 
-    String documentURL = "http://localhost:4506";
-
-    String documentTTL = "600000";
+    private String documentURL = "http://localhost:4506";
+    private String documentTTL = "600000";
+    private String salt = "AAAOA7A2AA6AAAA5";
 
     @Test
     void documentMetadataInstantiation() {
@@ -124,6 +119,7 @@ class DocumentManagementServiceImplTest {
     void setUp() {
         ReflectionTestUtils.setField(sut, "documentTtl", "600000");
         ReflectionTestUtils.setField(sut, "documentURL", "http://localhost:4506");
+        ReflectionTestUtils.setField(sut, "salt", "AAAOA7A2AA6AAAA5");
 
         final HttpHeaders headers = new HttpHeaders();
         headers.add(SERVICE_AUTHORIZATION, "123");
@@ -154,7 +150,6 @@ class DocumentManagementServiceImplTest {
     @Test
     void getDocumentMetadata_Throws_HttpClientErrorException_ResourceNotFoundException() {
         HttpClientErrorException httpClientErrorException = HttpClientErrorException.create(HttpStatus.NOT_FOUND,"woopsie", new HttpHeaders(),null,null);
-
         Mockito.when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID,
             HttpMethod.GET,requestEntityGlobal,
@@ -413,7 +408,7 @@ class DocumentManagementServiceImplTest {
         List<Permission> permissionsList = new ArrayList<>();
         permissionsList.add(Permission.UPDATE);
         Document doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList)
-            .hashToken(ApplicationUtils.generateHashCode(MATCHED_DOCUMENT_ID.concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
+            .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
         List<Document> documentList = new ArrayList<>();
         documentList.add(doc);
 
@@ -575,8 +570,6 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void patchDocument_HappyPath() {
-        List<String> roles = new ArrayList<>();
-        roles.add("Role");
         UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
         String effectiveTTL = getEffectiveTTL();
         updateDocumentCommand.setTtl(effectiveTTL);
@@ -597,8 +590,6 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void patchDocument_ResourceNotFound() {
-        List<String> roles = new ArrayList<>();
-        roles.add("Role");
         UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
         String effectiveTTL = getEffectiveTTL();
         updateDocumentCommand.setTtl(effectiveTTL);
@@ -620,8 +611,6 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void patchDocument_HttpClientErrorException() {
-        List<String> roles = new ArrayList<>();
-        roles.add("Role");
         UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
         String effectiveTTL = getEffectiveTTL();
         updateDocumentCommand.setTtl(effectiveTTL);
@@ -643,8 +632,6 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void patchDocument_ServiceException() {
-        //List<String> roles = new ArrayList<>();
-        //roles.add("Role");
         UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
         String effectiveTTL = getEffectiveTTL();
         updateDocumentCommand.setTtl(effectiveTTL);
@@ -686,12 +673,6 @@ class DocumentManagementServiceImplTest {
     @Test
     @SuppressWarnings("unchecked")
     void deleteDocument_HappyPath() {
-        final HttpHeaders headers = new HttpHeaders();
-        headers.add(SERVICE_AUTHORIZATION, "123");
-
-        when(securityUtilsMock.serviceAuthorizationHeaders()).thenReturn(headers);
-        when(securityUtilsMock.getUserId()).thenReturn("123");
-
         Boolean permanent = true;
         HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
         String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, MATCHED_DOCUMENT_ID, permanent);
