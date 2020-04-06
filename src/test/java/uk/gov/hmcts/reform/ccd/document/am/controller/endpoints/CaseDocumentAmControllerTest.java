@@ -394,7 +394,7 @@ public class CaseDocumentAmControllerTest {
     @SuppressWarnings("unchecked")
     void generateHashCode_HappyPath() {
 
-        ReflectionTestUtils.setField(testee, "salt", "CNTOE7D2NX6XHBKT");
+        ReflectionTestUtils.setField(testee, "salt", "AAAOA7A2AA6AAAA5");
 
         Map<String, String> myMap = new HashMap<>();
         myMap.put("caseId",CASE_ID);
@@ -409,7 +409,7 @@ public class CaseDocumentAmControllerTest {
         ResponseEntity<Object> responseEntity = testee.generateHashCode(UUID.fromString(MATCHED_DOCUMENT_ID));
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
-        assertEquals("{hashcode=a68e9940e9d5a0fc1ef6ad976dc3449861ba00b55a5123c0534d6c0557a0f728}", responseEntity.getBody().toString());
+        assertEquals("{hashcode=a54bbca80a425a73ddaa27f12076fb09981da48c30bbbe74b68bf46cb7762dcb}", responseEntity.getBody().toString());
     }
 
     @Test //this test returns an illegal argument exception because UUID.fromString() contains a throw for illegal arguments
