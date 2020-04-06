@@ -96,6 +96,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private CaseDataStoreService caseDataStoreService;
 
+    @Value("${idam.s2s-auth.totp_secret}")
+    protected String salt;
+
     @Autowired
     public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils,
                                          CaseDataStoreService caseDataStoreService) {
@@ -229,9 +232,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             if (responseEntity.getStatusCode().equals(HttpStatus.OK) && null != responseEntity.getBody()) {
                 StoredDocumentHalResource resource = (StoredDocumentHalResource) responseEntity.getBody();
 
-                String hashcodeFromStoredDocument = ApplicationUtils.generateHashCode(document.getId()
+                String hashcodeFromStoredDocument = ApplicationUtils.generateHashCode(salt.concat(document.getId()
                                                        .concat(resource.getMetadata().get("jurisdictionId"))
-                                                       .concat(resource.getMetadata().get("caseTypeId")));
+                                                       .concat(resource.getMetadata().get("caseTypeId"))));
                 if (!hashcodeFromStoredDocument.equals(document.getHashToken())) {
                     throw new ResourceNotFoundException(String.format(": Document %s does not exists in DM Store", document.getId()));
                 }
@@ -354,10 +357,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
             String href = (String) links.getJSONObject(SELF).get(HREF);
             links.getJSONObject(SELF).put(HREF, buildDocumentURL(href, 36));
-            hashmap.put(HASHCODE, ApplicationUtils.generateHashCode(
+            hashmap.put(HASHCODE, ApplicationUtils.generateHashCode(salt.concat(
                 href.substring(href.length() - 36)
                     .concat(jurisdictionId)
-                    .concat(caseTypeId)));
+                    .concat(caseTypeId))));
 
             links.getJSONObject(BINARY).put(HREF, buildDocumentURL((String) links.getJSONObject(BINARY).get(HREF), 43));
             hashmap.put(LINKS, links.toMap());
