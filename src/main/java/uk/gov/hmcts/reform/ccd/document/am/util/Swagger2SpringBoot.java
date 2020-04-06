@@ -13,7 +13,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class Swagger2SpringBoot implements CommandLineRunner {
 
     public static void main(String[] args) {
-        new SpringApplication(Swagger2SpringBoot.class).run(args);
+        new SpringApplication(Swagger2SpringBoot.class).run("");
     }
 
     @Override

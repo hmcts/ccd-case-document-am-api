@@ -66,12 +66,12 @@ public class ValidationService {
     }
 
     public static boolean validateTTL(String strDate) {
-
-        String pattern = "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\+|\\-)\\d{4}";
-
-        if (strDate.trim().equals("") || !Pattern.matches(pattern, strDate)) {
+        if (strDate.length() < 24) {
             return false;
-        } else {
+        }
+        String timeZone = strDate.substring(20);
+
+        if ((!timeZone.equals("") && timeZone.chars().allMatch(Character::isDigit))) {
             SimpleDateFormat sdfrmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
             sdfrmt.setLenient(false);
             try {
@@ -81,6 +81,8 @@ public class ValidationService {
                 return false;
             }
             return true;
+        } else {
+            return false;
         }
     }
 

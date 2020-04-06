@@ -184,15 +184,13 @@ project.tasks['pitest'].group="verification"
 
 sonarqube {
   properties {
-    property "sonar.projectName", "Reform :: ccd-case-document-am-api"
-    property "sonar.projectKey", "uk.gov.hmcts.reform:ccd-case-document-am-api"
+    property "sonar.projectName", "ccd-case-document-am-api"
+    property "sonar.projectKey", "ccd-case-document-am-api"
     property "sonar.coverage.jacoco.xmlReportPaths", "${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml"
     property "sonar.pitest.mode", "reuseReport"
     property "sonar.pitest.reportsDirectory", "build/reports/pitest"
-    property "sonar.exclusions", "src/main/java/uk/gov/hmcts/reform/ccd/document/am/**," + "src/main/java/uk/gov/hmcts/reform/ccd/document/am/configuration/**," + "src/main/java/uk/gov/hmcts/reform/ccd/document/am/apihelper/**" + "src/main/java/uk/gov/hmcts/reform/ccd/document/am/model/enums/**"
+    property "sonar.exclusions", "src/main/java/uk/gov/hmcts/reform/ccd/document/am/configuration/**," + "src/main/java/uk/gov/hmcts/reform/ccd/document/am/apihelper/**"
     property "sonar.junit.reportPaths", "${project.buildDir}/test-results/junit-platform"
-    property "sonar.projectName", "ccd-case-document-am-api"
-    property "sonar.projectKey", "ccd-case-document-am-api"
   }
 }
 
