@@ -53,10 +53,10 @@
             "hashcode": "[[ANYTHING_PRESENT]]",
             "_links": {
               "self": {
-                "href": "${[scenarioContext][customValues][validSelfLink]}"
+                "href": "${[scenarioContext][customValues][S_040_validSelfLink]}"
               },
               "binary": {
-                "href": "${[scenarioContext][customValues][validBinaryLink]}"
+                "href": "${[scenarioContext][customValues][S_040_validBinaryLink]}"
               }
             }
           }
