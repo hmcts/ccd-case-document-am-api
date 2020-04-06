@@ -1,9 +1,9 @@
 {
   "_guid_": "S-045",
   "_extends_": "F-004_Test_Base_data",
-  "title": "must get an error response for a non-existing classification",
+  "title": "must get an error response for a non-existing secutiry classification",
   "specs": [
-    "for a non-existing classification"
+    "contains a non-existing secutiry classification"
   ],
   "request": {
     "headers": {
@@ -14,7 +14,7 @@
       "arrayInMap": [
         {
           "key": "classification",
-          "value": "NONEXISTING"
+          "value": "NonExisting"
         },
         {
           "key": "roles",

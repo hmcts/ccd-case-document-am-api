@@ -1,9 +1,9 @@
 {
   "_guid_": "S-041",
   "_extends_": "F-004_Test_Base_data",
-  "title": "must get an error response for a malformed caseTypeId",
+  "title": "must get an error response for a malformed case type id",
   "specs": [
-    "for a malformed caseTypeId"
+    "contains a malformed case type id"
   ],
   "request": {
     "headers": {
@@ -22,7 +22,7 @@
         },
         {
           "key": "files",
-          "filePath": "SampleImage.png"
+          "filePath": "CCD_BEFTA_JURISDICTION2.xlsx"
         }
       ]
     }

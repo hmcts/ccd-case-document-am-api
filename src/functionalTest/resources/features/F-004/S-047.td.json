@@ -3,7 +3,7 @@
   "_extends_": "F-004_Test_Base_data",
   "title": "must get an error response for a malformed roles",
   "specs": [
-    "for a malformed roles"
+    "contains a malformed roles"
   ],
   "request": {
     "headers": {
@@ -18,11 +18,11 @@
         },
         {
           "key": "roles",
-          "value": "case£$$%^&worker"
+          "value": "case$%^&worker"
         },
         {
           "key": "files",
-          "filePath": "SampleImage.png"
+          "filePath": "Sample.pdf"
         }
       ]
     }

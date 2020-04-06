@@ -36,6 +36,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
                 return "Error extracting the Document Id";
             }
         }
+
         else if(key.equals(key.equals("S_040_validSelfLink"))) {
             try {
                 String self = (String) ReflectionUtils.deepGetFieldInObject(scenarioContext,
@@ -46,6 +47,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
             } catch (Exception e) {
                 throw new FunctionalTestException("Couldn't get self link from response field", e);
             }
+
         }
         else if(key.equals(key.equals("S_040_validBinaryLink"))) {
             try {

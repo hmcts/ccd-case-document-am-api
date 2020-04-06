@@ -1,10 +1,10 @@
 {
   "_guid_": "S-048",
   "_extends_": "F-004_Test_Base_data",
-  "title": "must successfully Post Upload multiple Document with Binary Content",
+  "title": "must successfully upload multiple document with binary content",
   "specs": [
-    "contain multiple document with binary content",
-    "contains the metadata for the document uploaded above"
+    "contains multiple documents with binary contents",
+    "contains the metadata for each of the documents uploaded above"
   ],
   "request": {
     "headers": {
@@ -31,11 +31,11 @@
         },
         {
           "key": "files",
-          "filePath": "SampleImage.png"
+          "filePath": "CCD_BEFTA_JURISDICTION2.xlsx"
         },
         {
           "key": "files",
-          "filePath": "SampleImage.png"
+          "filePath": "CCD_BEFTA_JURISDICTION2.xlsx"
         },
         {
           "key": "files",
@@ -56,183 +56,204 @@
     "_extends_": "Common_200_Response",
     "body": {
       "_embedded": {
-        "documents" : [ {
-          "size" : "[[ANYTHING_PRESENT]]",
-          "mimeType" : "image/png",
-          "originalDocumentName" : "[[ANYTHING_PRESENT]]",
-          "createdBy" : "[someUserId]",
-          "lastModifiedBy" : "[someUserId]",
-          "modifiedOn" : "[[ANYTHING_PRESENT]]",
-          "createdOn" : "[[ANYTHING_PRESENT]]",
-          "classification" : "PUBLIC",
-          "roles" : [ "caseworker" ],
-          "metadata" : {
-            "caseId" : "1111222233334444",
-            "caseTypeId" : "BEFTA_CASETYPE_2_2",
-            "jurisdictionId" : "BEFTA_JURISDICTION_2"
-          },
-          "ttl" : "[[ANYTHING_PRESENT]]",
-          "_links" : {
-            "binary" : {
-              "href" : "[[ANYTHING_PRESENT]]"
-            },
-            "self" : {
-              "href" : "[[ANYTHING_PRESENT]]"
-            }
-          },
-          "hashcode" : "[[ANYTHING_PRESENT]]"
-        }, {
-          "size" : "[[ANYTHING_PRESENT]]",
-          "mimeType" : "image/png",
-          "originalDocumentName" : "[[ANYTHING_PRESENT]]",
-          "createdBy" : "[someUserId]",
-          "lastModifiedBy" : "[someUserId]",
-          "modifiedOn" : "[[ANYTHING_PRESENT]]",
-          "createdOn" : "[[ANYTHING_PRESENT]]",
-          "classification" : "PUBLIC",
-          "roles" : [ "caseworker" ],
-          "metadata" : {
-            "caseId" : "1111222233334444",
-            "caseTypeId" : "BEFTA_CASETYPE_2_2",
-            "jurisdictionId" : "BEFTA_JURISDICTION_2"
-          },
-          "ttl" : "[[ANYTHING_PRESENT]]",
-          "_links" : {
-            "binary" : {
-              "href" : "[[ANYTHING_PRESENT]]"
-            },
-            "self" : {
-              "href" : "[[ANYTHING_PRESENT]]"
-            }
-          },
-          "hashcode" : "[[ANYTHING_PRESENT]]"
-        }, {
-          "size" : "[[ANYTHING_PRESENT]]",
-          "mimeType" : "image/png",
-          "originalDocumentName" : "[[ANYTHING_PRESENT]]",
-          "createdBy" : "[someUserId]",
-          "lastModifiedBy" : "[someUserId]",
-          "modifiedOn" : "[[ANYTHING_PRESENT]]",
-          "createdOn" : "[[ANYTHING_PRESENT]]",
-          "classification" : "PUBLIC",
-          "roles" : [ "caseworker" ],
-          "metadata" : {
-            "caseId" : "1111222233334444",
-            "caseTypeId" : "BEFTA_CASETYPE_2_2",
-            "jurisdictionId" : "BEFTA_JURISDICTION_2"
-          },
-          "ttl" : "[[ANYTHING_PRESENT]]",
-          "_links" : {
-            "binary" : {
-              "href" : "[[ANYTHING_PRESENT]]"
-            },
-            "self" : {
-              "href" : "[[ANYTHING_PRESENT]]"
-            }
-          },
-          "hashcode" : "[[ANYTHING_PRESENT]]"
-        }, {
-          "size" : "[[ANYTHING_PRESENT]]",
-          "mimeType" : "image/png",
-          "originalDocumentName" : "[[ANYTHING_PRESENT]]",
-          "createdBy" : "[someUserId]",
-          "lastModifiedBy" : "[someUserId]",
-          "modifiedOn" : "[[ANYTHING_PRESENT]]",
-          "createdOn" : "[[ANYTHING_PRESENT]]",
-          "classification" : "PUBLIC",
-          "roles" : [ "caseworker" ],
-          "metadata" : {
-            "caseId" : "1111222233334444",
-            "caseTypeId" : "BEFTA_CASETYPE_2_2",
-            "jurisdictionId" : "BEFTA_JURISDICTION_2"
-          },
-          "ttl" : "[[ANYTHING_PRESENT]]",
-          "_links" : {
-            "binary" : {
-              "href" : "[[ANYTHING_PRESENT]]"
-            },
-            "self" : {
-              "href" : "[[ANYTHING_PRESENT]]"
-            }
-          },
-          "hashcode" : "[[ANYTHING_PRESENT]]"
-        }, {
-          "size" : "[[ANYTHING_PRESENT]]",
-          "mimeType" : "image/png",
-          "originalDocumentName" : "[[ANYTHING_PRESENT]]",
-          "createdBy" : "[someUserId]",
-          "lastModifiedBy" : "[someUserId]",
-          "modifiedOn" : "[[ANYTHING_PRESENT]]",
-          "createdOn" : "[[ANYTHING_PRESENT]]",
-          "classification" : "PUBLIC",
-          "roles" : [ "caseworker" ],
-          "metadata" : {
-            "caseId" : "1111222233334444",
-            "caseTypeId" : "BEFTA_CASETYPE_2_2",
-            "jurisdictionId" : "BEFTA_JURISDICTION_2"
-          },
-          "ttl" : "[[ANYTHING_PRESENT]]",
-          "_links" : {
-            "binary" : {
-              "href" : "[[ANYTHING_PRESENT]]"
-            },
-            "self" : {
-              "href" : "[[ANYTHING_PRESENT]]"
-            }
-          },
-          "hashcode" : "[[ANYTHING_PRESENT]]"
-        }, {
-          "size" : "[[ANYTHING_PRESENT]]",
-          "mimeType" : "application/pdf",
-          "originalDocumentName" : "[[ANYTHING_PRESENT]]",
-          "createdBy" : "[someUserId]",
-          "lastModifiedBy" : "[someUserId]",
-          "modifiedOn" : "[[ANYTHING_PRESENT]]",
-          "createdOn" : "[[ANYTHING_PRESENT]]",
-          "classification" : "PUBLIC",
-          "roles" : [ "caseworker" ],
-          "metadata" : {
-            "caseId" : "1111222233334444",
-            "caseTypeId" : "BEFTA_CASETYPE_2_2",
-            "jurisdictionId" : "BEFTA_JURISDICTION_2"
-          },
-          "ttl" : "[[ANYTHING_PRESENT]]",
-          "_links" : {
-            "binary" : {
-              "href" : "[[ANYTHING_PRESENT]]"
-            },
-            "self" : {
-              "href" : "[[ANYTHING_PRESENT]]"
-            }
-          },
-          "hashcode" : "[[ANYTHING_PRESENT]]"
-        },
+        "documents": [
           {
-            "size" : "[[ANYTHING_PRESENT]]",
-            "mimeType" : "application/pdf",
-            "originalDocumentName" : "[[ANYTHING_PRESENT]]",
-            "createdBy" : "[someUserId]",
-            "lastModifiedBy" : "[someUserId]",
-            "modifiedOn" : "[[ANYTHING_PRESENT]]",
-            "createdOn" : "[[ANYTHING_PRESENT]]",
-            "classification" : "PUBLIC",
-            "roles" : [ "caseworker" ],
-            "metadata" : {
-              "caseId" : "1111222233334444",
-              "caseTypeId" : "BEFTA_CASETYPE_2_2",
-              "jurisdictionId" : "BEFTA_JURISDICTION_2"
+            "size": "[[ANYTHING_PRESENT]]",
+            "mimeType": "image/png",
+            "originalDocumentName": "[[ANYTHING_PRESENT]]",
+            "createdBy": "[someUserId]",
+            "lastModifiedBy": "[someUserId]",
+            "modifiedOn": "[[ANYTHING_PRESENT]]",
+            "createdOn": "[[ANYTHING_PRESENT]]",
+            "classification": "PUBLIC",
+            "roles": [
+              "caseworker"
+            ],
+            "metadata": {
+              "caseId": "1111222233334444",
+              "caseTypeId": "BEFTA_CASETYPE_2_2",
+              "jurisdictionId": "BEFTA_JURISDICTION_2"
             },
-            "ttl" : "[[ANYTHING_PRESENT]]",
-            "_links" : {
-              "binary" : {
-                "href" : "[[ANYTHING_PRESENT]]"
+            "ttl": "[[ANYTHING_PRESENT]]",
+            "hashcode": "[[ANYTHING_PRESENT]]",
+            "_links": {
+              "binary": {
+                "href": "${[scenarioContext][customValues][validBinaryLink]}"
               },
-              "self" : {
-                "href" : "[[ANYTHING_PRESENT]]"
+              "self": {
+                "href": "${[scenarioContext][customValues][validSelfLink]}"
               }
+            }
+          },
+          {
+            "size": "[[ANYTHING_PRESENT]]",
+            "mimeType": "image/png",
+            "originalDocumentName": "[[ANYTHING_PRESENT]]",
+            "createdBy": "[someUserId]",
+            "lastModifiedBy": "[someUserId]",
+            "modifiedOn": "[[ANYTHING_PRESENT]]",
+            "createdOn": "[[ANYTHING_PRESENT]]",
+            "classification": "PUBLIC",
+            "roles": [
+              "caseworker"
+            ],
+            "metadata": {
+              "caseId": "1111222233334444",
+              "caseTypeId": "BEFTA_CASETYPE_2_2",
+              "jurisdictionId": "BEFTA_JURISDICTION_2"
             },
-            "hashcode" : "[[ANYTHING_PRESENT]]"
-          } ]
+            "ttl": "[[ANYTHING_PRESENT]]",
+            "hashcode": "[[ANYTHING_PRESENT]]",
+            "_links": {
+              "binary": {
+                "href": "${[scenarioContext][customValues][validBinaryLink]}"
+              },
+              "self": {
+                "href": "${[scenarioContext][customValues][validSelfLink]}"
+              }
+            }
+          },
+          {
+            "size": "[[ANYTHING_PRESENT]]",
+            "mimeType": "image/png",
+            "originalDocumentName": "[[ANYTHING_PRESENT]]",
+            "createdBy": "[someUserId]",
+            "lastModifiedBy": "[someUserId]",
+            "modifiedOn": "[[ANYTHING_PRESENT]]",
+            "createdOn": "[[ANYTHING_PRESENT]]",
+            "classification": "PUBLIC",
+            "roles": [
+              "caseworker"
+            ],
+            "metadata": {
+              "caseId": "1111222233334444",
+              "caseTypeId": "BEFTA_CASETYPE_2_2",
+              "jurisdictionId": "BEFTA_JURISDICTION_2"
+            },
+            "ttl": "[[ANYTHING_PRESENT]]",
+            "hashcode": "[[ANYTHING_PRESENT]]",
+            "_links": {
+              "binary": {
+                "href": "${[scenarioContext][customValues][validBinaryLink]}"
+              },
+              "self": {
+                "href": "${[scenarioContext][customValues][validSelfLink]}"
+              }
+            }
+          },
+          {
+            "size": "[[ANYTHING_PRESENT]]",
+            "mimeType": "image/png",
+            "originalDocumentName": "[[ANYTHING_PRESENT]]",
+            "createdBy": "[someUserId]",
+            "lastModifiedBy": "[someUserId]",
+            "modifiedOn": "[[ANYTHING_PRESENT]]",
+            "createdOn": "[[ANYTHING_PRESENT]]",
+            "classification": "PUBLIC",
+            "roles": [
+              "caseworker"
+            ],
+            "metadata": {
+              "caseId": "1111222233334444",
+              "caseTypeId": "BEFTA_CASETYPE_2_2",
+              "jurisdictionId": "BEFTA_JURISDICTION_2"
+            },
+            "ttl": "[[ANYTHING_PRESENT]]",
+            "hashcode": "[[ANYTHING_PRESENT]]",
+            "_links": {
+              "binary": {
+                "href": "${[scenarioContext][customValues][validBinaryLink]}"
+              },
+              "self": {
+                "href": "${[scenarioContext][customValues][validSelfLink]}"
+              }
+            }
+          },
+          {
+            "size": "[[ANYTHING_PRESENT]]",
+            "mimeType": "image/png",
+            "originalDocumentName": "[[ANYTHING_PRESENT]]",
+            "createdBy": "[someUserId]",
+            "lastModifiedBy": "[someUserId]",
+            "modifiedOn": "[[ANYTHING_PRESENT]]",
+            "createdOn": "[[ANYTHING_PRESENT]]",
+            "classification": "PUBLIC",
+            "roles": [
+              "caseworker"
+            ],
+            "metadata": {
+              "caseId": "1111222233334444",
+              "caseTypeId": "BEFTA_CASETYPE_2_2",
+              "jurisdictionId": "BEFTA_JURISDICTION_2"
+            },
+            "ttl": "[[ANYTHING_PRESENT]]",
+            "hashcode": "[[ANYTHING_PRESENT]]",
+            "_links": {
+              "binary": {
+                "href": "${[scenarioContext][customValues][validBinaryLink]}"
+              },
+              "self": {
+                "href": "${[scenarioContext][customValues][validSelfLink]}"
+              }
+            }
+          },
+          {
+            "size": "[[ANYTHING_PRESENT]]",
+            "mimeType": "application/pdf",
+            "originalDocumentName": "[[ANYTHING_PRESENT]]",
+            "createdBy": "[someUserId]",
+            "lastModifiedBy": "[someUserId]",
+            "modifiedOn": "[[ANYTHING_PRESENT]]",
+            "createdOn": "[[ANYTHING_PRESENT]]",
+            "classification": "PUBLIC",
+            "roles": [
+              "caseworker"
+            ],
+            "metadata": {
+              "caseId": "1111222233334444",
+              "caseTypeId": "BEFTA_CASETYPE_2_2",
+              "jurisdictionId": "BEFTA_JURISDICTION_2"
+            },
+            "ttl": "[[ANYTHING_PRESENT]]",
+            "hashcode": "[[ANYTHING_PRESENT]]",
+            "_links": {
+              "binary": {
+                "href": "${[scenarioContext][customValues][validBinaryLink]}"
+              },
+              "self": {
+                "href": "${[scenarioContext][customValues][validSelfLink]}"
+              }
+            }
+          },
+          {
+            "size": "[[ANYTHING_PRESENT]]",
+            "mimeType": "application/pdf",
+            "originalDocumentName": "[[ANYTHING_PRESENT]]",
+            "createdBy": "[someUserId]",
+            "lastModifiedBy": "[someUserId]",
+            "modifiedOn": "[[ANYTHING_PRESENT]]",
+            "createdOn": "[[ANYTHING_PRESENT]]",
+            "classification": "PUBLIC",
+            "roles": [
+              "caseworker"
+            ],
+            "metadata": {
+              "caseId": "1111222233334444",
+              "caseTypeId": "BEFTA_CASETYPE_2_2",
+              "jurisdictionId": "BEFTA_JURISDICTION_2"
+            },
+            "ttl": "[[ANYTHING_PRESENT]]",
+            "hashcode": "[[ANYTHING_PRESENT]]",
+            "_links": {
+              "binary": {
+                "href": "${[scenarioContext][customValues][validBinaryLink]}"
+              },
+              "self": {
+                "href": "${[scenarioContext][customValues][validSelfLink]}"
+              }
+            }
+          }
+        ]
       }
     }
   }
