@@ -153,6 +153,7 @@ public class CaseDocumentAmController  {
     public ResponseEntity<Object> patchMetaDataOnDocuments(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody DocumentMetadata caseDocumentMetadata) {
+        boolean isDocumentPatched = false;
 
         try {
             if (!ValidationService.validate(caseDocumentMetadata.getCaseId())) {
@@ -165,14 +166,19 @@ public class CaseDocumentAmController  {
                                     ValidationService.validateDocumentId(document.getId());
                                 });
 
-            documentManagementService.patchDocumentMetadata(caseDocumentMetadata);
+            isDocumentPatched = documentManagementService.patchDocumentMetadata(caseDocumentMetadata);
+
+            return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(isDocumentPatched);
         } catch (BadRequestException | IllegalArgumentException e) {
             throw new BadRequestException("Exception while attaching the documents to a case :" + e);
         } catch (Exception e) {
             LOG.error("Exception in controller for patch MetaData Documents API");
-            throw e;
+            return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(isDocumentPatched);
         }
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     //**************** Upload Documents  API ***************
