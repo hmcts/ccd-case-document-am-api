@@ -217,8 +217,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             restTemplate.exchange(documentUrl, HttpMethod.PATCH, requestEntity, Void.class);
 
         } catch (RestClientException ex) {
-            LOG.error("Exception occurred");
-            throw ex;
+            LOG.error("Exception occurred while patching the document metadata");
+            return false;
         }
         return true;
     }
