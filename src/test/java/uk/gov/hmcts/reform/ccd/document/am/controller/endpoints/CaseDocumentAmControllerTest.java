@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
@@ -365,6 +366,9 @@ public class CaseDocumentAmControllerTest {
     @Test
     @SuppressWarnings("unchecked")
     void generateHashCode_HappyPath() {
+
+        ReflectionTestUtils.setField(testee, "salt", "AAAOA7A2AA6AAAA5");
+
         Map<String, String> myMap = new HashMap<>();
         myMap.put("caseId",CASE_ID);
         myMap.put("caseTypeId", BEFTA_CASETYPE_2);
@@ -377,6 +381,8 @@ public class CaseDocumentAmControllerTest {
 
         ResponseEntity<Object> responseEntity = testee.generateHashCode(UUID.fromString(MATCHED_DOCUMENT_ID));
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+
+        assertEquals("{hashcode=a54bbca80a425a73ddaa27f12076fb09981da48c30bbbe74b68bf46cb7762dcb}", responseEntity.getBody().toString());
     }
 
     @Test //this test returns an illegal argument exception because UUID.fromString() contains a throw for illegal arguments
