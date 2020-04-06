@@ -40,7 +40,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
         else if(key.equals(key.equals("S_040_validSelfLink"))) {
             try {
                 String self = (String) ReflectionUtils.deepGetFieldInObject(scenarioContext,
-                        "testData.actualResponse.body.links.self.href");
+                        "testData.actualResponse.body._embedded.documents[0]._links.self.href");
                 if (self != null && self.startsWith(docAmUrl + "/cases/documents/"))
                     return self;
                 return docAmUrl + "/cases/documents/<a document id>";
@@ -52,7 +52,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
         else if(key.equals(key.equals("S_040_validBinaryLink"))) {
             try {
                 String binary = (String) ReflectionUtils.deepGetFieldInObject(scenarioContext,
-                        "testData.actualResponse.body.links.binary.href");
+                        "testData.actualResponse.body._embedded.documents[0]._links.binary.href");
                 if (binary != null && binary.startsWith(docAmUrl + "/cases/documents/") && binary.endsWith("/binary"))
                     return binary;
                 return docAmUrl + "/cases/documents/<a document id>/binary";
