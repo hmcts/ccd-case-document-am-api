@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.ccd.document.am.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
