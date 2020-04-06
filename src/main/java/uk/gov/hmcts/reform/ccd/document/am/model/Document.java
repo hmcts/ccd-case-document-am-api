@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.document.am.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
@@ -48,6 +49,6 @@ public class Document {
     @JsonProperty("hashToken")
     private String hashToken;
 
-    @JsonProperty("permissions")
+    @JsonIgnore
     private List<Permission> permissions;
 }
