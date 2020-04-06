@@ -1,17 +1,17 @@
 {
 	"_guid_": "F-007-Base-Root",
-
-  "users": {
-    "invokingUser": {
-      "username": "befta.caseworker.2.solicitor.2@gmail.com",
-      "password": "[[$CCD_BEFTA_CASEWORKER_2_SOLICITOR_2_PWD]]"
-    }
-  },
-  "request": {
+	"apiClientId": "ccd_data",
+	"users": {
+		"invokingUser": {
+			"username": "befta.caseworker.2.solicitor.2@gmail.com",
+			"password": "[[$CCD_BEFTA_CASEWORKER_2_SOLICITOR_2_PWD]]"
+		}
+	},
+	"request": {
 		"headers": {
-      "Authorization": "[[DYNAMIC]]",
-      "ServiceAuthorization": "[[DYNAMIC]]",
-      "Content-Type": "application/json"
-    }
+			"Authorization": "[[DYNAMIC]]",
+			"ServiceAuthorization": "[[DYNAMIC]]",
+			"Content-Type": "application/json"
+		}
 	}
 }
