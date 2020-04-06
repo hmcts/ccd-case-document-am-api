@@ -49,6 +49,6 @@ public class Document {
     @JsonProperty("hashToken")
     private String hashToken;
 
-    @JsonIgnore
+    @JsonProperty("permissions")
     private List<Permission> permissions;
 }
