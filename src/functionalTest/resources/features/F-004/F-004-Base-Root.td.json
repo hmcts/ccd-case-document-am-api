@@ -9,10 +9,10 @@
   },
   "request": {
     "headers": {
-      "Authorization": "[[DYNAMIC]]",
-      "ServiceAuthorization": "[[DYNAMIC]]",
+      "Authorization": "[[DEFAULT_AUTO_VALUE]]",
+      "ServiceAuthorization": "[[DEFAULT_AUTO_VALUE]]",
       "Content-Type": "multipart/form-data",
-      "uid": "[[DYNAMIC]]",
+      "uid": "[[DEFAULT_AUTO_VALUE]]",
       "user-id": "[someUserId]",
       "user-roles": "caseworker"
     }

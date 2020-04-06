@@ -41,6 +41,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
             try {
                 String self = (String) ReflectionUtils.deepGetFieldInObject(scenarioContext,
                         "testData.actualResponse.body._embedded.documents[0]._links.self.href");
+                scenarioContext.getScenario().write("Self: " + self);
                 if (self != null && self.startsWith(docAmUrl + "/cases/documents/"))
                     return self;
                 return docAmUrl + "/cases/documents/<a document id>";
@@ -53,6 +54,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
             try {
                 String binary = (String) ReflectionUtils.deepGetFieldInObject(scenarioContext,
                         "testData.actualResponse.body._embedded.documents[0]._links.binary.href");
+                scenarioContext.getScenario().write("Binary: " + binary);
                 if (binary != null && binary.startsWith(docAmUrl + "/cases/documents/") && binary.endsWith("/binary"))
                     return binary;
                 return docAmUrl + "/cases/documents/<a document id>/binary";
