@@ -69,7 +69,7 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DOCUMENTS;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EMBEDDED;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FILES;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FORBIDDEN;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHCODE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHTOKEN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HREF;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LINKS;
@@ -413,7 +413,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
             String href = (String) links.getJSONObject(SELF).get(HREF);
             links.getJSONObject(SELF).put(HREF, buildDocumentURL(href, 36));
-            hashmap.put(HASHCODE, ApplicationUtils.generateHashCode(salt.concat(
+            hashmap.put(HASHTOKEN, ApplicationUtils.generateHashCode(salt.concat(
                 href.substring(href.length() - 36)
                     .concat(jurisdictionId)
                     .concat(caseTypeId))));

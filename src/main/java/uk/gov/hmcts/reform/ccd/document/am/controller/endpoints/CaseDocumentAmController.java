@@ -40,11 +40,14 @@ import java.util.List;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BAD_REQUEST;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHCODE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_DOCUMENT_ID_INVALID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_DOCUMENT_NOT_FOUND;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_NOT_VALID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_TYPE_ID_INVALID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHTOKEN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_CASE_ID_PATTERN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.RESOURCE_NOT_FOUND;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.JID_INVALID;
 
 @Api(value = "cases")
 @RestController
@@ -68,22 +71,20 @@ public class CaseDocumentAmController  {
         path = "/cases/documents/{documentId}",
         produces = {APPLICATION_JSON}
         )
-    @ApiOperation(
-        value = "Deletes a case document with service authorization."
-    )
+    @ApiOperation("Deletes a case document with service authorization.")
     @ApiResponses({
         @ApiResponse(
-            code = 204,
-            message = "No Content"
+            code = 200,
+            message = "OK"
         ),
         @ApiResponse(
             code = 400,
-            message = BAD_REQUEST
+            message = CASE_DOCUMENT_ID_INVALID
 
         ),
         @ApiResponse(
             code = 404,
-            message = RESOURCE_NOT_FOUND
+            message = CASE_DOCUMENT_NOT_FOUND
         )
        })
 
@@ -100,19 +101,24 @@ public class CaseDocumentAmController  {
         path = "/cases/documents/{documentId}/binary",
         produces = {APPLICATION_JSON
         })
-    @ApiOperation(
-        value = "Streams contents of the most recent Document associated with the Case Document."
-         )
+    @ApiOperation("Streams contents of the most recent Document associated with the Case Document.")
     @ApiResponses({
         @ApiResponse(
             code = 200,
-            message = "Returns contents of a file",
+            message = "OK",
             response = Object.class
         ),
+        @ApiResponse(
+            code = 400,
+            message = CASE_DOCUMENT_ID_INVALID
+        ),
+        @ApiResponse(
+            code = 404,
+            message = CASE_DOCUMENT_NOT_FOUND
+        )
        })
 
-    public ResponseEntity<Object> getDocumentBinaryContentbyDocumentId(
-        @PathVariable("documentId") UUID documentId) {
+    public ResponseEntity<Object> getDocumentBinaryContentbyDocumentId(@PathVariable("documentId") UUID documentId) {
         ValidationService.validateDocumentId(documentId.toString());
         ResponseEntity documentMetadata = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkUserPermission(documentMetadata, documentId, Permission.READ)) {
@@ -124,14 +130,28 @@ public class CaseDocumentAmController  {
     }
 
     //**************** Document MetaData  API ***********
-
+    @GetMapping(
+        path = "/cases/documents/{documentId}",
+        produces = {APPLICATION_JSON
+        })
     @ApiOperation("Retrieves JSON representation of a Stored Document.")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Success", response = StoredDocumentHalResource.class)
+    @ApiResponses({
+        @ApiResponse(
+            code = 200,
+            message = "Success",
+            response = StoredDocumentHalResource.class
+        ),
+        @ApiResponse(
+            code = 400,
+            message = CASE_DOCUMENT_ID_INVALID
+        ),
+        @ApiResponse(
+            code = 404,
+            message = CASE_DOCUMENT_NOT_FOUND
+        )
     })
-    @GetMapping(value = "/cases/documents/{documentId}", produces = {APPLICATION_JSON})
-    public ResponseEntity<Object> getDocumentbyDocumentId(
-        @PathVariable("documentId") UUID documentId) {
+    public ResponseEntity<Object> getDocumentbyDocumentId(@PathVariable("documentId") UUID documentId) {
+
         ValidationService.validateDocumentId(documentId.toString());
         ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkUserPermission(responseEntity, documentId,  Permission.READ)) {
@@ -144,13 +164,28 @@ public class CaseDocumentAmController  {
     }
 
     //**************** Patch Document by DocumentId  API ***************
-
-    @ApiOperation(value = "Updates document instance (ex. ttl).")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Success", response = StoredDocumentHalResource.class)})
-    @PatchMapping(value = "/cases/documents/{documentId}",
+    @PatchMapping(
+        path = "/cases/documents/{documentId}",
         produces = {APPLICATION_JSON},
-        consumes = {APPLICATION_JSON})
+        consumes = {APPLICATION_JSON}
+        )
+    @ApiOperation("Updates ttl on document ")
+    @ApiResponses({
+        @ApiResponse(
+            code = 200,
+            message = "Success",
+            response = StoredDocumentHalResource.class
+        ),
+        @ApiResponse(
+            code = 400,
+            message = CASE_DOCUMENT_ID_INVALID
+        ),
+        @ApiResponse(
+            code = 404,
+            message = CASE_DOCUMENT_NOT_FOUND
+        )
+    })
+
     public ResponseEntity<Object> patchDocumentbyDocumentId(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody UpdateDocumentCommand body,
@@ -161,13 +196,40 @@ public class CaseDocumentAmController  {
 
 
     //**************** Patch Meta Data on Documents  API ***************
-
-    @ApiOperation(value = "Updates a list of Case Documents with provided Metadata")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Success", response = StoredDocumentHalResource.class)})
-    @PatchMapping(value = "/cases/documents/attachToCase",
+    @PatchMapping(
+        path = "/cases/documents/attachToCase",
         produces = {APPLICATION_JSON},
-        consumes = {APPLICATION_JSON})
+        consumes = {APPLICATION_JSON}
+        )
+    @ApiOperation("Updates a list of case document with provided metadata")
+    @ApiResponses({
+        @ApiResponse(
+            code = 200,
+            message = "Success",
+            response = StoredDocumentHalResource.class
+        ),
+        @ApiResponse(
+            code = 400,
+            message = CASE_DOCUMENT_ID_INVALID
+        ),
+        @ApiResponse(
+            code = 400,
+            message = CASE_ID_NOT_VALID
+        ),
+        @ApiResponse(
+            code = 400,
+            message = CASE_TYPE_ID_INVALID
+        ),
+        @ApiResponse(
+            code = 400,
+            message = JID_INVALID
+        ),
+        @ApiResponse(
+            code = 422,
+            message = CASE_DOCUMENT_NOT_FOUND
+        ),
+    })
+
     public ResponseEntity<Object> patchMetaDataOnDocuments(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody DocumentMetadata caseDocumentMetadata) {
@@ -175,7 +237,7 @@ public class CaseDocumentAmController  {
 
         try {
             if (!ValidationService.validate(caseDocumentMetadata.getCaseId())) {
-                throw new BadRequestException("The Case Id is invalid");
+                throw new BadRequestException(CASE_ID_NOT_VALID);
             }
             ValidationService.validateInputParams(INPUT_CASE_ID_PATTERN, caseDocumentMetadata.getCaseId());
             caseDocumentMetadata.getDocuments()
@@ -256,7 +318,7 @@ public class CaseDocumentAmController  {
 
         String hashedToken = ApplicationUtils.generateHashCode(salt.concat(documentId.toString().concat(
             resource.getMetadata().get("jurisdictionId")).concat(resource.getMetadata().get("caseTypeId"))));
-        responseBody.put(HASHCODE, hashedToken);
+        responseBody.put(HASHTOKEN, hashedToken);
 
         return new ResponseEntity<>(responseBody, HttpStatus.OK);
     }
