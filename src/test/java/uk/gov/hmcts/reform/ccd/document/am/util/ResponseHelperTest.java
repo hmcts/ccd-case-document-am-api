@@ -26,6 +26,7 @@ class ResponseHelperTest {
         StoredDocumentHalResource name = new StoredDocumentHalResource();
         Optional<StoredDocumentHalResource> opt = Optional.of(name);
         ResponseHelper.addHateoasLinks(opt, UUID.fromString("f565abb5-c337-4ccb-ba78-1c43989e3bd5"));
+        assertNotNull(opt);
     }
 
     private HttpHeaders getHttpHeaders() {
