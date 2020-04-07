@@ -10,12 +10,12 @@
 
   "request": {
     "body": {
-      "caseId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][_embedded][documents][0][metadata][caseId]}",
+      "caseId": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][caseId]}",
       "jurisdictionId" : "BEFTA_JURISDICTION£$",
       "documents": [
         {
-          "id": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}",
-          "hashToken": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][_embedded][documents][0][hashcode]}"
+          "id": "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
+          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][hashcode]}"
         }
       ]
     }

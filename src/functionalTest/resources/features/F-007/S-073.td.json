@@ -10,11 +10,11 @@
 
   "request": {
     "body": {
-      "caseId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][_embedded][documents][0][metadata][caseId]}",
+      "caseId": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][caseId]}",
       "documents": [
         {
           "id": "8de9957b-d7a6-40a1-@£$&-6aac30d33644",
-          "hashToken": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][_embedded][documents][0][hashcode]}"
+          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][hashcode]}"
         }
       ]
     }
