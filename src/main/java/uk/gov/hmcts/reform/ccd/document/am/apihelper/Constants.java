@@ -41,6 +41,7 @@ public class Constants {
     public static final String CASE_DOCUMENT_ID_INVALID = "Case document Id is not valid";
     public static final String CASE_ID_NOT_VALID = "Case Id is not valid";
     public static final String CASE_TYPE_ID_INVALID = "Case Type Id Id is not valid";
-    public static final String JID_INVALID = "Jurisdiction Id is not valid";
+    public static final String JURISDICTION_ID_INVALID = "Jurisdiction Id is not valid";
+    public static final String CLASSIFICATION_ID_INVALID = "Jurisdiction Id is not valid";
 
 }
