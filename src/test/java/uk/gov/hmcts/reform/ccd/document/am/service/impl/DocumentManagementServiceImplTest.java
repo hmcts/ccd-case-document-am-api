@@ -681,6 +681,82 @@ class DocumentManagementServiceImplTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void uploadDocuments_Throw_ServiceException() {
+
+        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any())).thenThrow(HttpClientErrorException.create(HttpStatus.BAD_GATEWAY,"woopsie", new HttpHeaders(),null,null));
+
+        List<MultipartFile> files = new ArrayList<>();
+        List<String> roles = new ArrayList<>();
+        roles.add("Role");
+
+        Assertions.assertThrows(ServiceException.class, () -> {
+            sut.uploadDocuments(
+                files,
+                "classification",
+                BEFTA_CASETYPE_2,
+                BEFTA_JURISDICTION_2);
+        });
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void uploadDocuments_Throw_ForbiddenException() {
+
+        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any())).thenThrow(HttpClientErrorException.create(HttpStatus.FORBIDDEN,"woopsie", new HttpHeaders(),null,null));
+
+        List<MultipartFile> files = new ArrayList<>();
+        List<String> roles = new ArrayList<>();
+        roles.add("Role");
+
+        Assertions.assertThrows(ForbiddenException.class, () -> {
+            sut.uploadDocuments(
+                files,
+                "classification",
+                BEFTA_CASETYPE_2,
+                BEFTA_JURISDICTION_2);
+        });
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void uploadDocuments_Throw_BadRequestException() {
+
+        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any())).thenThrow(HttpClientErrorException.create(HttpStatus.BAD_REQUEST,"woopsie", new HttpHeaders(),null,null));
+
+        List<MultipartFile> files = new ArrayList<>();
+        List<String> roles = new ArrayList<>();
+        roles.add("Role");
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            sut.uploadDocuments(
+                files,
+                "classification",
+                BEFTA_CASETYPE_2,
+                BEFTA_JURISDICTION_2);
+        });
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void uploadDocuments_Throw_NotFoundException() {
+
+        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any())).thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND,"woopsie", new HttpHeaders(),null,null));
+
+        List<MultipartFile> files = new ArrayList<>();
+        List<String> roles = new ArrayList<>();
+        roles.add("Role");
+
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+            sut.uploadDocuments(
+                files,
+                "classification",
+                BEFTA_CASETYPE_2,
+                BEFTA_JURISDICTION_2);
+        });
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void uploadDocuments_NoLinksExceptionThrow() {
 
         HashMap<String, String> binaryHash = new HashMap<>();
@@ -689,7 +765,6 @@ class DocumentManagementServiceImplTest {
         binaryHash.put(HREF, "http://localhost:4455/cases/documents/35471d43-0dad-42c1-b05a-4821028f50a2/binary");
 
         LinkedHashMap<String, Object> linksLinkedHashMap = new LinkedHashMap<>();
-        LinkedHashMap<String, Object> binarySelfLinkedHashMap = new LinkedHashMap<>();
 
         ArrayList arrayList = new ArrayList();
         arrayList.add(linksLinkedHashMap);
@@ -770,6 +845,48 @@ class DocumentManagementServiceImplTest {
     }
 
     @Test
+    void patchDocument_BadRequest() {
+        UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
+        String effectiveTTL = getEffectiveTTL();
+        updateDocumentCommand.setTtl(effectiveTTL);
+        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand, getHttpHeaders());
+        String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
+
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        when(restTemplateMock.exchange(
+            patchTTLUrl,
+            PATCH,
+            requestEntity,
+            StoredDocumentHalResource.class
+        )).thenThrow(HttpClientErrorException.create(HttpStatus.BAD_REQUEST,"woopsie", new HttpHeaders(),null,null));
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID), updateDocumentCommand);
+        });
+    }
+
+    @Test
+    void patchDocument_Forbidden() {
+        UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
+        String effectiveTTL = getEffectiveTTL();
+        updateDocumentCommand.setTtl(effectiveTTL);
+        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand, getHttpHeaders());
+        String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
+
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        when(restTemplateMock.exchange(
+            patchTTLUrl,
+            PATCH,
+            requestEntity,
+            StoredDocumentHalResource.class
+        )).thenThrow(HttpClientErrorException.create(HttpStatus.FORBIDDEN,"woopsie", new HttpHeaders(),null,null));
+
+        Assertions.assertThrows(ForbiddenException.class, () -> {
+            sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID), updateDocumentCommand);
+        });
+    }
+
+    @Test
     void patchDocument_HttpClientErrorException() {
         UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
         String effectiveTTL = getEffectiveTTL();
@@ -803,10 +920,10 @@ class DocumentManagementServiceImplTest {
             PATCH,
             requestEntity,
             StoredDocumentHalResource.class
-        )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.FORBIDDEN, "403", new HttpHeaders(), new byte[1],
+        )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.BAD_GATEWAY, "403", new HttpHeaders(), new byte[1],
                                                               Charset.defaultCharset()));
 
-        Assertions.assertThrows(ForbiddenException.class, () -> {
+        Assertions.assertThrows(ServiceException.class, () -> {
             sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID), updateDocumentCommand);
         });
     }
@@ -853,7 +970,7 @@ class DocumentManagementServiceImplTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void deleteDocument_HttpClientErrorException() {
+    void deleteDocument_NotFoundException() {
         Boolean permanent = true;
 
         HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
@@ -874,6 +991,48 @@ class DocumentManagementServiceImplTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void deleteDocument_ForbiddenException() {
+        Boolean permanent = true;
+
+        HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
+        String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL, MATCHED_DOCUMENT_ID);
+
+        when(restTemplateMock.exchange(
+            documentDeleteUrl,
+            DELETE,
+            requestEntity,
+            ResponseEntity.class
+        )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.FORBIDDEN, "404", new HttpHeaders(), new byte[1],
+                                                              Charset.defaultCharset()));
+
+        Assertions.assertThrows(ForbiddenException.class, () -> {
+            sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), permanent);
+        });
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void deleteDocument_BadRequestException() {
+        Boolean permanent = true;
+
+        HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
+        String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL, MATCHED_DOCUMENT_ID);
+
+        when(restTemplateMock.exchange(
+            documentDeleteUrl,
+            DELETE,
+            requestEntity,
+            ResponseEntity.class
+        )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.BAD_REQUEST, "404", new HttpHeaders(), new byte[1],
+                                                              Charset.defaultCharset()));
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), permanent);
+        });
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void deleteDocument_ServiceException() {
         Boolean permanent = true;
 
@@ -885,10 +1044,10 @@ class DocumentManagementServiceImplTest {
             DELETE,
             requestEntity,
             ResponseEntity.class
-        )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.NOT_FOUND, "404", new HttpHeaders(), new byte[1],
+        )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.BAD_GATEWAY, "404", new HttpHeaders(), new byte[1],
                                                               Charset.defaultCharset()));
 
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+        Assertions.assertThrows(ServiceException.class, () -> {
             sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), permanent);
         });
     }
