@@ -1,6 +1,8 @@
 {
 	"_guid_": "F-007-Base-Root",
 
+  "apiClientId": "ccd_data",
+
 	"users": {
 		"invokingUser": {
 			"username": "befta.caseworker.2.solicitor.2@gmail.com",
