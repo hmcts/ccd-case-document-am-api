@@ -14,4 +14,3 @@ java:
     CCD_DATA_STORE_URL: http://ccd-data-store-api-pr-842.service.core-compute-preview.internal
     IDAM_USER_URL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
 
-
