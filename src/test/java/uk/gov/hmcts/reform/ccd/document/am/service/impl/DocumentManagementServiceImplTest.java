@@ -683,7 +683,8 @@ class DocumentManagementServiceImplTest {
     @SuppressWarnings("unchecked")
     void uploadDocuments_Throw_ServiceException() {
 
-        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any())).thenThrow(HttpClientErrorException.create(HttpStatus.BAD_GATEWAY,"woopsie", new HttpHeaders(),null,null));
+        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any())).thenThrow(HttpClientErrorException.create(
+            HttpStatus.BAD_GATEWAY,"woopsie", new HttpHeaders(),null,null));
 
         List<MultipartFile> files = new ArrayList<>();
         List<String> roles = new ArrayList<>();
@@ -702,7 +703,8 @@ class DocumentManagementServiceImplTest {
     @SuppressWarnings("unchecked")
     void uploadDocuments_Throw_ForbiddenException() {
 
-        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any())).thenThrow(HttpClientErrorException.create(HttpStatus.FORBIDDEN,"woopsie", new HttpHeaders(),null,null));
+        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any())).thenThrow(HttpClientErrorException.create(
+            HttpStatus.FORBIDDEN,"woopsie", new HttpHeaders(),null,null));
 
         List<MultipartFile> files = new ArrayList<>();
         List<String> roles = new ArrayList<>();
@@ -721,7 +723,8 @@ class DocumentManagementServiceImplTest {
     @SuppressWarnings("unchecked")
     void uploadDocuments_Throw_BadRequestException() {
 
-        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any())).thenThrow(HttpClientErrorException.create(HttpStatus.BAD_REQUEST,"woopsie", new HttpHeaders(),null,null));
+        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any())).thenThrow(HttpClientErrorException.create(
+            HttpStatus.BAD_REQUEST,"woopsie", new HttpHeaders(),null,null));
 
         List<MultipartFile> files = new ArrayList<>();
         List<String> roles = new ArrayList<>();
@@ -740,7 +743,8 @@ class DocumentManagementServiceImplTest {
     @SuppressWarnings("unchecked")
     void uploadDocuments_Throw_NotFoundException() {
 
-        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any())).thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND,"woopsie", new HttpHeaders(),null,null));
+        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any())).thenThrow(HttpClientErrorException.create(
+            HttpStatus.NOT_FOUND,"woopsie", new HttpHeaders(),null,null));
 
         List<MultipartFile> files = new ArrayList<>();
         List<String> roles = new ArrayList<>();
