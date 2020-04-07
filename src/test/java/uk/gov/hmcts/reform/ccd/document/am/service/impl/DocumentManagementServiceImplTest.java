@@ -162,6 +162,34 @@ class DocumentManagementServiceImplTest {
     }
 
     @Test
+    void getDocumentMetadata_Throws_HttpClientErrorException_ForbiddenException() {
+        HttpClientErrorException httpClientErrorException = HttpClientErrorException.create(HttpStatus.FORBIDDEN,"woopsie", new HttpHeaders(),null,null);
+        Mockito.when(restTemplateMock.exchange(
+            documentURL + "/documents/" + MATCHED_DOCUMENT_ID,
+            HttpMethod.GET,requestEntityGlobal,
+            StoredDocumentHalResource.class))
+            .thenThrow(httpClientErrorException);
+        Assertions.assertThrows(ForbiddenException.class, () -> {
+            sut.getDocumentMetadata(matchedDocUUID);
+        });
+        verifyRestExchangeOnStoredDoc();
+    }
+
+    @Test
+    void getDocumentMetadata_Throws_HttpClientErrorException_BadRequestException() {
+        HttpClientErrorException httpClientErrorException = HttpClientErrorException.create(HttpStatus.BAD_REQUEST,"woopsie", new HttpHeaders(),null,null);
+        Mockito.when(restTemplateMock.exchange(
+            documentURL + "/documents/" + MATCHED_DOCUMENT_ID,
+            HttpMethod.GET,requestEntityGlobal,
+            StoredDocumentHalResource.class))
+            .thenThrow(httpClientErrorException);
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            sut.getDocumentMetadata(matchedDocUUID);
+        });
+        verifyRestExchangeOnStoredDoc();
+    }
+
+    @Test
     void getDocumentMetadata_Throws_HttpClientErrorException_ServiceException() {
         Mockito.when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID,
