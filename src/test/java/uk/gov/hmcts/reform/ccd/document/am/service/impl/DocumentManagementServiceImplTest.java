@@ -20,7 +20,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -35,7 +34,6 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceEx
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
-import uk.gov.hmcts.reform.ccd.document.am.model.DocumentUpdate;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
@@ -61,12 +59,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpMethod.DELETE;
-import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PATCH;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
@@ -86,7 +84,6 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
 class DocumentManagementServiceImplTest {
 
     private static final String MATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9c";
-    private static final String UNMATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9d";
 
     private transient String serviceAuthorization = "auth";
     private static final String CASE_ID = "1582550122096256";
@@ -464,6 +461,35 @@ class DocumentManagementServiceImplTest {
         List<Document> documentList = new ArrayList<>();
         documentList.add(doc);
 
+        Map<String, String> myMetadata = new HashMap<>();
+        myMetadata.put("caseId",CASE_ID);
+        myMetadata.put("jurisdictionId", BEFTA_JURISDICTION_2);
+        myMetadata.put("caseTypeId", BEFTA_CASETYPE_2);
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        storedDocumentHalResource.setMetadata(myMetadata);
+
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
+
+        DocumentMetadata documentMetadata = DocumentMetadata.builder()
+            .caseId(CASE_ID)
+            .caseTypeId(BEFTA_CASETYPE_2)
+            .jurisdictionId(BEFTA_JURISDICTION_2)
+            .documents(documentList)
+            .build();
+
+        Boolean response = sut.patchDocumentMetadata(documentMetadata);
+        assertEquals(Boolean.TRUE, response);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void patchDocumentMetadata_Throws_NotFoundException() {
+        List<Permission> permissionsList = new ArrayList<>();
+        permissionsList.add(Permission.UPDATE);
+        Document doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList)
+            .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
+        List<Document> documentList = new ArrayList<>();
+        documentList.add(doc);
 
         Map<String, String> myMetadata = new HashMap<>();
         myMetadata.put("caseId",CASE_ID);
@@ -473,32 +499,12 @@ class DocumentManagementServiceImplTest {
         storedDocumentHalResource.setMetadata(myMetadata);
         mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
 
-        DocumentUpdate documentUpdate = new DocumentUpdate();
-        documentUpdate.setDocumentId(UUID.fromString(MATCHED_DOCUMENT_ID));
-        documentUpdate.setMetadata(myMetadata);
-        LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
-        bodyMap.add("documents", documentUpdate);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set(SERVICE_AUTHORIZATION, serviceAuthorization);
-        headers.set(USERID, USER_ID);
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
-        String documentUrl = String.format("%s/documents", documentURL);
-
         Mockito.when(restTemplateMock.exchange(
-            documentUrl,
-            HttpMethod.PATCH,requestEntity,
-            Void.class))
-            .thenReturn(new ResponseEntity<>(HttpStatus.ACCEPTED));
-
-        List<String> collection = new ArrayList<String>();
-        collection.add("string");
-        ServiceAndUserDetails serviceAndUserDetails = new ServiceAndUserDetails(USER_ID,serviceAuthorization, collection,"servicename");
-        Authentication authentication = Mockito.mock(Authentication.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
-        when(securityContext.getAuthentication().getPrincipal()).thenReturn(serviceAndUserDetails);
+            anyString(),
+            any(HttpMethod.class),
+            any(HttpEntity.class),
+            eq(Void.class)))
+            .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND,"woopsie", new HttpHeaders(),null,null));
 
         DocumentMetadata documentMetadata = DocumentMetadata.builder()
             .caseId(CASE_ID)
@@ -507,18 +513,120 @@ class DocumentManagementServiceImplTest {
             .documents(documentList)
             .build();
 
-        String documentMetadataUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
-        HttpEntity requestEntityMeta = new HttpEntity(getHttpHeaders());
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+            sut.patchDocumentMetadata(documentMetadata);
+        });
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void patchDocumentMetadata_Throws_ForbiddenException() {
+        List<Permission> permissionsList = new ArrayList<>();
+        permissionsList.add(Permission.UPDATE);
+        Document doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList)
+            .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
+        List<Document> documentList = new ArrayList<>();
+        documentList.add(doc);
+
+        Map<String, String> myMetadata = new HashMap<>();
+        myMetadata.put("caseId",CASE_ID);
+        myMetadata.put("jurisdictionId", BEFTA_JURISDICTION_2);
+        myMetadata.put("caseTypeId", BEFTA_CASETYPE_2);
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        storedDocumentHalResource.setMetadata(myMetadata);
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
 
         Mockito.when(restTemplateMock.exchange(
-            documentMetadataUrl,
-            GET,
-            requestEntityMeta,
-            StoredDocumentHalResource.class)).thenReturn(new ResponseEntity<>(storedDocumentHalResource, HttpStatus.OK));
+            anyString(),
+            any(HttpMethod.class),
+            any(HttpEntity.class),
+            eq(Void.class)))
+            .thenThrow(HttpClientErrorException.create(HttpStatus.FORBIDDEN,"woopsie", new HttpHeaders(),null,null));
 
-        Boolean response = sut.patchDocumentMetadata(documentMetadata);
-        assertEquals(Boolean.TRUE, response);
+        DocumentMetadata documentMetadata = DocumentMetadata.builder()
+            .caseId(CASE_ID)
+            .caseTypeId(BEFTA_CASETYPE_2)
+            .jurisdictionId(BEFTA_JURISDICTION_2)
+            .documents(documentList)
+            .build();
 
+        Assertions.assertThrows(ForbiddenException.class, () -> {
+            sut.patchDocumentMetadata(documentMetadata);
+        });
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void patchDocumentMetadata_Throws_BadRequestException() {
+        List<Permission> permissionsList = new ArrayList<>();
+        permissionsList.add(Permission.UPDATE);
+        Document doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList)
+            .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
+        List<Document> documentList = new ArrayList<>();
+        documentList.add(doc);
+
+        Map<String, String> myMetadata = new HashMap<>();
+        myMetadata.put("caseId",CASE_ID);
+        myMetadata.put("jurisdictionId", BEFTA_JURISDICTION_2);
+        myMetadata.put("caseTypeId", BEFTA_CASETYPE_2);
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        storedDocumentHalResource.setMetadata(myMetadata);
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
+
+        Mockito.when(restTemplateMock.exchange(
+            anyString(),
+            any(HttpMethod.class),
+            any(HttpEntity.class),
+            eq(Void.class)))
+            .thenThrow(HttpClientErrorException.create(HttpStatus.BAD_REQUEST,"woopsie", new HttpHeaders(),null,null));
+
+        DocumentMetadata documentMetadata = DocumentMetadata.builder()
+            .caseId(CASE_ID)
+            .caseTypeId(BEFTA_CASETYPE_2)
+            .jurisdictionId(BEFTA_JURISDICTION_2)
+            .documents(documentList)
+            .build();
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            sut.patchDocumentMetadata(documentMetadata);
+        });
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void patchDocumentMetadata_Throws_BadGatewayException() {
+        List<Permission> permissionsList = new ArrayList<>();
+        permissionsList.add(Permission.UPDATE);
+        Document doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList)
+            .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
+        List<Document> documentList = new ArrayList<>();
+        documentList.add(doc);
+
+        Map<String, String> myMetadata = new HashMap<>();
+        myMetadata.put("caseId",CASE_ID);
+        myMetadata.put("jurisdictionId", BEFTA_JURISDICTION_2);
+        myMetadata.put("caseTypeId", BEFTA_CASETYPE_2);
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        storedDocumentHalResource.setMetadata(myMetadata);
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
+
+        Mockito.when(restTemplateMock.exchange(
+            anyString(),
+            any(HttpMethod.class),
+            any(HttpEntity.class),
+            eq(Void.class)))
+            .thenThrow(HttpClientErrorException.create(HttpStatus.BAD_GATEWAY,"woopsie", new HttpHeaders(),null,null));
+
+        DocumentMetadata documentMetadata = DocumentMetadata.builder()
+            .caseId(CASE_ID)
+            .caseTypeId(BEFTA_CASETYPE_2)
+            .jurisdictionId(BEFTA_JURISDICTION_2)
+            .documents(documentList)
+            .build();
+
+        Assertions.assertThrows(ServiceException.class, () -> {
+            sut.patchDocumentMetadata(documentMetadata);
+        });
     }
 
     @Test
