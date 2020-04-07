@@ -1,42 +1,5 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
-import static org.springframework.http.HttpMethod.DELETE;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.PATCH;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DATA_SOURCE;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DOCUMENTS;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EMBEDDED;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FILES;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHCODE;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HREF;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LINKS;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ROLES;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.THUMBNAIL;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USER_ROLES;
-
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
-import javax.servlet.http.HttpServletRequest;
-
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -61,6 +24,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.CaseNotFoundException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
@@ -77,6 +41,42 @@ import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.document.am.util.ResponseHelper;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
+
+import javax.servlet.http.HttpServletRequest;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+
+import static javax.servlet.RequestDispatcher.ERROR_MESSAGE;
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.PATCH;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DATA_SOURCE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DOCUMENTS;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EMBEDDED;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FILES;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHCODE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HREF;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LINKS;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ROLES;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.THUMBNAIL;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
 
 @Slf4j
 @Service
@@ -95,6 +95,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     protected String documentTtl;
 
     private CaseDataStoreService caseDataStoreService;
+
+    @Value("${idam.s2s-auth.totp_secret}")
+    protected String salt;
 
     @Autowired
     public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils,
@@ -131,16 +134,25 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                     .getStatusCode());
                 throw new ResourceNotFoundException(documentId.toString());
             }
-        } catch (HttpClientErrorException ex) {
-            LOG.error("Exception while getting the metadata: {}", ex.getMessage());
-            if (HttpStatus.NOT_FOUND.equals(ex.getStatusCode())) {
+        } catch (HttpClientErrorException exception) {
+            if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
+                LOG.error(ERROR_MESSAGE, documentId.toString(), HttpStatus.NOT_FOUND);
                 throw new ResourceNotFoundException(documentId.toString());
+            } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
+                LOG.error(ERROR_MESSAGE,documentId.toString(), HttpStatus.FORBIDDEN);
+                throw new ForbiddenException(documentId.toString());
+            } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
+                LOG.error(ERROR_MESSAGE, documentId.toString(), HttpStatus.BAD_REQUEST);
+                throw new BadRequestException(documentId.toString());
             } else {
-                throw new ServiceException(String.format("Problem fetching the document for document id: %s because of %s", documentId, ex.getMessage()));
+                LOG.error("Exception occurred while getting the document from Document store: {}", exception.getMessage());
+                throw new ServiceException(String.format(
+                    "Problem  fetching the document for document id: %s because of %s",
+                    documentId,
+                    exception.getMessage()
+                ));
             }
-
         }
-
     }
 
     @Override
@@ -190,37 +202,39 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public boolean patchDocumentMetadata(DocumentMetadata documentMetadata, String serviceAuthorization, String userId) {
+    public boolean patchDocumentMetadata(DocumentMetadata documentMetadata) {
         try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.addAll(securityUtils.authorizationHeaders());
+            headers.add(USERID,securityUtils.getUserId());
+            headers.setContentType(MediaType.APPLICATION_JSON);
             LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
-            HttpHeaders headers = new HttpHeaders(securityUtils.authorizationHeaders());
-
-            prepareRequestForAttachingDocumentToCase(documentMetadata, userId, bodyMap, headers);
+            prepareRequestForAttachingDocumentToCase(documentMetadata,  bodyMap);
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
 
             restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
-            restTemplate.exchange(documentURL.concat("/documents"), HttpMethod.PATCH, requestEntity, Void.class);
+            String documentUrl = String.format("%s/documents", documentURL);
+            restTemplate.exchange(documentUrl, HttpMethod.PATCH, requestEntity, Void.class);
 
         } catch (RestClientException ex) {
-            LOG.error("Exception occurred");
-            throw ex;
+            LOG.error("Exception occurred while patching the document metadata");
+            return false;
         }
         return true;
     }
 
     private void prepareRequestForAttachingDocumentToCase(DocumentMetadata documentMetadata,
-                                                      String userId,
-                                                      LinkedMultiValueMap<String, Object> bodyMap,
-                                                      HttpHeaders headers) {
+
+                                                      LinkedMultiValueMap<String, Object> bodyMap) {
 
         for (Document document : documentMetadata.getDocuments()) {
             ResponseEntity responseEntity = getDocumentMetadata(UUID.fromString(document.getId()));
             if (responseEntity.getStatusCode().equals(HttpStatus.OK) && null != responseEntity.getBody()) {
                 StoredDocumentHalResource resource = (StoredDocumentHalResource) responseEntity.getBody();
 
-                String hashcodeFromStoredDocument = ApplicationUtils.generateHashCode(document.getId()
+                String hashcodeFromStoredDocument = ApplicationUtils.generateHashCode(salt.concat(document.getId()
                                                        .concat(resource.getMetadata().get("jurisdictionId"))
-                                                       .concat(resource.getMetadata().get("caseTypeId")));
+                                                       .concat(resource.getMetadata().get("caseTypeId"))));
                 if (!hashcodeFromStoredDocument.equals(document.getHashToken())) {
                     throw new ResourceNotFoundException(String.format(": Document %s does not exists in DM Store", document.getId()));
                 }
@@ -245,28 +259,25 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             bodyMap.add("documents", documentUpdate);
         }
 
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set(USERID, userId);
     }
 
     @Override
     public ResponseEntity<Object> uploadDocuments(List<MultipartFile> files, String classification, List<String> roles,
-                                                  String serviceAuthorization, String caseTypeId, String jurisdictionId,
-                                                  String userId) {
+                                                   String caseTypeId, String jurisdictionId) {
 
         LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
-        HttpHeaders headers = prepareRequestForUpload(classification, roles, serviceAuthorization, caseTypeId, jurisdictionId,
-            userId, bodyMap);
+        HttpHeaders headers = prepareRequestForUpload(classification, roles, caseTypeId, jurisdictionId,bodyMap);
 
         for (MultipartFile file : files) {
             if (!file.isEmpty()) {
                 bodyMap.add(FILES, file.getResource());
             }
         }
+        String docUrl = String.format("%s/documents", documentURL);
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
         ResponseEntity<Object> uploadedDocumentResponse = restTemplate
-            .postForEntity(documentURL.concat("/documents"), requestEntity, Object.class);
+            .postForEntity(docUrl, requestEntity, Object.class);
 
         if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode()) && null != uploadedDocumentResponse
             .getBody()) {
@@ -279,14 +290,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public ResponseEntity patchDocument(UUID documentId, UpdateDocumentCommand ttl, String userId, String userRoles) {
+    public ResponseEntity patchDocument(UUID documentId, UpdateDocumentCommand ttl) {
         if (!ValidationService.validateTTL(ttl.getTtl())) {
             throw new BadRequestException(String.format(
                 "Incorrect date format %s",
                 ttl.getTtl()));
         }
         try {
-            final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(ttl, getHttpHeaders(userId, userRoles));
+            final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(ttl, getHttpHeaders());
             String patchTTLUrl = String.format("%s/documents/%s", documentURL, documentId);
             ResponseEntity<StoredDocumentHalResource> response = restTemplate.exchange(
                 patchTTLUrl,
@@ -346,10 +357,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
             String href = (String) links.getJSONObject(SELF).get(HREF);
             links.getJSONObject(SELF).put(HREF, buildDocumentURL(href, 36));
-            hashmap.put(HASHCODE, ApplicationUtils.generateHashCode(
+            hashmap.put(HASHCODE, ApplicationUtils.generateHashCode(salt.concat(
                 href.substring(href.length() - 36)
                     .concat(jurisdictionId)
-                    .concat(caseTypeId)));
+                    .concat(caseTypeId))));
 
             links.getJSONObject(BINARY).put(HREF, buildDocumentURL((String) links.getJSONObject(BINARY).get(HREF), 43));
             hashmap.put(LINKS, links.toMap());
@@ -365,13 +376,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         documentUrl = documentUrl.substring(documentUrl.length() - length);
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
             .getRequest();
-        LOG.info("URL from request is: {}", request.getRequestURL());
+
         return request.getRequestURL().append("/").append(documentUrl).toString();
     }
 
     private HttpHeaders prepareRequestForUpload(String classification, List<String> roles,
-                                                String serviceAuthorization,
-                                                String caseTypeId, String jurisdictionId, String userId,
+                                                String caseTypeId, String jurisdictionId,
                                                 LinkedMultiValueMap<String, Object> bodyMap) {
 
 
@@ -387,8 +397,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         //S2S token needs to be generated by our microservice.
-        headers.set(SERVICE_AUTHORIZATION, serviceAuthorization);
-        headers.set(USERID, userId);
+        headers.addAll(securityUtils.serviceAuthorizationHeaders());
+        headers.set(USERID, securityUtils.getUserId());
         return headers;
     }
 
@@ -408,7 +418,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     }
 
-    public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, String authorization, Permission permissionToCheck) {
+    public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, Permission permissionToCheck) {
         String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
         if (!ValidationService.validate(caseId)) {
             LOG.error("Bad Request Exception {}", CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
@@ -416,7 +426,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
         } else {
             CaseDocumentMetadata caseDocumentMetadata = caseDataStoreService
-                .getCaseDocumentMetadata(caseId, documentId, authorization)
+                .getCaseDocumentMetadata(caseId, documentId)
                 .orElseThrow(() -> new CaseNotFoundException(caseId));
 
             return (caseDocumentMetadata.getDocument().getId().equals(documentId.toString())
@@ -426,10 +436,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Override
     @SuppressWarnings("unchecked")
-    public ResponseEntity<Object> deleteDocument(UUID documentId, String userId, String userRoles, Boolean permanent) {
+    public ResponseEntity<Object> deleteDocument(UUID documentId,  Boolean permanent) {
 
         try {
-            final HttpEntity requestEntity = new HttpEntity(getHttpHeaders(userId, userRoles));
+            final HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
             String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, documentId, permanent);
             LOG.info("documentDeleteUrl : {}", documentDeleteUrl);
             ResponseEntity response = restTemplate.exchange(
@@ -461,11 +471,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
     }
 
-    private HttpHeaders getHttpHeaders(String userId, String userRoles) {
+    private HttpHeaders getHttpHeaders() {
         HttpHeaders headers = securityUtils.authorizationHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.add(USERID, userId);
-        headers.add(USER_ROLES, userRoles);
         return headers;
     }
 }

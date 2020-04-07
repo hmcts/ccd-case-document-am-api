@@ -52,18 +52,14 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Optional<CaseDocumentMetadata> getCaseDocumentMetadata(String caseId, UUID documentId, String authorization) {
+    public Optional<CaseDocumentMetadata> getCaseDocumentMetadata(String caseId, UUID documentId) {
         try {
-            HttpHeaders headers = prepareRequestForUpload(authorization);
+            HttpHeaders headers = prepareRequestForUpload();
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
+            String documentUrl = String.format("%s/cases/%s/documents/%s", caseDataStoreUrl, caseId, documentId);
 
             ResponseEntity<Object> responseEntity =
-                restTemplate.exchange(caseDataStoreUrl
-                                          .concat("/cases/")
-                                          .concat(caseId)
-                                          .concat("/documents/")
-                                          .concat(documentId.toString()),
-                                      HttpMethod.GET, requestEntity, Object.class);
+                restTemplate.exchange(documentUrl, HttpMethod.GET, requestEntity, Object.class);
 
             if (responseEntity.getStatusCode() == HttpStatus.OK
                 && responseEntity.getBody() instanceof LinkedHashMap) {
@@ -98,13 +94,12 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
         return Optional.empty();
     }
 
-    private HttpHeaders prepareRequestForUpload(String authorization) {
+    private HttpHeaders prepareRequestForUpload() {
 
         HttpHeaders headers = new HttpHeaders();
         headers.addAll(securityUtils.authorizationHeaders());
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("experimental", "true");
-        headers.set("Authorization", authorization);
         return headers;
     }
 }
