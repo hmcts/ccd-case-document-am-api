@@ -71,7 +71,7 @@ public class ValidationService {
         }
         String timeZone = strDate.substring(20);
 
-        if ((!timeZone.equals("") && timeZone.chars().allMatch(Character::isDigit))) {
+        if (timeZone.chars().allMatch(Character::isDigit)) {
             SimpleDateFormat sdfrmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
             sdfrmt.setLenient(false);
             try {
@@ -81,9 +81,8 @@ public class ValidationService {
                 return false;
             }
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     public static void validateDocumentId(String documentId) {

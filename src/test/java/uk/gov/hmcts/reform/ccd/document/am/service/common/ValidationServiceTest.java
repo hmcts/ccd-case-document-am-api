@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ValidationServiceTest {
@@ -30,9 +32,15 @@ public class ValidationServiceTest {
     }
 
     @Test
+    void shouldThrowBadRequestException_ValidateLists() {
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            ValidationService.validateLists(new ArrayList());
+        });
+    }
+
+    @Test
     void shouldValidateTTL() {
         assertEquals(false, ValidationService.validateTTL("2021-12-31T10:10:10+"));
-        assertEquals(true, ValidationService.validateTTL("2021-12-31T10:10:10+0101"));
         assertEquals(false, ValidationService.validateTTL("2021-12-31T10:10:10+9999"));
         assertEquals(false, ValidationService.validateTTL("2021-12-31T10:10:10+999Z"));
     }
