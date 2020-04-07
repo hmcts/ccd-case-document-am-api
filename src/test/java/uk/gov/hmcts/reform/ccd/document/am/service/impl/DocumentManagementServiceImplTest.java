@@ -272,6 +272,30 @@ class DocumentManagementServiceImplTest {
         verifyRestExchangeByteArray();
     }
 
+    @Test
+    void getDocumentBinaryContent_Throws_HttpClientErrorException_ForbiddenException() {
+        HttpClientErrorException httpClientErrorException = HttpClientErrorException.create(HttpStatus.FORBIDDEN,"woopsie", new HttpHeaders(),null,null);
+        mockitoWhenRestExchangeByteArrayThenThrow(httpClientErrorException);
+
+        Assertions.assertThrows(ForbiddenException.class, () -> {
+            sut.getDocumentBinaryContent(matchedDocUUID);
+        });
+
+        verifyRestExchangeByteArray();
+    }
+
+    @Test
+    void getDocumentBinaryContent_Throws_HttpClientErrorException_BadRequestException() {
+        HttpClientErrorException httpClientErrorException = HttpClientErrorException.create(HttpStatus.BAD_REQUEST,"woopsie", new HttpHeaders(),null,null);
+        mockitoWhenRestExchangeByteArrayThenThrow(httpClientErrorException);
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            sut.getDocumentBinaryContent(matchedDocUUID);
+        });
+
+        verifyRestExchangeByteArray();
+    }
+
     private void mockitoWhenRestExchangeByteArrayThenThrow(HttpClientErrorException httpClientErrorException) {
         Mockito.when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID + "/binary",
