@@ -24,20 +24,26 @@ public class Constants {
     public static final String INPUT_INVALID = "The case reference or document id is not valid";
     public static final String INSUFFICIENT_PERMISSION = "Insufficient permission on requested  document";
     public static final String CLASSIFICATION = "classification";
-    public static final String ROLES = "roles";
     public static final String USERID = "user-id";
-    public static final String USER_ROLES = "user-roles";
     public static final String FILES = "files";
     public static final String LINKS = "_links";
     public static final String HREF = "href";
     public static final String SELF = "self";
     public static final String BINARY = "binary";
-    public static final String HASHCODE = "hashcode";
+    public static final String HASHTOKEN = "hashcode";
     public static final String TEST_URL = "TEST_URL";
     public static final String EMBEDDED = "_embedded";
     public static final String THUMBNAIL = "thumbnail";
     public static final String DOCUMENTS = "documents";
     public static final String INPUT_STRING_PATTERN = "^[a-zA-Z0-9_-]*$";
     public static final String INPUT_CASE_ID_PATTERN = "^[0-9]*$";
+    public static final String CASE_DOCUMENT_NOT_FOUND = "Case document not found";
+    public static final String CASE_DOCUMENT_ID_INVALID = "Case document Id is not valid";
+    public static final String CASE_ID_NOT_VALID = "Case Id is not valid";
+    public static final String CASE_TYPE_ID_INVALID = "Case Type Id Id is not valid";
+    public static final String JURISDICTION_ID_INVALID = "Jurisdiction Id is not valid";
+    public static final String CLASSIFICATION_ID_INVALID = "Jurisdiction Id is not valid";
+    public static final String EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE = "Exception occurred with operation on document id: %s because of %s";
+    public static final String EXCEPTION_ERROR_MESSAGE = "Exception occurred with operation because of %s";
 
 }

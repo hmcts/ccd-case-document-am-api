@@ -114,9 +114,9 @@ public class SmokeTest extends BaseTest {
 
         JSONObject requestBody = new JSONObject();
         requestBody.put("caseId", "1234123412341234");
-        requestBody.put("documents", documents);
+        requestBody.put("caseDocuments", documents);
 
-        RestAssured.baseURI = caseDocumentAmUrl + "/cases/documents/" + documentId;
+        RestAssured.baseURI = caseDocumentAmUrl + "/cases/documents/attachToCase";
         RestAssured.useRelaxedHTTPSValidation();
 
         Response response = SerenityRest
@@ -127,7 +127,7 @@ public class SmokeTest extends BaseTest {
             .header("Authorization", "Bearer " + userToken)
             .body(requestBody.toString())
             .when()
-            .patch("/")
+            .patch()
             .andReturn();
         response.then().assertThat().statusCode(HttpStatus.NOT_FOUND.value())
             .body("message", Matchers.equalTo("Resource not found " + documentId));

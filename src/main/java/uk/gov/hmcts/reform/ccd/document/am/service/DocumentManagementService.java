@@ -18,7 +18,7 @@ public interface DocumentManagementService {
 
     ResponseEntity<Object> getDocumentBinaryContent(final UUID documentId);
 
-    ResponseEntity<Object> uploadDocuments(List<MultipartFile> files, String classification, List<String> roles,
+    ResponseEntity<Object> uploadDocuments(List<MultipartFile> files, String classification,
                                             String caseTypeId,
                                            String jurisdictionId);
 

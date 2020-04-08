@@ -50,9 +50,9 @@ public class ValidationService {
     public static void validateInputParams(String pattern, String... inputString) {
         for (String input : inputString) {
             if (StringUtils.isEmpty(input)) {
-                throw new IllegalArgumentException("The input parameter is Null/Empty");
+                throw new BadRequestException("The input parameter is Null/Empty");
             } else if (!Pattern.matches(pattern, input)) {
-                throw new IllegalArgumentException("The input parameter: \"" + input +  "\", does not comply with the required pattern");
+                throw new BadRequestException("The input parameter: \"" + input +  "\", does not comply with the required pattern");
             }
         }
     }
@@ -71,7 +71,7 @@ public class ValidationService {
         }
         String timeZone = strDate.substring(20);
 
-        if ((!timeZone.equals("") && timeZone.chars().allMatch(Character::isDigit))) {
+        if (timeZone.chars().allMatch(Character::isDigit)) {
             SimpleDateFormat sdfrmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
             sdfrmt.setLenient(false);
             try {
@@ -81,9 +81,8 @@ public class ValidationService {
                 return false;
             }
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     public static void validateDocumentId(String documentId) {
@@ -91,7 +90,7 @@ public class ValidationService {
             UUID uuid = UUID.fromString(documentId);
             LOG.info("UUID {}", uuid);
         } catch (IllegalArgumentException exception) {
-            throw new IllegalArgumentException(String.format("The input parameter: %s is not a valid UUID", documentId));
+            throw new BadRequestException(String.format("The input parameter: %s is not a valid UUID", documentId));
         }
     }
 }

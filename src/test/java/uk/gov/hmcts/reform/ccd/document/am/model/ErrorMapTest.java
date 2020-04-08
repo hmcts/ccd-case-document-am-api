@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.ccd.document.am.model;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ErrorMapTest {
@@ -24,7 +25,8 @@ class ErrorMapTest {
 
     @Test
     void shouldTestEquals() {
-        assertNotNull(errorMap.equals(new ErrorMap()));
+        assertTrue(errorMap.equals(new ErrorMap()));
+        assertFalse(errorMap.equals(""));
     }
 
     @Test
