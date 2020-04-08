@@ -3,8 +3,10 @@ package uk.gov.hmcts.reform.ccd.document.am.model;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * CaseDocumentMetadata.
@@ -12,16 +14,9 @@ import lombok.Data;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class DocumentMetadata {
-    public DocumentMetadata() {
-    }
-
-    public DocumentMetadata(String caseId, String caseTypeId, String jurisdictionId, List<Document> documents) {
-        this.caseId = caseId;
-        this.caseTypeId = caseTypeId;
-        this.jurisdictionId = jurisdictionId;
-        this.documents = documents;
-    }
 
     @JsonProperty
     private String caseId;
