@@ -285,11 +285,6 @@ public class CaseDocumentAmController  {
                 .body(isDocumentPatched);
         } catch (BadRequestException | IllegalArgumentException e) {
             throw new BadRequestException("Exception while attaching the documents to a case :" + e);
-        } catch (Exception e) {
-            LOG.error("Exception in controller for patch MetaData Documents API");
-            return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(isDocumentPatched);
         }
     }
 
