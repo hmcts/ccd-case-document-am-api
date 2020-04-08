@@ -67,6 +67,8 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TY
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DATA_SOURCE;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DOCUMENTS;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EMBEDDED;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EXCEPTION_ERROR_MESSAGE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FILES;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FORBIDDEN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHTOKEN;
@@ -136,24 +138,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 throw new ResourceNotFoundException(documentId.toString());
             }
         } catch (HttpClientErrorException exception) {
-            if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE, documentId.toString(), HttpStatus.NOT_FOUND);
-                throw new ResourceNotFoundException(documentId.toString());
-            } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE,documentId.toString(), HttpStatus.FORBIDDEN);
-                throw new ForbiddenException(documentId.toString());
-            } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE, documentId.toString(), HttpStatus.BAD_REQUEST);
-                throw new BadRequestException(documentId.toString());
-            } else {
-                LOG.error("Exception occurred while getting the document from Document store: {}", exception.getMessage());
-                throw new ServiceException(String.format(
-                    "Problem  fetching the document for document id: %s because of %s",
-                    documentId,
-                    exception.getMessage()
-                ));
-            }
+            catchException(exception, documentId.toString(), EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE);
         }
+        return new ResponseEntity<>(HttpStatus.OK);
 
     }
 
@@ -188,28 +175,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             }
 
         } catch (HttpClientErrorException exception) {
-            if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE, documentId.toString(), HttpStatus.NOT_FOUND);
-                throw new ResourceNotFoundException(documentId.toString());
-            } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE, documentId.toString(), HttpStatus.FORBIDDEN);
-                throw new ForbiddenException(documentId.toString());
-            } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE, documentId.toString(), HttpStatus.BAD_REQUEST);
-                throw new BadRequestException(documentId.toString());
-            } else {
-                LOG.error(
-                    "Exception occurred while getting the document from Document store: {}",
-                    exception.getMessage()
-                );
-                throw new ServiceException(String.format(
-                    "Problem  fetching the document for document id: %s because of %s",
-                    documentId,
-                    exception.getMessage()
-                ));
-            }
-
+            catchException(exception, documentId.toString(), EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE);
         }
+        return new ResponseEntity<>(HttpStatus.OK);
 
     }
 
@@ -225,25 +193,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             restTemplate.exchange(documentUrl, HttpMethod.PATCH, requestEntity, Void.class);
 
         } catch (HttpClientErrorException exception) {
-            if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE, HttpStatus.NOT_FOUND);
-                throw new ResourceNotFoundException(RESOURCE_NOT_FOUND);
-            } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE, HttpStatus.FORBIDDEN);
-                throw new ForbiddenException(FORBIDDEN);
-            } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE, HttpStatus.BAD_REQUEST);
-                throw new BadRequestException(BAD_REQUEST);
-            } else {
-                LOG.error(
-                    "Exception occurred while performing the operation at Document store: {}",
-                    exception.getMessage()
-                );
-                throw new ServiceException(String.format(
-                    "Problem  performing the operation because of %s",
-                    exception.getMessage()
-                ));
-            }
+            catchException(exception, EXCEPTION_ERROR_MESSAGE);
         }
         return true;
     }
@@ -314,26 +264,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 .status(uploadedDocumentResponse.getStatusCode())
                 .body(uploadedDocumentResponse.getBody());
         } catch (HttpClientErrorException exception) {
-            if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE, HttpStatus.NOT_FOUND);
-                throw new ResourceNotFoundException(RESOURCE_NOT_FOUND);
-            } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE, HttpStatus.FORBIDDEN);
-                throw new ForbiddenException(FORBIDDEN);
-            } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE, HttpStatus.BAD_REQUEST);
-                throw new BadRequestException(BAD_REQUEST);
-            } else {
-                LOG.error(
-                    "Exception occurred while performing the operation at Document store: {}",
-                    exception.getMessage()
-                );
-                throw new ServiceException(String.format(
-                    "Problem  performing the operation because of %s",
-                    exception.getMessage()
-                ));
-            }
+            catchException(exception, EXCEPTION_ERROR_MESSAGE);
         }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
@@ -361,28 +294,39 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 throw new ResourceNotFoundException(documentId.toString());
             }
         } catch (HttpClientErrorException exception) {
-            if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE, documentId.toString(), HttpStatus.NOT_FOUND);
-                throw new ResourceNotFoundException(documentId.toString());
-            } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE, documentId.toString(), HttpStatus.FORBIDDEN);
-                throw new ForbiddenException(documentId.toString());
-            } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE, documentId.toString(), HttpStatus.BAD_REQUEST);
-                throw new BadRequestException(documentId.toString());
-            } else {
-                LOG.error(
-                    "Exception occurred while updating the document from Document store: {}",
-                    exception.getMessage()
-                );
-                throw new ServiceException(String.format(
-                    "Problem updating the document with document id: %s because of %s",
-                    documentId,
-                    exception.getMessage()
-                ));
-            }
+            catchException(exception, documentId.toString(), EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE);
         }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public ResponseEntity<Object> deleteDocument(UUID documentId,  Boolean permanent) {
+
+        try {
+            final HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
+            String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, documentId, permanent);
+            LOG.info("documentDeleteUrl : {}", documentDeleteUrl);
+            ResponseEntity response = restTemplate.exchange(
+                documentDeleteUrl,
+                DELETE,
+                requestEntity,
+                ResponseEntity.class
+            );
+            if (HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
+                LOG.info("Positive response");
+                return response;
+            } else {
+                LOG.error("Document doesn't exist for requested document id at Document Store {}", response
+                    .getStatusCode());
+                throw new ResourceNotFoundException(documentId.toString());
+            }
+        } catch (HttpClientErrorException exception) {
+            catchException(exception, documentId.toString(), EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 
     @SuppressWarnings("unchecked")
     private void formatUploadDocumentResponse(String caseTypeId, String jurisdictionId,
@@ -439,8 +383,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private HttpHeaders prepareRequestForUpload(String classification,
                                                 String caseTypeId, String jurisdictionId,
                                                 LinkedMultiValueMap<String, Object> bodyMap) {
-
-
         bodyMap.set(CLASSIFICATION, classification);
         bodyMap.set("metadata[jurisdictionId]", jurisdictionId);
         bodyMap.set("metadata[caseTypeId]", caseTypeId);
@@ -483,57 +425,49 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public ResponseEntity<Object> deleteDocument(UUID documentId,  Boolean permanent) {
-
-        try {
-            final HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
-            String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, documentId, permanent);
-            LOG.info("documentDeleteUrl : {}", documentDeleteUrl);
-            ResponseEntity response = restTemplate.exchange(
-                documentDeleteUrl,
-                DELETE,
-                requestEntity,
-                ResponseEntity.class
-            );
-            if (HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
-                LOG.info("Positive response");
-                return response;
-            } else {
-                LOG.error("Document doesn't exist for requested document id at Document Store {}", response
-                    .getStatusCode());
-                throw new ResourceNotFoundException(documentId.toString());
-            }
-        } catch (HttpClientErrorException exception) {
-            if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE, documentId.toString(), HttpStatus.NOT_FOUND);
-                throw new ResourceNotFoundException(documentId.toString());
-            } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE, documentId.toString(), HttpStatus.FORBIDDEN);
-                throw new ForbiddenException(documentId.toString());
-            } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE, documentId.toString(), HttpStatus.BAD_REQUEST);
-                throw new BadRequestException(documentId.toString());
-            } else {
-                LOG.error(
-                    "Exception occurred while deleting the document from Document store: {}",
-                    exception.getMessage()
-                );
-                throw new ServiceException(String.format(
-                    "Problem  deleting the document with document id: %s because of %s",
-                    documentId,
-                    exception.getMessage()
-                ));
-            }
-
-        }
-    }
-
     private HttpHeaders getHttpHeaders() {
         HttpHeaders headers = securityUtils.serviceAuthorizationHeaders();
         headers.set(USERID, securityUtils.getUserId());
         headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
+    }
+
+    private HttpClientErrorException catchException(HttpClientErrorException exception, String messageParam,
+                                                    String errorMessage) {
+        if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
+            LOG.error(ERROR_MESSAGE, messageParam, HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException(messageParam);
+        } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
+            LOG.error(ERROR_MESSAGE, messageParam, HttpStatus.FORBIDDEN);
+            throw new ForbiddenException(messageParam);
+        } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
+            LOG.error(ERROR_MESSAGE, messageParam, HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(messageParam);
+        } else {
+            throw new ServiceException(String.format(
+                errorMessage,
+                messageParam,
+                exception.getMessage()
+            ));
+        }
+    }
+
+    private HttpClientErrorException catchException(HttpClientErrorException exception,
+                                                    String errorMessage) {
+        if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
+            LOG.error(ERROR_MESSAGE, HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException(RESOURCE_NOT_FOUND);
+        } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
+            LOG.error(ERROR_MESSAGE, HttpStatus.FORBIDDEN);
+            throw new ForbiddenException(FORBIDDEN);
+        } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
+            LOG.error(ERROR_MESSAGE, HttpStatus.BAD_REQUEST);
+            throw new BadRequestException(BAD_REQUEST);
+        } else {
+            throw new ServiceException(String.format(
+                errorMessage,
+                exception.getMessage()
+            ));
+        }
     }
 }
