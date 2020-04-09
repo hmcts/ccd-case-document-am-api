@@ -209,7 +209,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
             String hashcodeFromStoredDocument = generateHashToken(UUID.fromString(caseDocument.getId()));
             if (!hashcodeFromStoredDocument.equals(caseDocument.getHashToken())) {
-                throw new BadRequestException(String.format(CASE_DOCUMENT_HASH_TOKEN_INVALID));
+                throw new BadRequestException(String.format(CASE_DOCUMENT_HASH_TOKEN_INVALID, caseDocument.getId()));
             }
 
             Map<String, String> metadataMap = new HashMap<>();
