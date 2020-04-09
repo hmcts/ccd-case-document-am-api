@@ -12,7 +12,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
@@ -29,9 +28,7 @@ import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -367,22 +364,13 @@ public class CaseDocumentAmControllerTest {
     @SuppressWarnings("unchecked")
     void generateHashCode_HappyPath() {
 
-        ReflectionTestUtils.setField(testee, "salt", "AAAOA7A2AA6AAAA5");
-
-        Map<String, String> myMap = new HashMap<>();
-        myMap.put("caseId",CASE_ID);
-        myMap.put("caseTypeId", BEFTA_CASETYPE_2);
-        myMap.put("jurisdictionId", BEFTA_JURISDICTION_2);
-        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
-        storedDocumentHalResource.setMetadata(myMap);
-
-        when(documentManagementService.getDocumentMetadata(UUID.fromString(MATCHED_DOCUMENT_ID)))
-            .thenReturn(new ResponseEntity(storedDocumentHalResource, HttpStatus.OK));
+        when(documentManagementService.generateHashToken(UUID.fromString(MATCHED_DOCUMENT_ID)))
+            .thenReturn("hashToken");
 
         ResponseEntity<Object> responseEntity = testee.generateHashCode(UUID.fromString(MATCHED_DOCUMENT_ID));
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
-        assertEquals("{hashToken=a54bbca80a425a73ddaa27f12076fb09981da48c30bbbe74b68bf46cb7762dcb}", responseEntity.getBody().toString());
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("{hashToken=hashToken}", responseEntity.getBody().toString());
     }
 
     @Test //this test returns an illegal argument exception because UUID.fromString() contains a throw for illegal arguments

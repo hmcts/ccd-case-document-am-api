@@ -28,4 +28,6 @@ public interface DocumentManagementService {
     ResponseEntity patchDocument(final UUID documentId, UpdateDocumentCommand updateDocumentCommand);
 
     ResponseEntity<Object> patchDocumentMetadata(CaseDocumentsMetadata caseDocumentsMetadata);
+
+    String generateHashToken(final UUID documentId);
 }

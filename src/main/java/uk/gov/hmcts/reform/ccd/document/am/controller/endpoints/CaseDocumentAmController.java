@@ -30,7 +30,6 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
-import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -44,13 +43,11 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_DOCUM
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_DOCUMENT_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_DOCUMENT_NOT_FOUND;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_NOT_VALID;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_TYPE_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHTOKEN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_CASE_ID_PATTERN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.JURISDICTION_ID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.JURISDICTION_ID_INVALID;
 
 @Api(value = "cases")
@@ -225,6 +222,9 @@ public class CaseDocumentAmController  {
         @ApiParam(value = "", required = true)
         @Valid @RequestBody UpdateDocumentCommand body,
         @PathVariable("documentId") UUID documentId) {
+
+        ValidationService.validateDocumentId(documentId.toString());
+
         ResponseEntity response =   documentManagementService.patchDocument(documentId, body);
         return  ResponseEntity.status(HttpStatus.OK).body(response.getBody());
     }
@@ -315,6 +315,9 @@ public class CaseDocumentAmController  {
         @PathVariable("documentId") UUID documentId,
         @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false")
             Boolean permanent) {
+
+        ValidationService.validateDocumentId(documentId.toString());
+
         return  documentManagementService.deleteDocument(documentId, permanent);
     }
 
@@ -345,20 +348,11 @@ public class CaseDocumentAmController  {
     public ResponseEntity<Object> generateHashCode(
         @PathVariable("documentId") UUID documentId) {
 
-        StoredDocumentHalResource resource = new StoredDocumentHalResource();
-        ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
-        if (responseEntity.getStatusCode().equals(HttpStatus.OK) && null != responseEntity.getBody()) {
-            resource = (StoredDocumentHalResource) responseEntity.getBody();
-        }
-
-        ValidationService.validateInputParams(INPUT_STRING_PATTERN, documentId.toString(),
-                                              resource.getMetadata().get(CASE_TYPE_ID), resource.getMetadata().get(JURISDICTION_ID));
+        ValidationService.validateDocumentId(documentId.toString());
 
         HashMap<String, String> responseBody = new HashMap<>();
 
-        String hashedToken = ApplicationUtils.generateHashCode(salt.concat(documentId.toString().concat(
-            resource.getMetadata().get(JURISDICTION_ID)).concat(resource.getMetadata().get(CASE_TYPE_ID))));
-        responseBody.put(HASHTOKEN, hashedToken);
+        responseBody.put(HASHTOKEN, documentManagementService.generateHashToken(documentId));
 
         return new ResponseEntity<>(responseBody, HttpStatus.OK);
     }

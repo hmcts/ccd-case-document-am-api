@@ -206,26 +206,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                                           LinkedMultiValueMap<String, Object> bodyMap) {
 
         for (CaseDocument caseDocument : caseDocumentsMetadata.getDocuments()) {
-            ResponseEntity responseEntity = getDocumentMetadata(UUID.fromString(caseDocument.getId()));
-            if (responseEntity.getStatusCode().equals(HttpStatus.OK) && null != responseEntity.getBody()) {
-                StoredDocumentHalResource resource = (StoredDocumentHalResource) responseEntity.getBody();
-                String hashcodeFromStoredDocument = "";
-                if (resource.getMetadata().get(CASE_ID) == null) {
-                    hashcodeFromStoredDocument = ApplicationUtils
-                          .generateHashCode(salt.concat(caseDocument.getId()
-                           .concat(resource.getMetadata().get(JURISDICTION_ID))
-                           .concat(resource.getMetadata().get(CASE_TYPE_ID))));
-                } else {
-                    hashcodeFromStoredDocument = ApplicationUtils
-                        .generateHashCode(salt.concat(caseDocument.getId()
-                          .concat(resource.getMetadata().get(CASE_ID))
-                          .concat(resource.getMetadata().get(JURISDICTION_ID))
-                          .concat(resource.getMetadata().get(CASE_TYPE_ID))));
-                }
 
-                if (!hashcodeFromStoredDocument.equals(caseDocument.getHashToken())) {
-                    throw new BadRequestException(String.format(CASE_DOCUMENT_HASH_TOKEN_INVALID));
-                }
+            String hashcodeFromStoredDocument = generateHashToken(UUID.fromString(caseDocument.getId()));
+            if (!hashcodeFromStoredDocument.equals(caseDocument.getHashToken())) {
+                throw new BadRequestException(String.format(CASE_DOCUMENT_HASH_TOKEN_INVALID));
             }
 
             Map<String, String> metadataMap = new HashMap<>();
@@ -247,6 +231,28 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             bodyMap.add("documents", documentUpdate);
         }
 
+    }
+
+    public String generateHashToken(UUID documentId) {
+        ResponseEntity responseEntity = getDocumentMetadata(documentId);
+        String hashcodeFromStoredDocument = "";
+        if (responseEntity.getStatusCode().equals(HttpStatus.OK) && null != responseEntity.getBody()) {
+            StoredDocumentHalResource resource = (StoredDocumentHalResource) responseEntity.getBody();
+
+            if (resource.getMetadata().get(CASE_ID) == null) {
+                hashcodeFromStoredDocument = ApplicationUtils
+                      .generateHashCode(salt.concat(documentId.toString()
+                       .concat(resource.getMetadata().get(JURISDICTION_ID))
+                       .concat(resource.getMetadata().get(CASE_TYPE_ID))));
+            } else {
+                hashcodeFromStoredDocument = ApplicationUtils
+                    .generateHashCode(salt.concat(documentId.toString()
+                      .concat(resource.getMetadata().get(CASE_ID))
+                      .concat(resource.getMetadata().get(JURISDICTION_ID))
+                      .concat(resource.getMetadata().get(CASE_TYPE_ID))));
+            }
+        }
+        return hashcodeFromStoredDocument;
     }
 
     @Override
