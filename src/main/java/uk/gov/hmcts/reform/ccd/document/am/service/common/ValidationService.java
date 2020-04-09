@@ -18,6 +18,9 @@ import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.SecurityClassification;
 
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_CASE_ID_PATTERN;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
+
 @Named
 @Singleton
 @Slf4j
@@ -35,6 +38,7 @@ public class ValidationService {
      * @return
      */
     public static boolean validate(String numberString) {
+        validateInputParams(INPUT_CASE_ID_PATTERN, numberString);
         return (numberString != null && numberString.length() == 16);
     }
 
@@ -86,6 +90,7 @@ public class ValidationService {
     }
 
     public static void validateDocumentId(String documentId) {
+        validateInputParams(INPUT_STRING_PATTERN, documentId);
         try {
             UUID uuid = UUID.fromString(documentId);
             LOG.info("UUID {}", uuid);
