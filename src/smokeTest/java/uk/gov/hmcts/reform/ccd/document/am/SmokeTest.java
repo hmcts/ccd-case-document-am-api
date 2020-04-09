@@ -116,7 +116,7 @@ public class SmokeTest extends BaseTest {
 
         JSONObject requestBody = new JSONObject();
         requestBody.put("caseId", "1234123412341234");
-        requestBody.put("caseDocuments", documents);
+        requestBody.put("documentHashTokens", documents);
 
         RestAssured.baseURI = caseDocumentAmUrl + "/cases/documents/attachToCase";
         RestAssured.useRelaxedHTTPSValidation();
