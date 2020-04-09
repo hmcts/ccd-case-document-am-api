@@ -27,9 +27,9 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.Forbidden
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
-import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocument;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentsMetadata;
-import uk.gov.hmcts.reform.ccd.document.am.model.Document;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentUpdate;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
@@ -205,11 +205,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private void prepareRequestForAttachingDocumentToCase(CaseDocumentsMetadata caseDocumentsMetadata,
                                                           LinkedMultiValueMap<String, Object> bodyMap) {
 
-        for (CaseDocument caseDocument : caseDocumentsMetadata.getDocuments()) {
+        for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashToken()) {
 
-            String hashcodeFromStoredDocument = generateHashToken(UUID.fromString(caseDocument.getId()));
-            if (!hashcodeFromStoredDocument.equals(caseDocument.getHashToken())) {
-                throw new BadRequestException(String.format(CASE_DOCUMENT_HASH_TOKEN_INVALID, caseDocument.getId()));
+            String hashcodeFromStoredDocument = generateHashToken(UUID.fromString(documentHashToken.getId()));
+            if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
+                throw new BadRequestException(String.format(CASE_DOCUMENT_HASH_TOKEN_INVALID, documentHashToken.getId()));
             }
 
             Map<String, String> metadataMap = new HashMap<>();
@@ -225,7 +225,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             }
 
             DocumentUpdate documentUpdate = new DocumentUpdate();
-            documentUpdate.setDocumentId(UUID.fromString(caseDocument.getId()));
+            documentUpdate.setDocumentId(UUID.fromString(documentHashToken.getId()));
 
             documentUpdate.setMetadata(metadataMap);
             bodyMap.add("documents", documentUpdate);
@@ -435,12 +435,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             throw new BadRequestException(CASE_ID_INVALID);
 
         } else {
-            Document documentMetadata = caseDataStoreService
+            DocumentPermissions documentPermissions = caseDataStoreService
                 .getCaseDocumentMetadata(caseId, documentId)
                 .orElseThrow(() -> new CaseNotFoundException(caseId));
 
-            return (documentMetadata.getId().equals(documentId.toString())
-                    && documentMetadata.getPermissions().contains(permissionToCheck));
+            return (documentPermissions.getId().equals(documentId.toString())
+                    && documentPermissions.getPermissions().contains(permissionToCheck));
         }
     }
 

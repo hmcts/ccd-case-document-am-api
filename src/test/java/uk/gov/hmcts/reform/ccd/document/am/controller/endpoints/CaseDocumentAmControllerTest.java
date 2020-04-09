@@ -15,9 +15,9 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
-import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocument;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentsMetadata;
-import uk.gov.hmcts.reform.ccd.document.am.model.Document;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Classifications;
@@ -82,7 +82,7 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     public void shouldGetValidMetaDataResponse() {
-        Optional<Document> caseDocumentMetadata = Optional.ofNullable(getCaseDocumentMetadata(
+        Optional<DocumentPermissions> documentPermissions = Optional.ofNullable(getDocumentPermissions(
             MATCHED_DOCUMENT_ID,
             Arrays.asList(
                 Permission.CREATE,
@@ -106,7 +106,7 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     public void shouldNotGetValidMetaDataResponse() {
-        Optional<Document> caseDocumentMetadata = Optional.ofNullable(getCaseDocumentMetadata(
+        Optional<DocumentPermissions> documentPermissions = Optional.ofNullable(getDocumentPermissions(
             UNMATCHED_DOCUMENT_ID,
             Arrays.asList(
                 Permission.CREATE,
@@ -126,7 +126,7 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("should get 200 document binary content")
     public void shouldGetDocumentBinaryContent() {
-        Optional<Document> caseDocumentMetadata = Optional.ofNullable(getCaseDocumentMetadata(
+        Optional<DocumentPermissions> documentPermissions = Optional.ofNullable(getDocumentPermissions(
             MATCHED_DOCUMENT_ID,
             Arrays.asList(
                Permission.CREATE,
@@ -154,7 +154,7 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("should throw 403 forbidden  when the requested document does not have read permission")
     public void shouldThrowForbiddenWhenDocumentDoesNotHaveReadPermission() {
-        Optional<Document> caseDocumentMetadata = Optional.ofNullable(getCaseDocumentMetadata(
+        Optional<DocumentPermissions> documentPermissions = Optional.ofNullable(getDocumentPermissions(
             MATCHED_DOCUMENT_ID,
             Arrays.asList(Permission.CREATE)
         ));
@@ -174,7 +174,7 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("should throw 403 forbidden when the requested document does not match with available doc")
     public void shouldThrowForbiddenWhenDocumentDoesNotMatch() {
-        Optional<Document> caseDocumentMetadata = Optional.ofNullable(getCaseDocumentMetadata(
+        Optional<DocumentPermissions> documentPermissions = Optional.ofNullable(getDocumentPermissions(
             UNMATCHED_DOCUMENT_ID,
             Arrays.asList(
                 Permission.CREATE,
@@ -184,7 +184,7 @@ public class CaseDocumentAmControllerTest {
 
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
-        doReturn(caseDocumentMetadata).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
+        doReturn(documentPermissions).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
         doReturn(setDocumentBinaryContent(FORBIDDEN)).when(documentManagementService).getDocumentBinaryContent(getUuid());
 
         Assertions.assertThrows(ForbiddenException.class, () -> {
@@ -235,10 +235,10 @@ public class CaseDocumentAmControllerTest {
     @Test
     public void shouldPatchMetaDataOnDocuments() {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        CaseDocument document = CaseDocument.builder().id("cab18c21-8b7c-452b-937c-091225e0cc12").build();
+        DocumentHashToken document = DocumentHashToken.builder().id("cab18c21-8b7c-452b-937c-091225e0cc12").build();
         CaseDocumentsMetadata body = CaseDocumentsMetadata.builder()
                                                 .caseId("1111122222333334")
-                                                .documents(Arrays.asList(document))
+                                                .documentHashToken(Arrays.asList(document))
                                                 .build();
         ResponseEntity response = testee.patchMetaDataOnDocuments(body);
 
@@ -318,9 +318,9 @@ public class CaseDocumentAmControllerTest {
         return UUID.fromString(MATCHED_DOCUMENT_ID);
     }
 
-    private Document getCaseDocumentMetadata(String docId, List<Permission> permission) {
-        Document document = Document.builder().permissions(permission).id(docId).build();
-        return document;
+    private DocumentPermissions getDocumentPermissions(String docId, List<Permission> permission) {
+        DocumentPermissions documentPermissions = DocumentPermissions.builder().permissions(permission).id(docId).build();
+        return documentPermissions;
     }
 
     private ResponseEntity<ByteArrayResource> setDocumentBinaryContent(String responseType) {

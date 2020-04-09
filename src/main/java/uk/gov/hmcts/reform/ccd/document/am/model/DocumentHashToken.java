@@ -15,7 +15,7 @@ import org.springframework.validation.annotation.Validated;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CaseDocument {
+public class DocumentHashToken {
 
     @JsonProperty("id")
     private String id;

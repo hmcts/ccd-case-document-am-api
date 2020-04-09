@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BAD_REQUEST;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_DOCUMENT_HASH_TOKEN_INVALID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_DOCUMENT_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_DOCUMENT_NOT_FOUND;
@@ -46,7 +47,6 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_NO
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_TYPE_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHTOKEN;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_CASE_ID_PATTERN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.JURISDICTION_ID_INVALID;
 
@@ -272,21 +272,26 @@ public class CaseDocumentAmController  {
     public ResponseEntity<Object> patchMetaDataOnDocuments(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody CaseDocumentsMetadata caseDocumentsMetadata) {
+
         if (!ValidationService.validate(caseDocumentsMetadata.getCaseId())) {
             throw new BadRequestException(CASE_ID_NOT_VALID);
         }
-        ValidationService.validateInputParams(INPUT_CASE_ID_PATTERN, caseDocumentsMetadata.getCaseId());
-        caseDocumentsMetadata.getDocuments()
-                            .forEach(document -> {
-                                ValidationService.validateInputParams(INPUT_STRING_PATTERN, document.getId());
-                                ValidationService.validateDocumentId(document.getId());
-                            });
 
-        documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
+        if (caseDocumentsMetadata.getDocumentHashToken() != null) {
+            caseDocumentsMetadata.getDocumentHashToken()
+                .forEach(document -> {
+                    ValidationService.validateDocumentId(document.getId());
+                });
 
-        return ResponseEntity
-            .status(HttpStatus.OK)
-            .body("Success");
+            documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
+
+            return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Success");
+        } else {
+            throw new BadRequestException(BAD_REQUEST);
+        }
+
     }
 
 

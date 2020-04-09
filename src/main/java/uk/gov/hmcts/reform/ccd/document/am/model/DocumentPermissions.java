@@ -18,7 +18,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Document {
+public class DocumentPermissions {
 
     @JsonProperty("id")
     private String id;

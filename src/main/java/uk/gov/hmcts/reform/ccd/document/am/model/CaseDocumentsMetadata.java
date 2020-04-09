@@ -27,7 +27,7 @@ public class CaseDocumentsMetadata {
     @JsonProperty
     private String jurisdictionId;
 
-    @JsonProperty("caseDocuments")
-    private List<CaseDocument> documents;
+    @JsonProperty("documentHashTokens")
+    private List<DocumentHashToken> documentHashToken;
 
 }
