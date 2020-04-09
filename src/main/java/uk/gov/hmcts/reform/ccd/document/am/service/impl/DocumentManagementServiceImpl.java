@@ -205,7 +205,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private void prepareRequestForAttachingDocumentToCase(CaseDocumentsMetadata caseDocumentsMetadata,
                                                           LinkedMultiValueMap<String, Object> bodyMap) {
 
-        for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashToken()) {
+        for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashTokens()) {
 
             String hashcodeFromStoredDocument = generateHashToken(UUID.fromString(documentHashToken.getId()));
             if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {

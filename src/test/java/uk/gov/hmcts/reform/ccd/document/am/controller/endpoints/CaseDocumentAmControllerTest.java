@@ -238,7 +238,7 @@ public class CaseDocumentAmControllerTest {
         DocumentHashToken document = DocumentHashToken.builder().id("cab18c21-8b7c-452b-937c-091225e0cc12").build();
         CaseDocumentsMetadata body = CaseDocumentsMetadata.builder()
                                                 .caseId("1111122222333334")
-                                                .documentHashToken(Arrays.asList(document))
+                                                .documentHashTokens(Arrays.asList(document))
                                                 .build();
         ResponseEntity response = testee.patchMetaDataOnDocuments(body);
 

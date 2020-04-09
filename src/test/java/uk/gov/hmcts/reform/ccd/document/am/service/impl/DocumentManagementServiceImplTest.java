@@ -468,7 +468,7 @@ class DocumentManagementServiceImplTest {
             .caseId(CASE_ID)
             .caseTypeId(BEFTA_CASETYPE_2)
             .jurisdictionId(BEFTA_JURISDICTION_2)
-            .documentHashToken(documentList)
+            .documentHashTokens(documentList)
             .build();
 
         ResponseEntity responseEntity = sut.patchDocumentMetadata(caseDocumentsMetadata);
@@ -501,7 +501,7 @@ class DocumentManagementServiceImplTest {
             .caseId(CASE_ID)
             .caseTypeId(BEFTA_CASETYPE_2)
             .jurisdictionId(BEFTA_JURISDICTION_2)
-            .documentHashToken(documentList)
+            .documentHashTokens(documentList)
             .build();
 
         Assertions.assertThrows(ResourceNotFoundException.class, () -> {
@@ -535,7 +535,7 @@ class DocumentManagementServiceImplTest {
             .caseId(CASE_ID)
             .caseTypeId(BEFTA_CASETYPE_2)
             .jurisdictionId(BEFTA_JURISDICTION_2)
-            .documentHashToken(documentList)
+            .documentHashTokens(documentList)
             .build();
 
         Assertions.assertThrows(ForbiddenException.class, () -> {
@@ -569,7 +569,7 @@ class DocumentManagementServiceImplTest {
             .caseId(CASE_ID)
             .caseTypeId(BEFTA_CASETYPE_2)
             .jurisdictionId(BEFTA_JURISDICTION_2)
-            .documentHashToken(documentList)
+            .documentHashTokens(documentList)
             .build();
 
         Assertions.assertThrows(BadRequestException.class, () -> {
@@ -604,7 +604,7 @@ class DocumentManagementServiceImplTest {
             .caseId(CASE_ID)
             .caseTypeId(BEFTA_CASETYPE_2)
             .jurisdictionId(BEFTA_JURISDICTION_2)
-            .documentHashToken(documentList)
+            .documentHashTokens(documentList)
             .build();
 
         Assertions.assertThrows(BadRequestException.class, () -> {
@@ -638,7 +638,7 @@ class DocumentManagementServiceImplTest {
             .caseId(CASE_ID)
             .caseTypeId(BEFTA_CASETYPE_2)
             .jurisdictionId(BEFTA_JURISDICTION_2)
-            .documentHashToken(documentList)
+            .documentHashTokens(documentList)
             .build();
 
         Assertions.assertThrows(ServiceException.class, () -> {

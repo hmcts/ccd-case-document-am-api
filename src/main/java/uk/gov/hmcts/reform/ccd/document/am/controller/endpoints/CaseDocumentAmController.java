@@ -277,8 +277,8 @@ public class CaseDocumentAmController  {
             throw new BadRequestException(CASE_ID_NOT_VALID);
         }
 
-        if (caseDocumentsMetadata.getDocumentHashToken() != null) {
-            caseDocumentsMetadata.getDocumentHashToken()
+        if (caseDocumentsMetadata.getDocumentHashTokens() != null) {
+            caseDocumentsMetadata.getDocumentHashTokens()
                 .forEach(document -> {
                     ValidationService.validateDocumentId(document.getId());
                 });

@@ -28,6 +28,6 @@ public class CaseDocumentsMetadata {
     private String jurisdictionId;
 
     @JsonProperty("documentHashTokens")
-    private List<DocumentHashToken> documentHashToken;
+    private List<DocumentHashToken> documentHashTokens;
 
 }
