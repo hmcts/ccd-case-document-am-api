@@ -19,7 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
-import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
@@ -52,7 +52,7 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Optional<CaseDocumentMetadata> getCaseDocumentMetadata(String caseId, UUID documentId) {
+    public Optional<Document> getCaseDocumentMetadata(String caseId, UUID documentId) {
         try {
             HttpHeaders headers = prepareRequestForUpload();
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
@@ -64,13 +64,13 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
             if (responseEntity.getStatusCode() == HttpStatus.OK
                 && responseEntity.getBody() instanceof LinkedHashMap) {
                 LinkedHashMap<String, Object> responseObject = (LinkedHashMap<String, Object>) responseEntity.getBody();
-                CaseDocumentMetadata caseDocumentMetadata = new ObjectMapper().convertValue(responseObject.get("documentMetadata"),
-                                                                                            CaseDocumentMetadata.class);
-                if (null == caseDocumentMetadata.getDocument()) {
+                Document documentMetadata = new ObjectMapper().convertValue(responseObject.get("documentMetadata"),
+                                                                                Document.class);
+                if (null == documentMetadata) {
                     LOG.error(ERROR_MESSAGE, caseId, HttpStatus.FORBIDDEN);
                     throw new ForbiddenException(CASE_ERROR_MESSAGE + caseId);
                 }
-                return Optional.of(caseDocumentMetadata);
+                return Optional.of(documentMetadata);
             }
         } catch (HttpClientErrorException exception) {
             if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {

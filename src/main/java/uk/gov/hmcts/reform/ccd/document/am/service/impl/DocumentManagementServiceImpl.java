@@ -27,9 +27,9 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.Forbidden
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
-import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocument;
+import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
-import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentUpdate;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
@@ -59,7 +59,10 @@ import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PATCH;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BAD_REQUEST;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_DOCUMENT_HASH_TOKEN_INVALID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
@@ -74,6 +77,7 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FORBIDDEN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHTOKEN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HREF;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.JURISDICTION_ID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LINKS;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.RESOURCE_NOT_FOUND;
@@ -182,10 +186,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public boolean patchDocumentMetadata(DocumentMetadata documentMetadata) {
+    public ResponseEntity<Object> patchDocumentMetadata(CaseDocumentsMetadata caseDocumentsMetadata) {
         try {
             LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
-            prepareRequestForAttachingDocumentToCase(documentMetadata,  bodyMap);
+            prepareRequestForAttachingDocumentToCase(caseDocumentsMetadata,  bodyMap);
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, getHttpHeaders());
 
             restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
@@ -195,40 +199,49 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         } catch (HttpClientErrorException exception) {
             catchException(exception, EXCEPTION_ERROR_MESSAGE);
         }
-        return true;
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private void prepareRequestForAttachingDocumentToCase(DocumentMetadata documentMetadata,
+    private void prepareRequestForAttachingDocumentToCase(CaseDocumentsMetadata caseDocumentsMetadata,
+                                                          LinkedMultiValueMap<String, Object> bodyMap) {
 
-                                                      LinkedMultiValueMap<String, Object> bodyMap) {
-
-        for (Document document : documentMetadata.getDocuments()) {
-            ResponseEntity responseEntity = getDocumentMetadata(UUID.fromString(document.getId()));
+        for (CaseDocument caseDocument : caseDocumentsMetadata.getDocuments()) {
+            ResponseEntity responseEntity = getDocumentMetadata(UUID.fromString(caseDocument.getId()));
             if (responseEntity.getStatusCode().equals(HttpStatus.OK) && null != responseEntity.getBody()) {
                 StoredDocumentHalResource resource = (StoredDocumentHalResource) responseEntity.getBody();
+                String hashcodeFromStoredDocument = "";
+                if (resource.getMetadata().get(CASE_ID) == null) {
+                    hashcodeFromStoredDocument = ApplicationUtils
+                          .generateHashCode(salt.concat(caseDocument.getId()
+                           .concat(resource.getMetadata().get(JURISDICTION_ID))
+                           .concat(resource.getMetadata().get(CASE_TYPE_ID))));
+                } else {
+                    hashcodeFromStoredDocument = ApplicationUtils
+                        .generateHashCode(salt.concat(caseDocument.getId()
+                          .concat(resource.getMetadata().get(CASE_ID))
+                          .concat(resource.getMetadata().get(JURISDICTION_ID))
+                          .concat(resource.getMetadata().get(CASE_TYPE_ID))));
+                }
 
-                String hashcodeFromStoredDocument = ApplicationUtils.generateHashCode(salt.concat(document.getId()
-                                                       .concat(resource.getMetadata().get("jurisdictionId"))
-                                                       .concat(resource.getMetadata().get("caseTypeId"))));
-                if (!hashcodeFromStoredDocument.equals(document.getHashToken())) {
-                    throw new ResourceNotFoundException(String.format(": Document %s does not exists in DM Store", document.getId()));
+                if (!hashcodeFromStoredDocument.equals(caseDocument.getHashToken())) {
+                    throw new BadRequestException(String.format(CASE_DOCUMENT_HASH_TOKEN_INVALID));
                 }
             }
 
             Map<String, String> metadataMap = new HashMap<>();
-            metadataMap.put("caseId", documentMetadata.getCaseId());
+            metadataMap.put(CASE_ID, caseDocumentsMetadata.getCaseId());
 
-            if (null != documentMetadata.getCaseTypeId()) {
-                ValidationService.validateInputParams(INPUT_STRING_PATTERN, documentMetadata.getCaseTypeId());
-                metadataMap.put("caseTypeId", documentMetadata.getCaseTypeId());
+            if (null != caseDocumentsMetadata.getCaseTypeId()) {
+                ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseDocumentsMetadata.getCaseTypeId());
+                metadataMap.put(CASE_TYPE_ID, caseDocumentsMetadata.getCaseTypeId());
             }
-            if (null != documentMetadata.getJurisdictionId()) {
-                ValidationService.validateInputParams(INPUT_STRING_PATTERN, documentMetadata.getJurisdictionId());
-                metadataMap.put("jurisdictionId", documentMetadata.getJurisdictionId());
+            if (null != caseDocumentsMetadata.getJurisdictionId()) {
+                ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseDocumentsMetadata.getJurisdictionId());
+                metadataMap.put(JURISDICTION_ID, caseDocumentsMetadata.getJurisdictionId());
             }
 
             DocumentUpdate documentUpdate = new DocumentUpdate();
-            documentUpdate.setDocumentId(UUID.fromString(document.getId()));
+            documentUpdate.setDocumentId(UUID.fromString(caseDocument.getId()));
 
             documentUpdate.setMetadata(metadataMap);
             bodyMap.add("documents", documentUpdate);
@@ -416,12 +429,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             throw new BadRequestException(CASE_ID_INVALID);
 
         } else {
-            CaseDocumentMetadata caseDocumentMetadata = caseDataStoreService
+            Document documentMetadata = caseDataStoreService
                 .getCaseDocumentMetadata(caseId, documentId)
                 .orElseThrow(() -> new CaseNotFoundException(caseId));
 
-            return (caseDocumentMetadata.getDocument().getId().equals(documentId.toString())
-                    && caseDocumentMetadata.getDocument().getPermissions().contains(permissionToCheck));
+            return (documentMetadata.getId().equals(documentId.toString())
+                    && documentMetadata.getPermissions().contains(permissionToCheck));
         }
     }
 

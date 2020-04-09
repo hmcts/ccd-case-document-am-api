@@ -1,22 +1,22 @@
 package uk.gov.hmcts.reform.ccd.document.am.model;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
- * CaseDocumentMetadata.
+ * CaseDocumentsMetadata.
  */
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DocumentMetadata {
+public class CaseDocumentsMetadata {
 
     @JsonProperty
     private String caseId;
@@ -28,6 +28,6 @@ public class DocumentMetadata {
     private String jurisdictionId;
 
     @JsonProperty("caseDocuments")
-    private List<Document> documents;
+    private List<CaseDocument> documents;
 
 }

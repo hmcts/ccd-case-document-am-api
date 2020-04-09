@@ -14,6 +14,8 @@ public class Constants {
     public static final String SERVICE_AUTHORIZATION = "serviceauthorization";
     public static final String S2S_API_PARAM = "Service Auth (S2S). Use it when accessing the API on App Tier level.";
     public static final String AUTHORIZATION = "Authorization";
+    public static final String SERVICE_AUTHORIZATION2 = "ServiceAuthorization";
+    public static final String BEARER = "Bearer ";
     public static final String AUTHORIZATION_DESCRIPTION = "Authorization (user-token) of the IDAM user.";
     public static final String ORIGINAL_FILE_NAME = "OriginalFileName";
     public static final String CONTENT_DISPOSITION = "Content-Disposition";
@@ -30,7 +32,7 @@ public class Constants {
     public static final String HREF = "href";
     public static final String SELF = "self";
     public static final String BINARY = "binary";
-    public static final String HASHTOKEN = "hashcode";
+    public static final String HASHTOKEN = "hashToken";
     public static final String TEST_URL = "TEST_URL";
     public static final String EMBEDDED = "_embedded";
     public static final String THUMBNAIL = "thumbnail";
@@ -40,10 +42,14 @@ public class Constants {
     public static final String CASE_DOCUMENT_NOT_FOUND = "Case document not found";
     public static final String CASE_DOCUMENT_ID_INVALID = "Case document Id is not valid";
     public static final String CASE_ID_NOT_VALID = "Case Id is not valid";
+    public static final String CASE_DOCUMENT_HASH_TOKEN_INVALID = "Case document hash-token is not valid";
     public static final String CASE_TYPE_ID_INVALID = "Case Type Id Id is not valid";
     public static final String JURISDICTION_ID_INVALID = "Jurisdiction Id is not valid";
     public static final String CLASSIFICATION_ID_INVALID = "Jurisdiction Id is not valid";
     public static final String EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE = "Exception occurred with operation on document id: %s because of %s";
     public static final String EXCEPTION_ERROR_MESSAGE = "Exception occurred with operation because of %s";
+    public static final String CASE_ID = "caseId";
+    public static final String CASE_TYPE_ID = "caseTypeId";
+    public static final String JURISDICTION_ID = "jurisdictionId";
 
 }

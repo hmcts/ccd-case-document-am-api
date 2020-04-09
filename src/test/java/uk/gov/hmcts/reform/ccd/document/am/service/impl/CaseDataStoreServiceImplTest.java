@@ -17,14 +17,9 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
-import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.mock;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -33,6 +28,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 class CaseDataStoreServiceImplTest {
 
@@ -45,7 +44,7 @@ class CaseDataStoreServiceImplTest {
 
     private CaseDataStoreServiceImpl sut = new CaseDataStoreServiceImpl(restTemplate,securityUtils);
 
-    Optional<CaseDocumentMetadata> caseDocumentMetadataResponse;
+    Optional<Document> caseDocumentMetadataResponse;
 
     @Value("${caseDataStoreUrl}")
     String caseDataStoreUrl;
@@ -58,12 +57,8 @@ class CaseDataStoreServiceImplTest {
         Document doc;
         doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList).build();
 
-        CaseDocumentMetadata caseDocMetaData = new CaseDocumentMetadata();
-        caseDocMetaData.setCaseId(CASE_ID);
-        caseDocMetaData.setDocument(doc);
-
-        Map<String,CaseDocumentMetadata> linkedHashMap = new LinkedHashMap<>();
-        linkedHashMap.put("documentMetadata",caseDocMetaData);
+        Map<String,Document> linkedHashMap = new LinkedHashMap<>();
+        linkedHashMap.put("documentMetadata",doc);
         HttpHeaders headers = prepareRequestForUpload();
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
@@ -74,34 +69,9 @@ class CaseDataStoreServiceImplTest {
 
         caseDocumentMetadataResponse = sut.getCaseDocumentMetadata(CASE_ID, UUID.fromString(MATCHED_DOCUMENT_ID));
         assertNotNull(caseDocumentMetadataResponse);
-        assertEquals(CASE_ID,caseDocumentMetadataResponse.get().getCaseId());
-        assertEquals(MATCHED_DOCUMENT_ID,caseDocumentMetadataResponse.get().getDocument().getId());
+        assertEquals(MATCHED_DOCUMENT_ID,caseDocumentMetadataResponse.get().getId());
     }
 
-    @Test
-    void getCaseDocumentMetadata_NoDocumentThrowsException() {
-
-        HttpHeaders headers = prepareRequestForUpload();
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
-
-        String documentUrl = String.format("%s/cases/%s/documents/%s", caseDataStoreUrl, CASE_ID, MATCHED_DOCUMENT_ID);
-
-        CaseDocumentMetadata caseDocMetaData = new CaseDocumentMetadata();
-        caseDocMetaData.setCaseId(CASE_ID);
-
-        Map<String,CaseDocumentMetadata> linkedHashMap = new LinkedHashMap<>();
-        linkedHashMap.put("documentMetadata",caseDocMetaData);
-
-        Mockito.when(restTemplate.exchange(documentUrl, HttpMethod.GET, requestEntity, Object.class))
-            .thenReturn(new ResponseEntity<>(linkedHashMap, HttpStatus.OK));
-
-        Assertions.assertThrows(ForbiddenException.class, () -> {
-            caseDocumentMetadataResponse = sut.getCaseDocumentMetadata(
-                CASE_ID,
-                UUID.fromString(MATCHED_DOCUMENT_ID)
-            );
-        });
-    }
 
     @Test
     void getCaseDocumentMetadata_HttpClientErrorNotFound() {

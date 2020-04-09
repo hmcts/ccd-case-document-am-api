@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.ccd.document.am.service;
 
+import uk.gov.hmcts.reform.ccd.document.am.model.Document;
+
 import java.util.Optional;
 import java.util.UUID;
-
-import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 
 public interface CaseDataStoreService {
 
@@ -14,5 +14,5 @@ public interface CaseDataStoreService {
      * @param documentId Document Id
      * @return Optional containing Case Metadata when found; empty optional otherwise
      */
-    Optional<CaseDocumentMetadata> getCaseDocumentMetadata(final String caseReference, UUID documentId);
+    Optional<Document> getCaseDocumentMetadata(final String caseReference, UUID documentId);
 }

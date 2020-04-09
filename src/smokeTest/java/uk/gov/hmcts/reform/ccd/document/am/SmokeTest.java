@@ -17,6 +17,9 @@ import uk.gov.hmcts.reform.ccd.document.am.utils.IdamUtils;
 
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.AUTHORIZATION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BEARER;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION2;
 
 @SpringBootTest
 @RunWith(SpringIntegrationSerenityRunner.class)
@@ -50,9 +53,8 @@ public class SmokeTest extends BaseTest {
             .given()
             .relaxedHTTPSValidation()
             .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-            .header("user-roles", "caseworker")
-            .header("ServiceAuthorization", "Bearer " + getServiceAuth())
-            .header("Authorization", "Bearer " + userToken)
+            .header(SERVICE_AUTHORIZATION2, BEARER + getServiceAuth())
+            .header(AUTHORIZATION, BEARER + userToken)
             .when()
             .get("/")
             .andReturn();
@@ -70,8 +72,8 @@ public class SmokeTest extends BaseTest {
             .given()
             .relaxedHTTPSValidation()
             .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-            .header("ServiceAuthorization", "Bearer " + getServiceAuth())
-            .header("Authorization", "Bearer " + userToken)
+            .header(SERVICE_AUTHORIZATION2, BEARER + getServiceAuth())
+            .header(AUTHORIZATION, BEARER + userToken)
             .when()
             .get("/")
             .andReturn();
@@ -92,8 +94,8 @@ public class SmokeTest extends BaseTest {
             .given()
             .relaxedHTTPSValidation()
             .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-            .header("ServiceAuthorization", "Bearer " + getServiceAuth())
-            .header("Authorization", "Bearer " + userToken)
+            .header(SERVICE_AUTHORIZATION2, BEARER + getServiceAuth())
+            .header(AUTHORIZATION, BEARER + userToken)
             .body(requestBody.toString())
             .when()
             .patch("/")
@@ -123,8 +125,8 @@ public class SmokeTest extends BaseTest {
             .given()
             .relaxedHTTPSValidation()
             .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-            .header("ServiceAuthorization", "Bearer " + getServiceAuth())
-            .header("Authorization", "Bearer " + userToken)
+            .header(SERVICE_AUTHORIZATION2, BEARER + getServiceAuth())
+            .header(AUTHORIZATION, BEARER + userToken)
             .body(requestBody.toString())
             .when()
             .patch()

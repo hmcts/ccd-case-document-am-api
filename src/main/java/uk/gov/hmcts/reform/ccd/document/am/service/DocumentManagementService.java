@@ -1,14 +1,13 @@
 package uk.gov.hmcts.reform.ccd.document.am.service;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentsMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 
 import java.util.List;
 import java.util.UUID;
-
-import org.springframework.web.multipart.MultipartFile;
-import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
-import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
-import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 
 public interface DocumentManagementService {
 
@@ -28,5 +27,5 @@ public interface DocumentManagementService {
 
     ResponseEntity patchDocument(final UUID documentId, UpdateDocumentCommand updateDocumentCommand);
 
-    boolean patchDocumentMetadata(DocumentMetadata caseDocumentMetadata);
+    ResponseEntity<Object> patchDocumentMetadata(CaseDocumentsMetadata caseDocumentsMetadata);
 }

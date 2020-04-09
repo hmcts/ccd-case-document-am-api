@@ -31,9 +31,9 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.Forbidden
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
-import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocument;
+import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
-import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
@@ -330,8 +330,7 @@ class DocumentManagementServiceImplTest {
         permissionsList.add(Permission.READ);
         Document doc;
         doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList).build();
-        CaseDocumentMetadata cdm = CaseDocumentMetadata.builder().caseId("1234qwer1234qwer").document(doc).build();
-        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class))).thenReturn(Optional.of(cdm));
+        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class))).thenReturn(Optional.of(doc));
 
         Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID, Permission.READ);
         assertEquals(Boolean.TRUE, result);
@@ -393,9 +392,8 @@ class DocumentManagementServiceImplTest {
         List<Permission> permissionsList = new ArrayList<>();
         Document doc;
         doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList).build();
-        CaseDocumentMetadata cdm = CaseDocumentMetadata.builder().caseId("1234qwer1234qwer").document(doc).build();
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class)))
-            .thenReturn(Optional.ofNullable(cdm));
+            .thenReturn(Optional.ofNullable(doc));
 
         Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID, Permission.READ);
         assertEquals(Boolean.FALSE, result);
@@ -417,9 +415,8 @@ class DocumentManagementServiceImplTest {
         List<Permission> permissionsList = new ArrayList<>();
         Document doc;
         doc = Document.builder().id("40000a2b-00ce-00eb-0068-2d00a700be9c").permissions(permissionsList).build();
-        CaseDocumentMetadata cdm = CaseDocumentMetadata.builder().caseId("1234qwer1234qwer").document(doc).build();
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class)))
-            .thenReturn(Optional.ofNullable(cdm));
+            .thenReturn(Optional.ofNullable(doc));
 
         Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID, Permission.READ);
         assertEquals(Boolean.FALSE, result);
@@ -454,15 +451,12 @@ class DocumentManagementServiceImplTest {
     @Test
     @SuppressWarnings("unchecked")
     void patchDocumentMetadata_HappyPath() {
-        List<Permission> permissionsList = new ArrayList<>();
-        permissionsList.add(Permission.UPDATE);
-        Document doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList)
+        CaseDocument doc = CaseDocument.builder().id(MATCHED_DOCUMENT_ID)
             .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
-        List<Document> documentList = new ArrayList<>();
+        List<CaseDocument> documentList = new ArrayList<>();
         documentList.add(doc);
 
         Map<String, String> myMetadata = new HashMap<>();
-        myMetadata.put("caseId",CASE_ID);
         myMetadata.put("jurisdictionId", BEFTA_JURISDICTION_2);
         myMetadata.put("caseTypeId", BEFTA_CASETYPE_2);
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
@@ -470,29 +464,26 @@ class DocumentManagementServiceImplTest {
 
         mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
 
-        DocumentMetadata documentMetadata = DocumentMetadata.builder()
+        CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
             .caseId(CASE_ID)
             .caseTypeId(BEFTA_CASETYPE_2)
             .jurisdictionId(BEFTA_JURISDICTION_2)
             .documents(documentList)
             .build();
 
-        Boolean response = sut.patchDocumentMetadata(documentMetadata);
-        assertEquals(Boolean.TRUE, response);
+        ResponseEntity responseEntity = sut.patchDocumentMetadata(caseDocumentsMetadata);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
     @Test
     @SuppressWarnings("unchecked")
     void patchDocumentMetadata_Throws_NotFoundException() {
-        List<Permission> permissionsList = new ArrayList<>();
-        permissionsList.add(Permission.UPDATE);
-        Document doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList)
+        CaseDocument doc = CaseDocument.builder().id(MATCHED_DOCUMENT_ID)
             .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
-        List<Document> documentList = new ArrayList<>();
+        List<CaseDocument> documentList = new ArrayList<>();
         documentList.add(doc);
 
         Map<String, String> myMetadata = new HashMap<>();
-        myMetadata.put("caseId",CASE_ID);
         myMetadata.put("jurisdictionId", BEFTA_JURISDICTION_2);
         myMetadata.put("caseTypeId", BEFTA_CASETYPE_2);
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
@@ -506,7 +497,7 @@ class DocumentManagementServiceImplTest {
             eq(Void.class)))
             .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND,"woopsie", new HttpHeaders(),null,null));
 
-        DocumentMetadata documentMetadata = DocumentMetadata.builder()
+        CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
             .caseId(CASE_ID)
             .caseTypeId(BEFTA_CASETYPE_2)
             .jurisdictionId(BEFTA_JURISDICTION_2)
@@ -514,22 +505,19 @@ class DocumentManagementServiceImplTest {
             .build();
 
         Assertions.assertThrows(ResourceNotFoundException.class, () -> {
-            sut.patchDocumentMetadata(documentMetadata);
+            sut.patchDocumentMetadata(caseDocumentsMetadata);
         });
     }
 
     @Test
     @SuppressWarnings("unchecked")
     void patchDocumentMetadata_Throws_ForbiddenException() {
-        List<Permission> permissionsList = new ArrayList<>();
-        permissionsList.add(Permission.UPDATE);
-        Document doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList)
+        CaseDocument doc = CaseDocument.builder().id(MATCHED_DOCUMENT_ID)
             .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
-        List<Document> documentList = new ArrayList<>();
+        List<CaseDocument> documentList = new ArrayList<>();
         documentList.add(doc);
 
         Map<String, String> myMetadata = new HashMap<>();
-        myMetadata.put("caseId",CASE_ID);
         myMetadata.put("jurisdictionId", BEFTA_JURISDICTION_2);
         myMetadata.put("caseTypeId", BEFTA_CASETYPE_2);
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
@@ -543,7 +531,7 @@ class DocumentManagementServiceImplTest {
             eq(Void.class)))
             .thenThrow(HttpClientErrorException.create(HttpStatus.FORBIDDEN,"woopsie", new HttpHeaders(),null,null));
 
-        DocumentMetadata documentMetadata = DocumentMetadata.builder()
+        CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
             .caseId(CASE_ID)
             .caseTypeId(BEFTA_CASETYPE_2)
             .jurisdictionId(BEFTA_JURISDICTION_2)
@@ -551,18 +539,50 @@ class DocumentManagementServiceImplTest {
             .build();
 
         Assertions.assertThrows(ForbiddenException.class, () -> {
-            sut.patchDocumentMetadata(documentMetadata);
+            sut.patchDocumentMetadata(caseDocumentsMetadata);
         });
     }
 
     @Test
     @SuppressWarnings("unchecked")
     void patchDocumentMetadata_Throws_BadRequestException() {
-        List<Permission> permissionsList = new ArrayList<>();
-        permissionsList.add(Permission.UPDATE);
-        Document doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList)
+        CaseDocument doc = CaseDocument.builder().id(MATCHED_DOCUMENT_ID)
             .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
-        List<Document> documentList = new ArrayList<>();
+        List<CaseDocument> documentList = new ArrayList<>();
+        documentList.add(doc);
+
+        Map<String, String> myMetadata = new HashMap<>();
+        myMetadata.put("jurisdictionId", BEFTA_JURISDICTION_2);
+        myMetadata.put("caseTypeId", BEFTA_CASETYPE_2);
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        storedDocumentHalResource.setMetadata(myMetadata);
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
+
+        Mockito.when(restTemplateMock.exchange(
+            anyString(),
+            any(HttpMethod.class),
+            any(HttpEntity.class),
+            eq(Void.class)))
+            .thenThrow(HttpClientErrorException.create(HttpStatus.BAD_REQUEST,"woopsie", new HttpHeaders(),null,null));
+
+        CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
+            .caseId(CASE_ID)
+            .caseTypeId(BEFTA_CASETYPE_2)
+            .jurisdictionId(BEFTA_JURISDICTION_2)
+            .documents(documentList)
+            .build();
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            sut.patchDocumentMetadata(caseDocumentsMetadata);
+        });
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void patchDocumentMetadata_Throws_BadRequestException_InvalidHashToken() {
+        CaseDocument doc = CaseDocument.builder().id(MATCHED_DOCUMENT_ID)
+            .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
+        List<CaseDocument> documentList = new ArrayList<>();
         documentList.add(doc);
 
         Map<String, String> myMetadata = new HashMap<>();
@@ -580,7 +600,7 @@ class DocumentManagementServiceImplTest {
             eq(Void.class)))
             .thenThrow(HttpClientErrorException.create(HttpStatus.BAD_REQUEST,"woopsie", new HttpHeaders(),null,null));
 
-        DocumentMetadata documentMetadata = DocumentMetadata.builder()
+        CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
             .caseId(CASE_ID)
             .caseTypeId(BEFTA_CASETYPE_2)
             .jurisdictionId(BEFTA_JURISDICTION_2)
@@ -588,22 +608,19 @@ class DocumentManagementServiceImplTest {
             .build();
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            sut.patchDocumentMetadata(documentMetadata);
+            sut.patchDocumentMetadata(caseDocumentsMetadata);
         });
     }
 
     @Test
     @SuppressWarnings("unchecked")
     void patchDocumentMetadata_Throws_BadGatewayException() {
-        List<Permission> permissionsList = new ArrayList<>();
-        permissionsList.add(Permission.UPDATE);
-        Document doc = Document.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList)
+        CaseDocument doc = CaseDocument.builder().id(MATCHED_DOCUMENT_ID)
             .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
-        List<Document> documentList = new ArrayList<>();
+        List<CaseDocument> documentList = new ArrayList<>();
         documentList.add(doc);
 
         Map<String, String> myMetadata = new HashMap<>();
-        myMetadata.put("caseId",CASE_ID);
         myMetadata.put("jurisdictionId", BEFTA_JURISDICTION_2);
         myMetadata.put("caseTypeId", BEFTA_CASETYPE_2);
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
@@ -617,7 +634,7 @@ class DocumentManagementServiceImplTest {
             eq(Void.class)))
             .thenThrow(HttpClientErrorException.create(HttpStatus.BAD_GATEWAY,"woopsie", new HttpHeaders(),null,null));
 
-        DocumentMetadata documentMetadata = DocumentMetadata.builder()
+        CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
             .caseId(CASE_ID)
             .caseTypeId(BEFTA_CASETYPE_2)
             .jurisdictionId(BEFTA_JURISDICTION_2)
@@ -625,7 +642,7 @@ class DocumentManagementServiceImplTest {
             .build();
 
         Assertions.assertThrows(ServiceException.class, () -> {
-            sut.patchDocumentMetadata(documentMetadata);
+            sut.patchDocumentMetadata(caseDocumentsMetadata);
         });
     }
 

@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
-import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
@@ -40,14 +40,17 @@ import java.util.List;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_DOCUMENT_HASH_TOKEN_INVALID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_DOCUMENT_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_DOCUMENT_NOT_FOUND;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_NOT_VALID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_TYPE_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHTOKEN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_CASE_ID_PATTERN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.JURISDICTION_ID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.JURISDICTION_ID_INVALID;
 
 @Api(value = "cases")
@@ -257,35 +260,33 @@ public class CaseDocumentAmController  {
             message = JURISDICTION_ID_INVALID
         ),
         @ApiResponse(
-            code = 422,
+            code = 400,
+            message = CASE_DOCUMENT_HASH_TOKEN_INVALID
+        ),
+        @ApiResponse(
+            code = 404,
             message = CASE_DOCUMENT_NOT_FOUND
         )
     })
 
     public ResponseEntity<Object> patchMetaDataOnDocuments(
         @ApiParam(value = "", required = true)
-        @Valid @RequestBody DocumentMetadata caseDocumentMetadata) {
-        boolean isDocumentPatched = false;
-
-        try {
-            if (!ValidationService.validate(caseDocumentMetadata.getCaseId())) {
-                throw new BadRequestException(CASE_ID_NOT_VALID);
-            }
-            ValidationService.validateInputParams(INPUT_CASE_ID_PATTERN, caseDocumentMetadata.getCaseId());
-            caseDocumentMetadata.getDocuments()
-                                .forEach(document -> {
-                                    ValidationService.validateInputParams(INPUT_STRING_PATTERN, document.getId());
-                                    ValidationService.validateDocumentId(document.getId());
-                                });
-
-            isDocumentPatched = documentManagementService.patchDocumentMetadata(caseDocumentMetadata);
-
-            return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(isDocumentPatched);
-        } catch (BadRequestException | IllegalArgumentException e) {
-            throw new BadRequestException("Exception while attaching the documents to a case :" + e);
+        @Valid @RequestBody CaseDocumentsMetadata caseDocumentsMetadata) {
+        if (!ValidationService.validate(caseDocumentsMetadata.getCaseId())) {
+            throw new BadRequestException(CASE_ID_NOT_VALID);
         }
+        ValidationService.validateInputParams(INPUT_CASE_ID_PATTERN, caseDocumentsMetadata.getCaseId());
+        caseDocumentsMetadata.getDocuments()
+                            .forEach(document -> {
+                                ValidationService.validateInputParams(INPUT_STRING_PATTERN, document.getId());
+                                ValidationService.validateDocumentId(document.getId());
+                            });
+
+        documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
+
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body("Success");
     }
 
 
@@ -351,12 +352,12 @@ public class CaseDocumentAmController  {
         }
 
         ValidationService.validateInputParams(INPUT_STRING_PATTERN, documentId.toString(),
-                                              resource.getMetadata().get("caseTypeId"), resource.getMetadata().get("jurisdictionId"));
+                                              resource.getMetadata().get(CASE_TYPE_ID), resource.getMetadata().get(JURISDICTION_ID));
 
         HashMap<String, String> responseBody = new HashMap<>();
 
         String hashedToken = ApplicationUtils.generateHashCode(salt.concat(documentId.toString().concat(
-            resource.getMetadata().get("jurisdictionId")).concat(resource.getMetadata().get("caseTypeId"))));
+            resource.getMetadata().get(JURISDICTION_ID)).concat(resource.getMetadata().get(CASE_TYPE_ID))));
         responseBody.put(HASHTOKEN, hashedToken);
 
         return new ResponseEntity<>(responseBody, HttpStatus.OK);

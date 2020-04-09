@@ -6,23 +6,21 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
-
-import java.util.List;
 
 /**
- * Document.
+ * Case Document.
  */
 @Validated
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Document {
+public class CaseDocument {
 
     @JsonProperty("id")
     private String id;
 
-    @JsonProperty("permissions")
-    private List<Permission> permissions;
+    @JsonProperty("hashToken")
+    private String hashToken;
+
 }
