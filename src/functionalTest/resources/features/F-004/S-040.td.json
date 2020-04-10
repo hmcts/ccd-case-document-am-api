@@ -36,8 +36,8 @@
             "size": "[[ANYTHING_PRESENT]]",
             "mimeType": "[[ANYTHING_PRESENT]]",
             "originalDocumentName": "[[ANYTHING_PRESENT]]",
-            "createdBy": "[someUserId]",
-            "lastModifiedBy": "[someUserId]",
+            "createdBy":  "[[ANYTHING_PRESENT]]",
+            "lastModifiedBy":  "[[ANYTHING_PRESENT]]",
             "modifiedOn": "[[ANYTHING_PRESENT]]",
             "createdOn": "[[ANYTHING_PRESENT]]",
             "classification": "PUBLIC",
@@ -53,10 +53,10 @@
             "hashcode": "[[ANYTHING_PRESENT]]",
             "_links": {
               "self": {
-                "href": "${[scenarioContext][customValues][S_040_validSelfLink]}"
+                "href": "${[scenarioContext][customValues][validSelfLink]}"
               },
               "binary": {
-                "href": "${[scenarioContext][customValues][S_040_validBinaryLink]}"
+                "href": "${[scenarioContext][customValues][validBinaryLink]}"
               }
             }
           }

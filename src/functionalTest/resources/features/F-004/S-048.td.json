@@ -61,8 +61,8 @@
             "size": "[[ANYTHING_PRESENT]]",
             "mimeType": "image/png",
             "originalDocumentName": "[[ANYTHING_PRESENT]]",
-            "createdBy": "[someUserId]",
-            "lastModifiedBy": "[someUserId]",
+            "createdBy": "[[ANYTHING_PRESENT]]",
+            "lastModifiedBy": "[[ANYTHING_PRESENT]]",
             "modifiedOn": "[[ANYTHING_PRESENT]]",
             "createdOn": "[[ANYTHING_PRESENT]]",
             "classification": "PUBLIC",
@@ -89,8 +89,8 @@
             "size": "[[ANYTHING_PRESENT]]",
             "mimeType": "image/png",
             "originalDocumentName": "[[ANYTHING_PRESENT]]",
-            "createdBy": "[someUserId]",
-            "lastModifiedBy": "[someUserId]",
+            "createdBy": "[[ANYTHING_PRESENT]]",
+            "lastModifiedBy": "[[ANYTHING_PRESENT]]",
             "modifiedOn": "[[ANYTHING_PRESENT]]",
             "createdOn": "[[ANYTHING_PRESENT]]",
             "classification": "PUBLIC",
@@ -106,10 +106,66 @@
             "hashcode": "[[ANYTHING_PRESENT]]",
             "_links": {
               "binary": {
-                "href": "${[scenarioContext][customValues][validBinaryLink]}"
+                "href": "[[ANYTHING_PRESENT]]"
               },
               "self": {
-                "href": "${[scenarioContext][customValues][validSelfLink]}"
+                "href": "[[ANYTHING_PRESENT]]"
+              }
+            }
+          },
+          {
+            "size": "[[ANYTHING_PRESENT]]",
+            "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "originalDocumentName": "[[ANYTHING_PRESENT]]",
+            "createdBy": "[[ANYTHING_PRESENT]]",
+            "lastModifiedBy": "[[ANYTHING_PRESENT]]",
+            "modifiedOn": "[[ANYTHING_PRESENT]]",
+            "createdOn": "[[ANYTHING_PRESENT]]",
+            "classification": "PUBLIC",
+            "roles": [
+              "caseworker"
+            ],
+            "metadata": {
+              "caseId": "1111222233334444",
+              "caseTypeId": "BEFTA_CASETYPE_2_2",
+              "jurisdictionId": "BEFTA_JURISDICTION_2"
+            },
+            "ttl": "[[ANYTHING_PRESENT]]",
+            "hashcode": "[[ANYTHING_PRESENT]]",
+            "_links": {
+              "binary": {
+                "href": "[[ANYTHING_PRESENT]]"
+              },
+              "self": {
+                "href": "[[ANYTHING_PRESENT]]"
+              }
+            }
+          },
+          {
+            "size": "[[ANYTHING_PRESENT]]",
+            "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "originalDocumentName": "[[ANYTHING_PRESENT]]",
+            "createdBy": "[[ANYTHING_PRESENT]]",
+            "lastModifiedBy": "[[ANYTHING_PRESENT]]",
+            "modifiedOn": "[[ANYTHING_PRESENT]]",
+            "createdOn": "[[ANYTHING_PRESENT]]",
+            "classification": "PUBLIC",
+            "roles": [
+              "caseworker"
+            ],
+            "metadata": {
+              "caseId": "1111222233334444",
+              "caseTypeId": "BEFTA_CASETYPE_2_2",
+              "jurisdictionId": "BEFTA_JURISDICTION_2"
+            },
+            "ttl": "[[ANYTHING_PRESENT]]",
+            "hashcode": "[[ANYTHING_PRESENT]]",
+            "_links": {
+              "binary": {
+                "href": "[[ANYTHING_PRESENT]]"
+              },
+              "self": {
+                "href": "[[ANYTHING_PRESENT]]"
               }
             }
           },
@@ -117,8 +173,8 @@
             "size": "[[ANYTHING_PRESENT]]",
             "mimeType": "image/png",
             "originalDocumentName": "[[ANYTHING_PRESENT]]",
-            "createdBy": "[someUserId]",
-            "lastModifiedBy": "[someUserId]",
+            "createdBy": "[[ANYTHING_PRESENT]]",
+            "lastModifiedBy": "[[ANYTHING_PRESENT]]",
             "modifiedOn": "[[ANYTHING_PRESENT]]",
             "createdOn": "[[ANYTHING_PRESENT]]",
             "classification": "PUBLIC",
@@ -134,66 +190,10 @@
             "hashcode": "[[ANYTHING_PRESENT]]",
             "_links": {
               "binary": {
-                "href": "${[scenarioContext][customValues][validBinaryLink]}"
+                "href": "[[ANYTHING_PRESENT]]"
               },
               "self": {
-                "href": "${[scenarioContext][customValues][validSelfLink]}"
-              }
-            }
-          },
-          {
-            "size": "[[ANYTHING_PRESENT]]",
-            "mimeType": "image/png",
-            "originalDocumentName": "[[ANYTHING_PRESENT]]",
-            "createdBy": "[someUserId]",
-            "lastModifiedBy": "[someUserId]",
-            "modifiedOn": "[[ANYTHING_PRESENT]]",
-            "createdOn": "[[ANYTHING_PRESENT]]",
-            "classification": "PUBLIC",
-            "roles": [
-              "caseworker"
-            ],
-            "metadata": {
-              "caseId": "1111222233334444",
-              "caseTypeId": "BEFTA_CASETYPE_2_2",
-              "jurisdictionId": "BEFTA_JURISDICTION_2"
-            },
-            "ttl": "[[ANYTHING_PRESENT]]",
-            "hashcode": "[[ANYTHING_PRESENT]]",
-            "_links": {
-              "binary": {
-                "href": "${[scenarioContext][customValues][validBinaryLink]}"
-              },
-              "self": {
-                "href": "${[scenarioContext][customValues][validSelfLink]}"
-              }
-            }
-          },
-          {
-            "size": "[[ANYTHING_PRESENT]]",
-            "mimeType": "image/png",
-            "originalDocumentName": "[[ANYTHING_PRESENT]]",
-            "createdBy": "[someUserId]",
-            "lastModifiedBy": "[someUserId]",
-            "modifiedOn": "[[ANYTHING_PRESENT]]",
-            "createdOn": "[[ANYTHING_PRESENT]]",
-            "classification": "PUBLIC",
-            "roles": [
-              "caseworker"
-            ],
-            "metadata": {
-              "caseId": "1111222233334444",
-              "caseTypeId": "BEFTA_CASETYPE_2_2",
-              "jurisdictionId": "BEFTA_JURISDICTION_2"
-            },
-            "ttl": "[[ANYTHING_PRESENT]]",
-            "hashcode": "[[ANYTHING_PRESENT]]",
-            "_links": {
-              "binary": {
-                "href": "${[scenarioContext][customValues][validBinaryLink]}"
-              },
-              "self": {
-                "href": "${[scenarioContext][customValues][validSelfLink]}"
+                "href": "[[ANYTHING_PRESENT]]"
               }
             }
           },
@@ -201,8 +201,8 @@
             "size": "[[ANYTHING_PRESENT]]",
             "mimeType": "application/pdf",
             "originalDocumentName": "[[ANYTHING_PRESENT]]",
-            "createdBy": "[someUserId]",
-            "lastModifiedBy": "[someUserId]",
+            "createdBy": "[[ANYTHING_PRESENT]]",
+            "lastModifiedBy": "[[ANYTHING_PRESENT]]",
             "modifiedOn": "[[ANYTHING_PRESENT]]",
             "createdOn": "[[ANYTHING_PRESENT]]",
             "classification": "PUBLIC",
@@ -218,10 +218,10 @@
             "hashcode": "[[ANYTHING_PRESENT]]",
             "_links": {
               "binary": {
-                "href": "${[scenarioContext][customValues][validBinaryLink]}"
+                "href": "[[ANYTHING_PRESENT]]"
               },
               "self": {
-                "href": "${[scenarioContext][customValues][validSelfLink]}"
+                "href": "[[ANYTHING_PRESENT]]"
               }
             }
           },
@@ -229,8 +229,8 @@
             "size": "[[ANYTHING_PRESENT]]",
             "mimeType": "application/pdf",
             "originalDocumentName": "[[ANYTHING_PRESENT]]",
-            "createdBy": "[someUserId]",
-            "lastModifiedBy": "[someUserId]",
+            "createdBy": "[[ANYTHING_PRESENT]]",
+            "lastModifiedBy": "[[ANYTHING_PRESENT]]",
             "modifiedOn": "[[ANYTHING_PRESENT]]",
             "createdOn": "[[ANYTHING_PRESENT]]",
             "classification": "PUBLIC",
@@ -246,10 +246,10 @@
             "hashcode": "[[ANYTHING_PRESENT]]",
             "_links": {
               "binary": {
-                "href": "${[scenarioContext][customValues][validBinaryLink]}"
+                "href": "[[ANYTHING_PRESENT]]"
               },
               "self": {
-                "href": "${[scenarioContext][customValues][validSelfLink]}"
+                "href": "[[ANYTHING_PRESENT]]"
               }
             }
           }

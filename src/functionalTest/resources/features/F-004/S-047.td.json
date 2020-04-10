@@ -30,7 +30,7 @@
   "expectedResponse": {
     "_extends_": "Common_400_Response",
     "body" : {
-      "message" : "Exception while uploading the documents :java.lang.IllegalArgumentException: The input parameter does not complies with the required pattern",
+      "message" : "Exception while uploading the documents :java.lang.IllegalArgumentException: The input parameter: \"case$%^&worker\", does not comply with the required pattern",
       "path" : "/cases/documents"
     }
   }

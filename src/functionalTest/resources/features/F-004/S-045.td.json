@@ -28,9 +28,9 @@
     }
   },
   "expectedResponse": {
-    "_extends_": "Common_404_Response",
+    "_extends_": "Common_400_Response",
     "body" : {
-      "message" : "Exception while uploading the documents :java.lang.IllegalArgumentException: The input parameter does not complies with the required pattern",
+      "message" : "Exception while uploading the documents :uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException: The security classification NonExisting is not valid",
       "path" : "/cases/documents"
     }
   }

@@ -29,7 +29,7 @@
   "expectedResponse": {
     "_extends_": "Common_400_Response",
     "body" : {
-      "message" : "Exception while uploading the documents :java.lang.IllegalArgumentException: The input parameter does not complies with the required pattern",
+      "message" : "Missing request header 'jurisdictionId' for method parameter of type String",
       "path" : "/cases/documents"
     }
   }
