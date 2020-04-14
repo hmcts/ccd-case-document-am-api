@@ -60,7 +60,7 @@ Feature: F-004: Upload Document With Binary Content
     And   the response has all the details as expected
 
   @S-045
-  Scenario: must get an error response for a non-existing secutiry classification
+  Scenario: must get an error response for a non-existing security classification
     Given a user with [an active caseworker profile in CCD with full permissions on a document field]
     When  a request is prepared with appropriate values
     And   the request [contains a non-existing secutiry classification]
@@ -69,7 +69,7 @@ Feature: F-004: Upload Document With Binary Content
     And   the response has all the details as expected
 
   @S-046
-  Scenario: must get an error response for a malformed secutiry classification
+  Scenario: must get an error response for a malformed security classification
     Given a user with [an active caseworker profile in CCD with full permissions on a document field]
     When  a request is prepared with appropriate values
     And   the request [contains a malformed secutiry classification]
