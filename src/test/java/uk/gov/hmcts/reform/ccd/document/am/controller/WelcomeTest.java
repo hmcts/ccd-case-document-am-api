@@ -19,8 +19,7 @@ public class WelcomeTest {
         ResponseEntity<String> caseDocumentControllerResponse = caseDocumentAmController.welcome();
         assertNotNull(caseDocumentControllerResponse, "No Response from WelcomeController");
         assertEquals(HttpStatus.OK, caseDocumentControllerResponse.getStatusCode(), "Status code is NOT OK");
-        assertEquals(caseDocumentControllerResponse.getBody(),
-                     "Welcome to CCD Case Document AM Controller",
+        assertEquals("Welcome to CCD Case Document AM Controller", caseDocumentControllerResponse.getBody(),
                      "Response body does not have expected value");
     }
 
@@ -28,7 +27,7 @@ public class WelcomeTest {
     public void shouldGetReturnIndex() {
         String response = caseDocumentAmController.index();
         assertNotNull(response, "Valid Response from WelcomeController");
-        assertEquals(response, "redirect:swagger-ui.html", "Response Value");
+        assertEquals("redirect:swagger-ui.html", response, "Response Value");
     }
 
     @Test

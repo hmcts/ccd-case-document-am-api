@@ -22,7 +22,7 @@ public class StoredDocumentHalResourceCollection {
 
     public StoredDocumentHalResourceCollection addContentItem(StoredDocumentHalResource contentItem) {
         if (this.content == null) {
-            this.content = new ArrayList<StoredDocumentHalResource>();
+            this.content = new ArrayList<>();
         }
         this.content.add(contentItem);
         return this;

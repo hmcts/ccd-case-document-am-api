@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.ccd.document.am.model;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ErrorMapTest {
@@ -12,19 +13,20 @@ class ErrorMapTest {
     void shouldGetCode() {
         errorMap.setCode("NOT_FOUND");
         String code = errorMap.getCode();
-        assertEquals(code, "NOT_FOUND");
+        assertEquals("NOT_FOUND", code);
     }
 
     @Test
     void shouldGetMessage() {
         errorMap.setMessage("ERROR_MESSAGE");
         String message = errorMap.getMessage();
-        assertEquals(message, "ERROR_MESSAGE");
+        assertEquals("ERROR_MESSAGE", message);
     }
 
     @Test
     void shouldTestEquals() {
-        assertNotNull(errorMap.equals(new ErrorMap()));
+        assertTrue(errorMap.equals(new ErrorMap()));
+        assertFalse(errorMap.equals(""));
     }
 
     @Test

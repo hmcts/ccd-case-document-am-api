@@ -61,6 +61,8 @@ env.OAUTH2_REDIRECT_URI = "https://www-ccd.aat.platform.hmcts.net/oauth2redirect
 env.DOCUMENT_STORE_URL = "http://dm-store-aat.service.core-compute-aat.internal"
 env.DEFINITION_STORE_HOST = "http://ccd-definition-store-api-pr-552.service.core-compute-preview.internal"
 env.CCD_DATA_STORE_URL = "http://ccd-data-store-api-pr-842.service.core-compute-preview.internal"
+env.CASE_DOCUMENT_AM_URL = "http://ccd-case-document-am-api-pr-22.service.core-compute-preview.internal";
+env.CASE_DOCUMENT_SWAGGER_AM_URL = "ccd-case-document-am-api-pr-22.service.core-compute-preview.internal";
 
 withPipeline(type, product, component) {
   onMaster {
@@ -86,5 +88,13 @@ withPipeline(type, product, component) {
 
   after('functionalTest:aat') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/cucumber/**/*'
+  }
+
+  after('smoketest:preview') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/site/serenity/**'
+  }
+
+  after('smoketest:aat') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/site/serenity/**'
   }
 }

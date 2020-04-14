@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.ccd.document.am.util;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
@@ -14,7 +12,6 @@ import java.util.UUID;
 
 @SuppressWarnings("unchecked")
 public class ResponseHelper {
-    private static final ObjectMapper json = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     private ResponseHelper() {
     }

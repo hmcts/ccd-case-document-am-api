@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
@@ -28,7 +29,8 @@ class StoredDocumentHalResourceCollectionTest {
 
     @Test
     void shouldTestEquals() {
-        assertNotNull(storedDocumentHalResourceCollection.equals(new StoredDocumentHalResourceCollection()));
+        assertTrue(storedDocumentHalResourceCollection.equals(new StoredDocumentHalResourceCollection()));
+        assertFalse(storedDocumentHalResourceCollection.equals(""));
     }
 
     @Test
