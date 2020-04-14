@@ -3,12 +3,12 @@
   "_extends_": "S-000-Base-Success",
 
   "productName": "CCD Case Document AM API",
-  "operationName": "Get Document Metadata by Document ID",
+  "operationName": "upload a document with mandatory metadata",
   "specs": [
     "an active caseworker profile in CCD with full permissions on a document field"
   ],
-  "method": "GET",
-  "uri": "/cases/documents/{documentId}",
+  "method": "POST",
+  "uri": "/cases/documents",
 
   "expectedResponse": {
     "headers": {

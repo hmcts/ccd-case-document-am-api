@@ -1,5 +1,5 @@
 @F-000
-Feature: [SAMPLE] Upload case document to DM Store
+Feature: [SAMPLE] Upload case document to CCD Case Document AM API
 
   Background:
     Given an appropriate test context as detailed in the test data source
