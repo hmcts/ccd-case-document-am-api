@@ -279,9 +279,7 @@ public class CaseDocumentAmController  {
 
         if (caseDocumentsMetadata.getDocumentHashTokens() != null) {
             caseDocumentsMetadata.getDocumentHashTokens()
-                .forEach(document -> {
-                    ValidationService.validateDocumentId(document.getId());
-                });
+                .forEach(document -> ValidationService.validateDocumentId(document.getId()));
 
             documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
 
