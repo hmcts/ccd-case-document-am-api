@@ -33,7 +33,7 @@ Feature: F-004: Upload Document With Binary Content
     And   the response has all the details as expected
 
   @S-042
-  Scenario: must get an error response for a without case type td parameter in request
+  Scenario: must get an error response for a without case type id parameter in request
     Given a user with [an active caseworker profile in CCD with full permissions on a document field]
     When  a request is prepared with appropriate values
     And   the request [contains without case type id parameter]
@@ -77,36 +77,36 @@ Feature: F-004: Upload Document With Binary Content
     Then  a negative response is received
     And   the response has all the details as expected
 
-  @S-047
-  Scenario: must get an error response for a malformed roles
-    Given a user with [an active caseworker profile in CCD with full permissions on a document field]
-    When  a request is prepared with appropriate values
-    And   the request [contains a malformed roles]
-    And   it is submitted to call the [Upload Document With Binary Content] operation of [CCD Case Document AM API]
-    Then  a negative response is received
-    And   the response has all the details as expected
-
-  @S-049 @Ignore # This is the test need to be done manually
-  Scenario: must get an error response for a above max allowed size of a document
-    Given a user with [an active caseworker profile in CCD with full permissions on a document field]
-    When  a request is prepared with appropriate values
-    And   the request [contains a max allowed size of a document]
-    And   it is submitted to call the [Upload Document With Binary Content] operation of [CCD Case Document AM API]
-    Then  a negative response is received
-    And   the response has all the details as expected
-
-  @S-050 @Ignore # This is the test need to be done manually
-  Scenario: must get an error response for a upload document with unauthorised user id after 10 minuts
-    Given a user with [an active caseworker profile in CCD with full permissions on a document field]
-    When  a request is prepared with appropriate values
-    And   the request [contains unauthorised user]
-    And   it is submitted to call the [Upload Document With Binary Content] operation of [CCD Case Document AM API]
-    Then  a positive response is received
-    And   the response has all the details as expected
-    And   the request [contains the id of the document just uploaded above and wait for 10 minuts]
-    And   it is submitted to call the [Get Document Metadata by Document ID] operation of [CCD Case Document AM API]
-    Then  a negative response is received
-    And   the response has all the details as expected
+#  @S-047 @Ignore # Not required
+#  Scenario: must get an error response for a malformed roles
+#    Given a user with [an active caseworker profile in CCD with full permissions on a document field]
+#    When  a request is prepared with appropriate values
+#    And   the request [contains a malformed roles]
+#    And   it is submitted to call the [Upload Document With Binary Content] operation of [CCD Case Document AM API]
+#    Then  a negative response is received
+#    And   the response has all the details as expected
+#
+#  @S-049 @Ignore # This is the test need to be done manually
+#  Scenario: must get an error response for a above max allowed size of a document
+#    Given a user with [an active caseworker profile in CCD with full permissions on a document field]
+#    When  a request is prepared with appropriate values
+#    And   the request [contains a max allowed size of a document]
+#    And   it is submitted to call the [Upload Document With Binary Content] operation of [CCD Case Document AM API]
+#    Then  a negative response is received
+#    And   the response has all the details as expected
+#
+#  @S-050 @Ignore # This is the test need to be done manually
+#  Scenario: must get an error response for a upload document with unauthorised user id after 10 minuts
+#    Given a user with [an active caseworker profile in CCD with full permissions on a document field]
+#    When  a request is prepared with appropriate values
+#    And   the request [contains unauthorised user]
+#    And   it is submitted to call the [Upload Document With Binary Content] operation of [CCD Case Document AM API]
+#    Then  a positive response is received
+#    And   the response has all the details as expected
+#    And   the request [contains the id of the document just uploaded above and wait for 10 minuts]
+#    And   it is submitted to call the [Get Document Metadata by Document ID] operation of [CCD Case Document AM API]
+#    Then  a negative response is received
+#    And   the response has all the details as expected
 
   @S-051 # should be picked up automatically by the freamework as suggested by CCD team
   Scenario: generic scenario for Unauthorized

@@ -6,10 +6,6 @@
     "contains a malformed jurisdiction Id"
   ],
   "request": {
-    "headers": {
-      "caseTypeId": "BEFTA_CASETYPE_2_2",
-      "jurisdictionId": "BEFTA_@£$%^&_JURISDICTION_2"
-    },
     "body": {
       "arrayInMap": [
         {
@@ -17,8 +13,12 @@
           "value": "PUBLIC"
         },
         {
-          "key": "roles",
-          "value": "caseworker"
+          "key": "caseTypeId",
+          "value": "BEFTA_CASETYPE_2_2"
+        },
+        {
+          "key": "jurisdictionId",
+          "value": "BEFTA_@£$%^&_JURISDICTION_2"
         },
         {
           "key": "files",
@@ -30,10 +30,8 @@
   "expectedResponse": {
     "_extends_": "Common_400_Response",
     "body" : {
-      "message" : "Exception while uploading the documents :java.lang.IllegalArgumentException: The input parameter: \"BEFTA_@£$%^&_JURISDICTION_2\", does not comply with the required pattern",
+      "message" : "The input parameter: \"BEFTA_@?$%^&_JURISDICTION_2\", does not comply with the required pattern",
       "path" : "/cases/documents"
     }
   }
 }
-
-

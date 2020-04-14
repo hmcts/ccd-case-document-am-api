@@ -6,10 +6,6 @@
     "contains a non-existing security classification"
   ],
   "request": {
-    "headers": {
-      "caseTypeId": "BEFTA_CASETYPE_2_2",
-      "jurisdictionId": "BEFTA_JURISDICTION_2"
-    },
     "body": {
       "arrayInMap": [
         {
@@ -17,8 +13,12 @@
           "value": "NonExisting"
         },
         {
-          "key": "roles",
-          "value": "caseworker"
+          "key": "caseTypeId",
+          "value": "BEFTA_CASETYPE_2_2"
+        },
+        {
+          "key": "jurisdictionId",
+          "value": "BEFTA_JURISDICTION_2"
         },
         {
           "key": "files",
@@ -30,10 +30,8 @@
   "expectedResponse": {
     "_extends_": "Common_400_Response",
     "body" : {
-      "message" : "Exception while uploading the documents :uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException: The security classification NonExisting is not valid",
+      "message" : "The security classification NonExisting is not valid",
       "path" : "/cases/documents"
     }
   }
 }
-
-

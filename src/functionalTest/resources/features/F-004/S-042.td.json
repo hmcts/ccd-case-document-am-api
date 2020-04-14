@@ -1,14 +1,11 @@
 {
   "_guid_": "S-042",
   "_extends_": "F-004_Test_Base_data",
-  "title": "must get an error response for a without case type td parameter in request",
+  "title": "must get an error response for a without case type id parameter in request",
   "specs": [
     "contains without case type id parameter"
   ],
   "request": {
-    "headers": {
-      "jurisdictionId": "BEFTA_JURISDICTION_2"
-    },
     "body": {
       "arrayInMap": [
         {
@@ -16,8 +13,8 @@
           "value": "PUBLIC"
         },
         {
-          "key": "roles",
-          "value": "caseworker"
+          "key": "jurisdictionId",
+          "value": "BEFTA_JURISDICTION_2"
         },
         {
           "key": "files",
@@ -29,7 +26,7 @@
   "expectedResponse": {
     "_extends_": "Common_400_Response",
     "body" : {
-      "message" : "Missing request header 'caseTypeId' for method parameter of type String",
+      "message" : "Required String parameter 'caseTypeId' is not present",
       "path" : "/cases/documents"
     }
   }

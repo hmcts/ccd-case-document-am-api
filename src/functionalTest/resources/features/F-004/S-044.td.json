@@ -6,9 +6,6 @@
     "contains without jurisdiction Id parameter"
   ],
   "request": {
-    "headers": {
-      "caseTypeId": "BEFTA_CASETYPE_2_2"
-    },
     "body": {
       "arrayInMap": [
         {
@@ -16,8 +13,8 @@
           "value": "PUBLIC"
         },
         {
-          "key": "roles",
-          "value": "caseworker"
+          "key": "caseTypeId",
+          "value": "BEFTA_CASETYPE_2_2"
         },
         {
           "key": "files",
@@ -29,10 +26,8 @@
   "expectedResponse": {
     "_extends_": "Common_400_Response",
     "body" : {
-      "message" : "Missing request header 'jurisdictionId' for method parameter of type String",
+      "message" : "Required String parameter 'jurisdictionId' is not present",
       "path" : "/cases/documents"
     }
   }
 }
-
-
