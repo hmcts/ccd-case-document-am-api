@@ -11,10 +11,7 @@
     "headers": {
       "Authorization": "[[DEFAULT_AUTO_VALUE]]",
       "ServiceAuthorization": "[[DEFAULT_AUTO_VALUE]]",
-      "Content-Type": "multipart/form-data",
-      "uid": "[[DEFAULT_AUTO_VALUE]]",
-      "user-id": "[someUserId]",
-      "user-roles": "caseworker"
+      "Content-Type": "multipart/form-data"
     }
   }
 }

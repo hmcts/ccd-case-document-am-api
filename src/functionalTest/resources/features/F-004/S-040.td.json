@@ -6,10 +6,6 @@
     "contains the metadata for the document uploaded above"
   ],
   "request": {
-    "headers": {
-      "caseTypeId": "BEFTA_CASETYPE_2_2",
-      "jurisdictionId": "BEFTA_JURISDICTION_2"
-    },
     "body": {
       "arrayInMap": [
         {
@@ -17,8 +13,12 @@
           "value": "PUBLIC"
         },
         {
-          "key": "roles",
-          "value": "caseworker"
+          "key": "caseTypeId",
+          "value": "BEFTA_CASETYPE_2_2"
+        },
+        {
+          "key": "jurisdictionId",
+          "value": "BEFTA_JURISDICTION_2"
         },
         {
           "key": "files",
@@ -41,16 +41,12 @@
             "modifiedOn": "[[ANYTHING_PRESENT]]",
             "createdOn": "[[ANYTHING_PRESENT]]",
             "classification": "PUBLIC",
-            "roles": [
-              "caseworker"
-            ],
             "metadata": {
-              "caseId": "1111222233334444",
               "caseTypeId": "BEFTA_CASETYPE_2_2",
               "jurisdictionId": "BEFTA_JURISDICTION_2"
             },
             "ttl": "[[ANYTHING_PRESENT]]",
-            "hashcode": "[[ANYTHING_PRESENT]]",
+            "hashToken": "[[ANYTHING_PRESENT]]",
             "_links": {
               "self": {
                 "href": "${[scenarioContext][customValues][validSelfLink]}"
