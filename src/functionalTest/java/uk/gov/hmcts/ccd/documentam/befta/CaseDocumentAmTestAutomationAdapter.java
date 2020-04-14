@@ -35,28 +35,27 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
                 logger.error("Exception while getting the Document ID from the response", exception.getMessage());
                 return "Error extracting the Document Id";
             }
-        }
-
-        else if (key.toString().equalsIgnoreCase("validSelfLink")) {
+        } else if (key.toString().equalsIgnoreCase("validSelfLink")) {
             try {
                 String self = (String) ReflectionUtils.deepGetFieldInObject(scenarioContext,
                         "testData.actualResponse.body._embedded.documents[0]._links.self.href");
                 scenarioContext.getScenario().write("Self: " + self);
-                if (self != null && self.startsWith(docAmUrl + "/cases/documents/"))
+                if (self != null && self.startsWith(docAmUrl + "/cases/documents/")) {
                     return self;
+                }
                 return docAmUrl + "/cases/documents/<a document id>";
             } catch (Exception e) {
                 throw new FunctionalTestException("Couldn't get self link from response field", e);
             }
 
-        }
-        else if (key.toString().equalsIgnoreCase("validBinaryLink")) {
+        } else if (key.toString().equalsIgnoreCase("validBinaryLink")) {
             try {
                 String binary = (String) ReflectionUtils.deepGetFieldInObject(scenarioContext,
                         "testData.actualResponse.body._embedded.documents[0]._links.binary.href");
                 scenarioContext.getScenario().write("Binary: " + binary);
-                if (binary != null && binary.startsWith(docAmUrl + "/cases/documents/") && binary.endsWith("/binary"))
+                if (binary != null && binary.startsWith(docAmUrl + "/cases/documents/") && binary.endsWith("/binary")) {
                     return binary;
+                }
                 return docAmUrl + "/cases/documents/<a document id>/binary";
             } catch (Exception e) {
                 throw new FunctionalTestException("Couldn't get binary link from response field", e);
