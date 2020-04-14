@@ -37,7 +37,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
             }
         }
 
-        else if (key.toString().equalsIgnoreCase("S_040_validSelfLink")) {
+        else if (key.toString().equalsIgnoreCase("validSelfLink")) {
             try {
                 String self = (String) ReflectionUtils.deepGetFieldInObject(scenarioContext,
                         "testData.actualResponse.body._embedded.documents[0]._links.self.href");
@@ -50,7 +50,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
             }
 
         }
-        else if (key.toString().equalsIgnoreCase("S_040_validBinaryLink")) {
+        else if (key.toString().equalsIgnoreCase("validBinaryLink")) {
             try {
                 String binary = (String) ReflectionUtils.deepGetFieldInObject(scenarioContext,
                         "testData.actualResponse.body._embedded.documents[0]._links.binary.href");
