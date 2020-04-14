@@ -219,6 +219,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseDocumentsMetadata.getCaseTypeId());
                 metadataMap.put(CASE_TYPE_ID, caseDocumentsMetadata.getCaseTypeId());
             }
+
             if (null != caseDocumentsMetadata.getJurisdictionId()) {
                 ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseDocumentsMetadata.getJurisdictionId());
                 metadataMap.put(JURISDICTION_ID, caseDocumentsMetadata.getJurisdictionId());
