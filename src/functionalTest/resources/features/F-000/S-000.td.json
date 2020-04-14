@@ -49,16 +49,17 @@
     "responseMessage": "OK",
     "headers": {
       "Cache-Control" : "[[ANYTHING_PRESENT]]",
+      "Content-Encoding" : "gzip",
+      "Content-Length" : "[[ANYTHING_PRESENT]]",
       "Content-Type" : "application/json",
       "Date" : "[[ANYTHING_PRESENT]]",
       "Expires" : "0",
       "Pragma" : "no-cache",
+      "Strict-Transport-Security" : "[[ANYTHING_PRESENT]]",
+      "Vary" : "Accept-Encoding",
       "X-Content-Type-Options" : "nosniff",
       "X-Frame-Options" : "DENY",
-      "X-Xss-Protection" : "1; mode=block",
-      "Connection" : "keep-alive",
-      "Keep-Alive" : "timeout=60",
-      "Transfer-Encoding" : "chunked"
+      "X-Xss-Protection" : "1; mode=block"
     },
     "body": {
       "_embedded": {
