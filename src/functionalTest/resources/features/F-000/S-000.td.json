@@ -2,7 +2,7 @@
   "_guid_": "S-000",
   "users": {
     "invokingUser": {
-      "username": "befta.caseworker.2.solicitor.1@gmail.com",
+      "username": "befta.caseworker.2.solicitor.2@gmail.com",
       "password": "Pa55word11"
     }
   },
@@ -21,10 +21,7 @@
       "ServiceAuthorization": "[[DYNAMIC]]",
       "Content-Type": "multipart/form-data",
       "caseTypeId": "BEFTA_CASETYPE_2_2",
-      "jurisdictionId": "BEFTA_JURISDICTION_2",
-      "uid": "[[DYNAMIC]]",
-      "user-id": "29e430eb-7f1d-4bc1-96a2-904bb6493276",
-      "user-roles": "caseworker"
+      "jurisdictionId": "BEFTA_JURISDICTION_2"
     },
     "body": {
       "arrayInMap": [
@@ -33,8 +30,12 @@
           "value": "PUBLIC"
         },
         {
-          "key": "roles",
-          "value": "caseworker"
+          "key": "caseTypeId",
+          "value": "BEFTA_CASETYPE_2_2"
+        },
+        {
+          "key": "jurisdictionId",
+          "value": "BEFTA_JURISDICTION_2"
         },
         {
           "key": "files",
@@ -48,17 +49,16 @@
     "responseMessage": "OK",
     "headers": {
       "Cache-Control" : "[[ANYTHING_PRESENT]]",
-      "Content-Encoding" : "gzip",
-      "Content-Length" : "[[ANYTHING_PRESENT]]",
       "Content-Type" : "application/json",
       "Date" : "[[ANYTHING_PRESENT]]",
       "Expires" : "0",
       "Pragma" : "no-cache",
-      "Strict-Transport-Security" : "[[ANYTHING_PRESENT]]",
-      "Vary" : "Accept-Encoding",
       "X-Content-Type-Options" : "nosniff",
       "X-Frame-Options" : "DENY",
-      "X-Xss-Protection" : "1; mode=block"
+      "X-Xss-Protection" : "1; mode=block",
+      "Connection" : "keep-alive",
+      "Keep-Alive" : "timeout=60",
+      "Transfer-Encoding" : "chunked"
     },
     "body": {
       "_embedded": {
