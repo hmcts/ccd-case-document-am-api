@@ -1,26 +1,15 @@
 {
   "_guid_": "S-000",
-  "users": {
-    "invokingUser": {
-      "username": "befta.caseworker.2.solicitor.2@gmail.com",
-      "password": "[[$CCD_BEFTA_CASEWORKER_2_SOLICITOR_2_PWD]]"
-    }
-  },
-  "title": "Get Document Metadata by Document ID",
-  "productName": "DM Store",
+  "_extends_": "S-000-Test-Base-data",
+  "title": "must upload a document successfully and get the response",
+  "productName": "CCD Case Document AM API",
   "operationName": "upload a document with mandatory metadata",
   "method": "POST",
   "uri": "/cases/documents",
   "specs": [
-    "an active caseworker profile in CCD with full permissions on a document field",
     "uses a uid that exists in IDAM"
   ],
   "request": {
-    "headers": {
-      "Authorization": "[[DEFAULT_AUTO_VALUE]]",
-      "ServiceAuthorization": "[[DEFAULT_AUTO_VALUE]]",
-      "Content-Type": "multipart/form-data"
-    },
     "body": {
       "arrayInMap": [
         {
