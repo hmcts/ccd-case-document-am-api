@@ -11,10 +11,10 @@
   "request": {
     "body": {
       "caseId": "12345678900£$@00",
-      "documents": [
+      "documentHashTokens": [
         {
           "id": "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
-          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][hashcode]}"
+          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][hashToken]}"
         }
       ]
     }
@@ -22,8 +22,12 @@
 
   "expectedResponse": {
     "_extends_": "Common_400_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
     "body" : {
-      "message" : "Exception while attaching the documents to a case :java.lang.IllegalArgumentException: The input parameter: \"12345678900£$@00\", does not comply with the required pattern",
+      "message" : "The input parameter: \"${[scenarioContext][testData][request][body][caseId]}\", does not comply with the required pattern",
       "path" : "/cases/documents/attachToCase"
     }
   }

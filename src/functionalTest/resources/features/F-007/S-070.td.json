@@ -13,16 +13,21 @@
       "caseId": "1234567890099900",
       "caseTypeId" : "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][caseTypeId]}",
       "jurisdictionId" : "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][jurisdictionId]}",
-      "documents": [
+      "documentHashTokens": [
         {
           "id": "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
-          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][hashcode]}"
+          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][hashToken]}"
         }
       ]
     }
   },
 
   "expectedResponse": {
-    "_extends_": "Common_200_Response"
+    "_extends_": "Common_200_Response",
+    "headers": {
+      "Content-Encoding": "[[ANYTHING_PRESENT]]",
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    }
   }
 }

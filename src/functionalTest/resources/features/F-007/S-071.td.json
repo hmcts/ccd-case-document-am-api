@@ -10,8 +10,8 @@
 
   "request": {
     "body": {
-      "caseId": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][caseId]}",
-      "documents": [
+      "caseId": "1234567890099900",
+      "documentHashTokens": [
         {
           "id": "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
           "hashToken": "3a38541c0f372334196d1dd3b70d4449142aeb44589f00000000000000000000"
@@ -21,9 +21,13 @@
   },
 
   "expectedResponse": {
-    "_extends_": "Common_404_Response",
+    "_extends_": "Common_400_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
     "body" : {
-      "message" : "Resource not found : Document ${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]} does not exists in DM Store",
+      "message" : "Case document hash-token is not valid for document Id : ${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
       "path" : "/cases/documents/attachToCase"
     }
   }

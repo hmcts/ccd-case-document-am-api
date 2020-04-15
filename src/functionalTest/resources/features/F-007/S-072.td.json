@@ -10,11 +10,11 @@
 
   "request": {
     "body": {
-      "caseId": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][caseId]}",
-      "documents": [
+      "caseId": "1234567890099900",
+      "documentHashTokens": [
         {
           "id": "00000000-0000-0000-0000-000000000000",
-          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][hashcode]}"
+          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][hashToken]}"
         }
       ]
     }
@@ -22,8 +22,12 @@
 
   "expectedResponse": {
     "_extends_": "Common_404_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
     "body" : {
-      "message" : "Resource not found ${[scenarioContext][testData][request][body][documents][0][id]}",
+      "message" : "Resource not found ${[scenarioContext][testData][request][body][documentHashTokens][0][id]}",
       "path" : "/cases/documents/attachToCase"
     }
   }
