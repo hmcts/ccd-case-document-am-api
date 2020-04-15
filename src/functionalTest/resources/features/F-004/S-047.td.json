@@ -1,0 +1,39 @@
+{
+  "_guid_": "S-047",
+  "_extends_": "F-004_Test_Base_data",
+  "title": "must get an error response for a malformed roles",
+  "specs": [
+    "contains a malformed roles"
+  ],
+  "request": {
+    "headers": {
+      "caseTypeId": "BEFTA_CASETYPE_2_2",
+      "jurisdictionId": "BEFTA_JURISDICTION_2"
+    },
+    "body": {
+      "arrayInMap": [
+        {
+          "key": "classification",
+          "value": "PUBLIC"
+        },
+        {
+          "key": "roles",
+          "value": "case$%^&worker"
+        },
+        {
+          "key": "files",
+          "filePath": "Sample.pdf"
+        }
+      ]
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_400_Response",
+    "body" : {
+      "message" : "Exception while uploading the documents :java.lang.IllegalArgumentException: The input parameter: \"case$%^&worker\", does not comply with the required pattern",
+      "path" : "/cases/documents"
+    }
+  }
+}
+
+
