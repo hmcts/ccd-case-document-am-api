@@ -284,8 +284,7 @@ public class CaseDocumentAmController  {
             documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
 
             return ResponseEntity
-                .status(HttpStatus.OK)
-                .body("Success");
+                .status(HttpStatus.OK).build();
         } else {
             throw new BadRequestException(BAD_REQUEST);
         }

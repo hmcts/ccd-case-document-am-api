@@ -14,12 +14,13 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
 
     private static final Logger logger = LoggerFactory.getLogger(CaseDocumentAmTestAutomationAdapter.class);
 
-    private transient TestDataLoaderToDefinitionStore loader = new TestDataLoaderToDefinitionStore(this);
+    private TestDataLoaderToDefinitionStore loader = new TestDataLoaderToDefinitionStore(this);
 
     @Override
     public void doLoadTestData() {
-     //   loader.addCcdRoles();
-     //   loader.importDefinitions();
+        loader.addCcdRoles();
+        loader.importDefinitions();
+        super.registerApiClientWithEnvVariable("API_CLIENT_DATA_STORE");
     }
 
     @Override
@@ -32,7 +33,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
                                           "testData.actualResponse.body._embedded.documents[0]._links.self.href");
                 return href.substring(href.length() - 36);
             } catch (Exception exception) {
-                logger.error("Exception while getting the Document ID from the response", exception.getMessage());
+                logger.error("Exception while getting the Document ID from the response :{}", exception.getMessage());
                 return "Error extracting the Document Id";
             }
         } else if (key.toString().equalsIgnoreCase("validSelfLink")) {
