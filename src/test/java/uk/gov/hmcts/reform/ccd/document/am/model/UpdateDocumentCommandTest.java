@@ -6,7 +6,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class UpdateDocumentCommandTest {
@@ -22,7 +24,8 @@ class UpdateDocumentCommandTest {
 
     @Test
     void shouldTestEquals() {
-        assertNotNull(updateDocumentCommand.equals(new UpdateDocumentCommand()));
+        assertTrue(updateDocumentCommand.equals(new UpdateDocumentCommand()));
+        assertFalse(updateDocumentCommand.equals(""));
     }
 
     @Test
