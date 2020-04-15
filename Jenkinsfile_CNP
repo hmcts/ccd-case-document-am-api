@@ -34,7 +34,8 @@ def secrets = [
         secret('ccd-api-gateway-oauth2-client-secret', 'OAUTH2_CLIENT_SECRET')
     ],
     's2s-${env}': [
-        secret('microservicekey-ccd-gw', 'BEFTA_S2S_CLIENT_SECRET')
+        secret('microservicekey-ccd-gw', 'BEFTA_S2S_CLIENT_SECRET'),
+        secret('ccd-data-s2s-secret', 'API_CLIENT_DATA_STORE_SECRET')
     ]
 ]
 
@@ -63,6 +64,7 @@ env.DEFINITION_STORE_HOST = "http://ccd-definition-store-api-pr-575.service.core
 env.CCD_DATA_STORE_URL = "http://ccd-data-store-api-pr-842.service.core-compute-preview.internal"
 env.CASE_DOCUMENT_AM_URL = "http://ccd-case-document-am-api-pr-22.service.core-compute-preview.internal";
 env.CASE_DOCUMENT_SWAGGER_AM_URL = "ccd-case-document-am-api-pr-22.service.core-compute-preview.internal";
+env.API_CLIENT_DATA_STORE_ID = "ccd_data"
 
 withPipeline(type, product, component) {
   onMaster {
