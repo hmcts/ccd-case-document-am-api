@@ -54,10 +54,10 @@
             "hashToken": "[[ANYTHING_PRESENT]]",
             "_links": {
               "self": {
-                "href": "${[scenarioContext][customValues][validSelfLink]}"
+                "href": "[[ANYTHING_PRESENT]]"
               },
               "binary": {
-                "href": "${[scenarioContext][customValues][validBinaryLink]}"
+                "href": "[[ANYTHING_PRESENT]]"
               }
             }
           }
