@@ -11,28 +11,7 @@
     "headers": {
       "Authorization": "[[DEFAULT_AUTO_VALUE]]",
       "ServiceAuthorization": "[[DEFAULT_AUTO_VALUE]]",
-      "Content-Type": "multipart/form-data",
-      "caseTypeId": "BEFTA_CASETYPE_2_2",
-      "jurisdictionId": "BEFTA_JURISDICTION_2",
-      "uid": "[[DEFAULT_AUTO_VALUE]]",
-      "user-id": "[someUserId]",
-      "user-roles": "caseworker"
-    },
-    "body": {
-      "arrayInMap": [
-        {
-          "key": "classification",
-          "value": "PUBLIC"
-        },
-        {
-          "key": "roles",
-          "value": "caseworker"
-        },
-        {
-          "key": "files",
-          "filePath": "SampleImage.png"
-        }
-      ]
+      "Content-Type": "multipart/form-data"
     }
   }
 }

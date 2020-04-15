@@ -12,7 +12,7 @@
       "caseTypeId": "BEFTA_CASETYPE_2_2",
       "jurisdictionId": "BEFTA_JURISDICTION_2",
       "uid": "[[DEFAULT_AUTO_VALUE]]",
-      "user-id": "29e430eb-7f1d-4bc1-96a2-904bb6493276",
+      "user-id": "[someUserId]",
       "user-roles": "caseworker"
     }
   },

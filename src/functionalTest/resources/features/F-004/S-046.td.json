@@ -1,16 +1,20 @@
 {
-  "_guid_": "S-042",
+  "_guid_": "S-046",
   "_extends_": "F-004_Test_Base_data",
-  "title": "must get an error response for a without case type id parameter in request",
+  "title": "must get an error response for a malformed security classification",
   "specs": [
-    "contains without case type id parameter"
+    "contains a malformed security classification"
   ],
   "request": {
     "body": {
       "arrayInMap": [
         {
           "key": "classification",
-          "value": "PUBLIC"
+          "value": "PUB^&^%"
+        },
+        {
+          "key": "caseTypeId",
+          "value": "BEFTA_CASETYPE_2_2"
         },
         {
           "key": "jurisdictionId",
@@ -18,7 +22,7 @@
         },
         {
           "key": "files",
-          "filePath": "CCD_BEFTA_JURISDICTION2.xlsx"
+          "filePath": "SampleImage.png"
         }
       ]
     }
@@ -30,10 +34,8 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body" : {
-      "message" : "Required String parameter 'caseTypeId' is not present",
+      "message" : "The input parameter: \"PUB^&^%\", does not comply with the required pattern",
       "path" : "/cases/documents"
     }
   }
 }
-
-
