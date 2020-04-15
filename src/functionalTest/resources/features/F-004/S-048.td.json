@@ -54,6 +54,11 @@
   },
   "expectedResponse": {
     "_extends_": "Common_200_Response",
+    "headers": {
+      "Content-Encoding": "[[ANYTHING_PRESENT]]",
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
     "body": {
       "_embedded": {
         "documents": [

@@ -25,6 +25,10 @@
   },
   "expectedResponse": {
     "_extends_": "Common_400_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
     "body" : {
       "message" : "Required String parameter 'caseTypeId' is not present",
       "path" : "/cases/documents"

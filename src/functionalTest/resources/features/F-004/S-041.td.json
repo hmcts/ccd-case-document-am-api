@@ -29,6 +29,10 @@
   },
   "expectedResponse": {
     "_extends_": "Common_400_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
     "body" : {
       "message" : "The input parameter: \"BEFTA_@?$%^&_CASETYPE_2_2\", does not comply with the required pattern",
       "path" : "/cases/documents"
