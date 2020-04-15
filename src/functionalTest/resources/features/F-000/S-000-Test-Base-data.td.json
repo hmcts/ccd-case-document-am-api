@@ -8,5 +8,5 @@
     "an active caseworker profile in CCD with full permissions on a document field"
   ],
   "method": "POST",
-  "uri": "/cases/documents",
+  "uri": "/cases/documents"
 }
