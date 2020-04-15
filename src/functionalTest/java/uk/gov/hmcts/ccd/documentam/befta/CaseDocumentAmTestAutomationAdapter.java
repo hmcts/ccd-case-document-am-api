@@ -18,13 +18,13 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
 
     @Override
     public void doLoadTestData() {
-        loader.addCcdRoles();
-        loader.importDefinitions();
+     //   loader.addCcdRoles();
+     //   loader.importDefinitions();
     }
 
     @Override
     public Object calculateCustomValue(BackEndFunctionalTestScenarioContext scenarioContext, Object key) {
-        String docAmUrl = EnvironmentVariableUtils.getRequiredVariable("CASE_DOC_AM_URL");
+        String docAmUrl = EnvironmentVariableUtils.getRequiredVariable("CASE_DOCUMENT_AM_URL");
         if (key.equals("documentIdInTheResponse")) {
             try {
                 String href = (String) ReflectionUtils
