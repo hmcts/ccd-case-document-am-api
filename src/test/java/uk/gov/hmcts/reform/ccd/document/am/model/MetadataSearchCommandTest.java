@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.ccd.document.am.model;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MetadataSearchCommandTest {
@@ -24,7 +25,8 @@ class MetadataSearchCommandTest {
 
     @Test
     void shouldTestEquals() {
-        assertNotNull(metadataSearch.equals(new MetadataSearchCommand()));
+        assertTrue(metadataSearch.equals(new MetadataSearchCommand()));
+        assertFalse(metadataSearch.equals(""));
     }
 
     @Test

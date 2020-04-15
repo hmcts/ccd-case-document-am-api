@@ -15,9 +15,9 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
-import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
-import uk.gov.hmcts.reform.ccd.document.am.model.Document;
-import uk.gov.hmcts.reform.ccd.document.am.model.DocumentMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentHashToken;
+import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentsMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Classifications;
@@ -28,9 +28,7 @@ import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -84,7 +82,7 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     public void shouldGetValidMetaDataResponse() {
-        Optional<CaseDocumentMetadata> caseDocumentMetadata = Optional.ofNullable(getCaseDocumentMetadata(
+        Optional<DocumentPermissions> documentPermissions = Optional.ofNullable(getDocumentPermissions(
             MATCHED_DOCUMENT_ID,
             Arrays.asList(
                 Permission.CREATE,
@@ -108,7 +106,7 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     public void shouldNotGetValidMetaDataResponse() {
-        Optional<CaseDocumentMetadata> caseDocumentMetadata = Optional.ofNullable(getCaseDocumentMetadata(
+        Optional<DocumentPermissions> documentPermissions = Optional.ofNullable(getDocumentPermissions(
             UNMATCHED_DOCUMENT_ID,
             Arrays.asList(
                 Permission.CREATE,
@@ -128,7 +126,7 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("should get 200 document binary content")
     public void shouldGetDocumentBinaryContent() {
-        Optional<CaseDocumentMetadata> caseDocumentMetadata = Optional.ofNullable(getCaseDocumentMetadata(
+        Optional<DocumentPermissions> documentPermissions = Optional.ofNullable(getDocumentPermissions(
             MATCHED_DOCUMENT_ID,
             Arrays.asList(
                Permission.CREATE,
@@ -156,7 +154,7 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("should throw 403 forbidden  when the requested document does not have read permission")
     public void shouldThrowForbiddenWhenDocumentDoesNotHaveReadPermission() {
-        Optional<CaseDocumentMetadata> caseDocumentMetadata = Optional.ofNullable(getCaseDocumentMetadata(
+        Optional<DocumentPermissions> documentPermissions = Optional.ofNullable(getDocumentPermissions(
             MATCHED_DOCUMENT_ID,
             Arrays.asList(Permission.CREATE)
         ));
@@ -176,7 +174,7 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("should throw 403 forbidden when the requested document does not match with available doc")
     public void shouldThrowForbiddenWhenDocumentDoesNotMatch() {
-        Optional<CaseDocumentMetadata> caseDocumentMetadata = Optional.ofNullable(getCaseDocumentMetadata(
+        Optional<DocumentPermissions> documentPermissions = Optional.ofNullable(getDocumentPermissions(
             UNMATCHED_DOCUMENT_ID,
             Arrays.asList(
                 Permission.CREATE,
@@ -186,7 +184,7 @@ public class CaseDocumentAmControllerTest {
 
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
-        doReturn(caseDocumentMetadata).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
+        doReturn(documentPermissions).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
         doReturn(setDocumentBinaryContent(FORBIDDEN)).when(documentManagementService).getDocumentBinaryContent(getUuid());
 
         Assertions.assertThrows(ForbiddenException.class, () -> {
@@ -196,6 +194,7 @@ public class CaseDocumentAmControllerTest {
         });
 
     }
+
 
     @Test
     @DisplayName("should get 204 when document delete is successful")
@@ -215,20 +214,6 @@ public class CaseDocumentAmControllerTest {
         );
     }
 
-    @Test
-    @DisplayName("should throw 403 forbidden when user doesn't have UPDATE permission on requested document")
-    public void shouldNotDeleteDocumentByDocumentId() {
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(FALSE).when(documentManagementService)
-            .checkUserPermission(setDocumentMetaData(),getUuid(), Permission.UPDATE);
-
-        Assertions.assertThrows(ForbiddenException.class, () -> {
-            testee.deleteDocumentbyDocumentId(
-                getUuid(),
-                true
-            );
-        });
-    }
 
     @Test
     public void shouldPatchDocumentByDocumentId() {
@@ -246,28 +231,14 @@ public class CaseDocumentAmControllerTest {
         );
     }
 
-    @Test
-    @DisplayName("should throw 403 forbidden when user doesn't have UPDATE permission on requested document")
-    public void shouldNotPatchDocumentByDocumentId() {
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(FALSE).when(documentManagementService)
-            .checkUserPermission(setDocumentMetaData(),getUuid(), Permission.UPDATE);
-        UpdateDocumentCommand body = null;
-        Assertions.assertThrows(ForbiddenException.class, () -> {
-            testee.patchDocumentbyDocumentId(
-                body,
-                getUuid()
-            );
-        });
-    }
 
     @Test
     public void shouldPatchMetaDataOnDocuments() {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        Document document = Document.builder().id("cab18c21-8b7c-452b-937c-091225e0cc12").build();
-        DocumentMetadata body = DocumentMetadata.builder()
+        DocumentHashToken document = DocumentHashToken.builder().id("cab18c21-8b7c-452b-937c-091225e0cc12").build();
+        CaseDocumentsMetadata body = CaseDocumentsMetadata.builder()
                                                 .caseId("1111122222333334")
-                                                .documents(Arrays.asList(document))
+                                                .documentHashTokens(Arrays.asList(document))
                                                 .build();
         ResponseEntity response = testee.patchMetaDataOnDocuments(body);
 
@@ -276,12 +247,12 @@ public class CaseDocumentAmControllerTest {
             () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE));
     }
 
-    //Tests for UploadDocuments controller.
+
     @Test
     @DisplayName("Should throw 400 when the uploaded file is empty")
     public void shouldThrowBadRequestExceptionWhenUploadedFilesIsNull() {
         Assertions.assertThrows(BadRequestException.class, () -> {
-            testee.uploadDocuments(null, Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE),
+            testee.uploadDocuments(null, Classifications.PUBLIC.name(),
                                    BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
         });
     }
@@ -291,7 +262,7 @@ public class CaseDocumentAmControllerTest {
     public void shouldThrowBadRequestExceptionWhenUserRolesAreEmpty() {
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
-                                   Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE),
+                                   Classifications.PUBLIC.name(),
                                    BEFTA_CASETYPE_2, "BEFTA@JURISDICTION_2$$$$");
         });
     }
@@ -301,7 +272,7 @@ public class CaseDocumentAmControllerTest {
     public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsNull() {
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
-                                   Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE),
+                                   Classifications.PUBLIC.name(),
                                    null, BEFTA_JURISDICTION_2);
         });
     }
@@ -311,7 +282,7 @@ public class CaseDocumentAmControllerTest {
     public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsMalformed() {
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
-                                   Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE),
+                                   Classifications.PUBLIC.name(),
                                    "BEFTA_CASETYPE_2&&&&&&&&&", "BEFTA_JURISDICTION_2");
         });
     }
@@ -321,7 +292,7 @@ public class CaseDocumentAmControllerTest {
     public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsNull() {
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
-                                   Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE),
+                                   Classifications.PUBLIC.name(),
                                    BEFTA_CASETYPE_2, null);
         });
     }
@@ -331,7 +302,7 @@ public class CaseDocumentAmControllerTest {
     public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsMalformed() {
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
-                                   Classifications.PUBLIC.name(), Arrays.asList(DUMMY_ROLE),
+                                   Classifications.PUBLIC.name(),
                                    BEFTA_CASETYPE_2, "BEFTA@JURISDICTION_2$$$$");
         });
     }
@@ -347,9 +318,9 @@ public class CaseDocumentAmControllerTest {
         return UUID.fromString(MATCHED_DOCUMENT_ID);
     }
 
-    private CaseDocumentMetadata getCaseDocumentMetadata(String docId, List<Permission> permission) {
-        Document document = Document.builder().permissions(permission).id(docId).build();
-        return CaseDocumentMetadata.builder().caseId(CASE_ID).document(document).build();
+    private DocumentPermissions getDocumentPermissions(String docId, List<Permission> permission) {
+        DocumentPermissions documentPermissions = DocumentPermissions.builder().permissions(permission).id(docId).build();
+        return documentPermissions;
     }
 
     private ResponseEntity<ByteArrayResource> setDocumentBinaryContent(String responseType) {
@@ -392,18 +363,14 @@ public class CaseDocumentAmControllerTest {
     @Test
     @SuppressWarnings("unchecked")
     void generateHashCode_HappyPath() {
-        Map<String, String> myMap = new HashMap<>();
-        myMap.put("caseId",CASE_ID);
-        myMap.put("caseTypeId", BEFTA_CASETYPE_2);
-        myMap.put("jurisdictionId", BEFTA_JURISDICTION_2);
-        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
-        storedDocumentHalResource.setMetadata(myMap);
 
-        when(documentManagementService.getDocumentMetadata(UUID.fromString(MATCHED_DOCUMENT_ID)))
-            .thenReturn(new ResponseEntity(storedDocumentHalResource, HttpStatus.OK));
+        when(documentManagementService.generateHashToken(UUID.fromString(MATCHED_DOCUMENT_ID)))
+            .thenReturn("hashToken");
 
         ResponseEntity<Object> responseEntity = testee.generateHashCode(UUID.fromString(MATCHED_DOCUMENT_ID));
+
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("{hashToken=hashToken}", responseEntity.getBody().toString());
     }
 
     @Test //this test returns an illegal argument exception because UUID.fromString() contains a throw for illegal arguments
