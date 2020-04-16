@@ -1,0 +1,29 @@
+{
+  "title": "must successfully get hashtoken by document Id",
+  "_guid_": "S-061",
+  "_extends_": "F-006_Test_Base_data",
+
+  "specs": [
+    "contains the document Id from just uploaded document",
+    "contains the hashtoken received from just uploaded document",
+    "by same user to get a hashtoken"
+  ],
+  "request": {
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_200_Response",
+    "headers": {
+      "Content-Encoding": "[[ANYTHING_PRESENT]]",
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body": {
+      "hashToken": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][_embedded][documents][0][hashToken]}"
+    }
+  }
+}
+
+
