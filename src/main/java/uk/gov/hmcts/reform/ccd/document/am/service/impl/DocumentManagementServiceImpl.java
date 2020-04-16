@@ -472,6 +472,20 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
     }
 
+    public boolean checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId, Permission permission) {
+        String serviceId = securityUtils.getServiceId();
+        Map<String, Object> serviceConfig = getServiceDetailsFromJson(serviceId);
+        if (validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(serviceConfig,
+                                                                                    jurisdictionId) && validatePermissions(
+            serviceConfig,
+            permission
+        )) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private boolean validateCaseTypeId(Map<String, Object> serviceConfig, String caseTypeId) {
         boolean result = !StringUtils.isEmpty(caseTypeId) && (serviceConfig.get("caseTypeId").equals("*") || caseTypeId.equals(
             serviceConfig.get(

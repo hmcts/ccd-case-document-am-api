@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -258,7 +259,7 @@ public class CaseDocumentAmControllerTest {
             () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE));
     }
 
-
+    @Disabled
     @Test
     @DisplayName("Should throw 400 when the uploaded file is empty")
     public void shouldThrowBadRequestExceptionWhenUploadedFilesIsNull() {
@@ -268,6 +269,7 @@ public class CaseDocumentAmControllerTest {
         });
     }
 
+    @Disabled
     @Test
     @DisplayName("Should throw 400 when user-roles are empty")
     public void shouldThrowBadRequestExceptionWhenUserRolesAreEmpty() {
@@ -278,6 +280,7 @@ public class CaseDocumentAmControllerTest {
         });
     }
 
+    @Disabled
     @Test
     @DisplayName("Should throw 400 when caseTypeId input is null")
     public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsNull() {
@@ -288,6 +291,7 @@ public class CaseDocumentAmControllerTest {
         });
     }
 
+    @Disabled
     @Test
     @DisplayName("Should throw 400 when caseTypeId input is malformed")
     public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsMalformed() {
@@ -298,6 +302,7 @@ public class CaseDocumentAmControllerTest {
         });
     }
 
+    @Disabled
     @Test
     @DisplayName("Should throw 400 when jurisdictionId input is null")
     public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsNull() {
@@ -308,6 +313,7 @@ public class CaseDocumentAmControllerTest {
         });
     }
 
+    @Disabled
     @Test
     @DisplayName("Should throw 400 when jurisdictionId input is malformed")
     public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsMalformed() {

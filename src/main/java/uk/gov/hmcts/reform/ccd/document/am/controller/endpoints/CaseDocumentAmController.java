@@ -1,6 +1,7 @@
 
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_PERMISSION_ERROR;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -93,7 +94,7 @@ public class CaseDocumentAmController  {
         @PathVariable("documentId") UUID documentId) {
 
         ValidationService.validateDocumentId(documentId.toString());
-        ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
+        ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkServicePermission(responseEntity, Permission.READ)) {
             if (documentManagementService.checkUserPermission(responseEntity, documentId, Permission.READ)) {
                 return ResponseEntity
@@ -103,7 +104,7 @@ public class CaseDocumentAmController  {
             LOG.error("User doesn't have read permission on requested document {}", HttpStatus.FORBIDDEN);
             throw new ForbiddenException(documentId.toString());
         }
-        LOG.error("Service doesn't have sufficient permission on requested API {}", HttpStatus.FORBIDDEN);
+        LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -133,7 +134,7 @@ public class CaseDocumentAmController  {
     public ResponseEntity<Object> getDocumentBinaryContentbyDocumentId(
         @PathVariable("documentId") UUID documentId) {
         ValidationService.validateDocumentId(documentId.toString());
-        ResponseEntity documentMetadata = documentManagementService.getDocumentMetadata(documentId);
+        ResponseEntity<?> documentMetadata = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkServicePermission(documentMetadata, Permission.READ)) {
             if (documentManagementService.checkUserPermission(documentMetadata, documentId, Permission.READ)) {
                 return documentManagementService.getDocumentBinaryContent(documentId);
@@ -142,7 +143,7 @@ public class CaseDocumentAmController  {
             LOG.error("User doesn't have read permission on requested document {}", HttpStatus.FORBIDDEN);
             throw new ForbiddenException(documentId.toString());
         }
-        LOG.error("Service doesn't have sufficient permission on requested API {}", HttpStatus.FORBIDDEN);
+        LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -194,12 +195,15 @@ public class CaseDocumentAmController  {
         @NotNull(message = "Provide the Jurisdiction ID ")
         @RequestParam(value = "jurisdictionId", required = true) String jurisdictionId
     ) {
+        if (documentManagementService.checkServicePermissionsForUpload(caseTypeId, jurisdictionId, Permission.CREATE)) {
+            ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification);
+            ValidationService.isValidSecurityClassification(classification);
+            ValidationService.validateLists(files);
 
-        ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification);
-        ValidationService.isValidSecurityClassification(classification);
-        ValidationService.validateLists(files);
-
-        return documentManagementService.uploadDocuments(files, classification, caseTypeId, jurisdictionId);
+            return documentManagementService.uploadDocuments(files, classification, caseTypeId, jurisdictionId);
+        }
+        LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
+        throw new ForbiddenException(caseTypeId + " " + jurisdictionId);
     }
 
 
@@ -230,14 +234,14 @@ public class CaseDocumentAmController  {
         @ApiParam(value = "", required = true)
         @Valid @RequestBody UpdateDocumentCommand body,
         @PathVariable("documentId") UUID documentId) {
-        ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
+        ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkServicePermission(responseEntity, Permission.DELETE)) {
             ValidationService.validateDocumentId(documentId.toString());
 
-            ResponseEntity response = documentManagementService.patchDocument(documentId, body);
+            ResponseEntity<?> response = documentManagementService.patchDocument(documentId, body);
             return ResponseEntity.status(HttpStatus.OK).body(response.getBody());
         }
-        LOG.error("Service doesn't have sufficient permission on requested API {}", HttpStatus.FORBIDDEN);
+        LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -329,13 +333,13 @@ public class CaseDocumentAmController  {
         @PathVariable("documentId") UUID documentId,
         @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false")
             Boolean permanent) {
-        ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
+        ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkServicePermission(responseEntity, Permission.DELETE)) {
             ValidationService.validateDocumentId(documentId.toString());
 
             return documentManagementService.deleteDocument(documentId, permanent);
         }
-        LOG.error("Service doesn't have sufficient permission on requested API {}", HttpStatus.FORBIDDEN);
+        LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -366,7 +370,7 @@ public class CaseDocumentAmController  {
     public ResponseEntity<Object> generateHashCode(
         @PathVariable("documentId") UUID documentId) {
 
-        ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
+        ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkServicePermission(responseEntity, Permission.HASHTOKEN)) {
             ValidationService.validateDocumentId(documentId.toString());
 
@@ -376,7 +380,7 @@ public class CaseDocumentAmController  {
 
             return new ResponseEntity<>(responseBody, HttpStatus.OK);
         }
-        LOG.error("Service doesn't have sufficient permission on requested API {}", HttpStatus.FORBIDDEN);
+        LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 }

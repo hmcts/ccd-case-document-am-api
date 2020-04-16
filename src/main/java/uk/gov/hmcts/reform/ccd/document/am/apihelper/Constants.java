@@ -51,5 +51,6 @@ public class Constants {
     public static final String CASE_ID = "caseId";
     public static final String CASE_TYPE_ID = "caseTypeId";
     public static final String JURISDICTION_ID = "jurisdictionId";
+    public static final String SERVICE_PERMISSION_ERROR = "Service doesn't have sufficient permission on requested API {}";
 
 }
