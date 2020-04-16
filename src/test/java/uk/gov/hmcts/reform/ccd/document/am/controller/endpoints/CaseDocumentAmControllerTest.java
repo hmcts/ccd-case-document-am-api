@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -247,10 +246,14 @@ public class CaseDocumentAmControllerTest {
     @Test
     public void shouldPatchMetaDataOnDocuments() {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload("BEFTA_CASETYPE_2_1", "BEFTA_JURISDICTION_2", Permission.ATTACH);
         DocumentHashToken document = DocumentHashToken.builder().id("cab18c21-8b7c-452b-937c-091225e0cc12").build();
         CaseDocumentsMetadata body = CaseDocumentsMetadata.builder()
                                                 .caseId("1111122222333334")
                                                 .documentHashTokens(Arrays.asList(document))
+                                                .caseTypeId("BEFTA_CASETYPE_2_1")
+                                                .jurisdictionId("BEFTA_JURISDICTION_2")
                                                 .build();
         ResponseEntity response = testee.patchMetaDataOnDocuments(body);
 
@@ -259,20 +262,20 @@ public class CaseDocumentAmControllerTest {
             () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE));
     }
 
-    @Disabled
     @Test
     @DisplayName("Should throw 400 when the uploaded file is empty")
     public void shouldThrowBadRequestExceptionWhenUploadedFilesIsNull() {
+        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload("BEFTA_CASETYPE_2", "BEFTA_JURISDICTION_2", Permission.CREATE);
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(null, Classifications.PUBLIC.name(),
                                    BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
         });
     }
 
-    @Disabled
     @Test
     @DisplayName("Should throw 400 when user-roles are empty")
     public void shouldThrowBadRequestExceptionWhenUserRolesAreEmpty() {
+        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload("BEFTA_CASETYPE_2", "BEFTA@JURISDICTION_2$$$$", Permission.CREATE);
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
                                    Classifications.PUBLIC.name(),
@@ -280,10 +283,10 @@ public class CaseDocumentAmControllerTest {
         });
     }
 
-    @Disabled
     @Test
     @DisplayName("Should throw 400 when caseTypeId input is null")
     public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsNull() {
+        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload(null, "BEFTA_JURISDICTION_2", Permission.CREATE);
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
                                    Classifications.PUBLIC.name(),
@@ -291,10 +294,10 @@ public class CaseDocumentAmControllerTest {
         });
     }
 
-    @Disabled
     @Test
     @DisplayName("Should throw 400 when caseTypeId input is malformed")
     public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsMalformed() {
+        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload("BEFTA_CASETYPE_2&&&&&&&&&", "BEFTA_JURISDICTION_2", Permission.CREATE);
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
                                    Classifications.PUBLIC.name(),
@@ -302,10 +305,10 @@ public class CaseDocumentAmControllerTest {
         });
     }
 
-    @Disabled
     @Test
     @DisplayName("Should throw 400 when jurisdictionId input is null")
     public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsNull() {
+        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload("BEFTA_CASETYPE_2", null, Permission.CREATE);
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
                                    Classifications.PUBLIC.name(),
@@ -313,10 +316,10 @@ public class CaseDocumentAmControllerTest {
         });
     }
 
-    @Disabled
     @Test
     @DisplayName("Should throw 400 when jurisdictionId input is malformed")
     public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsMalformed() {
+        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload("BEFTA_CASETYPE_2", "BEFTA@JURISDICTION_2$$$$", Permission.CREATE);
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
                                    Classifications.PUBLIC.name(),

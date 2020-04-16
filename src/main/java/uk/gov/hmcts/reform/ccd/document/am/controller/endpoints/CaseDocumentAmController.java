@@ -288,23 +288,29 @@ public class CaseDocumentAmController  {
     public ResponseEntity<Object> patchMetaDataOnDocuments(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody CaseDocumentsMetadata caseDocumentsMetadata) {
+        if (documentManagementService.checkServicePermissionsForUpload(
+            caseDocumentsMetadata.getCaseTypeId(),
+            caseDocumentsMetadata.getJurisdictionId(),
+            Permission.ATTACH
+        )) {
+            if (!ValidationService.validate(caseDocumentsMetadata.getCaseId())) {
+                throw new BadRequestException(CASE_ID_NOT_VALID);
+            }
 
-        if (!ValidationService.validate(caseDocumentsMetadata.getCaseId())) {
-            throw new BadRequestException(CASE_ID_NOT_VALID);
+            if (caseDocumentsMetadata.getDocumentHashTokens() != null) {
+                caseDocumentsMetadata.getDocumentHashTokens()
+                    .forEach(document -> ValidationService.validateDocumentId(document.getId()));
+
+                documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
+
+                return ResponseEntity
+                    .status(HttpStatus.OK).build();
+            } else {
+                throw new BadRequestException(BAD_REQUEST);
+            }
         }
-
-        if (caseDocumentsMetadata.getDocumentHashTokens() != null) {
-            caseDocumentsMetadata.getDocumentHashTokens()
-                .forEach(document -> ValidationService.validateDocumentId(document.getId()));
-
-            documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
-
-            return ResponseEntity
-                .status(HttpStatus.OK).build();
-        } else {
-            throw new BadRequestException(BAD_REQUEST);
-        }
-
+        LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
+        throw new ForbiddenException(caseDocumentsMetadata.getCaseTypeId() + " " + caseDocumentsMetadata.getJurisdictionId());
     }
 
 

@@ -46,7 +46,8 @@ import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.document.am.util.ResponseHelper;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
-
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_TYPE_ID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.JURISDICTION_ID;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
@@ -487,16 +488,16 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     private boolean validateCaseTypeId(Map<String, Object> serviceConfig, String caseTypeId) {
-        boolean result = !StringUtils.isEmpty(caseTypeId) && (serviceConfig.get("caseTypeId").equals("*") || caseTypeId.equals(
+        boolean result = !StringUtils.isEmpty(caseTypeId) && (serviceConfig.get(CASE_TYPE_ID).equals("*") || caseTypeId.equals(
             serviceConfig.get(
-                "caseTypeId")));
+                CASE_TYPE_ID)));
         LOG.info("Case Type Id is {} and validation result is {}", caseTypeId, result);
         return result;
     }
 
     private boolean validateJurisdictionId(Map<String, Object> serviceConfig, String jurisdictionId) {
-        boolean result =  !StringUtils.isEmpty(jurisdictionId) && (serviceConfig.get("jurisdictionId").equals("*") || jurisdictionId.equals(
-            serviceConfig.get("jurisdictionId")));
+        boolean result =  !StringUtils.isEmpty(jurisdictionId) && (serviceConfig.get(JURISDICTION_ID).equals("*") || jurisdictionId.equals(
+            serviceConfig.get(JURISDICTION_ID)));
         LOG.info("JurisdictionI Id is {} and validation result is {}", jurisdictionId, result);
         return result;
     }
@@ -516,20 +517,20 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             ObjectMapper mapper = new ObjectMapper();
             File jsonConfigFile = new File("Service_Config.json");
             JsonNode rootNode = mapper.readValue(jsonConfigFile, JsonNode.class);
-            String caseTypeId = rootNode.at("/services/" + serviceId + "/caseTypeId").textValue();
-            String jurisdictionId = rootNode.at("/services/" + serviceId + "/jurisdictionId").textValue();
+            String caseTypeId = rootNode.at("/services/" + serviceId + "/" + CASE_TYPE_ID).textValue();
+            String jurisdictionId = rootNode.at("/services/" + serviceId + "/" + JURISDICTION_ID).textValue();
             JsonNode permissionsNode = rootNode.at("/services/" + serviceId + "/permission");
             permissions = mapper.readValue(permissionsNode.toString(), new TypeReference<List<String>>() {
             });
-            serviceDetails.put("caseTypeId", caseTypeId.toString());
-            serviceDetails.put("jurisdictionId", jurisdictionId.toString());
+            serviceDetails.put(CASE_TYPE_ID, caseTypeId.toString());
+            serviceDetails.put(JURISDICTION_ID, jurisdictionId.toString());
             serviceDetails.put("permissions", permissions);
         } catch (JsonParseException e) {
-            e.printStackTrace();
+            LOG.error("JsonParseException {}", e);
         } catch (JsonMappingException e) {
-            e.printStackTrace();
+            LOG.error("JsonMappingException {}", e);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("IOException {}", e);
         }
         return serviceDetails;
     }
@@ -537,7 +538,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public String extractCaseTypeIdFromMetadata(Object storedDocument) {
         if (storedDocument instanceof StoredDocumentHalResource) {
             Map<String, String> metadata = ((StoredDocumentHalResource) storedDocument).getMetadata();
-            return metadata.get("caseTypeId");
+            return metadata.get(CASE_TYPE_ID);
         }
         return null;
     }
@@ -545,7 +546,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public String extractJurisdictionIdFromMetadata(Object storedDocument) {
         if (storedDocument instanceof StoredDocumentHalResource) {
             Map<String, String> metadata = ((StoredDocumentHalResource) storedDocument).getMetadata();
-            return metadata.get("jurisdictionId");
+            return metadata.get(JURISDICTION_ID);
         }
         return null;
     }
