@@ -1,0 +1,24 @@
+{
+  "services": {
+    "xui_webapp": {
+      "caseTypeId": "*",
+      "jurisdictionId": "BEFTA_JURISDICTION_2",
+      "permission": ["CREATE", "READ", "UPDATE", "DELETE"]
+    },
+    "bulk_scan_processor": {
+      "caseTypeId": "BEFTA_CASETYPE_2_1",
+      "jurisdictionId": "BEFTA_JURISDICTION_2",
+      "permission": ["HASHTOKEN"]
+    },
+    "ccd_data": {
+      "caseTypeId": "*",
+      "jurisdictionId": "BEFTA_JURISDICTION_2",
+      "permission": ["ATTACH"]
+    },
+    "ccd_gw": {
+      "caseTypeId": "*",
+      "jurisdictionId": "*",
+      "permission": ["R"]
+    }
+  }
+}

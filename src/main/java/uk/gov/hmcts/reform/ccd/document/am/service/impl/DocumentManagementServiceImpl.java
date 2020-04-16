@@ -1,6 +1,12 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +48,8 @@ import uk.gov.hmcts.reform.ccd.document.am.util.ResponseHelper;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -430,6 +438,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, Permission permissionToCheck) {
+        if (permissionToCheck.toString().equals(Permission.READ.toString())) {
+            return true;
+        }
         String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
         if (!ValidationService.validate(caseId)) {
             LOG.error("Bad Request Exception {}", CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
@@ -441,8 +452,88 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 .orElseThrow(() -> new CaseNotFoundException(caseId));
 
             return (documentPermissions.getId().equals(documentId.toString())
-                    && documentPermissions.getPermissions().contains(permissionToCheck));
+                && documentPermissions.getPermissions().contains(permissionToCheck));
         }
+    }
+
+    public boolean checkServicePermission(ResponseEntity responseEntity, Permission permission) {
+        String serviceId = securityUtils.getServiceId();
+        Map<String, Object> serviceConfig = getServiceDetailsFromJson(serviceId);
+        String caseTypeId = extractCaseTypeIdFromMetadata(responseEntity.getBody());
+        String jurisdictionId = extractJurisdictionIdFromMetadata(responseEntity.getBody());
+        if (validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(serviceConfig,
+                                                                                    jurisdictionId) && validatePermissions(
+            serviceConfig,
+            permission
+        )) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean validateCaseTypeId(Map<String, Object> serviceConfig, String caseTypeId) {
+        boolean result = !StringUtils.isEmpty(caseTypeId) && (serviceConfig.get("caseTypeId").equals("*") || caseTypeId.equals(
+            serviceConfig.get(
+                "caseTypeId")));
+        LOG.info("Case Type Id is {} and validation result is {}", caseTypeId, result);
+        return result;
+    }
+
+    private boolean validateJurisdictionId(Map<String, Object> serviceConfig, String jurisdictionId) {
+        boolean result =  !StringUtils.isEmpty(jurisdictionId) && (serviceConfig.get("jurisdictionId").equals("*") || jurisdictionId.equals(
+            serviceConfig.get("jurisdictionId")));
+        LOG.info("JurisdictionI Id is {} and validation result is {}", jurisdictionId, result);
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private boolean validatePermissions(Map<String, Object> serviceDetails, Permission permission) {
+        List<String> servicePermissions = (List<String>) serviceDetails.get("permissions");
+        boolean result = !servicePermissions.isEmpty() && (servicePermissions.contains(permission.toString()));
+        LOG.info("Permission is {} and validation result is {}", permission.toString(), result);
+        return result;
+    }
+
+    private Map<String, Object> getServiceDetailsFromJson(String serviceId) {
+        Map<String, Object> serviceDetails = new HashMap<String, Object>();
+        List<String> permissions = new ArrayList<>();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            File jsonConfigFile = new File("Service_Config.json");
+            JsonNode rootNode = mapper.readValue(jsonConfigFile, JsonNode.class);
+            String caseTypeId = rootNode.at("/services/" + serviceId + "/caseTypeId").textValue();
+            String jurisdictionId = rootNode.at("/services/" + serviceId + "/jurisdictionId").textValue();
+            JsonNode permissionsNode = rootNode.at("/services/" + serviceId + "/permission");
+            permissions = mapper.readValue(permissionsNode.toString(), new TypeReference<List<String>>() {
+            });
+            serviceDetails.put("caseTypeId", caseTypeId.toString());
+            serviceDetails.put("jurisdictionId", jurisdictionId.toString());
+            serviceDetails.put("permissions", permissions);
+        } catch (JsonParseException e) {
+            e.printStackTrace();
+        } catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return serviceDetails;
+    }
+
+    public String extractCaseTypeIdFromMetadata(Object storedDocument) {
+        if (storedDocument instanceof StoredDocumentHalResource) {
+            Map<String, String> metadata = ((StoredDocumentHalResource) storedDocument).getMetadata();
+            return metadata.get("caseTypeId");
+        }
+        return null;
+    }
+
+    public String extractJurisdictionIdFromMetadata(Object storedDocument) {
+        if (storedDocument instanceof StoredDocumentHalResource) {
+            Map<String, String> metadata = ((StoredDocumentHalResource) storedDocument).getMetadata();
+            return metadata.get("jurisdictionId");
+        }
+        return null;
     }
 
     private HttpHeaders getHttpHeaders() {

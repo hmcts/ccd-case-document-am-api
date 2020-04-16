@@ -92,7 +92,8 @@ public class CaseDocumentAmControllerTest {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(TRUE).when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),getUuid(), Permission.READ);
-
+        doReturn(TRUE).when(documentManagementService)
+            .checkServicePermission(setDocumentMetaData(), Permission.READ);
 
         ResponseEntity response = testee
             .getDocumentbyDocumentId(getUuid());
@@ -136,6 +137,8 @@ public class CaseDocumentAmControllerTest {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(TRUE).when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),getUuid(), Permission.READ);
+        doReturn(TRUE).when(documentManagementService)
+            .checkServicePermission(setDocumentMetaData(), Permission.READ);
         doReturn(setDocumentBinaryContent("OK")).when(documentManagementService).getDocumentBinaryContent(getUuid());
 
         ResponseEntity<Object> response = testee.getDocumentBinaryContentbyDocumentId(
@@ -158,6 +161,8 @@ public class CaseDocumentAmControllerTest {
             MATCHED_DOCUMENT_ID,
             Arrays.asList(Permission.CREATE)
         ));
+        doReturn(TRUE).when(documentManagementService)
+            .checkServicePermission(setDocumentMetaData(), Permission.READ);
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(setDocumentBinaryContent(FORBIDDEN)).when(documentManagementService).getDocumentBinaryContent(getUuid());
 
@@ -186,6 +191,8 @@ public class CaseDocumentAmControllerTest {
         doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
         doReturn(documentPermissions).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
         doReturn(setDocumentBinaryContent(FORBIDDEN)).when(documentManagementService).getDocumentBinaryContent(getUuid());
+        doReturn(TRUE).when(documentManagementService)
+            .checkServicePermission(setDocumentMetaData(), Permission.READ);
 
         Assertions.assertThrows(ForbiddenException.class, () -> {
             testee.getDocumentBinaryContentbyDocumentId(
@@ -200,6 +207,8 @@ public class CaseDocumentAmControllerTest {
     @DisplayName("should get 204 when document delete is successful")
     public void shouldDeleteDocumentByDocumentId() {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(TRUE).when(documentManagementService)
+            .checkServicePermission(setDocumentMetaData(), Permission.DELETE);
         doReturn(TRUE).when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),getUuid(), Permission.UPDATE);
         doReturn(ResponseEntity.status(HttpStatus.NO_CONTENT).build()).when(documentManagementService)
@@ -218,6 +227,8 @@ public class CaseDocumentAmControllerTest {
     @Test
     public void shouldPatchDocumentByDocumentId() {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(TRUE).when(documentManagementService)
+            .checkServicePermission(setDocumentMetaData(), Permission.DELETE);
         doReturn(TRUE).when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),getUuid(), Permission.UPDATE);
         UpdateDocumentCommand body = null;
@@ -364,6 +375,9 @@ public class CaseDocumentAmControllerTest {
     @SuppressWarnings("unchecked")
     void generateHashCode_HappyPath() {
 
+        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        when(documentManagementService.checkServicePermission(setDocumentMetaData(), Permission.HASHTOKEN))
+            .thenReturn(TRUE);
         when(documentManagementService.generateHashToken(UUID.fromString(MATCHED_DOCUMENT_ID)))
             .thenReturn("hashToken");
 

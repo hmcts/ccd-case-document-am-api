@@ -30,4 +30,6 @@ public interface DocumentManagementService {
     ResponseEntity<Object> patchDocumentMetadata(CaseDocumentsMetadata caseDocumentsMetadata);
 
     String generateHashToken(final UUID documentId);
+
+    boolean checkServicePermission(ResponseEntity documentMetadata, Permission permission);
 }
