@@ -20,7 +20,9 @@
   "expectedResponse": {
     "_extends_": "Common_200_Response",
     "headers": {
-      "Content-Length": "[[ANYTHING_PRESENT]]"
+      "Content-Length": "[[ANYTHING_PRESENT]]",
+      "Content-Encoding" : "gzip",
+      "Content-Type" : "application/json"
     },
     "body": {
       "size": "[[ANYTHING_PRESENT]]",
