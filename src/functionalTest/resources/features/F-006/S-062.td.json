@@ -18,7 +18,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body" : {
-      "message" : "Failed to convert value of type 'java.lang.String' to required type 'java.util.UUID'; nested exception is java.lang.NumberFormatException: Error at index 0 in: \"@£$&\"",
+      "message" : "Failed to convert value of type 'java.lang.String' to required type 'java.util.UUID'; nested exception is java.lang.NumberFormatException: For input string: \"@£$&\"",
       "path" : "[[ANYTHING_PRESENT]]"
     }
   }
