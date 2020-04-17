@@ -93,6 +93,7 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.RESOURCE_N
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.THUMBNAIL;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICES;
 
 @Slf4j
 @Service
@@ -457,7 +458,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
     }
 
-    public boolean checkServicePermission(ResponseEntity responseEntity, Permission permission) {
+    public boolean checkServicePermission(ResponseEntity<?> responseEntity, Permission permission) {
         String serviceId = securityUtils.getServiceId();
         Map<String, Object> serviceConfig = getServiceDetailsFromJson(serviceId);
         String caseTypeId = extractCaseTypeIdFromMetadata(responseEntity.getBody());
@@ -506,31 +507,31 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private boolean validatePermissions(Map<String, Object> serviceDetails, Permission permission) {
         List<String> servicePermissions = (List<String>) serviceDetails.get("permissions");
         boolean result = !servicePermissions.isEmpty() && (servicePermissions.contains(permission.toString()));
-        LOG.info("Permission is {} and validation result is {}", permission.toString(), result);
+        LOG.info("Permission is {} and validation result is {}", permission, result);
         return result;
     }
 
     private Map<String, Object> getServiceDetailsFromJson(String serviceId) {
-        Map<String, Object> serviceDetails = new HashMap<String, Object>();
+        Map<String, Object> serviceDetails = new HashMap<>();
         List<String> permissions = new ArrayList<>();
         try {
             ObjectMapper mapper = new ObjectMapper();
             File jsonConfigFile = new File("Service_Config.json");
             JsonNode rootNode = mapper.readValue(jsonConfigFile, JsonNode.class);
-            String caseTypeId = rootNode.at("/services/" + serviceId + "/" + CASE_TYPE_ID).textValue();
-            String jurisdictionId = rootNode.at("/services/" + serviceId + "/" + JURISDICTION_ID).textValue();
-            JsonNode permissionsNode = rootNode.at("/services/" + serviceId + "/permission");
+            String caseTypeId = rootNode.at("/" + SERVICES + "/" + serviceId + "/" + CASE_TYPE_ID).textValue();
+            String jurisdictionId = rootNode.at("/" + SERVICES + "/" + serviceId + "/" + JURISDICTION_ID).textValue();
+            JsonNode permissionsNode = rootNode.at("/" + SERVICES + "/" + serviceId + "/permission");
             permissions = mapper.readValue(permissionsNode.toString(), new TypeReference<List<String>>() {
             });
-            serviceDetails.put(CASE_TYPE_ID, caseTypeId.toString());
-            serviceDetails.put(JURISDICTION_ID, jurisdictionId.toString());
+            serviceDetails.put(CASE_TYPE_ID, caseTypeId);
+            serviceDetails.put(JURISDICTION_ID, jurisdictionId);
             serviceDetails.put("permissions", permissions);
         } catch (JsonParseException e) {
-            LOG.error("JsonParseException {}", e);
+            LOG.error("JsonParseException {}", e.getMessage());
         } catch (JsonMappingException e) {
-            LOG.error("JsonMappingException {}", e);
+            LOG.error("JsonMappingException {}", e.getMessage());
         } catch (IOException e) {
-            LOG.error("IOException {}", e);
+            LOG.error("IOException {}", e.getMessage());
         }
         return serviceDetails;
     }

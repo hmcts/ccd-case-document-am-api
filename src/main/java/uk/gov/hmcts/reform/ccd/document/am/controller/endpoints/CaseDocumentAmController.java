@@ -235,7 +235,7 @@ public class CaseDocumentAmController  {
         @Valid @RequestBody UpdateDocumentCommand body,
         @PathVariable("documentId") UUID documentId) {
         ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
-        if (documentManagementService.checkServicePermission(responseEntity, Permission.DELETE)) {
+        if (documentManagementService.checkServicePermission(responseEntity, Permission.UPDATE)) {
             ValidationService.validateDocumentId(documentId.toString());
 
             ResponseEntity<?> response = documentManagementService.patchDocument(documentId, body);
