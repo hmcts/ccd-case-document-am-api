@@ -340,7 +340,7 @@ public class CaseDocumentAmController  {
         @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false")
             Boolean permanent) {
         ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
-        if (documentManagementService.checkServicePermission(responseEntity, Permission.DELETE)) {
+        if (documentManagementService.checkServicePermission(responseEntity, Permission.UPDATE)) {
             ValidationService.validateDocumentId(documentId.toString());
 
             return documentManagementService.deleteDocument(documentId, permanent);

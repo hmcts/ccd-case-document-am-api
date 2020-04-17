@@ -341,6 +341,33 @@ class DocumentManagementServiceImplTest {
         verifyCaseDataServiceGetDocMetadata();
     }
 
+    @Test
+    void checkServicePermission_HappyPath() {
+        when(securityUtilsMock.getServiceId()).thenReturn("xui_webapp");
+        mockitoWhenRestExchangeThenThrow(initialiseMetaData("caseTypeId", "BEFTA_JURISDICTION_2"), HttpStatus.OK);
+        ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+
+        Boolean result = sut.checkServicePermission(responseEntity, Permission.READ);
+        assertEquals(Boolean.TRUE, result);
+    }
+
+    private StoredDocumentHalResource initialiseMetaData(String caseTypeId, String jurisdictionID) {
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        Map<String, String> myMap = new HashMap<>();
+        myMap.put("caseTypeId", caseTypeId);
+        myMap.put("jurisdictionId", jurisdictionID);
+        storedDocumentHalResource.setMetadata(myMap);
+        return storedDocumentHalResource;
+    }
+
+    @Test
+    void checkServicePermissionForUpload_HappyPath() {
+        when(securityUtilsMock.getServiceId()).thenReturn("xui_webapp");
+        Boolean result = sut.checkServicePermissionsForUpload("caseTypeId", "BEFTA_JURISDICTION_2", Permission.READ);
+        assertEquals(Boolean.TRUE, result);
+    }
+
     @Disabled("Disabled temporarily due to issue with AM-450")
     @Test
     void checkUserPermission_Throws_CaseNotFoundException() {
