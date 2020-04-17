@@ -1,0 +1,26 @@
+{
+  "title": "must get an error response for a non existing document Id",
+  "_guid_": "S-063",
+  "_extends_": "F-006_Test_Base_data",
+  "specs": [
+    "contains a non existing document Id"
+  ],
+  "request": {
+    "pathVariables": {
+      "documentId": "00000000-0000-0000-0000-000000000000"
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_404_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body" : {
+      "message" : "Resource not found ${[scenarioContext][testData][request][pathVariables][documentId]}",
+      "path" : "/cases/documents/${[scenarioContext][testData][request][pathVariables][documentId]}/token"
+    }
+  }
+}
+
+
