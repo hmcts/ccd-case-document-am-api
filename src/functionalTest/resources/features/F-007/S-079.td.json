@@ -34,6 +34,9 @@
     "_extends_": "Common_200_Response",
     "headers": {
       "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body" : {
+      "Result" : "Success"
     }
   }
 }
