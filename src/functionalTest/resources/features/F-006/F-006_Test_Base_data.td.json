@@ -1,0 +1,11 @@
+{
+  "_guid_": "F-006_Test_Base_data",
+  "_extends_": "F-006-Base-Root",
+  "productName": "CCD Case Document AM API",
+  "operationName": "Get hashtoken by Document ID",
+  "specs": [
+    "an active caseworker profile in CCD with full permissions on a document field"
+  ],
+  "method": "GET",
+  "uri": "/cases/documents/{documentId}/token"
+}

@@ -1,0 +1,27 @@
+{
+  "title": "must successfully get an updated hashtoken after the caseId attached on document metadata",
+  "_guid_": "S-064",
+  "_extends_": "F-006_Test_Base_data",
+
+  "specs": [
+    "contains the document Id from just uploaded document",
+    "doesn't contain the hashtoken received from previous call"
+  ],
+  "request": {
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_200_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body": {
+      "hashToken": "${[scenarioContext][customValues][hashTokenDifferentFromPrevious]}"
+    }
+  }
+}
+
+
