@@ -1,0 +1,30 @@
+{
+  "title": "must get an error response for a malformed document Id",
+  "_guid_": "S-054",
+  "_extends_": "F-005_Test_Data_Base",
+
+  "specs": [
+    "contains a malformed document Id"
+  ],
+
+  "request": {
+      "pathVariables": {
+        "documentId": "8de9957b-d7a6-40a1-@£$&-6aac30d33644"
+    },
+    "body": {
+      "ttl": "2021-12-30T10:10:10+0000"
+    }
+  },
+
+  "expectedResponse": {
+    "_extends_": "Common_400_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body" : {
+      "message" : "Failed to convert value of type 'java.lang.String' to required type 'java.util.UUID'; nested exception is java.lang.NumberFormatException: For input string: \"@£$&\"",
+      "path" : "/cases/documents/8de9957b-d7a6-40a1-%40%C2%A3%24%26-6aac30d33644"
+    }
+  }
+}
