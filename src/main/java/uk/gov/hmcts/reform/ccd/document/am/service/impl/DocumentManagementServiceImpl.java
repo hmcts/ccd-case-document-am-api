@@ -27,8 +27,8 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.Forbidden
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
-import uk.gov.hmcts.reform.ccd.document.am.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentsMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentUpdate;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
@@ -59,7 +59,6 @@ import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PATCH;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BAD_REQUEST;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_DOCUMENT_HASH_TOKEN_INVALID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_TYPE_ID;
@@ -209,7 +208,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
             String hashcodeFromStoredDocument = generateHashToken(UUID.fromString(documentHashToken.getId()));
             if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
-                throw new BadRequestException(String.format(CASE_DOCUMENT_HASH_TOKEN_INVALID, documentHashToken.getId()));
+                HashMap<String, String> responseBody = new HashMap<>();
+
+                responseBody.put("documentId", documentHashToken.getId());
+                throw new ForbiddenException(UUID.fromString(documentHashToken.getId()));
             }
 
             Map<String, String> metadataMap = new HashMap<>();
@@ -231,7 +233,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             documentUpdate.setMetadata(metadataMap);
             bodyMap.add("documents", documentUpdate);
         }
-
     }
 
     public String generateHashToken(UUID documentId) {

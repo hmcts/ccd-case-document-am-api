@@ -272,23 +272,22 @@ public class CaseDocumentAmController  {
     public ResponseEntity<Object> patchMetaDataOnDocuments(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody CaseDocumentsMetadata caseDocumentsMetadata) {
-
         if (!ValidationService.validate(caseDocumentsMetadata.getCaseId())) {
             throw new BadRequestException(CASE_ID_NOT_VALID);
         }
-
         if (caseDocumentsMetadata.getDocumentHashTokens() != null) {
             caseDocumentsMetadata.getDocumentHashTokens()
                 .forEach(document -> ValidationService.validateDocumentId(document.getId()));
 
             documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
 
-            return ResponseEntity
-                .status(HttpStatus.OK).build();
         } else {
             throw new BadRequestException(BAD_REQUEST);
         }
-
+        HashMap<String, String> responseBody = new HashMap<>();
+        responseBody.put("Result", "Success");
+        return ResponseEntity
+            .status(HttpStatus.OK).body(responseBody);
     }
 
 
