@@ -9,7 +9,7 @@
 
   "request": {
       "pathVariables": {
-        "documentId": "05d4c1f7-af36-4290-abe5-1d3fbe2cda84"
+        "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
     },
     "body": {
       "ttl": "2021-13-30T12:10:10+0000"

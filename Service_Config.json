@@ -18,7 +18,7 @@
     "ccd_gw": {
       "caseTypeId": "*",
       "jurisdictionId": "*",
-      "permission": ["R"]
+      "permission": ["CREATE", "READ", "UPDATE", "DELETE"]
     }
   }
 }
