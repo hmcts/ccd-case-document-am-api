@@ -463,35 +463,32 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         Map<String, Object> serviceConfig = getServiceDetailsFromJson(serviceId);
         String caseTypeId = extractCaseTypeIdFromMetadata(responseEntity.getBody());
         String jurisdictionId = extractJurisdictionIdFromMetadata(responseEntity.getBody());
-        if (validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(serviceConfig,
-                                                                                    jurisdictionId) && validatePermissions(
+        return validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(
+            serviceConfig,
+            jurisdictionId
+        ) && validatePermissions(
             serviceConfig,
             permission
-        )) {
-            return true;
-        } else {
-            return false;
-        }
+        );
     }
 
     public boolean checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId, Permission permission) {
         String serviceId = securityUtils.getServiceId();
         Map<String, Object> serviceConfig = getServiceDetailsFromJson(serviceId);
-        if (validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(serviceConfig,
-                                                                                    jurisdictionId) && validatePermissions(
+        return validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(
+            serviceConfig,
+            jurisdictionId
+        ) && validatePermissions(
             serviceConfig,
             permission
-        )) {
-            return true;
-        } else {
-            return false;
-        }
+        );
     }
 
     private boolean validateCaseTypeId(Map<String, Object> serviceConfig, String caseTypeId) {
         boolean result = !StringUtils.isEmpty(caseTypeId) && (serviceConfig.get(CASE_TYPE_ID).equals("*") || caseTypeId.equals(
             serviceConfig.get(
                 CASE_TYPE_ID)));
+        caseTypeId = sanitiseData(caseTypeId);
         LOG.info("Case Type Id is {} and validation result is {}", caseTypeId, result);
         return result;
     }
@@ -499,8 +496,13 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private boolean validateJurisdictionId(Map<String, Object> serviceConfig, String jurisdictionId) {
         boolean result =  !StringUtils.isEmpty(jurisdictionId) && (serviceConfig.get(JURISDICTION_ID).equals("*") || jurisdictionId.equals(
             serviceConfig.get(JURISDICTION_ID)));
+        jurisdictionId = sanitiseData(jurisdictionId);
         LOG.info("JurisdictionI Id is {} and validation result is {}", jurisdictionId, result);
         return result;
+    }
+
+    private String sanitiseData(String value) {
+        return value.replaceAll("[\n|\r|\t]", "_");
     }
 
     @SuppressWarnings("unchecked")
