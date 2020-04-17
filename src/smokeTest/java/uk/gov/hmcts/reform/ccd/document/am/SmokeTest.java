@@ -81,7 +81,7 @@ public class SmokeTest extends BaseTest {
             .body("message", Matchers.equalTo("Resource not found " + documentId));
     }
 
-    @Test
+    /*@Test
     public void should_receive_response_for_patch_ttl() throws JSONException {
 
         JSONObject requestBody = new JSONObject();
@@ -102,7 +102,7 @@ public class SmokeTest extends BaseTest {
             .andReturn();
         response.then().assertThat().statusCode(HttpStatus.NOT_FOUND.value())
             .body("message", Matchers.equalTo("Resource not found " + documentId));
-    }
+    }*/
 
     @Test
     public void should_receive_response_for_patch_attach_to_document() throws JSONException {
