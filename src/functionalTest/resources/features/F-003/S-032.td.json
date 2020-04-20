@@ -1,0 +1,16 @@
+{
+  "title": "must successfully delete a document by document Id soft delete",
+  "_guid_": "S-032",
+  "_extends_": "F-003_Test_Data_Base",
+
+  "request": {
+      "pathVariables": {
+        "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}",
+        "permanent": false
+    }
+  },
+
+  "expectedResponse": {
+    "_extends_": "Common_204_Response"
+  }
+}
