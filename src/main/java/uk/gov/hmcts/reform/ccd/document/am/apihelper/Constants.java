@@ -53,5 +53,8 @@ public class Constants {
     public static final String JURISDICTION_ID = "jurisdictionId";
     public static final String SERVICE_PERMISSION_ERROR = "Service doesn't have sufficient permission on requested API {}";
     public static final String SERVICES = "services";
+    public static final String XUI_WEBAPP = "xui_webapp";
+    public static final String BULK_SCAN_PROCESSOR = "bulk_scan_processor";
+    public static final String CCD_DATA = "ccd_data";
 
 }

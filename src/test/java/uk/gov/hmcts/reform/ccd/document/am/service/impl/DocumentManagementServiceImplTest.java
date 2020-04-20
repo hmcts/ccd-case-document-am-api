@@ -80,6 +80,7 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_F
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.XUI_WEBAPP;
 
 @RunWith(MockitoJUnitRunner.class)
 class DocumentManagementServiceImplTest {
@@ -348,7 +349,7 @@ class DocumentManagementServiceImplTest {
         ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
-        Boolean result = sut.checkServicePermission(responseEntity, Permission.READ);
+        Boolean result = sut.checkServicePermission(responseEntity, Permission.READ, XUI_WEBAPP);
         assertEquals(Boolean.TRUE, result);
     }
 
@@ -364,7 +365,9 @@ class DocumentManagementServiceImplTest {
     @Test
     void checkServicePermissionForUpload_HappyPath() {
         when(securityUtilsMock.getServiceId()).thenReturn("xui_webapp");
-        Boolean result = sut.checkServicePermissionsForUpload("caseTypeId", "BEFTA_JURISDICTION_2", Permission.READ);
+        Boolean result = sut.checkServicePermissionsForUpload("caseTypeId", "BEFTA_JURISDICTION_2", Permission.READ,
+                                                              XUI_WEBAPP
+        );
         assertEquals(Boolean.TRUE, result);
     }
 

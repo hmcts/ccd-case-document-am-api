@@ -71,7 +71,6 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_DOCUMENT_HASH_TOKEN_INVALID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
@@ -86,7 +85,6 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FORBIDDEN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHTOKEN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HREF;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.JURISDICTION_ID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LINKS;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.RESOURCE_NOT_FOUND;
@@ -458,8 +456,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
     }
 
-    public boolean checkServicePermission(ResponseEntity<?> responseEntity, Permission permission) {
-        String serviceId = securityUtils.getServiceId();
+    public boolean checkServicePermission(ResponseEntity<?> responseEntity, Permission permission, String serviceId) {
+        if (!serviceId.equals(securityUtils.getServiceId())) {
+            LOG.info("Service {} is not allowed to access API ", securityUtils.getServiceId());
+            return false;
+        }
         Map<String, Object> serviceConfig = getServiceDetailsFromJson(serviceId);
         String caseTypeId = extractCaseTypeIdFromMetadata(responseEntity.getBody());
         String jurisdictionId = extractJurisdictionIdFromMetadata(responseEntity.getBody());
@@ -472,8 +473,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         );
     }
 
-    public boolean checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId, Permission permission) {
-        String serviceId = securityUtils.getServiceId();
+    public boolean checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId, Permission permission, String serviceId) {
+        if (!serviceId.equals(securityUtils.getServiceId())) {
+            LOG.info("Service {} is not allowed to access API ", securityUtils.getServiceId());
+            return false;
+        }
         Map<String, Object> serviceConfig = getServiceDetailsFromJson(serviceId);
         return validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(
             serviceConfig,
