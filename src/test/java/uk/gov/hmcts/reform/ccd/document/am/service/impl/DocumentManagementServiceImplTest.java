@@ -579,7 +579,7 @@ class DocumentManagementServiceImplTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void patchDocumentMetadata_Throws_BadRequestException_InvalidHashToken() {
+    void patchDocumentMetadata_Throws_ForbiddenException_InvalidHashToken() {
         DocumentHashToken doc = DocumentHashToken.builder().id(MATCHED_DOCUMENT_ID)
             .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
         List<DocumentHashToken> documentList = new ArrayList<>();
@@ -598,7 +598,7 @@ class DocumentManagementServiceImplTest {
             any(HttpMethod.class),
             any(HttpEntity.class),
             eq(Void.class)))
-            .thenThrow(HttpClientErrorException.create(HttpStatus.BAD_REQUEST,"woopsie", new HttpHeaders(),null,null));
+            .thenThrow(HttpClientErrorException.create(HttpStatus.FORBIDDEN,"woopsie", new HttpHeaders(),null,null));
 
         CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
             .caseId(CASE_ID)
@@ -607,7 +607,7 @@ class DocumentManagementServiceImplTest {
             .documentHashTokens(documentList)
             .build();
 
-        Assertions.assertThrows(BadRequestException.class, () -> {
+        Assertions.assertThrows(ForbiddenException.class, () -> {
             sut.patchDocumentMetadata(caseDocumentsMetadata);
         });
     }
