@@ -21,6 +21,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
         loader.addCcdRoles();
         loader.importDefinitions();
         super.registerApiClientWithEnvVariable("API_CLIENT_DATA_STORE");
+        super.registerApiClientWithEnvVariable("API_CLIENT_BULK_SCAN_PROCESSOR");
     }
 
     @Override
