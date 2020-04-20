@@ -6,7 +6,7 @@
       "permission": ["CREATE", "READ", "UPDATE", "DELETE"]
     },
     "bulk_scan_processor": {
-      "caseTypeId": "BEFTA_CASETYPE_2_1",
+      "caseTypeId": "BEFTA_CASETYPE_2_2",
       "jurisdictionId": "BEFTA_JURISDICTION_2",
       "permission": ["HASHTOKEN"]
     },
