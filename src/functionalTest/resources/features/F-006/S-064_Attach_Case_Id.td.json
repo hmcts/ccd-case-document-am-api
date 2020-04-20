@@ -1,0 +1,34 @@
+{
+  "title": "must successfully attach a document to a case with hash token",
+  "_guid_": "S-064_Attach_Case_Id",
+  "_extends_": "F-007_Test_Data_Base",
+
+  "specs": [
+    "by same user to attach this documents to a case"
+  ],
+
+  "request": {
+    "body": {
+      "caseId": "1234567890099900",
+      "caseTypeId" : "${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][_embedded][documents][0][metadata][caseTypeId]}",
+      "jurisdictionId" : "${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][_embedded][documents][0][metadata][jurisdictionId]}",
+      "documentHashTokens": [
+        {
+          "id": "${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}",
+          "hashToken": "${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][_embedded][documents][0][hashToken]}"
+        }
+      ]
+    }
+  },
+
+  "expectedResponse": {
+    "_extends_": "Common_200_Response",
+    "headers": {
+      "Content-Length": "[[ANYTHING_PRESENT]]",
+      "Content-Type" : "application/json"
+    },
+    "body" : {
+      "Result" : "Success"
+    }
+  }
+}

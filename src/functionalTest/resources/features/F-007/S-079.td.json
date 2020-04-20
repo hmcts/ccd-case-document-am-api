@@ -33,7 +33,8 @@
   "expectedResponse": {
     "_extends_": "Common_200_Response",
     "headers": {
-      "Content-Length": "[[ANYTHING_PRESENT]]"
+      "Content-Length": "[[ANYTHING_PRESENT]]",
+      "Content-Type" : "application/json"
     },
     "body" : {
       "Result" : "Success"
