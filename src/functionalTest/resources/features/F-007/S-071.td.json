@@ -23,8 +23,9 @@
   "expectedResponse": {
     "_extends_": "Common_403_Response",
     "headers": {
-      "Content-Type": "application/json"},
-      "Content-Length": "[[ANYTHING_PRESENT]]",
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
     "body" : {
       "message" : "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
       "path" : "/cases/documents/attachToCase"
