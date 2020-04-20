@@ -28,6 +28,7 @@ Feature: F-005: Patch Document with ttl
   @S-053
   Scenario: must get an error response for a malformed ttl
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
+    And a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
     When  a request is prepared with appropriate values,
     And   the request [contains a malformed ttl],
     And   it is submitted to call the [Patch Document with ttl] operation of [CCD Case Document AM API],
