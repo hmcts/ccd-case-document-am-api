@@ -81,6 +81,7 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.XUI_WEBAPP;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BULK_SCAN_PROCESSOR;
 
 @RunWith(MockitoJUnitRunner.class)
 class DocumentManagementServiceImplTest {
@@ -349,8 +350,39 @@ class DocumentManagementServiceImplTest {
         ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
-        Boolean result = sut.checkServicePermission(responseEntity, Permission.READ, XUI_WEBAPP);
+        Boolean result = sut.checkServicePermission(responseEntity, Permission.READ);
         assertEquals(Boolean.TRUE, result);
+    }
+
+    @Test
+    void checkServicePermission_WhenServiceIsNotAuthorised() {
+        when(securityUtilsMock.getServiceId()).thenReturn(BULK_SCAN_PROCESSOR);
+        mockitoWhenRestExchangeThenThrow(initialiseMetaData("caseTypeId", "BEFTA_JURISDICTION_2"), HttpStatus.OK);
+        ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+
+        Boolean result = sut.checkServicePermission(responseEntity, Permission.READ);
+        assertEquals(Boolean.FALSE, result);
+    }
+
+    @Test
+    void checkServicePermission_WhenCaseTypeIsNull() {
+        when(securityUtilsMock.getServiceId()).thenReturn(XUI_WEBAPP);
+        mockitoWhenRestExchangeThenThrow(initialiseMetaData("", "BEFTA_JURISDICTION_2"), HttpStatus.OK);
+        ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
+
+        Boolean result = sut.checkServicePermission(responseEntity, Permission.READ);
+        assertEquals(Boolean.FALSE, result);
+    }
+
+    @Test
+    void checkServicePermission_WhenJurisdictionIdIsNull() {
+        when(securityUtilsMock.getServiceId()).thenReturn(XUI_WEBAPP);
+        mockitoWhenRestExchangeThenThrow(initialiseMetaData("caseTypeId", ""), HttpStatus.OK);
+        ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
+
+        Boolean result = sut.checkServicePermission(responseEntity, Permission.READ);
+        assertEquals(Boolean.FALSE, result);
     }
 
     private StoredDocumentHalResource initialiseMetaData(String caseTypeId, String jurisdictionID) {
@@ -365,10 +397,33 @@ class DocumentManagementServiceImplTest {
     @Test
     void checkServicePermissionForUpload_HappyPath() {
         when(securityUtilsMock.getServiceId()).thenReturn("xui_webapp");
-        Boolean result = sut.checkServicePermissionsForUpload("caseTypeId", "BEFTA_JURISDICTION_2", Permission.READ,
-                                                              XUI_WEBAPP
+        Boolean result = sut.checkServicePermissionsForUpload("caseTypeId", "BEFTA_JURISDICTION_2", Permission.READ
         );
         assertEquals(Boolean.TRUE, result);
+    }
+
+    @Test
+    void checkServicePermissionForUpload_WhenServiceIsNotAuthorised() {
+        when(securityUtilsMock.getServiceId()).thenReturn(BULK_SCAN_PROCESSOR);
+        Boolean result = sut.checkServicePermissionsForUpload("caseTypeId", "BEFTA_JURISDICTION_2", Permission.READ
+        );
+        assertEquals(Boolean.FALSE, result);
+    }
+
+    @Test
+    void checkServicePermissionForUpload_WhenCaseTypeIsNull() {
+        when(securityUtilsMock.getServiceId()).thenReturn(BULK_SCAN_PROCESSOR);
+        Boolean result = sut.checkServicePermissionsForUpload("", "BEFTA_JURISDICTION_2", Permission.READ
+        );
+        assertEquals(Boolean.FALSE, result);
+    }
+
+    @Test
+    void checkServicePermissionForUpload_WhenJurisdictionIdIsNull() {
+        when(securityUtilsMock.getServiceId()).thenReturn(BULK_SCAN_PROCESSOR);
+        Boolean result = sut.checkServicePermissionsForUpload("caseTypeId", "", Permission.READ
+        );
+        assertEquals(Boolean.FALSE, result);
     }
 
     @Disabled("Disabled temporarily due to issue with AM-450")
