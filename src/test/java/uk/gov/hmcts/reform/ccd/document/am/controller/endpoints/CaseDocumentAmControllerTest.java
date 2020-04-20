@@ -43,6 +43,9 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.XUI_WEBAPP;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BULK_SCAN_PROCESSOR;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CCD_DATA;
 
 @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
 public class CaseDocumentAmControllerTest {
@@ -93,7 +96,7 @@ public class CaseDocumentAmControllerTest {
         doReturn(TRUE).when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),getUuid(), Permission.READ);
         doReturn(TRUE).when(documentManagementService)
-            .checkServicePermission(setDocumentMetaData(), Permission.READ);
+            .checkServicePermission(setDocumentMetaData(), Permission.READ, XUI_WEBAPP);
 
         ResponseEntity response = testee
             .getDocumentbyDocumentId(getUuid());
@@ -118,7 +121,6 @@ public class CaseDocumentAmControllerTest {
         doReturn(FALSE).when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),getUuid(),Permission.READ);
 
-
         Assertions.assertThrows(ForbiddenException.class, () -> {
             testee.getDocumentbyDocumentId(getUuid());
         });
@@ -138,7 +140,7 @@ public class CaseDocumentAmControllerTest {
         doReturn(TRUE).when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),getUuid(), Permission.READ);
         doReturn(TRUE).when(documentManagementService)
-            .checkServicePermission(setDocumentMetaData(), Permission.READ);
+            .checkServicePermission(setDocumentMetaData(), Permission.READ, XUI_WEBAPP);
         doReturn(setDocumentBinaryContent("OK")).when(documentManagementService).getDocumentBinaryContent(getUuid());
 
         ResponseEntity<Object> response = testee.getDocumentBinaryContentbyDocumentId(
@@ -162,10 +164,9 @@ public class CaseDocumentAmControllerTest {
             Arrays.asList(Permission.CREATE)
         ));
         doReturn(TRUE).when(documentManagementService)
-            .checkServicePermission(setDocumentMetaData(), Permission.READ);
+            .checkServicePermission(setDocumentMetaData(), Permission.READ, XUI_WEBAPP);
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(setDocumentBinaryContent(FORBIDDEN)).when(documentManagementService).getDocumentBinaryContent(getUuid());
-
 
         Assertions.assertThrows(ForbiddenException.class, () -> {
             testee.getDocumentBinaryContentbyDocumentId(
@@ -186,13 +187,12 @@ public class CaseDocumentAmControllerTest {
                 Permission.READ
             )
                                                                                                          ));
-
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
         doReturn(documentPermissions).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
         doReturn(setDocumentBinaryContent(FORBIDDEN)).when(documentManagementService).getDocumentBinaryContent(getUuid());
         doReturn(TRUE).when(documentManagementService)
-            .checkServicePermission(setDocumentMetaData(), Permission.READ);
+            .checkServicePermission(setDocumentMetaData(), Permission.READ, XUI_WEBAPP);
 
         Assertions.assertThrows(ForbiddenException.class, () -> {
             testee.getDocumentBinaryContentbyDocumentId(
@@ -208,7 +208,7 @@ public class CaseDocumentAmControllerTest {
     public void shouldDeleteDocumentByDocumentId() {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(TRUE).when(documentManagementService)
-            .checkServicePermission(setDocumentMetaData(), Permission.UPDATE);
+            .checkServicePermission(setDocumentMetaData(), Permission.UPDATE, XUI_WEBAPP);
         doReturn(TRUE).when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),getUuid(), Permission.UPDATE);
         doReturn(ResponseEntity.status(HttpStatus.NO_CONTENT).build()).when(documentManagementService)
@@ -228,7 +228,7 @@ public class CaseDocumentAmControllerTest {
     public void shouldPatchDocumentByDocumentId() {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(TRUE).when(documentManagementService)
-            .checkServicePermission(setDocumentMetaData(), Permission.UPDATE);
+            .checkServicePermission(setDocumentMetaData(), Permission.UPDATE, XUI_WEBAPP);
         doReturn(TRUE).when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),getUuid(), Permission.UPDATE);
         UpdateDocumentCommand body = null;
@@ -242,12 +242,11 @@ public class CaseDocumentAmControllerTest {
         );
     }
 
-
     @Test
     public void shouldPatchMetaDataOnDocuments() {
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload("BEFTA_CASETYPE_2_1", "BEFTA_JURISDICTION_2", Permission.ATTACH);
+        doReturn(TRUE).when(documentManagementService).checkServicePermission(setDocumentMetaData(), Permission.ATTACH,
+                                                                              CCD_DATA
+        );
         DocumentHashToken document = DocumentHashToken.builder().id("cab18c21-8b7c-452b-937c-091225e0cc12").build();
         CaseDocumentsMetadata body = CaseDocumentsMetadata.builder()
                                                 .caseId("1111122222333334")
@@ -255,6 +254,7 @@ public class CaseDocumentAmControllerTest {
                                                 .caseTypeId("BEFTA_CASETYPE_2_1")
                                                 .jurisdictionId("BEFTA_JURISDICTION_2")
                                                 .build();
+        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(UUID.fromString(body.getDocumentHashTokens().get(0).getId()));
         ResponseEntity response = testee.patchMetaDataOnDocuments(body);
 
         assertAll(
@@ -265,7 +265,9 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when the uploaded file is empty")
     public void shouldThrowBadRequestExceptionWhenUploadedFilesIsNull() {
-        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload("BEFTA_CASETYPE_2", "BEFTA_JURISDICTION_2", Permission.CREATE);
+        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload("BEFTA_CASETYPE_2", "BEFTA_JURISDICTION_2", Permission.CREATE,
+                                                                                        XUI_WEBAPP
+        );
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(null, Classifications.PUBLIC.name(),
                                    BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
@@ -275,7 +277,9 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when user-roles are empty")
     public void shouldThrowBadRequestExceptionWhenUserRolesAreEmpty() {
-        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload("BEFTA_CASETYPE_2", "BEFTA@JURISDICTION_2$$$$", Permission.CREATE);
+        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload("BEFTA_CASETYPE_2", "BEFTA@JURISDICTION_2$$$$", Permission.CREATE,
+                                                                                        XUI_WEBAPP
+        );
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
                                    Classifications.PUBLIC.name(),
@@ -286,7 +290,9 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when caseTypeId input is null")
     public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsNull() {
-        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload(null, "BEFTA_JURISDICTION_2", Permission.CREATE);
+        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload(null, "BEFTA_JURISDICTION_2", Permission.CREATE,
+                                                                                        XUI_WEBAPP
+        );
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
                                    Classifications.PUBLIC.name(),
@@ -297,7 +303,9 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when caseTypeId input is malformed")
     public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsMalformed() {
-        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload("BEFTA_CASETYPE_2&&&&&&&&&", "BEFTA_JURISDICTION_2", Permission.CREATE);
+        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload("BEFTA_CASETYPE_2&&&&&&&&&", "BEFTA_JURISDICTION_2", Permission.CREATE,
+                                                                                        XUI_WEBAPP
+        );
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
                                    Classifications.PUBLIC.name(),
@@ -308,7 +316,9 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when jurisdictionId input is null")
     public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsNull() {
-        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload("BEFTA_CASETYPE_2", null, Permission.CREATE);
+        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload("BEFTA_CASETYPE_2", null, Permission.CREATE,
+                                                                                        XUI_WEBAPP
+        );
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
                                    Classifications.PUBLIC.name(),
@@ -319,7 +329,9 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when jurisdictionId input is malformed")
     public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsMalformed() {
-        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload("BEFTA_CASETYPE_2", "BEFTA@JURISDICTION_2$$$$", Permission.CREATE);
+        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload("BEFTA_CASETYPE_2", "BEFTA@JURISDICTION_2$$$$", Permission.CREATE,
+                                                                                        XUI_WEBAPP
+        );
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
                                    Classifications.PUBLIC.name(),
@@ -385,7 +397,7 @@ public class CaseDocumentAmControllerTest {
     void generateHashCode_HappyPath() {
 
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        when(documentManagementService.checkServicePermission(setDocumentMetaData(), Permission.HASHTOKEN))
+        when(documentManagementService.checkServicePermission(setDocumentMetaData(), Permission.HASHTOKEN, BULK_SCAN_PROCESSOR))
             .thenReturn(TRUE);
         when(documentManagementService.generateHashToken(UUID.fromString(MATCHED_DOCUMENT_ID)))
             .thenReturn("hashToken");
