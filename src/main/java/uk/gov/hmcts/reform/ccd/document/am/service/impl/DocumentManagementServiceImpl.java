@@ -457,11 +457,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
     }
 
-    public boolean checkServicePermission(ResponseEntity<?> responseEntity, Permission permission, String serviceId) {
-        if (!serviceId.equals(securityUtils.getServiceId())) {
-            LOG.info("Service {} is not allowed to access API ", securityUtils.getServiceId());
-            return false;
-        }
+    public boolean checkServicePermission(ResponseEntity<?> responseEntity, Permission permission) {
+        String serviceId = securityUtils.getServiceId();
         Map<String, Object> serviceConfig = getServiceDetailsFromJson(serviceId);
         String caseTypeId = extractCaseTypeIdFromMetadata(responseEntity.getBody());
         String jurisdictionId = extractJurisdictionIdFromMetadata(responseEntity.getBody());
@@ -474,11 +471,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         );
     }
 
-    public boolean checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId, Permission permission, String serviceId) {
-        if (!serviceId.equals(securityUtils.getServiceId())) {
-            LOG.info("Service {} is not allowed to access API ", securityUtils.getServiceId());
-            return false;
-        }
+    public boolean checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId, Permission permission) {
+        String serviceId = securityUtils.getServiceId();
         Map<String, Object> serviceConfig = getServiceDetailsFromJson(serviceId);
         return validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(
             serviceConfig,

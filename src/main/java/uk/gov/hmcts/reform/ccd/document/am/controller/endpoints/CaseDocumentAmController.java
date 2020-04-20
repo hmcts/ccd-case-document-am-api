@@ -50,9 +50,6 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICA
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHTOKEN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.JURISDICTION_ID_INVALID;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.XUI_WEBAPP;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BULK_SCAN_PROCESSOR;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CCD_DATA;
 
 @Api(value = "cases")
 @RestController
@@ -97,7 +94,7 @@ public class CaseDocumentAmController  {
         @PathVariable("documentId") UUID documentId) {
         ValidationService.validateDocumentId(documentId.toString());
         ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
-        if (documentManagementService.checkServicePermission(responseEntity, Permission.READ, XUI_WEBAPP)) {
+        if (documentManagementService.checkServicePermission(responseEntity, Permission.READ)) {
             if (documentManagementService.checkUserPermission(responseEntity, documentId, Permission.READ)) {
                 return ResponseEntity
                     .status(HttpStatus.OK)
@@ -137,7 +134,7 @@ public class CaseDocumentAmController  {
         @PathVariable("documentId") UUID documentId) {
         ValidationService.validateDocumentId(documentId.toString());
         ResponseEntity<?> documentMetadata = documentManagementService.getDocumentMetadata(documentId);
-        if (documentManagementService.checkServicePermission(documentMetadata, Permission.READ, XUI_WEBAPP)) {
+        if (documentManagementService.checkServicePermission(documentMetadata, Permission.READ)) {
             if (documentManagementService.checkUserPermission(documentMetadata, documentId, Permission.READ)) {
                 return documentManagementService.getDocumentBinaryContent(documentId);
 
@@ -197,7 +194,7 @@ public class CaseDocumentAmController  {
         @NotNull(message = "Provide the Jurisdiction ID ")
         @RequestParam(value = "jurisdictionId", required = true) String jurisdictionId
     ) {
-        if (documentManagementService.checkServicePermissionsForUpload(caseTypeId, jurisdictionId, Permission.CREATE, XUI_WEBAPP)) {
+        if (documentManagementService.checkServicePermissionsForUpload(caseTypeId, jurisdictionId, Permission.CREATE)) {
             ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification);
             ValidationService.isValidSecurityClassification(classification);
             ValidationService.validateLists(files);
@@ -237,7 +234,7 @@ public class CaseDocumentAmController  {
         @Valid @RequestBody UpdateDocumentCommand body,
         @PathVariable("documentId") UUID documentId) {
         ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
-        if (documentManagementService.checkServicePermission(responseEntity, Permission.UPDATE, XUI_WEBAPP)) {
+        if (documentManagementService.checkServicePermission(responseEntity, Permission.UPDATE)) {
             ValidationService.validateDocumentId(documentId.toString());
 
             ResponseEntity<?> response = documentManagementService.patchDocument(documentId, body);
@@ -292,7 +289,7 @@ public class CaseDocumentAmController  {
         @Valid @RequestBody CaseDocumentsMetadata caseDocumentsMetadata) {
         ResponseEntity<?> documentMetadata = documentManagementService.getDocumentMetadata(UUID.fromString(
             caseDocumentsMetadata.getDocumentHashTokens().get(0).getId()));
-        if (documentManagementService.checkServicePermission(documentMetadata, Permission.ATTACH, CCD_DATA)) {
+        if (documentManagementService.checkServicePermission(documentMetadata, Permission.ATTACH)) {
             if (!ValidationService.validate(caseDocumentsMetadata.getCaseId())) {
                 throw new BadRequestException(CASE_ID_NOT_VALID);
             }
@@ -340,7 +337,7 @@ public class CaseDocumentAmController  {
         @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false")
             Boolean permanent) {
         ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
-        if (documentManagementService.checkServicePermission(responseEntity, Permission.UPDATE, XUI_WEBAPP)) {
+        if (documentManagementService.checkServicePermission(responseEntity, Permission.UPDATE)) {
             ValidationService.validateDocumentId(documentId.toString());
 
             return documentManagementService.deleteDocument(documentId, permanent);
@@ -377,7 +374,7 @@ public class CaseDocumentAmController  {
         @PathVariable("documentId") UUID documentId) {
 
         ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
-        if (documentManagementService.checkServicePermission(responseEntity, Permission.HASHTOKEN, BULK_SCAN_PROCESSOR)) {
+        if (documentManagementService.checkServicePermission(responseEntity, Permission.HASHTOKEN)) {
             ValidationService.validateDocumentId(documentId.toString());
 
             HashMap<String, String> responseBody = new HashMap<>();
