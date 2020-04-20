@@ -31,7 +31,8 @@ public interface DocumentManagementService {
 
     String generateHashToken(final UUID documentId);
 
-    boolean checkServicePermission(ResponseEntity<?> documentMetadata, Permission permission);
+    boolean checkServicePermission(ResponseEntity<?> documentMetadata, Permission permission, String serviceId);
 
-    boolean checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId, Permission create);
+    boolean checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId, Permission create, String serviceId);
+
 }

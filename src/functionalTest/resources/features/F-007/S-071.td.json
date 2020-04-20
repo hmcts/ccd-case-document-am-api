@@ -23,13 +23,13 @@
   },
 
   "expectedResponse": {
-    "_extends_": "Common_400_Response",
+    "_extends_": "Common_403_Response",
     "headers": {
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body" : {
-      "message" : "Case document hash-token is not valid for document Id : ${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
+      "message" : "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
       "path" : "/cases/documents/attachToCase"
     }
   }

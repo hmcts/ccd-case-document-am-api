@@ -80,6 +80,7 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_F
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.XUI_WEBAPP;
 
 @RunWith(MockitoJUnitRunner.class)
 class DocumentManagementServiceImplTest {
@@ -348,7 +349,7 @@ class DocumentManagementServiceImplTest {
         ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
-        Boolean result = sut.checkServicePermission(responseEntity, Permission.READ);
+        Boolean result = sut.checkServicePermission(responseEntity, Permission.READ, XUI_WEBAPP);
         assertEquals(Boolean.TRUE, result);
     }
 
@@ -364,7 +365,9 @@ class DocumentManagementServiceImplTest {
     @Test
     void checkServicePermissionForUpload_HappyPath() {
         when(securityUtilsMock.getServiceId()).thenReturn("xui_webapp");
-        Boolean result = sut.checkServicePermissionsForUpload("caseTypeId", "BEFTA_JURISDICTION_2", Permission.READ);
+        Boolean result = sut.checkServicePermissionsForUpload("caseTypeId", "BEFTA_JURISDICTION_2", Permission.READ,
+                                                              XUI_WEBAPP
+        );
         assertEquals(Boolean.TRUE, result);
     }
 
@@ -612,7 +615,7 @@ class DocumentManagementServiceImplTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void patchDocumentMetadata_Throws_BadRequestException_InvalidHashToken() {
+    void patchDocumentMetadata_Throws_ForbiddenException_InvalidHashToken() {
         DocumentHashToken doc = DocumentHashToken.builder().id(MATCHED_DOCUMENT_ID)
             .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
         List<DocumentHashToken> documentList = new ArrayList<>();
@@ -631,7 +634,7 @@ class DocumentManagementServiceImplTest {
             any(HttpMethod.class),
             any(HttpEntity.class),
             eq(Void.class)))
-            .thenThrow(HttpClientErrorException.create(HttpStatus.BAD_REQUEST,"woopsie", new HttpHeaders(),null,null));
+            .thenThrow(HttpClientErrorException.create(HttpStatus.FORBIDDEN,"woopsie", new HttpHeaders(),null,null));
 
         CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
             .caseId(CASE_ID)
@@ -640,7 +643,7 @@ class DocumentManagementServiceImplTest {
             .documentHashTokens(documentList)
             .build();
 
-        Assertions.assertThrows(BadRequestException.class, () -> {
+        Assertions.assertThrows(ForbiddenException.class, () -> {
             sut.patchDocumentMetadata(caseDocumentsMetadata);
         });
     }
