@@ -17,11 +17,11 @@ public class ResponseHelper {
     }
 
 
-    public static ResponseEntity toResponseEntity(ResponseEntity response, UUID documentId) {
-        Optional payload = Optional.of(response.getBody());
+    public static ResponseEntity<Object> toResponseEntity(ResponseEntity response, UUID documentId) {
+        Optional<?> payload = Optional.of(response.getBody());
         addHateoasLinks(payload,documentId);
 
-        return new ResponseEntity(
+        return new ResponseEntity<Object>(
             payload.orElse(null),
             convertHeaders(response.getHeaders()),
             response.getStatusCode());
@@ -38,7 +38,7 @@ public class ResponseHelper {
         return responseEntityHeaders;
     }
 
-    public static void addHateoasLinks(Optional payload,UUID documentId) {
+    public static void addHateoasLinks(Optional<?> payload,UUID documentId) {
         if (payload.isPresent()) {
             Object obj = payload.get();
             if (obj instanceof StoredDocumentHalResource) {

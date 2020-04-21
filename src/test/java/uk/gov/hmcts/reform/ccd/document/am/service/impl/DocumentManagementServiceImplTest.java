@@ -1071,7 +1071,7 @@ class DocumentManagementServiceImplTest {
             documentDeleteUrl,
             DELETE,
             requestEntity,
-            ResponseEntity.class
+            Object.class
         )).thenReturn(new ResponseEntity<>(responseEntity, HttpStatus.NO_CONTENT));
 
         responseEntity = sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), permanent);
@@ -1092,7 +1092,7 @@ class DocumentManagementServiceImplTest {
             documentDeleteUrl,
             DELETE,
             requestEntity,
-            ResponseEntity.class
+            Object.class
         )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.NOT_FOUND, "404", new HttpHeaders(), new byte[1],
                                                               Charset.defaultCharset()));
 
@@ -1113,7 +1113,7 @@ class DocumentManagementServiceImplTest {
             documentDeleteUrl,
             DELETE,
             requestEntity,
-            ResponseEntity.class
+            Object.class
         )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.FORBIDDEN, "404", new HttpHeaders(), new byte[1],
                                                               Charset.defaultCharset()));
 
@@ -1134,7 +1134,7 @@ class DocumentManagementServiceImplTest {
             documentDeleteUrl,
             DELETE,
             requestEntity,
-            ResponseEntity.class
+            Object.class
         )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.BAD_REQUEST, "404", new HttpHeaders(), new byte[1],
                                                               Charset.defaultCharset()));
 
@@ -1155,7 +1155,7 @@ class DocumentManagementServiceImplTest {
             documentDeleteUrl,
             DELETE,
             requestEntity,
-            ResponseEntity.class
+            Object.class
         )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.BAD_GATEWAY, "404", new HttpHeaders(), new byte[1],
                                                               Charset.defaultCharset()));
 
@@ -1177,7 +1177,7 @@ class DocumentManagementServiceImplTest {
             documentDeleteUrl,
             DELETE,
             requestEntity,
-            ResponseEntity.class
+            Object.class
         )).thenReturn(new ResponseEntity<>(responseEntity, HttpStatus.NOT_FOUND));
 
         Assertions.assertThrows(ResourceNotFoundException.class, () -> {
