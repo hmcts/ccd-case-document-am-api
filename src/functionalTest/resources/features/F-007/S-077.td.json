@@ -25,7 +25,8 @@
   "expectedResponse": {
     "_extends_": "Common_400_Response",
     "headers": {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "Content-Length" : "[[ANYTHING_PRESENT]]"
     },
     "body" : {
       "message" : "The input parameter: \"${[scenarioContext][testData][request][body][jurisdictionId]}\", does not comply with the required pattern",
