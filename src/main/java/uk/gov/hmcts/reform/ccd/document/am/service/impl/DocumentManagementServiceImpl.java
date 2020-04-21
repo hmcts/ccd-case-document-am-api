@@ -48,9 +48,8 @@ import uk.gov.hmcts.reform.ccd.document.am.util.ResponseHelper;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -114,6 +113,18 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Value("${idam.s2s-auth.totp_secret}")
     protected String salt;
+
+    private static JsonNode rootNode;
+
+    static {
+        InputStream inputStream = DocumentManagementServiceImpl.class.getClassLoader()
+            .getResourceAsStream("service_config.json");
+        try {
+            rootNode = new ObjectMapper().readValue(inputStream, JsonNode.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Autowired
     public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils,
@@ -521,8 +532,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             ObjectMapper mapper = new ObjectMapper();
             //File jsonConfigFile = new File("service_config.json");
             //Application main = new Application();
-            File jsonConfigFile = getFileFromResources("service_config.json");
-            JsonNode rootNode = mapper.readValue(jsonConfigFile, JsonNode.class);
+            //File jsonConfigFile = getFileFromResources("service_config.json");
+            //InputStream inputStream = DocumentManagementServiceImpl.class
+            //    .getClassLoader().getResourceAsStream("service_config.json");
+
+            //JsonNode rootNode = new ObjectMapper().readValue(inputStream, JsonNode.class);
             String caseTypeId = rootNode.at("/" + SERVICES + "/" + serviceId + "/" + CASE_TYPE_ID).textValue();
             String jurisdictionId = rootNode.at("/" + SERVICES + "/" + serviceId + "/" + JURISDICTION_ID).textValue();
             JsonNode permissionsNode = rootNode.at("/" + SERVICES + "/" + serviceId + "/permission");
@@ -539,17 +553,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             LOG.error("IOException {}", e.getMessage());
         }
         return serviceDetails;
-    }
-
-    // get file from classpath, resources folder
-    private File getFileFromResources(String fileName) {
-        ClassLoader classLoader = getClass().getClassLoader();
-        URL resource = classLoader.getResource(fileName);
-        if (resource == null) {
-            throw new IllegalArgumentException("file is not found!");
-        } else {
-            return new File(resource.getFile());
-        }
     }
 
     public String extractCaseTypeIdFromMetadata(Object storedDocument) {
