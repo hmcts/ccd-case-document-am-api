@@ -233,9 +233,9 @@ public class CaseDocumentAmController  {
         @ApiParam(value = "", required = true)
         @Valid @RequestBody UpdateDocumentCommand body,
         @PathVariable("documentId") UUID documentId) {
+        ValidationService.validateDocumentId(documentId.toString());
         ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkServicePermission(responseEntity, Permission.UPDATE)) {
-            ValidationService.validateDocumentId(documentId.toString());
 
             ResponseEntity<?> response = documentManagementService.patchDocument(documentId, body);
             return ResponseEntity.status(HttpStatus.OK).body(response.getBody());
@@ -287,29 +287,31 @@ public class CaseDocumentAmController  {
     public ResponseEntity<Object> patchMetaDataOnDocuments(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody CaseDocumentsMetadata caseDocumentsMetadata) {
-        ResponseEntity<?> documentMetadata = documentManagementService.getDocumentMetadata(UUID.fromString(
-            caseDocumentsMetadata.getDocumentHashTokens().get(0).getId()));
-        if (documentManagementService.checkServicePermission(documentMetadata, Permission.ATTACH)) {
-            if (!ValidationService.validate(caseDocumentsMetadata.getCaseId())) {
-                throw new BadRequestException(CASE_ID_NOT_VALID);
-            }
 
-            if (caseDocumentsMetadata.getDocumentHashTokens() != null) {
-                caseDocumentsMetadata.getDocumentHashTokens()
-                    .forEach(document -> ValidationService.validateDocumentId(document.getId()));
-
-                documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
-
-                return ResponseEntity
-                    .status(HttpStatus.OK).build();
-            } else {
-                throw new BadRequestException(BAD_REQUEST);
-            }
+        if (!ValidationService.validate(caseDocumentsMetadata.getCaseId())) {
+            throw new BadRequestException(CASE_ID_NOT_VALID);
         }
-        LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
-        throw new ForbiddenException(caseDocumentsMetadata.getCaseTypeId() + " " + caseDocumentsMetadata.getJurisdictionId());
-    }
 
+        if (caseDocumentsMetadata.getDocumentHashTokens() != null) {
+            caseDocumentsMetadata.getDocumentHashTokens()
+                .forEach(document -> ValidationService.validateDocumentId(document.getId()));
+            //validate the service authorization for first document in payload
+            ResponseEntity<?> documentMetadata = documentManagementService.getDocumentMetadata(UUID.fromString(
+                caseDocumentsMetadata.getDocumentHashTokens().get(0).getId()));
+            if (documentManagementService.checkServicePermission(documentMetadata, Permission.ATTACH)) {
+                documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
+                HashMap<String, String> responseBody = new HashMap<>();
+                responseBody.put("Result", "Success");
+                return ResponseEntity
+                    .status(HttpStatus.OK).body(responseBody);
+            } else {
+                LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
+                throw new ForbiddenException(caseDocumentsMetadata.getCaseTypeId() + " " + caseDocumentsMetadata.getJurisdictionId());
+            }
+        } else {
+            throw new BadRequestException(BAD_REQUEST);
+        }
+    }
 
     //******************** Delete API ************
     @DeleteMapping(
@@ -336,9 +338,9 @@ public class CaseDocumentAmController  {
         @PathVariable("documentId") UUID documentId,
         @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false")
             Boolean permanent) {
+        ValidationService.validateDocumentId(documentId.toString());
         ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkServicePermission(responseEntity, Permission.UPDATE)) {
-            ValidationService.validateDocumentId(documentId.toString());
 
             return documentManagementService.deleteDocument(documentId, permanent);
         }
@@ -373,9 +375,9 @@ public class CaseDocumentAmController  {
     public ResponseEntity<Object> generateHashCode(
         @PathVariable("documentId") UUID documentId) {
 
+        ValidationService.validateDocumentId(documentId.toString());
         ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkServicePermission(responseEntity, Permission.HASHTOKEN)) {
-            ValidationService.validateDocumentId(documentId.toString());
 
             HashMap<String, String> responseBody = new HashMap<>();
 
