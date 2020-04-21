@@ -194,11 +194,10 @@ public class CaseDocumentAmController  {
         @NotNull(message = "Provide the Jurisdiction ID ")
         @RequestParam(value = "jurisdictionId", required = true) String jurisdictionId
     ) {
-        if (documentManagementService.checkServicePermissionsForUpload(caseTypeId, jurisdictionId, Permission.CREATE)) {
             ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification);
             ValidationService.isValidSecurityClassification(classification);
             ValidationService.validateLists(files);
-
+        if (documentManagementService.checkServicePermissionsForUpload(caseTypeId, jurisdictionId, Permission.CREATE)) {
             return documentManagementService.uploadDocuments(files, classification, caseTypeId, jurisdictionId);
         }
         LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);

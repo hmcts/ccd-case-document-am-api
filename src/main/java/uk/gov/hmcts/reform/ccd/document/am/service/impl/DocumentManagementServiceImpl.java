@@ -517,7 +517,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         List<String> permissions = new ArrayList<>();
         try {
             ObjectMapper mapper = new ObjectMapper();
-            File jsonConfigFile = new File("Service_Config.json");
+            File jsonConfigFile = new File("service_config.json");
             JsonNode rootNode = mapper.readValue(jsonConfigFile, JsonNode.class);
             String caseTypeId = rootNode.at("/" + SERVICES + "/" + serviceId + "/" + CASE_TYPE_ID).textValue();
             String jurisdictionId = rootNode.at("/" + SERVICES + "/" + serviceId + "/" + JURISDICTION_ID).textValue();
