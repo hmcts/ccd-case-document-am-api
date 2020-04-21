@@ -140,7 +140,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public ResponseEntity getDocumentMetadata(UUID documentId) {
 
         try {
-            final HttpEntity<String> requestEntity = new HttpEntity <> (getHttpHeaders());
+            final HttpEntity<String> requestEntity = new HttpEntity<>(getHttpHeaders());
             LOG.info("Document Store URL is : {}", documentURL);
             String documentMetadataUrl = String.format("%s/documents/%s", documentURL, documentId);
             LOG.info("documentMetadataUrl : {}", documentMetadataUrl);
@@ -181,7 +181,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @SuppressWarnings("unchecked")
     public ResponseEntity<Object> getDocumentBinaryContent(UUID documentId) {
         try {
-            final HttpEntity<?> requestEntity = new HttpEntity <> (getHttpHeaders());
+            final HttpEntity<?> requestEntity = new HttpEntity<>(getHttpHeaders());
             String documentBinaryUrl = String.format("%s/documents/%s/binary", documentURL, documentId);
             ResponseEntity<ByteArrayResource> response = restTemplate.exchange(
                 documentBinaryUrl,
@@ -346,7 +346,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public ResponseEntity<Object> deleteDocument(UUID documentId,  Boolean permanent) {
 
         try {
-            final HttpEntity<?> requestEntity = new HttpEntity <> (getHttpHeaders());
+            final HttpEntity<?> requestEntity = new HttpEntity<>(getHttpHeaders());
             String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, documentId, permanent);
             LOG.info("documentDeleteUrl : {}", documentDeleteUrl);
             ResponseEntity<Object> response = restTemplate.exchange(
