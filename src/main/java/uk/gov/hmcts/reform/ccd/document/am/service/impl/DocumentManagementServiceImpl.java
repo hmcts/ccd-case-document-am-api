@@ -46,11 +46,11 @@ import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.document.am.util.ResponseHelper;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_TYPE_ID;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.JURISDICTION_ID;
+
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -70,6 +70,7 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BAD_REQUES
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
@@ -84,13 +85,14 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FORBIDDEN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHTOKEN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HREF;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.JURISDICTION_ID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LINKS;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.RESOURCE_NOT_FOUND;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICES;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.THUMBNAIL;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICES;
 
 @Slf4j
 @Service
@@ -517,7 +519,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         List<String> permissions = new ArrayList<>();
         try {
             ObjectMapper mapper = new ObjectMapper();
-            File jsonConfigFile = new File("service_config.json");
+            //File jsonConfigFile = new File("service_config.json");
+            //Application main = new Application();
+            File jsonConfigFile = getFileFromResources("service_config.json");
             JsonNode rootNode = mapper.readValue(jsonConfigFile, JsonNode.class);
             String caseTypeId = rootNode.at("/" + SERVICES + "/" + serviceId + "/" + CASE_TYPE_ID).textValue();
             String jurisdictionId = rootNode.at("/" + SERVICES + "/" + serviceId + "/" + JURISDICTION_ID).textValue();
@@ -535,6 +539,17 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             LOG.error("IOException {}", e.getMessage());
         }
         return serviceDetails;
+    }
+
+    // get file from classpath, resources folder
+    private File getFileFromResources(String fileName) {
+        ClassLoader classLoader = getClass().getClassLoader();
+        URL resource = classLoader.getResource(fileName);
+        if (resource == null) {
+            throw new IllegalArgumentException("file is not found!");
+        } else {
+            return new File(resource.getFile());
+        }
     }
 
     public String extractCaseTypeIdFromMetadata(Object storedDocument) {
