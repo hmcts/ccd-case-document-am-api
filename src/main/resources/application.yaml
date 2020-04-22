@@ -40,10 +40,6 @@ security:
   ### Update list with service id of any service going to interact with casse document api
   authorisedServices: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor}
 
-  authorisedRoles:
-    - caseworker
-    - ccd-import
-
 ### dependency configuration
 auth.provider.service.client.baseUrl: ${IDAM_S2S_URL:http://localhost:4502}
 idam:
