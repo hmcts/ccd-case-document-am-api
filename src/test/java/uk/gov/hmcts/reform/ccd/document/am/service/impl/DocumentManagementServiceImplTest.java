@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -61,6 +62,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -133,6 +135,23 @@ class DocumentManagementServiceImplTest {
         mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
         ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
         assertEquals(HttpStatus.OK,responseEntity.getStatusCode());
+
+        verifyRestExchangeOnStoredDoc();
+    }
+
+    @Test
+    void getDocumentMetadata_ServiceException() {
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        Mockito.when(restTemplateMock.exchange(
+            documentURL + "/documents/" + MATCHED_DOCUMENT_ID,
+            HttpMethod.GET,requestEntityGlobal,
+            StoredDocumentHalResource.class))
+            .thenThrow(HttpClientErrorException.create("woopsie", HttpStatus.BAD_GATEWAY, "404", new HttpHeaders(), new byte[1],
+                                                                Charset.defaultCharset()));
+
+        Assertions.assertThrows(ServiceException.class, () -> {
+            sut.getDocumentMetadata(matchedDocUUID);
+        });
 
         verifyRestExchangeOnStoredDoc();
     }
@@ -243,6 +262,30 @@ class DocumentManagementServiceImplTest {
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
         assertEquals(responseEntity.getHeaders(),headers);
+
+        verifyRestExchangeByteArray();
+    }
+
+    @Test
+    void getDocumentBinaryContent_ServiceException() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(ORIGINAL_FILE_NAME, "name");
+        headers.add(CONTENT_DISPOSITION, "disp");
+        headers.add(DATA_SOURCE, "source");
+        headers.add(CONTENT_TYPE, "type");
+        headers.add(CONTENT_LENGTH, "length");
+
+        Mockito.when(restTemplateMock.exchange(
+            documentURL + "/documents/" + MATCHED_DOCUMENT_ID + "/binary",
+            HttpMethod.GET,
+            requestEntityGlobal,
+            ByteArrayResource.class
+        )).thenThrow(HttpClientErrorException.create("woopsie", HttpStatus.BAD_GATEWAY, "404", new HttpHeaders(), new byte[1],
+                                                    Charset.defaultCharset()));
+
+        Assertions.assertThrows(ServiceException.class, () -> {
+            sut.getDocumentBinaryContent(matchedDocUUID);
+        });
 
         verifyRestExchangeByteArray();
     }
@@ -566,6 +609,42 @@ class DocumentManagementServiceImplTest {
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
+    @Disabled("Disabled because the same endpoint is called twice and the documented way to mock multiple calls is not working as expected")
+    @Test
+    @SuppressWarnings("unchecked")
+    void patchDocumentMetadata_ServiceException() {
+        DocumentHashToken doc = DocumentHashToken.builder().id(MATCHED_DOCUMENT_ID)
+            .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
+        List<DocumentHashToken> documentList = new ArrayList<>();
+        documentList.add(doc);
+
+        Map<String, String> myMetadata = new HashMap<>();
+        myMetadata.put("jurisdictionId", BEFTA_JURISDICTION_2);
+        myMetadata.put("caseTypeId", BEFTA_CASETYPE_2);
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        storedDocumentHalResource.setMetadata(myMetadata);
+
+        HttpClientErrorException myEx = HttpClientErrorException.create(
+            "woopsie", HttpStatus.BAD_GATEWAY, "404", new HttpHeaders(), new byte[1], Charset.defaultCharset());
+
+        doReturn(new ResponseEntity<>(storedDocumentHalResource, HttpStatus.OK))
+            .doThrow(myEx)
+            .when(restTemplateMock)
+            .exchange(documentURL + "/documents/" + MATCHED_DOCUMENT_ID, HttpMethod.GET,requestEntityGlobal, StoredDocumentHalResource.class);
+
+
+        CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
+            .caseId(CASE_ID)
+            .caseTypeId(BEFTA_CASETYPE_2)
+            .jurisdictionId(BEFTA_JURISDICTION_2)
+            .documentHashTokens(documentList)
+            .build();
+
+        Assertions.assertThrows(ServiceException.class, () -> {
+            sut.patchDocumentMetadata(caseDocumentsMetadata);
+        });
+    }
+
     @Test
     @SuppressWarnings("unchecked")
     void patchDocumentMetadata_Throws_NotFoundException() {
@@ -776,7 +855,9 @@ class DocumentManagementServiceImplTest {
         SecurityContextHolder.setContext(securityContext);
         when(securityContext.getAuthentication().getPrincipal()).thenReturn(serviceAndUserDetails);
 
+        MockMultipartFile multipartFile = mock(MockMultipartFile.class);
         List<MultipartFile> files = new ArrayList<>();
+        files.add(multipartFile);
         List<String> roles = new ArrayList<>();
         roles.add("Role");
 
@@ -1184,4 +1265,55 @@ class DocumentManagementServiceImplTest {
             sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), permanent);
         });
     }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void checkUserPermissionTest1() {
+        Boolean result = sut.checkUserPermission(new ResponseEntity<Object>(HttpStatus.OK), UUID.fromString(MATCHED_DOCUMENT_ID), Permission.READ);
+        assertEquals(true, result);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void checkUserPermissionTest2() {
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        Map<String, String> myMap = new HashMap<>();
+        myMap.put("caseId","!!VCB12");
+        storedDocumentHalResource.setMetadata(myMap);
+
+        List<Permission> permissionsList = new ArrayList<>();
+        permissionsList.add(Permission.READ);
+        DocumentPermissions doc;
+        doc = DocumentPermissions.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList).build();
+        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class))).thenReturn(Optional.of(doc));
+
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
+        ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            sut.checkUserPermission(responseEntity, UUID.fromString(MATCHED_DOCUMENT_ID), Permission.CREATE);
+        });
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void checkUserPermissionTest3() {
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        Map<String, String> myMap = new HashMap<>();
+        myMap.put("caseId","1234567890123456");
+        storedDocumentHalResource.setMetadata(myMap);
+
+        List<Permission> permissionsList = new ArrayList<>();
+        permissionsList.add(Permission.READ);
+        DocumentPermissions doc;
+        doc = DocumentPermissions.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList).build();
+        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class))).thenReturn(Optional.of(doc));
+
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
+        ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
+
+        Boolean result = sut.checkUserPermission(responseEntity, UUID.fromString(MATCHED_DOCUMENT_ID), Permission.CREATE);
+        assertEquals(false, result);
+    }
+
 }
