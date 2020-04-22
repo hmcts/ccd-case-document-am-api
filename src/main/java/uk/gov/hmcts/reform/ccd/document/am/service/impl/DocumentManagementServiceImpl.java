@@ -515,10 +515,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     private uk.gov.hmcts.reform.ccd.document.am.model.Service getServiceDetailsFromJson(String serviceId) {
-        LOG.info("Json contents..." + services);
         Optional<uk.gov.hmcts.reform.ccd.document.am.model.Service> service = services.getService().stream().filter(s -> s.getId().equals(
             serviceId)).findAny();
-        return service.get();
+        if (service.isPresent()) {
+            return service.get();
+        }
+        return null;
     }
 
     public String extractCaseTypeIdFromMetadata(Object storedDocument) {
