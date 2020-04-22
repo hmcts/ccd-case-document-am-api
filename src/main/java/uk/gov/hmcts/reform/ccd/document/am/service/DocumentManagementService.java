@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public interface DocumentManagementService {
 
-    ResponseEntity<?> getDocumentMetadata(final UUID documentId);
+    ResponseEntity<Object> getDocumentMetadata(final UUID documentId);
 
     String extractCaseIdFromMetadata(Object storedDocument);
 
@@ -25,7 +25,7 @@ public interface DocumentManagementService {
 
     ResponseEntity<Object> deleteDocument(final UUID documentId,  Boolean permanent);
 
-    ResponseEntity<?> patchDocument(final UUID documentId, UpdateDocumentCommand updateDocumentCommand);
+    ResponseEntity<Object> patchDocument(final UUID documentId, UpdateDocumentCommand updateDocumentCommand);
 
     ResponseEntity<Object> patchDocumentMetadata(CaseDocumentsMetadata caseDocumentsMetadata);
 

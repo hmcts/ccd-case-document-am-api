@@ -1,24 +1,41 @@
 {
-  "services": {
-    "xui_webapp": {
+    "service": [{
+      "Id": "xui_webapp",
       "caseTypeId": "*",
       "jurisdictionId": "BEFTA_JURISDICTION_2",
-      "permission": ["CREATE", "READ", "UPDATE", "DELETE"]
+      "permission": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
     },
-    "bulk_scan_processor": {
-      "caseTypeId": "BEFTA_CASETYPE_2_2",
-      "jurisdictionId": "BEFTA_JURISDICTION_2",
-      "permission": ["HASHTOKEN"]
-    },
-    "ccd_data": {
-      "caseTypeId": "*",
-      "jurisdictionId": "BEFTA_JURISDICTION_2",
-      "permission": ["ATTACH"]
-    },
-    "ccd_gw": {
-      "caseTypeId": "*",
-      "jurisdictionId": "*",
-      "permission": ["CREATE", "READ", "UPDATE", "DELETE"]
-    }
-  }
+      {
+        "Id": "bulk_scan_processor",
+        "caseTypeId": "BEFTA_CASETYPE_2_2",
+        "jurisdictionId": "BEFTA_JURISDICTION_2",
+        "permission": [
+          "HASHTOKEN"
+        ]
+      },
+      {
+        "Id": "ccd_data",
+        "caseTypeId": "*",
+        "jurisdictionId": "BEFTA_JURISDICTION_2",
+        "permission": [
+          "ATTACH"
+        ]
+      },
+      {
+        "Id": "ccd_gw",
+        "caseTypeId": "*",
+        "jurisdictionId": "*",
+        "permission": [
+          "CREATE",
+          "READ",
+          "UPDATE",
+          "DELETE"
+        ]
+      }
+    ]
 }

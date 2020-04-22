@@ -17,11 +17,11 @@ public class ResponseHelper {
     }
 
 
-    public static ResponseEntity<Object> toResponseEntity(ResponseEntity response, UUID documentId) {
+    public static ResponseEntity<Object> toResponseEntity(ResponseEntity<StoredDocumentHalResource> response, UUID documentId) {
         Optional<?> payload = Optional.of(response.getBody());
         addHateoasLinks(payload,documentId);
 
-        return new ResponseEntity<Object>(
+        return new ResponseEntity<>(
             payload.orElse(null),
             convertHeaders(response.getHeaders()),
             response.getStatusCode());

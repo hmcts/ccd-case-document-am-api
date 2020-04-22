@@ -1,9 +1,5 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -33,12 +29,7 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.Forbidden
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
-import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentsMetadata;
-import uk.gov.hmcts.reform.ccd.document.am.model.DocumentHashToken;
-import uk.gov.hmcts.reform.ccd.document.am.model.DocumentPermissions;
-import uk.gov.hmcts.reform.ccd.document.am.model.DocumentUpdate;
-import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
-import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.document.am.model.*;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
@@ -60,6 +51,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Optional;
 
 import static javax.servlet.RequestDispatcher.ERROR_MESSAGE;
 import static org.springframework.http.HttpMethod.DELETE;
@@ -89,7 +81,6 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LINKS;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.RESOURCE_NOT_FOUND;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICES;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.THUMBNAIL;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
 
@@ -114,13 +105,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Value("${idam.s2s-auth.totp_secret}")
     protected String salt;
 
-    private static JsonNode rootNode;
+    private static Services services;
 
     static {
         InputStream inputStream = DocumentManagementServiceImpl.class.getClassLoader()
             .getResourceAsStream("service_config.json");
         try {
-            rootNode = new ObjectMapper().readValue(inputStream, JsonNode.class);
+            services = new ObjectMapper().readValue(inputStream, Services.class);
+            LOG.info("services config loaded {}", services);
         } catch (IOException e) {
             LOG.error("IOException {}", e.getMessage());
         }
@@ -137,7 +129,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Override
     @SuppressWarnings("unchecked")
-    public ResponseEntity getDocumentMetadata(UUID documentId) {
+    public ResponseEntity<Object> getDocumentMetadata(UUID documentId) {
 
         try {
             final HttpEntity<String> requestEntity = new HttpEntity<>(getHttpHeaders());
@@ -152,7 +144,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                                                                       );
             LOG.info("response : {}", response.getStatusCode());
             LOG.info("response : {}", response.getBody());
-            ResponseEntity<?> responseEntity = ResponseHelper.toResponseEntity(response, documentId);
+            ResponseEntity<Object> responseEntity = ResponseHelper.toResponseEntity(response, documentId);
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
                 LOG.info("Positive response");
                 return responseEntity;
@@ -312,7 +304,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public ResponseEntity patchDocument(UUID documentId, UpdateDocumentCommand ttl) {
+    public ResponseEntity<Object> patchDocument(UUID documentId, UpdateDocumentCommand ttl) {
         if (!ValidationService.validateTTL(ttl.getTtl())) {
             throw new BadRequestException(String.format(
                 "Incorrect date format %s",
@@ -327,7 +319,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 requestEntity,
                 StoredDocumentHalResource.class
             );
-            ResponseEntity<?> responseEntity = ResponseHelper.toResponseEntity(response, documentId);
+            ResponseEntity<Object> responseEntity = ResponseHelper.toResponseEntity(response, documentId);
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
                 return responseEntity;
             } else {
@@ -471,8 +463,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     public boolean checkServicePermission(ResponseEntity<?> responseEntity, Permission permission) {
-        String serviceId = securityUtils.getServiceId();
-        Map<String, Object> serviceConfig = getServiceDetailsFromJson(serviceId);
+        uk.gov.hmcts.reform.ccd.document.am.model.Service serviceConfig = getServiceDetailsFromJson(securityUtils.getServiceId());
         String caseTypeId = extractCaseTypeIdFromMetadata(responseEntity.getBody());
         String jurisdictionId = extractJurisdictionIdFromMetadata(responseEntity.getBody());
         return validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(
@@ -485,8 +476,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     public boolean checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId, Permission permission) {
-        String serviceId = securityUtils.getServiceId();
-        Map<String, Object> serviceConfig = getServiceDetailsFromJson(serviceId);
+        uk.gov.hmcts.reform.ccd.document.am.model.Service serviceConfig = getServiceDetailsFromJson(securityUtils.getServiceId());
         return validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(
             serviceConfig,
             jurisdictionId
@@ -496,18 +486,17 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         );
     }
 
-    private boolean validateCaseTypeId(Map<String, Object> serviceConfig, String caseTypeId) {
-        boolean result = !StringUtils.isEmpty(caseTypeId) && (serviceConfig.get(CASE_TYPE_ID).equals("*") || caseTypeId.equals(
-            serviceConfig.get(
-                CASE_TYPE_ID)));
+    private boolean validateCaseTypeId(uk.gov.hmcts.reform.ccd.document.am.model.Service serviceConfig, String caseTypeId) {
+        boolean result = !StringUtils.isEmpty(caseTypeId) && (serviceConfig.getCaseTypeId().equals("*") || caseTypeId.equals(
+            serviceConfig.getCaseTypeId()));
         caseTypeId = sanitiseData(caseTypeId);
         LOG.info("Case Type Id is {} and validation result is {}", caseTypeId, result);
         return result;
     }
 
-    private boolean validateJurisdictionId(Map<String, Object> serviceConfig, String jurisdictionId) {
-        boolean result =  !StringUtils.isEmpty(jurisdictionId) && (serviceConfig.get(JURISDICTION_ID).equals("*") || jurisdictionId.equals(
-            serviceConfig.get(JURISDICTION_ID)));
+    private boolean validateJurisdictionId(uk.gov.hmcts.reform.ccd.document.am.model.Service serviceConfig, String jurisdictionId) {
+        boolean result =  !StringUtils.isEmpty(jurisdictionId) && (serviceConfig.getJurisdictionId().equals("*") || jurisdictionId.equals(
+            serviceConfig.getJurisdictionId()));
         jurisdictionId = sanitiseData(jurisdictionId);
         LOG.info("JurisdictionI Id is {} and validation result is {}", jurisdictionId, result);
         return result;
@@ -518,41 +507,18 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @SuppressWarnings("unchecked")
-    private boolean validatePermissions(Map<String, Object> serviceDetails, Permission permission) {
-        List<String> servicePermissions = (List<String>) serviceDetails.get("permissions");
-        boolean result = !servicePermissions.isEmpty() && (servicePermissions.contains(permission.toString()));
+    private boolean validatePermissions(uk.gov.hmcts.reform.ccd.document.am.model.Service serviceConfig, Permission permission) {
+        List<Permission> servicePermissions = serviceConfig.getPermission();
+        boolean result = !servicePermissions.isEmpty() && (servicePermissions.contains(permission));
         LOG.info("Permission is {} and validation result is {}", permission, result);
         return result;
     }
 
-    private Map<String, Object> getServiceDetailsFromJson(String serviceId) {
-        Map<String, Object> serviceDetails = new HashMap<>();
-        List<String> permissions = new ArrayList<>();
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            //File jsonConfigFile = new File("service_config.json");
-            //Application main = new Application();
-            //File jsonConfigFile = getFileFromResources("service_config.json");
-            //InputStream inputStream = DocumentManagementServiceImpl.class
-            //    .getClassLoader().getResourceAsStream("service_config.json");
-
-            //JsonNode rootNode = new ObjectMapper().readValue(inputStream, JsonNode.class);
-            String caseTypeId = rootNode.at("/" + SERVICES + "/" + serviceId + "/" + CASE_TYPE_ID).textValue();
-            String jurisdictionId = rootNode.at("/" + SERVICES + "/" + serviceId + "/" + JURISDICTION_ID).textValue();
-            JsonNode permissionsNode = rootNode.at("/" + SERVICES + "/" + serviceId + "/permission");
-            permissions = mapper.readValue(permissionsNode.toString(), new TypeReference<List<String>>() {
-            });
-            serviceDetails.put(CASE_TYPE_ID, caseTypeId);
-            serviceDetails.put(JURISDICTION_ID, jurisdictionId);
-            serviceDetails.put("permissions", permissions);
-        } catch (JsonParseException e) {
-            LOG.error("JsonParseException {}", e.getMessage());
-        } catch (JsonMappingException e) {
-            LOG.error("JsonMappingException {}", e.getMessage());
-        } catch (IOException e) {
-            LOG.error("IOException {}", e.getMessage());
-        }
-        return serviceDetails;
+    private uk.gov.hmcts.reform.ccd.document.am.model.Service getServiceDetailsFromJson(String serviceId) {
+        LOG.info("Json contents..." + services);
+        Optional<uk.gov.hmcts.reform.ccd.document.am.model.Service> service = services.getService().stream().filter(s -> s.getId().equals(
+            serviceId)).findAny();
+        return service.get();
     }
 
     public String extractCaseTypeIdFromMetadata(Object storedDocument) {
