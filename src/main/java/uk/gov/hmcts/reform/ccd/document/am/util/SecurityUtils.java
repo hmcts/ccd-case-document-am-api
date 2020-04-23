@@ -53,6 +53,11 @@ public class SecurityUtils {
         return serviceAndUser.getPassword();
     }
 
+    public String getServiceId() {
+        final ServiceAndUserDetails serviceAndUser = (ServiceAndUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return serviceAndUser.getServicename();
+    }
+
     public String getUserRolesHeader() {
         final ServiceAndUserDetails serviceAndUser = (ServiceAndUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return serviceAndUser.getAuthorities()

@@ -11,6 +11,8 @@
   "request": {
     "body": {
       "caseId": "12345678900£$@00",
+      "caseTypeId" : "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][caseTypeId]}",
+      "jurisdictionId" : "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][jurisdictionId]}",
       "documentHashTokens": [
         {
           "id": "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",

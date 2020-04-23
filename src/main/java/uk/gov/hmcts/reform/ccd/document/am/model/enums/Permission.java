@@ -8,28 +8,10 @@ package uk.gov.hmcts.reform.ccd.document.am.model.enums;
  * the binary 'AND' operation is done (the 'isGranted' method).
  */
 public enum Permission {
-    CREATE(1),
-    READ(2),
-    UPDATE(4),
-    DELETE(8);
-
-    private int value;
-
-    Permission(int value) {
-        this.value = value;
-    }
-
-    public int getValue() {
-        return value;
-    }
-
-    /**
-     * Performs a binary AND operation to determine whether permission can be derived from the sum of permissions.
-     *
-     * @param permissions the numeric sum of permissions
-     * @return true if particular permission is included is sum of permissions, otherwise false
-     */
-    public boolean isGranted(int permissions) {
-        return (permissions & this.getValue()) == this.getValue();
-    }
+    CREATE(),
+    READ(),
+    UPDATE(),
+    DELETE(),
+    HASHTOKEN(),
+    ATTACH();
 }

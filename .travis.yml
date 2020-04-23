@@ -16,9 +16,7 @@ before_install:
 
 script:
   - "./gradlew dependencyCheckAnalyze || echo 'dependencyCheckAnalyze failed'"
-  - "./gradlew sendCoverageToCodacy || echo sendCoverageToCodacy failed"
 
 after_success:
-  - 'bash <(curl -s https://codecov.io/bash) || echo "Codecov failed to upload"'
   - '[ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ] && sh ./publish-swagger-group-docs.sh v1 v2'
 

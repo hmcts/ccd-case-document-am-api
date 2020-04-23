@@ -38,11 +38,9 @@ security:
     - "/error"
     - "/favicon.ico"
   ### Update list with service id of any service going to interact with casse document api
-  authorisedServices: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_gw,xui_webapp,ccd_case_document_am_api,ccd_data}
+  authorisedServices: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor}
 
   authorisedRoles:
-    - caseworker
-    - ccd-import
 
 ### dependency configuration
 auth.provider.service.client.baseUrl: ${IDAM_S2S_URL:http://localhost:4502}
@@ -78,7 +76,7 @@ ccd:
   case-definition:
     host: ${DEFINITION_STORE_HOST:http://localhost:4451}
 
-documentTTL: ${DOCUMENT_TTL:600000}
+documentTTL: ${DOCUMENT_TTL:3600000}
 
 documentStoreUrl: ${DOCUMENT_STORE_URL:http://localhost:4506}
 caseDataStoreUrl: ${CCD_DATA_STORE_URL:http://localhost:4452}

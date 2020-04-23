@@ -1,6 +1,7 @@
 
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_PERMISSION_ERROR;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -91,15 +92,18 @@ public class CaseDocumentAmController  {
     })
     public ResponseEntity<Object> getDocumentbyDocumentId(
         @PathVariable("documentId") UUID documentId) {
-
         ValidationService.validateDocumentId(documentId.toString());
-        ResponseEntity responseEntity = documentManagementService.getDocumentMetadata(documentId);
-        if (documentManagementService.checkUserPermission(responseEntity, documentId,  Permission.READ)) {
-            return  ResponseEntity
-                .status(HttpStatus.OK)
-                .body(responseEntity.getBody());
+        ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
+        if (documentManagementService.checkServicePermission(responseEntity, Permission.READ)) {
+            if (documentManagementService.checkUserPermission(responseEntity, documentId, Permission.READ)) {
+                return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(responseEntity.getBody());
+            }
+            LOG.error("User doesn't have read permission on requested document {}", HttpStatus.FORBIDDEN);
+            throw new ForbiddenException(documentId.toString());
         }
-        LOG.error("User doesn't have read permission on requested document {}", HttpStatus.FORBIDDEN);
+        LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -129,12 +133,16 @@ public class CaseDocumentAmController  {
     public ResponseEntity<Object> getDocumentBinaryContentbyDocumentId(
         @PathVariable("documentId") UUID documentId) {
         ValidationService.validateDocumentId(documentId.toString());
-        ResponseEntity documentMetadata = documentManagementService.getDocumentMetadata(documentId);
-        if (documentManagementService.checkUserPermission(documentMetadata, documentId, Permission.READ)) {
-            return documentManagementService.getDocumentBinaryContent(documentId);
+        ResponseEntity<?> documentMetadata = documentManagementService.getDocumentMetadata(documentId);
+        if (documentManagementService.checkServicePermission(documentMetadata, Permission.READ)) {
+            if (documentManagementService.checkUserPermission(documentMetadata, documentId, Permission.READ)) {
+                return documentManagementService.getDocumentBinaryContent(documentId);
 
+            }
+            LOG.error("User doesn't have read permission on requested document {}", HttpStatus.FORBIDDEN);
+            throw new ForbiddenException(documentId.toString());
         }
-        LOG.error("User doesn't have read permission on requested document {}", HttpStatus.FORBIDDEN);
+        LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -186,12 +194,14 @@ public class CaseDocumentAmController  {
         @NotNull(message = "Provide the Jurisdiction ID ")
         @RequestParam(value = "jurisdictionId", required = true) String jurisdictionId
     ) {
-
         ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification);
         ValidationService.isValidSecurityClassification(classification);
         ValidationService.validateLists(files);
-
-        return documentManagementService.uploadDocuments(files, classification, caseTypeId, jurisdictionId);
+        if (documentManagementService.checkServicePermissionsForUpload(caseTypeId, jurisdictionId, Permission.CREATE)) {
+            return documentManagementService.uploadDocuments(files, classification, caseTypeId, jurisdictionId);
+        }
+        LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
+        throw new ForbiddenException(caseTypeId + " " + jurisdictionId);
     }
 
 
@@ -222,11 +232,15 @@ public class CaseDocumentAmController  {
         @ApiParam(value = "", required = true)
         @Valid @RequestBody UpdateDocumentCommand body,
         @PathVariable("documentId") UUID documentId) {
-
         ValidationService.validateDocumentId(documentId.toString());
+        ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
+        if (documentManagementService.checkServicePermission(responseEntity, Permission.UPDATE)) {
 
-        ResponseEntity response =   documentManagementService.patchDocument(documentId, body);
-        return  ResponseEntity.status(HttpStatus.OK).body(response.getBody());
+            ResponseEntity<?> response = documentManagementService.patchDocument(documentId, body);
+            return ResponseEntity.status(HttpStatus.OK).body(response.getBody());
+        }
+        LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
+        throw new ForbiddenException(documentId.toString());
     }
 
 
@@ -272,24 +286,31 @@ public class CaseDocumentAmController  {
     public ResponseEntity<Object> patchMetaDataOnDocuments(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody CaseDocumentsMetadata caseDocumentsMetadata) {
+
         if (!ValidationService.validate(caseDocumentsMetadata.getCaseId())) {
             throw new BadRequestException(CASE_ID_NOT_VALID);
         }
+
         if (caseDocumentsMetadata.getDocumentHashTokens() != null) {
             caseDocumentsMetadata.getDocumentHashTokens()
                 .forEach(document -> ValidationService.validateDocumentId(document.getId()));
-
-            documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
-
+            //validate the service authorization for first document in payload
+            ResponseEntity<?> documentMetadata = documentManagementService.getDocumentMetadata(UUID.fromString(
+                caseDocumentsMetadata.getDocumentHashTokens().get(0).getId()));
+            if (documentManagementService.checkServicePermission(documentMetadata, Permission.ATTACH)) {
+                documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
+                HashMap<String, String> responseBody = new HashMap<>();
+                responseBody.put("Result", "Success");
+                return ResponseEntity
+                    .status(HttpStatus.OK).body(responseBody);
+            } else {
+                LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
+                throw new ForbiddenException(caseDocumentsMetadata.getCaseTypeId() + " " + caseDocumentsMetadata.getJurisdictionId());
+            }
         } else {
             throw new BadRequestException(BAD_REQUEST);
         }
-        HashMap<String, String> responseBody = new HashMap<>();
-        responseBody.put("Result", "Success");
-        return ResponseEntity
-            .status(HttpStatus.OK).body(responseBody);
     }
-
 
     //******************** Delete API ************
     @DeleteMapping(
@@ -316,10 +337,14 @@ public class CaseDocumentAmController  {
         @PathVariable("documentId") UUID documentId,
         @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false")
             Boolean permanent) {
-
         ValidationService.validateDocumentId(documentId.toString());
+        ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
+        if (documentManagementService.checkServicePermission(responseEntity, Permission.UPDATE)) {
 
-        return  documentManagementService.deleteDocument(documentId, permanent);
+            return documentManagementService.deleteDocument(documentId, permanent);
+        }
+        LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
+        throw new ForbiddenException(documentId.toString());
     }
 
 
@@ -350,11 +375,16 @@ public class CaseDocumentAmController  {
         @PathVariable("documentId") UUID documentId) {
 
         ValidationService.validateDocumentId(documentId.toString());
+        ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
+        if (documentManagementService.checkServicePermission(responseEntity, Permission.HASHTOKEN)) {
 
-        HashMap<String, String> responseBody = new HashMap<>();
+            HashMap<String, String> responseBody = new HashMap<>();
 
-        responseBody.put(HASHTOKEN, documentManagementService.generateHashToken(documentId));
+            responseBody.put(HASHTOKEN, documentManagementService.generateHashToken(documentId));
 
-        return new ResponseEntity<>(responseBody, HttpStatus.OK);
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+        }
+        LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
+        throw new ForbiddenException(documentId.toString());
     }
 }

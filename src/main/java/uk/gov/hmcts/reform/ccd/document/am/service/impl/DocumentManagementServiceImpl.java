@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,8 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.Forbidden
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
+import uk.gov.hmcts.reform.ccd.document.am.model.AuthorisedService;
+import uk.gov.hmcts.reform.ccd.document.am.model.AuthorisedServices;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentPermissions;
@@ -42,6 +46,8 @@ import uk.gov.hmcts.reform.ccd.document.am.util.ResponseHelper;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,6 +57,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static javax.servlet.RequestDispatcher.ERROR_MESSAGE;
@@ -105,6 +112,19 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Value("${idam.s2s-auth.totp_secret}")
     protected String salt;
 
+    private static AuthorisedServices authorisedServices;
+
+    static {
+        InputStream inputStream = DocumentManagementServiceImpl.class.getClassLoader()
+            .getResourceAsStream("service_config.json");
+        try {
+            authorisedServices = new ObjectMapper().readValue(inputStream, AuthorisedServices.class);
+            LOG.info("services config loaded {}", authorisedServices);
+        } catch (IOException e) {
+            LOG.error("IOException {}", e.getMessage());
+        }
+    }
+
     @Autowired
     public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils,
                                          CaseDataStoreService caseDataStoreService) {
@@ -116,10 +136,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Override
     @SuppressWarnings("unchecked")
-    public ResponseEntity getDocumentMetadata(UUID documentId) {
+    public ResponseEntity<Object> getDocumentMetadata(UUID documentId) {
 
         try {
-            final HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
+            final HttpEntity<String> requestEntity = new HttpEntity<>(getHttpHeaders());
             LOG.info("Document Store URL is : {}", documentURL);
             String documentMetadataUrl = String.format("%s/documents/%s", documentURL, documentId);
             LOG.info("documentMetadataUrl : {}", documentMetadataUrl);
@@ -131,7 +151,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                                                                       );
             LOG.info("response : {}", response.getStatusCode());
             LOG.info("response : {}", response.getBody());
-            ResponseEntity responseEntity = ResponseHelper.toResponseEntity(response, documentId);
+            ResponseEntity<Object> responseEntity = ResponseHelper.toResponseEntity(response, documentId);
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
                 LOG.info("Positive response");
                 return responseEntity;
@@ -160,7 +180,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @SuppressWarnings("unchecked")
     public ResponseEntity<Object> getDocumentBinaryContent(UUID documentId) {
         try {
-            final HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
+            final HttpEntity<?> requestEntity = new HttpEntity<>(getHttpHeaders());
             String documentBinaryUrl = String.format("%s/documents/%s/binary", documentURL, documentId);
             ResponseEntity<ByteArrayResource> response = restTemplate.exchange(
                 documentBinaryUrl,
@@ -236,7 +256,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     public String generateHashToken(UUID documentId) {
-        ResponseEntity responseEntity = getDocumentMetadata(documentId);
+        ResponseEntity<?> responseEntity = getDocumentMetadata(documentId);
         String hashcodeFromStoredDocument = "";
         if (responseEntity.getStatusCode().equals(HttpStatus.OK) && null != responseEntity.getBody()) {
             StoredDocumentHalResource resource = (StoredDocumentHalResource) responseEntity.getBody();
@@ -291,7 +311,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public ResponseEntity patchDocument(UUID documentId, UpdateDocumentCommand ttl) {
+    public ResponseEntity<Object> patchDocument(UUID documentId, UpdateDocumentCommand ttl) {
         if (!ValidationService.validateTTL(ttl.getTtl())) {
             throw new BadRequestException(String.format(
                 "Incorrect date format %s",
@@ -306,7 +326,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 requestEntity,
                 StoredDocumentHalResource.class
             );
-            ResponseEntity responseEntity = ResponseHelper.toResponseEntity(response, documentId);
+            ResponseEntity<Object> responseEntity = ResponseHelper.toResponseEntity(response, documentId);
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
                 return responseEntity;
             } else {
@@ -325,14 +345,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public ResponseEntity<Object> deleteDocument(UUID documentId,  Boolean permanent) {
 
         try {
-            final HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
+            final HttpEntity<?> requestEntity = new HttpEntity<>(getHttpHeaders());
             String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, documentId, permanent);
             LOG.info("documentDeleteUrl : {}", documentDeleteUrl);
-            ResponseEntity response = restTemplate.exchange(
+            ResponseEntity<Object> response = restTemplate.exchange(
                 documentDeleteUrl,
                 DELETE,
                 requestEntity,
-                ResponseEntity.class
+                Object.class
             );
             if (HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
                 LOG.info("Positive response");
@@ -353,7 +373,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private void formatUploadDocumentResponse(String caseTypeId, String jurisdictionId,
                                               ResponseEntity<Object> uploadedDocumentResponse) {
         try {
-            LinkedHashMap documents = (LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse.getBody())
+            LinkedHashMap<String, Object> documents = (LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse.getBody())
                 .get(EMBEDDED);
 
             ArrayList<Object> documentList = (ArrayList<Object>) (documents.get(DOCUMENTS));
@@ -442,8 +462,85 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 .orElseThrow(() -> new CaseNotFoundException(caseId));
 
             return (documentPermissions.getId().equals(documentId.toString())
-                    && documentPermissions.getPermissions().contains(permissionToCheck));
+                && documentPermissions.getPermissions().contains(permissionToCheck));
         }
+    }
+
+    public boolean checkServicePermission(ResponseEntity<?> responseEntity, Permission permission) {
+        AuthorisedService serviceConfig = getServiceDetailsFromJson(securityUtils.getServiceId());
+        String caseTypeId = extractCaseTypeIdFromMetadata(responseEntity.getBody());
+        String jurisdictionId = extractJurisdictionIdFromMetadata(responseEntity.getBody());
+        return validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(
+            serviceConfig,
+            jurisdictionId
+        ) && validatePermissions(
+            serviceConfig,
+            permission
+        );
+    }
+
+    public boolean checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId, Permission permission) {
+        AuthorisedService serviceConfig = getServiceDetailsFromJson(securityUtils.getServiceId());
+        return validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(
+            serviceConfig,
+            jurisdictionId
+        ) && validatePermissions(
+            serviceConfig,
+            permission
+        );
+    }
+
+    private boolean validateCaseTypeId(AuthorisedService serviceConfig, String caseTypeId) {
+        boolean result = !StringUtils.isEmpty(caseTypeId) && (serviceConfig.getCaseTypeId().equals("*") || caseTypeId.equals(
+            serviceConfig.getCaseTypeId()));
+        caseTypeId = sanitiseData(caseTypeId);
+        LOG.info("Case Type Id is {} and validation result is {}", caseTypeId, result);
+        return result;
+    }
+
+    private boolean validateJurisdictionId(AuthorisedService serviceConfig, String jurisdictionId) {
+        boolean result =  !StringUtils.isEmpty(jurisdictionId) && (serviceConfig.getJurisdictionId().equals("*") || jurisdictionId.equals(
+            serviceConfig.getJurisdictionId()));
+        jurisdictionId = sanitiseData(jurisdictionId);
+        LOG.info("JurisdictionI Id is {} and validation result is {}", jurisdictionId, result);
+        return result;
+    }
+
+    private String sanitiseData(String value) {
+        return value.replaceAll("[\n|\r|\t]", "_");
+    }
+
+    @SuppressWarnings("unchecked")
+    private boolean validatePermissions(AuthorisedService serviceConfig, Permission permission) {
+        List<Permission> servicePermissions = serviceConfig.getPermissions();
+        boolean result = !servicePermissions.isEmpty() && (servicePermissions.contains(permission));
+        LOG.info("Permission is {} and validation result is {}", permission, result);
+        return result;
+    }
+
+    private AuthorisedService getServiceDetailsFromJson(String serviceId) {
+        Optional<AuthorisedService> service = authorisedServices.getAuthServices().stream().filter(s -> s.getId().equals(
+            serviceId)).findAny();
+        if (service.isPresent()) {
+            return service.get();
+        }
+        return null;
+    }
+
+    public String extractCaseTypeIdFromMetadata(Object storedDocument) {
+        if (storedDocument instanceof StoredDocumentHalResource) {
+            Map<String, String> metadata = ((StoredDocumentHalResource) storedDocument).getMetadata();
+            return metadata.get(CASE_TYPE_ID);
+        }
+        return null;
+    }
+
+    public String extractJurisdictionIdFromMetadata(Object storedDocument) {
+        if (storedDocument instanceof StoredDocumentHalResource) {
+            Map<String, String> metadata = ((StoredDocumentHalResource) storedDocument).getMetadata();
+            return metadata.get(JURISDICTION_ID);
+        }
+        return null;
     }
 
     private HttpHeaders getHttpHeaders() {

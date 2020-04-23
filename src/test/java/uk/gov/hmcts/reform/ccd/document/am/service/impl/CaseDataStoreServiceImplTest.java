@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
+import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
@@ -56,9 +57,11 @@ class CaseDataStoreServiceImplTest {
         permissionsList.add(Permission.READ);
         DocumentPermissions doc;
         doc = DocumentPermissions.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList).build();
+        CaseDocumentMetadata caseDocumentMetadata = CaseDocumentMetadata.builder().caseId("1234567890123456")
+            .documentPermissions(doc).build();
 
-        Map<String,DocumentPermissions> linkedHashMap = new LinkedHashMap<>();
-        linkedHashMap.put("documentMetadata",doc);
+        Map<String,Object> linkedHashMap = new LinkedHashMap<>();
+        linkedHashMap.put("documentMetadata",caseDocumentMetadata);
         HttpHeaders headers = prepareRequestForUpload();
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);

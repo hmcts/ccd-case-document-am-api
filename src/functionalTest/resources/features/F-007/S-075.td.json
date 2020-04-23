@@ -12,6 +12,7 @@
     "body": {
       "caseId": "1234567890099900",
       "caseTypeId" : "BEFTA_CASETYPE_@£$",
+      "jurisdictionId" : "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][jurisdictionId]}",
       "documentHashTokens": [
         {
           "id": "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
