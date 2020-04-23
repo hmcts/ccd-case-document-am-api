@@ -20,3 +20,10 @@ script:
 after_success:
   - '[ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ] && sh ./publish-swagger-group-docs.sh v1 v2'
 
+notifications:
+  email: false
+  slack:
+    rooms:
+      - secure: X/Loz73xNWWkDozTk+TEhm3URhpBK6Perj1QytfulvuQ4NCJe11u92jaxs/puB0tyraR/0pCU5ET1Cso7NgBBbbwYA+FhuhSLfkWuXGPf/rFQHtD+2K4jxrY7BsdcD1DPqim5RPXBxQO9bOGye66EMml87BdaE80ilzcUKqTtV9TGyCYRiLrKhhQ0faKHB08D8V0sBYk1SW8/jLpXiWb6dUoiRglqeECXvD7lGpzBkGb53D1s9MTTpp/HC/qfla7Meet3fY3xkrna7i6S7tBWU8KMV2Yp5ZygCapLhiijo5co3vILGaNToDlarBm3hKwOz35erucAUkyY6k+Cz7zO6+rS4LGvUTMXiqaay7Hd9+zAHKjnd/CJfALfGiiV6uk0Dch1D8t/89tOrvl/2Vctt8uSIVtn1scHNMK9x/xr7nMSI8MKU9GNJDPvg3TbUFzkkxpHvutzJZkM6uNNbLN9fw3UoBQNdQSy5yMzjH8kwTK2S/uebqnlZmKbRKimoYLp+qysqCI/82oBoglDwlRYNi+SkeCd2njAwsQOEA1ttzJWao67ZttORQDPvrvitu6YgEud4W0xtjdfWfUcB2w3RdY3hk84wOuW+txeQIPDYp4niYmV+IXko29hQdCNyejzU1RG/fYgdxVjzJZZQB+vow0G5Q5EbCH4zZ42lyesJo=
+    on_success: always
+    on_failure: always
