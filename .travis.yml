@@ -23,8 +23,15 @@ after_success:
 notifications:
   email: false
   slack:
+    rooms:
+      - secure: VHdzsDycR2A7kNrjjFAJZptblA0ty8WK3hLnU/QV6WWWWFeV06OumeuUxJocEF5+tzM4OyxWihnz21L0r0vFan5kuar4c18s+aSGxTzva4o0gEXG7FZ0xhGw1vJfTs/OEg6zty4Le8Hfx6ZPQWcPUgaCPMP7lzMUhBZnSvO7rZ15LnzVegwmdwvhxbYsh9Uk3vEvglXdtsErok7ID/bhTD8BoRElsMcKWXEFpiNTzwuAnn4ht8uSRmdo/UAgdrK8YgOBm0LbJ/nHyrNy2E4pMNBAhvCXoj66DGDr1j7rpu80xuAjLSSZmxiWDxI3X879nuwW2U6KVKQWKU72RnPDjqQOBmacJqQiNVfT3V72pBVT9WkT2eyj7fGViK+cLYkd/ERswHz7CtzeoFhYd5r60QiN8QB5wznPVB4ecafJ/C4ivWAK8F65cpRkG8W3r7DPpQkTI+w3KTqHBsiobYPbUIWRrAVPMtayA+LsRkSiuUF/F1wu8wNl284tp3WYBNGP0Dk+282rEeW8OFi6v8uRJkSFu+/1J/3lzZTyw/k5ubQhgB81f4R/9Ynyefko5nwlc5dckeEq4DXhTphJNc8EpGM4QbaJgmHzZ5wxdBCYZbkDpqbq7wsqXXq/ZEAB/VoMO5CX6td2o2DTVoTZpFU1anSjgv5Sl2eXzxaZArBU0HI=
     on_success: always
     on_failure: always
     on_pull_requests: true
-    rooms:
-      - secure: VHdzsDycR2A7kNrjjFAJZptblA0ty8WK3hLnU/QV6WWWWFeV06OumeuUxJocEF5+tzM4OyxWihnz21L0r0vFan5kuar4c18s+aSGxTzva4o0gEXG7FZ0xhGw1vJfTs/OEg6zty4Le8Hfx6ZPQWcPUgaCPMP7lzMUhBZnSvO7rZ15LnzVegwmdwvhxbYsh9Uk3vEvglXdtsErok7ID/bhTD8BoRElsMcKWXEFpiNTzwuAnn4ht8uSRmdo/UAgdrK8YgOBm0LbJ/nHyrNy2E4pMNBAhvCXoj66DGDr1j7rpu80xuAjLSSZmxiWDxI3X879nuwW2U6KVKQWKU72RnPDjqQOBmacJqQiNVfT3V72pBVT9WkT2eyj7fGViK+cLYkd/ERswHz7CtzeoFhYd5r60QiN8QB5wznPVB4ecafJ/C4ivWAK8F65cpRkG8W3r7DPpQkTI+w3KTqHBsiobYPbUIWRrAVPMtayA+LsRkSiuUF/F1wu8wNl284tp3WYBNGP0Dk+282rEeW8OFi6v8uRJkSFu+/1J/3lzZTyw/k5ubQhgB81f4R/9Ynyefko5nwlc5dckeEq4DXhTphJNc8EpGM4QbaJgmHzZ5wxdBCYZbkDpqbq7wsqXXq/ZEAB/VoMO5CX6td2o2DTVoTZpFU1anSjgv5Sl2eXzxaZArBU0HI=
+    template:
+      - "Repo: `%{repository_slug}`"
+      - "Branch: `%{branch}`"
+      - "Build Number: (<%{build_url}|#%{build_number}>), Commit (<%{compare_url}|%{commit}>)"
+      - "Build Result: *%{result}*"
+      - "Execution time: *%{duration}*"
+      - "Message: %{message}"
