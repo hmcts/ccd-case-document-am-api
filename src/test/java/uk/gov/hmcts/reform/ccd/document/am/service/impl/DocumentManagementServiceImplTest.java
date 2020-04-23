@@ -579,7 +579,6 @@ class DocumentManagementServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void patchDocumentMetadata_HappyPath() {
         DocumentHashToken doc = DocumentHashToken.builder().id(MATCHED_DOCUMENT_ID)
             .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
@@ -607,7 +606,6 @@ class DocumentManagementServiceImplTest {
 
 
     @Test
-    @SuppressWarnings("unchecked")
     void patchDocumentMetadata_Throws_NotFoundException() {
         DocumentHashToken doc = DocumentHashToken.builder().id(MATCHED_DOCUMENT_ID)
             .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
@@ -641,7 +639,6 @@ class DocumentManagementServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void patchDocumentMetadata_Throws_ForbiddenException() {
         DocumentHashToken doc = DocumentHashToken.builder().id(MATCHED_DOCUMENT_ID)
             .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
@@ -675,7 +672,6 @@ class DocumentManagementServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void patchDocumentMetadata_Throws_BadRequestException() {
         DocumentHashToken doc = DocumentHashToken.builder().id(MATCHED_DOCUMENT_ID)
             .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
@@ -709,7 +705,6 @@ class DocumentManagementServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void patchDocumentMetadata_Throws_ForbiddenException_InvalidHashToken() {
         DocumentHashToken doc = DocumentHashToken.builder().id(MATCHED_DOCUMENT_ID)
             .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
@@ -744,7 +739,6 @@ class DocumentManagementServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void patchDocumentMetadata_Throws_BadGatewayException() {
         DocumentHashToken doc = DocumentHashToken.builder().id(MATCHED_DOCUMENT_ID)
             .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
@@ -1228,7 +1222,6 @@ class DocumentManagementServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void checkUserPermissionTest2() {
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
         Map<String, String> myMap = new HashMap<>();
@@ -1250,7 +1243,6 @@ class DocumentManagementServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void checkUserPermissionTest3() {
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
         Map<String, String> myMap = new HashMap<>();

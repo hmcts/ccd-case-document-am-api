@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 @EnableTransactionManagement(proxyTargetClass = true)
 @EnableCircuitBreaker
 @EnableFeignClients
-@SuppressWarnings("HideUtilityClassConstructor") // Spring needs a constructor, its not a utility class
 public class Application {
 
     public static void main(final String[] args) {

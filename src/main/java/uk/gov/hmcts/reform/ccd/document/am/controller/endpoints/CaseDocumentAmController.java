@@ -53,7 +53,6 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.JURISDICTI
 
 @Api(value = "cases")
 @RestController
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class CaseDocumentAmController  {
 
     private static final Logger LOG = LoggerFactory.getLogger(CaseDocumentAmController.class);

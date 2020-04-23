@@ -10,12 +10,10 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
-@SuppressWarnings("unchecked")
 public class ResponseHelper {
 
     private ResponseHelper() {
     }
-
 
     public static ResponseEntity<Object> toResponseEntity(ResponseEntity<StoredDocumentHalResource> response, UUID documentId) {
         Optional<?> payload = Optional.of(response.getBody());
