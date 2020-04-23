@@ -105,14 +105,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Value("${idam.s2s-auth.totp_secret}")
     protected String salt;
 
-    private static Services services;
+    private static AuthorisedServices authorisedServices;
 
     static {
         InputStream inputStream = DocumentManagementServiceImpl.class.getClassLoader()
             .getResourceAsStream("service_config.json");
         try {
-            services = new ObjectMapper().readValue(inputStream, Services.class);
-            LOG.info("services config loaded {}", services);
+            authorisedServices = new ObjectMapper().readValue(inputStream, AuthorisedServices.class);
+            LOG.info("services config loaded {}", authorisedServices);
         } catch (IOException e) {
             LOG.error("IOException {}", e.getMessage());
         }
@@ -463,7 +463,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     public boolean checkServicePermission(ResponseEntity<?> responseEntity, Permission permission) {
-        uk.gov.hmcts.reform.ccd.document.am.model.Service serviceConfig = getServiceDetailsFromJson(securityUtils.getServiceId());
+        AuthorisedService serviceConfig = getServiceDetailsFromJson(securityUtils.getServiceId());
         String caseTypeId = extractCaseTypeIdFromMetadata(responseEntity.getBody());
         String jurisdictionId = extractJurisdictionIdFromMetadata(responseEntity.getBody());
         return validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(
@@ -476,7 +476,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     public boolean checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId, Permission permission) {
-        uk.gov.hmcts.reform.ccd.document.am.model.Service serviceConfig = getServiceDetailsFromJson(securityUtils.getServiceId());
+        AuthorisedService serviceConfig = getServiceDetailsFromJson(securityUtils.getServiceId());
         return validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(
             serviceConfig,
             jurisdictionId
@@ -486,7 +486,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         );
     }
 
-    private boolean validateCaseTypeId(uk.gov.hmcts.reform.ccd.document.am.model.Service serviceConfig, String caseTypeId) {
+    private boolean validateCaseTypeId(AuthorisedService serviceConfig, String caseTypeId) {
         boolean result = !StringUtils.isEmpty(caseTypeId) && (serviceConfig.getCaseTypeId().equals("*") || caseTypeId.equals(
             serviceConfig.getCaseTypeId()));
         caseTypeId = sanitiseData(caseTypeId);
@@ -494,7 +494,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return result;
     }
 
-    private boolean validateJurisdictionId(uk.gov.hmcts.reform.ccd.document.am.model.Service serviceConfig, String jurisdictionId) {
+    private boolean validateJurisdictionId(AuthorisedService serviceConfig, String jurisdictionId) {
         boolean result =  !StringUtils.isEmpty(jurisdictionId) && (serviceConfig.getJurisdictionId().equals("*") || jurisdictionId.equals(
             serviceConfig.getJurisdictionId()));
         jurisdictionId = sanitiseData(jurisdictionId);
@@ -507,15 +507,15 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @SuppressWarnings("unchecked")
-    private boolean validatePermissions(uk.gov.hmcts.reform.ccd.document.am.model.Service serviceConfig, Permission permission) {
-        List<Permission> servicePermissions = serviceConfig.getPermission();
+    private boolean validatePermissions(AuthorisedService serviceConfig, Permission permission) {
+        List<Permission> servicePermissions = serviceConfig.getPermissions();
         boolean result = !servicePermissions.isEmpty() && (servicePermissions.contains(permission));
         LOG.info("Permission is {} and validation result is {}", permission, result);
         return result;
     }
 
-    private uk.gov.hmcts.reform.ccd.document.am.model.Service getServiceDetailsFromJson(String serviceId) {
-        Optional<uk.gov.hmcts.reform.ccd.document.am.model.Service> service = services.getService().stream().filter(s -> s.getId().equals(
+    private AuthorisedService getServiceDetailsFromJson(String serviceId) {
+        Optional<AuthorisedService> service = authorisedServices.getAuthorisedServices().stream().filter(s -> s.getId().equals(
             serviceId)).findAny();
         if (service.isPresent()) {
             return service.get();

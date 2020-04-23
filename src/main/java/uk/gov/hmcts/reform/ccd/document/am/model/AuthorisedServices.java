@@ -18,9 +18,9 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Services {
+public class AuthorisedServices {
 
-    @JsonProperty("service")
-    private List<Service> service;
+    @JsonProperty("authorisedServices")
+    private List<AuthorisedService> authorisedServices;
 
 }

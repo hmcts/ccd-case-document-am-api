@@ -1,9 +1,9 @@
 {
-    "service": [{
-      "Id": "xui_webapp",
+    "authorisedServices": [{
+      "id": "xui_webapp",
       "caseTypeId": "*",
       "jurisdictionId": "BEFTA_JURISDICTION_2",
-      "permission": [
+      "permissions": [
         "CREATE",
         "READ",
         "UPDATE",
@@ -11,26 +11,26 @@
       ]
     },
       {
-        "Id": "bulk_scan_processor",
+        "id": "bulk_scan_processor",
         "caseTypeId": "BEFTA_CASETYPE_2_2",
         "jurisdictionId": "BEFTA_JURISDICTION_2",
-        "permission": [
+        "permissions": [
           "HASHTOKEN"
         ]
       },
       {
-        "Id": "ccd_data",
+        "id": "ccd_data",
         "caseTypeId": "*",
         "jurisdictionId": "BEFTA_JURISDICTION_2",
-        "permission": [
+        "permissions": [
           "ATTACH"
         ]
       },
       {
-        "Id": "ccd_gw",
+        "id": "ccd_gw",
         "caseTypeId": "*",
         "jurisdictionId": "*",
-        "permission": [
+        "permissions": [
           "CREATE",
           "READ",
           "UPDATE",

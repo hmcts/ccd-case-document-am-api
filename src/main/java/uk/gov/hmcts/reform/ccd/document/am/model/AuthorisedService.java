@@ -18,9 +18,9 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Service {
+public class AuthorisedService {
 
-    @JsonProperty("Id")
+    @JsonProperty("id")
     private String id;
 
     @JsonProperty("caseTypeId")
@@ -29,7 +29,7 @@ public class Service {
     @JsonProperty("jurisdictionId")
     private String jurisdictionId;
 
-    @JsonProperty("permission")
-    private List<Permission> permission;
+    @JsonProperty("permissions")
+    private List<Permission> permissions;
 
 }
