@@ -31,7 +31,7 @@ notifications:
     template:
       - "Repo: `%{repository_slug}`"
       - "Branch: `%{branch}`"
-      - "Build Number: (<%{build_url}|#%{build_number}>), Commit (<%{compare_url}|%{commit}>)"
+      - "Build Number: (<%{build_url}|#%{build_number}>), Commit: (<%{compare_url}|%{commit}>)"
       - "Build Result: *%{result}*"
       - "Execution time: *%{duration}*"
       - "Message: %{message}"
