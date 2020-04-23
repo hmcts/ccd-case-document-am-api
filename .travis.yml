@@ -22,3 +22,11 @@ after_success:
   - 'bash <(curl -s https://codecov.io/bash) || echo "Codecov failed to upload"'
   - '[ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ] && sh ./publish-swagger-group-docs.sh v1 v2'
 
+notifications:
+  email: false
+  slack:
+    rooms:
+      - secure: 1pm2iDk0xgyE7c6YcXWlZzE2orMMsoXXExSgGgH85MZnkhsLFSH6IVF46jFHAiQox9jvZbhHzb5+nDYThmZS1WCLH9b5HAqJ8OUaQy3Bp+ByNZja/HHULU6bPd68WpDE5Tlj7tR16dXz1gZpbcEHBRBMHW83iLwkCR3egf/FApF7WLDSwMz8GsxKDbY949P44SAS5Jj3O6x8/uMwxFmMJxFtgGbDRx35lKPIM22V2TG6hblH2shc8gAIvvijACZOBtmizF9jmxgE0OgOMRsJ6AWMdBjblvI2U2ZzrI64DqFQ3a0/lt4ztXADEcSiZG7VJ7+YnOZt9xxdRMJ+QrKsPqH2pZACrERH+wOXQojAIjAfgmQ6TG0hIkOiXfeXtRfTqOQPXSTOVLHhRXYIl6QZBLscFlIdbYZ34PtJWk3dJXsAXD8KUCbU0VbF+F+np7F1yM+tF4AUkboPlwURqEE77Qx2924TBX+tWeKrT9rVeM/ysAL95zZBs41gibyyIy3Lpt1H2Ib3wfjNGZ+8j7OKVlRq9Nv3Dq089xj4J+HIguVLUmWLlwpCiHRWMkLS9/pvi/algQ/th0fToil5ptRsYa5NnGCY3T8C0+J7RrafrZB+ccCJ1gIbb6J2VRnUL98SfmV9p+Q51ZJosMCSlwQJnGs+f6Z1hU1F60I0Tqvc0kY=
+    on_success: always
+    on_failure: always
+    on_pull_requests: true
