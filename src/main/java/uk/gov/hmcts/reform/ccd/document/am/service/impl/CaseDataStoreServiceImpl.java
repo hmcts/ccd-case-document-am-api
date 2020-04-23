@@ -19,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
+import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
@@ -64,13 +65,15 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
             if (responseEntity.getStatusCode() == HttpStatus.OK
                 && responseEntity.getBody() instanceof LinkedHashMap) {
                 LinkedHashMap<String, Object> responseObject = (LinkedHashMap<String, Object>) responseEntity.getBody();
-                DocumentPermissions documentMetadata = new ObjectMapper().convertValue(responseObject.get("documentMetadata"),
-                                                                                       DocumentPermissions.class);
-                if (null == documentMetadata) {
+                CaseDocumentMetadata documentMetadata = new ObjectMapper().convertValue(responseObject.get("documentMetadata"),
+                                                                                       CaseDocumentMetadata.class);
+
+                if (documentMetadata != null && documentMetadata.getDocumentPermissions() != null) {
+                    return Optional.of(documentMetadata.getDocumentPermissions());
+                } else {
                     LOG.error(ERROR_MESSAGE, caseId, HttpStatus.FORBIDDEN);
                     throw new ForbiddenException(CASE_ERROR_MESSAGE + caseId);
                 }
-                return Optional.of(documentMetadata);
             }
         } catch (HttpClientErrorException exception) {
             if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {

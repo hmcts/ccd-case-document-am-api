@@ -4,7 +4,7 @@ buildscript {
   }
   configurations.maybeCreate("pitest")
   dependencies {
-    classpath("net.serenity-bdd:serenity-gradle-plugin:2.2.1")
+    classpath("net.serenity-bdd:serenity-gradle-plugin:2.2.2")
     classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.4.7'
     pitest 'org.pitest:pitest-junit5-plugin:0.12'
   }
@@ -16,7 +16,7 @@ plugins {
   id 'pmd'
   id 'jacoco'
   id 'io.spring.dependency-management' version '1.0.9.RELEASE'
-  id 'info.solidsoft.pitest' version '1.4.8'
+  id 'info.solidsoft.pitest' version '1.4.9'
   id 'org.springframework.boot' version '2.2.6.RELEASE'
   id 'org.owasp.dependencycheck' version '5.3.2.1'
   id 'com.github.ben-manes.versions' version '0.28.0'

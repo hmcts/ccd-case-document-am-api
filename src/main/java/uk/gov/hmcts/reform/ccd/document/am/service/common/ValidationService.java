@@ -62,7 +62,7 @@ public class ValidationService {
     }
 
     public static void validateLists(List<?>... inputList) {
-        for (List list : inputList) {
+        for (List<?> list : inputList) {
             if (CollectionUtils.isEmpty(list)) {
                 throw new BadRequestException("The List is empty");
             }

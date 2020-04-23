@@ -3,6 +3,7 @@
   "_extends_": "F-006-Base-Root",
   "productName": "CCD Case Document AM API",
   "operationName": "Get hashtoken by Document ID",
+  "apiClientId": "bulk_scan_processor",
   "specs": [
     "an active caseworker profile in CCD with full permissions on a document field"
   ],
