@@ -366,7 +366,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private void formatUploadDocumentResponse(String caseTypeId, String jurisdictionId,
                                               ResponseEntity<Object> uploadedDocumentResponse) {
         try {
-            LinkedHashMap documents = (LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse.getBody())
+            LinkedHashMap<String, Object> documents = (LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse.getBody())
                 .get(EMBEDDED);
 
             ArrayList<Object> documentList = (ArrayList<Object>) (documents.get(DOCUMENTS));
