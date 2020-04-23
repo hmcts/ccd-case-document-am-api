@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -33,8 +32,8 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.Forbidden
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
-import uk.gov.hmcts.reform.ccd.document.am.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentsMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
@@ -62,7 +61,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -70,6 +68,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.PATCH;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BULK_SCAN_PROCESSOR;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_LENGTH;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
@@ -83,7 +82,6 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.XUI_WEBAPP;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BULK_SCAN_PROCESSOR;
 
 @RunWith(MockitoJUnitRunner.class)
 class DocumentManagementServiceImplTest {
@@ -362,7 +360,7 @@ class DocumentManagementServiceImplTest {
         verifyRestExchangeByteArray();
     }
 
-    @Disabled("Disabled temporarily due to issue with AM-450")
+
     @Test
     void checkUserPermission_HappyPath() {
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
@@ -469,7 +467,6 @@ class DocumentManagementServiceImplTest {
         assertEquals(Boolean.FALSE, result);
     }
 
-    @Disabled("Disabled temporarily due to issue with AM-450")
     @Test
     void checkUserPermission_Throws_CaseNotFoundException() {
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
@@ -493,7 +490,6 @@ class DocumentManagementServiceImplTest {
         verifyCaseDataServiceGetDocMetadata();
     }
 
-    @Disabled("Disabled temporarily due to issue with AM-450")
     @Test
     void checkUserPermission_Throws_InvalidCaseId_BadRequestException() {
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
@@ -511,7 +507,7 @@ class DocumentManagementServiceImplTest {
         verifyRestExchangeOnStoredDoc();
     }
 
-    @Disabled("Disabled temporarily due to issue with AM-450")
+
     @Test
     void checkUserPermission_ReturnsFalse_Scenario1() {
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
@@ -535,7 +531,7 @@ class DocumentManagementServiceImplTest {
         verifyCaseDataServiceGetDocMetadata();
     }
 
-    @Disabled("Disabled temporarily due to issue with AM-450")
+
     @Test
     void checkUserPermission_ReturnsFalse_Scenario2() {
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
@@ -609,41 +605,6 @@ class DocumentManagementServiceImplTest {
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
-    @Disabled("Disabled because the same endpoint is called twice and the documented way to mock multiple calls is not working as expected")
-    @Test
-    @SuppressWarnings("unchecked")
-    void patchDocumentMetadata_ServiceException() {
-        DocumentHashToken doc = DocumentHashToken.builder().id(MATCHED_DOCUMENT_ID)
-            .hashToken(ApplicationUtils.generateHashCode(salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2).concat(BEFTA_CASETYPE_2))).build();
-        List<DocumentHashToken> documentList = new ArrayList<>();
-        documentList.add(doc);
-
-        Map<String, String> myMetadata = new HashMap<>();
-        myMetadata.put("jurisdictionId", BEFTA_JURISDICTION_2);
-        myMetadata.put("caseTypeId", BEFTA_CASETYPE_2);
-        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
-        storedDocumentHalResource.setMetadata(myMetadata);
-
-        HttpClientErrorException myEx = HttpClientErrorException.create(
-            "woopsie", HttpStatus.BAD_GATEWAY, "404", new HttpHeaders(), new byte[1], Charset.defaultCharset());
-
-        doReturn(new ResponseEntity<>(storedDocumentHalResource, HttpStatus.OK))
-            .doThrow(myEx)
-            .when(restTemplateMock)
-            .exchange(documentURL + "/documents/" + MATCHED_DOCUMENT_ID, HttpMethod.GET,requestEntityGlobal, StoredDocumentHalResource.class);
-
-
-        CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
-            .caseId(CASE_ID)
-            .caseTypeId(BEFTA_CASETYPE_2)
-            .jurisdictionId(BEFTA_JURISDICTION_2)
-            .documentHashTokens(documentList)
-            .build();
-
-        Assertions.assertThrows(ServiceException.class, () -> {
-            sut.patchDocumentMetadata(caseDocumentsMetadata);
-        });
-    }
 
     @Test
     @SuppressWarnings("unchecked")
@@ -1264,13 +1225,6 @@ class DocumentManagementServiceImplTest {
         Assertions.assertThrows(ResourceNotFoundException.class, () -> {
             sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), permanent);
         });
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    void checkUserPermissionTest1() {
-        Boolean result = sut.checkUserPermission(new ResponseEntity<Object>(HttpStatus.OK), UUID.fromString(MATCHED_DOCUMENT_ID), Permission.READ);
-        assertEquals(true, result);
     }
 
     @Test

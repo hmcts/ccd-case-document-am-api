@@ -29,7 +29,14 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.Forbidden
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
-import uk.gov.hmcts.reform.ccd.document.am.model.*;
+import uk.gov.hmcts.reform.ccd.document.am.model.AuthorisedService;
+import uk.gov.hmcts.reform.ccd.document.am.model.AuthorisedServices;
+import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentsMetadata;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentHashToken;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentPermissions;
+import uk.gov.hmcts.reform.ccd.document.am.model.DocumentUpdate;
+import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
+import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
@@ -50,8 +57,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 import java.util.Optional;
+import java.util.UUID;
 
 import static javax.servlet.RequestDispatcher.ERROR_MESSAGE;
 import static org.springframework.http.HttpMethod.DELETE;
@@ -444,9 +451,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, Permission permissionToCheck) {
-        if (permissionToCheck.toString().equals(Permission.READ.toString())) {
-            return true;
-        }
+        //if (permissionToCheck.toString().equals(Permission.READ.toString())) {
+        //    return true;
+        //}
         String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
         if (!ValidationService.validate(caseId)) {
             LOG.error("Bad Request Exception {}", CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
