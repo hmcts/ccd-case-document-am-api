@@ -451,9 +451,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, Permission permissionToCheck) {
-        //if (permissionToCheck.toString().equals(Permission.READ.toString())) {
-        //    return true;
-        //}
         String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
         if (!ValidationService.validate(caseId)) {
             LOG.error("Bad Request Exception {}", CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
@@ -522,7 +519,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     private AuthorisedService getServiceDetailsFromJson(String serviceId) {
-        Optional<AuthorisedService> service = authorisedServices.getAuthorisedServices().stream().filter(s -> s.getId().equals(
+        Optional<AuthorisedService> service = authorisedServices.getAuthServices().stream().filter(s -> s.getId().equals(
             serviceId)).findAny();
         if (service.isPresent()) {
             return service.get();

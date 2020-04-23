@@ -21,6 +21,6 @@ import java.util.List;
 public class AuthorisedServices {
 
     @JsonProperty("authorisedServices")
-    private List<AuthorisedService> authorisedServices;
+    private List<AuthorisedService> authServices;
 
 }
