@@ -3,16 +3,16 @@
   "productName": "CCD Data Store",
   "operationName": "Submit case creation as Case worker",
   "method": "POST",
-  "uri": "/caseworkers/{uid}/jurisdictions/{jid}/case-types/{ctid}/cases",
+  "uri": "http://localhost:4452/case-types/{ctid}/cases",
   "specs": [
-    "by a privileged user with full ACL to create a case of this case type"
+    "by a privileged user with full ACL to create a case of this case type",
+    "to create a case of this case type"
   ],
   "request": {
     "headers": {
-      "_extends_": "Common_Request_Headers"
-    },
-    "pathVariables": {
-      "uid": "[[DEFAULT_AUTO_VALUE]]"
+      "_extends_": "Common_Request_Headers",
+      "experimental": true,
+      "Content-Type": "application/vnd.uk.gov.hmcts.ccd-data-store-api.create-case+json;charset=UTF-8;version=2.1"
     },
     "body": {
       "event": {
@@ -31,20 +31,7 @@
       "Content-Encoding": "gzip",
       "Content-Type": "application/json;charset=UTF-8",
       "vary": "accept-encoding",
-      "Content-Length": "[[ANY]]"
-    },
-    "body": {
-      "id": "[[ANY]]",
-      "state": "TODO",
-      "version": 0,
-      "created_date": "[[ANY]]",
-      "last_modified": "[[ANY]]",
-      "security_classification": "PUBLIC",
-      "after_submit_callback_response": null,
-      "callback_response_status_code": null,
-      "callback_response_status": null,
-      "delete_draft_response_status_code": null,
-      "delete_draft_response_status": null
+      "Content-Length": "[[ANYTHING_PRESENT]]"
     }
   }
 }
