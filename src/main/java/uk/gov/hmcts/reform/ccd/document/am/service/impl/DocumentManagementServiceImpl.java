@@ -67,7 +67,6 @@ import static org.springframework.http.HttpMethod.PATCH;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BAD_REQUEST;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
@@ -452,18 +451,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, Permission permissionToCheck) {
         String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
-        if (!ValidationService.validate(caseId)) {
-            LOG.error("Bad Request Exception {}", CASE_ID_INVALID + HttpStatus.BAD_REQUEST);
-            throw new BadRequestException(CASE_ID_INVALID);
+        ValidationService.validate(caseId);
 
-        } else {
-            DocumentPermissions documentPermissions = caseDataStoreService
-                .getCaseDocumentMetadata(caseId, documentId)
-                .orElseThrow(() -> new CaseNotFoundException(caseId));
+        DocumentPermissions documentPermissions = caseDataStoreService
+            .getCaseDocumentMetadata(caseId, documentId)
+            .orElseThrow(() -> new CaseNotFoundException(caseId));
 
-            return (documentPermissions.getId().equals(documentId.toString())
-                && documentPermissions.getPermissions().contains(permissionToCheck));
-        }
+        return (documentPermissions.getId().equals(documentId.toString())
+            && documentPermissions.getPermissions().contains(permissionToCheck));
     }
 
     public boolean checkServicePermission(ResponseEntity<?> responseEntity, Permission permission) {
@@ -520,13 +515,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private AuthorisedService getServiceDetailsFromJson(String serviceId) {
         Optional<AuthorisedService> service = authorisedServices.getAuthServices().stream().filter(s -> s.getId().equals(
             serviceId)).findAny();
-        if (service.isPresent()) {
-            return service.get();
-        }
-        return null;
+        return service.orElse(null);
     }
 
-    public String extractCaseTypeIdFromMetadata(Object storedDocument) {
+    private String extractCaseTypeIdFromMetadata(Object storedDocument) {
         if (storedDocument instanceof StoredDocumentHalResource) {
             Map<String, String> metadata = ((StoredDocumentHalResource) storedDocument).getMetadata();
             return metadata.get(CASE_TYPE_ID);
@@ -534,7 +526,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return null;
     }
 
-    public String extractJurisdictionIdFromMetadata(Object storedDocument) {
+    private String extractJurisdictionIdFromMetadata(Object storedDocument) {
         if (storedDocument instanceof StoredDocumentHalResource) {
             Map<String, String> metadata = ((StoredDocumentHalResource) storedDocument).getMetadata();
             return metadata.get(JURISDICTION_ID);
@@ -549,8 +541,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return headers;
     }
 
-    private HttpClientErrorException catchException(HttpClientErrorException exception, String messageParam,
-                                                    String errorMessage) {
+    private void catchException(HttpClientErrorException exception, String messageParam,
+                                String errorMessage) {
         if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
             LOG.error(ERROR_MESSAGE, messageParam, HttpStatus.NOT_FOUND);
             throw new ResourceNotFoundException(messageParam);
@@ -569,7 +561,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
     }
 
-    private HttpClientErrorException catchException(HttpClientErrorException exception,
+    private void catchException(HttpClientErrorException exception,
                                                     String errorMessage) {
         if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
             LOG.error(ERROR_MESSAGE, HttpStatus.NOT_FOUND);
