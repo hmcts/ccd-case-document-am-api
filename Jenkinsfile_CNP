@@ -36,7 +36,8 @@ def secrets = [
     's2s-${env}': [
         secret('microservicekey-ccd-gw', 'BEFTA_S2S_CLIENT_SECRET'),
         secret('microservicekey-ccd-data', 'API_CLIENT_DATA_STORE_SECRET'),
-        secret('microservicekey-bulk-scan-processor', 'API_CLIENT_BULK_SCAN_PROCESSOR_SECRET')
+        secret('microservicekey-bulk-scan-processor', 'API_CLIENT_BULK_SCAN_PROCESSOR_SECRET'),
+        secret('microservicekey-xui-webapp', 'API_CLIENT_XUI_WEBAPP_SECRET')
     ]
 ]
 
@@ -67,6 +68,7 @@ env.CASE_DOCUMENT_AM_URL = "http://ccd-case-document-am-api-pr-22.service.core-c
 env.CASE_DOCUMENT_SWAGGER_AM_URL = "ccd-case-document-am-api-pr-22.service.core-compute-preview.internal";
 env.API_CLIENT_BULK_SCAN_PROCESSOR_ID = "bulk_scan_processor"
 env.API_CLIENT_DATA_STORE_ID = "ccd_data"
+env.API_CLIENT_XUI_WEBAPP_ID = "xui_webapp"
 
 withPipeline(type, product, component) {
   onMaster {
