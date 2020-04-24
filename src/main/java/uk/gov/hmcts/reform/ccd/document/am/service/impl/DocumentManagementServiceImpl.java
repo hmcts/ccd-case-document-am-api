@@ -135,7 +135,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public ResponseEntity<Object> getDocumentMetadata(UUID documentId) {
 
         try {
@@ -177,7 +176,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public ResponseEntity<Object> getDocumentBinaryContent(UUID documentId) {
         try {
             final HttpEntity<?> requestEntity = new HttpEntity<>(getHttpHeaders());
@@ -341,7 +339,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public ResponseEntity<Object> deleteDocument(UUID documentId,  Boolean permanent) {
 
         try {
@@ -510,7 +507,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return value.replaceAll("[\n|\r|\t]", "_");
     }
 
-    @SuppressWarnings("unchecked")
     private boolean validatePermissions(AuthorisedService serviceConfig, Permission permission) {
         List<Permission> servicePermissions = serviceConfig.getPermissions();
         boolean result = !servicePermissions.isEmpty() && (servicePermissions.contains(permission));

@@ -44,7 +44,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("PMD.DataflowAnomalyAnalysis")
 public class CaseDocumentAmControllerTest {
     @InjectMocks
     private transient CaseDocumentAmController testee;
@@ -499,7 +498,6 @@ public class CaseDocumentAmControllerTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void generateHashCode_HappyPath() {
 
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
@@ -522,7 +520,6 @@ public class CaseDocumentAmControllerTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void generateHashCode_BadRequestWhenServiceIsNotAuthorised() {
 
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
