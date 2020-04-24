@@ -135,7 +135,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Override
     public ResponseEntity<Object> getDocumentMetadata(UUID documentId) {
-        ResponseEntity<Object> responseReturn = new ResponseEntity<>(HttpStatus.OK);
+        ResponseEntity<Object> responseResult = new ResponseEntity<>(HttpStatus.OK);
         try {
             final HttpEntity<String> requestEntity = new HttpEntity<>(getHttpHeaders());
             LOG.info("Document Store URL is : {}", documentURL);
@@ -152,7 +152,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             ResponseEntity<Object> responseEntity = ResponseHelper.toResponseEntity(response, documentId);
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
                 LOG.info("Positive response");
-                responseReturn = responseEntity;
+                responseResult = responseEntity;
             } else {
                 LOG.error("Document doesn't exist for requested document id at Document Store {}", responseEntity
                     .getStatusCode());
@@ -161,7 +161,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         } catch (HttpClientErrorException exception) {
             catchException(exception, documentId.toString(), EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE);
         }
-        return responseReturn;
+        return responseResult;
 
     }
 
@@ -176,7 +176,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Override
     public ResponseEntity<Object> getDocumentBinaryContent(UUID documentId) {
-        ResponseEntity<Object> responseReturn = new ResponseEntity<>(HttpStatus.OK);
+        ResponseEntity<Object> responseResult = new ResponseEntity<>(HttpStatus.OK);
         try {
             final HttpEntity<?> requestEntity = new HttpEntity<>(getHttpHeaders());
             String documentBinaryUrl = String.format("%s/documents/%s/binary", documentURL, documentId);
@@ -187,10 +187,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 ByteArrayResource.class
                                                                               );
             if (HttpStatus.OK.equals(response.getStatusCode())) {
-                responseReturn =  ResponseEntity.ok().headers(getHeaders(response))
+                responseResult =  ResponseEntity.ok().headers(getHeaders(response))
                                      .body(response.getBody());
             } else {
-                responseReturn = ResponseEntity
+                responseResult = ResponseEntity
                     .status(response.getStatusCode())
                     .body(response.getBody());
             }
@@ -198,7 +198,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         } catch (HttpClientErrorException exception) {
             catchException(exception, documentId.toString(), EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE);
         }
-        return responseReturn;
+        return responseResult;
 
     }
 
@@ -278,7 +278,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Override
     public ResponseEntity<Object> uploadDocuments(List<MultipartFile> files, String classification,
                                                    String caseTypeId, String jurisdictionId) {
-        ResponseEntity<Object> responseReturn = new ResponseEntity<>(HttpStatus.OK);
+        ResponseEntity<Object> responseResult = new ResponseEntity<>(HttpStatus.OK);
         try {
             LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
             HttpHeaders headers = prepareRequestForUpload(classification, caseTypeId, jurisdictionId, bodyMap);
@@ -300,18 +300,18 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 formatUploadDocumentResponse(caseTypeId, jurisdictionId, uploadedDocumentResponse);
             }
 
-            responseReturn = ResponseEntity
+            responseResult = ResponseEntity
                 .status(uploadedDocumentResponse.getStatusCode())
                 .body(uploadedDocumentResponse.getBody());
         } catch (HttpClientErrorException exception) {
             catchException(exception, EXCEPTION_ERROR_MESSAGE);
         }
-        return responseReturn;
+        return responseResult;
     }
 
     @Override
     public ResponseEntity<Object> patchDocument(UUID documentId, UpdateDocumentCommand ttl) {
-        ResponseEntity<Object> responseReturn = new ResponseEntity<>(HttpStatus.OK);
+        ResponseEntity<Object> responseResult = new ResponseEntity<>(HttpStatus.OK);
         if (!ValidationService.validateTTL(ttl.getTtl())) {
             throw new BadRequestException(String.format(
                 "Incorrect date format %s",
@@ -328,7 +328,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             );
             ResponseEntity<Object> responseEntity = ResponseHelper.toResponseEntity(response, documentId);
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
-                responseReturn = responseEntity;
+                responseResult = responseEntity;
             } else {
                 LOG.error("Document doesn't exist for requested document id at Document Store API Side {}", response
                     .getStatusCode());
@@ -337,12 +337,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         } catch (HttpClientErrorException exception) {
             catchException(exception, documentId.toString(), EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE);
         }
-        return responseReturn;
+        return responseResult;
     }
 
     @Override
     public ResponseEntity<Object> deleteDocument(UUID documentId,  Boolean permanent) {
-        ResponseEntity<Object> responseReturn = new ResponseEntity<>(HttpStatus.OK);
+        ResponseEntity<Object> responseResult = new ResponseEntity<>(HttpStatus.OK);
         try {
             final HttpEntity<?> requestEntity = new HttpEntity<>(getHttpHeaders());
             String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, documentId, permanent);
@@ -355,7 +355,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             );
             if (HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
                 LOG.info("Positive response");
-                responseReturn = response;
+                responseResult = response;
             } else {
                 LOG.error("Document doesn't exist for requested document id at Document Store {}", response
                     .getStatusCode());
@@ -364,7 +364,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         } catch (HttpClientErrorException exception) {
             catchException(exception, documentId.toString(), EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE);
         }
-        return responseReturn;
+        return responseResult;
     }
 
 
