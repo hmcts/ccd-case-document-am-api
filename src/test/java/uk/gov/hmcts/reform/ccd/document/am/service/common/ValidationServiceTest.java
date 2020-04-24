@@ -40,14 +40,6 @@ public class ValidationServiceTest {
     }
 
     @Test
-    void shouldValidateLists() {
-        List<String> file1 = Arrays.asList("file1");
-        List<String> file2 = Arrays.asList("file2");
-        List<List> files = Arrays.asList(file1, file2);
-        ValidationService.validateLists(files);
-    }
-
-    @Test
     void shouldValidateTTL() {
         assertEquals(false, ValidationService.validateTTL("2021-12-31T10:10:10+"));
         assertEquals(false, ValidationService.validateTTL("2021-12-31T10:10:10+9999"));
