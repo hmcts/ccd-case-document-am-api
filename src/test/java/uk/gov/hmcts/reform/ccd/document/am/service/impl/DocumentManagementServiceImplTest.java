@@ -478,7 +478,7 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void checkUserPermission_Throws_InvalidCaseId_BadRequestException() {
-        mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("123456789012345", "", ""), HttpStatus.OK);
+        mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("123456789012345@", "", ""), HttpStatus.OK);
         ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
