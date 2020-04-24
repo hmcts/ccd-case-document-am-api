@@ -126,7 +126,7 @@ task functional(type: Test, description: 'Runs the functional tests.', group: 'V
       main = "uk.gov.hmcts.ccd.documentam.befta.CaseDocumentAmBeftaMain"
       classpath += configurations.cucumberRuntime + sourceSets.functionalTest.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
       args = ['--plugin', "json:${projectDir}/target/cucumber.json", '--tags', 'not @Ignore', '--glue',
-              'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features/F-000']
+              'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features/']
     }
   }
 }
