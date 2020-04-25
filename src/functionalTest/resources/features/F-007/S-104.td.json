@@ -2,19 +2,13 @@
   "title": "must get an error response when API-Gateway tries to access Attach Document to a Case API",
   "_guid_": "S-104",
   "_extends_": "F-007_Test_Data_Base",
-
   "apiClientId": "ccd_gw",
-
   "specs": [
     "contains a Case Id",
     "is to be made on behalf of API-Gateway API"
   ],
-
   "request": {
     "body": {
-      "caseId": "1234567890099900",
-      "caseTypeId" : "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][caseTypeId]}",
-      "jurisdictionId" : "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][jurisdictionId]}",
       "documentHashTokens": [
         {
           "id": "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
@@ -23,16 +17,15 @@
       ]
     }
   },
-
   "expectedResponse": {
     "_extends_": "Common_403_Response",
     "headers": {
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
-    "body" : {
-      "message" : "Forbidden: Insufficient permissions: ${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][caseTypeId]} ${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][jurisdictionId]}",
-      "path" : "/cases/documents/attachToCase"
+    "body": {
+      "message": "Forbidden: Insufficient permissions: ${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][caseTypeId]} ${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][jurisdictionId]}",
+      "path": "/cases/documents/attachToCase"
     }
   }
 }
