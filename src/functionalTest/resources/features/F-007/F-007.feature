@@ -94,11 +94,11 @@ Feature: F-007: Attach Document to Case
     Then a positive response is received,
     And the response has all other details as expected.
 
-  @S-080 @Ignore
-  Scenario: generic scenario for Unauthorised
-
-  @S-081 @Ignore
-  Scenario: generic scenario for Forbidden
+#  @S-080 @Ignore
+#  Scenario: generic scenario for Unauthorised
+#
+#  @S-081 @Ignore
+#  Scenario: generic scenario for Forbidden
 
   @S-102
   Scenario: must get an error response when Ex-UI tries to access Attach Document to a Case API
