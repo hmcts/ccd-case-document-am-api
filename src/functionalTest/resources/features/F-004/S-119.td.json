@@ -1,0 +1,42 @@
+{
+  "_guid_": "S-119",
+  "_extends_": "F-004_Test_Base_data",
+  "apiClientId": "bulk_scan_processor",
+  "title": "must get an error response when Bulk Scan Processor tries to access Upload Document With Binary Content API",
+  "specs": [
+    "is to be made on behalf of Bulk Scan Processor API"
+  ],
+  "request": {
+    "body": {
+      "arrayInMap": [
+        {
+          "key": "classification",
+          "value": "PUBLIC"
+        },
+        {
+          "key": "caseTypeId",
+          "value": "BEFTA_CASETYPE_2_2"
+        },
+        {
+          "key": "jurisdictionId",
+          "value": "BEFTA_JURISDICTION_2"
+        },
+        {
+          "key": "files",
+          "filePath": "CCD_BEFTA_JURISDICTION2.xlsx"
+        }
+      ]
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_403_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body": {
+      "message": "Forbidden: Insufficient permissions: ${[scenarioContext][testData][request][body][arrayInMap][1][value]} ${[scenarioContext][testData][request][body][arrayInMap][2][value]}",
+      "path": "/cases/documents"
+    }
+  }
+}

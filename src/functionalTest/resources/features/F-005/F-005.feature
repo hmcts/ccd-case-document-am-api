@@ -115,7 +115,6 @@ Feature: F-005: Patch Document with ttl
     Then  a negative response is received,
     And   the response has all the details as expected.
 
-  @Ignore #service_config has updated with full privileges for Gateway-API
   @S-124
   Scenario: must get an error response when API-Gateway tries to access Patch Document with ttl API
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
