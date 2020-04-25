@@ -92,3 +92,37 @@ Feature: F-005: Patch Document with ttl
 
   @S-059
   Scenario: generic scenario for Unsupported Media Type
+
+  @S-122
+  Scenario: must get an error response when CCD Data Store tries to access Patch Document with ttl API
+    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
+    And   a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
+    When  a request is prepared with appropriate values,
+    And   the request [contains document id uploaded above with ttl],
+    And   the request [is to be made on behalf of CCD Data Store API],
+    And   it is submitted to call the [Patch Document with ttl] operation of [CCD Case Document AM API],
+    Then  a negative response is received,
+    And   the response has all the details as expected.
+
+  @S-123
+  Scenario: must get an error response when Bulk Scan Processor tries to access Patch Document with ttl API
+    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
+    And   a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
+    When  a request is prepared with appropriate values,
+    And   the request [contains document id uploaded above with ttl],
+    And   the request [is to be made on behalf of Bulk Scan Processor API],
+    And   it is submitted to call the [Patch Document with ttl] operation of [CCD Case Document AM API],
+    Then  a negative response is received,
+    And   the response has all the details as expected.
+
+  @Ignore #service_config has updated with full privileges for Gateway-API
+  @S-124
+  Scenario: must get an error response when API-Gateway tries to access Patch Document with ttl API
+    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
+    And   a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
+    When  a request is prepared with appropriate values,
+    And   the request [contains document id uploaded above with ttl],
+    And   the request [is to be made on behalf of API-Gateway API],
+    And   it is submitted to call the [Patch Document with ttl] operation of [CCD Case Document AM API],
+    Then  a negative response is received,
+    And   the response has all the details as expected.
