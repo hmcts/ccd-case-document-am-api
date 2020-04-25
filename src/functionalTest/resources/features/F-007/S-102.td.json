@@ -1,5 +1,5 @@
 {
-  "title": "must get an error response when Ex-UI tries to access Attach Document to a Case API",
+  "title": "must get an error response when Ex-UI tries to access Attach Document to Case API",
   "_guid_": "S-102",
   "_extends_": "F-007_Test_Data_Base",
   "apiClientId": "xui_webapp",
