@@ -1,0 +1,28 @@
+{
+  "title": "must receive an error response when CCD Data Store tries to access Get Document Binary Content by Document ID API",
+
+  "_guid_": "S-114",
+  "_extends_": "F-002_Test_Data_Base",
+  "apiClientId": "ccd_data",
+
+  "specs": [
+    "is to be made on behalf of CCD Data Store API"
+  ],
+
+  "request": {
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  },
+
+  "expectedResponse": {
+    "_extends_": "Common_403_Response",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "message" : "Access Denied",
+      "path" : "/cases/documents/${[scenarioContext][testData][request][pathVariables][documentId]}/binary"
+    }
+  }
+}

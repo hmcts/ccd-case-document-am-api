@@ -65,3 +65,33 @@ Feature: F-003: Delete Document by Document ID
 
   @S-038
   Scenario: generic scenario for Unsupported Media Type
+
+  @S-126
+  Scenario: must get an error response when CCD Data Store tries to access Delete Document by Document ID API
+    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
+    And a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
+    When a request is prepared with appropriate values,
+    And the request [is to be made on behalf of CCD Data Store API],
+    And it is submitted to call the [Delete Document by Document ID] operation of [CCD Case Document AM API],
+    Then a negative response is received,
+    And the response has all the details as expected.
+
+  @S-127
+  Scenario: must get an error response when Bulk Scan Processor tries to access Delete Document by Document ID API
+    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
+    And a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
+    When a request is prepared with appropriate values,
+    And the request [is to be made on behalf of Bulk Scan Processor API],
+    And it is submitted to call the [Delete Document by Document ID] operation of [CCD Case Document AM API],
+    Then a negative response is received,
+    And the response has all the details as expected.
+
+  @S-128
+  Scenario: must get an error response when API-Gateway tries to access Delete Document by Document ID API
+    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
+    And a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
+    When a request is prepared with appropriate values,
+    And the request [is to be made on behalf of API-Gateway API],
+    And it is submitted to call the [Delete Document by Document ID] operation of [CCD Case Document AM API],
+    Then a negative response is received,
+    And the response has all the details as expected.
