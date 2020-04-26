@@ -1,0 +1,24 @@
+{
+  "title": "must get an error response when Bulk Scan Processor tries to access Get Document Metadata by Document ID API",
+  "_extends_": "F-001_Test_Base_data",
+  "_guid_": "S-111",
+  "apiClientId": "bulk_scan_processor",
+  "specs": [
+    "is to be made on behalf of Bulk Scan Processor API"
+  ],
+  "request": {
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_403_Response",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "message": "Access Denied",
+      "path": "/cases/documents/${[scenarioContext][testData][request][pathVariables][documentId]}"
+    }
+  }
+}
