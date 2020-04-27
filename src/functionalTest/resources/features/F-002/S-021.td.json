@@ -17,8 +17,8 @@
   "expectedResponse": {
     "_extends_": "Common_404_Response",
     "headers": {
-      "Connection" : "keep-alive",
-      "Content-Type" : "application/json"
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body" : {
       "timestamp" : "[[ANYTHING_PRESENT]]",
