@@ -3,7 +3,7 @@
   "productName": "CCD Data Store",
   "operationName": "Start event creation as Case worker",
   "method": "GET",
-  "uri": "http://localhost:4452/caseworkers/{uid}/jurisdictions/{jid}/case-types/{ctid}/event-triggers/{etid}/token",
+  "uri": "{{CCD_DATA_STORE_URL}}/caseworkers/{uid}/jurisdictions/{jid}/case-types/{ctid}/event-triggers/{etid}/token",
   "specs": [
     "to create a token for case creation"
   ],
