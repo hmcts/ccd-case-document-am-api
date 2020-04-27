@@ -24,8 +24,7 @@
     "_extends_": "Common_403_Response",
     "headers": {
       "Connection" : "keep-alive",
-      "Content-Type" : "application/json",
-      "Keep-Alive" : "[[ANYTHING_PRESENT]]"
+      "Content-Type" : "application/json"
     },
     "body" : {
       "timestamp" : "[[ANYTHING_PRESENT]]",
