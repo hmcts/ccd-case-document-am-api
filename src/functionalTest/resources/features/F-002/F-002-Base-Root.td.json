@@ -9,8 +9,8 @@
   },
   "request": {
 		"headers": {
-			"ServiceAuthorization": "[[DEFAULT_AUTO_VALUE]]",
-      "user-roles": "caseworker"
-		}
+      "Authorization": "[[DEFAULT_AUTO_VALUE]]",
+      "ServiceAuthorization": "[[DEFAULT_AUTO_VALUE]]"
+    }
 	}
 }

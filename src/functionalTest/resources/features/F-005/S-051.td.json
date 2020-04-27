@@ -35,7 +35,7 @@
       "createdOn": "[[ANYTHING_PRESENT]]",
       "classification": "PUBLIC",
       "metadata": {
-        "caseTypeId": "BEFTA_CASETYPE_2_2",
+        "caseTypeId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][_embedded][documents][0][metadata][caseTypeId]}",
         "jurisdictionId": "BEFTA_JURISDICTION_2"
       },
       "ttl": "2021-12-30T12:10:10.000+0000",
