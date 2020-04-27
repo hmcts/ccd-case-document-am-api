@@ -26,12 +26,20 @@
     }
   },
   "expectedResponse": {
-    "_extends_": "Common_201_Response",
-    "headers": {
-      "Content-Encoding": "gzip",
-      "Content-Type": "application/json;charset=UTF-8",
-      "vary": "accept-encoding",
-      "Content-Length": "[[ANYTHING_PRESENT]]"
+    "responseCode" : 201,
+    "responseMessage" : "Created",
+    "headers" : {
+      "Cache-Control" : "no-cache, no-store, max-age=0, must-revalidate",
+      "Content-Encoding" : "gzip",
+      "Content-Length" : "[[ANYTHING_PRESENT]]",
+      "Content-Type" : "application/vnd.uk.gov.hmcts.ccd-data-store-api.create-case.v2+json;charset=UTF-8",
+      "Date" : "[[ANYTHING_PRESENT]]",
+      "Expires" : "[[ANYTHING_PRESENT]]",
+      "Pragma" : "no-cache",
+      "Vary" : "[[ANYTHING_PRESENT]]",
+      "X-Content-Type-Options" : "nosniff",
+      "X-Frame-Options" : "DENY",
+      "X-Xss-Protection" : "1; mode=block"
     }
   }
 }
