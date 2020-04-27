@@ -53,25 +53,25 @@ Feature: F-002: Get Document Binary Content by Document ID
 #    @S-026 @Ignore
 #    Scenario: generic scenario for Unsupported Media Type
 
-  @S-114
-  Scenario: must receive an error response when CCD Data Store tries to access Get Document Binary Content by Document ID API
-    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
-    And a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
-    When a request is prepared with appropriate values,
-    And the request [is to be made on behalf of CCD Data Store API],
-    And it is submitted to call the [Get Binary Content by Document ID] operation of [CCD Case Document AM API],
-    Then a negative response is received,
-    And the response has all the details as expected.
-
-  @S-115
-  Scenario: must receive an error response when Bulk Scan Processor tries to access Get Document Binary Content by Document ID API
-    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
-    And a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
-    When a request is prepared with appropriate values,
-    And the request [is to be made on behalf of Bulk Scan Processor API],
-    And it is submitted to call the [Get Binary Content by Document ID] operation of [CCD Case Document AM API],
-    Then a negative response is received,
-    And the response has all the details as expected.
+#  @S-114
+#  Scenario: must receive an error response when CCD Data Store tries to access Get Document Binary Content by Document ID API
+#    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
+#    And a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
+#    When a request is prepared with appropriate values,
+#    And the request [is to be made on behalf of CCD Data Store API],
+#    And it is submitted to call the [Get Binary Content by Document ID] operation of [CCD Case Document AM API],
+#    Then a negative response is received,
+#    And the response has all the details as expected.
+#
+#  @S-115
+#  Scenario: must receive an error response when Bulk Scan Processor tries to access Get Document Binary Content by Document ID API
+#    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
+#    And a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
+#    When a request is prepared with appropriate values,
+#    And the request [is to be made on behalf of Bulk Scan Processor API],
+#    And it is submitted to call the [Get Binary Content by Document ID] operation of [CCD Case Document AM API],
+#    Then a negative response is received,
+#    And the response has all the details as expected.
 
 #  @S-116
 #  Scenario: must successfully receive response when API-Gateway tries to access Get Document Binary Content by Document ID API
