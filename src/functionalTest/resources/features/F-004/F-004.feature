@@ -136,11 +136,12 @@ Feature: F-004: Upload Document With Binary Content
     And   the response has all the details as expected.
 
   @S-120
-  Scenario: must get an error response when API-Gateway tries to access Upload Document With Binary Content API
+  Scenario: must successfully upload document when API-Gateway tries to access Upload Document With Binary Content API
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
     When  a request is prepared with appropriate values,
     And   the request [is to be made on behalf of API-Gateway API],
     And   it is submitted to call the [Upload Document With Binary Content] operation of [CCD Case Document AM API],
-    Then  a negative response is received,
-    And   the response has all the details as expected.
+    Then  a positive response is received,
+    And   the response [contains the metadata for the document uploaded above],
+    And   the response has all other details as expected.
 

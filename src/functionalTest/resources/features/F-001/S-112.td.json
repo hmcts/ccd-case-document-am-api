@@ -1,10 +1,11 @@
 {
-  "title": "must get an error response when API-Gateway tries to access Get Document Metadata by Document ID API",
+  "title": "must successfully get response when API-Gateway tries to access Get Document Metadata by Document ID API",
   "_extends_": "F-001_Test_Base_data",
   "_guid_": "S-112",
   "apiClientId": "ccd_gw",
   "specs": [
-    "is to be made on behalf of API-Gateway API"
+    "is to be made on behalf of API-Gateway API",
+    "contains the binary content for the uploaded document"
   ],
   "request": {
     "pathVariables": {
@@ -12,13 +13,28 @@
     }
   },
   "expectedResponse": {
-    "_extends_": "Common_403_Response",
-    "headers": {
-      "Content-Type": "application/json"
-    },
+    "_extends_": "Common_200_Response",
     "body": {
-      "message": "Access Denied",
-      "path": "/cases/documents/${[scenarioContext][testData][request][pathVariables][documentId]}"
+      "links": {
+        "self": {
+          "href": "{{CASE_DOC_AM_URL}}/cases/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+        },
+        "binary": {
+          "href": "{{CASE_DOC_AM_URL}}/cases/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}/binary"
+        }
+      },
+      "classification": "PUBLIC",
+      "createdOn": "[[ANYTHING_PRESENT]]",
+      "metadata": {
+        "caseId": "1111122222333334"
+      },
+      "mimeType": "multipart/form-data",
+      "modifiedOn": "[[ANYTHING_PRESENT]]",
+      "originalDocumentName": "[[ANYTHING_PRESENT]]",
+      "roles": [
+        "caseworker"
+      ],
+      "size": "[[ANYTHING_PRESENT]]"
     }
   }
 }

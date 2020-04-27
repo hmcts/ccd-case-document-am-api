@@ -1,12 +1,13 @@
 {
-  "title": "must receive an error response when API-Gateway tries to access Get Document Binary Content by Document ID API",
+  "title": "must successfully receive response when API-Gateway tries to access Get Document Binary Content by Document ID API",
 
   "_guid_": "S-116",
   "_extends_": "F-002_Test_Data_Base",
   "apiClientId": "ccd_gw",
 
   "specs": [
-    "is to be made on behalf of API-Gateway API"
+    "is to be made on behalf of API-Gateway API",
+    "contains the binary content for the uploaded document"
   ],
 
   "request": {
@@ -16,13 +17,23 @@
   },
 
   "expectedResponse": {
-    "_extends_": "Common_403_Response",
-    "headers": {
-      "Content-Type": "application/json"
+    "_extends_": "Common_200_Response",
+    "headers" : {
+      "Accept-Ranges" : "bytes",
+      "Connection" : "keep-alive",
+      "Content-Disposition" : "[[ANYTHING_PRESENT]]",
+      "Content-Length" : "679361",
+      "Content-Type" : "image/png",
+      "data-source" : "contentURI",
+      "Keep-Alive" :"[[ANYTHING_PRESENT]]",
+      "OriginalFileName" : "[[ANYTHING_PRESENT]]"
     },
-    "body": {
-      "message" : "Access Denied",
-      "path" : "/cases/documents/${[scenarioContext][testData][request][pathVariables][documentId]}/binary"
+    "body" : {
+      "__fileInBody__" : {
+        "fullPath" : "file",
+        "size" : "679361",
+        "contentHash" : "hash"
+      }
     }
   }
 }

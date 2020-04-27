@@ -1,5 +1,5 @@
 {
-  "title": "must get an error response when API-Gateway tries to access Delete Document by Document ID API",
+  "title": "must successfully delete a document when API-Gateway tries to access Delete Document by Document ID API",
   "_guid_": "S-128",
   "_extends_": "F-003_Test_Data_Base",
   "apiClientId": "ccd_gw",
@@ -16,14 +16,6 @@
   },
 
   "expectedResponse": {
-    "_extends_": "Common_403_Response",
-    "headers": {
-      "Content-Type": "application/json",
-      "Content-Length": "[[ANYTHING_PRESENT]]"
-    },
-    "body": {
-      "message" : "Forbidden: Insufficient permissions: ${[scenarioContext][testData][request][pathVariables][documentId]}",
-      "path" : "/cases/documents/${[scenarioContext][testData][request][pathVariables][documentId]}"
-    }
+    "_extends_": "Common_204_Response"
   }
 }
