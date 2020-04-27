@@ -15,8 +15,8 @@ Feature: F-001: Get Document Metadata by Document ID
     Then  a positive response is received,
     And   the response [contains the metadata for the document uploaded above],
     And   the response has all other details as expected.
-#
-#
+
+
   @S-002
   Scenario: must get an error response for a non-existing document ID
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
@@ -25,7 +25,7 @@ Feature: F-001: Get Document Metadata by Document ID
     And   it is submitted to call the [Get Document Metadata by Document ID] operation of [CCD Case Document AM API],
     Then  a negative response is received,
     And   the response has all the details as expected.
-#
+
   @S-003
   Scenario: must get an error response for a malformed document ID
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
@@ -34,7 +34,7 @@ Feature: F-001: Get Document Metadata by Document ID
     And   it is submitted to call the [Get Document Metadata by Document ID] operation of [CCD Case Document AM API],
     Then  a negative response is received,
     And   the response has all the details as expected.
-#
+
   @S-004
   Scenario: must get an error response for a document id which is not associated
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
