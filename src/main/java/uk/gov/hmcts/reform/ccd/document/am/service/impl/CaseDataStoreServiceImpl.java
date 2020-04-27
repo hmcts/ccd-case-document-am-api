@@ -54,6 +54,7 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
     @Override
     @SuppressWarnings("unchecked")
     public Optional<DocumentPermissions> getCaseDocumentMetadata(String caseId, UUID documentId) {
+        Optional<DocumentPermissions> result = Optional.empty();
         try {
             HttpHeaders headers = prepareRequestForUpload();
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
@@ -69,7 +70,7 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
                                                                                        CaseDocumentMetadata.class);
 
                 if (documentMetadata != null && documentMetadata.getDocumentPermissions() != null) {
-                    return Optional.of(documentMetadata.getDocumentPermissions());
+                    result = Optional.of(documentMetadata.getDocumentPermissions());
                 } else {
                     LOG.error(ERROR_MESSAGE, caseId, HttpStatus.FORBIDDEN);
                     throw new ForbiddenException(CASE_ERROR_MESSAGE + caseId);
@@ -94,7 +95,7 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
                 ));
             }
         }
-        return Optional.empty();
+        return result;
     }
 
     private HttpHeaders prepareRequestForUpload() {
