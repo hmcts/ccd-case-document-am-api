@@ -1,0 +1,30 @@
+{
+  "title": "must get an error response for a malformed ttl",
+  "_guid_": "S-053",
+  "_extends_": "F-005_Test_Data_Base",
+
+  "specs": [
+    "contains a malformed ttl"
+  ],
+
+  "request": {
+      "pathVariables": {
+        "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    },
+    "body": {
+      "ttl": "2021-12-30T1@:10:10+0000"
+    }
+  },
+
+  "expectedResponse": {
+    "_extends_": "Common_400_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body" : {
+      "message" : "Incorrect date format 2021-12-30T1@:10:10+0000",
+      "path" : "/cases/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  }
+}

@@ -1,0 +1,237 @@
+{
+  "_guid_": "S-048",
+  "_extends_": "F-004_Test_Base_data",
+  "title": "must successfully upload multiple document with binary content",
+  "specs": [
+    "contains multiple documents with binary contents",
+    "contains the metadata for each of the documents uploaded above"
+  ],
+  "request": {
+    "body": {
+      "arrayInMap": [
+        {
+          "key": "classification",
+          "value": "PUBLIC"
+        },
+        {
+          "key": "caseTypeId",
+          "value": "BEFTA_CASETYPE_2_2"
+        },
+        {
+          "key": "jurisdictionId",
+          "value": "BEFTA_JURISDICTION_2"
+        },
+        {
+          "key": "files",
+          "filePath": "SampleImage.png"
+        },
+        {
+          "key": "files",
+          "filePath": "SampleImage.png"
+        },
+        {
+          "key": "files",
+          "filePath": "CCD_BEFTA_JURISDICTION2.xlsx"
+        },
+        {
+          "key": "files",
+          "filePath": "CCD_BEFTA_JURISDICTION2.xlsx"
+        },
+        {
+          "key": "files",
+          "filePath": "SampleImage.png"
+        },
+        {
+          "key": "files",
+          "filePath": "Sample.pdf"
+        },
+        {
+          "key": "files",
+          "filePath": "Sample.pdf"
+        }
+      ]
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_200_Response",
+    "headers": {
+      "Content-Encoding": "[[ANYTHING_PRESENT]]",
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body": {
+      "_embedded": {
+        "documents": [
+          {
+            "size": "[[ANYTHING_PRESENT]]",
+            "mimeType": "image/png",
+            "originalDocumentName": "[[ANYTHING_PRESENT]]",
+            "createdBy": "[[ANYTHING_PRESENT]]",
+            "lastModifiedBy": "[[ANYTHING_PRESENT]]",
+            "modifiedOn": "[[ANYTHING_PRESENT]]",
+            "createdOn": "[[ANYTHING_PRESENT]]",
+            "classification": "PUBLIC",
+            "metadata": {
+              "caseTypeId": "BEFTA_CASETYPE_2_2",
+              "jurisdictionId": "BEFTA_JURISDICTION_2"
+            },
+            "ttl": "[[ANYTHING_PRESENT]]",
+            "hashToken": "[[ANYTHING_PRESENT]]",
+            "_links": {
+              "binary": {
+                "href": "[[ANYTHING_PRESENT]]"
+              },
+              "self": {
+                "href": "[[ANYTHING_PRESENT]]"
+              }
+            }
+          },
+          {
+            "size": "[[ANYTHING_PRESENT]]",
+            "mimeType": "image/png",
+            "originalDocumentName": "[[ANYTHING_PRESENT]]",
+            "createdBy": "[[ANYTHING_PRESENT]]",
+            "lastModifiedBy": "[[ANYTHING_PRESENT]]",
+            "modifiedOn": "[[ANYTHING_PRESENT]]",
+            "createdOn": "[[ANYTHING_PRESENT]]",
+            "classification": "PUBLIC",
+            "metadata": {
+              "caseTypeId": "BEFTA_CASETYPE_2_2",
+              "jurisdictionId": "BEFTA_JURISDICTION_2"
+            },
+            "ttl": "[[ANYTHING_PRESENT]]",
+            "hashToken": "[[ANYTHING_PRESENT]]",
+            "_links": {
+              "binary": {
+                "href": "[[ANYTHING_PRESENT]]"
+              },
+              "self": {
+                "href": "[[ANYTHING_PRESENT]]"
+              }
+            }
+          },
+          {
+            "size": "[[ANYTHING_PRESENT]]",
+            "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "originalDocumentName": "[[ANYTHING_PRESENT]]",
+            "createdBy": "[[ANYTHING_PRESENT]]",
+            "lastModifiedBy": "[[ANYTHING_PRESENT]]",
+            "modifiedOn": "[[ANYTHING_PRESENT]]",
+            "createdOn": "[[ANYTHING_PRESENT]]",
+            "classification": "PUBLIC",
+            "metadata": {
+              "caseTypeId": "BEFTA_CASETYPE_2_2",
+              "jurisdictionId": "BEFTA_JURISDICTION_2"
+            },
+            "ttl": "[[ANYTHING_PRESENT]]",
+            "hashToken": "[[ANYTHING_PRESENT]]",
+            "_links": {
+              "binary": {
+                "href": "[[ANYTHING_PRESENT]]"
+              },
+              "self": {
+                "href": "[[ANYTHING_PRESENT]]"
+              }
+            }
+          },
+          {
+            "size": "[[ANYTHING_PRESENT]]",
+            "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "originalDocumentName": "[[ANYTHING_PRESENT]]",
+            "createdBy": "[[ANYTHING_PRESENT]]",
+            "lastModifiedBy": "[[ANYTHING_PRESENT]]",
+            "modifiedOn": "[[ANYTHING_PRESENT]]",
+            "createdOn": "[[ANYTHING_PRESENT]]",
+            "classification": "PUBLIC",
+            "metadata": {
+              "caseTypeId": "BEFTA_CASETYPE_2_2",
+              "jurisdictionId": "BEFTA_JURISDICTION_2"
+            },
+            "ttl": "[[ANYTHING_PRESENT]]",
+            "hashToken": "[[ANYTHING_PRESENT]]",
+            "_links": {
+              "binary": {
+                "href": "[[ANYTHING_PRESENT]]"
+              },
+              "self": {
+                "href": "[[ANYTHING_PRESENT]]"
+              }
+            }
+          },
+          {
+            "size": "[[ANYTHING_PRESENT]]",
+            "mimeType": "image/png",
+            "originalDocumentName": "[[ANYTHING_PRESENT]]",
+            "createdBy": "[[ANYTHING_PRESENT]]",
+            "lastModifiedBy": "[[ANYTHING_PRESENT]]",
+            "modifiedOn": "[[ANYTHING_PRESENT]]",
+            "createdOn": "[[ANYTHING_PRESENT]]",
+            "classification": "PUBLIC",
+            "metadata": {
+              "caseTypeId": "BEFTA_CASETYPE_2_2",
+              "jurisdictionId": "BEFTA_JURISDICTION_2"
+            },
+            "ttl": "[[ANYTHING_PRESENT]]",
+            "hashToken": "[[ANYTHING_PRESENT]]",
+            "_links": {
+              "binary": {
+                "href": "[[ANYTHING_PRESENT]]"
+              },
+              "self": {
+                "href": "[[ANYTHING_PRESENT]]"
+              }
+            }
+          },
+          {
+            "size": "[[ANYTHING_PRESENT]]",
+            "mimeType": "application/pdf",
+            "originalDocumentName": "[[ANYTHING_PRESENT]]",
+            "createdBy": "[[ANYTHING_PRESENT]]",
+            "lastModifiedBy": "[[ANYTHING_PRESENT]]",
+            "modifiedOn": "[[ANYTHING_PRESENT]]",
+            "createdOn": "[[ANYTHING_PRESENT]]",
+            "classification": "PUBLIC",
+            "metadata": {
+              "caseTypeId": "BEFTA_CASETYPE_2_2",
+              "jurisdictionId": "BEFTA_JURISDICTION_2"
+            },
+            "ttl": "[[ANYTHING_PRESENT]]",
+            "hashToken": "[[ANYTHING_PRESENT]]",
+            "_links": {
+              "binary": {
+                "href": "[[ANYTHING_PRESENT]]"
+              },
+              "self": {
+                "href": "[[ANYTHING_PRESENT]]"
+              }
+            }
+          },
+          {
+            "size": "[[ANYTHING_PRESENT]]",
+            "mimeType": "application/pdf",
+            "originalDocumentName": "[[ANYTHING_PRESENT]]",
+            "createdBy": "[[ANYTHING_PRESENT]]",
+            "lastModifiedBy": "[[ANYTHING_PRESENT]]",
+            "modifiedOn": "[[ANYTHING_PRESENT]]",
+            "createdOn": "[[ANYTHING_PRESENT]]",
+            "classification": "PUBLIC",
+            "metadata": {
+              "caseTypeId": "BEFTA_CASETYPE_2_2",
+              "jurisdictionId": "BEFTA_JURISDICTION_2"
+            },
+            "ttl": "[[ANYTHING_PRESENT]]",
+            "hashToken": "[[ANYTHING_PRESENT]]",
+            "_links": {
+              "binary": {
+                "href": "[[ANYTHING_PRESENT]]"
+              },
+              "self": {
+                "href": "[[ANYTHING_PRESENT]]"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "_guid_": "S-042",
+  "_extends_": "F-004_Test_Base_data",
+  "title": "must get an error response for a without case type id parameter in request",
+  "specs": [
+    "contains without case type id parameter"
+  ],
+  "request": {
+    "body": {
+      "arrayInMap": [
+        {
+          "key": "classification",
+          "value": "PUBLIC"
+        },
+        {
+          "key": "jurisdictionId",
+          "value": "BEFTA_JURISDICTION_2"
+        },
+        {
+          "key": "files",
+          "filePath": "CCD_BEFTA_JURISDICTION2.xlsx"
+        }
+      ]
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_400_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body" : {
+      "message" : "Required String parameter 'caseTypeId' is not present",
+      "path" : "/cases/documents"
+    }
+  }
+}
+
+

@@ -14,7 +14,9 @@ variable "raw_product" {
   default = "ccd" // jenkins-library overrides product for PRs and adds e.g. pr-118-ccd
 }
 
-variable "env" {}
+variable "env" {
+  type = "string"
+}
 
 variable "subscription" {}
 
@@ -87,5 +89,15 @@ variable "http_client_validate_after_inactivity" {
   default = "0"
 }
 
-variable "deployment_namespace" {}
+variable "frontend_url" {
+  description = "Optional front end URL to use for building redirect URI"
+  type = "string"
+  default = ""
+}
 
+variable "authorised-services" {
+  type    = "string"
+  default = "ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor"
+}
+
+variable "deployment_namespace" {}

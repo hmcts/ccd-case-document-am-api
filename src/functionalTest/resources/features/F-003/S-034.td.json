@@ -1,0 +1,28 @@
+{
+  "title": "must get an error response for a malformed document Id",
+  "_guid_": "S-034",
+  "_extends_": "F-003_Test_Data_Base",
+
+  "specs": [
+    "contains a malformed document Id"
+  ],
+
+  "request": {
+      "pathVariables": {
+        "documentId": "8de9957b-d7a6-40a1-@£$&-6aac30d33644",
+        "permanent": false
+    }
+  },
+
+  "expectedResponse": {
+    "_extends_": "Common_400_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body" : {
+      "message" : "[[ANYTHING_PRESENT]]",
+      "path" : "/cases/documents/8de9957b-d7a6-40a1-%40%C2%A3%24%26-6aac30d33644"
+    }
+  }
+}

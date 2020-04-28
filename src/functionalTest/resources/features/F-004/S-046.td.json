@@ -1,0 +1,41 @@
+{
+  "_guid_": "S-046",
+  "_extends_": "F-004_Test_Base_data",
+  "title": "must get an error response for a malformed security classification",
+  "specs": [
+    "contains a malformed security classification"
+  ],
+  "request": {
+    "body": {
+      "arrayInMap": [
+        {
+          "key": "classification",
+          "value": "PUB^&^%"
+        },
+        {
+          "key": "caseTypeId",
+          "value": "BEFTA_CASETYPE_2_2"
+        },
+        {
+          "key": "jurisdictionId",
+          "value": "BEFTA_JURISDICTION_2"
+        },
+        {
+          "key": "files",
+          "filePath": "SampleImage.png"
+        }
+      ]
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_400_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body" : {
+      "message" : "The input parameter: \"PUB^&^%\", does not comply with the required pattern",
+      "path" : "/cases/documents"
+    }
+  }
+}

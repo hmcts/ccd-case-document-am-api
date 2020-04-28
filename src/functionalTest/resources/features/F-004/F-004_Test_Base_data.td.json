@@ -1,0 +1,11 @@
+{
+  "_guid_": "F-004_Test_Base_data",
+  "_extends_": "F-004-Base-Root",
+  "productName": "CCD Case Document AM API",
+  "operationName": "Upload Document With Binary Content",
+  "specs": [
+    "an active caseworker profile in CCD with full permissions on a document field"
+  ],
+  "method": "POST",
+  "uri": "/cases/documents"
+}

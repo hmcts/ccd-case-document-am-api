@@ -1,0 +1,31 @@
+{
+  "_guid_": "Default_Document_Upload_Data_Base",
+  "productName": "CCD Case Document AM API",
+  "operationName": "Upload a case document",
+  "method": "POST",
+  "uri": "/cases/documents",
+  "request": {
+    "headers": {
+      "Authorization": "[[DEFAULT_AUTO_VALUE]]",
+      "ServiceAuthorization": "[[DEFAULT_AUTO_VALUE]]",
+      "Content-Type": "multipart/form-data"
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_200_Response",
+    "headers": {
+      "Content-Encoding": "[[ANYTHING_PRESENT]]",
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body": {
+      "_embedded": {
+        "documents": [
+          {
+            "_extends_": "Common_Response_Body_Document_Base"
+          }
+        ]
+      }
+    }
+  }
+}
