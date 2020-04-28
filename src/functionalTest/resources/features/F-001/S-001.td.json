@@ -12,6 +12,11 @@
   },
   "expectedResponse": {
     "_extends_": "Common_200_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]",
+      "Content-Encoding" : "gzip"
+    },
     "body" : {
       "links" : [ {
         "rel" : "self",
