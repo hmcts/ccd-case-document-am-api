@@ -13,7 +13,7 @@
       {
         "id": "bulk_scan_processor",
         "caseTypeId": "*",
-        "jurisdictionId": "BEFTA_JURISDICTION_2",
+        "jurisdictionId": "*",
         "permissions": [
           "HASHTOKEN"
         ]
