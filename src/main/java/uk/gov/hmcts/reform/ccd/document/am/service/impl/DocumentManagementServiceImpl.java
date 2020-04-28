@@ -89,6 +89,9 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.RESOURCE_N
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.THUMBNAIL;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CREATED_BY;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LAST_MODIFIED_BY;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.MODIFIED_ON;
 
 @Slf4j
 @Service
@@ -371,6 +374,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @SuppressWarnings("unchecked")
     private LinkedHashMap<String, Object> formatUploadDocumentResponse(String caseTypeId, String jurisdictionId,
                                               ResponseEntity<Object> uploadedDocumentResponse) {
+        LinkedHashMap<String, Object> updatedUploadedDocumentResponse = new LinkedHashMap<>();
         try {
             LinkedHashMap<String, Object> documents = (LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse.getBody())
                 .get(EMBEDDED);
@@ -382,13 +386,16 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 if (document instanceof LinkedHashMap) {
                     LinkedHashMap<String, Object> hashmap = ((LinkedHashMap<String, Object>) (document));
                     hashmap.remove(EMBEDDED);
+                    hashmap.remove(CREATED_BY);
+                    hashmap.remove(LAST_MODIFIED_BY);
+                    hashmap.remove(MODIFIED_ON);
                     updateDomainForLinks(hashmap, jurisdictionId, caseTypeId);
                 }
             }
-            ArrayList<Object> documentListTemp  = (ArrayList<Object>) ((LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse.getBody())
+            ArrayList<Object> documentListObject  = (ArrayList<Object>) ((LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse.getBody())
                 .get(EMBEDDED)).get(DOCUMENTS);
-            LinkedHashMap<String, Object> updatedUploadedDocumentResponse = new LinkedHashMap<>();
-            updatedUploadedDocumentResponse.put(DOCUMENTS,documentListTemp);
+            updatedUploadedDocumentResponse.put(DOCUMENTS, documentListObject);
+
             return  updatedUploadedDocumentResponse;
 
         } catch (Exception exception) {
