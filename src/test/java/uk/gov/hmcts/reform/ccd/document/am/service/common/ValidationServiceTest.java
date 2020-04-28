@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -37,14 +35,6 @@ public class ValidationServiceTest {
         Assertions.assertThrows(BadRequestException.class, () -> {
             ValidationService.validateLists(new ArrayList());
         });
-    }
-
-    @Test
-    void shouldValidateLists() {
-        List<String> file1 = Arrays.asList("file1");
-        List<String> file2 = Arrays.asList("file2");
-        List<List> files = Arrays.asList(file1, file2);
-        ValidationService.validateLists(files);
     }
 
     @Test

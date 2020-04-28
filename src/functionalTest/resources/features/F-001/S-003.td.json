@@ -12,8 +12,12 @@
   },
   "expectedResponse": {
     "_extends_": "Common_400_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
     "body": {
-      "message": "Failed to convert value of type 'java.lang.String' to required type 'java.util.UUID'; nested exception is java.lang.NumberFormatException: For input string: \"$£@!\""
+      "message" : "[[ANYTHING_PRESENT]]"
     }
   }
 }
