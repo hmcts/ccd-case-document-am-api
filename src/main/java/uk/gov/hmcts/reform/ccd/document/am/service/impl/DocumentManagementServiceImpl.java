@@ -444,7 +444,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         headers.add(CONTENT_DISPOSITION, response.getHeaders().get(CONTENT_DISPOSITION).get(0));
         headers.add(DATA_SOURCE, response.getHeaders().get(DATA_SOURCE).get(0));
         headers.add(CONTENT_TYPE, response.getHeaders().get(CONTENT_TYPE).get(0));
-        headers.add(CONTENT_LENGTH, response.getHeaders().get(CONTENT_LENGTH).get(0));
         return headers;
 
     }

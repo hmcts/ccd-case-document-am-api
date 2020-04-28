@@ -20,7 +20,6 @@
       "Accept-Ranges" : "bytes",
       "Connection" : "keep-alive",
       "Content-Disposition" : "[[ANYTHING_PRESENT]]",
-      "Content-Length": "[[ANYTHING_PRESENT]]",
       "Content-Type" : "[[ANYTHING_PRESENT]]",
       "data-source" : "contentURI",
       "Keep-Alive" :"[[ANYTHING_PRESENT]]",
