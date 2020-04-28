@@ -291,18 +291,18 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             String docUrl = String.format("%s/documents", documentURL);
 
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
-
+            LinkedHashMap<String, Object> updatedDocumentResponse = null;
             ResponseEntity<Object> uploadedDocumentResponse = restTemplate
                 .postForEntity(docUrl, requestEntity, Object.class);
 
             if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode()) && null != uploadedDocumentResponse
                 .getBody()) {
-                formatUploadDocumentResponse(caseTypeId, jurisdictionId, uploadedDocumentResponse);
+                updatedDocumentResponse = formatUploadDocumentResponse(caseTypeId, jurisdictionId, uploadedDocumentResponse);
             }
 
             responseResult = ResponseEntity
                 .status(uploadedDocumentResponse.getStatusCode())
-                .body(uploadedDocumentResponse.getBody());
+                .body(updatedDocumentResponse);
         } catch (HttpClientErrorException exception) {
             catchException(exception, EXCEPTION_ERROR_MESSAGE);
         }
@@ -369,7 +369,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
 
     @SuppressWarnings("unchecked")
-    private void formatUploadDocumentResponse(String caseTypeId, String jurisdictionId,
+    private LinkedHashMap<String, Object> formatUploadDocumentResponse(String caseTypeId, String jurisdictionId,
                                               ResponseEntity<Object> uploadedDocumentResponse) {
         try {
             LinkedHashMap<String, Object> documents = (LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse.getBody())
@@ -385,6 +385,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                     updateDomainForLinks(hashmap, jurisdictionId, caseTypeId);
                 }
             }
+            ArrayList<Object> documentListTemp  = (ArrayList<Object>) ((LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse.getBody())
+                .get(EMBEDDED)).get(DOCUMENTS);
+            LinkedHashMap<String, Object> updatedUploadedDocumentResponse = new LinkedHashMap<>();
+            updatedUploadedDocumentResponse.put(DOCUMENTS,documentListTemp);
+            return  updatedUploadedDocumentResponse;
+
         } catch (Exception exception) {
             throw new ResponseFormatException("Error while formatting the uploaded document response " + exception);
         }
