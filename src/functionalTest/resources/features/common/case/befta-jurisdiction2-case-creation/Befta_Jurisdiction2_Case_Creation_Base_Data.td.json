@@ -12,7 +12,7 @@
     "headers": {
       "_extends_": "Common_Request_Headers",
       "experimental": true,
-      "Content-Type": "application/vnd.uk.gov.hmcts.ccd-data-store-api.create-case+json;charset=UTF-8;version=2.1"
+      "Content-Type": "application/vnd.uk.gov.hmcts.ccd-data-store-api.create-case.v3+json;charset=UTF-8"
     },
     "body": {
       "event": {
@@ -32,7 +32,7 @@
       "Cache-Control" : "no-cache, no-store, max-age=0, must-revalidate",
       "Content-Encoding" : "gzip",
       "Content-Length" : "[[ANYTHING_PRESENT]]",
-      "Content-Type" : "application/vnd.uk.gov.hmcts.ccd-data-store-api.create-case.v2+json;charset=UTF-8",
+      "Content-Type" : "application/vnd.uk.gov.hmcts.ccd-data-store-api.create-case.v3+json;charset=UTF-8",
       "Date" : "[[ANYTHING_PRESENT]]",
       "Expires" : "[[ANYTHING_PRESENT]]",
       "Pragma" : "no-cache",
