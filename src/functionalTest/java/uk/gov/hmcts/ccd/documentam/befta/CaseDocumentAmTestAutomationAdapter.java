@@ -26,8 +26,8 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
 
     @Override
     public Object calculateCustomValue(BackEndFunctionalTestScenarioContext scenarioContext, Object key) {
-        //the docAMUrl is currently pointing to ccd-data-store the below 2 valid* functions are not used anywhere.
-        String docAmUrl = EnvironmentVariableUtils.getRequiredVariable("CCD_DATA_STORE_URL");
+        //the docAMUrl is is referring the self link in PR
+        String docAmUrl = EnvironmentVariableUtils.getRequiredVariable("TEST_URL");
         switch (key.toString()) {
             case ("documentIdInTheResponse"):
                 return getDocumentIdInTheRresponse(scenarioContext);

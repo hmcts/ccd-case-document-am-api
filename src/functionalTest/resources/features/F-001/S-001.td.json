@@ -20,10 +20,10 @@
     "body" : {
       "links" : [ {
         "rel" : "self",
-        "href" : "[[ANYTHING_PRESENT]]"
+        "href" : "{{TEST_URL}}/cases/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
       }, {
         "rel" : "binary",
-        "href" : "[[ANYTHING_PRESENT]]"
+        "href" : "{{TEST_URL}}/cases/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}/binary"
       } ],
         "classification": "PUBLIC",
         "createdBy" : "[[ANYTHING_PRESENT]]",
