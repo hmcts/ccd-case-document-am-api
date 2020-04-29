@@ -2,7 +2,6 @@ package uk.gov.hmcts.ccd.documentam.befta;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import uk.gov.hmcts.befta.DefaultTestAutomationAdapter;
 import uk.gov.hmcts.befta.dse.ccd.TestDataLoaderToDefinitionStore;
 import uk.gov.hmcts.befta.exception.FunctionalTestException;
@@ -27,7 +26,8 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
 
     @Override
     public Object calculateCustomValue(BackEndFunctionalTestScenarioContext scenarioContext, Object key) {
-        String docAmUrl = EnvironmentVariableUtils.getRequiredVariable("CASE_DOCUMENT_AM_URL");
+        //the docAMUrl is currently pointing to ccd-data-store the below 2 valid* functions are not used anywhere.
+        String docAmUrl = EnvironmentVariableUtils.getRequiredVariable("CCD_DATA_STORE_URL");
         switch (key.toString()) {
             case ("documentIdInTheResponse"):
                 return getDocumentIdInTheRresponse(scenarioContext);
