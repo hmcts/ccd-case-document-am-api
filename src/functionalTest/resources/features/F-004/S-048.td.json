@@ -57,7 +57,7 @@
     "headers": {
       "Content-Encoding": "[[ANYTHING_PRESENT]]",
       "Content-Type": "application/json",
-      "Transfer-Encoding" : "chunked"
+      "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
       "_embedded": {
