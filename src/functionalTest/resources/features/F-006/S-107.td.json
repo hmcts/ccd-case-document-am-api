@@ -1,5 +1,5 @@
 {
-  "title": "must get an error response when API-Gateway tries to access get hashtoken by document Id API",
+  "title": "must get an error response when API-Gateway tries to access get hashtoken API",
   "_guid_": "S-107",
   "_extends_": "F-006_Test_Base_data",
 

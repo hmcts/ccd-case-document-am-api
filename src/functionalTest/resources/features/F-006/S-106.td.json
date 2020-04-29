@@ -1,5 +1,5 @@
 {
-  "title": "must get an error response when Ex-UI tries to access get hashtoken by document Id API",
+  "title": "must get an error response when Ex-UI tries to access get hashtoken API",
   "_guid_": "S-106",
   "_extends_": "F-006_Test_Base_data",
 
