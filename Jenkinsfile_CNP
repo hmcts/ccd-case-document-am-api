@@ -66,6 +66,7 @@ env.DEFINITION_STORE_HOST = "http://ccd-definition-store-api-pr-575.service.core
 env.CCD_DATA_STORE_URL = "http://ccd-data-store-api-pr-905.service.core-compute-preview.internal"
 env.CASE_DOCUMENT_AM_URL = "https://ccd-case-document-am-api-pr-202.service.core-compute-preview.internal";
 env.CASE_DOCUMENT_SWAGGER_AM_URL = "ccd-case-document-am-api-pr-202.service.core-compute-preview.internal";
+
 env.API_CLIENT_BULK_SCAN_PROCESSOR_ID = "bulk_scan_processor"
 env.API_CLIENT_DATA_STORE_ID = "ccd_data"
 env.API_CLIENT_XUI_WEBAPP_ID = "xui_webapp"
