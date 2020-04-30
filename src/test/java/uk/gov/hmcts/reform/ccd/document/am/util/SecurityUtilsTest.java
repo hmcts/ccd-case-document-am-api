@@ -65,4 +65,11 @@ class SecurityUtilsTest {
         mockSecurityContextData();
         assertEquals("string", securityUtils.getUserRolesHeader());
     }
+
+    @Test
+    void getServiceId() {
+        mockSecurityContextData();
+        assertEquals("servicename", securityUtils.getServiceId());
+    }
+
 }
