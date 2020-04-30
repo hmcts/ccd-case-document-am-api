@@ -328,7 +328,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 requestEntity,
                 StoredDocumentHalResource.class
             );
-            ResponseEntity<Object> responseEntity = ResponseHelper.toResponseEntity(response, documentId);
+            ResponseEntity<Object> responseEntity = ResponseHelper.updatePatchTTLResponse(response);
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
                 responseResult = responseEntity;
             } else {
@@ -473,6 +473,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     public boolean checkServicePermission(ResponseEntity<?> responseEntity, Permission permission) {
+        LOG.info("API call initiated from {} token ", securityUtils.getServiceId());
         AuthorisedService serviceConfig = getServiceDetailsFromJson(securityUtils.getServiceId());
         String caseTypeId = extractCaseTypeIdFromMetadata(responseEntity.getBody());
         String jurisdictionId = extractJurisdictionIdFromMetadata(responseEntity.getBody());

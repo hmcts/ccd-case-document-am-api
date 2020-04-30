@@ -59,5 +59,12 @@ public class Constants {
     public static final String XUI_WEBAPP = "xui_webapp";
     public static final String BULK_SCAN_PROCESSOR = "bulk_scan_processor";
     public static final String CCD_DATA = "ccd_data";
+    public static final String SIZE = "size";
+    public static final String METADATA = "metadata";
+    public static final String ROLES = "roles";
+    public static final String TTL = "ttl";
+    public static final String CREATED_ON = "createdOn";
+    public static final String DOCUMENT_LINKS = "links";
+
 
 }
