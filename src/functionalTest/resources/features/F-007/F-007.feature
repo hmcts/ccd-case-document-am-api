@@ -48,7 +48,7 @@ Feature: F-007: Attach Document to Case
     Then a negative response is received,
     And the response has all the details as expected.
 
-  @S-075
+  @S-074
   Scenario: must get an error response for a malformed CaseType Id
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
     And a successful call [by same user to upload a document with mandatory metadata] as in [F-007-Upload_Document1],
@@ -59,7 +59,7 @@ Feature: F-007: Attach Document to Case
     Then a negative response is received,
     And the response has all the details as expected.
 
-  @S-077
+  @S-075
   Scenario: must get an error response for a malformed Jurisdiction Id
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
     And a successful call [by same user to upload a document with mandatory metadata] as in [F-007-Upload_Document1],
@@ -70,7 +70,7 @@ Feature: F-007: Attach Document to Case
     Then a negative response is received,
     And the response has all the details as expected.
 
-  @S-078
+  @S-076
   Scenario: must get an error response for a malformed Case Id
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
     And a successful call [by same user to upload a document with mandatory metadata] as in [F-007-Upload_Document1],
@@ -81,7 +81,7 @@ Feature: F-007: Attach Document to Case
     Then a negative response is received,
     And the response has all the details as expected.
 
-  @S-079
+  @S-077
   Scenario: must successfully validate hashed-token for multiple documents
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
     And a successful call [by same user to upload a document with mandatory metadata] as in [F-007-Upload_Document1],
