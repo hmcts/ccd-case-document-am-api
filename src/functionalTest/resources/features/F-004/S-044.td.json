@@ -1,0 +1,37 @@
+{
+  "_guid_": "S-044",
+  "_extends_": "F-004_Test_Base_data",
+  "title": "must get an error response for without jurisdiction Id parameter in request",
+  "specs": [
+    "contains without jurisdiction Id parameter"
+  ],
+  "request": {
+    "body": {
+      "arrayInMap": [
+        {
+          "key": "classification",
+          "value": "PUBLIC"
+        },
+        {
+          "key": "caseTypeId",
+          "value": "BEFTA_CASETYPE_2_1"
+        },
+        {
+          "key": "files",
+          "filePath": "CCD_BEFTA_JURISDICTION2.xlsx"
+        }
+      ]
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_400_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body": {
+      "message": "Required String parameter 'jurisdictionId' is not present",
+      "path": "/cases/documents"
+    }
+  }
+}

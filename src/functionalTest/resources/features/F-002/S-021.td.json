@@ -1,28 +1,23 @@
 {
   "title": "must receive an error response for a non existing document id",
-
   "_guid_": "S-021",
   "_extends_": "F-002_Test_Data_Base",
-
   "specs": [
     "contains a non existing document id"
   ],
-
   "request": {
     "pathVariables": {
       "documentId": "00000000-0000-0000-0000-000000000000"
     }
   },
-
   "expectedResponse": {
     "_extends_": "Common_404_Response",
     "headers": {
-      "Connection" : "keep-alive",
-      "Content-Type" : "application/json",
-      "Keep-Alive" : "[[ANYTHING_PRESENT]]"
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
     },
-    "body" : {
-      "timestamp" : "[[ANYTHING_PRESENT]]",
+    "body": {
+      "timestamp": "[[ANYTHING_PRESENT]]",
       "message": "Resource not found 00000000-0000-0000-0000-000000000000",
       "path": "/cases/documents/00000000-0000-0000-0000-000000000000/binary"
     }

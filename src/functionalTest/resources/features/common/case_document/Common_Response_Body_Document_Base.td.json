@@ -3,20 +3,13 @@
   "size": "[[ANYTHING_PRESENT]]",
   "mimeType": "[[ANYTHING_PRESENT]]",
   "originalDocumentName": "[[ANYTHING_PRESENT]]",
-  "modifiedOn": "[[ANYTHING_PRESENT]]",
-  "createdBy": "[[ANYTHING_PRESENT]]",
   "createdOn": "[[ANYTHING_PRESENT]]",
-  "lastModifiedBy": "[[ANYTHING_PRESENT]]",
   "classification": "PUBLIC",
-  "roles": [
-    "caseworker"
-  ],
   "metadata": {
-    "caseTypeId": "BEFTA_CASETYPE_2_2",
-    "jurisdictionId": "BEFTA_JURISDICTION_2",
-    "caseId" : "1111222233334444"
+    "caseTypeId": "BEFTA_CASETYPE_2_1",
+    "jurisdictionId": "BEFTA_JURISDICTION_2"
   },
-  "hashcode": "[[ANYTHING_PRESENT]]",
+  "hashToken": "[[ANYTHING_PRESENT]]",
   "ttl": "[[ANYTHING_PRESENT]]",
   "_links": {
     "self": {

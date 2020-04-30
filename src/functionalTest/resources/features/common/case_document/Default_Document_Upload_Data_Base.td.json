@@ -1,36 +1,30 @@
 {
   "_guid_": "Default_Document_Upload_Data_Base",
-  "productName": "DM Store",
+  "productName": "CCD Case Document AM API",
   "operationName": "Upload a case document",
+  "apiClientId": "xui_webapp",
   "method": "POST",
   "uri": "/cases/documents",
   "request": {
     "headers": {
-      "Authorization": "[[DYNAMIC]]",
-      "ServiceAuthorization": "[[DYNAMIC]]",
-      "Content-Type": "multipart/form-data",
-      "caseTypeId": "BEFTA_CASETYPE_2_2",
-      "jurisdictionId": "BEFTA_JURISDICTION_2",
-      "uid": "[[DYNAMIC]]",
-      "user-id": "[someUserId]",
-      "user-roles": "caseworker"
+      "Authorization": "[[DEFAULT_AUTO_VALUE]]",
+      "ServiceAuthorization": "[[DEFAULT_AUTO_VALUE]]",
+      "Content-Type": "multipart/form-data"
     }
   },
   "expectedResponse": {
-    "responseCode": 200,
-    "responseMessage": "OK",
+    "_extends_": "Common_200_Response",
     "headers": {
-      "_extends_": "Common_Response_Header_Base",
-      "content-type": "application/vnd.uk.gov.hmcts.dm.document-collection.v1+hal+json;charset=UTF-8"
+      "Content-Encoding": "[[ANYTHING_PRESENT]]",
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "_embedded": {
-        "documents": [
-          {
-            "_extends_": "Common_Response_Body_Document_Base"
-          }
-        ]
-      }
+      "documents": [
+        {
+          "_extends_": "Common_Response_Body_Document_Base"
+        }
+      ]
     }
   }
 }

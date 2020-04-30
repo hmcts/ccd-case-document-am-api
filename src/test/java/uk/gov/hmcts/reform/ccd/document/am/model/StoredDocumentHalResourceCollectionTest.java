@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SuppressWarnings("PMD.DataflowAnomalyAnalysis")
 class StoredDocumentHalResourceCollectionTest {
 
     private transient StoredDocumentHalResourceCollection storedDocumentHalResourceCollection = new StoredDocumentHalResourceCollection();
@@ -15,8 +15,9 @@ class StoredDocumentHalResourceCollectionTest {
     @Test
     void shouldAddContentItem() {
         List<String> roles = Arrays.asList("citizen");
-        storedDocumentHalResourceCollection.addContentItem(new StoredDocumentHalResource());
+        StoredDocumentHalResourceCollection payloadBody = storedDocumentHalResourceCollection.addContentItem(new StoredDocumentHalResource());
         assertNotNull(storedDocumentHalResourceCollection.getContent());
+        assertEquals(payloadBody.getClass(), StoredDocumentHalResourceCollection.class);
     }
 
     @Test
@@ -28,13 +29,26 @@ class StoredDocumentHalResourceCollectionTest {
 
     @Test
     void shouldTestEquals() {
-        assertNotNull(storedDocumentHalResourceCollection.equals(new StoredDocumentHalResourceCollection()));
+        assertTrue(storedDocumentHalResourceCollection.equals(new StoredDocumentHalResourceCollection()));
+        assertFalse(storedDocumentHalResourceCollection.equals(""));
+    }
+
+    @Test
+    void shouldEqualTrue() {
+        assertTrue(storedDocumentHalResourceCollection.equals(storedDocumentHalResourceCollection));
     }
 
     @Test
     void shouldTestHashCode() {
         assertNotNull(storedDocumentHalResourceCollection.hashCode());
     }
+
+    @Test
+    void shouldTestHashCodeValue() {
+        int result = storedDocumentHalResourceCollection.hashCode();
+        assertEquals(31, result);
+    }
+
 
     @Test
     void shouldTestToString() {

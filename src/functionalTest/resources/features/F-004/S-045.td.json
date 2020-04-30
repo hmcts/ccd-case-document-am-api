@@ -1,0 +1,41 @@
+{
+  "_guid_": "S-045",
+  "_extends_": "F-004_Test_Base_data",
+  "title": "must get an error response for a non-existing security classification",
+  "specs": [
+    "contains a non-existing security classification"
+  ],
+  "request": {
+    "body": {
+      "arrayInMap": [
+        {
+          "key": "classification",
+          "value": "NonExisting"
+        },
+        {
+          "key": "caseTypeId",
+          "value": "BEFTA_CASETYPE_2_1"
+        },
+        {
+          "key": "jurisdictionId",
+          "value": "BEFTA_JURISDICTION_2"
+        },
+        {
+          "key": "files",
+          "filePath": "SampleImage.png"
+        }
+      ]
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_400_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body": {
+      "message": "The security classification NonExisting is not valid",
+      "path": "/cases/documents"
+    }
+  }
+}

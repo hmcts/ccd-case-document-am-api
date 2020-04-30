@@ -1,0 +1,30 @@
+{
+  "title": "must get an error response for a non existing document Id",
+  "_guid_": "S-072",
+  "_extends_": "F-007_Test_Data_Base",
+  "specs": [
+    "contains a non existing document Id",
+    "is to be made on behalf of CCD Data Store API"
+  ],
+  "request": {
+    "body": {
+      "documentHashTokens": [
+        {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][hashToken]}"
+        }
+      ]
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_404_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body": {
+      "message": "Resource not found ${[scenarioContext][testData][request][body][documentHashTokens][0][id]}",
+      "path": "/cases/documents/attachToCase"
+    }
+  }
+}

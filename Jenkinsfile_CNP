@@ -34,7 +34,10 @@ def secrets = [
         secret('ccd-api-gateway-oauth2-client-secret', 'OAUTH2_CLIENT_SECRET')
     ],
     's2s-${env}': [
-        secret('microservicekey-ccd-gw', 'BEFTA_S2S_CLIENT_SECRET')
+        secret('microservicekey-ccd-gw', 'BEFTA_S2S_CLIENT_SECRET'),
+        secret('microservicekey-ccd-data', 'API_CLIENT_DATA_STORE_SECRET'),
+        secret('microservicekey-bulk-scan-processor', 'API_CLIENT_BULK_SCAN_PROCESSOR_SECRET'),
+        secret('microservicekey-xui-webapp', 'API_CLIENT_XUI_WEBAPP_SECRET')
     ]
 ]
 
@@ -58,9 +61,12 @@ env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.int
 env.BEFTA_S2S_CLIENT_ID = "ccd_gw"
 env.OAUTH2_CLIENT_ID = "ccd_gateway"
 env.OAUTH2_REDIRECT_URI = "https://www-ccd.aat.platform.hmcts.net/oauth2redirect"
-env.DOCUMENT_STORE_URL = "http://dm-store-pr-529.service.core-compute-preview.internal/documents"
-env.DEFINITION_STORE_HOST = "http://ccd-definition-store-api-pr-552.service.core-compute-preview.internal"
-env.CCD_DATA_STORE_URL = "http://ccd-data-store-api-pr-842.service.core-compute-preview.internal"
+env.DOCUMENT_STORE_URL = "http://dm-store-aat.service.core-compute-aat.internal"
+env.DEFINITION_STORE_HOST = "http://ccd-definition-store-api-pr-575.service.core-compute-preview.internal"
+env.CCD_DATA_STORE_URL = "http://ccd-data-store-api-pr-905.service.core-compute-preview.internal"
+env.API_CLIENT_BULK_SCAN_PROCESSOR_ID = "bulk_scan_processor"
+env.API_CLIENT_DATA_STORE_ID = "ccd_data"
+env.API_CLIENT_XUI_WEBAPP_ID = "xui_webapp"
 
 withPipeline(type, product, component) {
   onMaster {
@@ -86,5 +92,13 @@ withPipeline(type, product, component) {
 
   after('functionalTest:aat') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/cucumber/**/*'
+  }
+
+  after('smoketest:preview') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/site/serenity/**'
+  }
+
+  after('smoketest:aat') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/site/serenity/**'
   }
 }

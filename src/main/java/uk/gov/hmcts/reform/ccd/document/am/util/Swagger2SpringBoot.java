@@ -5,15 +5,15 @@ import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
 
 @SpringBootApplication
-@EnableSwagger2
+@EnableSwagger2WebMvc
 @ComponentScan(basePackages = {"uk.gov.hmcts.reform.ccd.document.am"})
 public class Swagger2SpringBoot implements CommandLineRunner {
 
-    public static void main(String[] args) throws Exception {
-        new SpringApplication(Swagger2SpringBoot.class).run(args);
+    public static void main(String[] args) {
+        new SpringApplication(Swagger2SpringBoot.class).run("");
     }
 
     @Override
