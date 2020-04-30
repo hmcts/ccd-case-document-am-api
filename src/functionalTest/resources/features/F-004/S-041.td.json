@@ -14,7 +14,7 @@
         },
         {
           "key": "caseTypeId",
-          "value": "BEFTA_@£$%^&_CASETYPE_2_2"
+          "value": "BEFTA_@£$%^&_CASETYPE_2_1"
         },
         {
           "key": "jurisdictionId",
@@ -34,7 +34,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body" : {
-      "message" : "The input parameter: \"BEFTA_@?$%^&_CASETYPE_2_2\", does not comply with the required pattern",
+      "message" : "The input parameter: \"BEFTA_@?$%^&_CASETYPE_2_1\", does not comply with the required pattern",
       "path" : "/cases/documents"
     }
   }

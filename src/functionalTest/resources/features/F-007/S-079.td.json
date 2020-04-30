@@ -2,17 +2,12 @@
   "title": "must successfully validate hashed-token for multiple documents",
   "_guid_": "S-079",
   "_extends_": "F-007_Test_Data_Base",
-
   "specs": [
     "contains a Case Id along with ids of the documents uploaded above",
     "is to be made on behalf of CCD Data Store API"
   ],
-
   "request": {
     "body": {
-      "caseId": "1234567890099900",
-      "caseTypeId" : "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][caseTypeId]}",
-      "jurisdictionId" : "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][jurisdictionId]}",
       "documentHashTokens": [
         {
           "id": "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
@@ -29,15 +24,14 @@
       ]
     }
   },
-
   "expectedResponse": {
     "_extends_": "Common_200_Response",
     "headers": {
       "Content-Length": "[[ANYTHING_PRESENT]]",
-      "Content-Type" : "application/json"
+      "Content-Type": "application/json"
     },
-    "body" : {
-      "Result" : "Success"
+    "body": {
+      "Result": "Success"
     }
   }
 }

@@ -1,15 +1,12 @@
 {
   "_guid_": "S-047",
   "_extends_": "F-004_Test_Base_data",
-  "title": "must get an error response for a malformed roles",
+  "title": "must successfully upload multiple document with binary content",
   "specs": [
-    "contains a malformed roles"
+    "contains multiple documents with binary contents",
+    "contains the metadata for each of the documents uploaded above"
   ],
   "request": {
-    "headers": {
-      "caseTypeId": "BEFTA_CASETYPE_2_2",
-      "jurisdictionId": "BEFTA_JURISDICTION_2"
-    },
     "body": {
       "arrayInMap": [
         {
@@ -17,8 +14,36 @@
           "value": "PUBLIC"
         },
         {
-          "key": "roles",
-          "value": "case$%^&worker"
+          "key": "caseTypeId",
+          "value": "BEFTA_CASETYPE_2_1"
+        },
+        {
+          "key": "jurisdictionId",
+          "value": "BEFTA_JURISDICTION_2"
+        },
+        {
+          "key": "files",
+          "filePath": "SampleImage.png"
+        },
+        {
+          "key": "files",
+          "filePath": "SampleImage.png"
+        },
+        {
+          "key": "files",
+          "filePath": "CCD_BEFTA_JURISDICTION2.xlsx"
+        },
+        {
+          "key": "files",
+          "filePath": "CCD_BEFTA_JURISDICTION2.xlsx"
+        },
+        {
+          "key": "files",
+          "filePath": "SampleImage.png"
+        },
+        {
+          "key": "files",
+          "filePath": "Sample.pdf"
         },
         {
           "key": "files",
@@ -28,12 +53,38 @@
     }
   },
   "expectedResponse": {
-    "_extends_": "Common_400_Response",
-    "body" : {
-      "message" : "Exception while uploading the documents :java.lang.IllegalArgumentException: The input parameter: \"case$%^&worker\", does not comply with the required pattern",
-      "path" : "/cases/documents"
+    "_extends_": "Common_200_Response",
+    "headers": {
+      "Content-Encoding": "[[ANYTHING_PRESENT]]",
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body": {
+      "_embedded": {
+        "documents": [
+          {
+            "_extends_": "Common_Response_Body_Document_Base"
+          },
+          {
+            "_extends_": "Common_Response_Body_Document_Base"
+          },
+          {
+            "_extends_": "Common_Response_Body_Document_Base"
+          },
+          {
+            "_extends_": "Common_Response_Body_Document_Base"
+          },
+          {
+            "_extends_": "Common_Response_Body_Document_Base"
+          },
+          {
+            "_extends_": "Common_Response_Body_Document_Base"
+          },
+          {
+            "_extends_": "Common_Response_Body_Document_Base"
+          }
+        ]
+      }
     }
   }
 }
-
-

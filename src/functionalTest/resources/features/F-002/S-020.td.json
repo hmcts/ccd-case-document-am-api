@@ -18,18 +18,17 @@
     "_extends_": "Common_200_Response",
     "headers" : {
       "Accept-Ranges" : "bytes",
-      "Connection" : "keep-alive",
       "Content-Disposition" : "[[ANYTHING_PRESENT]]",
-      "Content-Length" : "679361",
-      "Content-Type" : "image/png",
+      "Content-Type" : "[[ANYTHING_PRESENT]]",
       "data-source" : "contentURI",
-      "Keep-Alive" :"[[ANYTHING_PRESENT]]",
-      "OriginalFileName" : "[[ANYTHING_PRESENT]]"
+      "OriginalFileName" : "[[ANYTHING_PRESENT]]",
+      "Content-Encoding" : "gzip",
+      "Transfer-Encoding" : "chunked"
     },
     "body" : {
       "__fileInBody__" : {
         "fullPath" : "file",
-        "size" : "679361",
+        "size" : "[[ANYTHING_PRESENT]]",
         "contentHash" : "hash"
       }
     }

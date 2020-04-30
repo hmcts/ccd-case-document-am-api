@@ -2,17 +2,13 @@
   "title": "must get an error response for a malformed CaseType Id",
   "_guid_": "S-075",
   "_extends_": "F-007_Test_Data_Base",
-
   "specs": [
     "contains a malformed CaseType Id",
     "is to be made on behalf of CCD Data Store API"
   ],
-
   "request": {
     "body": {
-      "caseId": "1234567890099900",
-      "caseTypeId" : "BEFTA_CASETYPE_@£$",
-      "jurisdictionId" : "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][jurisdictionId]}",
+      "caseTypeId": "BEFTA_CASETYPE_@£$",
       "documentHashTokens": [
         {
           "id": "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
@@ -21,16 +17,15 @@
       ]
     }
   },
-
   "expectedResponse": {
     "_extends_": "Common_400_Response",
     "headers": {
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
-    "body" : {
-      "message" : "The input parameter: \"${[scenarioContext][testData][request][body][caseTypeId]}\", does not comply with the required pattern",
-      "path" : "/cases/documents/attachToCase"
+    "body": {
+      "message": "The input parameter: \"${[scenarioContext][testData][request][body][caseTypeId]}\", does not comply with the required pattern",
+      "path": "/cases/documents/attachToCase"
     }
   }
 }

@@ -5,7 +5,7 @@ buildscript {
   configurations.maybeCreate("pitest")
   dependencies {
     classpath("net.serenity-bdd:serenity-gradle-plugin:2.2.2")
-    classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.4.7'
+    classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.5.0'
     pitest 'org.pitest:pitest-junit5-plugin:0.12'
   }
 }
@@ -16,7 +16,7 @@ plugins {
   id 'pmd'
   id 'jacoco'
   id 'io.spring.dependency-management' version '1.0.9.RELEASE'
-  id 'info.solidsoft.pitest' version '1.4.9'
+  id 'info.solidsoft.pitest' version '1.5.0'
   id 'org.springframework.boot' version '2.2.6.RELEASE'
   id 'org.owasp.dependencycheck' version '5.3.2.1'
   id 'com.github.ben-manes.versions' version '0.28.0'
@@ -270,7 +270,7 @@ dependencies {
   compile group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
   compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.2.RELEASE'
   compile group: 'org.springframework.hateoas', name: 'spring-hateoas', version: '0.25.1.RELEASE'
-  compile group: 'org.springframework', name: 'spring-tx', version: '5.2.5.RELEASE'
+  compile group: 'org.springframework', name: 'spring-tx', version: '5.2.6.RELEASE'
 
   testCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
 

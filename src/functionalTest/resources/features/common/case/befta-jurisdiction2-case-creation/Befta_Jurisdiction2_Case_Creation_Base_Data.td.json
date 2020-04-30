@@ -3,16 +3,16 @@
   "productName": "CCD Data Store",
   "operationName": "Submit case creation as Case worker",
   "method": "POST",
-  "uri": "/caseworkers/{uid}/jurisdictions/{jid}/case-types/{ctid}/cases",
+  "uri": "{{CCD_DATA_STORE_URL}}/case-types/{ctid}/cases",
   "specs": [
-    "by a privileged user with full ACL to create a case of this case type"
+    "by a privileged user with full ACL to create a case of this case type",
+    "to create a case of this case type"
   ],
   "request": {
     "headers": {
-      "_extends_": "Common_Request_Headers"
-    },
-    "pathVariables": {
-      "uid": "[[DEFAULT_AUTO_VALUE]]"
+      "_extends_": "Common_Request_Headers",
+      "experimental": true,
+      "Content-Type": "application/vnd.uk.gov.hmcts.ccd-data-store-api.create-case.v3+json;charset=UTF-8"
     },
     "body": {
       "event": {
@@ -26,25 +26,20 @@
     }
   },
   "expectedResponse": {
-    "_extends_": "Common_201_Response",
-    "headers": {
-      "Content-Encoding": "gzip",
-      "Content-Type": "application/json;charset=UTF-8",
-      "vary": "accept-encoding",
-      "Content-Length": "[[ANY]]"
-    },
-    "body": {
-      "id": "[[ANY]]",
-      "state": "TODO",
-      "version": 0,
-      "created_date": "[[ANY]]",
-      "last_modified": "[[ANY]]",
-      "security_classification": "PUBLIC",
-      "after_submit_callback_response": null,
-      "callback_response_status_code": null,
-      "callback_response_status": null,
-      "delete_draft_response_status_code": null,
-      "delete_draft_response_status": null
+    "responseCode" : 201,
+    "responseMessage" : "Created",
+    "headers" : {
+      "Cache-Control" : "no-cache, no-store, max-age=0, must-revalidate",
+      "Content-Encoding" : "gzip",
+      "Content-Length" : "[[ANYTHING_PRESENT]]",
+      "Content-Type" : "application/vnd.uk.gov.hmcts.ccd-data-store-api.create-case.v3+json;charset=UTF-8",
+      "Date" : "[[ANYTHING_PRESENT]]",
+      "Expires" : "[[ANYTHING_PRESENT]]",
+      "Pragma" : "no-cache",
+      "Vary" : "[[ANYTHING_PRESENT]]",
+      "X-Content-Type-Options" : "nosniff",
+      "X-Frame-Options" : "DENY",
+      "X-Xss-Protection" : "1; mode=block"
     }
   }
 }

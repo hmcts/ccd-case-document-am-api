@@ -244,7 +244,6 @@ class DocumentManagementServiceImplTest {
         headers.add(CONTENT_DISPOSITION, "disp");
         headers.add(DATA_SOURCE, "source");
         headers.add(CONTENT_TYPE, "type");
-        headers.add(CONTENT_LENGTH, "length");
 
         Mockito.when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID + "/binary",
