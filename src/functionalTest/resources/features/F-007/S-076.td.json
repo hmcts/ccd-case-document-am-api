@@ -1,6 +1,6 @@
 {
   "title": "must get an error response for a malformed Case Id",
-  "_guid_": "S-078",
+  "_guid_": "S-076",
   "_extends_": "F-007_Test_Data_Base",
   "specs": [
     "contains a malformed Case Id",
@@ -12,7 +12,7 @@
       "documentHashTokens": [
         {
           "id": "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
-          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][hashToken]}"
+          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][hashToken]}"
         }
       ]
     }

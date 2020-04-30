@@ -12,7 +12,7 @@
       "documentHashTokens": [
         {
           "id": "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
-          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][hashToken]}"
+          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][hashToken]}"
         }
       ]
     }
@@ -24,7 +24,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "message": "Forbidden: Insufficient permissions: ${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][caseTypeId]} ${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][jurisdictionId]}",
+      "message": "Forbidden: Insufficient permissions: ${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][metadata][caseTypeId]} ${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][metadata][jurisdictionId]}",
       "path": "/cases/documents/attachToCase"
     }
   }

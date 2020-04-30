@@ -11,8 +11,8 @@
   "method": "GET",
   "uri": "/cases/documents/{documentId}",
   "request": {
-      "pathVariables": {
-        "documentId": "${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    "pathVariables": {
+      "documentId": "${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
     }
   },
   "expectedResponse": {
@@ -21,9 +21,9 @@
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
-    "body" : {
-      "message" : "Resource not found ${[scenarioContext][testData][request][pathVariables][documentId]}",
-      "path" : "/cases/documents/${[scenarioContext][testData][request][pathVariables][documentId]}"
+    "body": {
+      "message": "Resource not found ${[scenarioContext][testData][request][pathVariables][documentId]}",
+      "path": "/cases/documents/${[scenarioContext][testData][request][pathVariables][documentId]}"
     }
   }
 }

@@ -33,9 +33,9 @@
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
-    "body" : {
-      "message" : "The input parameter: \"BEFTA_@?$%^&_JURISDICTION_2\", does not comply with the required pattern",
-      "path" : "/cases/documents"
+    "body": {
+      "message": "The input parameter: \"BEFTA_@?$%^&_JURISDICTION_2\", does not comply with the required pattern",
+      "path": "/cases/documents"
     }
   }
 }

@@ -16,9 +16,9 @@
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
-    "body" : {
-      "message" : "Resource not found ${[scenarioContext][testData][request][pathVariables][documentId]}",
-      "path" : "/cases/documents/${[scenarioContext][testData][request][pathVariables][documentId]}/token"
+    "body": {
+      "message": "Resource not found ${[scenarioContext][testData][request][pathVariables][documentId]}",
+      "path": "/cases/documents/${[scenarioContext][testData][request][pathVariables][documentId]}/token"
     }
   }
 }
