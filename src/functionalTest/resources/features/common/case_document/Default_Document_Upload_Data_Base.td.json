@@ -2,6 +2,7 @@
   "_guid_": "Default_Document_Upload_Data_Base",
   "productName": "CCD Case Document AM API",
   "operationName": "Upload a case document",
+  "apiClientId": "xui_webapp",
   "method": "POST",
   "uri": "/cases/documents",
   "request": {

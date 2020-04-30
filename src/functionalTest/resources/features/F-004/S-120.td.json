@@ -1,9 +1,11 @@
 {
-  "_guid_": "S-041",
+  "_guid_": "S-120",
   "_extends_": "F-004_Test_Base_data",
-  "title": "must get an error response for a malformed case type id",
+  "title": "must get an error response when API-Gateway tries to access Upload Document With Binary Content API",
+  "apiClientId": "ccd_gw",
+
   "specs": [
-    "contains a malformed case type id"
+    "is to be made on behalf of API-Gateway API"
   ],
   "request": {
     "body": {
@@ -14,7 +16,7 @@
         },
         {
           "key": "caseTypeId",
-          "value": "BEFTA_@£$%^&_CASETYPE_2_1"
+          "value": "BEFTA_CASETYPE_2_1"
         },
         {
           "key": "jurisdictionId",
@@ -28,14 +30,14 @@
     }
   },
   "expectedResponse": {
-    "_extends_": "Common_400_Response",
+    "_extends_": "Common_403_Response",
     "headers": {
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
-    "body" : {
-      "message" : "The input parameter: \"BEFTA_@?$%^&_CASETYPE_2_1\", does not comply with the required pattern",
-      "path" : "/cases/documents"
+    "body": {
+      "message": "Forbidden: Insufficient permissions: ${[scenarioContext][testData][request][body][arrayInMap][1][value]} ${[scenarioContext][testData][request][body][arrayInMap][2][value]}",
+      "path": "/cases/documents"
     }
   }
 }

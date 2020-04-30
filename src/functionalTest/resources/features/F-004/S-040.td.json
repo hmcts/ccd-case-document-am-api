@@ -14,7 +14,7 @@
         },
         {
           "key": "caseTypeId",
-          "value": "BEFTA_CASETYPE_2_2"
+          "value": "BEFTA_CASETYPE_2_1"
         },
         {
           "key": "jurisdictionId",
@@ -38,28 +38,7 @@
       "_embedded": {
         "documents": [
           {
-            "size": "[[ANYTHING_PRESENT]]",
-            "mimeType": "[[ANYTHING_PRESENT]]",
-            "originalDocumentName": "[[ANYTHING_PRESENT]]",
-            "createdBy":  "[[ANYTHING_PRESENT]]",
-            "lastModifiedBy":  "[[ANYTHING_PRESENT]]",
-            "modifiedOn": "[[ANYTHING_PRESENT]]",
-            "createdOn": "[[ANYTHING_PRESENT]]",
-            "classification": "PUBLIC",
-            "metadata": {
-              "caseTypeId": "BEFTA_CASETYPE_2_2",
-              "jurisdictionId": "BEFTA_JURISDICTION_2"
-            },
-            "ttl": "[[ANYTHING_PRESENT]]",
-            "hashToken": "[[ANYTHING_PRESENT]]",
-            "_links": {
-              "self": {
-                "href": "[[ANYTHING_PRESENT]]"
-              },
-              "binary": {
-                "href": "[[ANYTHING_PRESENT]]"
-              }
-            }
+            "_extends_": "Common_Response_Body_Document_Base"
           }
         ]
       }
