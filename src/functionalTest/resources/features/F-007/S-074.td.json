@@ -1,29 +1,30 @@
 {
-  "title": "must get an error response for a non existing document Id",
-  "_guid_": "S-072",
+  "title": "must get an error response for a malformed CaseType Id",
+  "_guid_": "S-074",
   "_extends_": "F-007_Test_Data_Base",
   "specs": [
-    "contains a non existing document Id",
+    "contains a malformed CaseType Id",
     "is to be made on behalf of CCD Data Store API"
   ],
   "request": {
     "body": {
+      "caseTypeId": "BEFTA_CASETYPE_@£$",
       "documentHashTokens": [
         {
-          "id": "00000000-0000-0000-0000-000000000000",
+          "id": "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
           "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][hashToken]}"
         }
       ]
     }
   },
   "expectedResponse": {
-    "_extends_": "Common_404_Response",
+    "_extends_": "Common_400_Response",
     "headers": {
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "message": "Resource not found ${[scenarioContext][testData][request][body][documentHashTokens][0][id]}",
+      "message": "The input parameter: \"${[scenarioContext][testData][request][body][caseTypeId]}\", does not comply with the required pattern",
       "path": "/cases/documents/attachToCase"
     }
   }
