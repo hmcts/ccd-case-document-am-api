@@ -28,7 +28,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @EqualsAndHashCode(callSuper = true)
 @Validated
 @JsonIgnoreProperties(value = { "_links,_embedded,roles" })
-public class StoredDocumentHalResource extends RepresentationModel {
+public class StoredDocumentHalResource extends RepresentationModel<StoredDocumentHalResource> {
 
     @JsonProperty("classification")
     private ClassificationEnum classification = ClassificationEnum.PRIVATE;
