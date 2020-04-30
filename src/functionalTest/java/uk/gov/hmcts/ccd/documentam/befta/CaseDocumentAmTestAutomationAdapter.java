@@ -66,7 +66,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
     private Object getValidBinaryLink(BackEndFunctionalTestScenarioContext scenarioContext, String docAmUrl) {
         try {
             String binary = (String) ReflectionUtils.deepGetFieldInObject(scenarioContext,
-                                                                          "testData.actualResponse.body._embedded.documents[0]._links.binary.href");
+                                                                          "testData.actualResponse.body.documents[0]._links.binary.href");
             scenarioContext.getScenario().write("Binary: " + binary);
             if (binary != null && binary.startsWith(docAmUrl + "/cases/documents/") && binary.endsWith("/binary")) {
                 return binary;
@@ -80,7 +80,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
     private Object getValidSelfLink(BackEndFunctionalTestScenarioContext scenarioContext, String docAmUrl) {
         try {
             String self = (String) ReflectionUtils.deepGetFieldInObject(scenarioContext,
-                                                                        "testData.actualResponse.body._embedded.documents[0]._links.self.href");
+                                                                        "testData.actualResponse.body.documents[0]._links.self.href");
             scenarioContext.getScenario().write("Self: " + self);
             if (self != null && self.startsWith(docAmUrl + "/cases/documents/")) {
                 return self;
@@ -95,7 +95,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
         try {
             String href = (String) ReflectionUtils
                 .deepGetFieldInObject(scenarioContext,
-                                      "testData.actualResponse.body._embedded.documents[0]._links.self.href");
+                                      "testData.actualResponse.body.documents[0]._links.self.href");
             return href.substring(href.length() - 36);
         } catch (Exception exception) {
             logger.error("Exception while getting the Document ID from the response :{}", exception.getMessage());
