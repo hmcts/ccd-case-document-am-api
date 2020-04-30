@@ -11,7 +11,7 @@
       "documentHashTokens": [
         {
           "id": "8de9957b-d7a6-40a1-@£$&-6aac30d33644",
-          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][hashToken]}"
+          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][hashToken]}"
         }
       ]
     }

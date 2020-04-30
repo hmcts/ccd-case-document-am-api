@@ -1,18 +1,18 @@
 {
-  "title": "must get an error response for a malformed CaseType Id",
+  "title": "must get an error response for a malformed Jurisdiction Id",
   "_guid_": "S-075",
   "_extends_": "F-007_Test_Data_Base",
   "specs": [
-    "contains a malformed CaseType Id",
+    "contains a malformed Jurisdiction Id",
     "is to be made on behalf of CCD Data Store API"
   ],
   "request": {
     "body": {
-      "caseTypeId": "BEFTA_CASETYPE_@£$",
+      "jurisdictionId": "BEFTA_JURISDICTION£$",
       "documentHashTokens": [
         {
           "id": "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
-          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][hashToken]}"
+          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][hashToken]}"
         }
       ]
     }
@@ -24,7 +24,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "message": "The input parameter: \"${[scenarioContext][testData][request][body][caseTypeId]}\", does not comply with the required pattern",
+      "message": "The input parameter: \"${[scenarioContext][testData][request][body][jurisdictionId]}\", does not comply with the required pattern",
       "path": "/cases/documents/attachToCase"
     }
   }

@@ -31,10 +31,10 @@
         "lastModifiedBy" : "[[ANYTHING_PRESENT]]",
         "metadata": {
           "caseId": "${[scenarioContext][childContexts][S-001_Case_Create][testData][actualResponse][body][id]}",
-          "caseTypeId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][_embedded][documents][0][metadata][caseTypeId]}",
-          "jurisdictionId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][_embedded][documents][0][metadata][jurisdictionId]}"
+          "caseTypeId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][documents][0][metadata][caseTypeId]}",
+          "jurisdictionId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][documents][0][metadata][jurisdictionId]}"
         },
-        "mimeType" : "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][_embedded][documents][0][mimeType]}",
+        "mimeType" : "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][documents][0][mimeType]}",
         "modifiedOn": "[[ANYTHING_PRESENT]]",
         "originalDocumentName": "[[ANYTHING_PRESENT]]",
         "roles": [ ],

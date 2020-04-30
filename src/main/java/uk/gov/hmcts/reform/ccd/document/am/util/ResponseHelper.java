@@ -10,18 +10,20 @@ import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseF
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 
 import java.util.ArrayList;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.Date;
 import java.util.Map;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SIZE;
+import java.util.Optional;
+import java.util.UUID;
+
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CREATED_BY;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.MODIFIED_ON;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.METADATA;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ROLES;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.TTL;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DOCUMENT_LINKS;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CREATED_ON;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DOCUMENT_LINKS;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.METADATA;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.MODIFIED_ON;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ROLES;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SIZE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.TTL;
 
 public class ResponseHelper {
 
@@ -55,7 +57,8 @@ public class ResponseHelper {
         try {
             StoredDocumentHalResource storedDocumentHalResource =  updateResponse.getBody();
             Map<String,Object> metaData = mapper.convertValue(storedDocumentHalResource, new TypeReference<Map<String, Object>>() {});
-            updateResponseFields(storedDocumentHalResource.getTtl(), storedDocumentHalResource.getCreatedOn(), metaData);
+            updateResponseFields(storedDocumentHalResource.getTtl(), storedDocumentHalResource.getCreatedOn(),
+                                 storedDocumentHalResource.getModifiedOn(), metaData);
             return new ResponseEntity<>(metaData, convertHeaders(updateResponse.getHeaders()), updateResponse.getStatusCode());
 
         } catch (Exception exception) {
@@ -63,15 +66,16 @@ public class ResponseHelper {
         }
     }
 
-    private static void updateResponseFields(Date ttl, Date createdOn, Map<String, Object> metaData) {
+    private static void updateResponseFields(Date ttl, Date createdOn, Date modifiedOn, Map<String, Object> metaData) {
         metaData.remove(SIZE);
         metaData.remove(CREATED_BY);
-        metaData.remove(MODIFIED_ON);
+        metaData.remove(CLASSIFICATION);
         metaData.remove(METADATA);
         metaData.remove(ROLES);
         metaData.remove(DOCUMENT_LINKS);
         metaData.put(TTL, ttl);
         metaData.put(CREATED_ON, createdOn);
+        metaData.put(MODIFIED_ON, modifiedOn);
     }
 
     public static void addHateoasLinks(Optional<?> payload,UUID documentId) {

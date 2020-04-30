@@ -15,7 +15,7 @@
     "document_url": "{{DOCUMENT_STORE_URL}}/documents/${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}",
     "document_binary_url": "{{DOCUMENT_STORE_URL}}/documents/${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}/binary",
     "document_filename": "Screenshot 2019-11-13 at 3.24.26 pm.png",
-    "hashToken": "${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][_embedded][documents][0][hashToken]}"
+    "hashToken": "${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][documents][0][hashToken]}"
   },
   "ComplexField": {
     "ComplexTextField": null,
