@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -58,6 +57,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -147,7 +147,7 @@ class DocumentManagementServiceImplTest {
             .thenThrow(HttpClientErrorException.create("woopsie", HttpStatus.BAD_GATEWAY, "404", new HttpHeaders(), new byte[1],
                                                                 Charset.defaultCharset()));
 
-        Assertions.assertThrows(ServiceException.class, () -> {
+        assertThrows(ServiceException.class, () -> {
             sut.getDocumentMetadata(matchedDocUUID);
         });
 
@@ -158,7 +158,7 @@ class DocumentManagementServiceImplTest {
     void getDocumentMetadata_Throws_ResourceNotFoundException() {
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
         mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.BAD_REQUEST);
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+        assertThrows(ResourceNotFoundException.class, () -> {
             sut.getDocumentMetadata(matchedDocUUID);
         });
         verifyRestExchangeOnStoredDoc();
@@ -172,7 +172,7 @@ class DocumentManagementServiceImplTest {
             HttpMethod.GET,requestEntityGlobal,
             StoredDocumentHalResource.class))
             .thenThrow(httpClientErrorException);
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+        assertThrows(ResourceNotFoundException.class, () -> {
             sut.getDocumentMetadata(matchedDocUUID);
         });
         verifyRestExchangeOnStoredDoc();
@@ -186,7 +186,7 @@ class DocumentManagementServiceImplTest {
             HttpMethod.GET,requestEntityGlobal,
             StoredDocumentHalResource.class))
             .thenThrow(httpClientErrorException);
-        Assertions.assertThrows(ForbiddenException.class, () -> {
+        assertThrows(ForbiddenException.class, () -> {
             sut.getDocumentMetadata(matchedDocUUID);
         });
         verifyRestExchangeOnStoredDoc();
@@ -200,7 +200,7 @@ class DocumentManagementServiceImplTest {
             HttpMethod.GET,requestEntityGlobal,
             StoredDocumentHalResource.class))
             .thenThrow(httpClientErrorException);
-        Assertions.assertThrows(BadRequestException.class, () -> {
+        assertThrows(BadRequestException.class, () -> {
             sut.getDocumentMetadata(matchedDocUUID);
         });
         verifyRestExchangeOnStoredDoc();
@@ -214,7 +214,7 @@ class DocumentManagementServiceImplTest {
             StoredDocumentHalResource.class))
             .thenThrow(HttpClientErrorException.class);
 
-        Assertions.assertThrows(ServiceException.class, () -> {
+        assertThrows(ServiceException.class, () -> {
             sut.getDocumentMetadata(matchedDocUUID);
         });
         verifyRestExchangeOnStoredDoc();
@@ -276,7 +276,7 @@ class DocumentManagementServiceImplTest {
         )).thenThrow(HttpClientErrorException.create("woopsie", HttpStatus.BAD_GATEWAY, "404", new HttpHeaders(), new byte[1],
                                                     Charset.defaultCharset()));
 
-        Assertions.assertThrows(ServiceException.class, () -> {
+        assertThrows(ServiceException.class, () -> {
             sut.getDocumentBinaryContent(matchedDocUUID);
         });
 
@@ -301,7 +301,7 @@ class DocumentManagementServiceImplTest {
         HttpClientErrorException httpClientErrorException = HttpClientErrorException.create(HttpStatus.NOT_FOUND,"woopsie", new HttpHeaders(),null,null);
         mockitoWhenRestExchangeByteArrayThenThrow(httpClientErrorException);
 
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+        assertThrows(ResourceNotFoundException.class, () -> {
             sut.getDocumentBinaryContent(matchedDocUUID);
         });
 
@@ -313,7 +313,7 @@ class DocumentManagementServiceImplTest {
         HttpClientErrorException httpClientErrorException = HttpClientErrorException.create(HttpStatus.FORBIDDEN,"woopsie", new HttpHeaders(),null,null);
         mockitoWhenRestExchangeByteArrayThenThrow(httpClientErrorException);
 
-        Assertions.assertThrows(ForbiddenException.class, () -> {
+        assertThrows(ForbiddenException.class, () -> {
             sut.getDocumentBinaryContent(matchedDocUUID);
         });
 
@@ -325,7 +325,7 @@ class DocumentManagementServiceImplTest {
         HttpClientErrorException httpClientErrorException = HttpClientErrorException.create(HttpStatus.BAD_REQUEST,"woopsie", new HttpHeaders(),null,null);
         mockitoWhenRestExchangeByteArrayThenThrow(httpClientErrorException);
 
-        Assertions.assertThrows(BadRequestException.class, () -> {
+        assertThrows(BadRequestException.class, () -> {
             sut.getDocumentBinaryContent(matchedDocUUID);
         });
 
@@ -348,7 +348,7 @@ class DocumentManagementServiceImplTest {
             ByteArrayResource.class))
             .thenThrow(HttpClientErrorException.class);
 
-        Assertions.assertThrows(ServiceException.class, () -> {
+        assertThrows(ServiceException.class, () -> {
             sut.getDocumentBinaryContent(matchedDocUUID);
         });
 
@@ -410,10 +410,9 @@ class DocumentManagementServiceImplTest {
     void checkServicePermission_WhenJurisdictionIdIsNull() {
         when(securityUtilsMock.getServiceId()).thenReturn(XUI_WEBAPP);
         mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("", "caseTypeId", ""), HttpStatus.OK);
-        ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
-
-        Boolean result = sut.checkServicePermission(responseEntity, Permission.READ);
-        assertEquals(Boolean.FALSE, result);
+        assertThrows(NullPointerException.class, () -> {
+            sut.checkServicePermission(new ResponseEntity<>(HttpStatus.OK), Permission.READ);
+        });
     }
 
     private StoredDocumentHalResource initialiseMetaData(String caseTypeId, String jurisdictionID) {
@@ -467,7 +466,7 @@ class DocumentManagementServiceImplTest {
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),any(UUID.class)))
             .thenReturn(null);
 
-        Assertions.assertThrows(Exception.class, () -> {
+        assertThrows(Exception.class, () -> {
             sut.checkUserPermission(responseEntity, matchedDocUUID, Permission.READ);
         });
 
@@ -481,7 +480,7 @@ class DocumentManagementServiceImplTest {
         ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
-        Assertions.assertThrows(BadRequestException.class, () -> {
+        assertThrows(BadRequestException.class, () -> {
             sut.checkUserPermission(responseEntity, matchedDocUUID, Permission.READ);
         });
 
@@ -604,7 +603,7 @@ class DocumentManagementServiceImplTest {
             .documentHashTokens(documentList)
             .build();
 
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+        assertThrows(ResourceNotFoundException.class, () -> {
             sut.patchDocumentMetadata(caseDocumentsMetadata);
         });
     }
@@ -637,7 +636,7 @@ class DocumentManagementServiceImplTest {
             .documentHashTokens(documentList)
             .build();
 
-        Assertions.assertThrows(ForbiddenException.class, () -> {
+        assertThrows(ForbiddenException.class, () -> {
             sut.patchDocumentMetadata(caseDocumentsMetadata);
         });
     }
@@ -670,7 +669,7 @@ class DocumentManagementServiceImplTest {
             .documentHashTokens(documentList)
             .build();
 
-        Assertions.assertThrows(BadRequestException.class, () -> {
+        assertThrows(BadRequestException.class, () -> {
             sut.patchDocumentMetadata(caseDocumentsMetadata);
         });
     }
@@ -704,7 +703,7 @@ class DocumentManagementServiceImplTest {
             .documentHashTokens(documentList)
             .build();
 
-        Assertions.assertThrows(ForbiddenException.class, () -> {
+        assertThrows(ForbiddenException.class, () -> {
             sut.patchDocumentMetadata(caseDocumentsMetadata);
         });
     }
@@ -737,7 +736,7 @@ class DocumentManagementServiceImplTest {
             .documentHashTokens(documentList)
             .build();
 
-        Assertions.assertThrows(ServiceException.class, () -> {
+        assertThrows(ServiceException.class, () -> {
             sut.patchDocumentMetadata(caseDocumentsMetadata);
         });
     }
@@ -805,7 +804,7 @@ class DocumentManagementServiceImplTest {
         List<String> roles = new ArrayList<>();
         roles.add("Role");
 
-        Assertions.assertThrows(ServiceException.class, () -> {
+        assertThrows(ServiceException.class, () -> {
             sut.uploadDocuments(
                 files,
                 "classification",
@@ -825,7 +824,7 @@ class DocumentManagementServiceImplTest {
         List<String> roles = new ArrayList<>();
         roles.add("Role");
 
-        Assertions.assertThrows(ForbiddenException.class, () -> {
+        assertThrows(ForbiddenException.class, () -> {
             sut.uploadDocuments(
                 files,
                 "classification",
@@ -845,7 +844,7 @@ class DocumentManagementServiceImplTest {
         List<String> roles = new ArrayList<>();
         roles.add("Role");
 
-        Assertions.assertThrows(BadRequestException.class, () -> {
+        assertThrows(BadRequestException.class, () -> {
             sut.uploadDocuments(
                 files,
                 "classification",
@@ -865,7 +864,7 @@ class DocumentManagementServiceImplTest {
         List<String> roles = new ArrayList<>();
         roles.add("Role");
 
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+        assertThrows(ResourceNotFoundException.class, () -> {
             sut.uploadDocuments(
                 files,
                 "classification",
@@ -912,7 +911,7 @@ class DocumentManagementServiceImplTest {
         MockHttpServletRequest request = new MockHttpServletRequest();
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
-        Assertions.assertThrows(ResponseFormatException.class, () -> {
+        assertThrows(ResponseFormatException.class, () -> {
             sut.uploadDocuments(files,"classification", BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
         });
     }
@@ -958,7 +957,7 @@ class DocumentManagementServiceImplTest {
             StoredDocumentHalResource.class
         )).thenReturn(new ResponseEntity<>(storedDocumentHalResource, HttpStatus.NOT_FOUND));
 
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+        assertThrows(ResourceNotFoundException.class, () -> {
             sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID), updateDocumentCommand);
         });
     }
@@ -979,7 +978,7 @@ class DocumentManagementServiceImplTest {
             StoredDocumentHalResource.class
         )).thenThrow(HttpClientErrorException.create(HttpStatus.BAD_REQUEST,"woopsie", new HttpHeaders(),null,null));
 
-        Assertions.assertThrows(BadRequestException.class, () -> {
+        assertThrows(BadRequestException.class, () -> {
             sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID), updateDocumentCommand);
         });
     }
@@ -1000,7 +999,7 @@ class DocumentManagementServiceImplTest {
             StoredDocumentHalResource.class
         )).thenThrow(HttpClientErrorException.create(HttpStatus.FORBIDDEN,"woopsie", new HttpHeaders(),null,null));
 
-        Assertions.assertThrows(ForbiddenException.class, () -> {
+        assertThrows(ForbiddenException.class, () -> {
             sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID), updateDocumentCommand);
         });
     }
@@ -1021,7 +1020,7 @@ class DocumentManagementServiceImplTest {
         )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.NOT_FOUND, "404", new HttpHeaders(), new byte[1],
                                                               Charset.defaultCharset()));
 
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+        assertThrows(ResourceNotFoundException.class, () -> {
             sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID), updateDocumentCommand);
         });
     }
@@ -1042,7 +1041,7 @@ class DocumentManagementServiceImplTest {
         )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.BAD_GATEWAY, "403", new HttpHeaders(), new byte[1],
                                                               Charset.defaultCharset()));
 
-        Assertions.assertThrows(ServiceException.class, () -> {
+        assertThrows(ServiceException.class, () -> {
             sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID), updateDocumentCommand);
         });
     }
@@ -1061,7 +1060,7 @@ class DocumentManagementServiceImplTest {
         roles.add("Role");
         UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
         updateDocumentCommand.setTtl("600000");
-        Assertions.assertThrows(BadRequestException.class, () -> {
+        assertThrows(BadRequestException.class, () -> {
             sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID), updateDocumentCommand);
         });
     }
@@ -1103,7 +1102,7 @@ class DocumentManagementServiceImplTest {
         )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.NOT_FOUND, "404", new HttpHeaders(), new byte[1],
                                                               Charset.defaultCharset()));
 
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+        assertThrows(ResourceNotFoundException.class, () -> {
             sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), permanent);
         });
     }
@@ -1124,7 +1123,7 @@ class DocumentManagementServiceImplTest {
         )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.FORBIDDEN, "404", new HttpHeaders(), new byte[1],
                                                               Charset.defaultCharset()));
 
-        Assertions.assertThrows(ForbiddenException.class, () -> {
+        assertThrows(ForbiddenException.class, () -> {
             sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), permanent);
         });
     }
@@ -1145,7 +1144,7 @@ class DocumentManagementServiceImplTest {
         )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.BAD_REQUEST, "404", new HttpHeaders(), new byte[1],
                                                               Charset.defaultCharset()));
 
-        Assertions.assertThrows(BadRequestException.class, () -> {
+        assertThrows(BadRequestException.class, () -> {
             sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), permanent);
         });
     }
@@ -1166,7 +1165,7 @@ class DocumentManagementServiceImplTest {
         )).thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.BAD_GATEWAY, "404", new HttpHeaders(), new byte[1],
                                                               Charset.defaultCharset()));
 
-        Assertions.assertThrows(ServiceException.class, () -> {
+        assertThrows(ServiceException.class, () -> {
             sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), permanent);
         });
     }
@@ -1187,7 +1186,7 @@ class DocumentManagementServiceImplTest {
             Object.class
         )).thenReturn(new ResponseEntity<>(responseEntity, HttpStatus.NOT_FOUND));
 
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+        assertThrows(ResourceNotFoundException.class, () -> {
             sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), permanent);
         });
     }
@@ -1203,7 +1202,7 @@ class DocumentManagementServiceImplTest {
         mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("!!VCB12", "", ""), HttpStatus.OK);
         ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
 
-        Assertions.assertThrows(BadRequestException.class, () -> {
+        assertThrows(BadRequestException.class, () -> {
             sut.checkUserPermission(responseEntity, UUID.fromString(MATCHED_DOCUMENT_ID), Permission.CREATE);
         });
     }
