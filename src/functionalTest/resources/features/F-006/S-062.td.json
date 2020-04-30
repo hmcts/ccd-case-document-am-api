@@ -2,7 +2,6 @@
   "title": "must get an error response for a malformed document Id",
   "_guid_": "S-062",
   "_extends_": "F-006_Test_Base_data",
-
   "specs": [
     "contains a malformed document Id"
   ],
@@ -17,9 +16,9 @@
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
-    "body" : {
-      "message" : "[[ANYTHING_PRESENT]]",
-      "path" : "[[ANYTHING_PRESENT]]"
+    "body": {
+      "message": "[[ANYTHING_PRESENT]]",
+      "path": "[[ANYTHING_PRESENT]]"
     }
   }
 }

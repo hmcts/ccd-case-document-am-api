@@ -26,12 +26,14 @@ class MetadataSearchCommandTest {
     @Test
     void shouldTestEquals() {
         assertTrue(metadataSearch.equals(new MetadataSearchCommand()));
+        assertTrue(metadataSearch.equals(metadataSearch));
         assertFalse(metadataSearch.equals(""));
     }
 
     @Test
     void shouldTestHashCode() {
-        assertNotNull(metadataSearch.hashCode());
+        int result = metadataSearch.hashCode();
+        assertEquals(961, result);
     }
 
     @Test

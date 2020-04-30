@@ -1,7 +1,6 @@
 {
-	"_guid_": "F-007-Upload_Document1",
+  "_guid_": "F-007-Upload_Document1",
   "_extends_": "Default_Document_Upload_Data",
-
   "specs": [
     "by same user to upload a document with mandatory metadata"
   ]

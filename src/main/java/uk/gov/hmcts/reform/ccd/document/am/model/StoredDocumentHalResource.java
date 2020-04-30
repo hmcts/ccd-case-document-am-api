@@ -7,18 +7,17 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.validation.annotation.Validated;
 import uk.gov.hmcts.reform.ccd.document.am.controller.endpoints.CaseDocumentAmController;
 
 import javax.validation.Valid;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 
 /**
@@ -28,8 +27,8 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Validated
-@JsonIgnoreProperties(value = { "_links,_embedded" })
-public class StoredDocumentHalResource extends ResourceSupport {
+@JsonIgnoreProperties(value = { "_links,_embedded,roles" })
+public class StoredDocumentHalResource extends RepresentationModel<StoredDocumentHalResource> {
 
     @JsonProperty("classification")
     private ClassificationEnum classification = ClassificationEnum.PRIVATE;
@@ -48,9 +47,6 @@ public class StoredDocumentHalResource extends ResourceSupport {
     private Date modifiedOn = null;
     @JsonProperty("originalDocumentName")
     private String originalDocumentName = null;
-    @JsonProperty("roles")
-    @Valid
-    private List<String> roles = null;
     @JsonProperty("size")
     private Long size = null;
     @JsonProperty("ttl")

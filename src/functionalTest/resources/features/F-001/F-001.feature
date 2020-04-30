@@ -16,7 +16,6 @@ Feature: F-001: Get Document Metadata by Document ID
     And   the response [contains the metadata for the document uploaded above],
     And   the response has all other details as expected.
 
-
   @S-002
   Scenario: must get an error response for a non-existing document ID
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
@@ -48,7 +47,6 @@ Feature: F-001: Get Document Metadata by Document ID
     Then  a negative response is received,
     And   the response has all the details as expected.
 
-
   @S-005
   Scenario: generic scenario for Unauthorized
 
@@ -58,4 +56,33 @@ Feature: F-001: Get Document Metadata by Document ID
   @S-007
   Scenario: generic scenario for Unsupported Media Type
 
+  @S-110
+  Scenario: must get an error response when CCD Data Store tries to access Get Document Metadata API
+    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
+    And   a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
+    When  a request is prepared with appropriate values,
+    And   the request [is to be made on behalf of CCD Data Store API],
+    And   it is submitted to call the [Get Document Metadata by Document ID] operation of [CCD Case Document AM API],
+    Then  a negative response is received,
+    And   the response has all the details as expected.
+
+  @S-111
+  Scenario: must get an error response when Bulk Scan Processor tries to access Get Document Metadata API
+    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
+    And   a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
+    When  a request is prepared with appropriate values,
+    And   the request [is to be made on behalf of Bulk Scan Processor API],
+    And   it is submitted to call the [Get Document Metadata by Document ID] operation of [CCD Case Document AM API],
+    Then  a negative response is received,
+    And   the response has all the details as expected.
+
+  @S-112 #This can be enabled once ccd_gw level permissions are removed.
+  Scenario: must get an error response when API-Gateway tries to access Get Document Metadata API
+#    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
+#    And   a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
+#    When  a request is prepared with appropriate values,
+#    And   the request [is to be made on behalf of API-Gateway API],
+#    And   it is submitted to call the [Get Document Metadata by Document ID] operation of [CCD Case Document AM API],
+#    Then  a negative response is received,
+#    And   the response has all the details as expected.
 
