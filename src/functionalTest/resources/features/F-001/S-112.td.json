@@ -18,7 +18,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "message" : "Forbidden: Insufficient permissions: ${[scenarioContext][testData][request][pathVariables][documentId]}",
+      "message": "Forbidden: Insufficient permissions: ${[scenarioContext][testData][request][pathVariables][documentId]}",
       "path": "/cases/documents/${[scenarioContext][testData][request][pathVariables][documentId]}"
     }
   }

@@ -2,33 +2,30 @@
   "title": "must successfully Patch Document with ttl",
   "_guid_": "S-051",
   "_extends_": "F-005_Test_Data_Base",
-
   "specs": [
     "contains document id uploaded above with ttl",
     "contains the same ttl applied in request"
   ],
-
   "request": {
-      "pathVariables": {
-        "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
     },
     "body": {
       "ttl": "2021-12-30T12:10:10+0000"
     }
   },
-
   "expectedResponse": {
     "_extends_": "Common_200_Response",
     "headers": {
       "Content-Length": "[[ANYTHING_PRESENT]]",
-      "Content-Type" : "application/json"
+      "Content-Type": "application/json"
     },
     "body": {
       "originalDocumentName": "[[ANYTHING_PRESENT]]",
       "mimeType": "[[ANYTHING_PRESENT]]",
       "createdOn": "[[ANYTHING_PRESENT]]",
       "modifiedOn": "[[ANYTHING_PRESENT]]",
-      "lastModifiedBy":  "[[ANYTHING_PRESENT]]",
+      "lastModifiedBy": "[[ANYTHING_PRESENT]]",
       "ttl": "2021-12-30T12:10:10.000+0000"
     }
   }

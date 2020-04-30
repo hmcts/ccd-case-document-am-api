@@ -4,12 +4,9 @@
   "productName": "CCD Case Document AM API",
   "operationName": "Delete Document by Document ID",
   "apiClientId": "xui_webapp",
-
   "specs": [
     "an active caseworker profile in CCD with full permissions on a document field"
   ],
-
   "method": "DELETE",
   "uri": "/cases/documents/{documentId}?permanent={permanent}"
-
 }

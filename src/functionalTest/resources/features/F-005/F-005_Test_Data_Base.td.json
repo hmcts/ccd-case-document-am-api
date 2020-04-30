@@ -4,12 +4,9 @@
   "productName": "CCD Case Document AM API",
   "operationName": "Patch Document with ttl",
   "apiClientId": "xui_webapp",
-
   "specs": [
     "an active caseworker profile in CCD with full permissions on a document field"
   ],
-
   "method": "PATCH",
   "uri": "/cases/documents/{documentId}"
-
 }

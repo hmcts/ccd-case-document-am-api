@@ -3,18 +3,15 @@
   "_guid_": "S-126",
   "_extends_": "F-003_Test_Data_Base",
   "apiClientId": "ccd_data",
-
   "specs": [
     "is to be made on behalf of CCD Data Store API"
   ],
-
   "request": {
-      "pathVariables": {
-        "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}",
-        "permanent": true
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}",
+      "permanent": true
     }
   },
-
   "expectedResponse": {
     "_extends_": "Common_403_Response",
     "headers": {
@@ -22,8 +19,8 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "message" : "Forbidden: Insufficient permissions: ${[scenarioContext][testData][request][pathVariables][documentId]}",
-      "path" : "/cases/documents/${[scenarioContext][testData][request][pathVariables][documentId]}"
+      "message": "Forbidden: Insufficient permissions: ${[scenarioContext][testData][request][pathVariables][documentId]}",
+      "path": "/cases/documents/${[scenarioContext][testData][request][pathVariables][documentId]}"
     }
   }
 }

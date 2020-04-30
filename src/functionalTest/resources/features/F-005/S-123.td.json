@@ -2,23 +2,19 @@
   "title": "must get an error response when Bulk Scan Processor tries to access Patch Document with ttl API",
   "_guid_": "S-123",
   "_extends_": "F-005_Test_Data_Base",
-
   "apiClientId": "bulk_scan_processor",
-
   "specs": [
     "contains document id uploaded above with ttl",
     "is to be made on behalf of Bulk Scan Processor API"
   ],
-
   "request": {
-      "pathVariables": {
-        "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
     },
     "body": {
       "ttl": "2021-12-30T12:10:10+0000"
     }
   },
-
   "expectedResponse": {
     "_extends_": "Common_403_Response",
     "headers": {
@@ -26,8 +22,8 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "message" : "Forbidden: Insufficient permissions: ${[scenarioContext][testData][request][pathVariables][documentId]}",
-      "path" : "/cases/documents/${[scenarioContext][testData][request][pathVariables][documentId]}"
+      "message": "Forbidden: Insufficient permissions: ${[scenarioContext][testData][request][pathVariables][documentId]}",
+      "path": "/cases/documents/${[scenarioContext][testData][request][pathVariables][documentId]}"
     }
   }
 }
