@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.LinkedHashMap;
 import java.util.Date;
 import java.util.Map;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SIZE;
@@ -51,11 +50,11 @@ public class ResponseHelper {
     }
 
     public static ResponseEntity<Object>  updatePatchTTLResponse(ResponseEntity<StoredDocumentHalResource> updateResponse) {
-        LinkedHashMap<String, Object> updatedUploadedDocumentResponse = new LinkedHashMap<>();
-        ObjectMapper m = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
+
         try {
             StoredDocumentHalResource storedDocumentHalResource =  updateResponse.getBody();
-            Map<String,Object> metaData = m.convertValue(storedDocumentHalResource, new TypeReference<Map<String, Object>>() {});
+            Map<String,Object> metaData = mapper.convertValue(storedDocumentHalResource, new TypeReference<Map<String, Object>>() {});
             updateResponseFields(storedDocumentHalResource.getTtl(), storedDocumentHalResource.getCreatedOn(), metaData);
             return new ResponseEntity<>(metaData, convertHeaders(updateResponse.getHeaders()), updateResponse.getStatusCode());
 
