@@ -532,7 +532,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             return service.get();
         } else {
             LOG.error("Service Id {} is not authorized to access API ", serviceId);
-            throw new BadRequestException(String.format(EXCEPTION_SERVICE_ID_NOT_AUTHORISED, serviceId));
+            throw new ForbiddenException(String.format(EXCEPTION_SERVICE_ID_NOT_AUTHORISED, serviceId));
         }
     }
 
