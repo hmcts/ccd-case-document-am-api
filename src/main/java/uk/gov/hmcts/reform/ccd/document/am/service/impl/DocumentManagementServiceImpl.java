@@ -91,6 +91,7 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CREATED_BY;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LAST_MODIFIED_BY;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.MODIFIED_ON;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EXCEPTION_SERVICE_ID_NOT_AUTHORISED;
 
 @Slf4j
 @Service
@@ -527,7 +528,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private AuthorisedService getServiceDetailsFromJson(String serviceId) {
         Optional<AuthorisedService> service = authorisedServices.getAuthServices().stream().filter(s -> s.getId().equals(
             serviceId)).findAny();
-        return service.orElse(null);
+        if (service.isPresent()) {
+            return service.get();
+        } else {
+            LOG.error("Service Id {} is not authorized to access API ", serviceId);
+            throw new BadRequestException(String.format(EXCEPTION_SERVICE_ID_NOT_AUTHORISED, serviceId));
+        }
     }
 
     private String extractCaseTypeIdFromMetadata(Object storedDocument) {

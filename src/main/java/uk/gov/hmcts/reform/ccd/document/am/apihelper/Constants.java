@@ -65,6 +65,7 @@ public class Constants {
     public static final String TTL = "ttl";
     public static final String CREATED_ON = "createdOn";
     public static final String DOCUMENT_LINKS = "links";
+    public static final String EXCEPTION_SERVICE_ID_NOT_AUTHORISED = "Service Id is not authorized to access API: %s ";
 
 
 }
