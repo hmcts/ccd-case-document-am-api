@@ -457,6 +457,15 @@ class DocumentManagementServiceImplTest {
     }
 
     @Test
+    void checkServicePermission_WhenServiceIdIsNotAuthorised() {
+        when(securityUtilsMock.getServiceId()).thenReturn("bad_Service_name");
+        mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("1234567812345678", "caseTypeId", "BEFTA_JURISDICTION_2"), HttpStatus.OK);
+        assertThrows(ForbiddenException.class, () -> {
+            sut.checkServicePermission(new ResponseEntity<>(HttpStatus.OK), Permission.READ);
+        });
+    }
+
+    @Test
     void checkUserPermission_Throws_CaseNotFoundException() {
         mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("1234567890123456", "", ""), HttpStatus.OK);
         ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
