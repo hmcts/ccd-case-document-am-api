@@ -458,7 +458,7 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void checkServicePermission_WhenServiceIdIsNotAuthorised() {
-        when(securityUtilsMock.getServiceId()).thenReturn("ccd_case_document_am_api");
+        when(securityUtilsMock.getServiceId()).thenReturn("bad_Service_name");
         mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("1234567812345678", "caseTypeId", "BEFTA_JURISDICTION_2"), HttpStatus.OK);
         assertThrows(BadRequestException.class, () -> {
             sut.checkServicePermission(new ResponseEntity<>(HttpStatus.OK), Permission.READ);
