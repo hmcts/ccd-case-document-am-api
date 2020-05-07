@@ -63,10 +63,11 @@ env.OAUTH2_CLIENT_ID = "ccd_gateway"
 env.OAUTH2_REDIRECT_URI = "https://www-ccd.aat.platform.hmcts.net/oauth2redirect"
 env.DOCUMENT_STORE_URL = "http://dm-store-aat.service.core-compute-aat.internal"
 env.DEFINITION_STORE_HOST = "http://ccd-definition-store-api-pr-575.service.core-compute-preview.internal"
-env.CCD_DATA_STORE_URL = "http://ccd-data-store-api-pr-905.service.core-compute-preview.internal"
+env.CCD_DATA_STORE_URL = "http://ccd-data-store-api-pr-903.service.core-compute-preview.internal"
 env.API_CLIENT_BULK_SCAN_PROCESSOR_ID = "bulk_scan_processor"
 env.API_CLIENT_DATA_STORE_ID = "ccd_data"
 env.API_CLIENT_XUI_WEBAPP_ID = "xui_webapp"
+env.BEFTA_RESPONSE_HEADER_CHECK_POLICY = "JUST_WARN"
 
 withPipeline(type, product, component) {
   onMaster {
