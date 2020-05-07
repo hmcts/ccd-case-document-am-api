@@ -67,6 +67,7 @@ env.CCD_DATA_STORE_URL = "http://ccd-data-store-api-pr-905.service.core-compute-
 env.API_CLIENT_BULK_SCAN_PROCESSOR_ID = "bulk_scan_processor"
 env.API_CLIENT_DATA_STORE_ID = "ccd_data"
 env.API_CLIENT_XUI_WEBAPP_ID = "xui_webapp"
+env.BEFTA_RESPONSE_HEADER_CHECK_POLICY = "JUST_WARN"
 
 withPipeline(type, product, component) {
   onMaster {
