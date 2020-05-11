@@ -1,106 +1,46 @@
-# Spring Boot application template
+# ccd-case-document-am-api
 
-[![Build Status](https://travis-ci.org/hmcts/spring-boot-template.svg?branch=master)](https://travis-ci.org/hmcts/spring-boot-template)
+[![API v1](https://img.shields.io/badge/API%20Docs-v1-e140ad.svg)](https://hmcts.github.io/reform-api-docs/swagger.html?url=https://hmcts.github.io/reform-api-docs/specs/document-management-store-app.json)
+[![Build Status](https://travis-ci.org/hmcts/document-management-store-app.svg?branch=master)](https://travis-ci.org/github/hmcts/document-management-store-app)
+[![Docker Build Status](https://img.shields.io/docker/build/hmcts/ccd-case-document-am-api.svg)](https://hub.docker.com/r/hmcts/ccd-case-document-am-api)
+[![codecov](https://codecov.io/gh/hmcts/ccd-case-document-am-api/branch/master/graph/badge.svg)](https://codecov.io/gh/hmcts/ccd-case-document-am-api)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Purpose
 
-The purpose of this template is to speed up the creation of new Spring applications within HMCTS
-and help keep the same standards across multiple teams. If you need to create a new app, you can
-simply use this one as a starting point and build on top of it.
+The purpose of this application is to act as a document management service for the ccd application.
 
-## What's inside
+Users with sufficient permissions and knowledge will be able to upload, modify, delete and download documents.
 
-The template is a working application with a minimal setup. It contains:
- * application skeleton
- * setup script to prepare project
- * common plugins and libraries
- * docker setup
- * swagger configuration for api documentation ([see how to publish your api documentation to shared repository](https://github.com/hmcts/reform-api-docs#publish-swagger-docs))
- * code quality tools already set up
- * integration with Travis CI
- * Hystrix circuit breaker enabled
- * MIT license and contribution information
- * Helm chart using chart-java.
+### Prerequisites
 
-The application exposes health endpoint (http://localhost:4455/health) and metrics endpoint
-(http://localhost:4455/metrics).
+- [Open JDK 8](https://openjdk.java.net/)
+- [Docker](https://www.docker.com)
 
-## Plugins
+This service works with the DocStore Api and CaseData Api alongside their databases CCD Data Store and Document Management Store.
 
-The template contains the following plugins:
+#### Environment variables
+The following environment variables are required:
 
-  * checkstyle
+| Name | Default | Description |
+|------|---------|-------------|
+      |CASE_DOCUMENT_S2S_AUTHORISED_SERVICES| ccd_case_document_am_api, ccd_gw, xui_webapp, ccd_data, bulk_scan_processor|
+      |REFORM_SERVICE_NAME| ccd-case-document-am-api|
+      |REFORM_TEAM| ccd
+      |REFORM_ENVIRONMENT| local
+      |S2S_SECRET|
+      |S2S_KEY| S2S_KEY
+      |CCD_DOCUMENT_API_IDAM_KEY|
+      |DEFINITION_STORE_HOST|
+      |USER_PROFILE_HOST|
+      |DOCUMENT_STORE_URL| http://dm-store:8080|
+      |CCD_DATA_STORE_URL| http://ccd-data-store-api:4452|
+      |AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY|
+      |IDAM_USER_URL| http://idam-api:5000 |
+      |IDAM_S2S_URL| http://service-auth-provider-api:8080|
+      |JAVA_TOOL_OPTIONS| -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket, server=y,suspend=n,address=5005
 
-    https://docs.gradle.org/current/userguide/checkstyle_plugin.html
-
-    Performs code style checks on Java source files using Checkstyle and generates reports from these checks.
-    The checks are included in gradle's *check* task (you can run them by executing `./gradlew check` command).
-
-  * pmd
-
-    https://docs.gradle.org/current/userguide/pmd_plugin.html
-
-    Performs static code analysis to finds common programming flaws. Included in gradle `check` task.
-
-
-  * jacoco
-
-    https://docs.gradle.org/current/userguide/jacoco_plugin.html
-
-    Provides code coverage metrics for Java code via integration with JaCoCo.
-    You can create the report by running the following command:
-
-    ```bash
-      ./gradlew jacocoTestReport
-    ```
-
-    The report will be created in build/reports subdirectory in your project directory.
-
-  * io.spring.dependency-management
-
-    https://github.com/spring-gradle-plugins/dependency-management-plugin
-
-    Provides Maven-like dependency management. Allows you to declare dependency management
-    using `dependency 'groupId:artifactId:version'`
-    or `dependency group:'group', name:'name', version:version'`.
-
-  * org.springframework.boot
-
-    http://projects.spring.io/spring-boot/
-
-    Reduces the amount of work needed to create a Spring application
-
-  * org.owasp.dependencycheck
-
-    https://jeremylong.github.io/DependencyCheck/dependency-check-gradle/index.html
-
-    Provides monitoring of the project's dependent libraries and creating a report
-    of known vulnerable components that are included in the build. To run it
-    execute `gradle dependencyCheck` command.
-
-  * com.github.ben-manes.versions
-
-    https://github.com/ben-manes/gradle-versions-plugin
-
-    Provides a task to determine which dependencies have updates. Usage:
-
-    ```bash
-      ./gradlew dependencyUpdates -Drevision=release
-    ```
-
-## Setup
-
-Located in `./bin/init.sh`. Simply run and follow the explanation how to execute it.
-
-## Notes
-
-Since Spring Boot 2.1 bean overriding is disabled. If you want to enable it you will need to set `spring.main.allow-bean-definition-overriding` to `true`.
-
-JUnit 5 is now enabled by default in the project. Please refrain from using JUnit4 and use the next generation
-
-## Building and deploying the application
-
-### Building the application
+## Building the application
 
 The project uses [Gradle](https://gradle.org) as a build tool. It already contains
 `./gradlew` wrapper script, so there's no need to install gradle.
@@ -110,96 +50,74 @@ To build the project execute the following command:
 ```bash
   ./gradlew build
 ```
-
-### Running the application
-
-Create the image of the application by executing the following command:
+To clean up your environment use the following, it will delete any temporarily generated files such as reports.
 
 ```bash
-  ./gradlew assemble
+  ./gradlew clean
 ```
+### Running
 
-Create docker image:
+If you want your code to become available to other Docker projects (e.g. for local environment testing), you need to build the image:
 
 ```bash
-  docker-compose build
+docker-compose build
 ```
 
-Run the distribution (created in `build/install/spring-boot-template` directory)
-by executing the following command:
+When the project has been packaged in `target/` directory, 
+you can run it by executing following command:
 
 ```bash
-  docker-compose up
+docker-compose up
 ```
 
-This will start the API container exposing the application's port
-(set to `4455` in this template app).
+As a result the following containers will get created and started:
 
-In order to test if the application is up, you can call its health endpoint:
+ - API exposing port `4455`
 
-```bash
-  curl http://localhost:4455/health
-```
+## Endpoints
 
-You should get a response similar to this:
+Authorization and ServiceAuthorization (S2S) tokens are required in the headers for all endpoints.
 
 ```
-  {"status":"UP","diskSpace":{"status":"UP","total":249644974080,"free":137188298752,"threshold":10485760}}
+GET /cases/documents/{documentId}
 ```
-
-### Alternative script to run application
-
-To skip all the setting up and building, just execute the following command:
-
-```bash
-./bin/run-in-docker.sh
+- Retrieves json representation of the document metadata from doc-store. 
 ```
-
-For more information:
-
-```bash
-./bin/run-in-docker.sh -h
+GET /cases/documents/{documentId}/binary
 ```
-
-Script includes bare minimum environment variables necessary to start api instance. Whenever any variable is changed or any other script regarding docker image/container build, the suggested way to ensure all is cleaned up properly is by this command:
-
-```bash
-docker-compose rm
+- Streams contents of the most recent Document Content Version associated with the Stored Document. 
 ```
-
-It clears stopped containers correctly. Might consider removing clutter of images too, especially the ones fiddled with:
-
-```bash
-docker images
-
-docker image rm <image-id>
+GET /cases/documents/{documentId}/token
 ```
+- Returns the hashed token required for document upload functionality.
+```
+POST /cases/documents
+```
+- Used for uploading any case related documents to doc-store.
 
-There is no need to remove postgres and java or similar core images.
+        Also requires a request body containing
+        - classification {string}
+        - files {multipart/form-data}
+        - caseTypeId {string}
+        - jurisdictionId {string}
+```
+PATCH /cases/documents/{documentId}
+```
+- Used to update the TTL(time to live) value for any case related document in doc-store. 
 
-## Hystrix
+        Also requires a request body containing
+        - ttl {string}
+```
+PATCH /cases/documents/attachToCase
+```
+- Will be exposed only for ccd-data-store application and utilised in a service to service call for attaching documents to their corresponding case while submitting case create/update with document.
 
-[Hystrix](https://github.com/Netflix/Hystrix/wiki) is a library that helps you control the interactions
-between your application and other services by adding latency tolerance and fault tolerance logic. It does this
-by isolating points of access between the services, stopping cascading failures across them,
-and providing fallback options. We recommend you to use Hystrix in your application if it calls any services.
+        Also requires a request body containing
+        - CaseDocumentMetadata {objects}
+```
+DELETE /cases/documents/{documentId}
+```
+- Will delete any case related documents from doc-store
 
-### Hystrix circuit breaker
-
-This template API has [Hystrix Circuit Breaker](https://github.com/Netflix/Hystrix/wiki/How-it-Works#circuit-breaker)
-already enabled. It monitors and manages all the`@HystrixCommand` or `HystrixObservableCommand` annotated methods
-inside `@Component` or `@Service` annotated classes.
-
-### Other
-
-Hystrix offers much more than Circuit Breaker pattern implementation or command monitoring.
-Here are some other functionalities it provides:
- * [Separate, per-dependency thread pools](https://github.com/Netflix/Hystrix/wiki/How-it-Works#isolation)
- * [Semaphores](https://github.com/Netflix/Hystrix/wiki/How-it-Works#semaphores), which you can use to limit
- the number of concurrent calls to any given dependency
- * [Request caching](https://github.com/Netflix/Hystrix/wiki/How-it-Works#request-caching), allowing
- different code paths to execute Hystrix Commands without worrying about duplicating work
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+        Also requires a request param for
+        - permanent {boolean}
