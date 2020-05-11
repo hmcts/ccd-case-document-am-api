@@ -2,17 +2,12 @@
   "title": "must get an error response for a wrong hash token",
   "_guid_": "S-071",
   "_extends_": "F-007_Test_Data_Base",
-
   "specs": [
     "contains a wrong hash token",
     "is to be made on behalf of CCD Data Store API"
   ],
-
   "request": {
     "body": {
-      "caseId": "1234567890099900",
-      "caseTypeId" : "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][caseTypeId]}",
-      "jurisdictionId" : "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][jurisdictionId]}",
       "documentHashTokens": [
         {
           "id": "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
@@ -21,16 +16,15 @@
       ]
     }
   },
-
   "expectedResponse": {
     "_extends_": "Common_403_Response",
     "headers": {
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
-    "body" : {
-      "message" : "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
-      "path" : "/cases/documents/attachToCase"
+    "body": {
+      "message": "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
+      "path": "/cases/documents/attachToCase"
     }
   }
 }

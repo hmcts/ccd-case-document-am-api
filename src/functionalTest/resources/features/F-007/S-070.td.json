@@ -2,34 +2,28 @@
   "title": "must successfully attach a document to a case with hash token",
   "_guid_": "S-070",
   "_extends_": "F-007_Test_Data_Base",
-
   "specs": [
     "contains a Case Id",
     "is to be made on behalf of CCD Data Store API"
   ],
-
   "request": {
     "body": {
-      "caseId": "1234567890099900",
-      "caseTypeId" : "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][caseTypeId]}",
-      "jurisdictionId" : "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][metadata][jurisdictionId]}",
       "documentHashTokens": [
         {
           "id": "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
-          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][_embedded][documents][0][hashToken]}"
+          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][hashToken]}"
         }
       ]
     }
   },
-
   "expectedResponse": {
     "_extends_": "Common_200_Response",
     "headers": {
       "Content-Length": "[[ANYTHING_PRESENT]]",
-      "Content-Type" : "application/json"
+      "Content-Type": "application/json"
     },
-    "body" : {
-      "Result" : "Success"
+    "body": {
+      "Result": "Success"
     }
   }
 }

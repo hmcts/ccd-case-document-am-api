@@ -29,9 +29,9 @@
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
-    "body" : {
-      "message" : "Required String parameter 'caseTypeId' is not present",
-      "path" : "/cases/documents"
+    "body": {
+      "message": "Required String parameter 'caseTypeId' is not present",
+      "path": "/cases/documents"
     }
   }
 }

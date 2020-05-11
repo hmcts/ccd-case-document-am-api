@@ -15,8 +15,9 @@ class StoredDocumentHalResourceCollectionTest {
     @Test
     void shouldAddContentItem() {
         List<String> roles = Arrays.asList("citizen");
-        storedDocumentHalResourceCollection.addContentItem(new StoredDocumentHalResource());
+        StoredDocumentHalResourceCollection payloadBody = storedDocumentHalResourceCollection.addContentItem(new StoredDocumentHalResource());
         assertNotNull(storedDocumentHalResourceCollection.getContent());
+        assertEquals(payloadBody.getClass(), StoredDocumentHalResourceCollection.class);
     }
 
     @Test
@@ -33,9 +34,21 @@ class StoredDocumentHalResourceCollectionTest {
     }
 
     @Test
+    void shouldEqualTrue() {
+        assertTrue(storedDocumentHalResourceCollection.equals(storedDocumentHalResourceCollection));
+    }
+
+    @Test
     void shouldTestHashCode() {
         assertNotNull(storedDocumentHalResourceCollection.hashCode());
     }
+
+    @Test
+    void shouldTestHashCodeValue() {
+        int result = storedDocumentHalResourceCollection.hashCode();
+        assertEquals(31, result);
+    }
+
 
     @Test
     void shouldTestToString() {

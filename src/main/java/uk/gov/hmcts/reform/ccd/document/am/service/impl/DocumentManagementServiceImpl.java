@@ -88,6 +88,10 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.RESOURCE_N
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.THUMBNAIL;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CREATED_BY;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LAST_MODIFIED_BY;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.MODIFIED_ON;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EXCEPTION_SERVICE_ID_NOT_AUTHORISED;
 
 @Slf4j
 @Service
@@ -290,18 +294,18 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             String docUrl = String.format("%s/documents", documentURL);
 
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
-
+            LinkedHashMap<String, Object> updatedDocumentResponse = null;
             ResponseEntity<Object> uploadedDocumentResponse = restTemplate
                 .postForEntity(docUrl, requestEntity, Object.class);
 
             if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode()) && null != uploadedDocumentResponse
                 .getBody()) {
-                formatUploadDocumentResponse(caseTypeId, jurisdictionId, uploadedDocumentResponse);
+                updatedDocumentResponse = formatUploadDocumentResponse(caseTypeId, jurisdictionId, uploadedDocumentResponse);
             }
 
             responseResult = ResponseEntity
                 .status(uploadedDocumentResponse.getStatusCode())
-                .body(uploadedDocumentResponse.getBody());
+                .body(updatedDocumentResponse);
         } catch (HttpClientErrorException exception) {
             catchException(exception, EXCEPTION_ERROR_MESSAGE);
         }
@@ -325,7 +329,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 requestEntity,
                 StoredDocumentHalResource.class
             );
-            ResponseEntity<Object> responseEntity = ResponseHelper.toResponseEntity(response, documentId);
+            ResponseEntity<Object> responseEntity = ResponseHelper.updatePatchTTLResponse(response);
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
                 responseResult = responseEntity;
             } else {
@@ -368,8 +372,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
 
     @SuppressWarnings("unchecked")
-    private void formatUploadDocumentResponse(String caseTypeId, String jurisdictionId,
+    private LinkedHashMap<String, Object> formatUploadDocumentResponse(String caseTypeId, String jurisdictionId,
                                               ResponseEntity<Object> uploadedDocumentResponse) {
+        LinkedHashMap<String, Object> updatedUploadedDocumentResponse = new LinkedHashMap<>();
         try {
             LinkedHashMap<String, Object> documents = (LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse.getBody())
                 .get(EMBEDDED);
@@ -381,9 +386,18 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 if (document instanceof LinkedHashMap) {
                     LinkedHashMap<String, Object> hashmap = ((LinkedHashMap<String, Object>) (document));
                     hashmap.remove(EMBEDDED);
+                    hashmap.remove(CREATED_BY);
+                    hashmap.remove(LAST_MODIFIED_BY);
+                    hashmap.remove(MODIFIED_ON);
                     updateDomainForLinks(hashmap, jurisdictionId, caseTypeId);
                 }
             }
+            ArrayList<Object> documentListObject  = (ArrayList<Object>) ((LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse.getBody())
+                .get(EMBEDDED)).get(DOCUMENTS);
+            updatedUploadedDocumentResponse.put(DOCUMENTS, documentListObject);
+
+            return  updatedUploadedDocumentResponse;
+
         } catch (Exception exception) {
             throw new ResponseFormatException("Error while formatting the uploaded document response " + exception);
         }
@@ -460,6 +474,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     public boolean checkServicePermission(ResponseEntity<?> responseEntity, Permission permission) {
+        LOG.info("API call initiated from {} token ", securityUtils.getServiceId());
         AuthorisedService serviceConfig = getServiceDetailsFromJson(securityUtils.getServiceId());
         String caseTypeId = extractCaseTypeIdFromMetadata(responseEntity.getBody());
         String jurisdictionId = extractJurisdictionIdFromMetadata(responseEntity.getBody());
@@ -513,7 +528,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private AuthorisedService getServiceDetailsFromJson(String serviceId) {
         Optional<AuthorisedService> service = authorisedServices.getAuthServices().stream().filter(s -> s.getId().equals(
             serviceId)).findAny();
-        return service.orElse(null);
+        if (service.isPresent()) {
+            return service.get();
+        } else {
+            LOG.error("Service Id {} is not authorized to access API ", serviceId);
+            throw new ForbiddenException(String.format(EXCEPTION_SERVICE_ID_NOT_AUTHORISED, serviceId));
+        }
     }
 
     private String extractCaseTypeIdFromMetadata(Object storedDocument) {

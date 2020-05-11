@@ -16,9 +16,9 @@
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
-    "body" : {
-      "message" : "Resource not found 00000000-0000-0000-0000-000000000000",
-      "path" : "/cases/documents/00000000-0000-0000-0000-000000000000"
+    "body": {
+      "message": "Resource not found 00000000-0000-0000-0000-000000000000",
+      "path": "/cases/documents/00000000-0000-0000-0000-000000000000"
     }
   }
 }
