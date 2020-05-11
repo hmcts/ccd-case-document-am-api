@@ -1,9 +1,8 @@
 # ccd-case-document-am-api
 
 [![API v1](https://img.shields.io/badge/API%20Docs-v1-e140ad.svg)](https://hmcts.github.io/reform-api-docs/swagger.html?url=https://hmcts.github.io/reform-api-docs/specs/document-management-store-app.json)
-[![Build Status](https://travis-ci.org/hmcts/document-management-store-app.svg?branch=master)](https://travis-ci.org/github/hmcts/document-management-store-app)
+[![Build Status](https://travis-ci.org/hmcts/ccd-case-document-am-api.svg?branch=master)](https://travis-ci.org/github/hmcts/ccd-case-document-am-api)
 [![Docker Build Status](https://img.shields.io/docker/build/hmcts/ccd-case-document-am-api.svg)](https://hub.docker.com/r/hmcts/ccd-case-document-am-api)
-[![codecov](https://codecov.io/gh/hmcts/ccd-case-document-am-api/branch/master/graph/badge.svg)](https://codecov.io/gh/hmcts/ccd-case-document-am-api)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Purpose
@@ -121,3 +120,49 @@ DELETE /cases/documents/{documentId}
 
         Also requires a request param for
         - permanent {boolean}
+
+### Functional Tests
+The functional tests are located in `functionalTest` folder. These are the tests run against an environment. For example if you would 
+like to test your local environment you'll need to export the following variables on your `.bash_profile` script.
+
+
+```bash
+#Smoke/Functional Tests
+export BEFTA_S2S_CLIENT_ID=ccd_gw
+export BEFTA_S2S_CLIENT_SECRET=AAAAAAAAAAAAAAAC
+export BEFTA_RESPONSE_HEADER_CHECK_POLICY=JUST_WARN
+export CASE_DOC_AM_URL=http://localhost:4455
+export DM_STORE_URL=http://localhost:4506
+export CCD_BEFTA_CITIZEN_2_PWD=Pa55word11
+export CCD_BEFTA_CASEWORKER_2_SOLICITOR_1_PWD=Pa55word11
+export DM_STORE_BASE_URL=http://localhost:4506
+export API_CLIENT_DATA_STORE_ID=ccd_data
+export API_CLIENT_DATA_STORE_SECRET=AAAAAAAAAAAAAAAB
+export CASE_DOCUMENT_AM_URL=http://localhost:4455
+export API_CLIENT_BULK_SCAN_PROCESSOR_ID=bulk_scan_processor
+export API_CLIENT_BULK_SCAN_PROCESSOR_SECRET=AAAAAAAAAAAAAAAA
+export CCD_DATA_STORE_URL=http://localhost:4452
+export CCD_DM_DOMAIN=http://localhost:4455
+export API_CLIENT_XUI_WEBAPP_ID=xui_webapp
+export API_CLIENT_XUI_WEBAPP_SECRET=AAAAAAAAAAAAAAAA
+export DOCUMENT_STORE_URL=http://localhost:4506
+```
+
+These tests also rely on the `CCD_BEFTA_JURISDICTION2.xlsx` file to be already imported. This file should be available in your local environment already.
+
+####Running the tests
+
+In order to run the tests you will need to pull down ```ccd-docker``` repo and checkout the ```AM-CCD_Docker_Custom_Setup_For_Case_Document_API``` branch.
+
+Then pull down ```ccd-case-document-utilities``` repo and update the following lines in ```env-main.sh``` to match your local file structure.
+```
+###### Please provide Docker project location please
+DOCKER_REPO='/Users/{username}/HMCTS-Projects/AM/ccd-docker'
+###### Please provide "ccd-case-document-utilities/auto-environment/idam-ui-automation" location
+WEB_REPO='/Users/{username}/HMCTS-Projects/AM/ccd-case-document-utilities/auto-environment/idam-ui-automation'
+###### Please provide "ccd-case-document-utilities/auto-environment/bin" location
+CURRENT_LOCATION='/Users/736062/HMCTS-Projects/AM/ccd-case-document-utilities/auto-environment/bin'
+```
+
+Run the scripts that follow.
+Once this is done, try to run your functional tests.
