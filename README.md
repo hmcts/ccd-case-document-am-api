@@ -7,9 +7,15 @@
 
 ## Purpose
 
-The purpose of this application is to act as a document management service for the ccd application.
+The purpose of this application is to act as a proxy document management service to facilitate following access controls on case documents:
 
-Users with sufficient permissions and knowledge will be able to upload, modify, delete and download documents.
+1) Applying CCD's configured access control policies to the upload of CCD case documents.
+
+2) Applying CCD's configured access control policies to the download of CCD case documents.
+
+3) Protecting against unauthorised access to CCD case documents while being uploaded to, stored in, and downloaded from the case document repository. In both cases, access control will be applied as if the document were a 'standard' item of case data contained within the CCD case data store.
+
+Users & services with sufficient permissions only will be able to upload, modify, delete and download documents.
 
 ### Prerequisites
 
