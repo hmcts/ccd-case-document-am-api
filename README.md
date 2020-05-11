@@ -76,7 +76,7 @@ As a result the following containers will get created and started:
 
 ## Endpoints
 
-Authorization and ServiceAuthorization (S2S) tokens are required in the headers for all endpoints.
+Authorization and ServiceAuthorization (S2S) tokens are required in the headers for all endpoints. All APIs are authorised with some service level permissions captured in the the configurables rules under service_config.json file (https://github.com/hmcts/ccd-case-document-am-api/blob/readme_update/src/main/resources/service_config.json). 
 
 ```
 GET /cases/documents/{documentId}
@@ -89,7 +89,7 @@ GET /cases/documents/{documentId}/binary
 ```
 GET /cases/documents/{documentId}/token
 ```
-- Returns the hashed token required for document upload functionality.
+- Returns the hashed token required for document upload functionality. Initially this API is reserved only for the bulk_scan_processor service.
 ```
 POST /cases/documents
 ```
