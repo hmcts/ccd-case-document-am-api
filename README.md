@@ -166,3 +166,7 @@ CURRENT_LOCATION='/Users/736062/HMCTS-Projects/AM/ccd-case-document-utilities/au
 
 Run the scripts that follow.
 Once this is done, try to run your functional tests.
+
+## LICENSE
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
