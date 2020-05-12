@@ -54,6 +54,7 @@ resource "azurerm_key_vault_secret" "ccd_case_document_am_api_s2s_secret" {
   value = "${data.azurerm_key_vault_secret.ccd_case_document_am_api_s2s_key.value}"
   key_vault_id = "${data.azurerm_key_vault.ccd_shared_key_vault.id}"
 }
+
 resource "random_string" "draft_encryption_key" {
   length  = 16
   special = true
