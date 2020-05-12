@@ -337,4 +337,46 @@
     <sha1>7d9c946cafac70ed91848ca8d3a0df4e57077231</sha1>
     <cpe>cpe:/a:gradle:gradle</cpe>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: commons-compress-1.18.jar
+   ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.apache\.commons/commons\-compress@.*$</packageUrl>
+    <cve>CVE-2019-12402</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: poi-4.0.0.jar
+   ]]></notes>
+    <sha1>7ddb9b983ed682c93a986e8bb596d5935b13086c</sha1>
+    <cve>CVE-2019-12415</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: poi-ooxml-4.0.0.jar
+   ]]></notes>
+    <sha1>f3fa9c2bd64eb3ec15378de960a07d077ae5b26d</sha1>
+    <cve>CVE-2019-12415</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: poi-ooxml-schemas-4.0.0.jar
+   ]]></notes>
+    <sha1>125f9ccd2cf652fa4169b1c30e9023362e23324f</sha1>
+    <cve>CVE-2019-12415</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: log4j-api-2.12.1.jar
+   ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.apache\.logging\.log4j/log4j\-api@.*$</packageUrl>
+    <cpe>cpe:/a:apache:log4j</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+   file name: log4j-to-slf4j-2.12.1.jar
+   ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.apache\.logging\.log4j/log4j\-to\-slf4j@.*$</packageUrl>
+    <cpe>cpe:/a:apache:log4j</cpe>
+  </suppress>
 </suppressions>

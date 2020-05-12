@@ -26,12 +26,14 @@ class ErrorMapTest {
     @Test
     void shouldTestEquals() {
         assertTrue(errorMap.equals(new ErrorMap()));
+        assertTrue(errorMap.equals(errorMap));
         assertFalse(errorMap.equals(""));
     }
 
     @Test
     void shouldTestHashCode() {
-        assertNotNull(errorMap.hashCode());
+        int result = errorMap.hashCode();
+        assertEquals(961, result);
     }
 
     @Test

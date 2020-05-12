@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -28,6 +29,8 @@ import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,6 +46,12 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DOCUMENTS;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EMBEDDED;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HREF;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LINKS;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
 
 public class CaseDocumentAmControllerTest {
     @InjectMocks
@@ -371,6 +380,46 @@ public class CaseDocumentAmControllerTest {
         assertAll(
             () -> assertNotNull(response, VALID_RESPONSE),
             () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE));
+    }
+
+    @Test
+    @DisplayName("Should go through happy path")
+    public void uploadDocuments_HappyPath() {
+        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload("BEFTA_CASETYPE_2", "BEFTA_JURISDICTION_2", Permission.CREATE
+        );
+        List<MultipartFile> multipartFiles = generateMultipartList();
+        Mockito.when(documentManagementService.uploadDocuments(multipartFiles,Classifications.PUBLIC.name(),BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2))
+            .thenReturn(new ResponseEntity<>(generateEmbeddedLinkedHashMap(), HttpStatus.OK));
+
+        ResponseEntity<Object> responseEntity = testee.uploadDocuments(multipartFiles, Classifications.PUBLIC.name(),
+                                   BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    }
+
+    @SuppressWarnings("unchecked")
+    public LinkedHashMap<String, Object> generateEmbeddedLinkedHashMap() {
+        HashMap<String, String> binaryHash = new HashMap<>();
+        HashMap<String, String> selfHash = new HashMap<>();
+        selfHash.put(HREF, "http://localhost:4455/cases/documents/35471d43-0dad-42c1-b05a-4821028f50a2");
+        binaryHash.put(HREF, "http://localhost:4455/cases/documents/35471d43-0dad-42c1-b05a-4821028f50a2/binary");
+
+        LinkedHashMap<String, Object> linksLinkedHashMap = new LinkedHashMap<>();
+        LinkedHashMap<String, Object> binarySelfLinkedHashMap = new LinkedHashMap<>();
+
+        binarySelfLinkedHashMap.put(BINARY, binaryHash);
+        binarySelfLinkedHashMap.put(SELF, selfHash);
+        linksLinkedHashMap.put(LINKS, binarySelfLinkedHashMap);
+
+        ArrayList arrayList = new ArrayList();
+        arrayList.add(linksLinkedHashMap);
+
+        LinkedHashMap<String, Object> documentsLinkedHashMap = new LinkedHashMap<>();
+        documentsLinkedHashMap.put(DOCUMENTS,arrayList);
+
+        LinkedHashMap<String, Object> embeddedLinkedHashMap = new LinkedHashMap<>();
+        embeddedLinkedHashMap.put(EMBEDDED,documentsLinkedHashMap);
+
+        return embeddedLinkedHashMap;
     }
 
     @Test

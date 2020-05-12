@@ -45,31 +45,45 @@ Feature: F-006: Get hashtoken by Document ID
     Then a positive response is received,
     And the response [doesn't contain the hashtoken received from previous call],
     And the response has all other details as expected.
-#
-#  @S-065
-#  Scenario: must get an error response for a malformed jurisdictionId
-#    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
-#    When  a request is prepared with appropriate values,
-#    And   the request [for a malformed jurisdictionId],
-#    And   it is submitted to call the [Post Upload Document with Binary Content] operation of [CCD Case Document AM API],
-#    Then  a negative response is received,
-#    And   the response has all the details as expected.
-#
-#  @S-066
-#  Scenario: must get an error response for without jurisdictionId parameter in request
-#    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
-#    When  a request is prepared with appropriate values,
-#    And   the request [without jurisdictionId parameter],
-#    And   it is submitted to call the [Post Upload Document with Binary Content] operation of [CCD Case Document AM API],
-#    Then  a negative response is received,
-#    And   the response has all the details as expected.
 
-
-  @S-067
+  @S-064
   Scenario: generic scenario for Unauthorized
 
-  @S-068
+  @S-065
   Scenario: generic scenario for Forbidden
 
-  @S-069
+  @S-066
   Scenario: generic scenario for Unsupported Media Type
+
+  @S-106
+  Scenario: must get an error response when Ex-UI tries to access get hashtoken API
+    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
+    And a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
+    When a request is prepared with appropriate values,
+    And the request [contains the document Id from just uploaded document],
+    And the request [is to be made on behalf of Ex-UI API],
+    And it is submitted to call the [Get hashtoken by Document ID] operation of [CCD Case Document AM API],
+    Then a negative response is received,
+    And the response has all the details as expected.
+
+  @S-107
+  Scenario: must get an error response when API-Gateway tries to access get hashtoken API
+    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
+    And a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
+    When a request is prepared with appropriate values,
+    And the request [contains the document Id from just uploaded document],
+    And the request [is to be made on behalf of API-Gateway API],
+    And it is submitted to call the [Get hashtoken by Document ID] operation of [CCD Case Document AM API],
+    Then a negative response is received,
+    And the response has all the details as expected.
+
+  @S-108
+  Scenario: must get an error response when CCD Data Store tries to access get hashtoken API
+    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
+    And a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
+    When a request is prepared with appropriate values,
+    And the request [contains the document Id from just uploaded document],
+    And the request [is to be made on behalf of CCD Data Store API],
+    And it is submitted to call the [Get hashtoken by Document ID] operation of [CCD Case Document AM API],
+    Then a negative response is received,
+    And the response has all the details as expected.

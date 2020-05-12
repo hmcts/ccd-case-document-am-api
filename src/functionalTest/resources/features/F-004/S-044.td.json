@@ -14,7 +14,7 @@
         },
         {
           "key": "caseTypeId",
-          "value": "BEFTA_CASETYPE_2_2"
+          "value": "BEFTA_CASETYPE_2_1"
         },
         {
           "key": "files",
@@ -29,9 +29,9 @@
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
-    "body" : {
-      "message" : "Required String parameter 'jurisdictionId' is not present",
-      "path" : "/cases/documents"
+    "body": {
+      "message": "Required String parameter 'jurisdictionId' is not present",
+      "path": "/cases/documents"
     }
   }
 }

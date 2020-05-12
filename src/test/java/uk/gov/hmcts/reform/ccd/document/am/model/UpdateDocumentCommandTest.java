@@ -29,6 +29,11 @@ class UpdateDocumentCommandTest {
     }
 
     @Test
+    void shouldTestEqualsTrue() {
+        assertTrue(updateDocumentCommand.equals(updateDocumentCommand));
+    }
+
+    @Test
     void shouldTestHashCode() {
         assertNotNull(updateDocumentCommand.hashCode());
     }
@@ -37,5 +42,12 @@ class UpdateDocumentCommandTest {
     void shouldTestToString() {
         String result = updateDocumentCommand.toString();
         assertNotNull(result);
+    }
+
+    @Test
+    void shouldTestHashCodeValue() {
+        //this passes because ttl is always null in the class as it has no context
+        int result = updateDocumentCommand.hashCode();
+        assertEquals(31, result);
     }
 }
