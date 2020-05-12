@@ -1,5 +1,5 @@
 provider "azurerm" {
-  version = "1.22.1"
+  version = "=1.44.0"
 }
 
 locals {
@@ -40,8 +40,8 @@ data "azurerm_key_vault" "ccd_shared_key_vault" {
 }
 
 data "azurerm_key_vault" "s2s_vault" {
-  name = "s2s-${local.local_env}"
-  resource_group_name = "rpe-service-auth-provider-${local.local_env}"
+  name = "s2s-${var.env}"
+  resource_group_name = "rpe-service-auth-provider-${var.env}"
 }
 
 data "azurerm_key_vault_secret" "ccd_case_document_am_api_s2s_key" {
@@ -54,7 +54,6 @@ resource "azurerm_key_vault_secret" "ccd_case_document_am_api_s2s_secret" {
   value = "${data.azurerm_key_vault_secret.ccd_case_document_am_api_s2s_key.value}"
   key_vault_id = "${data.azurerm_key_vault.ccd_shared_key_vault.id}"
 }
-
 
 resource "random_string" "draft_encryption_key" {
   length  = 16
