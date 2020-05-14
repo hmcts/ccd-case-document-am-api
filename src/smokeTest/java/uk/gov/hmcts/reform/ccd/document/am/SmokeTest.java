@@ -43,7 +43,7 @@ public class SmokeTest extends BaseTest {
     String documentId = "00000000-0000-0000-0000-000000000000";
 
 
-    @Test
+    /*@Test
     public void should_receive_response_for_a_get_document_meta_data() {
 
         RestAssured.baseURI = caseDocumentAmUrl + "/cases/documents/" + documentId;
@@ -60,7 +60,7 @@ public class SmokeTest extends BaseTest {
             .andReturn();
         response.then().assertThat().statusCode(HttpStatus.NOT_FOUND.value())
             .body("message", Matchers.equalTo("Resource not found " + documentId));
-    }
+    }*/
 
     @Test
     public void should_receive_response_for_a_get_document_binary() {
