@@ -1,0 +1,31 @@
+{
+  "title": "must get an error response for a malformed Case Id",
+  "_guid_": "S-076",
+  "_extends_": "F-007_Test_Data_Base",
+  "specs": [
+    "contains a malformed Case Id",
+    "is to be made on behalf of CCD Data Store API"
+  ],
+  "request": {
+    "body": {
+      "caseId": "12345678900£$@00",
+      "documentHashTokens": [
+        {
+          "id": "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
+          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][hashToken]}"
+        }
+      ]
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_400_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body": {
+      "message": "The input parameter: \"${[scenarioContext][testData][request][body][caseId]}\", does not comply with the required pattern",
+      "path": "/cases/documents/attachToCase"
+    }
+  }
+}

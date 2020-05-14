@@ -35,6 +35,9 @@ public class Constants {
     public static final String HASHTOKEN = "hashToken";
     public static final String TEST_URL = "TEST_URL";
     public static final String EMBEDDED = "_embedded";
+    public static final String CREATED_BY = "createdBy";
+    public static final String LAST_MODIFIED_BY = "lastModifiedBy";
+    public static final String MODIFIED_ON = "modifiedOn";
     public static final String THUMBNAIL = "thumbnail";
     public static final String DOCUMENTS = "documents";
     public static final String INPUT_STRING_PATTERN = "^[a-zA-Z0-9_-]*$";
@@ -56,5 +59,13 @@ public class Constants {
     public static final String XUI_WEBAPP = "xui_webapp";
     public static final String BULK_SCAN_PROCESSOR = "bulk_scan_processor";
     public static final String CCD_DATA = "ccd_data";
+    public static final String SIZE = "size";
+    public static final String METADATA = "metadata";
+    public static final String ROLES = "roles";
+    public static final String TTL = "ttl";
+    public static final String CREATED_ON = "createdOn";
+    public static final String DOCUMENT_LINKS = "links";
+    public static final String EXCEPTION_SERVICE_ID_NOT_AUTHORISED = "Service Id is not authorized to access API: %s ";
+
 
 }

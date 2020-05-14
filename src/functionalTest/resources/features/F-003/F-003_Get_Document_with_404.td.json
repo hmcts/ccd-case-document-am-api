@@ -1,0 +1,29 @@
+{
+  "title": "Get document metadata by document Id",
+  "_guid_": "F-003_Get_Document_with_404",
+  "_extends_": "F-003-Base-Root",
+  "productName": "CCD Case Document AM API",
+  "operationName": "Get Document Metadata by Document ID",
+  "apiClientId": "xui_webapp",
+  "specs": [
+    "to Get the Document just deleted"
+  ],
+  "method": "GET",
+  "uri": "/cases/documents/{documentId}",
+  "request": {
+    "pathVariables": {
+      "documentId": "${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_404_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body": {
+      "message": "Resource not found ${[scenarioContext][testData][request][pathVariables][documentId]}",
+      "path": "/cases/documents/${[scenarioContext][testData][request][pathVariables][documentId]}"
+    }
+  }
+}
