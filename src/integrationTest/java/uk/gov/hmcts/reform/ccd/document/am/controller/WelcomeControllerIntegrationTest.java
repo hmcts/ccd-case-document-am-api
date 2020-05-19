@@ -53,6 +53,6 @@ public class WelcomeControllerIntegrationTest {
         final MvcResult result = mockMvc.perform(get(url).contentType(JSON_CONTENT_TYPE))
             .andExpect(status().is(200))
             .andReturn();
-        assertEquals("Assert for data", "Welcome to CCD Case Document AM Controller", result.getResponse().getContentAsString());
+        assertEquals("Assert for data", "{\"status\":\"UP\"}", result.getResponse().getContentAsString());
     }
 }
