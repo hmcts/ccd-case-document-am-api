@@ -16,7 +16,7 @@ public class WelcomeTest {
 
     @Test
     public void shouldReturnWelcomeMessage() {
-         Health health = caseDocumentAmController.healthCheck();
+        Health health = caseDocumentAmController.healthCheck();
         assertEquals(Health.up().build(), health);
     }
 
