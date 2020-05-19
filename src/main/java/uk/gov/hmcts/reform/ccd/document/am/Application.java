@@ -40,4 +40,8 @@ public class Application {
     ) {
         return new ServiceAuthTokenGenerator(secret, microService, serviceAuthorisationApi);
     }
+
+
+
+
 }
