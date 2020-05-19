@@ -1,21 +1,19 @@
 package uk.gov.hmcts.reform.ccd.document.am.controller;
 
+import java.util.UUID;
+
+import org.springframework.boot.actuate.health.Health;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.RequiredFieldMissingException;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.InvalidRequest;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.CaseNotFoundException;
-
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.InvalidRequest;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.RequiredFieldMissingException;
+import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
-
-import java.util.UUID;
-
-import static org.springframework.http.ResponseEntity.ok;
 
 /**
  * Default endpoints per application.
@@ -33,9 +31,10 @@ public class WelcomeController {
      *
      * @return Welcome message from the service.
      */
-    @GetMapping("/")
-    public ResponseEntity<String> welcome() {
-        return ok("Welcome to CCD Case Document AM Controller");
+
+    @GetMapping(value = {"/", "/health"})
+    public Health healthCheck() {
+        return Health.up().build();
     }
 
     @GetMapping(value = "/swagger")
