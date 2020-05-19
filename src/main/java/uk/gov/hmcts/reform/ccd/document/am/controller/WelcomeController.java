@@ -44,7 +44,7 @@ public class WelcomeController {
         return "redirect:swagger-ui.html";
     }
 
-    @GetMapping(value = {"/", "/health"})
+    @GetMapping(value = "/health")
     public Health healthCheck() {
         return Health.up().build();
     }
