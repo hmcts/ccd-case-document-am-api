@@ -2,14 +2,26 @@ server:
   port: ${PORT:4455}
 
 management:
+  health:
+    defaults:
+      enabled: true
+    diskspace:
+      enabled: true
   endpoint:
     health:
+      enabled: true
       show-details: "always"
-  endpoints:
+      cache:
+        time-to-live: 1000ms
     web:
       base-path: /
       exposure:
         include: 'health'
+    metrics:
+      enabled: true
+      cache:
+        time-to-live: 1000ms
+
 
 #If you use a database then uncomment below lines and update db properties accordingly
 spring:
@@ -23,23 +35,8 @@ spring:
   jackson:
     default-property-inclusion: NON_NULL
 security:
-  anonymousPaths:
-    - "/"
-    - "/health"
-    - "/health/liveness"
-    - "/actuator/**"
-    - "/loggers/**"
-    - "/swagger-ui.html"
-    - "/swagger-resources/**"
-    - "/v2/api-docs"
-    - "/webjars/springfox-swagger-ui/**"
-    - "/search/**"
-    - "/csrf"
-    - "/error"
-    - "/favicon.ico"
   ### Update list with service id of any service going to interact with casse document api
   authorisedServices: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor}
-
   authorisedRoles:
 
 ### dependency configuration
