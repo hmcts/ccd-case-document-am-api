@@ -1,8 +1,0 @@
-{
-  "_guid_": "S-000",
-  "_extends_": "Default_Document_Upload_Data",
-  "specs": [
-    "uses a uid that exists in IDAM",
-    "an active caseworker profile in CCD with full permissions on a document field"
-  ]
-}
