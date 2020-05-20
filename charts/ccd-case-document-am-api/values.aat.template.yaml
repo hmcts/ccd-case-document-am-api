@@ -3,4 +3,4 @@ java:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   environment:
-    CCD_DATA_STORE_URL: http://ccd-data-store-api-pr-903.service.core-compute-preview.internal
+    CCD_DATA_STORE_URL: http://ccd-data-store-api-pr-922.service.core-compute-preview.internal
