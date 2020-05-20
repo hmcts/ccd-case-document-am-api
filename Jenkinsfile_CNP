@@ -1,0 +1,105 @@
+#!groovy
+properties(
+  [
+    [
+      $class       : 'GithubProjectProperty',
+      projectUrlStr: 'https://github.com/hmcts/ccd-case-document-am-api'
+    ],
+    pipelineTriggers([[$class: 'GitHubPushTrigger']])
+  ]
+)
+
+@Library("Infrastructure")
+
+def type = "java"
+def product = "ccd"
+def component = "case-document-am-api"
+
+def secrets = [
+    'ccd-${env}': [
+        secret('ccd-caseworker-autotest-email', 'CCD_CASEWORKER_AUTOTEST_EMAIL'),
+        secret('ccd-caseworker-autotest-password', 'CCD_CASEWORKER_AUTOTEST_PASSWORD'),
+        secret('ccd-importer-autotest-email', 'CCD_IMPORT_AUTOTEST_EMAIL'),
+        secret('ccd-importer-autotest-password', 'CCD_IMPORT_AUTOTEST_PASSWORD'),
+        secret('ccd-befta-caseworker-2-solicitor-1-pwd', 'CCD_BEFTA_CASEWORKER_2_SOLICITOR_1_PWD'),
+        secret('ccd-befta-caseworker-2-solicitor-2-pwd', 'CCD_BEFTA_CASEWORKER_2_SOLICITOR_2_PWD'),
+        secret('ccd-befta-caseworker-2-solicitor-3-pwd', 'CCD_BEFTA_CASEWORKER_2_SOLICITOR_3_PWD'),
+        secret('ccd-befta-caseworker-1-pwd', 'CCD_BEFTA_CASEWORKER_1_PWD'),
+        secret('ccd-befta-caseworker-2-pwd', 'CCD_BEFTA_CASEWORKER_2_PWD'),
+        secret('ccd-befta-caseworker-3-pwd', 'CCD_BEFTA_CASEWORKER_3_PWD'),
+        secret('ccd-befta-citizen-2-pwd', 'CCD_BEFTA_CITIZEN_2_PWD'),
+        secret('ccd-befta-citizen-3-pwd', 'CCD_BEFTA_CITIZEN_3_PWD'),
+        secret('ccd-befta-solicitor-3-pwd', 'CCD_BEFTA_SOLICITOR_3_PWD'),
+
+        secret('ccd-api-gateway-oauth2-client-secret', 'OAUTH2_CLIENT_SECRET')
+    ],
+    's2s-${env}': [
+        secret('microservicekey-ccd-gw', 'BEFTA_S2S_CLIENT_SECRET'),
+        secret('microservicekey-ccd-data', 'API_CLIENT_DATA_STORE_SECRET'),
+        secret('microservicekey-bulk-scan-processor', 'API_CLIENT_BULK_SCAN_PROCESSOR_SECRET'),
+        secret('microservicekey-xui-webapp', 'API_CLIENT_XUI_WEBAPP_SECRET')
+    ]
+]
+
+static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+  [$class     : 'AzureKeyVaultSecret',
+   secretType : 'Secret',
+   name       : secretName,
+   version    : '',
+   envVariable: envVar
+  ]
+}
+
+def vaultOverrides = [
+    'preview' : 'aat',
+    'spreview': 'saat'
+]
+
+// Vars needed for functional and smoke tests run against AKS
+env.IDAM_URL = "https://idam-api.aat.platform.hmcts.net"
+env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
+env.BEFTA_S2S_CLIENT_ID = "ccd_gw"
+env.OAUTH2_CLIENT_ID = "ccd_gateway"
+env.OAUTH2_REDIRECT_URI = "https://www-ccd.aat.platform.hmcts.net/oauth2redirect"
+env.DOCUMENT_STORE_URL = "http://dm-store-aat.service.core-compute-aat.internal"
+env.DEFINITION_STORE_HOST = "http://ccd-definition-store-api-pr-575.service.core-compute-preview.internal"
+env.CCD_DATA_STORE_URL = "http://ccd-data-store-api-pr-903.service.core-compute-preview.internal"
+env.API_CLIENT_BULK_SCAN_PROCESSOR_ID = "bulk_scan_processor"
+env.API_CLIENT_DATA_STORE_ID = "ccd_data"
+env.API_CLIENT_XUI_WEBAPP_ID = "xui_webapp"
+env.BEFTA_RESPONSE_HEADER_CHECK_POLICY = "JUST_WARN"
+
+withPipeline(type, product, component) {
+  onMaster {
+    enableSlackNotifications('#ccd-case-document-am-api-builds')
+  }
+  onDemo {
+    enableSlackNotifications('#ccd-case-document-am-api-builds')
+  }
+  onPR {
+    enableSlackNotifications('#ccd-case-document-am-api-builds')
+  }
+
+  overrideVaultEnvironments(vaultOverrides)
+  loadVaultSecrets(secrets)
+  enableAksStagingDeployment()
+  disableLegacyDeploymentOnAAT()
+  installCharts()
+  disableLegacyDeployment()
+
+  after('functionalTest:preview') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/cucumber/**/*'
+  }
+
+  after('functionalTest:aat') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/cucumber/**/*'
+  }
+
+  after('smoketest:preview') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/site/serenity/**'
+  }
+
+  after('smoketest:aat') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/site/serenity/**'
+  }
+}

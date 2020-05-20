@@ -1,0 +1,27 @@
+{
+  "title": "must successfully delete a document by document Id permanent delete",
+  "_guid_": "S-031",
+  "_extends_": "F-003_Test_Data_Base",
+  "request": {
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}",
+      "permanent": true
+    }
+  },
+  "expectedResponse": {
+    "responseCode" : 204,
+    "responseMessage" : "No Content",
+    "headers" : {
+      "Cache-Control" : "no-cache, no-store, max-age=0, must-revalidate",
+      "Date" : "[[ANYTHING_PRESENT]]",
+      "Expires" : "[[ANYTHING_PRESENT]]",
+      "Pragma" : "no-cache",
+      "Request-Context" : "[[ANYTHING_PRESENT]]",
+      "Strict-Transport-Security" : "[[ANYTHING_PRESENT]]",
+      "Vary" : "[[ANYTHING_PRESENT]]",
+      "X-Content-Type-Options" : "nosniff",
+      "X-Frame-Options" : "DENY",
+      "X-Xss-Protection" : "[[ANYTHING_PRESENT]]"
+    }
+  }
+}

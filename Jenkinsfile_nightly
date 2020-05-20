@@ -1,0 +1,16 @@
+#!groovy
+
+properties([
+  // H allow predefined but random minute see https://en.wikipedia.org/wiki/Cron#Non-standard_characters
+  pipelineTriggers([cron('H 05 * * *')])
+])
+
+@Library("Infrastructure")
+
+def type = "java"
+def product = "ccd"
+def component = "case-document-am-api"
+
+withNightlyPipeline(type, product, component) {
+  enableSlackNotifications('#ccd-case-document-am-api-builds')
+}

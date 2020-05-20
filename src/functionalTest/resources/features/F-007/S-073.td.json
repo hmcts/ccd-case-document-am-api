@@ -1,0 +1,30 @@
+{
+  "title": "must get an error response for a malformed document Id",
+  "_guid_": "S-073",
+  "_extends_": "F-007_Test_Data_Base",
+  "specs": [
+    "contains a malformed document Id",
+    "is to be made on behalf of CCD Data Store API"
+  ],
+  "request": {
+    "body": {
+      "documentHashTokens": [
+        {
+          "id": "8de9957b-d7a6-40a1-@£$&-6aac30d33644",
+          "hashToken": "${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][hashToken]}"
+        }
+      ]
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_400_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body": {
+      "message": "The input parameter: \"${[scenarioContext][testData][request][body][documentHashTokens][0][id]}\", does not comply with the required pattern",
+      "path": "/cases/documents/attachToCase"
+    }
+  }
+}

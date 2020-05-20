@@ -1,0 +1,28 @@
+{
+  "title": "must get an error response when CCD Data Store tries to access get hashtoken API",
+  "_guid_": "S-108",
+  "_extends_": "F-006_Test_Base_data",
+  "apiClientId": "ccd_data",
+  "specs": [
+    "contains the document Id from just uploaded document",
+    "is to be made on behalf of CCD Data Store API"
+  ],
+  "request": {
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_403_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body": {
+      "message": "Forbidden: Insufficient permissions: ${[scenarioContext][testData][request][pathVariables][documentId]}",
+      "path": "/cases/documents/${[scenarioContext][testData][request][pathVariables][documentId]}/token"
+    }
+  }
+}
+
+
