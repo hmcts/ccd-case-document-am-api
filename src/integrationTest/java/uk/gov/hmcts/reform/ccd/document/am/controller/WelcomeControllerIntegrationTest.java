@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.nio.charset.Charset;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
@@ -53,6 +54,7 @@ public class WelcomeControllerIntegrationTest {
         final MvcResult result = mockMvc.perform(get(url).contentType(JSON_CONTENT_TYPE))
             .andExpect(status().is(200))
             .andReturn();
-        assertEquals("Assert for data", "{\"status\":\"UP\"}", result.getResponse().getContentAsString());
+
+        assertTrue(result.getResponse().getContentAsString().contains("UP"));
     }
 }
