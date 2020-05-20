@@ -28,7 +28,7 @@ spring:
     discovery:
       client:
         composite-indicator:
-          enabled=false
+          enabled: false
 
 security:
   anonymousPaths:
