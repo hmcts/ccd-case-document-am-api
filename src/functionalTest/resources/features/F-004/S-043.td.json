@@ -1,0 +1,41 @@
+{
+  "_guid_": "S-043",
+  "_extends_": "F-004_Test_Base_data",
+  "title": "must get an error response for a malformed jurisdiction Id",
+  "specs": [
+    "contains a malformed jurisdiction Id"
+  ],
+  "request": {
+    "body": {
+      "arrayInMap": [
+        {
+          "key": "classification",
+          "value": "PUBLIC"
+        },
+        {
+          "key": "caseTypeId",
+          "value": "BEFTA_CASETYPE_2_1"
+        },
+        {
+          "key": "jurisdictionId",
+          "value": "BEFTA_@£$%^&_JURISDICTION_2"
+        },
+        {
+          "key": "files",
+          "filePath": "SampleImage.png"
+        }
+      ]
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_400_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body": {
+      "message": "The input parameter: \"BEFTA_@?$%^&_JURISDICTION_2\", does not comply with the required pattern",
+      "path": "/cases/documents"
+    }
+  }
+}

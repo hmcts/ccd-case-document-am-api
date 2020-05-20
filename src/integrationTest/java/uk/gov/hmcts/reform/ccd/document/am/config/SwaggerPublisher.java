@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.document.am.config;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +26,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class SwaggerPublisher {
 
     @Autowired
-    private MockMvc mvc;
+    private transient MockMvc mvc;
 
     @DisplayName("Generate swagger documentation")
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+    @Disabled
     void generateDocs() throws Exception {
         byte[] specs = mvc.perform(get("/v2/api-docs"))
             .andExpect(status().isOk())
@@ -40,6 +41,5 @@ class SwaggerPublisher {
         try (OutputStream outputStream = Files.newOutputStream(Paths.get("/tmp/swagger-specs.json"))) {
             outputStream.write(specs);
         }
-
     }
 }
