@@ -83,9 +83,8 @@ withPipeline(type, product, component) {
   overrideVaultEnvironments(vaultOverrides)
   loadVaultSecrets(secrets)
   enableAksStagingDeployment()
-  disableLegacyDeploymentOnAAT()
-  installCharts()
   disableLegacyDeployment()
+  installCharts()
 
   after('functionalTest:preview') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/cucumber/**/*'
