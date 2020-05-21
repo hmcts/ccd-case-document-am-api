@@ -11,6 +11,8 @@ management:
       exposure:
         include: 'health'
 
+endpoints.health.sensitive: false
+
 #If you use a database then uncomment below lines and update db properties accordingly
 spring:
   application:
@@ -22,6 +24,12 @@ spring:
       enabled: true
   jackson:
     default-property-inclusion: NON_NULL
+  cloud:
+    discovery:
+      client:
+        composite-indicator:
+          enabled: false
+
 security:
   anonymousPaths:
     - "/"
