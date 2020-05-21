@@ -83,8 +83,6 @@ withPipeline(type, product, component) {
   overrideVaultEnvironments(vaultOverrides)
   loadVaultSecrets(secrets)
   enableAksStagingDeployment()
-  disableLegacyDeploymentOnAAT()
-  installCharts()
   disableLegacyDeployment()
 
   after('functionalTest:preview') {
