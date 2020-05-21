@@ -52,15 +52,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         authenticationManager.setEraseCredentialsAfterAuthentication(false);
         authCheckerFilter.setAuthenticationManager(authenticationManager());
 
-        http
-            .addFilter(authCheckerFilter)
+        http.addFilter(authCheckerFilter)
             .sessionManagement().sessionCreationPolicy(STATELESS).and()
             .csrf().disable()
             .formLogin().disable()
             .logout().disable()
             .authorizeRequests()
+            .antMatchers("/actuator/**").permitAll()
             .anyRequest()
             .authenticated();
-
     }
 }

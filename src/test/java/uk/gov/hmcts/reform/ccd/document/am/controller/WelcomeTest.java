@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.ccd.document.am.controller;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.actuate.health.Health;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 
@@ -13,12 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class WelcomeTest {
     private transient WelcomeController caseDocumentAmController = new WelcomeController();
-
-    @Test
-    public void shouldReturnWelcomeMessage() {
-        Health health = caseDocumentAmController.healthCheck();
-        assertEquals(Health.up().build(), health);
-    }
 
     @Test
     public void shouldGetReturnIndex() {
