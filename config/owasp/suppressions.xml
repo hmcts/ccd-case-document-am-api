@@ -315,6 +315,7 @@
     <cpe>cpe:2.3:a:apache:tomcat:9.0.29:*:*:*:*:*:*:*</cpe>
     <cve>CVE-2019-17569</cve>
     <cve>CVE-2020-1935</cve>
+    <cve>CVE-2020-9484</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
