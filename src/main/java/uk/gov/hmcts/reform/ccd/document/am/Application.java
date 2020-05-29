@@ -10,9 +10,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement(proxyTargetClass = true)
 @EnableCircuitBreaker
 @EnableFeignClients
+@SuppressWarnings("checkstyle:HideUtilityClassConstructor")
 public class Application {
     public static void main(final String[] args) {
         SpringApplication.run(Application.class);
     }
-
 }
