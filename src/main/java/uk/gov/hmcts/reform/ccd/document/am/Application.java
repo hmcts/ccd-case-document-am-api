@@ -11,10 +11,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableCircuitBreaker
 @EnableFeignClients
 public class Application {
-
-    private Application() {
-    }
-
     public static void main(final String[] args) {
         SpringApplication.run(Application.class);
     }

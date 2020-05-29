@@ -1,6 +1,14 @@
 
 package uk.gov.hmcts.reform.ccd.document.am.controller;
 
+import static org.junit.Assert.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
+
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,33 +22,25 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.nio.charset.Charset;
-
-import static org.junit.Assert.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
-
-
 @SpringBootTest
 @RunWith(SpringRunner.class)
 public class WelcomeControllerIntegrationTest {
 
     private static final Logger logger = LoggerFactory.getLogger(WelcomeControllerIntegrationTest.class);
 
-    private transient MockMvc mockMvc;
+    private MockMvc mockMvc;
 
     @Value("${integrationTest.api.url}")
-    private transient String url;
+    private String url;
 
     private static final MediaType JSON_CONTENT_TYPE = new MediaType(
         MediaType.APPLICATION_JSON.getType(),
         MediaType.APPLICATION_JSON.getSubtype(),
-        Charset.forName("utf8")
+        Charset.forName(StandardCharsets.UTF_8.toString())
     );
 
     @Autowired
-    private transient WelcomeController welcomeController;
+    private WelcomeController welcomeController;
 
     @Before
     public void setUp() {
@@ -51,8 +51,8 @@ public class WelcomeControllerIntegrationTest {
     public void welComeAPITest() throws Exception {
         logger.info("\n\nWelcomeControllerIntegrationTest : Inside  Welcome API Test method...{}", url);
         final MvcResult result = mockMvc.perform(get(url).contentType(JSON_CONTENT_TYPE))
-            .andExpect(status().is(200))
-            .andReturn();
+                                        .andExpect(status().is(200))
+                                        .andReturn();
         assertEquals("Assert for data", "{\"status\":\"UP\"}", result.getResponse().getContentAsString());
     }
 }
