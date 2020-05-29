@@ -11,10 +11,6 @@ import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 @Service
 public class BaseTest {
 
-    private static final String AUTHORIZATION_CODE = "authorization_code";
-    private static final String CODE = "code";
-    private static final String BASIC = "Basic ";
-
     public ServiceAuthorisationApi generateServiceAuthorisationApi(final String s2sUrl) {
         return Feign.builder()
             .encoder(new JacksonEncoder())

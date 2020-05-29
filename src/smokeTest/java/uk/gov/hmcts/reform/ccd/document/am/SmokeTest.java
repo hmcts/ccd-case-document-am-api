@@ -12,7 +12,6 @@ import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
 import org.hamcrest.Matchers;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,8 +22,11 @@ import uk.gov.hmcts.reform.ccd.document.am.utils.IdamUtils;
 
 @SpringBootTest
 @RunWith(SpringIntegrationSerenityRunner.class)
-//@ConfigurationProperties()
 public class SmokeTest extends BaseTest {
+
+    public static final String CASES_DOCUMENTS = "/cases/documents/";
+    public static final String MESSAGE = "message";
+    public static final String RESOURCE_NOT_FOUND = "Resource not found ";
 
     @Value("${idam.s2s-auth.totp_secret}")
     String secret;
@@ -40,9 +42,9 @@ public class SmokeTest extends BaseTest {
     String documentId = "00000000-0000-0000-0000-000000000000";
 
     @Test
-    public void should_receive_response_for_a_get_document_meta_data() {
+    public void shouldReceiveResponseForGetdocumentmetadata() {
 
-        RestAssured.baseURI = caseDocumentAmUrl + "/cases/documents/" + documentId;
+        RestAssured.baseURI = caseDocumentAmUrl + CASES_DOCUMENTS + documentId;
         RestAssured.useRelaxedHTTPSValidation();
 
         Response response = SerenityRest
@@ -55,13 +57,13 @@ public class SmokeTest extends BaseTest {
             .get("/")
             .andReturn();
         response.then().assertThat().statusCode(HttpStatus.NOT_FOUND.value())
-                .body("message", Matchers.equalTo("Resource not found " + documentId));
+                .body(MESSAGE, Matchers.equalTo(RESOURCE_NOT_FOUND + documentId));
     }
 
     @Test
     public void should_receive_response_for_a_get_document_binary() {
 
-        RestAssured.baseURI = caseDocumentAmUrl + "/cases/documents/" + documentId + "/binary";
+        RestAssured.baseURI = caseDocumentAmUrl + CASES_DOCUMENTS + documentId + "/binary";
         RestAssured.useRelaxedHTTPSValidation();
 
         Response response = SerenityRest
@@ -74,16 +76,16 @@ public class SmokeTest extends BaseTest {
             .get("/")
             .andReturn();
         response.then().assertThat().statusCode(HttpStatus.NOT_FOUND.value())
-                .body("message", Matchers.equalTo("Resource not found " + documentId));
+                .body(MESSAGE, Matchers.equalTo(RESOURCE_NOT_FOUND + documentId));
     }
 
     @Test
-    public void should_receive_response_for_patch_ttl() throws JSONException {
+    public void should_receive_response_for_patch_ttl() {
 
         JSONObject requestBody = new JSONObject();
         requestBody.put("ttl", "2025-10-31T10:10:10+0000");
 
-        RestAssured.baseURI = caseDocumentAmUrl + "/cases/documents/" + documentId;
+        RestAssured.baseURI = caseDocumentAmUrl + CASES_DOCUMENTS + documentId;
         RestAssured.useRelaxedHTTPSValidation();
 
         Response response = SerenityRest
@@ -97,11 +99,11 @@ public class SmokeTest extends BaseTest {
             .patch("/")
             .andReturn();
         response.then().assertThat().statusCode(HttpStatus.NOT_FOUND.value())
-                .body("message", Matchers.equalTo("Resource not found " + documentId));
+                .body(MESSAGE, Matchers.equalTo(RESOURCE_NOT_FOUND + documentId));
     }
 
     @Test
-    public void should_receive_response_for_patch_attach_to_document() throws JSONException {
+    public void should_receive_response_for_patch_attach_to_document() {
 
         JSONObject document1 = new JSONObject();
         document1.put("id", documentId);
@@ -128,7 +130,7 @@ public class SmokeTest extends BaseTest {
             .patch()
             .andReturn();
         response.then().assertThat().statusCode(HttpStatus.NOT_FOUND.value())
-                .body("message", Matchers.equalTo("Resource not found " + documentId));
+                .body(MESSAGE, Matchers.equalTo(RESOURCE_NOT_FOUND + documentId));
     }
 
     private String getServiceAuth() {

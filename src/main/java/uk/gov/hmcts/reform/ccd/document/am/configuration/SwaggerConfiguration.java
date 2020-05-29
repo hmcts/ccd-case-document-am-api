@@ -20,6 +20,8 @@ import java.util.Arrays;
 @Configuration
 @EnableSwagger2WebMvc
 public class SwaggerConfiguration {
+    public static final String STRING = "string";
+    public static final String HEADER = "header";
     @Value("${swaggerUrl}")
     private  String host;
 
@@ -56,8 +58,8 @@ public class SwaggerConfiguration {
         return new ParameterBuilder()
             .name("ServiceAuthorization")
             .description("Valid Service-to-Service JWT token for a whitelisted micro-service")
-            .modelRef(new ModelRef("string"))
-            .parameterType("header")
+            .modelRef(new ModelRef(STRING))
+            .parameterType(HEADER)
             .required(true)
             .build();
     }
@@ -66,8 +68,8 @@ public class SwaggerConfiguration {
         return new ParameterBuilder()
             .name("Authorization")
             .description("Keyword `Bearer` followed by a valid IDAM user token")
-            .modelRef(new ModelRef("string"))
-            .parameterType("header")
+            .modelRef(new ModelRef(STRING))
+            .parameterType(HEADER)
             .required(true)
             .build();
     }
@@ -77,8 +79,8 @@ public class SwaggerConfiguration {
             .name("user-id")
             .description("User-id of the currently authenticated user. If provided will be used to populate the creator field of a document and"
                              + " will be used for authorisation.")
-            .modelRef(new ModelRef("string"))
-            .parameterType("header")
+            .modelRef(new ModelRef(STRING))
+            .parameterType(HEADER)
             .required(false)
             .build();
     }
@@ -87,8 +89,8 @@ public class SwaggerConfiguration {
         return new ParameterBuilder()
             .name("user-roles")
             .description("Comma-separated list of roles of the currently authenticated user. If provided will be used for authorisation.")
-            .modelRef(new ModelRef("string"))
-            .parameterType("header")
+            .modelRef(new ModelRef(STRING))
+            .parameterType(HEADER)
             .required(false)
             .build();
     }
