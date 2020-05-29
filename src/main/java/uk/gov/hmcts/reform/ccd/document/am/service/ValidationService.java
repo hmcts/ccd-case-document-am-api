@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.ccd.document.am.service.common;
+package uk.gov.hmcts.reform.ccd.document.am.service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -15,8 +15,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
-import uk.gov.hmcts.reform.ccd.document.am.model.enums.SecurityClassification;
+import uk.gov.hmcts.reform.ccd.document.am.exception.BadRequestException;
+import uk.gov.hmcts.reform.ccd.document.am.model.enums.Classification;
 
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_CASE_ID_PATTERN;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
@@ -44,7 +44,7 @@ public class ValidationService {
 
     public static void isValidSecurityClassification(String securityClassification) {
         try {
-            Enum.valueOf(SecurityClassification.class, securityClassification);
+            Enum.valueOf(Classification.class, securityClassification);
         } catch (final IllegalArgumentException ex) {
             LOG.info("The security classification is not valid");
             throw new BadRequestException("The security classification " + securityClassification + " is not valid");
@@ -61,7 +61,7 @@ public class ValidationService {
         }
     }
 
-    public static void validateLists(List<?>... inputList) {
+    public static void inputLists(List<?>... inputList) {
         for (List<?> list : inputList) {
             if (CollectionUtils.isEmpty(list)) {
                 throw new BadRequestException("The List is empty");
@@ -95,7 +95,8 @@ public class ValidationService {
             UUID uuid = UUID.fromString(documentId);
             LOG.info("UUID {}", uuid);
         } catch (IllegalArgumentException exception) {
-            throw new BadRequestException(String.format("The input parameter: %s is not a valid UUID", documentId));
+            throw new BadRequestException(String.format("The input parameter: %s is not a valid UUID. Exception is %s",
+                                                        documentId, exception.toString()));
         }
     }
 }

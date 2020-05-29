@@ -173,7 +173,7 @@ pitest {
   pitestVersion = "1.4.9"
   testPlugin = "junit5"
   targetClasses = ['uk.gov.hmcts.reform.ccd.document.am.*']
-  excludedClasses = ['uk.gov.hmcts.reform.ccd.document.am.Application','uk.gov.hmcts.reform.ccd.document.am.util.Swagger2SpringBoot', 'uk.gov.hmcts.reform.ccd.document.am.controller.advice.ErrorConstants', 'uk.gov.hmcts.reform.ccd.document.am.configuration.*','uk.gov.hmcts.reform.ccd.document.am.apihelper.*', 'uk.gov.hmcts.reform.ccd.document.am.model.enums.*', 'uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.*']
+  excludedClasses = ['uk.gov.hmcts.reform.ccd.document.am.Application','uk.gov.hmcts.reform.ccd.document.am.util.Swagger2SpringBoot', 'uk.gov.hmcts.reform.ccd.document.am.controller.advice.ErrorConstants', 'uk.gov.hmcts.reform.ccd.document.am.configuration.*','uk.gov.hmcts.reform.ccd.document.am.apihelper.*', 'uk.gov.hmcts.reform.ccd.document.am.model.enums.*', 'uk.gov.hmcts.reform.ccd.document.am.exception.*']
   threads = 15
   outputFormats = ['XML', 'HTML']
   timestampedReports = true
@@ -289,11 +289,13 @@ dependencies {
   }
   testCompile group: 'uk.gov.hmcts', name: 'befta-fw', version: '2.7.0'
   compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.2.2.RELEASE'
+  /*
 
   compile group: 'io.cucumber', name: 'cucumber-java', version: versions.cucumber
   testCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.rest_assured
   testCompile group: 'io.cucumber', name: 'cucumber-junit', version: versions.cucumber
   testCompile group: 'io.github.openfeign', name: 'feign-jackson', version: versions.feign_jackson
+  */
 
   smokeTestCompile group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
   smokeTestCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity

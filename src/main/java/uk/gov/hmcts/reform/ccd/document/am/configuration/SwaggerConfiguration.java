@@ -9,6 +9,7 @@ import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.schema.ModelRef;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Parameter;
+import springfox.documentation.service.Tag;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
@@ -19,15 +20,16 @@ import java.util.Arrays;
 @Configuration
 @EnableSwagger2WebMvc
 public class SwaggerConfiguration {
-
-
     @Value("${swaggerUrl}")
     private  String host;
 
     @Bean
     public Docket apiV2() {
         return new Docket(DocumentationType.SWAGGER_2)
-            .groupName("v2")
+            .tags(new Tag("get", "Get data endpoints"),
+                  new Tag("patch", "Patch data related endpoints"),
+                  new Tag("delete", "Delete endpoints"),
+                  new Tag("upload", "Upload documents"))
             .select()
             .apis(RequestHandlerSelectors.basePackage(CaseDocumentAmController.class.getPackage().getName()))
             .build()

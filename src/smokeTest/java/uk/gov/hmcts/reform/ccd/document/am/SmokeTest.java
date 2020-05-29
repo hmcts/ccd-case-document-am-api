@@ -1,5 +1,11 @@
 package uk.gov.hmcts.reform.ccd.document.am;
 
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.AUTHORIZATION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BEARER;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION2;
+
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
@@ -15,12 +21,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.ccd.document.am.utils.IdamUtils;
 
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.AUTHORIZATION;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BEARER;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_AUTHORIZATION2;
-
 @SpringBootTest
 @RunWith(SpringIntegrationSerenityRunner.class)
 //@ConfigurationProperties()
@@ -35,13 +35,9 @@ public class SmokeTest extends BaseTest {
     @Value("${caseDocumentAmUrl}")
     String caseDocumentAmUrl;
 
-    IdamUtils idamUtils =  new IdamUtils();
-
-    String username = "befta.caseworker.2.solicitor.2@gmail.com";
-    String password = "Pa55word11";
-    String userToken = idamUtils.getIdamOauth2Token(username, password);
+    IdamUtils idamUtils = new IdamUtils();
+    String userToken = idamUtils.getIdamOauth2Token("befta.caseworker.2.solicitor.2@gmail.com", "Pa55word11");
     String documentId = "00000000-0000-0000-0000-000000000000";
-
 
     @Test
     public void should_receive_response_for_a_get_document_meta_data() {
@@ -59,7 +55,7 @@ public class SmokeTest extends BaseTest {
             .get("/")
             .andReturn();
         response.then().assertThat().statusCode(HttpStatus.NOT_FOUND.value())
-            .body("message", Matchers.equalTo("Resource not found " + documentId));
+                .body("message", Matchers.equalTo("Resource not found " + documentId));
     }
 
     @Test
@@ -78,7 +74,7 @@ public class SmokeTest extends BaseTest {
             .get("/")
             .andReturn();
         response.then().assertThat().statusCode(HttpStatus.NOT_FOUND.value())
-            .body("message", Matchers.equalTo("Resource not found " + documentId));
+                .body("message", Matchers.equalTo("Resource not found " + documentId));
     }
 
     @Test
@@ -101,7 +97,7 @@ public class SmokeTest extends BaseTest {
             .patch("/")
             .andReturn();
         response.then().assertThat().statusCode(HttpStatus.NOT_FOUND.value())
-            .body("message", Matchers.equalTo("Resource not found " + documentId));
+                .body("message", Matchers.equalTo("Resource not found " + documentId));
     }
 
     @Test
@@ -132,7 +128,7 @@ public class SmokeTest extends BaseTest {
             .patch()
             .andReturn();
         response.then().assertThat().statusCode(HttpStatus.NOT_FOUND.value())
-            .body("message", Matchers.equalTo("Resource not found " + documentId));
+                .body("message", Matchers.equalTo("Resource not found " + documentId));
     }
 
     private String getServiceAuth() {
@@ -141,8 +137,8 @@ public class SmokeTest extends BaseTest {
         } else {
             s2sUrl = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal";
         }
-
         return new BaseTest().authTokenGenerator(secret, microService,
-            generateServiceAuthorisationApi(s2sUrl)).generate();
+                                                 generateServiceAuthorisationApi(s2sUrl)
+                                                ).generate();
     }
 }

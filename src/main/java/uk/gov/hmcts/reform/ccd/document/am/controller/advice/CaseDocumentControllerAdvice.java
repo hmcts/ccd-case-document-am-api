@@ -10,10 +10,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.InvalidRequest;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.RequiredFieldMissingException;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.UnauthorizedException;
+import uk.gov.hmcts.reform.ccd.document.am.exception.InvalidRequest;
+import uk.gov.hmcts.reform.ccd.document.am.exception.RequiredFieldMissingException;
+import uk.gov.hmcts.reform.ccd.document.am.exception.ResourceNotFoundException;
+import uk.gov.hmcts.reform.ccd.document.am.exception.UnauthorizedException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
@@ -92,7 +92,7 @@ public class CaseDocumentControllerAdvice {
         return errorDetailsResponseEntity(exeception, HttpStatus.INTERNAL_SERVER_ERROR, UNKNOWN_EXCEPTION.getErrorCode(), UNKNOWN_EXCEPTION.getErrorMessage());
     }
 
-    public String getTimeStamp() {
+    private String getTimeStamp() {
         return new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS", Locale.ENGLISH).format(new Date());
     }
 

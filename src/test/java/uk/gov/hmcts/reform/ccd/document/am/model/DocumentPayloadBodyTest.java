@@ -35,8 +35,8 @@ class DocumentPayloadBodyTest {
 
     @Test
     void addRolesItem() {
-        documentPayloadBody.addRolesItem(null);
-        DocumentPayloadBody payloadBody = documentPayloadBody.addRolesItem(CITIZEN);
+        documentPayloadBody.addRole(null);
+        DocumentPayloadBody payloadBody = documentPayloadBody.addRole(CITIZEN);
         assertEquals(CITIZEN, documentPayloadBody.getRoles().get(1).toString());
         assertEquals(payloadBody.getClass(), DocumentPayloadBody.class);
     }

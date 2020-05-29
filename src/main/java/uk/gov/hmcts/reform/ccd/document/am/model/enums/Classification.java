@@ -1,5 +1,5 @@
 package uk.gov.hmcts.reform.ccd.document.am.model.enums;
 
-public enum Classifications {
+public enum Classification {
     PUBLIC,PRIVATE,RESTRICTED
 }

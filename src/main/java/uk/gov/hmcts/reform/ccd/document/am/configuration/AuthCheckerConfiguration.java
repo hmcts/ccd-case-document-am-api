@@ -1,7 +1,18 @@
 package uk.gov.hmcts.reform.ccd.document.am.configuration;
 
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.servlet.http.HttpServletRequest;
+
 import com.google.common.collect.ImmutableSet;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
@@ -13,21 +24,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.servlet.http.HttpServletRequest;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-
 @Configuration
 @ConfigurationProperties(prefix = "security")
-@Slf4j
 public class AuthCheckerConfiguration {
 
     List<String> authorisedServices;
@@ -52,7 +50,6 @@ public class AuthCheckerConfiguration {
 
     @Bean
     public Function<HttpServletRequest, Collection<String>> authorizedServicesExtractor() {
-        //log.info(String.format("Configured authorised services: %s", String.join(", ", authorisedServices)));
         return any -> ImmutableSet.copyOf(authorisedServices);
     }
 
@@ -75,20 +72,21 @@ public class AuthCheckerConfiguration {
     public HttpClient userTokenParserHttpClient()
         throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
         HttpClientBuilder httpClientBuilder = HttpClients.custom()
-            .disableCookieManagement()
-            .disableAuthCaching()
-            .useSystemProperties();
+                                                         .disableCookieManagement()
+                                                         .disableAuthCaching()
+                                                         .useSystemProperties();
 
         TrustStrategy acceptingTrustStrategy = (chain, authType) -> true;
         // ignore Sonar's weak hostname verifier as we are deliberately disabling SSL verification
         HostnameVerifier allowAllHostnameVerifier = (hostName, session) -> true; // NOSONAR
         SSLContext sslContextWithoutValidation = SSLContexts.custom()
-            .loadTrustMaterial(null, acceptingTrustStrategy)
-            .build();
+                                                            .loadTrustMaterial(null, acceptingTrustStrategy)
+                                                            .build();
 
         SSLConnectionSocketFactory allowAllSslSocketFactory = new SSLConnectionSocketFactory(
             sslContextWithoutValidation,
-            allowAllHostnameVerifier);
+            allowAllHostnameVerifier
+        );
 
         httpClientBuilder.setSSLSocketFactory(allowAllSslSocketFactory);
 

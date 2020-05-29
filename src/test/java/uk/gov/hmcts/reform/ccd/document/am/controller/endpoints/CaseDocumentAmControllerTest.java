@@ -14,18 +14,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
+import uk.gov.hmcts.reform.ccd.document.am.exception.BadRequestException;
+import uk.gov.hmcts.reform.ccd.document.am.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
-import uk.gov.hmcts.reform.ccd.document.am.model.enums.Classifications;
+import uk.gov.hmcts.reform.ccd.document.am.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
-import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
+import uk.gov.hmcts.reform.ccd.document.am.service.ValidationService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -388,11 +388,11 @@ public class CaseDocumentAmControllerTest {
         doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload("BEFTA_CASETYPE_2", "BEFTA_JURISDICTION_2", Permission.CREATE
         );
         List<MultipartFile> multipartFiles = generateMultipartList();
-        Mockito.when(documentManagementService.uploadDocuments(multipartFiles,Classifications.PUBLIC.name(),BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2))
+        Mockito.when(documentManagementService.uploadDocuments(multipartFiles, Classification.PUBLIC.name(), BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2))
             .thenReturn(new ResponseEntity<>(generateEmbeddedLinkedHashMap(), HttpStatus.OK));
 
-        ResponseEntity<Object> responseEntity = testee.uploadDocuments(multipartFiles, Classifications.PUBLIC.name(),
-                                   BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
+        ResponseEntity<Object> responseEntity = testee.uploadDocuments(multipartFiles, Classification.PUBLIC.name(),
+                                                                       BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
@@ -428,7 +428,7 @@ public class CaseDocumentAmControllerTest {
         doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload("BEFTA_CASETYPE_2", "BEFTA_JURISDICTION_2", Permission.CREATE
         );
         Assertions.assertThrows(BadRequestException.class, () -> {
-            testee.uploadDocuments(null, Classifications.PUBLIC.name(),
+            testee.uploadDocuments(null, Classification.PUBLIC.name(),
                                    BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
         });
     }
@@ -440,7 +440,7 @@ public class CaseDocumentAmControllerTest {
         );
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
-                                   Classifications.PUBLIC.name(),
+                                   Classification.PUBLIC.name(),
                                    BEFTA_CASETYPE_2, "BEFTA@JURISDICTION_2$$$$");
         });
     }
@@ -452,7 +452,7 @@ public class CaseDocumentAmControllerTest {
         );
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
-                                   Classifications.PUBLIC.name(),
+                                   Classification.PUBLIC.name(),
                                    null, BEFTA_JURISDICTION_2);
         });
     }
@@ -464,7 +464,7 @@ public class CaseDocumentAmControllerTest {
         );
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
-                                   Classifications.PUBLIC.name(),
+                                   Classification.PUBLIC.name(),
                                    "BEFTA_CASETYPE_2&&&&&&&&&", "BEFTA_JURISDICTION_2");
         });
     }
@@ -476,7 +476,7 @@ public class CaseDocumentAmControllerTest {
         );
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
-                                   Classifications.PUBLIC.name(),
+                                   Classification.PUBLIC.name(),
                                    BEFTA_CASETYPE_2, null);
         });
     }
@@ -488,7 +488,7 @@ public class CaseDocumentAmControllerTest {
         );
         Assertions.assertThrows(BadRequestException.class, () -> {
             testee.uploadDocuments(generateMultipartList(),
-                                   Classifications.PUBLIC.name(),
+                                   Classification.PUBLIC.name(),
                                    BEFTA_CASETYPE_2, "BEFTA@JURISDICTION_2$$$$");
         });
     }

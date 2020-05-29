@@ -1,12 +1,32 @@
 
 package uk.gov.hmcts.reform.ccd.document.am.controller.endpoints;
 
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BAD_REQUEST;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_DOCUMENT_HASH_TOKEN_INVALID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_DOCUMENT_ID_INVALID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_DOCUMENT_NOT_FOUND;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_NOT_VALID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_TYPE_ID_INVALID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION_ID_INVALID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHTOKEN;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.JURISDICTION_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SERVICE_PERMISSION_ERROR;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,42 +42,24 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
+import uk.gov.hmcts.reform.ccd.document.am.exception.BadRequestException;
+import uk.gov.hmcts.reform.ccd.document.am.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
-import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
-
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BAD_REQUEST;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_DOCUMENT_HASH_TOKEN_INVALID;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_DOCUMENT_ID_INVALID;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_DOCUMENT_NOT_FOUND;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID_NOT_VALID;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_TYPE_ID_INVALID;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION_ID_INVALID;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHTOKEN;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.JURISDICTION_ID_INVALID;
+import uk.gov.hmcts.reform.ccd.document.am.service.ValidationService;
 
 @Api(value = "cases")
 @RestController
+@Slf4j
 public class CaseDocumentAmController  {
 
     private static final Logger LOG = LoggerFactory.getLogger(CaseDocumentAmController.class);
 
-    private DocumentManagementService  documentManagementService;
+    private DocumentManagementService documentManagementService;
 
     @Value("${idam.s2s-auth.totp_secret}")
     protected String salt;
@@ -73,7 +75,7 @@ public class CaseDocumentAmController  {
         path = "/cases/documents/{documentId}",
         produces = {APPLICATION_JSON
         })
-    @ApiOperation("Retrieves JSON representation of a Stored Document.")
+    @ApiOperation(value = "Retrieves JSON representation of a Stored Document.", tags = "get")
     @ApiResponses({
         @ApiResponse(
             code = 200,
@@ -112,7 +114,7 @@ public class CaseDocumentAmController  {
         path = "/cases/documents/{documentId}/binary",
         produces = {APPLICATION_JSON
         })
-    @ApiOperation("Streams contents of the most recent Document associated with the Case Document.")
+    @ApiOperation(value = "Streams contents of the most recent Document associated with the Case Document.", tags = "get")
     @ApiResponses({
         @ApiResponse(
             code = 200,
@@ -152,7 +154,7 @@ public class CaseDocumentAmController  {
         produces = {APPLICATION_JSON},
         consumes = {"multipart/form-data"}
         )
-    @ApiOperation("creates a list of stored document by uploading a list of binary/text file")
+    @ApiOperation(value = "creates a list of stored document by uploading a list of binary/text file", tags = "upload")
     @ApiResponses({
         @ApiResponse(
             code = 200,
@@ -195,7 +197,7 @@ public class CaseDocumentAmController  {
     ) {
         ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification);
         ValidationService.isValidSecurityClassification(classification);
-        ValidationService.validateLists(files);
+        ValidationService.inputLists(files);
         if (documentManagementService.checkServicePermissionsForUpload(caseTypeId, jurisdictionId, Permission.CREATE)) {
             return documentManagementService.uploadDocuments(files, classification, caseTypeId, jurisdictionId);
         }
@@ -210,7 +212,7 @@ public class CaseDocumentAmController  {
         produces = {APPLICATION_JSON},
         consumes = {APPLICATION_JSON}
         )
-    @ApiOperation("Updates ttl on document ")
+    @ApiOperation(value = "Updates ttl on document ", tags = "patch")
     @ApiResponses({
         @ApiResponse(
             code = 200,
@@ -249,7 +251,7 @@ public class CaseDocumentAmController  {
         produces = {APPLICATION_JSON},
         consumes = {APPLICATION_JSON}
         )
-    @ApiOperation("Updates a list of case document with provided metadata")
+    @ApiOperation(value = "Updates a list of case document with provided metadata", tags = "patch")
     @ApiResponses({
         @ApiResponse(
             code = 200,
@@ -316,7 +318,7 @@ public class CaseDocumentAmController  {
         path = "/cases/documents/{documentId}",
         produces = {APPLICATION_JSON}
     )
-    @ApiOperation("Deletes a case document with service authorization.")
+    @ApiOperation(value = "Deletes a case document with service authorization.", tags = "delete")
     @ApiResponses({
         @ApiResponse(
             code = 200,
@@ -331,7 +333,6 @@ public class CaseDocumentAmController  {
             message = CASE_DOCUMENT_NOT_FOUND
         )
     })
-
     public ResponseEntity<Object> deleteDocumentbyDocumentId(
         @PathVariable("documentId") UUID documentId,
         @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false")
@@ -353,7 +354,7 @@ public class CaseDocumentAmController  {
         path = "/cases/documents/{documentId}/token",
         produces = {APPLICATION_JSON}
         )
-    @ApiOperation("Retrieves the hashcode for document Id")
+    @ApiOperation(value = "Retrieves the hashcode for document Id", tags = "get")
     @ApiResponses({
         @ApiResponse(
             code = 200,

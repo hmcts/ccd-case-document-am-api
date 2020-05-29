@@ -4,9 +4,11 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class ApplicationUtils {
 
     private ApplicationUtils() {
@@ -38,8 +40,8 @@ public class ApplicationUtils {
 
             // return the HashText
             return hashtext.toString();
-        } catch (NoSuchAlgorithmException e) {
-            LOG.error("Error while generating the hashcode :{}", e.getMessage());
+        } catch (NoSuchAlgorithmException exception) {
+            LOG.error("Error while generating the hashcode :{}", exception.toString());
         }
         return null;
     }

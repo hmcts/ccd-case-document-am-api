@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.document.am.model;
 
+import java.io.File;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ public class DocumentPayloadBody {
 
     @JsonProperty("files")
     @Valid
-    private List<java.io.File> files;
+    private List<File> files;
 
     @ApiModelProperty(value = "")
     public String getClassification() {
@@ -46,7 +47,7 @@ public class DocumentPayloadBody {
         this.ttl = ttl;
     }
 
-    public DocumentPayloadBody addRolesItem(String rolesItem) {
+    public DocumentPayloadBody addRole(String rolesItem) {
         if (this.roles == null) {
             this.roles = new ArrayList<>();
         }
@@ -64,7 +65,7 @@ public class DocumentPayloadBody {
         this.roles = roles;
     }
 
-    public DocumentPayloadBody addFilesItem(java.io.File filesItem) {
+    public DocumentPayloadBody addFilesItem(File filesItem) {
         if (this.files == null) {
             this.files = new ArrayList<>();
         }
@@ -74,11 +75,11 @@ public class DocumentPayloadBody {
 
     @ApiModelProperty(value = "")
     @Valid
-    public List<java.io.File> getFiles() {
+    public List<File> getFiles() {
         return files;
     }
 
-    public void setFiles(List<java.io.File> files) {
+    public void setFiles(List<File> files) {
         this.files = files;
     }
 

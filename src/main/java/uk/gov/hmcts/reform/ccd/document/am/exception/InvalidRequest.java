@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception;
+package uk.gov.hmcts.reform.ccd.document.am.exception;
 
 public class InvalidRequest extends RuntimeException {
 

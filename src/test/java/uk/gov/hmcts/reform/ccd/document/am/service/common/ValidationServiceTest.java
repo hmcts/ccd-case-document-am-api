@@ -2,7 +2,8 @@ package uk.gov.hmcts.reform.ccd.document.am.service.common;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
+import uk.gov.hmcts.reform.ccd.document.am.exception.BadRequestException;
+import uk.gov.hmcts.reform.ccd.document.am.service.ValidationService;
 
 import java.util.ArrayList;
 
@@ -33,7 +34,7 @@ public class ValidationServiceTest {
     @Test
     void shouldThrowBadRequestException_ValidateLists() {
         Assertions.assertThrows(BadRequestException.class, () -> {
-            ValidationService.validateLists(new ArrayList());
+            ValidationService.inputLists(new ArrayList());
         });
     }
 

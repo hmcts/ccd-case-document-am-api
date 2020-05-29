@@ -1,5 +1,53 @@
 package uk.gov.hmcts.reform.ccd.document.am.service.impl;
 
+import static javax.servlet.RequestDispatcher.ERROR_MESSAGE;
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.PATCH;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BAD_REQUEST;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_TYPE_ID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CREATED_BY;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DATA_SOURCE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DOCUMENTS;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EMBEDDED;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EXCEPTION_ERROR_MESSAGE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EXCEPTION_SERVICE_ID_NOT_AUTHORISED;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FILES;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FORBIDDEN;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHTOKEN;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HREF;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.JURISDICTION_ID;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LAST_MODIFIED_BY;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LINKS;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.MODIFIED_ON;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.RESOURCE_NOT_FOUND;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.THUMBNAIL;
+import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import javax.servlet.http.HttpServletRequest;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -23,12 +71,12 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.BadRequestException;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.CaseNotFoundException;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ForbiddenException;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResourceNotFoundException;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ServiceException;
+import uk.gov.hmcts.reform.ccd.document.am.exception.BadRequestException;
+import uk.gov.hmcts.reform.ccd.document.am.exception.CaseNotFoundException;
+import uk.gov.hmcts.reform.ccd.document.am.exception.ForbiddenException;
+import uk.gov.hmcts.reform.ccd.document.am.exception.ResourceNotFoundException;
+import uk.gov.hmcts.reform.ccd.document.am.exception.ResponseFormatException;
+import uk.gov.hmcts.reform.ccd.document.am.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.document.am.model.AuthorisedService;
 import uk.gov.hmcts.reform.ccd.document.am.model.AuthorisedServices;
 import uk.gov.hmcts.reform.ccd.document.am.model.CaseDocumentsMetadata;
@@ -40,58 +88,10 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
-import uk.gov.hmcts.reform.ccd.document.am.service.common.ValidationService;
+import uk.gov.hmcts.reform.ccd.document.am.service.ValidationService;
 import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.document.am.util.ResponseHelper;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
-import static javax.servlet.RequestDispatcher.ERROR_MESSAGE;
-import static org.springframework.http.HttpMethod.DELETE;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.PATCH;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BAD_REQUEST;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.BINARY;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_ID;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CASE_TYPE_ID;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CLASSIFICATION;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_DISPOSITION;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CONTENT_TYPE;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DATA_SOURCE;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.DOCUMENTS;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EMBEDDED;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EXCEPTION_ERROR_MESSAGE;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FILES;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.FORBIDDEN;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HASHTOKEN;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.HREF;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRING_PATTERN;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.JURISDICTION_ID;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LINKS;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.ORIGINAL_FILE_NAME;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.RESOURCE_NOT_FOUND;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.SELF;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.THUMBNAIL;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.USERID;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.CREATED_BY;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.LAST_MODIFIED_BY;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.MODIFIED_ON;
-import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.EXCEPTION_SERVICE_ID_NOT_AUTHORISED;
 
 @Slf4j
 @Service
@@ -99,9 +99,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private static final Logger LOG = LoggerFactory.getLogger(DocumentManagementServiceImpl.class);
 
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
-    private SecurityUtils securityUtils;
+    private final SecurityUtils securityUtils;
 
     @Value("${documentStoreUrl}")
     protected String documentURL;
@@ -109,7 +109,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Value("${documentTTL}")
     protected String documentTtl;
 
-    private CaseDataStoreService caseDataStoreService;
+    private final CaseDataStoreService caseDataStoreService;
 
     @Value("${idam.s2s-auth.totp_secret}")
     protected String salt;
@@ -162,7 +162,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 throw new ResourceNotFoundException(documentId.toString());
             }
         } catch (HttpClientErrorException exception) {
-            catchException(exception, documentId.toString(), EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE);
+            catchException(exception, documentId.toString());
         }
         return responseResult;
 
@@ -199,7 +199,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             }
 
         } catch (HttpClientErrorException exception) {
-            catchException(exception, documentId.toString(), EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE);
+            catchException(exception, documentId.toString());
         }
         return responseResult;
 
@@ -217,7 +217,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             restTemplate.exchange(documentUrl, HttpMethod.PATCH, requestEntity, Void.class);
 
         } catch (HttpClientErrorException exception) {
-            catchException(exception, EXCEPTION_ERROR_MESSAGE);
+            catchException(exception);
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -229,9 +229,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
             String hashcodeFromStoredDocument = generateHashToken(UUID.fromString(documentHashToken.getId()));
             if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
-                HashMap<String, String> responseBody = new HashMap<>();
-
-                responseBody.put("documentId", documentHashToken.getId());
                 throw new ForbiddenException(UUID.fromString(documentHashToken.getId()));
             }
 
@@ -307,7 +304,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 .status(uploadedDocumentResponse.getStatusCode())
                 .body(updatedDocumentResponse);
         } catch (HttpClientErrorException exception) {
-            catchException(exception, EXCEPTION_ERROR_MESSAGE);
+            catchException(exception);
         }
         return responseResult;
     }
@@ -338,7 +335,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 throw new ResourceNotFoundException(documentId.toString());
             }
         } catch (HttpClientErrorException exception) {
-            catchException(exception, documentId.toString(), EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE);
+            catchException(exception, documentId.toString());
         }
         return responseResult;
     }
@@ -365,7 +362,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 throw new ResourceNotFoundException(documentId.toString());
             }
         } catch (HttpClientErrorException exception) {
-            catchException(exception, documentId.toString(), EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE);
+            catchException(exception, documentId.toString());
         }
         return responseResult;
     }
@@ -373,10 +370,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @SuppressWarnings("unchecked")
     private LinkedHashMap<String, Object> formatUploadDocumentResponse(String caseTypeId, String jurisdictionId,
-                                              ResponseEntity<Object> uploadedDocumentResponse) {
+                                                                       ResponseEntity<Object> uploadedDocumentResponse) {
         LinkedHashMap<String, Object> updatedUploadedDocumentResponse = new LinkedHashMap<>();
         try {
-            LinkedHashMap<String, Object> documents = (LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse.getBody())
+            LinkedHashMap<String, Object> documents = (LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse
+                .getBody())
                 .get(EMBEDDED);
 
             ArrayList<Object> documentList = (ArrayList<Object>) (documents.get(DOCUMENTS));
@@ -392,11 +390,13 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                     updateDomainForLinks(hashmap, jurisdictionId, caseTypeId);
                 }
             }
-            ArrayList<Object> documentListObject  = (ArrayList<Object>) ((LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse.getBody())
-                .get(EMBEDDED)).get(DOCUMENTS);
+            ArrayList<Object> documentListObject =
+                (ArrayList<Object>) ((LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse
+                    .getBody())
+                    .get(EMBEDDED)).get(DOCUMENTS);
             updatedUploadedDocumentResponse.put(DOCUMENTS, documentListObject);
 
-            return  updatedUploadedDocumentResponse;
+            return updatedUploadedDocumentResponse;
 
         } catch (Exception exception) {
             throw new ResponseFormatException("Error while formatting the uploaded document response " + exception);
@@ -419,9 +419,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             hashmap.put(LINKS, links.toMap());
             String message = hashmap.values().toString();
             LOG.info(message);
-        } catch (Exception e) {
-            LOG.error("Exception occurred");
-            throw e;
+        } catch (Exception exception) {
+            LOG.error("Exception occurred {}", exception.toString());
+            throw exception;
         }
     }
 
@@ -559,42 +559,38 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return headers;
     }
 
-    private void catchException(HttpClientErrorException exception, String messageParam,
-                                String errorMessage) {
+    private void catchException(HttpClientErrorException exception, String messageParam) {
         if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-            LOG.error(ERROR_MESSAGE, messageParam, HttpStatus.NOT_FOUND);
+            LOG.error(ERROR_MESSAGE + "{}" + "{}", messageParam, HttpStatus.NOT_FOUND);
             throw new ResourceNotFoundException(messageParam);
         } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
-            LOG.error(ERROR_MESSAGE, messageParam, HttpStatus.FORBIDDEN);
+            LOG.error(ERROR_MESSAGE + "{} {}", messageParam, HttpStatus.FORBIDDEN);
             throw new ForbiddenException(messageParam);
         } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
-            LOG.error(ERROR_MESSAGE, messageParam, HttpStatus.BAD_REQUEST);
+            LOG.error(ERROR_MESSAGE + "{} {}", messageParam, HttpStatus.BAD_REQUEST);
             throw new BadRequestException(messageParam);
         } else {
             throw new ServiceException(String.format(
-                errorMessage,
+                EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE,
                 messageParam,
-                exception.getMessage()
-            ));
+                exception));
         }
     }
 
-    private void catchException(HttpClientErrorException exception,
-                                                    String errorMessage) {
+    private void catchException(HttpClientErrorException exception) {
         if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-            LOG.error(ERROR_MESSAGE, HttpStatus.NOT_FOUND);
+            LOG.error(ERROR_MESSAGE + "{}", HttpStatus.NOT_FOUND);
             throw new ResourceNotFoundException(RESOURCE_NOT_FOUND);
         } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
-            LOG.error(ERROR_MESSAGE, HttpStatus.FORBIDDEN);
+            LOG.error(ERROR_MESSAGE + "{}", HttpStatus.FORBIDDEN);
             throw new ForbiddenException(FORBIDDEN);
         } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
-            LOG.error(ERROR_MESSAGE, HttpStatus.BAD_REQUEST);
+            LOG.error(ERROR_MESSAGE + "{}", HttpStatus.BAD_REQUEST);
             throw new BadRequestException(BAD_REQUEST);
         } else {
             throw new ServiceException(String.format(
-                errorMessage,
-                exception.getMessage()
-            ));
+                EXCEPTION_ERROR_MESSAGE,
+                exception));
         }
     }
 }

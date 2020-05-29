@@ -6,7 +6,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import uk.gov.hmcts.reform.ccd.document.am.controller.advice.exception.ResponseFormatException;
+import uk.gov.hmcts.reform.ccd.document.am.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 
 import java.util.ArrayList;
