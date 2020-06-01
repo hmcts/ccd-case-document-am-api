@@ -50,7 +50,7 @@ def versions = [
   feign_jackson      : '9.7.0'
 ]
 
-mainClassName = 'uk.gov.hmcts.reform.ccd.document.am.Application'
+mainClassName = 'uk.gov.hmcts.reform.ccd.documentam.Application'
 def jarName = 'ccd-case-document-am-api.jar'
 
 pmd {
@@ -58,7 +58,7 @@ pmd {
   sourceSets = []
 }
 
-group = 'uk.gov.hmcts.reform.ccd.document.am'
+group = 'uk.gov.hmcts.reform.ccd.documentam'
 version = '0.0.1'
 
 allprojects {
@@ -172,8 +172,8 @@ jacoco {
 pitest {
   pitestVersion = "1.4.9"
   testPlugin = "junit5"
-  targetClasses = ['uk.gov.hmcts.reform.ccd.document.am.*']
-  excludedClasses = ['uk.gov.hmcts.reform.ccd.document.am.Application','uk.gov.hmcts.reform.ccd.document.am.util.Swagger2SpringBoot', 'uk.gov.hmcts.reform.ccd.document.am.controller.advice.ErrorConstants', 'uk.gov.hmcts.reform.ccd.document.am.configuration.*','uk.gov.hmcts.reform.ccd.document.am.apihelper.*', 'uk.gov.hmcts.reform.ccd.document.am.model.enums.*', 'uk.gov.hmcts.reform.ccd.document.am.exception.*']
+  targetClasses = ['uk.gov.hmcts.reform.ccd.documentam.*']
+  excludedClasses = ['uk.gov.hmcts.reform.ccd.documentam.Application','uk.gov.hmcts.reform.ccd.documentam.util.Swagger2SpringBoot', 'uk.gov.hmcts.reform.ccd.documentam.controller.advice.ErrorConstants', 'uk.gov.hmcts.reform.ccd.documentam.configuration.*','uk.gov.hmcts.reform.ccd.documentam.apihelper.*', 'uk.gov.hmcts.reform.ccd.documentam.model.enums.*', 'uk.gov.hmcts.reform.ccd.documentam.exception.*']
   threads = 15
   outputFormats = ['XML', 'HTML']
   timestampedReports = true
