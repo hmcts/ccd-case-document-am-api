@@ -50,7 +50,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResourceCollec
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
-import uk.gov.hmcts.reform.ccd.document.am.service.ValidationService;
+import uk.gov.hmcts.reform.ccd.document.am.service.ValidationUtils;
 
 @Api(value = "cases")
 @RestController
@@ -59,14 +59,16 @@ public class CaseDocumentAmController  {
 
     private static final Logger LOG = LoggerFactory.getLogger(CaseDocumentAmController.class);
 
-    private DocumentManagementService documentManagementService;
+    private final DocumentManagementService documentManagementService;
+    private final ValidationUtils validationUtils;
 
     @Value("${idam.s2s-auth.totp_secret}")
     protected String salt;
 
     @Autowired
-    public CaseDocumentAmController(DocumentManagementService documentManagementService) {
+    public CaseDocumentAmController(DocumentManagementService documentManagementService, ValidationUtils validationUtils) {
         this.documentManagementService = documentManagementService;
+        this.validationUtils = validationUtils;
     }
 
 
@@ -93,7 +95,7 @@ public class CaseDocumentAmController  {
     })
     public ResponseEntity<Object> getDocumentbyDocumentId(
         @PathVariable("documentId") UUID documentId) {
-        ValidationService.validateDocumentId(documentId.toString());
+        validationUtils.validateDocumentId(documentId.toString());
         ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkServicePermission(responseEntity, Permission.READ)) {
             if (documentManagementService.checkUserPermission(responseEntity, documentId, Permission.READ)) {
@@ -131,7 +133,7 @@ public class CaseDocumentAmController  {
 
     public ResponseEntity<Object> getDocumentBinaryContentbyDocumentId(
         @PathVariable("documentId") UUID documentId) {
-        ValidationService.validateDocumentId(documentId.toString());
+        validationUtils.validateDocumentId(documentId.toString());
         ResponseEntity<?> documentMetadata = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkServicePermission(documentMetadata, Permission.READ)) {
             if (documentManagementService.checkUserPermission(documentMetadata, documentId, Permission.READ)) {
@@ -192,9 +194,9 @@ public class CaseDocumentAmController  {
         @NotNull(message = "Provide the Jurisdiction ID ")
         @RequestParam(value = "jurisdictionId", required = true) String jurisdictionId
     ) {
-        ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification);
-        ValidationService.isValidSecurityClassification(classification);
-        ValidationService.inputLists(files);
+        validationUtils.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification);
+        validationUtils.isValidSecurityClassification(classification);
+        validationUtils.inputLists(files);
         if (documentManagementService.checkServicePermissionsForUpload(caseTypeId, jurisdictionId, Permission.CREATE)) {
             return documentManagementService.uploadDocuments(files, classification, caseTypeId, jurisdictionId);
         }
@@ -230,7 +232,7 @@ public class CaseDocumentAmController  {
         @ApiParam(value = "", required = true)
         @Valid @RequestBody UpdateDocumentCommand body,
         @PathVariable("documentId") UUID documentId) {
-        ValidationService.validateDocumentId(documentId.toString());
+        validationUtils.validateDocumentId(documentId.toString());
         ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkServicePermission(responseEntity, Permission.UPDATE)) {
             ResponseEntity<?> response = documentManagementService.patchDocument(documentId, body);
@@ -284,12 +286,12 @@ public class CaseDocumentAmController  {
         @ApiParam(value = "", required = true)
         @Valid @RequestBody CaseDocumentsMetadata caseDocumentsMetadata) {
 
-        if (!ValidationService.validate(caseDocumentsMetadata.getCaseId())) {
+        if (!validationUtils.validate(caseDocumentsMetadata.getCaseId())) {
             throw new BadRequestException(CASE_ID_NOT_VALID);
         }
         if (caseDocumentsMetadata.getDocumentHashTokens() != null) {
             caseDocumentsMetadata.getDocumentHashTokens()
-                .forEach(document -> ValidationService.validateDocumentId(document.getId()));
+                .forEach(document -> validationUtils.validateDocumentId(document.getId()));
             //validate the service authorization for first document in payload
             ResponseEntity<?> documentMetadata = documentManagementService.getDocumentMetadata(UUID.fromString(
                 caseDocumentsMetadata.getDocumentHashTokens().get(0).getId()));
@@ -332,7 +334,7 @@ public class CaseDocumentAmController  {
         @PathVariable("documentId") UUID documentId,
         @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false")
             Boolean permanent) {
-        ValidationService.validateDocumentId(documentId.toString());
+        validationUtils.validateDocumentId(documentId.toString());
         ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkServicePermission(responseEntity, Permission.UPDATE)) {
             return documentManagementService.deleteDocument(documentId, permanent);
@@ -368,7 +370,7 @@ public class CaseDocumentAmController  {
     public ResponseEntity<Object> generateHashCode(
         @PathVariable("documentId") UUID documentId) {
 
-        ValidationService.validateDocumentId(documentId.toString());
+        validationUtils.validateDocumentId(documentId.toString());
         ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
         if (documentManagementService.checkServicePermission(responseEntity, Permission.HASHTOKEN)) {
             HashMap<String, String> responseBody = new HashMap<>();

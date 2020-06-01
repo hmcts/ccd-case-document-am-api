@@ -88,7 +88,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
-import uk.gov.hmcts.reform.ccd.document.am.service.ValidationService;
+import uk.gov.hmcts.reform.ccd.document.am.service.ValidationUtils;
 import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.document.am.util.ResponseHelper;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
@@ -100,7 +100,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private static final Logger LOG = LoggerFactory.getLogger(DocumentManagementServiceImpl.class);
 
     private final RestTemplate restTemplate;
-
+    private final ValidationUtils validationUtils;
     private final SecurityUtils securityUtils;
 
     @Value("${documentStoreUrl}")
@@ -129,11 +129,13 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Autowired
     public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils,
-                                         CaseDataStoreService caseDataStoreService) {
+                                         CaseDataStoreService caseDataStoreService,
+                                         ValidationUtils validationUtils) {
         this.restTemplate = restTemplate;
 
         this.securityUtils = securityUtils;
         this.caseDataStoreService = caseDataStoreService;
+        this.validationUtils = validationUtils;
     }
 
     @Override
@@ -236,12 +238,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             metadataMap.put(CASE_ID, caseDocumentsMetadata.getCaseId());
 
             if (null != caseDocumentsMetadata.getCaseTypeId()) {
-                ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseDocumentsMetadata.getCaseTypeId());
+                validationUtils.validateInputParams(INPUT_STRING_PATTERN, caseDocumentsMetadata.getCaseTypeId());
                 metadataMap.put(CASE_TYPE_ID, caseDocumentsMetadata.getCaseTypeId());
             }
 
             if (null != caseDocumentsMetadata.getJurisdictionId()) {
-                ValidationService.validateInputParams(INPUT_STRING_PATTERN, caseDocumentsMetadata.getJurisdictionId());
+                validationUtils.validateInputParams(INPUT_STRING_PATTERN, caseDocumentsMetadata.getJurisdictionId());
                 metadataMap.put(JURISDICTION_ID, caseDocumentsMetadata.getJurisdictionId());
             }
 
@@ -312,7 +314,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Override
     public ResponseEntity<Object> patchDocument(UUID documentId, UpdateDocumentCommand ttl) {
         ResponseEntity<Object> responseResult = new ResponseEntity<>(HttpStatus.OK);
-        if (!ValidationService.validateTTL(ttl.getTtl())) {
+        if (!validationUtils.validateTTL(ttl.getTtl())) {
             throw new BadRequestException(String.format(
                 "Incorrect date format %s",
                 ttl.getTtl()));
@@ -463,7 +465,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, Permission permissionToCheck) {
         String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
-        ValidationService.validate(caseId);
+        validationUtils.validate(caseId);
 
         DocumentPermissions documentPermissions = caseDataStoreService
             .getCaseDocumentMetadata(caseId, documentId)

@@ -24,12 +24,9 @@ import static uk.gov.hmcts.reform.ccd.document.am.apihelper.Constants.INPUT_STRI
 @Named
 @Singleton
 @Slf4j
-public class ValidationService {
+public class ValidationUtils {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ValidationService.class);
-
-    private ValidationService() {
-    }
+    private static final Logger LOG = LoggerFactory.getLogger(ValidationUtils.class);
 
     /**
      * Validate a number string using  algorithm.
@@ -37,12 +34,12 @@ public class ValidationService {
      * @param numberString =null
      * @return
      */
-    public static boolean validate(String numberString) {
+    public boolean validate(String numberString) {
         validateInputParams(INPUT_CASE_ID_PATTERN, numberString);
         return (numberString != null && numberString.length() == 16);
     }
 
-    public static void isValidSecurityClassification(String securityClassification) {
+    public void isValidSecurityClassification(String securityClassification) {
         try {
             Enum.valueOf(Classification.class, securityClassification);
         } catch (final IllegalArgumentException ex) {
@@ -51,7 +48,7 @@ public class ValidationService {
         }
     }
 
-    public static void validateInputParams(String pattern, String... inputString) {
+    public void validateInputParams(String pattern, String... inputString) {
         for (String input : inputString) {
             if (StringUtils.isEmpty(input)) {
                 throw new BadRequestException("The input parameter is Null/Empty");
@@ -61,7 +58,7 @@ public class ValidationService {
         }
     }
 
-    public static void inputLists(List<?>... inputList) {
+    public void inputLists(List<?>... inputList) {
         for (List<?> list : inputList) {
             if (CollectionUtils.isEmpty(list)) {
                 throw new BadRequestException("The List is empty");
@@ -69,7 +66,7 @@ public class ValidationService {
         }
     }
 
-    public static boolean validateTTL(String strDate) {
+    public boolean validateTTL(String strDate) {
         if (strDate.length() < 24) {
             return false;
         }
@@ -89,7 +86,7 @@ public class ValidationService {
         return false;
     }
 
-    public static void validateDocumentId(String documentId) {
+    public void validateDocumentId(String documentId) {
         validateInputParams(INPUT_STRING_PATTERN, documentId);
         try {
             UUID uuid = UUID.fromString(documentId);

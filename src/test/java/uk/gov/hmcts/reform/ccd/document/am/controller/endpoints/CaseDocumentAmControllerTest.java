@@ -25,7 +25,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.document.am.service.DocumentManagementService;
-import uk.gov.hmcts.reform.ccd.document.am.service.ValidationService;
+import uk.gov.hmcts.reform.ccd.document.am.service.ValidationUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,31 +61,22 @@ public class CaseDocumentAmControllerTest {
     private transient DocumentManagementService documentManagementService;
 
     @Mock
-    private transient ValidationService validationService;
-
-    @Mock
     private transient CaseDataStoreService caseDataStoreService;
-
-    private transient ResponseEntity responseEntity = new ResponseEntity(HttpStatus.OK);
-    private transient String serviceAuthorization = "";
 
     private static final String MATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9c";
     private static final String UNMATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9d";
     private static final String CASE_ID = "1582550122096256";
-    private static final String DUMMY_ROLE = "dummyRole";
     private static final String BEFTA_CASETYPE_2 =  "BEFTA_CASETYPE_2";
     private static final String BEFTA_JURISDICTION_2 =  "BEFTA_JURISDICTION_2";
-    private static final String USER_ID =  "userId";
     private static final String VALID_RESPONSE = "Valid Response from API";
     private static final String RESPONSE_CODE = "Status code is OK";
     private static final String NO_CONTENT_RESPONSE_CODE = "Status code is No Content";
-    private static final String AUTHORIZATION = "Authorization";
     private static final String FORBIDDEN = "forbidden";
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        //when(ValidationService.validate("")).thenReturn(TRUE);
+        testee = new CaseDocumentAmController(documentManagementService, new ValidationUtils());
     }
 
     @Test

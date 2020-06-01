@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.document.am.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.document.am.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.document.am.service.CaseDataStoreService;
+import uk.gov.hmcts.reform.ccd.document.am.service.ValidationUtils;
 import uk.gov.hmcts.reform.ccd.document.am.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.document.am.util.SecurityUtils;
 
@@ -94,17 +95,16 @@ class DocumentManagementServiceImplTest {
     private static final String BEFTA_JURISDICTION_2 =  "BEFTA_JURISDICTION_2";
     private static final String USER_ID =  "userId";
 
-    private RestTemplate restTemplateMock = Mockito.mock(RestTemplate.class);
-    private SecurityUtils securityUtilsMock = mock(SecurityUtils.class);
-    private CaseDataStoreService caseDataStoreServiceMock = mock(CaseDataStoreService.class);
+    private final RestTemplate restTemplateMock = Mockito.mock(RestTemplate.class);
+    private final SecurityUtils securityUtilsMock = mock(SecurityUtils.class);
+    private final CaseDataStoreService caseDataStoreServiceMock = mock(CaseDataStoreService.class);
 
     private HttpEntity<?> requestEntityGlobal  = new HttpEntity<>(getHttpHeaders());
-    private UUID matchedDocUUID = UUID.fromString(MATCHED_DOCUMENT_ID);
+    private final UUID matchedDocUUID = UUID.fromString(MATCHED_DOCUMENT_ID);
 
     @InjectMocks
     private DocumentManagementServiceImpl sut = new DocumentManagementServiceImpl(restTemplateMock, securityUtilsMock,
-
-                                                                                  caseDataStoreServiceMock);
+                                                                                  caseDataStoreServiceMock, new ValidationUtils());
 
     private String documentURL = "http://localhost:4506";
     private String documentTTL = "600000";
