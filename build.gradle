@@ -289,13 +289,6 @@ dependencies {
   }
   testCompile group: 'uk.gov.hmcts', name: 'befta-fw', version: '2.7.0'
   compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.2.2.RELEASE'
-  /*
-
-  compile group: 'io.cucumber', name: 'cucumber-java', version: versions.cucumber
-  testCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.rest_assured
-  testCompile group: 'io.cucumber', name: 'cucumber-junit', version: versions.cucumber
-  testCompile group: 'io.github.openfeign', name: 'feign-jackson', version: versions.feign_jackson
-  */
 
   smokeTestCompile group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
   smokeTestCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
@@ -304,11 +297,7 @@ dependencies {
   smokeTestCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.rest_assured
 
   // AM-467-Serenety report for Integration test
-  integrationTestCompile group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
-  integrationTestCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
-  integrationTestCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
-  integrationTestCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: versions.serenity
-  integrationTestCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.rest_assured
+ integrationTestCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.rest_assured
 
   integrationTestCompile sourceSets.main.runtimeClasspath
   integrationTestCompile sourceSets.test.runtimeClasspath
