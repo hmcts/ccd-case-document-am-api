@@ -43,8 +43,8 @@ public class Constants {
     public static final String CASE_TYPE_ID_INVALID = "Case Type Id Id is not valid";
     public static final String JURISDICTION_ID_INVALID = "Jurisdiction Id is not valid";
     public static final String CLASSIFICATION_ID_INVALID = "Jurisdiction Id is not valid";
-    public static final String EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE = "Exception occurred with operation on document id: %s because of %s";
-    public static final String EXCEPTION_ERROR_MESSAGE = "Exception occurred with operation because of %s";
+    public static final String EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE = "Exception occurred with operation on document id: %s";
+    public static final String EXCEPTION_ERROR_MESSAGE = "Exception occurred with operation";
     public static final String CASE_ID = "caseId";
     public static final String CASE_TYPE_ID = "caseTypeId";
     public static final String JURISDICTION_ID = "jurisdictionId";

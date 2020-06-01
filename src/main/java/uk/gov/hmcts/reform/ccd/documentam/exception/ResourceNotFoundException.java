@@ -12,4 +12,8 @@ public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(String message) {
         super(String.format(Constants.RESOURCE_NOT_FOUND + " %s", message));
     }
+
+    public ResourceNotFoundException(String message, Throwable exception) {
+        super(String.format(Constants.RESOURCE_NOT_FOUND + " %s", message), exception);
+    }
 }

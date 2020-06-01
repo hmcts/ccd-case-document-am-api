@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 
-import static javax.servlet.RequestDispatcher.ERROR_MESSAGE;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PATCH;
@@ -43,6 +42,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.CaseNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
@@ -64,7 +64,6 @@ import uk.gov.hmcts.reform.ccd.documentam.service.ValidationUtils;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.documentam.util.ResponseHelper;
 import uk.gov.hmcts.reform.ccd.documentam.util.SecurityUtils;
-import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 
 @Slf4j
 @Service
@@ -537,36 +536,25 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private void catchException(HttpClientErrorException exception, String messageParam) {
         if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-            LOG.error(ERROR_MESSAGE + "{}" + "{}", messageParam, HttpStatus.NOT_FOUND);
-            throw new ResourceNotFoundException(messageParam);
+            throw new ResourceNotFoundException(messageParam, exception);
         } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
-            LOG.error(ERROR_MESSAGE + "{} {}", messageParam, HttpStatus.FORBIDDEN);
             throw new ForbiddenException(messageParam);
         } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
-            LOG.error(ERROR_MESSAGE + "{} {}", messageParam, HttpStatus.BAD_REQUEST);
             throw new BadRequestException(messageParam);
         } else {
-            throw new ServiceException(String.format(
-                Constants.EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE,
-                messageParam,
-                exception));
+            throw new ServiceException(String.format(Constants.EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE, messageParam), exception);
         }
     }
 
     private void catchException(HttpClientErrorException exception) {
         if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-            LOG.error(ERROR_MESSAGE + "{}", HttpStatus.NOT_FOUND);
             throw new ResourceNotFoundException(Constants.RESOURCE_NOT_FOUND);
         } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
-            LOG.error(ERROR_MESSAGE + "{}", HttpStatus.FORBIDDEN);
             throw new ForbiddenException(Constants.FORBIDDEN);
         } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
-            LOG.error(ERROR_MESSAGE + "{}", HttpStatus.BAD_REQUEST);
             throw new BadRequestException(Constants.BAD_REQUEST);
         } else {
-            throw new ServiceException(String.format(
-                Constants.EXCEPTION_ERROR_MESSAGE,
-                exception));
+            throw new ServiceException(Constants.EXCEPTION_ERROR_MESSAGE, exception);
         }
     }
 }
