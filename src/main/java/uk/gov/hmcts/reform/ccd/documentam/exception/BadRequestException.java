@@ -8,11 +8,11 @@ public class BadRequestException extends RuntimeException {
 
     private static final long serialVersionUID = 6L;
 
-    public BadRequestException(String  message) {
+    public BadRequestException(String message) {
         super(message);
     }
 
-    public BadRequestException(String  message, Throwable exception) {
+    public BadRequestException(String message, Throwable exception) {
         super(message, exception);
     }
 }

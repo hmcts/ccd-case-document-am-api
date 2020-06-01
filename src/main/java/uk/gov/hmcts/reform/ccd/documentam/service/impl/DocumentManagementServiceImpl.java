@@ -538,9 +538,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
             throw new ResourceNotFoundException(messageParam, exception);
         } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
-            throw new ForbiddenException(messageParam);
+            throw new ForbiddenException(messageParam, exception);
         } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
-            throw new BadRequestException(messageParam);
+            throw new BadRequestException(messageParam, exception);
         } else {
             throw new ServiceException(String.format(Constants.EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE, messageParam), exception);
         }
@@ -548,11 +548,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private void catchException(HttpClientErrorException exception) {
         if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-            throw new ResourceNotFoundException(Constants.RESOURCE_NOT_FOUND);
+            throw new ResourceNotFoundException(Constants.RESOURCE_NOT_FOUND, exception);
         } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
-            throw new ForbiddenException(Constants.FORBIDDEN);
+            throw new ForbiddenException(Constants.FORBIDDEN, exception);
         } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
-            throw new BadRequestException(Constants.BAD_REQUEST);
+            throw new BadRequestException(Constants.BAD_REQUEST, exception);
         } else {
             throw new ServiceException(Constants.EXCEPTION_ERROR_MESSAGE, exception);
         }
