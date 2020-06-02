@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.ccd.documentam.service;
 
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.INPUT_CASE_ID_PATTERN;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.INPUT_STRING_PATTERN;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -17,9 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
-
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.INPUT_CASE_ID_PATTERN;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.INPUT_STRING_PATTERN;
 
 @Named
 @Singleton
@@ -92,8 +92,9 @@ public class ValidationUtils {
             UUID uuid = UUID.fromString(documentId);
             LOG.info("UUID {}", uuid);
         } catch (IllegalArgumentException exception) {
-            throw new BadRequestException(String.format("The input parameter: %s is not a valid UUID. Exception is %s",
-                                                        documentId, exception.toString()));
+            throw new BadRequestException(String.format(
+                "The input parameter: %s is not a valid UUID.",
+                documentId), exception);
         }
     }
 }

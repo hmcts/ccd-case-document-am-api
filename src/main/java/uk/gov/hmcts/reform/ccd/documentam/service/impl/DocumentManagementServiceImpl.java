@@ -395,7 +395,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             String message = hashmap.values().toString();
             LOG.info(message);
         } catch (Exception exception) {
-            LOG.error("Exception occurred {}", exception.toString());
+            LOG.error("Exception occurred", exception);
             throw exception;
         }
     }
