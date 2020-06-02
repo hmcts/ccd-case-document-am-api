@@ -290,12 +290,6 @@ dependencies {
   testCompile group: 'uk.gov.hmcts', name: 'befta-fw', version: '2.7.0'
   compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.2.2.RELEASE'
 
-  smokeTestCompile group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
-  smokeTestCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
-  smokeTestCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
-  smokeTestCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: versions.serenity
-  smokeTestCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.rest_assured
-
   // AM-467-Serenety report for Integration test
  integrationTestCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.rest_assured
 
