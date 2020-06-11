@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.ccd.documentam.configuration;
+package uk.gov.hmcts.reform.ccd.document.am.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -9,11 +9,10 @@ import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.schema.ModelRef;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Parameter;
-import springfox.documentation.service.Tag;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
-import uk.gov.hmcts.reform.ccd.documentam.controller.endpoints.CaseDocumentAmController;
+import uk.gov.hmcts.reform.ccd.document.am.controller.endpoints.CaseDocumentAmController;
 
 import java.util.Arrays;
 
@@ -21,8 +20,6 @@ import java.util.Arrays;
 @EnableSwagger2WebMvc
 public class SwaggerConfiguration {
 
-    public static final String STRING = "string";
-    public static final String HEADER = "header";
 
     @Value("${swaggerUrl}")
     private  String host;
@@ -30,10 +27,7 @@ public class SwaggerConfiguration {
     @Bean
     public Docket apiV2() {
         return new Docket(DocumentationType.SWAGGER_2)
-            .tags(new Tag("get", "Get data endpoints"),
-                  new Tag("patch", "Patch data related endpoints"),
-                  new Tag("delete", "Delete endpoints"),
-                  new Tag("upload", "Upload documents"))
+            .groupName("v2")
             .select()
             .apis(RequestHandlerSelectors.basePackage(CaseDocumentAmController.class.getPackage().getName()))
             .build()
@@ -58,8 +52,8 @@ public class SwaggerConfiguration {
         return new ParameterBuilder()
             .name("ServiceAuthorization")
             .description("Valid Service-to-Service JWT token for a whitelisted micro-service")
-            .modelRef(new ModelRef(STRING))
-            .parameterType(HEADER)
+            .modelRef(new ModelRef("string"))
+            .parameterType("header")
             .required(true)
             .build();
     }
@@ -68,8 +62,8 @@ public class SwaggerConfiguration {
         return new ParameterBuilder()
             .name("Authorization")
             .description("Keyword `Bearer` followed by a valid IDAM user token")
-            .modelRef(new ModelRef(STRING))
-            .parameterType(HEADER)
+            .modelRef(new ModelRef("string"))
+            .parameterType("header")
             .required(true)
             .build();
     }

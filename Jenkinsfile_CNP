@@ -83,7 +83,10 @@ withPipeline(type, product, component) {
   overrideVaultEnvironments(vaultOverrides)
   loadVaultSecrets(secrets)
   enableAksStagingDeployment()
+<<<<<<< HEAD
   disableLegacyDeploymentOnAAT()
+=======
+>>>>>>> refs/heads/masters_copy_for_grand_review
   disableLegacyDeployment()
 
   after('functionalTest:preview') {
