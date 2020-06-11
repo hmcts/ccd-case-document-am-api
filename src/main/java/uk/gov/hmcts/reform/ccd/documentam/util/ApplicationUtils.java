@@ -5,16 +5,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Slf4j
 public class ApplicationUtils {
 
     private ApplicationUtils() {
     }
-
-    private static final Logger LOG = LoggerFactory.getLogger(ApplicationUtils.class);
 
     public static String generateHashCode(String input) {
         try {
@@ -41,7 +37,7 @@ public class ApplicationUtils {
             // return the HashText
             return hashtext.toString();
         } catch (NoSuchAlgorithmException exception) {
-            LOG.error("Error while generating the hashcode :", exception);
+            log.error("Error while generating the hashcode :", exception);
         }
         return null;
     }

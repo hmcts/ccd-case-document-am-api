@@ -4,27 +4,8 @@ import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PATCH;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import javax.servlet.http.HttpServletRequest;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -42,6 +23,26 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import javax.servlet.http.HttpServletRequest;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.CaseNotFoundException;
@@ -69,8 +70,6 @@ import uk.gov.hmcts.reform.ccd.documentam.util.SecurityUtils;
 @Service
 public class DocumentManagementServiceImpl implements DocumentManagementService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DocumentManagementServiceImpl.class);
-
     private final RestTemplate restTemplate;
     private final ValidationUtils validationUtils;
     private final SecurityUtils securityUtils;
@@ -93,9 +92,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             .getResourceAsStream("service_config.json");
         try {
             authorisedServices = new ObjectMapper().readValue(inputStream, AuthorisedServices.class);
-            LOG.info("services config loaded {}", authorisedServices);
+            log.info("services config loaded {}", authorisedServices);
         } catch (IOException e) {
-            LOG.error("IOException {}", e.getMessage());
+            log.error("IOException {}", e.getMessage());
         }
     }
 
@@ -115,23 +114,23 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         ResponseEntity<Object> responseResult = new ResponseEntity<>(HttpStatus.OK);
         try {
             final HttpEntity<String> requestEntity = new HttpEntity<>(getHttpHeaders());
-            LOG.info("Document Store URL is : {}", documentURL);
+            log.info("Document Store URL is : {}", documentURL);
             String documentMetadataUrl = String.format("%s/documents/%s", documentURL, documentId);
-            LOG.info("documentMetadataUrl : {}", documentMetadataUrl);
+            log.info("documentMetadataUrl : {}", documentMetadataUrl);
             ResponseEntity<StoredDocumentHalResource> response = restTemplate.exchange(
                 documentMetadataUrl,
                 GET,
                 requestEntity,
                 StoredDocumentHalResource.class
                                                                                       );
-            LOG.info("response : {}", response.getStatusCode());
-            LOG.info("response : {}", response.getBody());
+            log.info("response : {}", response.getStatusCode());
+            log.info("response : {}", response.getBody());
             ResponseEntity<Object> responseEntity = ResponseHelper.toResponseEntity(response, documentId);
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
-                LOG.info("Positive response");
+                log.info("Positive response");
                 responseResult = responseEntity;
             } else {
-                LOG.error("Document doesn't exist for requested document id at Document Store {}", responseEntity
+                log.error("Document doesn't exist for requested document id at Document Store {}", responseEntity
                     .getStatusCode());
                 throw new ResourceNotFoundException(documentId.toString());
             }
@@ -227,6 +226,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
     }
 
+    @Override
     public String generateHashToken(UUID documentId) {
         ResponseEntity<?> responseEntity = getDocumentMetadata(documentId);
         String hashcodeFromStoredDocument = "";
@@ -304,7 +304,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
                 responseResult = responseEntity;
             } else {
-                LOG.error("Document doesn't exist for requested document id at Document Store API Side {}", response
+                log.error("Document doesn't exist for requested document id at Document Store API Side {}", response
                     .getStatusCode());
                 throw new ResourceNotFoundException(documentId.toString());
             }
@@ -320,7 +320,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         try {
             final HttpEntity<?> requestEntity = new HttpEntity<>(getHttpHeaders());
             String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, documentId, permanent);
-            LOG.info("documentDeleteUrl : {}", documentDeleteUrl);
+            log.info("documentDeleteUrl : {}", documentDeleteUrl);
             ResponseEntity<Object> response = restTemplate.exchange(
                 documentDeleteUrl,
                 DELETE,
@@ -328,10 +328,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 Object.class
             );
             if (HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
-                LOG.info("Positive response");
+                log.info("Positive response");
                 responseResult = response;
             } else {
-                LOG.error("Document doesn't exist for requested document id at Document Store {}", response
+                log.error("Document doesn't exist for requested document id at Document Store {}", response
                     .getStatusCode());
                 throw new ResourceNotFoundException(documentId.toString());
             }
@@ -347,12 +347,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                                                        ResponseEntity<Object> uploadedDocumentResponse) {
         LinkedHashMap<String, Object> updatedUploadedDocumentResponse = new LinkedHashMap<>();
         try {
-            LinkedHashMap<String, Object> documents = (LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse
+            LinkedHashMap<String, Object> documents = (LinkedHashMap<String, Object>) ((LinkedHashMap<String, Object>) uploadedDocumentResponse
                 .getBody())
                 .get(Constants.EMBEDDED);
 
             ArrayList<Object> documentList = (ArrayList<Object>) (documents.get(Constants.DOCUMENTS));
-            LOG.info("documentList :{}", documentList);
+            log.info("documentList :{}", documentList);
 
             for (Object document : documentList) {
                 if (document instanceof LinkedHashMap) {
@@ -365,7 +365,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 }
             }
             ArrayList<Object> documentListObject =
-                (ArrayList<Object>) ((LinkedHashMap) ((LinkedHashMap) uploadedDocumentResponse
+                    (ArrayList<Object>) ((LinkedHashMap<String, Object>) ((LinkedHashMap<String, Object>) uploadedDocumentResponse
                     .getBody())
                     .get(Constants.EMBEDDED)).get(Constants.DOCUMENTS);
             updatedUploadedDocumentResponse.put(Constants.DOCUMENTS, documentListObject);
@@ -393,9 +393,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 Constants.BINARY).get(Constants.HREF), 43));
             hashmap.put(Constants.LINKS, links.toMap());
             String message = hashmap.values().toString();
-            LOG.info(message);
+            log.info(message);
         } catch (Exception exception) {
-            LOG.error("Exception occurred", exception);
+            log.error("Exception occurred", exception);
             throw exception;
         }
     }
@@ -436,7 +436,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     }
 
-    public boolean checkUserPermission(ResponseEntity responseEntity, UUID documentId, Permission permissionToCheck) {
+    @Override
+    public boolean checkUserPermission(ResponseEntity<?> responseEntity, UUID documentId,
+            Permission permissionToCheck) {
         String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
         validationUtils.validate(caseId);
 
@@ -448,8 +450,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             && documentPermissions.getPermissions().contains(permissionToCheck));
     }
 
+    @Override
     public boolean checkServicePermission(ResponseEntity<?> responseEntity, Permission permission) {
-        LOG.info("API call initiated from {} token ", securityUtils.getServiceId());
+        log.info("API call initiated from {} token ", securityUtils.getServiceId());
         AuthorisedService serviceConfig = getServiceDetailsFromJson(securityUtils.getServiceId());
         String caseTypeId = extractCaseTypeIdFromMetadata(responseEntity.getBody());
         String jurisdictionId = extractJurisdictionIdFromMetadata(responseEntity.getBody());
@@ -462,6 +465,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         );
     }
 
+    @Override
     public boolean checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId, Permission permission) {
         AuthorisedService serviceConfig = getServiceDetailsFromJson(securityUtils.getServiceId());
         return validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(
@@ -477,7 +481,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         boolean result = !StringUtils.isEmpty(caseTypeId) && (serviceConfig.getCaseTypeId().equals("*") || caseTypeId.equals(
             serviceConfig.getCaseTypeId()));
         caseTypeId = sanitiseData(caseTypeId);
-        LOG.info("Case Type Id is {} and validation result is {}", caseTypeId, result);
+        log.info("Case Type Id is {} and validation result is {}", caseTypeId, result);
         return result;
     }
 
@@ -485,7 +489,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         boolean result =  !StringUtils.isEmpty(jurisdictionId) && (serviceConfig.getJurisdictionId().equals("*") || jurisdictionId.equals(
             serviceConfig.getJurisdictionId()));
         jurisdictionId = sanitiseData(jurisdictionId);
-        LOG.info("JurisdictionI Id is {} and validation result is {}", jurisdictionId, result);
+        log.info("JurisdictionI Id is {} and validation result is {}", jurisdictionId, result);
         return result;
     }
 
@@ -496,7 +500,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private boolean validatePermissions(AuthorisedService serviceConfig, Permission permission) {
         List<Permission> servicePermissions = serviceConfig.getPermissions();
         boolean result = !servicePermissions.isEmpty() && (servicePermissions.contains(permission));
-        LOG.info("Permission is {} and validation result is {}", permission, result);
+        log.info("Permission is {} and validation result is {}", permission, result);
         return result;
     }
 
@@ -506,7 +510,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         if (service.isPresent()) {
             return service.get();
         } else {
-            LOG.error("Service Id {} is not authorized to access API ", serviceId);
+            log.error("Service Id {} is not authorized to access API ", serviceId);
             throw new ForbiddenException(String.format(Constants.EXCEPTION_SERVICE_ID_NOT_AUTHORISED, serviceId));
         }
     }

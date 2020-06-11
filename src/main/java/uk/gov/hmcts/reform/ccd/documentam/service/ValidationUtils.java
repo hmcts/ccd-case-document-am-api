@@ -3,6 +3,12 @@ package uk.gov.hmcts.reform.ccd.documentam.service;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.INPUT_CASE_ID_PATTERN;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.INPUT_STRING_PATTERN;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -10,14 +16,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.regex.Pattern;
-import javax.inject.Named;
-import javax.inject.Singleton;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 
@@ -25,8 +25,6 @@ import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 @Singleton
 @Slf4j
 public class ValidationUtils {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ValidationUtils.class);
 
     /**
      * Validate a number string using  algorithm.
@@ -43,7 +41,7 @@ public class ValidationUtils {
         try {
             Enum.valueOf(Classification.class, securityClassification);
         } catch (final IllegalArgumentException ex) {
-            LOG.info("The security classification is not valid");
+            log.info("The security classification is not valid");
             throw new BadRequestException("The security classification " + securityClassification + " is not valid");
         }
     }
@@ -77,7 +75,7 @@ public class ValidationUtils {
             sdfrmt.setLenient(false);
             try {
                 Date javaDate = sdfrmt.parse(strDate);
-                LOG.info("TTL {}", javaDate);
+                log.info("TTL {}", javaDate);
             } catch (ParseException e) {
                 return false;
             }
@@ -90,7 +88,7 @@ public class ValidationUtils {
         validateInputParams(INPUT_STRING_PATTERN, documentId);
         try {
             UUID uuid = UUID.fromString(documentId);
-            LOG.info("UUID {}", uuid);
+            log.info("UUID {}", uuid);
         } catch (IllegalArgumentException exception) {
             throw new BadRequestException(String.format(
                 "The input parameter: %s is not a valid UUID.",

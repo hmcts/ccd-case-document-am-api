@@ -1,9 +1,5 @@
 package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -16,6 +12,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.LinkedHashMap;
+import java.util.Optional;
+import java.util.UUID;
+
+import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
@@ -23,17 +28,11 @@ import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.documentam.util.SecurityUtils;
-import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
-
-import java.util.LinkedHashMap;
-import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @Service
 public class CaseDataStoreServiceImpl implements CaseDataStoreService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CaseDataStoreServiceImpl.class);
     private static final String ERROR_MESSAGE = "Could't find document for case  : {}, response code from CCD : {}";
     private static final String CASE_ERROR_MESSAGE = "Could't find document for case  : ";
 
@@ -71,22 +70,23 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
                 if (documentMetadata != null && documentMetadata.getDocumentPermissions() != null) {
                     result = Optional.of(documentMetadata.getDocumentPermissions());
                 } else {
-                    LOG.error(ERROR_MESSAGE, caseId, HttpStatus.FORBIDDEN);
+                    log.error(ERROR_MESSAGE, caseId, HttpStatus.FORBIDDEN);
                     throw new ForbiddenException(CASE_ERROR_MESSAGE + caseId);
                 }
             }
         } catch (HttpClientErrorException exception) {
             if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE, caseId, HttpStatus.NOT_FOUND);
+                log.error(ERROR_MESSAGE, caseId, HttpStatus.NOT_FOUND);
                 throw new ForbiddenException(CASE_ERROR_MESSAGE + caseId);
             } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE,caseId, HttpStatus.FORBIDDEN);
+                log.error(ERROR_MESSAGE, caseId, HttpStatus.FORBIDDEN);
                 throw new ForbiddenException(CASE_ERROR_MESSAGE + caseId);
             } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
-                LOG.error(ERROR_MESSAGE, caseId, HttpStatus.BAD_REQUEST);
+                log.error(ERROR_MESSAGE, caseId, HttpStatus.BAD_REQUEST);
                 throw new BadRequestException(Constants.INPUT_INVALID);
             } else {
-                LOG.error("Exception occurred while getting document permissions from CCD Data store: {}", exception.getMessage());
+                log.error("Exception occurred while getting document permissions from CCD Data store: {}",
+                        exception.getMessage());
                 throw new ServiceException(String.format(
                     "Problem  fetching the document for document id: %s because of %s",
                     documentId,

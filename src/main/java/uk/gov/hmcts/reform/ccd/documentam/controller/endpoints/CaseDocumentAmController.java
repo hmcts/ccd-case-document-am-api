@@ -14,21 +14,6 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.INPUT_STRIN
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.JURISDICTION_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -42,6 +27,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
@@ -57,8 +57,6 @@ import uk.gov.hmcts.reform.ccd.documentam.service.ValidationUtils;
 @Slf4j
 public class CaseDocumentAmController  {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CaseDocumentAmController.class);
-
     private final DocumentManagementService documentManagementService;
     private final ValidationUtils validationUtils;
 
@@ -70,7 +68,6 @@ public class CaseDocumentAmController  {
         this.documentManagementService = documentManagementService;
         this.validationUtils = validationUtils;
     }
-
 
     //**************** Document MetaData  API ***********
     @GetMapping(
@@ -101,10 +98,10 @@ public class CaseDocumentAmController  {
             if (documentManagementService.checkUserPermission(responseEntity, documentId, Permission.READ)) {
                 return ResponseEntity.status(HttpStatus.OK).body(responseEntity.getBody());
             }
-            LOG.error("User doesn't have read permission on requested document {}", HttpStatus.FORBIDDEN);
+            log.error("User doesn't have read permission on requested document {}", HttpStatus.FORBIDDEN);
             throw new ForbiddenException(documentId.toString());
         }
-        LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
+        log.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -139,10 +136,10 @@ public class CaseDocumentAmController  {
             if (documentManagementService.checkUserPermission(documentMetadata, documentId, Permission.READ)) {
                 return documentManagementService.getDocumentBinaryContent(documentId);
             }
-            LOG.error("User doesn't have read permission on requested document {}", HttpStatus.FORBIDDEN);
+            log.error("User doesn't have read permission on requested document {}", HttpStatus.FORBIDDEN);
             throw new ForbiddenException(documentId.toString());
         }
-        LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
+        log.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -200,7 +197,7 @@ public class CaseDocumentAmController  {
         if (documentManagementService.checkServicePermissionsForUpload(caseTypeId, jurisdictionId, Permission.CREATE)) {
             return documentManagementService.uploadDocuments(files, classification, caseTypeId, jurisdictionId);
         }
-        LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
+        log.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
         throw new ForbiddenException(caseTypeId + " " + jurisdictionId);
     }
 
@@ -238,7 +235,7 @@ public class CaseDocumentAmController  {
             ResponseEntity<?> response = documentManagementService.patchDocument(documentId, body);
             return ResponseEntity.status(HttpStatus.OK).body(response.getBody());
         }
-        LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
+        log.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -302,7 +299,7 @@ public class CaseDocumentAmController  {
                 return ResponseEntity
                     .status(HttpStatus.OK).body(responseBody);
             } else {
-                LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
+                log.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
                 throw new ForbiddenException(caseDocumentsMetadata.getCaseTypeId() + " " + caseDocumentsMetadata.getJurisdictionId());
             }
         } else {
@@ -339,7 +336,7 @@ public class CaseDocumentAmController  {
         if (documentManagementService.checkServicePermission(responseEntity, Permission.UPDATE)) {
             return documentManagementService.deleteDocument(documentId, permanent);
         }
-        LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
+        log.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -377,7 +374,7 @@ public class CaseDocumentAmController  {
             responseBody.put(HASHTOKEN, documentManagementService.generateHashToken(documentId));
             return new ResponseEntity<>(responseBody, HttpStatus.OK);
         }
-        LOG.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
+        log.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 }
