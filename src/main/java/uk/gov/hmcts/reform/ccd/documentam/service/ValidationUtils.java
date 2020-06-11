@@ -56,8 +56,8 @@ public class ValidationUtils {
         }
     }
 
-    public void inputLists(List<?>... inputList) {
-        for (List<?> list : inputList) {
+    public void validateLists(List<?>... inputLists) {
+        for (List<?> list : inputLists) {
             if (CollectionUtils.isEmpty(list)) {
                 throw new BadRequestException("The List is empty");
             }

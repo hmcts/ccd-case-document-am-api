@@ -193,7 +193,7 @@ public class CaseDocumentAmController  {
     ) {
         validationUtils.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification);
         validationUtils.isValidSecurityClassification(classification);
-        validationUtils.inputLists(files);
+        validationUtils.validateLists(files);
         if (documentManagementService.checkServicePermissionsForUpload(caseTypeId, jurisdictionId, Permission.CREATE)) {
             return documentManagementService.uploadDocuments(files, classification, caseTypeId, jurisdictionId);
         }
