@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.ccd.documentam.service;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.INPUT_CASE_ID_PATTERN;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.INPUT_STRING_PATTERN;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
 import javax.inject.Named;
@@ -11,6 +12,7 @@ import javax.inject.Singleton;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -50,6 +52,14 @@ public class ValidationUtils {
                 throw new BadRequestException("The input parameter is Null/Empty");
             } else if (!Pattern.matches(pattern, input)) {
                 throw new BadRequestException("The input parameter: \"" + input +  "\", does not comply with the required pattern");
+            }
+        }
+    }
+
+    public void inputLists(List<?>... inputList) {
+        for (List<?> list : inputList) {
+            if (CollectionUtils.isEmpty(list)) {
+                throw new BadRequestException("The List is empty");
             }
         }
     }
