@@ -395,7 +395,6 @@
 	</suppress>
 
 	<!-- Temporary suppression to unblock development -->
-	>
 	<suppress>
 		<cve>CVE-2020-13692</cve>
 	</suppress>
