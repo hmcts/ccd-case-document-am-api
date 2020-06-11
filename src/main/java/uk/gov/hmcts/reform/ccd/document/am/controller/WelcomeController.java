@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.ccd.document.am.controller;
 
 import java.util.UUID;
 
-import org.springframework.boot.actuate.health.Health;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,11 +30,6 @@ public class WelcomeController {
      *
      * @return Welcome message from the service.
      */
-
-    @GetMapping(value = {"/", "/health"})
-    public Health healthCheck() {
-        return Health.up().build();
-    }
 
     @GetMapping(value = "/swagger")
     public String index() {
