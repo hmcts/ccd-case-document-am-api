@@ -3,6 +3,8 @@
 !gradle/wrapper/gradle-wrapper.jar
 *.class
 bin/main/application.yaml
+bin/functionalTest/
+bin/main/
 
 ### STS ###
 .apt_generated
@@ -20,5 +22,4 @@ bin/main/application.yaml
 *.ipr
 
 .DS_Store
-target/
-/bin/
+/target/

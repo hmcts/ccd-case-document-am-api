@@ -1,4 +1,4 @@
-@F-000
+@F-000 @Smoke
 Feature: [SAMPLE] Upload case document to CCD Case Document AM API
 
   Background:
