@@ -27,22 +27,6 @@
         },
         {
           "key": "files",
-          "filePath": "SampleImage.png"
-        },
-        {
-          "key": "files",
-          "filePath": "CCD_BEFTA_JURISDICTION2.xlsx"
-        },
-        {
-          "key": "files",
-          "filePath": "CCD_BEFTA_JURISDICTION2.xlsx"
-        },
-        {
-          "key": "files",
-          "filePath": "SampleImage.png"
-        },
-        {
-          "key": "files",
           "filePath": "Sample.pdf"
         },
         {
@@ -61,18 +45,6 @@
     },
     "body": {
       "documents": [
-        {
-          "_extends_": "Common_Response_Body_Document_Base"
-        },
-        {
-          "_extends_": "Common_Response_Body_Document_Base"
-        },
-        {
-          "_extends_": "Common_Response_Body_Document_Base"
-        },
-        {
-          "_extends_": "Common_Response_Body_Document_Base"
-        },
         {
           "_extends_": "Common_Response_Body_Document_Base"
         },
