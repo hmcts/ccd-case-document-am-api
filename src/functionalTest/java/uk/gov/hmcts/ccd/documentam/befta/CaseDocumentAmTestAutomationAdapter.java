@@ -20,9 +20,10 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
     public void doLoadTestData() {
         loader.addCcdRoles();
         loader.importDefinitions();
-        super.registerS2sClient(EnvironmentVariableUtils.getRequiredVariable("API_CLIENT_DATA_STORE"));
-        super.registerS2sClient(EnvironmentVariableUtils.getRequiredVariable("API_CLIENT_BULK_SCAN_PROCESSOR"));
-        super.registerS2sClient(EnvironmentVariableUtils.getRequiredVariable("API_CLIENT_XUI_WEBAPP"));
+        super.registerS2sClient(EnvironmentVariableUtils.getRequiredVariable("BEFTA_S2S_CLIENT_ID_OF_CCD_DATA"));
+        super.registerS2sClient(
+                EnvironmentVariableUtils.getRequiredVariable("BEFTA_S2S_CLIENT_ID_OF_BULK_SCAN_PROCESSOR"));
+        super.registerS2sClient(EnvironmentVariableUtils.getRequiredVariable("BEFTA_S2S_CLIENT_ID_OF_XUI_WEBAPP"));
     }
 
     @Override
