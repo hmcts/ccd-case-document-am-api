@@ -1,7 +1,7 @@
 {
   "_guid_": "S-118",
   "_extends_": "F-004_Test_Base_data",
-  "apiClientId": "ccd_data",
+  "s2sClientId": "ccd_data",
   "title": "must get an error response when CCD Data Store tries to access Upload Document With Binary Content API",
   "specs": [
     "is to be made on behalf of CCD Data Store API"

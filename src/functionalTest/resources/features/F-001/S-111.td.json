@@ -2,7 +2,7 @@
   "title": "must get an error response when Bulk Scan Processor tries to access Get Document Metadata API",
   "_extends_": "F-001_Test_Base_data",
   "_guid_": "S-111",
-  "apiClientId": "bulk_scan_processor",
+  "s2sClientId": "bulk_scan_processor",
   "specs": [
     "is to be made on behalf of Bulk Scan Processor API"
   ],

@@ -3,7 +3,7 @@
   "_extends_": "F-004-Base-Root",
   "productName": "CCD Case Document AM API",
   "operationName": "Upload Document With Binary Content",
-  "apiClientId": "xui_webapp",
+  "s2sClientId": "xui_webapp",
   "specs": [
     "an active caseworker profile in CCD with full permissions on a document field"
   ],

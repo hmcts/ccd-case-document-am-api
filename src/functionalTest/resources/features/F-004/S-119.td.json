@@ -1,7 +1,7 @@
 {
   "_guid_": "S-119",
   "_extends_": "F-004_Test_Base_data",
-  "apiClientId": "bulk_scan_processor",
+  "s2sClientId": "bulk_scan_processor",
   "title": "must get an error response when Bulk Scan Processor tries to access Upload Document With Binary Content API",
   "specs": [
     "is to be made on behalf of Bulk Scan Processor API"

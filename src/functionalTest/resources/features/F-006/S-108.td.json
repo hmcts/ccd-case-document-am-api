@@ -2,7 +2,7 @@
   "title": "must get an error response when CCD Data Store tries to access get hashtoken API",
   "_guid_": "S-108",
   "_extends_": "F-006_Test_Base_data",
-  "apiClientId": "ccd_data",
+  "s2sClientId": "ccd_data",
   "specs": [
     "contains the document Id from just uploaded document",
     "is to be made on behalf of CCD Data Store API"

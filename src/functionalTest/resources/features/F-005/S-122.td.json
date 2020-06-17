@@ -2,7 +2,7 @@
   "title": "must get an error response when CCD Data Store tries to access Patch Document with ttl API",
   "_guid_": "S-122",
   "_extends_": "F-005_Test_Data_Base",
-  "apiClientId": "ccd_data",
+  "s2sClientId": "ccd_data",
   "specs": [
     "contains document id uploaded above with ttl",
     "is to be made on behalf of CCD Data Store API"

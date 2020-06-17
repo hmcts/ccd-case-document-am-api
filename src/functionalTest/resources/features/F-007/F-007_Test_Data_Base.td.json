@@ -3,7 +3,7 @@
   "_extends_": "F-007-Base-Root",
   "productName": "CCD Case Document AM API",
   "operationName": "Attach Documents To Case",
-  "apiClientId": "ccd_data",
+  "s2sClientId": "ccd_data",
   "specs": [
     "an active caseworker profile in CCD with full permissions on a document field"
   ],

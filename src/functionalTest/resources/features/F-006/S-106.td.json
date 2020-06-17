@@ -2,7 +2,7 @@
   "title": "must get an error response when Ex-UI tries to access get hashtoken API",
   "_guid_": "S-106",
   "_extends_": "F-006_Test_Base_data",
-  "apiClientId": "xui_webapp",
+  "s2sClientId": "xui_webapp",
   "specs": [
     "contains the document Id from just uploaded document",
     "is to be made on behalf of Ex-UI API"
