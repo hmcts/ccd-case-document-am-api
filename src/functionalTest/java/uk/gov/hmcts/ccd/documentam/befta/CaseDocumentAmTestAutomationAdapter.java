@@ -2,6 +2,7 @@ package uk.gov.hmcts.ccd.documentam.befta;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import uk.gov.hmcts.befta.DefaultTestAutomationAdapter;
 import uk.gov.hmcts.befta.dse.ccd.TestDataLoaderToDefinitionStore;
 import uk.gov.hmcts.befta.exception.FunctionalTestException;
@@ -19,9 +20,9 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
     public void doLoadTestData() {
         loader.addCcdRoles();
         loader.importDefinitions();
-        super.registerApiClientWithEnvVariable("API_CLIENT_DATA_STORE");
-        super.registerApiClientWithEnvVariable("API_CLIENT_BULK_SCAN_PROCESSOR");
-        super.registerApiClientWithEnvVariable("API_CLIENT_XUI_WEBAPP");
+        super.registerS2sClient(EnvironmentVariableUtils.getRequiredVariable("API_CLIENT_DATA_STORE"));
+        super.registerS2sClient(EnvironmentVariableUtils.getRequiredVariable("API_CLIENT_BULK_SCAN_PROCESSOR"));
+        super.registerS2sClient(EnvironmentVariableUtils.getRequiredVariable("API_CLIENT_XUI_WEBAPP"));
     }
 
     @Override
