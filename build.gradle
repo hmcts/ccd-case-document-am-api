@@ -102,15 +102,6 @@ sourceSets {
     }
     resources.srcDir file('src/integrationTest/resources')
   }
-
-  smokeTest {
-    java {
-      compileClasspath += main.output + test.output
-      runtimeClasspath += main.output + test.output
-      srcDir file('src/smokeTest/java')
-    }
-    resources.srcDir file('src/smokeTest/resources')
-  }
 }
 
 tasks.withType(JavaCompile) {
@@ -139,9 +130,21 @@ task integration(type: Test, description: 'Runs the integration tests.', group: 
 }
 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
-  testClassesDirs = sourceSets.smokeTest.output.classesDirs
-  classpath = sourceSets.smokeTest.runtimeClasspath
-  finalizedBy aggregate
+    setTestClassesDirs(sourceSets.functionalTest.output.classesDirs)
+    setClasspath(sourceSets.functionalTest.runtimeClasspath)
+    include "uk/gov/hmcts/ccd/documentam/befta/**"
+    useJUnitPlatform {
+        includeTags 'smoke'
+    }
+    doLast {
+        generateCucumberReports.enabled = true
+        javaexec {
+            main = "uk.gov.hmcts.ccd.documentam.befta.CaseDocumentAmBeftaMain"
+            classpath += configurations.cucumberRuntime + sourceSets.aat.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
+            args = ['--plugin', "json:${rootDir}/target/cucumber.json", '--tags', '@Smoke', '--glue',
+                    'uk.gov.hmcts.befta.player', 'src/aat/resources/features']
+        }
+    }
 }
 
 checkstyle {
@@ -301,11 +304,6 @@ dependencies {
 
   compileOnly group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-  smokeTestCompile sourceSets.main.runtimeClasspath
-  smokeTestCompile sourceSets.test.runtimeClasspath
-  smokeTestCompileOnly group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-  smokeTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-
 }
 
 
