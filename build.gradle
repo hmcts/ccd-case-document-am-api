@@ -140,9 +140,9 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
         generateCucumberReports.enabled = true
         javaexec {
             main = "uk.gov.hmcts.ccd.documentam.befta.CaseDocumentAmBeftaMain"
-            classpath += configurations.cucumberRuntime + sourceSets.aat.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
+            classpath += configurations.cucumberRuntime + sourceSets.functionalTest.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
             args = ['--plugin', "json:${rootDir}/target/cucumber.json", '--tags', '@Smoke', '--glue',
-                    'uk.gov.hmcts.befta.player', 'src/aat/resources/features']
+                    'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features']
         }
     }
 }
