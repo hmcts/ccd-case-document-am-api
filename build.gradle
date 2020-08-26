@@ -111,15 +111,27 @@ tasks.withType(JavaCompile) {
 task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
   classpath = sourceSets.functionalTest.runtimeClasspath
+
   doFirst {
     generateCucumberReports.enabled = true
     javaexec {
       main = "uk.gov.hmcts.ccd.documentam.befta.CaseDocumentAmBeftaMain"
       classpath += configurations.cucumberRuntime + sourceSets.functionalTest.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
-      args = ['--plugin', "json:${projectDir}/target/cucumber.json", '--tags', 'not @Ignore', '--glue',
+      args = ['--plugin', "json:${rootDir}/target/cucumber.json", '--tags', 'not @Ignore', '--glue',
               'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features/']
     }
   }
+
+  finalizedBy {
+    generateCucumberReports {
+      doLast{
+        new File("${rootDir}/BEFTA Report for Functional Tests").mkdirs()
+        file("${rootDir}/target/cucumber/cucumber-html-reports").renameTo(file("${rootDir}/BEFTA Report for Functional Tests"))
+      }
+    }
+  }
+
+  outputs.upToDateWhen { false }
 }
 
 task integration(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
@@ -130,21 +142,33 @@ task integration(type: Test, description: 'Runs the integration tests.', group: 
 }
 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
-    setTestClassesDirs(sourceSets.functionalTest.output.classesDirs)
-    setClasspath(sourceSets.functionalTest.runtimeClasspath)
-    include "uk/gov/hmcts/ccd/documentam/befta/**"
-    useJUnitPlatform {
-        includeTags 'smoke'
+  setTestClassesDirs(sourceSets.functionalTest.output.classesDirs)
+  setClasspath(sourceSets.functionalTest.runtimeClasspath)
+  include "uk/gov/hmcts/ccd/documentam/befta/**"
+  useJUnitPlatform {
+    includeTags 'smoke'
+  }
+
+  doLast {
+    generateCucumberReports.enabled = true
+    javaexec {
+      main = "uk.gov.hmcts.ccd.documentam.befta.CaseDocumentAmBeftaMain"
+      classpath += configurations.cucumberRuntime + sourceSets.functionalTest.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
+      args = ['--plugin', "json:${rootDir}/target/cucumber.json", '--tags', '@Smoke', '--glue',
+              'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features']
     }
-    doLast {
-        generateCucumberReports.enabled = true
-        javaexec {
-            main = "uk.gov.hmcts.ccd.documentam.befta.CaseDocumentAmBeftaMain"
-            classpath += configurations.cucumberRuntime + sourceSets.functionalTest.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
-            args = ['--plugin', "json:${rootDir}/target/cucumber.json", '--tags', '@Smoke', '--glue',
-                    'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features']
-        }
+  }
+
+  finalizedBy {
+    generateCucumberReports {
+      doLast{
+        new File("${rootDir}/BEFTA Report for Smoke Tests").mkdirs()
+        file("${rootDir}/target/cucumber/cucumber-html-reports").renameTo(file("${rootDir}/BEFTA Report for Smoke Tests"))
+      }
     }
+  }
+
+  outputs.upToDateWhen { false }
 }
 
 checkstyle {
