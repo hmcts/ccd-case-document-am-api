@@ -314,7 +314,7 @@ dependencies {
   testCompile (group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot) {
     exclude group: 'junit', module: 'junit'
   }
-  testCompile group: 'uk.gov.hmcts', name: 'befta-fw', version: '4.1.1'
+  testCompile group: 'uk.gov.hmcts', name: 'befta-fw', version: '5.11.0-RDM-9238.2'
   compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.2.2.RELEASE'
 
   // AM-467-Serenety report for Integration test
