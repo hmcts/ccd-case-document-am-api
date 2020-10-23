@@ -6,3 +6,7 @@ home: https://github.com/hmcts/ccd-case-document-am-api
 version: 1.6.7
 maintainers:
   - name: Access Management Team
+dependencies:
+  - name: java
+    version: 2.18.1
+    repository: '@hmctspublic'
