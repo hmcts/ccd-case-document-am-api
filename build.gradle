@@ -336,7 +336,7 @@ dependencies {
 dependencyManagement {
   dependencies {
     // Remove once BEFTA rest-assured is updated
-    dependencySet(group: 'io.rest-assured', version: '4.3.0') {
+    dependencySet(group: 'io.rest-assured', version: '4.3.1') {
       entry 'json-path'
       entry 'xml-path'
     }
