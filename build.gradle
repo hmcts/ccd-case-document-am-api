@@ -318,7 +318,7 @@ dependencies {
     exclude group: 'junit', module: 'junit'
   }
   testCompile group: 'uk.gov.hmcts', name: 'befta-fw', version: '5.16.1'
-  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.2.2.RELEASE'
+  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.2.6.RELEASE'
 
   // AM-467-Serenety report for Integration test
  integrationTestCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.rest_assured
