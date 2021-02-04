@@ -31,22 +31,26 @@ apply plugin: 'project-report'
 apply plugin: 'idea'
 apply plugin: 'io.spring.dependency-management'
 
+ext {
+  tomcatVersion = '9.0.40!!'
+}
+
 def versions = [
   junit              : '5.5.0',
   lombok             : '1.18.6',
-  gradlePitest       : '1.3.0',
-  pitest             : '1.4.2',
+  gradlePitest       : '1.5.2',
+  pitest             : '1.5.2',
   reformLogging      : '5.1.1',
-  reformS2sClient    : '3.0.0',
+  reformS2sClient    : '3.1.1',
   serenity           : '2.1.0',
   sonarPitest        : '0.5',
-  springBoot         : '2.1.4.RELEASE',
+  springBoot         : '2.3.4.RELEASE',
   springHystrix      : '2.1.1.RELEASE',
   swagger2Version    : '3.0.0-SNAPSHOT',
   pact_version       : '3.5.24',
-  rest_assured       : '3.3.0',
+  rest_assured       : '4.3.0',
   cucumber           : '5.5.0',
-  feign_jackson      : '9.7.0'
+  feign_jackson      : '9.7.0',
 ]
 
 mainClassName = 'uk.gov.hmcts.reform.ccd.documentam.Application'
@@ -172,7 +176,7 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
 
 checkstyle {
   maxWarnings = 0
-  toolVersion = '8.18'
+  toolVersion = '8.29'
   // need to set configDir to rootDir otherwise submodule will use submodule/config/checkstyle
   configDir = new File(rootDir, 'config/checkstyle')
 
@@ -275,6 +279,13 @@ repositories {
 
 
 dependencies {
+  compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.10.3'
+  compile "com.fasterxml.jackson.core:jackson-databind:2.11.1"
+
+  compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+
+  compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.2'
+
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
@@ -311,14 +322,18 @@ dependencies {
   testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: versions.junit
 
   testCompile group: 'org.pitest', name: 'pitest', version: versions.pitest
-  testCompile 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.4.7'
+  testCompile 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.5.2'
   testCompile 'org.codehaus.sonar-plugins:sonar-pitest-plugin:0.5'
 
   testCompile (group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot) {
     exclude group: 'junit', module: 'junit'
   }
-  testCompile group: 'uk.gov.hmcts', name: 'befta-fw', version: '5.16.1'
-  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.2.2.RELEASE'
+  testCompile group: 'uk.gov.hmcts', name: 'befta-fw', version: '6.5.3'
+  compile('org.springframework.cloud:spring-cloud-starter-openfeign')
+  compile group: 'org.apache.poi', name: 'poi', version: '4.1.1'
+  compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.1'
+  compile group: 'org.apache.poi', name: 'poi-ooxml-schemas', version: '4.1.1'
+
 
   // AM-467-Serenety report for Integration test
  integrationTestCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.rest_assured
@@ -340,6 +355,25 @@ dependencyManagement {
       entry 'json-path'
       entry 'xml-path'
     }
+    // Versions prior to 30.0 vulnerable to CVE-2020-8908
+    dependency 'com.google.guava:guava:30.1-jre'
+
+    // CVE-2019-0232 - Java and Command Line injections in Windows
+    dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.40') {
+      entry 'tomcat-embed-core'
+      entry 'tomcat-embed-el'
+      entry 'tomcat-embed-websocket'
+    }
+
+    dependencySet(group: 'org.codehaus.groovy', version: '3.0.7') {
+      entry 'groovy'
+      entry 'groovy-xml'
+      entry 'groovy-json'
+    }
+
+    dependency "org.apache.httpcomponents:httpclient:4.5.13"
+
+
   }
 }
 
