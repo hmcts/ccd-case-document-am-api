@@ -5,9 +5,7 @@ buildscript {
   configurations.maybeCreate("pitest")
   dependencies {
     classpath("net.serenity-bdd:serenity-gradle-plugin:2.2.8")
-    classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.5.0'
-    pitest 'org.pitest:pitest-junit5-plugin:0.12'
-  }
+   }
 }
 
 plugins {
@@ -24,7 +22,6 @@ plugins {
   id 'com.github.spacialcircumstances.gradle-cucumber-reporting' version '0.1.21'
 }
 
-apply plugin: "info.solidsoft.pitest"
 apply plugin: 'java'
 apply plugin: 'net.serenity-bdd.aggregator'
 apply plugin: 'project-report'
@@ -38,12 +35,9 @@ ext {
 def versions = [
   junit              : '5.5.0',
   lombok             : '1.18.6',
-  gradlePitest       : '1.5.2',
-  pitest             : '1.5.2',
   reformLogging      : '5.1.1',
   reformS2sClient    : '3.1.1',
   serenity           : '2.1.0',
-  sonarPitest        : '0.5',
   springBoot         : '2.1.4.RELEASE',
   springHystrix      : '2.1.1.RELEASE',
   swagger2Version    : '3.0.0-SNAPSHOT',
@@ -279,6 +273,7 @@ repositories {
 
 
 dependencies {
+
   compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.10.3'
   compile "com.fasterxml.jackson.core:jackson-databind:2.11.1"
 
@@ -321,22 +316,28 @@ dependencies {
   testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: versions.junit
   testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: versions.junit
 
-  testCompile group: 'org.pitest', name: 'pitest', version: versions.pitest
-  testCompile 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.5.2'
-  testCompile 'org.codehaus.sonar-plugins:sonar-pitest-plugin:0.5'
-
   testCompile (group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot) {
     exclude group: 'junit', module: 'junit'
   }
-  testCompile group: 'uk.gov.hmcts', name: 'befta-fw', version: '5.16.1'
+  testCompile (group: 'uk.gov.hmcts', name: 'befta-fw', version: '5.16.1'){
+    exclude group: 'io.rest-assured', module : 'rest-assured'
+  }
+
+
   compile('org.springframework.cloud:spring-cloud-starter-openfeign')
   compile group: 'org.apache.poi', name: 'poi', version: '4.1.1'
   compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.1'
   compile group: 'org.apache.poi', name: 'poi-ooxml-schemas', version: '4.1.1'
 
-
   // AM-467-Serenety report for Integration test
- integrationTestCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.rest_assured
+  integrationTestCompile(group: 'io.rest-assured', name: 'rest-assured', version: '4.3.0') {
+    exclude group: 'org.apache.sling', module: 'org.apache.sling.javax.activation'
+  }
+  integrationTestCompile group: 'io.rest-assured', name: 'json-path', version: '4.3.0'
+  integrationTestCompile(group: 'io.rest-assured', name: 'xml-path', version: '4.3.0') {
+    exclude group: 'org.apache.sling', module: 'org.apache.sling.javax.activation'
+  }
+
 
   integrationTestCompile sourceSets.main.runtimeClasspath
   integrationTestCompile sourceSets.test.runtimeClasspath
@@ -355,6 +356,7 @@ dependencyManagement {
       entry 'json-path'
       entry 'xml-path'
     }
+
     // Versions prior to 30.0 vulnerable to CVE-2020-8908
     dependency 'com.google.guava:guava:30.1-jre'
 
