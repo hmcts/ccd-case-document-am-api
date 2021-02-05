@@ -19,10 +19,4 @@
     <cve>CVE-2020-29245</cve>
   </suppress>
 
-  <suppress>
-    <cve>CVE-2020-11022</cve>
-    <cve>CVE-2020-11023</cve>
-    <cve>CVE-2019-11065</cve>
-    <cve>CVE-2019-15052</cve>
-  </suppress>
 </suppressions>
