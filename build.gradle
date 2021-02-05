@@ -273,10 +273,6 @@ repositories {
 
 
 dependencies {
-
-  testCompile (group: 'io.cucumber', name: 'cucumber-core', version:'6.1.0'){
-    exclude group: 'io.cucumber', module: 'messages'
-  }
   compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.10.3'
   compile "com.fasterxml.jackson.core:jackson-databind:2.11.1"
 
@@ -324,7 +320,6 @@ dependencies {
   }
   testCompile (group: 'uk.gov.hmcts', name: 'befta-fw', version: '5.16.1'){
     exclude group: 'io.rest-assured', module : 'rest-assured'
-    exclude group: 'io.cucumber', module: 'cucumber-core'
   }
 
   compile('org.springframework.cloud:spring-cloud-starter-openfeign')
