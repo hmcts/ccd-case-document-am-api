@@ -328,7 +328,7 @@ dependencies {
   compile group: 'org.apache.poi', name: 'poi-ooxml-schemas', version: '4.1.1'
 
   // AM-467-Serenety report for Integration test
-  testCompile(group: 'io.rest-assured', name: 'rest-assured', version: '4.3.0') {
+  testCompile(group: 'io.rest-assured', name: 'rest-assured', version: '4.3.3') {
     exclude group: 'org.apache.sling', module: 'org.apache.sling.javax.activation'
   }
   testCompile group: 'io.rest-assured', name: 'json-path', version: '4.3.0'
