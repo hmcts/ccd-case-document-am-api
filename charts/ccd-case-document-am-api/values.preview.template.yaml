@@ -1,11 +1,6 @@
 java:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
-  keyVaults:
-    ccd:
-      resourceGroup: ccd-shared
-      secrets:
-        - ccd-case-document-am-api-s2s-secret
   environment:
     DEFINITION_STORE_HOST: http://ccd-definition-store-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     DOCUMENT_STORE_URL: http://dm-store-aat.service.core-compute-aat.internal

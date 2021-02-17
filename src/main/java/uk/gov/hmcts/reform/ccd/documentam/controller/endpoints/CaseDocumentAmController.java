@@ -1,4 +1,3 @@
-
 package uk.gov.hmcts.reform.ccd.documentam.controller.endpoints;
 
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.APPLICATION_JSON;
@@ -55,7 +54,7 @@ import uk.gov.hmcts.reform.ccd.documentam.service.ValidationUtils;
 @Api(value = "cases")
 @RestController
 @Slf4j
-public class CaseDocumentAmController  {
+public class CaseDocumentAmController {
 
     private final DocumentManagementService documentManagementService;
     private final ValidationUtils validationUtils;
@@ -64,7 +63,8 @@ public class CaseDocumentAmController  {
     protected String salt;
 
     @Autowired
-    public CaseDocumentAmController(DocumentManagementService documentManagementService, ValidationUtils validationUtils) {
+    public CaseDocumentAmController(DocumentManagementService documentManagementService,
+                                    ValidationUtils validationUtils) {
         this.documentManagementService = documentManagementService;
         this.validationUtils = validationUtils;
     }
@@ -111,7 +111,8 @@ public class CaseDocumentAmController  {
         path = "/cases/documents/{documentId}/binary",
         produces = {APPLICATION_JSON
         })
-    @ApiOperation(value = "Streams contents of the most recent Document associated with the Case Document.", tags = "get")
+    @ApiOperation(value = "Streams contents of the most recent Document associated with the Case Document.", tags =
+        "get")
     @ApiResponses({
         @ApiResponse(
             code = 200,
@@ -126,7 +127,7 @@ public class CaseDocumentAmController  {
             code = 404,
             message = CASE_DOCUMENT_NOT_FOUND
         )
-       })
+    })
 
     public ResponseEntity<Object> getDocumentBinaryContentbyDocumentId(
         @PathVariable("documentId") UUID documentId) {
@@ -149,7 +150,7 @@ public class CaseDocumentAmController  {
         path = "/cases/documents",
         produces = {APPLICATION_JSON},
         consumes = {"multipart/form-data"}
-        )
+    )
     @ApiOperation(value = "creates a list of stored document by uploading a list of binary/text file", tags = "upload")
     @ApiResponses({
         @ApiResponse(
@@ -207,7 +208,7 @@ public class CaseDocumentAmController  {
         path = "/cases/documents/{documentId}",
         produces = {APPLICATION_JSON},
         consumes = {APPLICATION_JSON}
-        )
+    )
     @ApiOperation(value = "Updates ttl on document ", tags = "patch")
     @ApiResponses({
         @ApiResponse(
@@ -245,7 +246,7 @@ public class CaseDocumentAmController  {
         path = "/cases/documents/attachToCase",
         produces = {APPLICATION_JSON},
         consumes = {APPLICATION_JSON}
-        )
+    )
     @ApiOperation(value = "Updates a list of case document with provided metadata", tags = "patch")
     @ApiResponses({
         @ApiResponse(
@@ -300,7 +301,8 @@ public class CaseDocumentAmController  {
                     .status(HttpStatus.OK).body(responseBody);
             } else {
                 log.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
-                throw new ForbiddenException(caseDocumentsMetadata.getCaseTypeId() + " " + caseDocumentsMetadata.getJurisdictionId());
+                throw new ForbiddenException(caseDocumentsMetadata.getCaseTypeId() + " "
+                    + caseDocumentsMetadata.getJurisdictionId());
             }
         } else {
             throw new BadRequestException(BAD_REQUEST);
@@ -341,12 +343,11 @@ public class CaseDocumentAmController  {
     }
 
 
-
     //**************** Generate Hash Token API  API ***************
     @GetMapping(
         path = "/cases/documents/{documentId}/token",
         produces = {APPLICATION_JSON}
-        )
+    )
     @ApiOperation(value = "Retrieves the hashcode for document Id", tags = "get")
     @ApiResponses({
         @ApiResponse(

@@ -24,8 +24,8 @@ public class SecurityUtils {
 
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
             final ServiceAndUserDetails serviceAndUser = (ServiceAndUserDetails) SecurityContextHolder.getContext()
-                                                                                                      .getAuthentication()
-                                                                                                      .getPrincipal();
+                .getAuthentication()
+                .getPrincipal();
             if (serviceAndUser.getPassword() != null) {
                 headers.add(HttpHeaders.AUTHORIZATION, serviceAndUser.getPassword());
             }
@@ -41,15 +41,15 @@ public class SecurityUtils {
 
     public String getUserId() {
         final ServiceAndUserDetails serviceAndUser = (ServiceAndUserDetails) SecurityContextHolder.getContext()
-                                                                                                  .getAuthentication()
-                                                                                                  .getPrincipal();
+            .getAuthentication()
+            .getPrincipal();
         return serviceAndUser.getUsername();
     }
 
     public String getServiceId() {
         final ServiceAndUserDetails serviceAndUser = (ServiceAndUserDetails) SecurityContextHolder.getContext()
-                                                                                                  .getAuthentication()
-                                                                                                  .getPrincipal();
+            .getAuthentication()
+            .getPrincipal();
         return serviceAndUser.getServicename();
     }
 }

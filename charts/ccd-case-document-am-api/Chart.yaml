@@ -5,8 +5,8 @@ name: ccd-case-document-am-api
 home: https://github.com/hmcts/ccd-case-document-am-api
 version: 1.6.7
 maintainers:
-  - name: Access Management Team
+  - name: CCD Team
 dependencies:
   - name: java
-    version: 2.18.1
-    repository: '@hmctspublic'
+    version: ~3.4.4
+    repository: https://hmctspublic.azurecr.io/helm/v1/repo/

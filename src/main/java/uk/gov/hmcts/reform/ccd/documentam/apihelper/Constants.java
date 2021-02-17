@@ -2,9 +2,6 @@ package uk.gov.hmcts.reform.ccd.documentam.apihelper;
 
 public class Constants {
 
-    private Constants() {
-    }
-
     public static final String BAD_REQUEST = "Bad Request";
     public static final String RESOURCE_NOT_FOUND = "Resource not found";
     public static final String FORBIDDEN = "Forbidden: Insufficient permissions";
@@ -39,16 +36,19 @@ public class Constants {
     public static final String CASE_DOCUMENT_NOT_FOUND = "Case document not found";
     public static final String CASE_DOCUMENT_ID_INVALID = "Case document Id is not valid";
     public static final String CASE_ID_NOT_VALID = "Case Id is not valid";
-    public static final String CASE_DOCUMENT_HASH_TOKEN_INVALID = "Case document hash-token is not valid for document Id : %s";
+    public static final String CASE_DOCUMENT_HASH_TOKEN_INVALID = "Case document hash-token is not valid for document"
+        + " Id : %s";
     public static final String CASE_TYPE_ID_INVALID = "Case Type Id Id is not valid";
     public static final String JURISDICTION_ID_INVALID = "Jurisdiction Id is not valid";
     public static final String CLASSIFICATION_ID_INVALID = "Jurisdiction Id is not valid";
-    public static final String EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE = "Exception occurred with operation on document id: %s";
+    public static final String EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE = "Exception occurred with operation on document "
+        + "id: %s";
     public static final String EXCEPTION_ERROR_MESSAGE = "Exception occurred with operation";
     public static final String CASE_ID = "caseId";
     public static final String CASE_TYPE_ID = "caseTypeId";
     public static final String JURISDICTION_ID = "jurisdictionId";
-    public static final String SERVICE_PERMISSION_ERROR = "Service doesn't have sufficient permission on requested API {}";
+    public static final String SERVICE_PERMISSION_ERROR = "Service doesn't have sufficient permission on requested "
+        + "API {}";
     public static final String XUI_WEBAPP = "xui_webapp";
     public static final String BULK_SCAN_PROCESSOR = "bulk_scan_processor";
     public static final String SIZE = "size";
@@ -58,4 +58,7 @@ public class Constants {
     public static final String CREATED_ON = "createdOn";
     public static final String DOCUMENT_LINKS = "links";
     public static final String EXCEPTION_SERVICE_ID_NOT_AUTHORISED = "Service Id is not authorized to access API: %s ";
+
+    private Constants() {
+    }
 }

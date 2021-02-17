@@ -28,7 +28,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Validated
-@JsonIgnoreProperties(value = { "_links,_embedded,roles" })
+@JsonIgnoreProperties(value = {"_links,_embedded,roles"})
 public class StoredDocumentHalResource extends RepresentationModel<StoredDocumentHalResource> {
 
     @JsonProperty("classification")
@@ -55,8 +55,10 @@ public class StoredDocumentHalResource extends RepresentationModel<StoredDocumen
     private String hashCode;
 
     public void addLinks(UUID documentId) {
-        add(WebMvcLinkBuilder.linkTo(methodOn(CaseDocumentAmController.class).getDocumentbyDocumentId(documentId)).withSelfRel());
-        add(linkTo(methodOn(CaseDocumentAmController.class).getDocumentBinaryContentbyDocumentId(documentId)).withRel("binary"));
+        add(WebMvcLinkBuilder.linkTo(methodOn(
+            CaseDocumentAmController.class).getDocumentbyDocumentId(documentId)).withSelfRel());
+        add(linkTo(methodOn(
+            CaseDocumentAmController.class).getDocumentBinaryContentbyDocumentId(documentId)).withRel("binary"));
     }
 
     /**

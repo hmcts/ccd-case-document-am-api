@@ -21,7 +21,8 @@ class StoredDocumentHalResourceTest {
 
     @Test
     void shouldTestEnums() {
-        StoredDocumentHalResource.ClassificationEnum myEnum = StoredDocumentHalResource.ClassificationEnum.fromValue("PUBLIC");
+        StoredDocumentHalResource.ClassificationEnum myEnum = StoredDocumentHalResource
+            .ClassificationEnum.fromValue("PUBLIC");
         assertEquals("PUBLIC", myEnum.toString());
         myEnum = StoredDocumentHalResource.ClassificationEnum.fromValue("PRIVATE");
         assertEquals("PRIVATE", myEnum.toString());

@@ -28,8 +28,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequestMapping(produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
 public class CaseDocumentControllerAdvice {
 
-    private static final long serialVersionUID = 2L;
-
     private static final String LOG_STRING = "handling exception: {}";
     private static final Logger logger = LoggerFactory.getLogger(CaseDocumentControllerAdvice.class);
 
@@ -40,7 +38,7 @@ public class CaseDocumentControllerAdvice {
         UnauthorizedException exeception
     ) {
         return errorDetailsResponseEntity(exeception, HttpStatus.UNAUTHORIZED,
-                                          ErrorConstants.UNAUTHORIZED.getErrorCode(), ErrorConstants.UNAUTHORIZED.getErrorMessage());
+            ErrorConstants.UNAUTHORIZED.getErrorCode(), ErrorConstants.UNAUTHORIZED.getErrorMessage());
     }
 
     @ExceptionHandler(RequiredFieldMissingException.class)
@@ -49,14 +47,14 @@ public class CaseDocumentControllerAdvice {
         RequiredFieldMissingException exeception
     ) {
         return errorDetailsResponseEntity(exeception, BAD_REQUEST,
-                                          ErrorConstants.INVALID_REQUEST.getErrorCode(), ErrorConstants.INVALID_REQUEST.getErrorMessage());
+            ErrorConstants.INVALID_REQUEST.getErrorCode(), ErrorConstants.INVALID_REQUEST.getErrorMessage());
     }
 
     @ExceptionHandler(InvalidRequest.class)
     public ResponseEntity<Object> customValidationError(
-            InvalidRequest ex) {
+        InvalidRequest ex) {
         return errorDetailsResponseEntity(ex, BAD_REQUEST,
-                                          ErrorConstants.INVALID_REQUEST.getErrorCode(), ErrorConstants.INVALID_REQUEST.getErrorMessage());
+            ErrorConstants.INVALID_REQUEST.getErrorCode(), ErrorConstants.INVALID_REQUEST.getErrorMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -65,7 +63,7 @@ public class CaseDocumentControllerAdvice {
         MethodArgumentNotValidException exeception
     ) {
         return errorDetailsResponseEntity(exeception, BAD_REQUEST,
-                                          ErrorConstants.INVALID_REQUEST.getErrorCode(), ErrorConstants.INVALID_REQUEST.getErrorMessage());
+            ErrorConstants.INVALID_REQUEST.getErrorCode(), ErrorConstants.INVALID_REQUEST.getErrorMessage());
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -74,7 +72,7 @@ public class CaseDocumentControllerAdvice {
         ResourceNotFoundException exeception
     ) {
         return errorDetailsResponseEntity(exeception, HttpStatus.NOT_FOUND,
-                                          ErrorConstants.RESOURCE_NOT_FOUND.getErrorCode(), ErrorConstants.RESOURCE_NOT_FOUND.getErrorMessage());
+            ErrorConstants.RESOURCE_NOT_FOUND.getErrorCode(), ErrorConstants.RESOURCE_NOT_FOUND.getErrorMessage());
     }
 
     @ExceptionHandler(HttpMessageConversionException.class)
@@ -83,7 +81,7 @@ public class CaseDocumentControllerAdvice {
         HttpMessageConversionException exeception
     ) {
         return errorDetailsResponseEntity(exeception, BAD_REQUEST,
-                                          ErrorConstants.INVALID_REQUEST.getErrorCode(), ErrorConstants.INVALID_REQUEST.getErrorMessage());
+            ErrorConstants.INVALID_REQUEST.getErrorCode(), ErrorConstants.INVALID_REQUEST.getErrorMessage());
     }
 
     @ExceptionHandler(Exception.class)
@@ -92,8 +90,8 @@ public class CaseDocumentControllerAdvice {
         Exception exeception
     ) {
         return errorDetailsResponseEntity(exeception,
-                                          HttpStatus.INTERNAL_SERVER_ERROR, ErrorConstants.UNKNOWN_EXCEPTION.getErrorCode(),
-                                          ErrorConstants.UNKNOWN_EXCEPTION.getErrorMessage());
+            HttpStatus.INTERNAL_SERVER_ERROR, ErrorConstants.UNKNOWN_EXCEPTION.getErrorCode(),
+            ErrorConstants.UNKNOWN_EXCEPTION.getErrorMessage());
     }
 
     private String getTimeStamp() {
@@ -108,16 +106,17 @@ public class CaseDocumentControllerAdvice {
         return rootException;
     }
 
-    private ResponseEntity<Object> errorDetailsResponseEntity(Exception ex, HttpStatus httpStatus, int errorCode, String errorMsg) {
+    private ResponseEntity<Object> errorDetailsResponseEntity(Exception ex, HttpStatus httpStatus, int errorCode,
+                                                              String errorMsg) {
 
         logger.error(LOG_STRING, ex);
         ErrorResponse errorDetails = ErrorResponse.builder()
-                .errorCode(errorCode)
-                .errorMessage(errorMsg)
-                .errorDescription(getRootException(ex).getLocalizedMessage())
-                .timeStamp(getTimeStamp())
-                .build();
+            .errorCode(errorCode)
+            .errorMessage(errorMsg)
+            .errorDescription(getRootException(ex).getLocalizedMessage())
+            .timeStamp(getTimeStamp())
+            .build();
         return new ResponseEntity<>(
-                errorDetails, httpStatus);
+            errorDetails, httpStatus);
     }
 }

@@ -20,8 +20,12 @@ class ResponseHelperTest {
     @Test
     void shouldGetToResponseEntity() {
         StoredDocumentHalResource resource = new StoredDocumentHalResource();
-        ResponseEntity<StoredDocumentHalResource> responseEntity = new ResponseEntity<>(resource, getHttpHeaders(), HttpStatus.OK);
-        ResponseEntity<Object> result = ResponseHelper.toResponseEntity(responseEntity, UUID.fromString("f565abb5-c337-4ccb-ba78-1c43989e3bd6"));
+        ResponseEntity<StoredDocumentHalResource> responseEntity = new ResponseEntity<>(resource, getHttpHeaders(),
+                                                                                        HttpStatus.OK);
+        ResponseEntity<Object> result = ResponseHelper.toResponseEntity(
+            responseEntity,
+            UUID.fromString("f565abb5-c337-4ccb-ba78-1c43989e3bd6")
+        );
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(2, result.getHeaders().size());
         assertNotNull(result.getBody());
