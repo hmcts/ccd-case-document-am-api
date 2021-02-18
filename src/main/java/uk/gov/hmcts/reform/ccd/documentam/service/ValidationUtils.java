@@ -4,7 +4,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.INPUT_CASE_
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.INPUT_STRING_PATTERN;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Named;
 import javax.inject.Singleton;

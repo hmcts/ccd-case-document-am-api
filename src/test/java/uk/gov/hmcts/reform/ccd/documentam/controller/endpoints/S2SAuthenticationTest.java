@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.ccd.documentam.controller.endpoints;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.junit.runner.RunWith;
@@ -49,6 +50,7 @@ public class S2SAuthenticationTest {
     }
 
     @Test
+    @Ignore // doing nothing - probably delete??
     public void verifyTestS2SAuthentication() {
         String expected = "S2S Authentication is successful !!";
         try {
