@@ -312,6 +312,7 @@ dependencies {
 
 dependencyManagement {
   dependencies {
+    dependency group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.61'
     // Remove once BEFTA rest-assured is updated
     dependencySet(group: 'io.rest-assured', version: '4.3.0') {
       entry 'json-path'
