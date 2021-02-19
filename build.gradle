@@ -32,7 +32,6 @@ def versions = [
   junit              : '5.6.2',
   lombok             : '1.18.8',
   reformLogging      : '5.1.1',
-  reformS2sClient    : '3.1.1',
   serenity           : '2.1.0',
   springBoot         : springBoot.class.package.implementationVersion,
   springfoxSwagger   : '3.0.0',
@@ -250,41 +249,26 @@ dependencies {
   implementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 
-  //Added for S2S and User Authentication
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: versions.springBoot
-  compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.reformS2sClient
-  compile(group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4') {
-    // TODO remove when auth-checker-lib upgrades its dependency to spring boot 2.0.x
-    exclude group: 'uk.gov.hmcts.reform', module: 'java-logging-spring'
-
-  }
-
-  // Security Implementation
-
   implementation group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformLogging
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
   implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version: '0.0.4'
 
-//  implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.1.2'
-//  implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '1.5.5'
-//
-//  implementation "org.springframework.security:spring-security-web"
-//  implementation "org.springframework.security:spring-security-config"
-//  implementation "org.springframework.boot:spring-boot-starter-oauth2-client"
-//  implementation "org.springframework.boot:spring-boot-starter-oauth2-resource-server"
-//  implementation "com.nimbusds:nimbus-jose-jwt:7.9"
-//  implementation "net.minidev:json-smart:2.3"
-//  implementation "io.jsonwebtoken:jjwt:0.9.1"
-//  implementation "io.github.openfeign:feign-httpclient:11.0"
-//  implementation "org.apache.httpcomponents:httpclient:4.5.13"
+  implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.1.2'
+  implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '1.5.5'
+
+  implementation "org.springframework.security:spring-security-web"
+  implementation "org.springframework.security:spring-security-config"
+  implementation "org.springframework.boot:spring-boot-starter-oauth2-client"
+  implementation "org.springframework.boot:spring-boot-starter-oauth2-resource-server"
+  implementation "com.nimbusds:nimbus-jose-jwt:7.9"
+  implementation "net.minidev:json-smart:2.3"
+  implementation "io.jsonwebtoken:jjwt:0.9.1"
+  implementation "io.github.openfeign:feign-httpclient:11.0"
+  implementation "org.apache.httpcomponents:httpclient:4.5.13"
+  implementation "com.github.ben-manes.caffeine:caffeine:2.7.0"
 
   implementation group: 'javax.inject', name: 'javax.inject', version: '1'
   implementation group: 'io.springfox', name: 'springfox-boot-starter', version: versions.springfoxSwagger
-
-
-  implementation group: 'org.apache.poi', name: 'poi', version: '4.1.1'
-  implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.1'
-  implementation group: 'org.apache.poi', name: 'poi-ooxml-schemas', version: '4.1.1'
 
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: versions.junit
@@ -297,7 +281,6 @@ dependencies {
     exclude group: 'io.rest-assured', module : 'rest-assured'
   }
 
-  // AM-467-Serenety report for Integration test
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
   testImplementation group: 'io.rest-assured', name: 'json-path', version: versions.restAssured
   testImplementation group: 'io.rest-assured', name: 'xml-path', version: versions.restAssured
@@ -314,7 +297,7 @@ dependencyManagement {
   dependencies {
     dependency group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.61'
     // Remove once BEFTA rest-assured is updated
-    dependencySet(group: 'io.rest-assured', version: '4.3.0') {
+    dependencySet(group: 'io.rest-assured', version: '4.3.1') {
       entry 'json-path'
       entry 'xml-path'
     }

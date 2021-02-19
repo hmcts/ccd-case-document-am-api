@@ -59,12 +59,12 @@ import uk.gov.hmcts.reform.ccd.documentam.model.DocumentUpdate;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
+import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.documentam.service.ValidationUtils;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.documentam.util.ResponseHelper;
-import uk.gov.hmcts.reform.ccd.documentam.util.SecurityUtils;
 
 @Slf4j
 @Service
@@ -456,9 +456,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public boolean checkServicePermission(ResponseEntity<?> responseEntity, Permission permission) {
-        log.info("API call initiated from {} token ", securityUtils.getServiceId());
-        AuthorisedService serviceConfig = getServiceDetailsFromJson(securityUtils.getServiceId());
+    public boolean checkServicePermission(ResponseEntity<?> responseEntity, String serviceId, Permission permission) {
+        AuthorisedService serviceConfig = getServiceDetailsFromJson(serviceId);
         String caseTypeId = extractCaseTypeIdFromMetadata(responseEntity.getBody());
         String jurisdictionId = extractJurisdictionIdFromMetadata(responseEntity.getBody());
         return validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(
@@ -471,8 +470,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public boolean checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId, Permission permission) {
-        AuthorisedService serviceConfig = getServiceDetailsFromJson(securityUtils.getServiceId());
+    public boolean checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId,
+                                                    String serviceId, Permission permission) {
+        AuthorisedService serviceConfig = getServiceDetailsFromJson(serviceId);
         return validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(
             serviceConfig,
             jurisdictionId
@@ -542,7 +542,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private HttpHeaders getHttpHeaders() {
         HttpHeaders headers = securityUtils.serviceAuthorizationHeaders();
-        headers.set(Constants.USERID, securityUtils.getUserId());
+        headers.set(Constants.USERID, securityUtils.getUserInfo().getUid());
         headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
     }

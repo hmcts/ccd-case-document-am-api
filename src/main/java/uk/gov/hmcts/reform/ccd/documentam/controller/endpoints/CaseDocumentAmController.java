@@ -12,6 +12,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.HASHTOKEN;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.INPUT_STRING_PATTERN;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.JURISDICTION_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
+import static uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils.SERVICE_AUTHORIZATION;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,6 +50,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
+import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.documentam.service.ValidationUtils;
 
@@ -58,15 +61,17 @@ public class CaseDocumentAmController {
 
     private final DocumentManagementService documentManagementService;
     private final ValidationUtils validationUtils;
+    private final SecurityUtils securityUtils;
 
     @Value("${idam.s2s-auth.totp_secret}")
     protected String salt;
 
     @Autowired
     public CaseDocumentAmController(DocumentManagementService documentManagementService,
-                                    ValidationUtils validationUtils) {
+                                    ValidationUtils validationUtils, SecurityUtils securityUtils) {
         this.documentManagementService = documentManagementService;
         this.validationUtils = validationUtils;
+        this.securityUtils = securityUtils;
     }
 
     //**************** Document MetaData  API ***********
@@ -91,10 +96,14 @@ public class CaseDocumentAmController {
         )
     })
     public ResponseEntity<Object> getDocumentbyDocumentId(
-        @PathVariable("documentId") UUID documentId) {
+        @PathVariable("documentId") UUID documentId,
+        @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
+        @RequestHeader(SERVICE_AUTHORIZATION) String s2sToken) {
         validationUtils.validateDocumentId(documentId.toString());
         ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
-        if (documentManagementService.checkServicePermission(responseEntity, Permission.READ)) {
+        if (documentManagementService.checkServicePermission(responseEntity,
+                                                             getServiceNameFromS2SToken(s2sToken),
+                                                             Permission.READ)) {
             if (documentManagementService.checkUserPermission(responseEntity, documentId, Permission.READ)) {
                 return ResponseEntity.status(HttpStatus.OK).body(responseEntity.getBody());
             }
@@ -104,7 +113,6 @@ public class CaseDocumentAmController {
         log.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
-
 
     //**************** Binary content API ***********
     @GetMapping(
@@ -130,10 +138,13 @@ public class CaseDocumentAmController {
     })
 
     public ResponseEntity<Object> getDocumentBinaryContentbyDocumentId(
-        @PathVariable("documentId") UUID documentId) {
+        @PathVariable("documentId") UUID documentId,
+        @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
+        @RequestHeader(SERVICE_AUTHORIZATION) String s2sToken) {
         validationUtils.validateDocumentId(documentId.toString());
         ResponseEntity<?> documentMetadata = documentManagementService.getDocumentMetadata(documentId);
-        if (documentManagementService.checkServicePermission(documentMetadata, Permission.READ)) {
+        if (documentManagementService.checkServicePermission(documentMetadata, getServiceNameFromS2SToken(s2sToken),
+                                                              Permission.READ)) {
             if (documentManagementService.checkUserPermission(documentMetadata, documentId, Permission.READ)) {
                 return documentManagementService.getDocumentBinaryContent(documentId);
             }
@@ -190,12 +201,16 @@ public class CaseDocumentAmController {
 
         @ApiParam(value = "Jurisdiction identifier for the case document.", required = true)
         @NotNull(message = "Provide the Jurisdiction ID ")
-        @RequestParam(value = "jurisdictionId", required = true) String jurisdictionId
+        @RequestParam(value = "jurisdictionId", required = true) String jurisdictionId,
+        @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
+        @RequestHeader(SERVICE_AUTHORIZATION) String s2sToken
     ) {
         validationUtils.validateInputParams(INPUT_STRING_PATTERN, caseTypeId, jurisdictionId, classification);
         validationUtils.isValidSecurityClassification(classification);
         validationUtils.validateLists(files);
-        if (documentManagementService.checkServicePermissionsForUpload(caseTypeId, jurisdictionId, Permission.CREATE)) {
+        if (documentManagementService.checkServicePermissionsForUpload(caseTypeId, jurisdictionId,
+                                                                       getServiceNameFromS2SToken(s2sToken),
+                                                                       Permission.CREATE)) {
             return documentManagementService.uploadDocuments(files, classification, caseTypeId, jurisdictionId);
         }
         log.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
@@ -229,10 +244,13 @@ public class CaseDocumentAmController {
     public ResponseEntity<Object> patchDocumentbyDocumentId(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody UpdateDocumentCommand body,
-        @PathVariable("documentId") UUID documentId) {
+        @PathVariable("documentId") UUID documentId,
+        @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
+        @RequestHeader(SERVICE_AUTHORIZATION) String s2sToken) {
         validationUtils.validateDocumentId(documentId.toString());
         ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
-        if (documentManagementService.checkServicePermission(responseEntity, Permission.UPDATE)) {
+        if (documentManagementService.checkServicePermission(responseEntity, getServiceNameFromS2SToken(s2sToken),
+                                                              Permission.UPDATE)) {
             ResponseEntity<?> response = documentManagementService.patchDocument(documentId, body);
             return ResponseEntity.status(HttpStatus.OK).body(response.getBody());
         }
@@ -282,7 +300,9 @@ public class CaseDocumentAmController {
 
     public ResponseEntity<Object> patchMetaDataOnDocuments(
         @ApiParam(value = "", required = true)
-        @Valid @RequestBody CaseDocumentsMetadata caseDocumentsMetadata) {
+        @Valid @RequestBody CaseDocumentsMetadata caseDocumentsMetadata,
+        @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
+        @RequestHeader(SERVICE_AUTHORIZATION) String s2sToken) {
 
         if (!validationUtils.validate(caseDocumentsMetadata.getCaseId())) {
             throw new BadRequestException(CASE_ID_NOT_VALID);
@@ -293,7 +313,8 @@ public class CaseDocumentAmController {
             //validate the service authorization for first document in payload
             ResponseEntity<?> documentMetadata = documentManagementService.getDocumentMetadata(UUID.fromString(
                 caseDocumentsMetadata.getDocumentHashTokens().get(0).getId()));
-            if (documentManagementService.checkServicePermission(documentMetadata, Permission.ATTACH)) {
+            if (documentManagementService.checkServicePermission(documentMetadata, getServiceNameFromS2SToken(s2sToken),
+                                                                 Permission.ATTACH)) {
                 documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
                 HashMap<String, String> responseBody = new HashMap<>();
                 responseBody.put("Result", "Success");
@@ -331,11 +352,13 @@ public class CaseDocumentAmController {
     })
     public ResponseEntity<Object> deleteDocumentbyDocumentId(
         @PathVariable("documentId") UUID documentId,
-        @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false")
-            Boolean permanent) {
+        @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false") Boolean permanent,
+        @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
+        @RequestHeader(SERVICE_AUTHORIZATION) String s2sToken) {
         validationUtils.validateDocumentId(documentId.toString());
         ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
-        if (documentManagementService.checkServicePermission(responseEntity, Permission.UPDATE)) {
+        if (documentManagementService.checkServicePermission(responseEntity, getServiceNameFromS2SToken(s2sToken),
+                                                             Permission.UPDATE)) {
             return documentManagementService.deleteDocument(documentId, permanent);
         }
         log.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
@@ -365,17 +388,23 @@ public class CaseDocumentAmController {
         )
     })
 
-    public ResponseEntity<Object> generateHashCode(
-        @PathVariable("documentId") UUID documentId) {
+    public ResponseEntity<Object> generateHashCode(@PathVariable("documentId") UUID documentId,
+        @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
+        @RequestHeader(SERVICE_AUTHORIZATION) String s2sToken) {
 
         validationUtils.validateDocumentId(documentId.toString());
         ResponseEntity<?> responseEntity = documentManagementService.getDocumentMetadata(documentId);
-        if (documentManagementService.checkServicePermission(responseEntity, Permission.HASHTOKEN)) {
+        if (documentManagementService.checkServicePermission(responseEntity, getServiceNameFromS2SToken(s2sToken),
+                                                             Permission.HASHTOKEN)) {
             HashMap<String, String> responseBody = new HashMap<>();
             responseBody.put(HASHTOKEN, documentManagementService.generateHashToken(documentId));
             return new ResponseEntity<>(responseBody, HttpStatus.OK);
         }
         log.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
+    }
+
+    private String getServiceNameFromS2SToken(String s2sToken) {
+        return securityUtils.getServiceNameFromS2SToken(s2sToken);
     }
 }

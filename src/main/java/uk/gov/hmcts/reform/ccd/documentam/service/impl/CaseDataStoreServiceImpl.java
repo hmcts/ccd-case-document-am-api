@@ -26,8 +26,8 @@ import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
+import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
-import uk.gov.hmcts.reform.ccd.documentam.util.SecurityUtils;
 
 @Slf4j
 @Service

@@ -32,37 +32,37 @@ spring:
       client:
         composite-indicator:
           enabled: false
+  main:
+    allow-bean-definition-overriding: true
+  cache:
+    cache-names: userInfoCache
+    caffeine:
+      spec: expireAfterAccess=1800s
+  security:
+    oauth2:
+      client:
+        provider:
+          oidc:
+            issuer-uri: ${IDAM_OIDC_URL:http://localhost:5000}/o
+        registration:
+          oidc:
+            client-id: internal
+            client-secret: internal
 
-security:
-  anonymousPaths:
-    - "/"
-    - "/health"
-    - "/health/liveness"
-    - "/actuator/**"
-    - "/loggers/**"
-    - "/swagger-ui.html"
-    - "/swagger-resources/**"
-    - "/v2/api-docs"
-    - "/webjars/springfox-swagger-ui/**"
-    - "/search/**"
-    - "/csrf"
-    - "/error"
-    - "/favicon.ico"
-  ### Update list with service id of any service going to interact with casse document api
-  authorisedServices: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor}
-
-  authorisedRoles:
-
-### dependency configuration
-auth.provider.service.client.baseUrl: ${IDAM_S2S_URL:http://localhost:4502}
 idam:
+  api:
+    url: ${IDAM_API_URL:http://localhost:5000}
+    # same for all environments - not used in mca but configured as idam mandates for token generation
+    redirect_uri: https://manage-case-assignment/oauth2redirect
   s2s-auth:
-    # AAAAAAAAAAAAAAAA
-    totp_secret: ${CCD_DOCUMENT_API_IDAM_KEY:CNTOE7D2NX6XHBKT}
     microservice: ccd_case_document_am_api
-    url: ${IDAM_S2S_URL:http://localhost:4502}
+    totp_secret: ${CCD_DOCUMENT_API_IDAM_KEY:CNTOE7D2NX6XHBKT}
+    url: ${S2S_URL:http://localhost:4502}
+  s2s-authorised:
+    services: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor}
+oidc:
+  issuer: ${OIDC_ISSUER:http://fr-am:8080/openam/oauth2/hmcts}
 
-auth.idam.client.baseUrl: ${IDAM_USER_URL:http://localhost:5000}
 testS2S:
   api:
     url: "/testS2SAuthorization"

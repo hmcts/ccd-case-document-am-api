@@ -56,9 +56,9 @@ public class StoredDocumentHalResource extends RepresentationModel<StoredDocumen
 
     public void addLinks(UUID documentId) {
         add(WebMvcLinkBuilder.linkTo(methodOn(
-            CaseDocumentAmController.class).getDocumentbyDocumentId(documentId)).withSelfRel());
+            CaseDocumentAmController.class).getDocumentbyDocumentId(documentId, null)).withSelfRel());
         add(linkTo(methodOn(
-            CaseDocumentAmController.class).getDocumentBinaryContentbyDocumentId(documentId)).withRel("binary"));
+            CaseDocumentAmController.class).getDocumentBinaryContentbyDocumentId(documentId, null)).withRel("binary"));
     }
 
     /**
