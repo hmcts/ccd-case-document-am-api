@@ -117,7 +117,7 @@ class SecurityUtilsTest {
             .sub("emailId@a.com")
             .build();
 
-       when(idamRepository.getUserInfo("Bearer " + USER_JWT)).thenReturn(userInfo);
+        when(idamRepository.getUserInfo("Bearer " + USER_JWT)).thenReturn(userInfo);
 
         assertThat(securityUtils.getUserInfo(), is(userInfo));
     }
