@@ -41,7 +41,7 @@ class SecurityUtilsTest {
 
     private static final String SERVICE_JWT = "7gf364fg367f67";
     private static final String USER_ID = "123";
-    private static final String USER_JWT = "Bearer 8gf364fg367f67";
+    private static final String USER_JWT = "8gf364fg367f67";
 
     @Mock
     private Authentication authentication;
@@ -94,8 +94,32 @@ class SecurityUtilsTest {
         final HttpHeaders headers = securityUtils.authorizationHeaders();
 
         assertAll(
+            () -> assertHeader(headers, "ServiceAuthorization", SERVICE_JWT),
+            () -> assertHeader(headers, "Authorization", "Bearer " + USER_JWT)
+        );
+    }
+
+    @Test
+    @DisplayName("serviceAuthorizationHeaders")
+    void serviceAuthorizationHeaders() {
+        final HttpHeaders headers = securityUtils.serviceAuthorizationHeaders();
+
+        assertAll(
             () -> assertHeader(headers, "ServiceAuthorization", SERVICE_JWT)
         );
+    }
+
+    @Test
+    @DisplayName("Get userInfo")
+    void shouldReturnUserInfo() {
+        UserInfo userInfo = UserInfo.builder()
+            .uid(USER_ID)
+            .sub("emailId@a.com")
+            .build();
+
+       when(idamRepository.getUserInfo("Bearer " + USER_JWT)).thenReturn(userInfo);
+
+        assertThat(securityUtils.getUserInfo(), is(userInfo));
     }
 
     @Test
