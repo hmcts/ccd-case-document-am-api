@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.ccd.documentam.security;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.ccd.documentam.security.JwtGrantedAuthoritiesConverter.BEARER;
 import static uk.gov.hmcts.reform.ccd.documentam.security.JwtGrantedAuthoritiesConverter.TOKEN_NAME;
 
+@ExtendWith(MockitoExtension.class)
 class JwtGrantedAuthoritiesConverterTest {
 
     private static final String ACCESS_TOKEN = "access_token";
@@ -32,11 +33,6 @@ class JwtGrantedAuthoritiesConverterTest {
 
     @Mock
     private Jwt jwt;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     @DisplayName("No Claims should return empty authorities")

@@ -1,17 +1,18 @@
 package uk.gov.hmcts.reform.ccd.documentam.security;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
+@ExtendWith(MockitoExtension.class)
 class IdamRepositoryTest {
 
     private static final String TEST_BEAR_TOKEN = "TestBearToken";
@@ -21,11 +22,6 @@ class IdamRepositoryTest {
 
     @InjectMocks
     private IdamRepository idamRepository;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     @DisplayName("Get user info if token is passed")
