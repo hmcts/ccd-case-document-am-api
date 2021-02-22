@@ -27,6 +27,8 @@ spring:
       enabled: true
   jackson:
     default-property-inclusion: NON_NULL
+  config:
+    import: "optional:configtree:/mnt/secrets/"
   cloud:
     discovery:
       client:
@@ -56,12 +58,16 @@ idam:
     redirect_uri: https://manage-case-assignment/oauth2redirect
   s2s-auth:
     microservice: ccd_case_document_am_api
-    totp_secret: ${CCD_DOCUMENT_API_IDAM_KEY:CNTOE7D2NX6XHBKT}
+    totp_secret: ${ccd.ccd-case-document-am-api-s2s-secret:CNTOE7D2NX6XHBKT}
     url: ${S2S_URL:http://localhost:4502}
   s2s-authorised:
     services: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor}
 oidc:
   issuer: ${OIDC_ISSUER:http://fr-am:8080/openam/oauth2/hmcts}
+
+azure:
+  application-insights:
+    instrumentation-key: ${ccd.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
 
 testS2S:
   api:
