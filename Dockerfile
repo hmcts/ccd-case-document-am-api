@@ -1,10 +1,17 @@
-# Keep hub.Dockerfile aligned to this file as far as possible
-ARG JAVA_OPTS="-Djava.security.egd=file:/dev/./urandom"
+FROM adoptopenjdk:11-jre-hotspot as builder
+ARG JAR_FILE=build/libs/*.jar
+COPY ${JAR_FILE} application.jar
+RUN java -Djarmode=layertools -jar application.jar extract
+
 ARG APP_INSIGHTS_AGENT_VERSION=2.5.1
 FROM hmctspublic.azurecr.io/base/java:openjdk-11-distroless-1.4
 
 COPY lib/AI-Agent.xml /opt/app/
-COPY build/libs/ccd-case-document-am-api.jar /opt/app/
+
+COPY --from=builder dependencies/ /opt/app/
+COPY --from=builder snapshot-dependencies/ /opt/app/
+COPY --from=builder spring-boot-loader/ /opt/app/
+COPY --from=builder application/ /opt/app/
 
 EXPOSE 4455
-CMD [ "ccd-case-document-am-api.jar" ]
+ENTRYPOINT ["/usr/bin/java", "org.springframework.boot.loader.JarLauncher"]
