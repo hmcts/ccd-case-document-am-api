@@ -1,4 +1,5 @@
 FROM adoptopenjdk:11-jre-hotspot as builder
+WORKDIR application
 ARG JAR_FILE=build/libs/*.jar
 COPY ${JAR_FILE} application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
@@ -8,10 +9,7 @@ FROM hmctspublic.azurecr.io/base/java:openjdk-11-distroless-1.4
 
 COPY lib/AI-Agent.xml /opt/app/
 
-COPY --from=builder dependencies/ /opt/app/
-COPY --from=builder spring-boot-loader/ /opt/app/
-COPY --from=builder snapshot-dependencies/ /opt/app/
-COPY --from=builder application/ /opt/app/
+COPY --from=builder application/* /opt/app/
 
 EXPOSE 4455
 ENTRYPOINT ["/usr/bin/java", "org.springframework.boot.loader.JarLauncher"]
