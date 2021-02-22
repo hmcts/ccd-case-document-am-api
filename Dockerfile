@@ -10,8 +10,8 @@ COPY lib/AI-Agent.xml /opt/app/
 
 COPY --from=builder dependencies/ /opt/app/
 COPY --from=builder snapshot-dependencies/ /opt/app/
-COPY --from=builder spring-boot-loader/ /opt/app/
 COPY --from=builder application/ /opt/app/
+COPY --from=builder spring-boot-loader/ /opt/app/
 
 EXPOSE 4455
 ENTRYPOINT ["/usr/bin/java", "org.springframework.boot.loader.JarLauncher"]
