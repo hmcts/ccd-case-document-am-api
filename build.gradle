@@ -35,7 +35,6 @@ def versions = [
   serenity           : '2.1.0',
   springBoot         : springBoot.class.package.implementationVersion,
   springfoxSwagger   : '3.0.0',
-  pact_version       : '3.5.24',
   restAssured        : '4.3.1',
   cucumber           : '5.5.0',
 ]

@@ -43,10 +43,6 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
   ]
 }
 
-def vaultOverrides = [
-  'preview' : 'aat'
-]
-
 // Vars needed for functional and smoke tests run against AKS
 env.IDAM_URL = "https://idam-api.aat.platform.hmcts.net"
 env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
@@ -71,7 +67,6 @@ withPipeline("java", product, component) {
 
   enableSlackNotifications('#ccd-case-document-am-api-builds')
 
-  overrideVaultEnvironments(vaultOverrides)
   loadVaultSecrets(secrets)
   enableAksStagingDeployment()
   disableLegacyDeployment()
