@@ -10,11 +10,9 @@ COPY lib/AI-Agent.xml /opt/app/
 
 COPY --from=builder application/ /opt/app/
 COPY --from=builder dependencies/ /opt/app/
-# Consecutive COPY commands failing intermittently.
+# Add 'CMD true or RUN true' if consecutive COPY commands are failing in case (intermittently).
 # See https://github.com/moby/moby/issues/37965#issuecomment-771526632
-CMD true
 COPY --from=builder spring-boot-loader/ /opt/app/
-CMD true
 COPY --from=builder snapshot-dependencies/ /opt/app/
 
 EXPOSE 4455
