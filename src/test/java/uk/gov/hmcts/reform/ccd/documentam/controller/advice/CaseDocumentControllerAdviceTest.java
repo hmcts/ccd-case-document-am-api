@@ -26,7 +26,7 @@ public class CaseDocumentControllerAdviceTest {
     public void handleUnautorizedExceptionException() {
         UnauthorizedException unauthorizedException = mock(UnauthorizedException.class);
         ResponseEntity<Object> responseEntity = csda
-            .handleUnautorizedExceptionException(servletRequestMock, unauthorizedException);
+            .handleUnAutorizedExceptionException(unauthorizedException);
         assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
         assertEquals(HttpStatus.UNAUTHORIZED.value(), responseEntity.getStatusCodeValue());
     }
@@ -35,7 +35,7 @@ public class CaseDocumentControllerAdviceTest {
     public void handleRequiredFieldMissingException() {
         RequiredFieldMissingException requiredFieldMissingException = mock(RequiredFieldMissingException.class);
         ResponseEntity<Object> responseEntity = csda
-            .handleRequiredFieldMissingException(servletRequestMock, requiredFieldMissingException);
+            .handleRequiredFieldMissingException(requiredFieldMissingException);
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
         assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
     }
@@ -52,7 +52,7 @@ public class CaseDocumentControllerAdviceTest {
     public void handleMethodArgumentNotValidException() {
         MethodArgumentNotValidException methodArgumentNotValidException = mock(MethodArgumentNotValidException.class);
         ResponseEntity<Object> responseEntity = csda
-            .handleMethodArgumentNotValidException(servletRequestMock, methodArgumentNotValidException);
+            .handleMethodArgumentNotValidException(methodArgumentNotValidException);
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
         assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
     }
@@ -61,7 +61,7 @@ public class CaseDocumentControllerAdviceTest {
     public void handleResourceNotFoundException() {
         ResourceNotFoundException resourceNotFoundException = mock(ResourceNotFoundException.class);
         ResponseEntity<Object> responseEntity = csda
-            .handleResourceNotFoundException(servletRequestMock, resourceNotFoundException);
+            .handleResourceNotFoundException(resourceNotFoundException);
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
         assertEquals(HttpStatus.NOT_FOUND.value(), responseEntity.getStatusCodeValue());
     }
@@ -70,7 +70,7 @@ public class CaseDocumentControllerAdviceTest {
     public void handleHttpMessageConversionException() {
         HttpMessageConversionException httpMessageConversionException = mock(HttpMessageConversionException.class);
         ResponseEntity<Object> responseEntity = csda
-            .handleHttpMessageConversionException(servletRequestMock, httpMessageConversionException);
+            .handleHttpMessageConversionException(httpMessageConversionException);
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
         assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
     }
@@ -78,7 +78,7 @@ public class CaseDocumentControllerAdviceTest {
     @Test
     public void handleUnknownException() {
         Exception exception = mock(Exception.class);
-        ResponseEntity<Object> responseEntity = csda.handleUnknownException(servletRequestMock, exception);
+        ResponseEntity<Object> responseEntity = csda.handleUnknownException(exception);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
 
