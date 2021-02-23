@@ -9,7 +9,6 @@ import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RequestMapping;
 import uk.gov.hmcts.reform.ccd.documentam.exception.InvalidRequest;
 import uk.gov.hmcts.reform.ccd.documentam.exception.RequiredFieldMissingException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
@@ -21,11 +20,9 @@ import java.util.Date;
 import java.util.Locale;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
-@ControllerAdvice(basePackages = "uk.gov.hmcts.reform.ccd.document.am.controllers")
-@RequestMapping(produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+@ControllerAdvice
 public class CaseDocumentControllerAdvice {
 
     private static final String LOG_STRING = "handling exception: {}";
