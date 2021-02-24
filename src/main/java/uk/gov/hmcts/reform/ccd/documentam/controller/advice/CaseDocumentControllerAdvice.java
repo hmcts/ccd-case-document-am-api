@@ -58,19 +58,19 @@ public class CaseDocumentControllerAdvice {
     @ExceptionHandler(RequiredFieldMissingException.class)
     protected ResponseEntity<Object> handleRequiredFieldMissingException(RequiredFieldMissingException exception) {
         return errorDetailsResponseEntity(exception, BAD_REQUEST,
-            ErrorConstants.INVALID_REQUEST.getErrorCode(), ErrorConstants.INVALID_REQUEST.getErrorMessage());
+            ErrorConstants.BAD_REQUEST.getErrorCode(), ErrorConstants.BAD_REQUEST.getErrorMessage());
     }
 
     @ExceptionHandler(InvalidRequest.class)
     public ResponseEntity<Object> customValidationError(InvalidRequest ex) {
         return errorDetailsResponseEntity(ex, BAD_REQUEST,
-            ErrorConstants.INVALID_REQUEST.getErrorCode(), ErrorConstants.INVALID_REQUEST.getErrorMessage());
+            ErrorConstants.BAD_REQUEST.getErrorCode(), ErrorConstants.BAD_REQUEST.getErrorMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     protected ResponseEntity<Object> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
         return errorDetailsResponseEntity(exception, BAD_REQUEST,
-            ErrorConstants.INVALID_REQUEST.getErrorCode(), ErrorConstants.INVALID_REQUEST.getErrorMessage());
+            ErrorConstants.BAD_REQUEST.getErrorCode(), ErrorConstants.BAD_REQUEST.getErrorMessage());
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -79,8 +79,8 @@ public class CaseDocumentControllerAdvice {
         return errorDetailsResponseEntity(
             exception,
             BAD_REQUEST,
-            ErrorConstants.INVALID_REQUEST.getErrorCode(),
-            ErrorConstants.INVALID_REQUEST.getErrorMessage()
+            ErrorConstants.BAD_REQUEST.getErrorCode(),
+            ErrorConstants.BAD_REQUEST.getErrorMessage()
         );
     }
 
@@ -93,7 +93,7 @@ public class CaseDocumentControllerAdvice {
     @ExceptionHandler(HttpMessageConversionException.class)
     protected ResponseEntity<Object> handleHttpMessageConversionException(HttpMessageConversionException exception) {
         return errorDetailsResponseEntity(exception, BAD_REQUEST,
-            ErrorConstants.INVALID_REQUEST.getErrorCode(), ErrorConstants.INVALID_REQUEST.getErrorMessage());
+            ErrorConstants.BAD_REQUEST.getErrorCode(), ErrorConstants.BAD_REQUEST.getErrorMessage());
     }
 
     @ExceptionHandler(Exception.class)
