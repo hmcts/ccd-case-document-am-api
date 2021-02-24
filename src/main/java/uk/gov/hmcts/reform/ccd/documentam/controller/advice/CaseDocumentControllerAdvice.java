@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -71,6 +72,16 @@ public class CaseDocumentControllerAdvice {
     protected ResponseEntity<Object> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
         return errorDetailsResponseEntity(exception, BAD_REQUEST,
             ErrorConstants.BAD_REQUEST.getErrorCode(), ErrorConstants.BAD_REQUEST.getErrorMessage());
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    protected ResponseEntity<Object> handleMissingRequestParameterException(
+        MissingServletRequestParameterException exception) {
+        return errorDetailsResponseEntity(exception,
+                                          BAD_REQUEST,
+                                          ErrorConstants.BAD_REQUEST.getErrorCode(),
+                                          ErrorConstants.BAD_REQUEST.getErrorMessage()
+        );
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
