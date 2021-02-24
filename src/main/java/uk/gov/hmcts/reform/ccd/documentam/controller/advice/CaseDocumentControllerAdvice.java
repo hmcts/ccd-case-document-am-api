@@ -26,7 +26,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @ControllerAdvice
 public class CaseDocumentControllerAdvice {
 
-    private static final String LOG_STRING = "handling exception: {}";
+    private static final String LOG_STRING = "handling exception: ";
     private static final Logger logger = LoggerFactory.getLogger(CaseDocumentControllerAdvice.class);
 
     @ExceptionHandler(UnauthorizedException.class)
