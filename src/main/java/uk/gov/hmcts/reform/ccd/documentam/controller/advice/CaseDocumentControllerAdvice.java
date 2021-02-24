@@ -9,6 +9,7 @@ import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.InvalidRequest;
@@ -70,6 +71,17 @@ public class CaseDocumentControllerAdvice {
     protected ResponseEntity<Object> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
         return errorDetailsResponseEntity(exception, BAD_REQUEST,
             ErrorConstants.INVALID_REQUEST.getErrorCode(), ErrorConstants.INVALID_REQUEST.getErrorMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    protected ResponseEntity<Object> handleMethodArgumentTypeMismatchException(
+        MethodArgumentTypeMismatchException exception) {
+        return errorDetailsResponseEntity(
+            exception,
+            BAD_REQUEST,
+            ErrorConstants.INVALID_REQUEST.getErrorCode(),
+            ErrorConstants.INVALID_REQUEST.getErrorMessage()
+        );
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
