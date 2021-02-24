@@ -17,8 +17,6 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorCode" : 4,
-      "errorMessage" : "Resource not found",
       "errorDescription": "Resource not found ${[scenarioContext][testData][request][pathVariables][documentId]}"
     }
   }

@@ -75,7 +75,7 @@ public class CaseDocumentControllerAdvice {
     @ExceptionHandler(ResourceNotFoundException.class)
     protected ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException exception) {
         return errorDetailsResponseEntity(exception, HttpStatus.NOT_FOUND,
-            ErrorConstants.RESOURCE_NOT_FOUND.getErrorCode(), ErrorConstants.RESOURCE_NOT_FOUND.getErrorMessage());
+            ErrorConstants.NOT_FOUND.getErrorCode(), ErrorConstants.NOT_FOUND.getErrorMessage());
     }
 
     @ExceptionHandler(HttpMessageConversionException.class)

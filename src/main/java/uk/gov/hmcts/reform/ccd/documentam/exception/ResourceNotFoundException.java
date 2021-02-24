@@ -9,11 +9,11 @@ public class ResourceNotFoundException extends RuntimeException {
 
     private static final long serialVersionUID = 4L;
 
-    public ResourceNotFoundException(String message) {
-        super(String.format(Constants.RESOURCE_NOT_FOUND + " %s", message));
+    public ResourceNotFoundException(String resourceId) {
+        super(Constants.RESOURCE_NOT_FOUND + " " + resourceId);
     }
 
     public ResourceNotFoundException(String message, Throwable exception) {
-        super(String.format(Constants.RESOURCE_NOT_FOUND + " %s", message), exception);
+        super(message, exception);
     }
 }
