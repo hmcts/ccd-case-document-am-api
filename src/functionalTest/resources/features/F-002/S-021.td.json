@@ -11,15 +11,13 @@
     }
   },
   "expectedResponse": {
-    "_extends_": "Common_404_Response",
+    "_extends_": "AM_404_Response",
     "headers": {
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "timestamp": "[[ANYTHING_PRESENT]]",
-      "message": "Resource not found 00000000-0000-0000-0000-000000000000",
-      "path": "/cases/documents/00000000-0000-0000-0000-000000000000/binary"
+      "errorDescription": "Resource not found 00000000-0000-0000-0000-000000000000"
     }
   }
 }

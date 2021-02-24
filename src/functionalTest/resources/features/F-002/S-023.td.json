@@ -18,15 +18,13 @@
     }
   },
   "expectedResponse": {
-    "_extends_": "Common_403_Response",
+    "_extends_": "AM_403_Response",
     "headers": {
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "timestamp": "[[ANYTHING_PRESENT]]",
-      "message": "Forbidden: Insufficient permissions: Could't find document for case  : ${[scenarioContext][childContexts][S-023_Case_Create][testData][actualResponse][body][id]}",
-      "path": "/cases/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}/binary"
+      "errorDescription": "Forbidden: Insufficient permissions: Could't find document for case  : ${[scenarioContext][childContexts][S-023_Case_Create][testData][actualResponse][body][id]}"
     }
   }
 }

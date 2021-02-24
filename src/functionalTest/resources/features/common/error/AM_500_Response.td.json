@@ -1,0 +1,18 @@
+{
+	"_guid_": "AM_500_Response",
+	"_extends_": "Common_Response",
+
+	"responseCode": 500,
+	"responseMessage": "Internal Server Error",
+
+	"headers": {
+		"_extends_": "Common_Response_Headers"
+	},
+
+  "body" : {
+    "errorCode" : 500,
+    "errorMessage" : "Internal Server Error",
+    "errorDescription" : "[[ANYTHING_PRESENT]]",
+    "timeStamp" : "[[ANYTHING_PRESENT]]"
+  }
+}

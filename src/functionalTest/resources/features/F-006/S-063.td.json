@@ -11,14 +11,15 @@
     }
   },
   "expectedResponse": {
-    "_extends_": "Common_404_Response",
+    "_extends_": "AM_404_Response",
     "headers": {
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "message": "Resource not found ${[scenarioContext][testData][request][pathVariables][documentId]}",
-      "path": "/cases/documents/${[scenarioContext][testData][request][pathVariables][documentId]}/token"
+      "errorCode" : 4,
+      "errorMessage" : "Resource not found",
+      "errorDescription": "Resource not found ${[scenarioContext][testData][request][pathVariables][documentId]}"
     }
   }
 }
