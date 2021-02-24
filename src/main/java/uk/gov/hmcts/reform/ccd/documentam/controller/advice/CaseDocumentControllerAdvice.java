@@ -95,14 +95,6 @@ public class CaseDocumentControllerAdvice {
         return new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS", Locale.ENGLISH).format(new Date());
     }
 
-    public static Throwable getRootException(Throwable exception) {
-        Throwable rootException = exception;
-        while (rootException.getCause() != null) {
-            rootException = rootException.getCause();
-        }
-        return rootException;
-    }
-
     private ResponseEntity<Object> errorDetailsResponseEntity(Exception ex, HttpStatus httpStatus, int errorCode,
                                                               String errorMsg) {
 
@@ -110,7 +102,7 @@ public class CaseDocumentControllerAdvice {
         ErrorResponse errorDetails = ErrorResponse.builder()
             .errorCode(errorCode)
             .errorMessage(errorMsg)
-            .errorDescription(getRootException(ex).getLocalizedMessage())
+            .errorDescription(ex.getLocalizedMessage())
             .timeStamp(getTimeStamp())
             .build();
         return new ResponseEntity<>(
