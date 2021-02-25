@@ -26,6 +26,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Slf4j
 @ControllerAdvice
+// FIXME : https://tools.hmcts.net/jira/browse/RDM-11324
 public class CaseDocumentControllerAdvice {
 
     private static final String LOG_STRING = "handling exception: ";
