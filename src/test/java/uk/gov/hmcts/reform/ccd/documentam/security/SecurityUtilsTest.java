@@ -1,5 +1,27 @@
 package uk.gov.hmcts.reform.ccd.documentam.security;
 
+import com.google.common.collect.Lists;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.impl.TextCodec;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+
+import java.util.Date;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -8,35 +30,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.TextCodec;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpHeaders;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-
-import com.google.common.collect.Lists;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.idam.client.models.UserInfo;
-
 @DisplayName("SecurityUtils")
+@ExtendWith(MockitoExtension.class)
 class SecurityUtilsTest {
 
     private static final String SERVICE_JWT = "7gf364fg367f67";
@@ -58,40 +53,28 @@ class SecurityUtilsTest {
     @InjectMocks
     private SecurityUtils securityUtils;
 
+    private Jwt jwt;
+
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
-
-        final GrantedAuthority[] authorities = new GrantedAuthority[] { newAuthority("role1"), newAuthority("role2")};
-
-        when(serviceTokenGenerator.generate()).thenReturn(SERVICE_JWT);
-
-        Jwt jwt =   Jwt.withTokenValue(USER_JWT)
+        jwt = Jwt.withTokenValue(USER_JWT)
             .claim("aClaim", "aClaim")
             .claim("aud", Lists.newArrayList("ccd_gateway"))
             .header("aHeader", "aHeader")
             .build();
-        Collection<? extends GrantedAuthority> authorityCollection = Stream.of("role1", "role2")
-            .map(a -> new SimpleGrantedAuthority(a))
-            .collect(Collectors.toCollection(ArrayList::new));
 
-        doReturn(jwt).when(authentication).getPrincipal();
-        doReturn(authentication).when(securityContext).getAuthentication();
-        when(authentication.getAuthorities()).thenAnswer(invocationOnMock -> authorityCollection);
         SecurityContextHolder.setContext(securityContext);
-
-
-        UserInfo userInfo = UserInfo.builder()
-            .uid(USER_ID)
-            .sub("emailId@a.com")
-            .build();
-        doReturn(userInfo).when(idamRepository).getUserInfo(USER_JWT);
     }
 
     @Test
     @DisplayName("authorizationHeaders")
     void authorizationHeaders() {
-        final HttpHeaders headers = securityUtils.authorizationHeaders();
+
+        when(serviceTokenGenerator.generate()).thenReturn(SERVICE_JWT);
+        doReturn(jwt).when(authentication).getPrincipal();
+        doReturn(authentication).when(securityContext).getAuthentication();
+
+        HttpHeaders headers = securityUtils.authorizationHeaders();
 
         assertAll(
             () -> assertHeader(headers, "ServiceAuthorization", SERVICE_JWT),
@@ -102,7 +85,10 @@ class SecurityUtilsTest {
     @Test
     @DisplayName("serviceAuthorizationHeaders")
     void serviceAuthorizationHeaders() {
-        final HttpHeaders headers = securityUtils.serviceAuthorizationHeaders();
+
+        when(serviceTokenGenerator.generate()).thenReturn(SERVICE_JWT);
+
+        HttpHeaders headers = securityUtils.serviceAuthorizationHeaders();
 
         assertAll(
             () -> assertHeader(headers, "ServiceAuthorization", SERVICE_JWT)
@@ -119,12 +105,19 @@ class SecurityUtilsTest {
 
         when(idamRepository.getUserInfo("Bearer " + USER_JWT)).thenReturn(userInfo);
 
+        doReturn(jwt).when(authentication).getPrincipal();
+        doReturn(authentication).when(securityContext).getAuthentication();
+
         assertThat(securityUtils.getUserInfo(), is(userInfo));
     }
 
     @Test
     @DisplayName("Get user token")
     void shouldReturnUserToken() {
+
+        doReturn(jwt).when(authentication).getPrincipal();
+        doReturn(authentication).when(securityContext).getAuthentication();
+
         assertThat(securityUtils.getUserToken(), is(USER_JWT));
     }
 

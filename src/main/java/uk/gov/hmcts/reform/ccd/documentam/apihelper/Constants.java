@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.apihelper;
 
-public class Constants {
+public final class Constants {
 
     public static final String BAD_REQUEST = "Bad Request";
     public static final String RESOURCE_NOT_FOUND = "Resource not found";
