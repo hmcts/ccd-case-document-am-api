@@ -131,7 +131,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             } else {
                 log.error("Document doesn't exist for requested document id at Document Store {}", responseEntity
                     .getStatusCode());
-                throw new ResourceNotFoundException(formateNotFoundMessage(documentId.toString()));
+                throw new ResourceNotFoundException(formatNotFoundMessage(documentId.toString()));
             }
         } catch (HttpClientErrorException exception) {
             catchException(exception, documentId.toString());
@@ -308,7 +308,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             } else {
                 log.error("Document doesn't exist for requested document id at Document Store API Side {}", response
                     .getStatusCode());
-                throw new ResourceNotFoundException(formateNotFoundMessage(documentId.toString()));
+                throw new ResourceNotFoundException(formatNotFoundMessage(documentId.toString()));
             }
         } catch (HttpClientErrorException exception) {
             catchException(exception, documentId.toString());
@@ -336,7 +336,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             } else {
                 log.error("Document doesn't exist for requested document id at Document Store {}", response
                     .getStatusCode());
-                throw new ResourceNotFoundException(formateNotFoundMessage(documentId.toString()));
+                throw new ResourceNotFoundException(formatNotFoundMessage(documentId.toString()));
             }
         } catch (HttpClientErrorException exception) {
             catchException(exception, documentId.toString());
@@ -549,7 +549,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private void catchException(HttpClientErrorException exception, String messageParam) {
         if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-            throw new ResourceNotFoundException(formateNotFoundMessage(messageParam), exception);
+            throw new ResourceNotFoundException(formatNotFoundMessage(messageParam), exception);
         } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
             throw new ForbiddenException(messageParam, exception);
         } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
@@ -572,7 +572,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
     }
 
-    private String formateNotFoundMessage(String resourceId) {
+    private String formatNotFoundMessage(String resourceId) {
         return Constants.RESOURCE_NOT_FOUND + " " + resourceId;
     }
 }
