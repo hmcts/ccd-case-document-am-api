@@ -33,7 +33,7 @@ public class CaseDocumentControllerAdvice {
     private static final Logger logger = LoggerFactory.getLogger(CaseDocumentControllerAdvice.class);
 
     @ExceptionHandler(UnauthorizedException.class)
-    protected ResponseEntity<Object> handleUnAutorizedExceptionException(UnauthorizedException exception) {
+    protected ResponseEntity<Object> handleUnauthorizedException(UnauthorizedException exception) {
         return errorDetailsResponseEntity(exception,
                                           HttpStatus.UNAUTHORIZED,
                                           ErrorConstants.UNAUTHORIZED.getErrorCode(),
@@ -42,7 +42,7 @@ public class CaseDocumentControllerAdvice {
     }
 
     @ExceptionHandler(ForbiddenException.class)
-    protected ResponseEntity<Object> handleUnAutorizedExceptionException(ForbiddenException exception) {
+    protected ResponseEntity<Object> handleForbiddenException(ForbiddenException exception) {
         return errorDetailsResponseEntity(exception, HttpStatus.FORBIDDEN,
                                           ErrorConstants.ACCESS_DENIED.getErrorCode(),
                                           ErrorConstants.ACCESS_DENIED.getErrorMessage()
@@ -50,7 +50,7 @@ public class CaseDocumentControllerAdvice {
     }
 
     @ExceptionHandler(BadRequestException.class)
-    protected ResponseEntity<Object> badRequestException(BadRequestException ex) {
+    protected ResponseEntity<Object> handleBadRequestException(BadRequestException ex) {
         return errorDetailsResponseEntity(ex, BAD_REQUEST,
                                           ErrorConstants.BAD_REQUEST.getErrorCode(),
                                           ErrorConstants.BAD_REQUEST.getErrorMessage()

@@ -54,8 +54,6 @@ spring:
 idam:
   api:
     url: ${IDAM_API_URL:http://localhost:5000}
-    # same for all environments - not used in mca but configured as idam mandates for token generation
-    redirect_uri: https://manage-case-assignment/oauth2redirect
   s2s-auth:
     microservice: ccd_case_document_am_api
     totp_secret: ${ccd.ccd-case-document-am-api-s2s-secret:CNTOE7D2NX6XHBKT}

@@ -23,10 +23,10 @@ public class CaseDocumentControllerAdviceTest {
 
 
     @Test
-    public void handleUnautorizedExceptionException() {
+    public void handleUnauthorizedExceptionException() {
         UnauthorizedException unauthorizedException = mock(UnauthorizedException.class);
         ResponseEntity<Object> responseEntity = csda
-            .handleUnAutorizedExceptionException(unauthorizedException);
+            .handleUnauthorizedException(unauthorizedException);
         assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
         assertEquals(HttpStatus.UNAUTHORIZED.value(), responseEntity.getStatusCodeValue());
     }

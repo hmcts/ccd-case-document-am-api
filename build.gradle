@@ -193,8 +193,9 @@ sonarqube {
     property "sonar.coverage.jacoco.xmlReportPaths", "${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml"
     property "sonar.pitest.mode", "reuseReport"
     property "sonar.pitest.reportsDirectory", "build/reports/pitest"
-    property "sonar.exclusions", "src/main/java/uk/gov/hmcts/reform/ccd/document/am/*Application.java," + "src/main/java/uk/gov/hmcts/reform/ccd/document/am/util/*Swagger2SpringBoot.java," + "src/main/java/uk/gov/hmcts/reform/ccd/document/am/controller/advice/*ErrorConstants.java," + "src/main/java/uk/gov/hmcts/reform/ccd/document/am/controller/advice/exception/**," + "src/main/java/uk/gov/hmcts/reform/ccd/document/am/configuration/**," + "src/main/java/uk/gov/hmcts/reform/ccd/document/am/model/enums/**," + "src/main/java/uk/gov/hmcts/reform/ccd/document/am/apihelper/**," + "src/main/java/uk/gov/hmcts/reform/ccd/documentam/service/impl/DocumentManagementServiceImpl.java," + "src/main/java/uk/gov/hmcts/reform/ccd/documentam/model/StoredDocumentHalResource.java," + "src/main/java/uk/gov/hmcts/reform/ccd/documentam/util/ResponseHelper.java," + "src/main/java/uk/gov/hmcts/reform/ccd/documentam/apihelper/Constants.java," + "src/main/java/uk/gov/hmcts/reform/ccd/documentam/controller/endpoints/CaseDocumentAmController.java" + "src/main/java/uk/gov/hmcts/reform/ccd/documentam/configuration/*.java,src/main/java/uk/gov/hmcts/reform/ccd/documentam/controller/endpoints/CaseDocumentAmController.java"
-    property "sonar.coverage.exclusions", "**/configuration/*.java"
+    // FIXME : RDM-11309
+    property "sonar.exclusions",  "**/service/impl/DocumentManagementServiceImpl.java,"
+    property "sonar.coverage.exclusions", "**/configuration/*.java,**/advice/exception/*.java,**/apihelper/*.java,**/ErrorConstants.java"
     property "sonar.junit.reportPaths", "${project.buildDir}/test-results/junit-platform"
   }
 }
@@ -256,16 +257,16 @@ dependencies {
   implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.1.2'
   implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '1.5.5'
 
-  implementation "org.springframework.security:spring-security-web"
-  implementation "org.springframework.security:spring-security-config"
-  implementation "org.springframework.boot:spring-boot-starter-oauth2-client"
-  implementation "org.springframework.boot:spring-boot-starter-oauth2-resource-server"
-  implementation "com.nimbusds:nimbus-jose-jwt:9.6"
-  implementation "net.minidev:json-smart:2.3"
-  implementation "io.jsonwebtoken:jjwt:0.9.1"
-  implementation "io.github.openfeign:feign-httpclient:11.0"
-  implementation "org.apache.httpcomponents:httpclient:4.5.13"
-  implementation "com.github.ben-manes.caffeine:caffeine:2.7.0"
+  implementation group: 'org.springframework.security', name: 'spring-security-web'
+  implementation group: 'org.springframework.security', name: 'spring-security-config'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-resource-server'
+  implementation group: 'com.nimbusds', name: 'nimbus-jose-jwt', version: '9.6'
+  implementation group: 'net.minidev', name: 'json-smart', version: '2.3'
+  implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+  implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '11.0'
+  implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
+  implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.7.0'
 
   implementation group: 'javax.inject', name: 'javax.inject', version: '1'
   implementation group: 'io.springfox', name: 'springfox-boot-starter', version: versions.springfoxSwagger
