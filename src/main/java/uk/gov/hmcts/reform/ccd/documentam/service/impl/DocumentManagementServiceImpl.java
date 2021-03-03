@@ -134,7 +134,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 throw new ResourceNotFoundException(formatNotFoundMessage(documentId.toString()));
             }
         } catch (HttpClientErrorException exception) {
-            catchException(exception, documentId.toString());
+            handleException(exception, documentId.toString());
         }
         return responseResult;
 
@@ -171,7 +171,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             }
 
         } catch (HttpClientErrorException exception) {
-            catchException(exception, documentId.toString());
+            handleException(exception, documentId.toString());
         }
         return responseResult;
 
@@ -189,7 +189,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             restTemplate.exchange(documentUrl, HttpMethod.PATCH, requestEntity, Void.class);
 
         } catch (HttpClientErrorException exception) {
-            catchException(exception);
+            handleException(exception);
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -280,7 +280,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 .status(uploadedDocumentResponse.getStatusCode())
                 .body(updatedDocumentResponse);
         } catch (HttpClientErrorException exception) {
-            catchException(exception);
+            handleException(exception);
         }
         return responseResult;
     }
@@ -311,7 +311,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 throw new ResourceNotFoundException(formatNotFoundMessage(documentId.toString()));
             }
         } catch (HttpClientErrorException exception) {
-            catchException(exception, documentId.toString());
+            handleException(exception, documentId.toString());
         }
         return responseResult;
     }
@@ -339,7 +339,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 throw new ResourceNotFoundException(formatNotFoundMessage(documentId.toString()));
             }
         } catch (HttpClientErrorException exception) {
-            catchException(exception, documentId.toString());
+            handleException(exception, documentId.toString());
         }
         return responseResult;
     }
@@ -547,7 +547,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return headers;
     }
 
-    private void catchException(HttpClientErrorException exception, String messageParam) {
+    private void handleException(HttpClientErrorException exception, String messageParam) {
         if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
             throw new ResourceNotFoundException(formatNotFoundMessage(messageParam), exception);
         } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
@@ -560,7 +560,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
     }
 
-    private void catchException(HttpClientErrorException exception) {
+    private void handleException(HttpClientErrorException exception) {
         if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
             throw new ResourceNotFoundException(Constants.RESOURCE_NOT_FOUND, exception);
         } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
