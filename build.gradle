@@ -336,7 +336,10 @@ dependencies {
     exclude group: 'org.apache.sling', module: 'org.apache.sling.javax.activation'
   }
 
-
+  compile group: 'org.springframework.security', name: 'spring-security-core', version: '5.3.8.RELEASE'
+  compile group: 'org.springframework.security', name: 'spring-security-config', version: '5.3.8.RELEASE'
+  compile group: 'org.springframework.security', name: 'spring-security-web', version: '5.3.8.RELEASE'
+  compile group: 'org.springframework.security', name: 'spring-security-crypto', version: '5.3.8.RELEASE'
 
   integrationTestCompile sourceSets.main.runtimeClasspath
   integrationTestCompile sourceSets.test.runtimeClasspath
