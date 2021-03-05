@@ -18,14 +18,13 @@
     }
   },
   "expectedResponse": {
-    "_extends_": "Common_403_Response",
+    "_extends_": "AM_403_Response",
     "headers": {
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "message": "Forbidden: Insufficient permissions: ${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][metadata][caseTypeId]} ${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][metadata][jurisdictionId]}",
-      "path": "/cases/documents/attachToCase"
+      "errorDescription": "Forbidden: Insufficient permissions: ${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][metadata][caseTypeId]} ${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][metadata][jurisdictionId]}"
     }
   }
 }

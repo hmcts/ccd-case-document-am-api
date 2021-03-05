@@ -13,4 +13,9 @@
     <cve>CVE-2021-22112</cve>
   </suppress>
 
+  <suppress>
+    <notes>spring-security error; FIXME: bump to latest version > 5.4.4</notes>
+    <cve>CVE-2021-22112</cve>
+  </suppress>
+
 </suppressions>
