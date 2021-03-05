@@ -8,5 +8,5 @@ maintainers:
   - name: CCD Team
 dependencies:
   - name: java
-    version: ~3.4.4
-    repository: https://hmctspublic.azurecr.io/helm/v1/repo/
+    version: 3.4.4
+    repository: '@hmctspublic'
