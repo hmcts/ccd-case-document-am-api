@@ -283,6 +283,7 @@ dependencies {
     exclude group: 'io.rest-assured', module : 'rest-assured'
   }
 
+  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '2.2.2.RELEASE'
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
   testImplementation group: 'io.rest-assured', name: 'json-path', version: versions.restAssured
   testImplementation group: 'io.rest-assured', name: 'xml-path', version: versions.restAssured
@@ -324,13 +325,16 @@ dependencyManagement {
   }
 }
 
-test {
-  generateCucumberReports.enabled = false
+tasks.withType(Test) {
   useJUnitPlatform()
-  failFast = true
+
   testLogging {
     exceptionFormat = 'full'
   }
+}
+
+test {
+  generateCucumberReports.enabled = false
 }
 
 mainClassName = 'uk.gov.hmcts.reform.ccd.documentam.Application'
