@@ -10,6 +10,17 @@
   </suppress>
 
   <suppress>
+    <notes><![CDATA[
+   file name: lang-tag-1.4.4.jar
+   ]]></notes>
+    <cve>CVE-2020-29242</cve>
+    <cve>CVE-2020-29243</cve>
+    <cve>CVE-2020-29244</cve>
+    <cve>CVE-2020-29245</cve>
+  </suppress>
+
+  <suppress>
+    <notes>spring-security error; FIXME: bump to latest version > 5.4.4</notes>
     <cve>CVE-2021-22112</cve>
   </suppress>
 

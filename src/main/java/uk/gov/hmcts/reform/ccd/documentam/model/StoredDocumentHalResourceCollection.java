@@ -19,7 +19,6 @@ public class StoredDocumentHalResourceCollection {
     private List<StoredDocumentHalResource> content = null;
 
 
-
     public StoredDocumentHalResourceCollection addContentItem(StoredDocumentHalResource contentItem) {
         if (this.content == null) {
             this.content = new ArrayList<>();
@@ -52,7 +51,8 @@ public class StoredDocumentHalResourceCollection {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        StoredDocumentHalResourceCollection storedDocumentHalResourceCollection = (StoredDocumentHalResourceCollection) o;
+        StoredDocumentHalResourceCollection storedDocumentHalResourceCollection =
+            (StoredDocumentHalResourceCollection) o;
         return Objects.equals(this.content, storedDocumentHalResourceCollection.content);
 
     }

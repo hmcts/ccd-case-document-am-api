@@ -13,14 +13,13 @@
     }
   },
   "expectedResponse": {
-    "_extends_": "Common_403_Response",
+    "_extends_": "AM_403_Response",
     "headers": {
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "message": "Forbidden: Insufficient permissions: ${[scenarioContext][testData][request][pathVariables][documentId]}",
-      "path": "/cases/documents/${[scenarioContext][testData][request][pathVariables][documentId]}"
+      "errorDescription": "Forbidden: Insufficient permissions: ${[scenarioContext][testData][request][pathVariables][documentId]}"
     }
   }
 }

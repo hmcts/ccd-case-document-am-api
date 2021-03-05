@@ -5,11 +5,16 @@ management:
   endpoint:
     health:
       show-details: "always"
+      cache:
+        time-to-live: 10s
   endpoints:
     web:
       base-path: /
       exposure:
-        include: 'health'
+        include: health, info, prometheus
+  health:
+    probes:
+      enabled: true
 
 #If you use a database then uncomment below lines and update db properties accordingly
 spring:
@@ -22,42 +27,46 @@ spring:
       enabled: true
   jackson:
     default-property-inclusion: NON_NULL
+  config:
+    import: "optional:configtree:/mnt/secrets/"
   cloud:
     discovery:
       client:
         composite-indicator:
           enabled: false
+  main:
+    allow-bean-definition-overriding: true
+  cache:
+    cache-names: userInfoCache
+    caffeine:
+      spec: expireAfterAccess=1800s
+  security:
+    oauth2:
+      client:
+        provider:
+          oidc:
+            issuer-uri: ${IDAM_OIDC_URL:http://localhost:5000}/o
+        registration:
+          oidc:
+            client-id: internal
+            client-secret: internal
 
-security:
-  anonymousPaths:
-    - "/"
-    - "/health"
-    - "/health/liveness"
-    - "/actuator/**"
-    - "/loggers/**"
-    - "/swagger-ui.html"
-    - "/swagger-resources/**"
-    - "/v2/api-docs"
-    - "/webjars/springfox-swagger-ui/**"
-    - "/search/**"
-    - "/csrf"
-    - "/error"
-    - "/favicon.ico"
-  ### Update list with service id of any service going to interact with casse document api
-  authorisedServices: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor}
-
-  authorisedRoles:
-
-### dependency configuration
-auth.provider.service.client.baseUrl: ${IDAM_S2S_URL:http://localhost:4502}
 idam:
+  api:
+    url: ${IDAM_API_URL:http://localhost:5000}
   s2s-auth:
-    # AAAAAAAAAAAAAAAA
-    totp_secret: ${CCD_DOCUMENT_API_IDAM_KEY:CNTOE7D2NX6XHBKT}
     microservice: ccd_case_document_am_api
-    url: ${IDAM_S2S_URL:http://localhost:4502}
+    totp_secret: ${ccd.ccd-case-document-am-api-s2s-secret:CNTOE7D2NX6XHBKT}
+    url: ${S2S_URL:http://localhost:4502}
+  s2s-authorised:
+    services: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor}
+oidc:
+  issuer: ${OIDC_ISSUER:http://fr-am:8080/openam/oauth2/hmcts}
 
-auth.idam.client.baseUrl: ${IDAM_USER_URL:http://localhost:5000}
+azure:
+  application-insights:
+    instrumentation-key: ${ccd.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
+
 testS2S:
   api:
     url: "/testS2SAuthorization"

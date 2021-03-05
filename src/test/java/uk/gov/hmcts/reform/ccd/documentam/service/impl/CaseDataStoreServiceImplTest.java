@@ -13,14 +13,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
-import uk.gov.hmcts.reform.ccd.documentam.util.SecurityUtils;
+import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -33,17 +32,17 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class CaseDataStoreServiceImplTest {
 
     private static final String CASE_ID = "1582550122096256";
     private static final String MATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9c";
 
-    private transient RestTemplate restTemplate = mock(RestTemplate.class);
-    private AuthTokenGenerator authTokenGenerator = mock(AuthTokenGenerator.class);
-    private transient SecurityUtils securityUtils = new SecurityUtils(authTokenGenerator);
+    private RestTemplate restTemplate = mock(RestTemplate.class);
+    private SecurityUtils securityUtils = mock(SecurityUtils.class);
 
-    private CaseDataStoreServiceImpl sut = new CaseDataStoreServiceImpl(restTemplate,securityUtils);
+    private CaseDataStoreServiceImpl sut = new CaseDataStoreServiceImpl(restTemplate, securityUtils);
 
     Optional<DocumentPermissions> caseDocumentMetadataResponse;
 
@@ -85,7 +84,8 @@ class CaseDataStoreServiceImplTest {
         String documentUrl = String.format("%s/cases/%s/documents/%s", caseDataStoreUrl, CASE_ID, MATCHED_DOCUMENT_ID);
 
         Mockito.when(restTemplate.exchange(documentUrl, HttpMethod.GET, requestEntity, Object.class))
-            .thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.NOT_FOUND, "404", new HttpHeaders(), new byte[1],
+            .thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.NOT_FOUND,
+                                                                "404", new HttpHeaders(), new byte[1],
                                                                 Charset.defaultCharset()));
 
         Assertions.assertThrows(ForbiddenException.class, () -> {
@@ -102,7 +102,8 @@ class CaseDataStoreServiceImplTest {
         String documentUrl = String.format("%s/cases/%s/documents/%s", caseDataStoreUrl, CASE_ID, MATCHED_DOCUMENT_ID);
 
         Mockito.when(restTemplate.exchange(documentUrl, HttpMethod.GET, requestEntity, Object.class))
-            .thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.FORBIDDEN, "404", new HttpHeaders(), new byte[1],
+            .thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.FORBIDDEN,
+                                                                "404", new HttpHeaders(), new byte[1],
                                                                 Charset.defaultCharset()));
 
         Assertions.assertThrows(ForbiddenException.class, () -> {
@@ -119,7 +120,8 @@ class CaseDataStoreServiceImplTest {
         String documentUrl = String.format("%s/cases/%s/documents/%s", caseDataStoreUrl, CASE_ID, MATCHED_DOCUMENT_ID);
 
         Mockito.when(restTemplate.exchange(documentUrl, HttpMethod.GET, requestEntity, Object.class))
-            .thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.BAD_REQUEST, "404", new HttpHeaders(), new byte[1],
+            .thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.BAD_REQUEST,
+                                                                "404", new HttpHeaders(), new byte[1],
                                                                 Charset.defaultCharset()));
 
         Assertions.assertThrows(BadRequestException.class, () -> {
@@ -136,7 +138,8 @@ class CaseDataStoreServiceImplTest {
         String documentUrl = String.format("%s/cases/%s/documents/%s", caseDataStoreUrl, CASE_ID, MATCHED_DOCUMENT_ID);
 
         Mockito.when(restTemplate.exchange(documentUrl, HttpMethod.GET, requestEntity, Object.class))
-            .thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.UNAUTHORIZED, "404", new HttpHeaders(), new byte[1],
+            .thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.UNAUTHORIZED,
+                                                                "404", new HttpHeaders(), new byte[1],
                                                                 Charset.defaultCharset()));
 
         Assertions.assertThrows(ServiceException.class, () -> {
@@ -146,8 +149,9 @@ class CaseDataStoreServiceImplTest {
 
     private HttpHeaders prepareRequestForUpload() {
 
+        when(securityUtils.authorizationHeaders()).thenReturn(new HttpHeaders());
+
         HttpHeaders headers = new HttpHeaders();
-        headers.addAll(securityUtils.authorizationHeaders());
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("experimental", "true");
         return headers;

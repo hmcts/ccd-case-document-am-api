@@ -4,7 +4,7 @@ import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PATCH;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,12 +59,12 @@ import uk.gov.hmcts.reform.ccd.documentam.model.DocumentUpdate;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
+import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.documentam.service.ValidationUtils;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.documentam.util.ResponseHelper;
-import uk.gov.hmcts.reform.ccd.documentam.util.SecurityUtils;
 
 @Slf4j
 @Service
@@ -76,7 +76,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Value("${documentStoreUrl}")
     protected String documentURL;
-
     @Value("${documentTTL}")
     protected String documentTtl;
 
@@ -122,7 +121,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 GET,
                 requestEntity,
                 StoredDocumentHalResource.class
-                                                                                      );
+            );
             log.info("response : {}", response.getStatusCode());
             log.info("response : {}", response.getBody());
             ResponseEntity<Object> responseEntity = ResponseHelper.toResponseEntity(response, documentId);
@@ -132,10 +131,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             } else {
                 log.error("Document doesn't exist for requested document id at Document Store {}", responseEntity
                     .getStatusCode());
-                throw new ResourceNotFoundException(documentId.toString());
+                throw new ResourceNotFoundException(formatNotFoundMessage(documentId.toString()));
             }
         } catch (HttpClientErrorException exception) {
-            catchException(exception, documentId.toString());
+            handleException(exception, documentId.toString());
         }
         return responseResult;
 
@@ -161,10 +160,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 GET,
                 requestEntity,
                 ByteArrayResource.class
-                                                                              );
+            );
             if (HttpStatus.OK.equals(response.getStatusCode())) {
-                responseResult =  ResponseEntity.ok().headers(getHeaders(response))
-                                     .body(response.getBody());
+                responseResult = ResponseEntity.ok().headers(getHeaders(response))
+                    .body(response.getBody());
             } else {
                 responseResult = ResponseEntity
                     .status(response.getStatusCode())
@@ -172,7 +171,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             }
 
         } catch (HttpClientErrorException exception) {
-            catchException(exception, documentId.toString());
+            handleException(exception, documentId.toString());
         }
         return responseResult;
 
@@ -182,7 +181,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public ResponseEntity<Object> patchDocumentMetadata(CaseDocumentsMetadata caseDocumentsMetadata) {
         try {
             LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
-            prepareRequestForAttachingDocumentToCase(caseDocumentsMetadata,  bodyMap);
+            prepareRequestForAttachingDocumentToCase(caseDocumentsMetadata, bodyMap);
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, getHttpHeaders());
 
             restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
@@ -190,7 +189,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             restTemplate.exchange(documentUrl, HttpMethod.PATCH, requestEntity, Void.class);
 
         } catch (HttpClientErrorException exception) {
-            catchException(exception);
+            handleException(exception);
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -209,12 +208,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             metadataMap.put(Constants.CASE_ID, caseDocumentsMetadata.getCaseId());
 
             if (null != caseDocumentsMetadata.getCaseTypeId()) {
-                validationUtils.validateInputParams(Constants.INPUT_STRING_PATTERN, caseDocumentsMetadata.getCaseTypeId());
+                validationUtils.validateInputParams(Constants.INPUT_STRING_PATTERN,
+                    caseDocumentsMetadata.getCaseTypeId());
                 metadataMap.put(Constants.CASE_TYPE_ID, caseDocumentsMetadata.getCaseTypeId());
             }
 
             if (null != caseDocumentsMetadata.getJurisdictionId()) {
-                validationUtils.validateInputParams(Constants.INPUT_STRING_PATTERN, caseDocumentsMetadata.getJurisdictionId());
+                validationUtils.validateInputParams(Constants.INPUT_STRING_PATTERN,
+                    caseDocumentsMetadata.getJurisdictionId());
                 metadataMap.put(Constants.JURISDICTION_ID, caseDocumentsMetadata.getJurisdictionId());
             }
 
@@ -235,15 +236,15 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
             if (resource.getMetadata().get(Constants.CASE_ID) == null) {
                 hashcodeFromStoredDocument = ApplicationUtils
-                      .generateHashCode(salt.concat(documentId.toString()
-                       .concat(resource.getMetadata().get(Constants.JURISDICTION_ID))
-                       .concat(resource.getMetadata().get(Constants.CASE_TYPE_ID))));
+                    .generateHashCode(salt.concat(documentId.toString()
+                        .concat(resource.getMetadata().get(Constants.JURISDICTION_ID))
+                        .concat(resource.getMetadata().get(Constants.CASE_TYPE_ID))));
             } else {
                 hashcodeFromStoredDocument = ApplicationUtils
                     .generateHashCode(salt.concat(documentId.toString()
-                      .concat(resource.getMetadata().get(Constants.CASE_ID))
-                      .concat(resource.getMetadata().get(Constants.JURISDICTION_ID))
-                      .concat(resource.getMetadata().get(Constants.CASE_TYPE_ID))));
+                        .concat(resource.getMetadata().get(Constants.CASE_ID))
+                        .concat(resource.getMetadata().get(Constants.JURISDICTION_ID))
+                        .concat(resource.getMetadata().get(Constants.CASE_TYPE_ID))));
             }
         }
         return hashcodeFromStoredDocument;
@@ -251,7 +252,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Override
     public ResponseEntity<Object> uploadDocuments(List<MultipartFile> files, String classification,
-                                                   String caseTypeId, String jurisdictionId) {
+                                                  String caseTypeId, String jurisdictionId) {
         ResponseEntity<Object> responseResult = new ResponseEntity<>(HttpStatus.OK);
         try {
             LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
@@ -271,14 +272,15 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
             if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode()) && null != uploadedDocumentResponse
                 .getBody()) {
-                updatedDocumentResponse = formatUploadDocumentResponse(caseTypeId, jurisdictionId, uploadedDocumentResponse);
+                updatedDocumentResponse = formatUploadDocumentResponse(caseTypeId, jurisdictionId,
+                    uploadedDocumentResponse);
             }
 
             responseResult = ResponseEntity
                 .status(uploadedDocumentResponse.getStatusCode())
                 .body(updatedDocumentResponse);
         } catch (HttpClientErrorException exception) {
-            catchException(exception);
+            handleException(exception);
         }
         return responseResult;
     }
@@ -306,20 +308,21 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             } else {
                 log.error("Document doesn't exist for requested document id at Document Store API Side {}", response
                     .getStatusCode());
-                throw new ResourceNotFoundException(documentId.toString());
+                throw new ResourceNotFoundException(formatNotFoundMessage(documentId.toString()));
             }
         } catch (HttpClientErrorException exception) {
-            catchException(exception, documentId.toString());
+            handleException(exception, documentId.toString());
         }
         return responseResult;
     }
 
     @Override
-    public ResponseEntity<Object> deleteDocument(UUID documentId,  Boolean permanent) {
+    public ResponseEntity<Object> deleteDocument(UUID documentId, Boolean permanent) {
         ResponseEntity<Object> responseResult = new ResponseEntity<>(HttpStatus.OK);
         try {
             final HttpEntity<?> requestEntity = new HttpEntity<>(getHttpHeaders());
-            String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, documentId, permanent);
+            String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, documentId,
+                permanent);
             log.info("documentDeleteUrl : {}", documentDeleteUrl);
             ResponseEntity<Object> response = restTemplate.exchange(
                 documentDeleteUrl,
@@ -333,23 +336,24 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             } else {
                 log.error("Document doesn't exist for requested document id at Document Store {}", response
                     .getStatusCode());
-                throw new ResourceNotFoundException(documentId.toString());
+                throw new ResourceNotFoundException(formatNotFoundMessage(documentId.toString()));
             }
         } catch (HttpClientErrorException exception) {
-            catchException(exception, documentId.toString());
+            handleException(exception, documentId.toString());
         }
         return responseResult;
     }
 
 
     @SuppressWarnings("unchecked")
-    private LinkedHashMap<String, Object> formatUploadDocumentResponse(String caseTypeId, String jurisdictionId,
-                                                                       ResponseEntity<Object> uploadedDocumentResponse) {
+    private LinkedHashMap<String, Object> formatUploadDocumentResponse(
+        String caseTypeId, String jurisdictionId, ResponseEntity<Object> uploadedDocumentResponse) {
         LinkedHashMap<String, Object> updatedUploadedDocumentResponse = new LinkedHashMap<>();
         try {
-            LinkedHashMap<String, Object> documents = (LinkedHashMap<String, Object>) ((LinkedHashMap<String, Object>) uploadedDocumentResponse
-                .getBody())
-                .get(Constants.EMBEDDED);
+            LinkedHashMap<String, Object> documents =
+                (LinkedHashMap<String, Object>) ((LinkedHashMap<String, Object>) uploadedDocumentResponse
+                    .getBody())
+                    .get(Constants.EMBEDDED);
 
             ArrayList<Object> documentList = (ArrayList<Object>) (documents.get(Constants.DOCUMENTS));
             log.info("documentList :{}", documentList);
@@ -365,7 +369,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 }
             }
             ArrayList<Object> documentListObject =
-                    (ArrayList<Object>) ((LinkedHashMap<String, Object>) ((LinkedHashMap<String, Object>) uploadedDocumentResponse
+                (ArrayList<Object>) ((LinkedHashMap<String, Object>)
+                    ((LinkedHashMap<String, Object>) uploadedDocumentResponse
                     .getBody())
                     .get(Constants.EMBEDDED)).get(Constants.DOCUMENTS);
             updatedUploadedDocumentResponse.put(Constants.DOCUMENTS, documentListObject);
@@ -438,7 +443,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Override
     public boolean checkUserPermission(ResponseEntity<?> responseEntity, UUID documentId,
-            Permission permissionToCheck) {
+                                       Permission permissionToCheck) {
         String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
         validationUtils.validate(caseId);
 
@@ -451,9 +456,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public boolean checkServicePermission(ResponseEntity<?> responseEntity, Permission permission) {
-        log.info("API call initiated from {} token ", securityUtils.getServiceId());
-        AuthorisedService serviceConfig = getServiceDetailsFromJson(securityUtils.getServiceId());
+    public boolean checkServicePermission(ResponseEntity<?> responseEntity, String serviceId, Permission permission) {
+        AuthorisedService serviceConfig = getServiceDetailsFromJson(serviceId);
         String caseTypeId = extractCaseTypeIdFromMetadata(responseEntity.getBody());
         String jurisdictionId = extractJurisdictionIdFromMetadata(responseEntity.getBody());
         return validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(
@@ -466,8 +470,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public boolean checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId, Permission permission) {
-        AuthorisedService serviceConfig = getServiceDetailsFromJson(securityUtils.getServiceId());
+    public boolean checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId,
+                                                    String serviceId, Permission permission) {
+        AuthorisedService serviceConfig = getServiceDetailsFromJson(serviceId);
         return validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(
             serviceConfig,
             jurisdictionId
@@ -478,16 +483,19 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     private boolean validateCaseTypeId(AuthorisedService serviceConfig, String caseTypeId) {
-        boolean result = !StringUtils.isEmpty(caseTypeId) && (serviceConfig.getCaseTypeId().equals("*") || caseTypeId.equals(
-            serviceConfig.getCaseTypeId()));
+        boolean result =
+            !StringUtils.isEmpty(caseTypeId) && (serviceConfig.getCaseTypeId().equals("*") || caseTypeId.equals(
+                serviceConfig.getCaseTypeId()));
         caseTypeId = sanitiseData(caseTypeId);
         log.info("Case Type Id is {} and validation result is {}", caseTypeId, result);
         return result;
     }
 
     private boolean validateJurisdictionId(AuthorisedService serviceConfig, String jurisdictionId) {
-        boolean result =  !StringUtils.isEmpty(jurisdictionId) && (serviceConfig.getJurisdictionId().equals("*") || jurisdictionId.equals(
-            serviceConfig.getJurisdictionId()));
+        boolean result =
+            !StringUtils.isEmpty(jurisdictionId) && (serviceConfig.getJurisdictionId().equals("*")
+                || jurisdictionId.equals(
+                serviceConfig.getJurisdictionId()));
         jurisdictionId = sanitiseData(jurisdictionId);
         log.info("JurisdictionI Id is {} and validation result is {}", jurisdictionId, result);
         return result;
@@ -505,8 +513,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     private AuthorisedService getServiceDetailsFromJson(String serviceId) {
-        Optional<AuthorisedService> service = authorisedServices.getAuthServices().stream().filter(s -> s.getId().equals(
-            serviceId)).findAny();
+        Optional<AuthorisedService> service =
+            authorisedServices.getAuthServices().stream().filter(s -> s.getId().equals(
+                serviceId)).findAny();
         if (service.isPresent()) {
             return service.get();
         } else {
@@ -533,24 +542,25 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private HttpHeaders getHttpHeaders() {
         HttpHeaders headers = securityUtils.serviceAuthorizationHeaders();
-        headers.set(Constants.USERID, securityUtils.getUserId());
+        headers.set(Constants.USERID, securityUtils.getUserInfo().getUid());
         headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
     }
 
-    private void catchException(HttpClientErrorException exception, String messageParam) {
+    private void handleException(HttpClientErrorException exception, String messageParam) {
         if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-            throw new ResourceNotFoundException(messageParam, exception);
+            throw new ResourceNotFoundException(formatNotFoundMessage(messageParam), exception);
         } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
             throw new ForbiddenException(messageParam, exception);
         } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
             throw new BadRequestException(messageParam, exception);
         } else {
-            throw new ServiceException(String.format(Constants.EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE, messageParam), exception);
+            throw new ServiceException(String.format(Constants.EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE, messageParam),
+                exception);
         }
     }
 
-    private void catchException(HttpClientErrorException exception) {
+    private void handleException(HttpClientErrorException exception) {
         if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
             throw new ResourceNotFoundException(Constants.RESOURCE_NOT_FOUND, exception);
         } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
@@ -560,5 +570,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         } else {
             throw new ServiceException(Constants.EXCEPTION_ERROR_MESSAGE, exception);
         }
+    }
+
+    private String formatNotFoundMessage(String resourceId) {
+        return Constants.RESOURCE_NOT_FOUND + " " + resourceId;
     }
 }
