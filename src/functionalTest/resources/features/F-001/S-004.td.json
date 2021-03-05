@@ -18,13 +18,13 @@
     }
   },
   "expectedResponse": {
-    "_extends_": "Common_403_Response",
+    "_extends_": "AM_403_Response",
     "headers": {
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "message": "Forbidden: Insufficient permissions: Could't find document for case  : ${[scenarioContext][childContexts][S-004_Case_Create][testData][actualResponse][body][id]}"
+      "errorDescription": "Forbidden: Insufficient permissions: Could't find document for case  : ${[scenarioContext][childContexts][S-004_Case_Create][testData][actualResponse][body][id]}"
     }
   }
 }

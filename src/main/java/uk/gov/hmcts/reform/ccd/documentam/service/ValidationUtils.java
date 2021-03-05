@@ -4,7 +4,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.INPUT_CASE_
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.INPUT_STRING_PATTERN;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -51,7 +51,8 @@ public class ValidationUtils {
             if (StringUtils.isEmpty(input)) {
                 throw new BadRequestException("The input parameter is Null/Empty");
             } else if (!Pattern.matches(pattern, input)) {
-                throw new BadRequestException("The input parameter: \"" + input +  "\", does not comply with the required pattern");
+                throw new BadRequestException("The input parameter: \"" + input + "\", does not comply with the "
+                    + "required pattern");
             }
         }
     }

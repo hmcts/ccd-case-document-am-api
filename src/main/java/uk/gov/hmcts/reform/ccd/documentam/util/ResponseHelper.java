@@ -21,9 +21,10 @@ public class ResponseHelper {
     private ResponseHelper() {
     }
 
-    public static ResponseEntity<Object> toResponseEntity(ResponseEntity<StoredDocumentHalResource> response, UUID documentId) {
+    public static ResponseEntity<Object> toResponseEntity(ResponseEntity<StoredDocumentHalResource> response,
+                                                          UUID documentId) {
         Optional<?> payload = Optional.of(response.getBody());
-        addHateoasLinks(payload,documentId);
+        addHateoasLinks(payload, documentId);
 
         return new ResponseEntity<>(
             payload.orElse(null),
@@ -42,15 +43,19 @@ public class ResponseHelper {
         return responseEntityHeaders;
     }
 
-    public static ResponseEntity<Object>  updatePatchTTLResponse(ResponseEntity<StoredDocumentHalResource> updateResponse) {
+    public static ResponseEntity<Object> updatePatchTTLResponse(
+        ResponseEntity<StoredDocumentHalResource> updateResponse) {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            StoredDocumentHalResource storedDocumentHalResource =  updateResponse.getBody();
-            Map<String,Object> metaData = mapper.convertValue(storedDocumentHalResource, new TypeReference<Map<String, Object>>() {});
+            StoredDocumentHalResource storedDocumentHalResource = updateResponse.getBody();
+            Map<String, Object> metaData = mapper.convertValue(storedDocumentHalResource,
+                new TypeReference<>() {
+                });
             updateResponseFields(storedDocumentHalResource.getTtl(), storedDocumentHalResource.getCreatedOn(),
-                                 storedDocumentHalResource.getModifiedOn(), metaData);
-            return new ResponseEntity<>(metaData, convertHeaders(updateResponse.getHeaders()), updateResponse.getStatusCode());
+                storedDocumentHalResource.getModifiedOn(), metaData);
+            return new ResponseEntity<>(metaData, convertHeaders(updateResponse.getHeaders()),
+                updateResponse.getStatusCode());
 
         } catch (Exception exception) {
             throw new ResponseFormatException("Error while updating patch TTL response " + exception);
@@ -69,7 +74,7 @@ public class ResponseHelper {
         metaData.put(Constants.MODIFIED_ON, modifiedOn);
     }
 
-    public static void addHateoasLinks(Optional<?> payload,UUID documentId) {
+    public static void addHateoasLinks(Optional<?> payload, UUID documentId) {
         if (payload.isPresent()) {
             Object obj = payload.get();
             if (obj instanceof StoredDocumentHalResource) {

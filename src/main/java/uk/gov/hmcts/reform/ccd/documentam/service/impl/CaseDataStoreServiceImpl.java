@@ -26,8 +26,8 @@ import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
+import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
-import uk.gov.hmcts.reform.ccd.documentam.util.SecurityUtils;
 
 @Slf4j
 @Service
@@ -64,8 +64,9 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
             if (responseEntity.getStatusCode() == HttpStatus.OK
                 && responseEntity.getBody() instanceof LinkedHashMap) {
                 LinkedHashMap<String, Object> responseObject = (LinkedHashMap<String, Object>) responseEntity.getBody();
-                CaseDocumentMetadata documentMetadata = new ObjectMapper().convertValue(responseObject.get("documentMetadata"),
-                                                                                       CaseDocumentMetadata.class);
+                CaseDocumentMetadata documentMetadata = new ObjectMapper().convertValue(responseObject.get(
+                    "documentMetadata"),
+                    CaseDocumentMetadata.class);
 
                 if (documentMetadata != null && documentMetadata.getDocumentPermissions() != null) {
                     result = Optional.of(documentMetadata.getDocumentPermissions());
@@ -86,7 +87,7 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
                 throw new BadRequestException(Constants.INPUT_INVALID);
             } else {
                 log.error("Exception occurred while getting document permissions from CCD Data store: {}",
-                        exception.getMessage());
+                    exception.getMessage());
                 throw new ServiceException(String.format(
                     "Problem  fetching the document for document id: %s because of %s",
                     documentId,

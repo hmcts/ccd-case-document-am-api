@@ -12,12 +12,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class StoredDocumentHalResourceCollectionTest {
 
-    private transient StoredDocumentHalResourceCollection storedDocumentHalResourceCollection = new StoredDocumentHalResourceCollection();
+    private transient StoredDocumentHalResourceCollection storedDocumentHalResourceCollection =
+        new StoredDocumentHalResourceCollection();
 
     @Test
     void shouldAddContentItem() {
         List<String> roles = Arrays.asList("citizen");
-        StoredDocumentHalResourceCollection payloadBody = storedDocumentHalResourceCollection.addContentItem(new StoredDocumentHalResource());
+        StoredDocumentHalResourceCollection payloadBody = storedDocumentHalResourceCollection
+            .addContentItem(new StoredDocumentHalResource());
         assertNotNull(storedDocumentHalResourceCollection.getContent());
         assertEquals(payloadBody.getClass(), StoredDocumentHalResourceCollection.class);
     }

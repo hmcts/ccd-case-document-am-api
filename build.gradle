@@ -13,12 +13,12 @@ plugins {
   id 'checkstyle'
   id 'pmd'
   id 'jacoco'
-  id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+  id 'io.spring.dependency-management' version '1.0.10.RELEASE'
   id 'info.solidsoft.pitest' version '1.5.0'
-  id 'org.springframework.boot' version '2.3.4.RELEASE'
-  id 'uk.gov.hmcts.java' version '0.12.0'
-  id 'com.github.ben-manes.versions' version '0.28.0'
-  id 'org.sonarqube' version '2.8'
+  id 'org.springframework.boot' version '2.4.2'
+  id 'uk.gov.hmcts.java' version '0.12.2'
+  id 'com.github.ben-manes.versions' version '0.36.0'
+  id 'org.sonarqube' version '3.0'
   id 'com.github.spacialcircumstances.gradle-cucumber-reporting' version '0.1.21'
 }
 
@@ -28,27 +28,17 @@ apply plugin: 'project-report'
 apply plugin: 'idea'
 apply plugin: 'io.spring.dependency-management'
 
-ext {
-  tomcatVersion = '9.0.40!!'
-}
-
 def versions = [
-  junit              : '5.5.0',
-  lombok             : '1.18.6',
-  reformLogging      : '5.1.1',
-  reformS2sClient    : '3.1.1',
+  junit              : '5.6.2',
+  lombok             : '1.18.8',
+  reformLogging      : '5.1.7',
   serenity           : '2.1.0',
-  springBoot         : '2.1.4.RELEASE',
-  springHystrix      : '2.1.1.RELEASE',
-  swagger2Version    : '3.0.0-SNAPSHOT',
-  pact_version       : '3.5.24',
-  rest_assured       : '4.3.0',
+  springBoot         : springBoot.class.package.implementationVersion,
+  springCloud        : '3.0.1',
+  springfoxSwagger   : '3.0.0',
+  restAssured        : '4.3.1',
   cucumber           : '5.5.0',
-  feign_jackson      : '9.7.0',
 ]
-
-mainClassName = 'uk.gov.hmcts.reform.ccd.documentam.Application'
-def jarName = 'ccd-case-document-am-api.jar'
 
 pmd {
   toolVersion = '6.21.0'
@@ -59,8 +49,8 @@ group = 'uk.gov.hmcts.reform.ccd.documentam'
 version = '0.0.1'
 
 allprojects {
-  sourceCompatibility = '1.11'
-  targetCompatibility = '1.11'
+  sourceCompatibility = '11'
+  targetCompatibility = '11'
 }
 
 jacocoTestCoverageVerification {
@@ -102,7 +92,7 @@ sourceSets {
 }
 
 tasks.withType(JavaCompile) {
-  options.compilerArgs << "-Xlint:unchecked" << "-Werror"
+  options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 }
 
 task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
@@ -168,16 +158,6 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
   outputs.upToDateWhen { false }
 }
 
-checkstyle {
-  maxWarnings = 0
-  toolVersion = '8.29'
-  // need to set configDir to rootDir otherwise submodule will use submodule/config/checkstyle
-  configDir = new File(rootDir, 'config/checkstyle')
-
-  checkstyleMain.shouldRunAfter(compileJava)
-  test.shouldRunAfter(checkstyleTest)
-}
-
 jacocoTestReport {
   executionData(test)
   reports {
@@ -213,7 +193,9 @@ sonarqube {
     property "sonar.coverage.jacoco.xmlReportPaths", "${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml"
     property "sonar.pitest.mode", "reuseReport"
     property "sonar.pitest.reportsDirectory", "build/reports/pitest"
-    property "sonar.exclusions", "src/main/java/uk/gov/hmcts/reform/ccd/document/am/*Application.java," + "src/main/java/uk/gov/hmcts/reform/ccd/document/am/util/*Swagger2SpringBoot.java," + "src/main/java/uk/gov/hmcts/reform/ccd/document/am/controller/advice/*ErrorConstants.java," + "src/main/java/uk/gov/hmcts/reform/ccd/document/am/controller/advice/exception/**," + "src/main/java/uk/gov/hmcts/reform/ccd/document/am/configuration/**," + "src/main/java/uk/gov/hmcts/reform/ccd/document/am/model/enums/**," + "src/main/java/uk/gov/hmcts/reform/ccd/document/am/apihelper/**"
+    // FIXME : RDM-11309
+    property "sonar.exclusions",  "**/service/impl/DocumentManagementServiceImpl.java,"
+    property "sonar.coverage.exclusions", "**/configuration/*.java,**/advice/exception/*.java,**/apihelper/*.java,**/ErrorConstants.java"
     property "sonar.junit.reportPaths", "${project.buildDir}/test-results/junit-platform"
   }
 }
@@ -221,31 +203,9 @@ sonarqube {
 project.tasks['sonarqube'].dependsOn test, integration, jacocoTestReport
 project.tasks['sonarqube'].group = "Verification"
 
-dependencyUpdates.resolutionStrategy {
-  componentSelection { rules ->
-    rules.all {
-      def isNonStable = { String version ->
-        ['alpha', 'beta', 'rc', 'cr', 'm', 'preview', 'b', 'ea'].any { qualifier ->
-          version ==~ /(?i).*[.-]\$qualifier[.\\d-+]*/
-        }
-      }
-      if (isNonStable(candidate.version) && !isNonStable(currentVersion)) {
-        selection.reject('Release candidate')
-      }
-    }
-  }
-}
-
 //https://jeremylong.github.io/DependencyCheck/dependency-check-gradle/configuration.html
 dependencyCheck {
-  // Specifies if the build should be failed if a CVSS score above a specified level is identified.
-  // range of 0-10 fails the build, anything greater and it doesn't fail the build
-  failBuildOnCVSS = System.getProperty('dependencyCheck.failBuild') == 'true' ? 0 : 11
-  suppressionFiles = ['config/owasp/suppressions.xml']
-  analyzers {
-    // Disable scanning of .NET related binaries
-    assemblyEnabled = false
-  }
+  suppressionFile = 'config/owasp/suppressions.xml'
 }
 
 dependencyUpdates.resolutionStrategy = {
@@ -273,41 +233,40 @@ repositories {
 
 
 dependencies {
-  compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.10.3'
-  compile "com.fasterxml.jackson.core:jackson-databind:2.11.1"
+  implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.10.3'
+  implementation "com.fasterxml.jackson.core:jackson-databind:2.11.1"
 
-  compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+  implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
 
-  compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.2'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-hateoas'
 
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-json'
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: '2.3.4.RELEASE'
-  compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
-  compile group: 'org.json', name: 'json', version: '20200518'
+  implementation group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
+  implementation group: 'org.json', name: 'json', version: '20200518'
 
-  //Added for Spring Security Implementation
-  compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: versions.springBoot
+  implementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+  annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 
-  //Added for S2S and User Authentication
-  compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.reformS2sClient
-  compile(group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4') {
-    // TODO remove when auth-checker-lib upgrades its dependency to spring boot 2.0.x
-    exclude group: 'uk.gov.hmcts.reform', module: 'java-logging-spring'
+  implementation group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformLogging
+  implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
 
-  }
-  compile group: 'javax.inject', name: 'javax.inject', version: '1'
-  compile group: 'io.springfox', name: 'springfox-swagger2', version: versions.swagger2Version
-  compile group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.swagger2Version
-  compile group: 'io.springfox', name: 'springfox-spring-webmvc', version: versions.swagger2Version
+  implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.1.2'
+  implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '1.5.5'
 
-  compile group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformLogging
-  compile group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
-  compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.2.2.RELEASE'
-  compile('org.springframework.boot:spring-boot-starter-hateoas')
-  compile group: 'org.springframework', name: 'spring-tx', version: '5.2.9.RELEASE'
+  implementation group: 'org.springframework.security', name: 'spring-security-web'
+  implementation group: 'org.springframework.security', name: 'spring-security-config'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-resource-server'
+  implementation group: 'com.nimbusds', name: 'nimbus-jose-jwt', version: '9.6'
+  implementation group: 'net.minidev', name: 'json-smart', version: '2.3'
+  implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+  implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '11.0'
+  implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
+  implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.7.0'
 
   compile group: 'org.springframework.security', name: 'spring-security-core', version: '5.3.8.RELEASE'
   compile group: 'org.springframework.security', name: 'spring-security-config', version: '5.3.8.RELEASE'
@@ -316,32 +275,24 @@ dependencies {
 
   testCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
 
+  implementation group: 'javax.inject', name: 'javax.inject', version: '1'
+  implementation group: 'io.springfox', name: 'springfox-boot-starter', version: versions.springfoxSwagger
+  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: versions.springCloud
+
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit
-  testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: versions.junit
+  testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: versions.junit
   testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: versions.junit
 
-  testCompile (group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot) {
+  testImplementation (group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot) {
     exclude group: 'junit', module: 'junit'
   }
-  testCompile (group: 'uk.gov.hmcts', name: 'befta-fw', version: '5.16.1'){
+  testImplementation (group: 'uk.gov.hmcts', name: 'befta-fw', version: '5.16.1') {
     exclude group: 'io.rest-assured', module : 'rest-assured'
   }
 
-  compile('org.springframework.cloud:spring-cloud-starter-openfeign')
-  compile group: 'org.apache.poi', name: 'poi', version: '4.1.1'
-  compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.1'
-  compile group: 'org.apache.poi', name: 'poi-ooxml-schemas', version: '4.1.1'
-
-  // AM-467-Serenety report for Integration test
-  testCompile(group: 'io.rest-assured', name: 'rest-assured', version: '4.3.0') {
-    exclude group: 'org.apache.sling', module: 'org.apache.sling.javax.activation'
-  }
-  testCompile group: 'io.rest-assured', name: 'json-path', version: '4.3.0'
-  testCompile(group: 'io.rest-assured', name: 'xml-path', version: '4.3.0') {
-    exclude group: 'org.apache.sling', module: 'org.apache.sling.javax.activation'
-  }
-
-
+  testImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
+  testImplementation group: 'io.rest-assured', name: 'json-path', version: versions.restAssured
+  testImplementation group: 'io.rest-assured', name: 'xml-path', version: versions.restAssured
 
   integrationTestCompile sourceSets.main.runtimeClasspath
   integrationTestCompile sourceSets.test.runtimeClasspath
@@ -349,14 +300,13 @@ dependencies {
   functionalTestCompile sourceSets.main.runtimeClasspath
   functionalTestCompile sourceSets.test.runtimeClasspath
 
-  compileOnly group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-  annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 }
 
 dependencyManagement {
   dependencies {
+    dependency group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.61'
     // Remove once BEFTA rest-assured is updated
-    dependencySet(group: 'io.rest-assured', version: '4.3.0') {
+    dependencySet(group: 'io.rest-assured', version: '4.3.1') {
       entry 'json-path'
       entry 'xml-path'
     }
@@ -376,9 +326,7 @@ dependencyManagement {
       entry 'groovy-xml'
       entry 'groovy-json'
     }
-
     dependency "org.apache.httpcomponents:httpclient:4.5.13"
-
 
   }
 }
@@ -387,15 +335,22 @@ test {
   generateCucumberReports.enabled = false
   useJUnitPlatform()
   failFast = true
+  testLogging {
+    exceptionFormat = 'full'
+  }
 }
 
+mainClassName = 'uk.gov.hmcts.reform.ccd.documentam.Application'
 
 bootJar {
-  archiveName = jarName
-
+  archiveName 'ccd-case-document-am-api.jar'
   manifest {
     attributes('Implementation-Version': project.version.toString())
   }
+}
+
+wrapper {
+  distributionType = Wrapper.DistributionType.ALL
 }
 
 cucumberReports {

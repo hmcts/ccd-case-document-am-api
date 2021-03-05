@@ -14,14 +14,13 @@
     }
   },
   "expectedResponse": {
-    "_extends_": "Common_400_Response",
+    "_extends_": "AM_400_Response",
     "headers": {
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "message": "Incorrect date format 2021-12-30T1@:10:10+0000",
-      "path": "/cases/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+      "errorDescription": "Incorrect date format 2021-12-30T1@:10:10+0000"
     }
   }
 }
