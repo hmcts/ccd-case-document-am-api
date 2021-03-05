@@ -268,6 +268,13 @@ dependencies {
   implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
   implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.7.0'
 
+  compile group: 'org.springframework.security', name: 'spring-security-core', version: '5.3.8.RELEASE'
+  compile group: 'org.springframework.security', name: 'spring-security-config', version: '5.3.8.RELEASE'
+  compile group: 'org.springframework.security', name: 'spring-security-web', version: '5.3.8.RELEASE'
+  compile group: 'org.springframework.security', name: 'spring-security-crypto', version: '5.3.8.RELEASE'
+
+  testCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+
   implementation group: 'javax.inject', name: 'javax.inject', version: '1'
   implementation group: 'io.springfox', name: 'springfox-boot-starter', version: versions.springfoxSwagger
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: versions.springCloud
