@@ -246,7 +246,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-hateoas'
 
   implementation group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
-  implementation group: 'org.json', name: 'json', version: '20200518'
+  implementation group: 'org.json', name: 'json', version: '20201115'
 
   implementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
