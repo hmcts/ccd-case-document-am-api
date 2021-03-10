@@ -21,7 +21,7 @@
     "body": {
       "_links" : {
         "self" : {
-          "href" : "{{CCD_DATA_STORE_URL}}/case-types/BEFTA_CASETYPE_2_1/cases{?ignore-warning}"
+          "href" : "{{CCD_DATA_STORE_API_BASE_URL}}/case-types/BEFTA_CASETYPE_2_1/cases{?ignore-warning}"
         }
       },
       "id": "[[ANYTHING_PRESENT]]",

@@ -52,13 +52,13 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 
 // Assume a feature build branched off 'develop', with dependencies develop-to-develop.
 env.DEFINITION_STORE_HOST = "http://ccd-definition-store-api-${definitionStoreDevelopPr}.service.core-compute-preview.internal".toLowerCase()
-env.CCD_DATA_STORE_URL = "http://ccd-data-store-api-${dataStoreApiDevelopPr}.service.core-compute-preview.internal".toLowerCase()
+env.CCD_DATA_STORE_API_BASE_URL = "http://ccd-data-store-api-${dataStoreApiDevelopPr}.service.core-compute-preview.internal".toLowerCase()
 
 env.IDAM_URL = "https://idam-api.aat.platform.hmcts.net"
 env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
 env.OAUTH2_CLIENT_ID = "ccd_gateway"
 env.OAUTH2_REDIRECT_URI = "https://www-ccd.aat.platform.hmcts.net/oauth2redirect"
-env.DOCUMENT_STORE_URL = "http://dm-store-aat.service.core-compute-aat.internal"
+env.DM_STORE_BASE_URL = "http://dm-store-aat.service.core-compute-aat.internal"
 
 env.BEFTA_S2S_CLIENT_ID = "ccd_gw"
 env.BEFTA_S2S_CLIENT_ID_OF_CCD_DATA = "ccd_data"
@@ -81,7 +81,7 @@ withPipeline("java", product, component) {
           environmentOfDependencies = "aat"
       }
       env.DEFINITION_STORE_HOST = "http://ccd-definition-store-api-${environmentOfDependencies}.service.core-compute-${environmentOfDependencies}.internal"
-      env.CCD_DATA_STORE_URL = "http://ccd-data-store-api-${environmentOfDependencies}.service.core-compute-${environmentOfDependencies}.internal"
+      env.CCD_DATA_STORE_API_BASE_URL = "http://ccd-data-store-api-${environmentOfDependencies}.service.core-compute-${environmentOfDependencies}.internal"
   }
   enableSlackNotifications('#ccd-case-document-am-api-builds')
 

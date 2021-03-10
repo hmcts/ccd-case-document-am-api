@@ -12,8 +12,8 @@
     "Country": null
   },
   "DocumentField1": {
-    "document_url": "{{DOCUMENT_STORE_URL}}/documents/${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}",
-    "document_binary_url": "{{DOCUMENT_STORE_URL}}/documents/${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}/binary",
+    "document_url": "{{DM_STORE_BASE_URL}}/documents/${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}",
+    "document_binary_url": "{{DM_STORE_BASE_URL}}/documents/${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}/binary",
     "document_filename": "Screenshot 2019-11-13 at 3.24.26 pm.png",
     "hashToken": "[[ANYTHING_PRESENT]]"
   },
