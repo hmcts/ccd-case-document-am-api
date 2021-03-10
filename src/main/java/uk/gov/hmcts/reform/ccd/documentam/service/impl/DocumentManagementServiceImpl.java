@@ -207,13 +207,13 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             Map<String, String> metadataMap = new HashMap<>();
             metadataMap.put(Constants.CASE_ID, caseDocumentsMetadata.getCaseId());
 
-            if (null != caseDocumentsMetadata.getCaseTypeId()) {
+            if (caseDocumentsMetadata.getCaseTypeId() != null) {
                 validationUtils.validateInputParams(Constants.INPUT_STRING_PATTERN,
                     caseDocumentsMetadata.getCaseTypeId());
                 metadataMap.put(Constants.CASE_TYPE_ID, caseDocumentsMetadata.getCaseTypeId());
             }
 
-            if (null != caseDocumentsMetadata.getJurisdictionId()) {
+            if (caseDocumentsMetadata.getJurisdictionId() != null) {
                 validationUtils.validateInputParams(Constants.INPUT_STRING_PATTERN,
                     caseDocumentsMetadata.getJurisdictionId());
                 metadataMap.put(Constants.JURISDICTION_ID, caseDocumentsMetadata.getJurisdictionId());
@@ -231,7 +231,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public String generateHashToken(UUID documentId) {
         ResponseEntity<?> responseEntity = getDocumentMetadata(documentId);
         String hashcodeFromStoredDocument = "";
-        if (responseEntity.getStatusCode().equals(HttpStatus.OK) && null != responseEntity.getBody()) {
+        if (responseEntity.getStatusCode().equals(HttpStatus.OK) && responseEntity.getBody() != null) {
             StoredDocumentHalResource resource = (StoredDocumentHalResource) responseEntity.getBody();
 
             if (resource.getMetadata().get(Constants.CASE_ID) == null) {
@@ -270,8 +270,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             ResponseEntity<Object> uploadedDocumentResponse = restTemplate
                 .postForEntity(docUrl, requestEntity, Object.class);
 
-            if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode()) && null != uploadedDocumentResponse
-                .getBody()) {
+            if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode())
+                && uploadedDocumentResponse.getBody() != null) {
                 updatedDocumentResponse = formatUploadDocumentResponse(caseTypeId, jurisdictionId,
                     uploadedDocumentResponse);
             }

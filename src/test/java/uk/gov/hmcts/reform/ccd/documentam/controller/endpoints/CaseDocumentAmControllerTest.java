@@ -73,7 +73,7 @@ public class CaseDocumentAmControllerTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         testee = new CaseDocumentAmController(documentManagementService, new ValidationUtils(), securityUtils);
         when(securityUtils.getServiceNameFromS2SToken(TEST_S2S_TOKEN)).thenReturn(XUI_WEBAPP);
     }
