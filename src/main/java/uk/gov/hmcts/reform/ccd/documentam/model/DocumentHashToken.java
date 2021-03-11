@@ -7,9 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 
-/**
- * Case Document.
- */
 @Validated
 @Data
 @Builder

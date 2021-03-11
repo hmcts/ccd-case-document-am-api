@@ -20,10 +20,6 @@ import java.util.UUID;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-
-/**
- * StoredDocumentHalResource.
- */
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
@@ -56,14 +52,11 @@ public class StoredDocumentHalResource extends RepresentationModel<StoredDocumen
 
     public void addLinks(UUID documentId) {
         add(WebMvcLinkBuilder.linkTo(methodOn(
-            CaseDocumentAmController.class).getDocumentbyDocumentId(documentId, null)).withSelfRel());
+            CaseDocumentAmController.class).getDocumentByDocumentId(documentId, null)).withSelfRel());
         add(linkTo(methodOn(
-            CaseDocumentAmController.class).getDocumentBinaryContentbyDocumentId(documentId, null)).withRel("binary"));
+            CaseDocumentAmController.class).getDocumentBinaryContentByDocumentId(documentId, null)).withRel("binary"));
     }
 
-    /**
-     * Gets or Sets classification.
-     */
     public enum ClassificationEnum {
         PUBLIC("PUBLIC"),
 

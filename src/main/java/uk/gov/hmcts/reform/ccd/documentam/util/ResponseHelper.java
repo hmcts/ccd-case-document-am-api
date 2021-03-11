@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResponseFormatException;
+import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 
@@ -21,9 +22,10 @@ public class ResponseHelper {
     private ResponseHelper() {
     }
 
-    public static ResponseEntity<Object> toResponseEntity(ResponseEntity<StoredDocumentHalResource> response,
-                                                          UUID documentId) {
-        Optional<?> payload = Optional.of(response.getBody());
+    public static ResponseEntity<StoredDocumentHalResource> toResponseEntity(
+                                                        ResponseEntity<StoredDocumentHalResource> response,
+                                                        UUID documentId) {
+        Optional<StoredDocumentHalResource> payload = Optional.of(response.getBody());
         addHateoasLinks(payload, documentId);
 
         return new ResponseEntity<>(
@@ -34,27 +36,29 @@ public class ResponseHelper {
 
     public static MultiValueMap<String, String> convertHeaders(HttpHeaders responseHeaders) {
         MultiValueMap<String, String> responseEntityHeaders = new LinkedMultiValueMap<>();
-        responseHeaders.entrySet().stream().forEach(e -> {
-            if (!(e.getKey().equalsIgnoreCase("request-context") || e.getKey().equalsIgnoreCase("x-powered-by"))) {
-                responseEntityHeaders.put(e.getKey(), new ArrayList<>(e.getValue()));
-            }
-        });
+        responseHeaders.entrySet().stream()
+            .forEach(e -> {
+                if (!(e.getKey().equalsIgnoreCase("request-context") || e.getKey().equalsIgnoreCase("x-powered-by"))) {
+                    responseEntityHeaders.put(e.getKey(), new ArrayList<>(e.getValue()));
+                }
+            });
 
         return responseEntityHeaders;
     }
 
-    public static ResponseEntity<Object> updatePatchTTLResponse(
+    public static ResponseEntity<PatchDocumentResponse> updatePatchTTLResponse(
         ResponseEntity<StoredDocumentHalResource> updateResponse) {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
             StoredDocumentHalResource storedDocumentHalResource = updateResponse.getBody();
-            Map<String, Object> metaData = mapper.convertValue(storedDocumentHalResource,
-                new TypeReference<>() {
-                });
-            updateResponseFields(storedDocumentHalResource.getTtl(), storedDocumentHalResource.getCreatedOn(),
-                storedDocumentHalResource.getModifiedOn(), metaData);
-            return new ResponseEntity<>(metaData, convertHeaders(updateResponse.getHeaders()),
+            Map<String, Object> metaData = mapper.convertValue(storedDocumentHalResource, new TypeReference<>(){});
+            PatchDocumentResponse updatedMetaData = updateResponseFields(storedDocumentHalResource.getTtl(),
+                                                                         storedDocumentHalResource.getCreatedOn(),
+                                                                         storedDocumentHalResource.getModifiedOn(),
+                                                                         metaData);
+
+            return new ResponseEntity<>(updatedMetaData, convertHeaders(updateResponse.getHeaders()),
                 updateResponse.getStatusCode());
 
         } catch (Exception exception) {
@@ -62,16 +66,16 @@ public class ResponseHelper {
         }
     }
 
-    private static void updateResponseFields(Date ttl, Date createdOn, Date modifiedOn, Map<String, Object> metaData) {
-        metaData.remove(Constants.SIZE);
-        metaData.remove(Constants.CREATED_BY);
-        metaData.remove(Constants.CLASSIFICATION);
-        metaData.remove(Constants.METADATA);
-        metaData.remove(Constants.ROLES);
-        metaData.remove(Constants.DOCUMENT_LINKS);
-        metaData.put(Constants.TTL, ttl);
-        metaData.put(Constants.CREATED_ON, createdOn);
-        metaData.put(Constants.MODIFIED_ON, modifiedOn);
+    private static PatchDocumentResponse updateResponseFields(Date ttl, Date createdOn,
+                                                              Date modifiedOn, Map<String, Object> metaData) {
+        return new PatchDocumentResponse(
+            ttl,
+            createdOn,
+            modifiedOn,
+            String.valueOf(metaData.get(Constants.ORIGINAL_DOCUMENT_NAME)),
+            String.valueOf(metaData.get(Constants.MIME_TYPE)),
+            String.valueOf(metaData.get(Constants.LAST_MODIFIED_BY))
+        );
     }
 
     public static void addHateoasLinks(Optional<?> payload, UUID documentId) {

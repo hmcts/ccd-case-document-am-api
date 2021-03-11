@@ -6,9 +6,6 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.Objects;
 
-/**
- * MetadataSearchCommand.
- */
 @Validated
 public class MetadataSearchCommand {
     @JsonProperty("name")
@@ -17,13 +14,7 @@ public class MetadataSearchCommand {
     @JsonProperty("value")
     private String value = null;
 
-    /**
-     * Get name.
-     *
-     * @return name
-     **/
-    @ApiModelProperty(value = "")
-
+    @ApiModelProperty
     public String getName() {
         return name;
     }
@@ -32,13 +23,7 @@ public class MetadataSearchCommand {
         this.name = name;
     }
 
-    /**
-     * Get value.
-     *
-     * @return value
-     **/
-    @ApiModelProperty(value = "")
-
+    @ApiModelProperty
     public String getValue() {
         return value;
     }
@@ -46,7 +31,6 @@ public class MetadataSearchCommand {
     public void setValue(String value) {
         this.value = value;
     }
-
 
     @Override
     public boolean equals(Object o) {

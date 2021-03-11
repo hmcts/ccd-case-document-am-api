@@ -56,6 +56,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentUpdate;
+import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
@@ -76,13 +77,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Value("${documentStoreUrl}")
     protected String documentURL;
+
     @Value("${documentTTL}")
     protected String documentTtl;
 
-    private final CaseDataStoreService caseDataStoreService;
-
     @Value("${idam.s2s-auth.totp_secret}")
     protected String salt;
+
+    private final CaseDataStoreService caseDataStoreService;
 
     private static AuthorisedServices authorisedServices;
 
@@ -99,32 +101,36 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Autowired
     public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils,
-                                         CaseDataStoreService caseDataStoreService,
-                                         ValidationUtils validationUtils) {
+                                         CaseDataStoreService caseDataStoreService, ValidationUtils validationUtils) {
         this.restTemplate = restTemplate;
-
         this.securityUtils = securityUtils;
         this.caseDataStoreService = caseDataStoreService;
         this.validationUtils = validationUtils;
     }
 
     @Override
-    public ResponseEntity<Object> getDocumentMetadata(UUID documentId) {
-        ResponseEntity<Object> responseResult = new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<StoredDocumentHalResource> getDocumentMetadata(UUID documentId) {
+        ResponseEntity<StoredDocumentHalResource> responseResult = new ResponseEntity<>(HttpStatus.OK);
+
         try {
             final HttpEntity<String> requestEntity = new HttpEntity<>(getHttpHeaders());
             log.info("Document Store URL is : {}", documentURL);
             String documentMetadataUrl = String.format("%s/documents/%s", documentURL, documentId);
             log.info("documentMetadataUrl : {}", documentMetadataUrl);
+
             ResponseEntity<StoredDocumentHalResource> response = restTemplate.exchange(
                 documentMetadataUrl,
                 GET,
                 requestEntity,
                 StoredDocumentHalResource.class
             );
+
             log.info("response : {}", response.getStatusCode());
             log.info("response : {}", response.getBody());
-            ResponseEntity<Object> responseEntity = ResponseHelper.toResponseEntity(response, documentId);
+
+            ResponseEntity<StoredDocumentHalResource> responseEntity =
+                ResponseHelper.toResponseEntity(response, documentId);
+
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
                 log.info("Positive response");
                 responseResult = responseEntity;
@@ -141,19 +147,19 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public String extractCaseIdFromMetadata(Object storedDocument) {
+    public String extractCaseIdFromMetadata(StoredDocumentHalResource storedDocument) {
         if (storedDocument instanceof StoredDocumentHalResource) {
-            Map<String, String> metadata = ((StoredDocumentHalResource) storedDocument).getMetadata();
+            Map<String, String> metadata = storedDocument.getMetadata();
             return metadata.get("caseId");
         }
         return null;
     }
 
     @Override
-    public ResponseEntity<Object> getDocumentBinaryContent(UUID documentId) {
-        ResponseEntity<Object> responseResult = new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<ByteArrayResource> getDocumentBinaryContent(UUID documentId) {
+        ResponseEntity<ByteArrayResource> responseResult = new ResponseEntity<>(HttpStatus.OK);
         try {
-            final HttpEntity<?> requestEntity = new HttpEntity<>(getHttpHeaders());
+            final HttpEntity<HttpHeaders> requestEntity = new HttpEntity<>(getHttpHeaders());
             String documentBinaryUrl = String.format("%s/documents/%s/binary", documentURL, documentId);
             ResponseEntity<ByteArrayResource> response = restTemplate.exchange(
                 documentBinaryUrl,
@@ -178,7 +184,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public ResponseEntity<Object> patchDocumentMetadata(CaseDocumentsMetadata caseDocumentsMetadata) {
+    public ResponseEntity<HttpStatus> patchDocumentMetadata(CaseDocumentsMetadata caseDocumentsMetadata) {
         try {
             LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
             prepareRequestForAttachingDocumentToCase(caseDocumentsMetadata, bodyMap);
@@ -187,7 +193,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
             String documentUrl = String.format("%s/documents", documentURL);
             restTemplate.exchange(documentUrl, HttpMethod.PATCH, requestEntity, Void.class);
-
         } catch (HttpClientErrorException exception) {
             handleException(exception);
         }
@@ -286,8 +291,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public ResponseEntity<Object> patchDocument(UUID documentId, UpdateDocumentCommand ttl) {
-        ResponseEntity<Object> responseResult = new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<PatchDocumentResponse> patchDocument(UUID documentId, UpdateDocumentCommand ttl) {
+        ResponseEntity<PatchDocumentResponse> responseResult = new ResponseEntity<>(HttpStatus.OK);
         if (!validationUtils.validateTTL(ttl.getTtl())) {
             throw new BadRequestException(String.format(
                 "Incorrect date format %s",
@@ -302,7 +307,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 requestEntity,
                 StoredDocumentHalResource.class
             );
-            ResponseEntity<Object> responseEntity = ResponseHelper.updatePatchTTLResponse(response);
+            ResponseEntity<PatchDocumentResponse> responseEntity = ResponseHelper.updatePatchTTLResponse(response);
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
                 responseResult = responseEntity;
             } else {
@@ -317,18 +322,18 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public ResponseEntity<Object> deleteDocument(UUID documentId, Boolean permanent) {
-        ResponseEntity<Object> responseResult = new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<HttpStatus> deleteDocument(UUID documentId, Boolean permanent) {
+        ResponseEntity<HttpStatus> responseResult = new ResponseEntity<>(HttpStatus.OK);
         try {
-            final HttpEntity<?> requestEntity = new HttpEntity<>(getHttpHeaders());
+            final HttpEntity<HttpHeaders> requestEntity = new HttpEntity<>(getHttpHeaders());
             String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, documentId,
                 permanent);
             log.info("documentDeleteUrl : {}", documentDeleteUrl);
-            ResponseEntity<Object> response = restTemplate.exchange(
+            ResponseEntity<HttpStatus> response = restTemplate.exchange(
                 documentDeleteUrl,
                 DELETE,
                 requestEntity,
-                Object.class
+                HttpStatus.class
             );
             if (HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
                 log.info("Positive response");
@@ -360,12 +365,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
             for (Object document : documentList) {
                 if (document instanceof LinkedHashMap) {
-                    LinkedHashMap<String, Object> hashmap = ((LinkedHashMap<String, Object>) (document));
-                    hashmap.remove(Constants.EMBEDDED);
-                    hashmap.remove(Constants.CREATED_BY);
-                    hashmap.remove(Constants.LAST_MODIFIED_BY);
-                    hashmap.remove(Constants.MODIFIED_ON);
-                    updateDomainForLinks(hashmap, jurisdictionId, caseTypeId);
+                    LinkedHashMap<String, Object> hashMap = ((LinkedHashMap<String, Object>) (document));
+                    hashMap.remove(Constants.EMBEDDED);
+                    hashMap.remove(Constants.CREATED_BY);
+                    hashMap.remove(Constants.LAST_MODIFIED_BY);
+                    hashMap.remove(Constants.MODIFIED_ON);
+                    updateDomainForLinks(hashMap, jurisdictionId, caseTypeId);
                 }
             }
             ArrayList<Object> documentListObject =
@@ -382,22 +387,22 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
     }
 
-    private void updateDomainForLinks(LinkedHashMap<String, Object> hashmap, String jurisdictionId, String caseTypeId) {
+    private void updateDomainForLinks(LinkedHashMap<String, Object> hashMap, String jurisdictionId, String caseTypeId) {
         try {
-            JSONObject links = new JSONObject(hashmap).getJSONObject(Constants.LINKS);
+            JSONObject links = new JSONObject(hashMap).getJSONObject(Constants.LINKS);
             links.remove(Constants.THUMBNAIL);
 
             String href = (String) links.getJSONObject(Constants.SELF).get(Constants.HREF);
             links.getJSONObject(Constants.SELF).put(Constants.HREF, buildDocumentURL(href, 36));
-            hashmap.put(Constants.HASHTOKEN, ApplicationUtils.generateHashCode(salt.concat(
+            hashMap.put(Constants.HASHTOKEN, ApplicationUtils.generateHashCode(salt.concat(
                 href.substring(href.length() - 36)
                     .concat(jurisdictionId)
                     .concat(caseTypeId))));
 
             links.getJSONObject(Constants.BINARY).put(Constants.HREF, buildDocumentURL((String) links.getJSONObject(
                 Constants.BINARY).get(Constants.HREF), 43));
-            hashmap.put(Constants.LINKS, links.toMap());
-            String message = hashmap.values().toString();
+            hashMap.put(Constants.LINKS, links.toMap());
+            String message = hashMap.values().toString();
             log.info(message);
         } catch (Exception exception) {
             log.error("Exception occurred", exception);
@@ -442,7 +447,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public boolean checkUserPermission(ResponseEntity<?> responseEntity, UUID documentId,
+    public boolean checkUserPermission(ResponseEntity<StoredDocumentHalResource> responseEntity,
+                                       UUID documentId,
                                        Permission permissionToCheck) {
         String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
         validationUtils.validate(caseId);
@@ -456,7 +462,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public boolean checkServicePermission(ResponseEntity<?> responseEntity, String serviceId, Permission permission) {
+    public boolean checkServicePermission(ResponseEntity<StoredDocumentHalResource> responseEntity,
+                                          String serviceId, Permission permission) {
         AuthorisedService serviceConfig = getServiceDetailsFromJson(serviceId);
         String caseTypeId = extractCaseTypeIdFromMetadata(responseEntity.getBody());
         String jurisdictionId = extractJurisdictionIdFromMetadata(responseEntity.getBody());
