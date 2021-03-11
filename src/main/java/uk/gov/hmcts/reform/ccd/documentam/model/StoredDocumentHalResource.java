@@ -30,24 +30,24 @@ public class StoredDocumentHalResource extends RepresentationModel<StoredDocumen
     @JsonProperty("classification")
     private ClassificationEnum classification = ClassificationEnum.PRIVATE;
     @JsonProperty("createdBy")
-    private String createdBy = null;
+    private String createdBy;
     @JsonProperty("createdOn")
-    private Date createdOn = null;
+    private Date createdOn;
     @JsonProperty("lastModifiedBy")
-    private String lastModifiedBy = null;
+    private String lastModifiedBy;
     @JsonProperty("metadata")
     @Valid
-    private Map<String, String> metadata = null;
+    private Map<String, String> metadata;
     @JsonProperty("mimeType")
-    private String mimeType = null;
+    private String mimeType;
     @JsonProperty("modifiedOn")
-    private Date modifiedOn = null;
+    private Date modifiedOn;
     @JsonProperty("originalDocumentName")
-    private String originalDocumentName = null;
+    private String originalDocumentName;
     @JsonProperty("size")
-    private Long size = null;
+    private Long size;
     @JsonProperty("ttl")
-    private Date ttl = null;
+    private Date ttl;
     private String hashCode;
 
     public void addLinks(UUID documentId) {
