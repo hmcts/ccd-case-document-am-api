@@ -462,18 +462,19 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public boolean checkServicePermission(ResponseEntity<StoredDocumentHalResource> responseEntity,
-                                          String serviceId, Permission permission) {
+    public void checkServicePermission(ResponseEntity<StoredDocumentHalResource> responseEntity,
+                                       String serviceId, Permission permission,
+                                       String logMessage, String exceptionMessage) {
         AuthorisedService serviceConfig = getServiceDetailsFromJson(serviceId);
         String caseTypeId = extractCaseTypeIdFromMetadata(responseEntity.getBody());
         String jurisdictionId = extractJurisdictionIdFromMetadata(responseEntity.getBody());
-        return validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(
-            serviceConfig,
-            jurisdictionId
-        ) && validatePermissions(
-            serviceConfig,
-            permission
-        );
+        if (!validateCaseTypeId(serviceConfig, caseTypeId)
+            || !validateJurisdictionId(serviceConfig, jurisdictionId)
+            || !validatePermissions(serviceConfig, permission)
+        ) {
+            log.error(logMessage, HttpStatus.FORBIDDEN);
+            throw new ForbiddenException(exceptionMessage);
+        }
     }
 
     @Override

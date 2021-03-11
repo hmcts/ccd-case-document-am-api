@@ -38,8 +38,9 @@ public interface DocumentManagementService {
     boolean checkUserPermission(ResponseEntity<StoredDocumentHalResource> responseEntity,
                                 UUID documentId, Permission permissionToCheck);
 
-    boolean checkServicePermission(ResponseEntity<StoredDocumentHalResource> documentMetadata,
-                                   String serviceId, Permission permission);
+    void checkServicePermission(ResponseEntity<StoredDocumentHalResource> responseEntity,
+                                String serviceId, Permission permission,
+                                String logMessage, String exceptionMessage);
 
     boolean checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId,
                                              String serviceId, Permission create);

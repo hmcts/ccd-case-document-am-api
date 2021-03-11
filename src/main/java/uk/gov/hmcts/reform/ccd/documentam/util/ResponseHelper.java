@@ -68,14 +68,14 @@ public class ResponseHelper {
 
     private static PatchDocumentResponse updateResponseFields(Date ttl, Date createdOn,
                                                               Date modifiedOn, Map<String, Object> metaData) {
-        return new PatchDocumentResponse(
-            ttl,
-            createdOn,
-            modifiedOn,
-            String.valueOf(metaData.get(Constants.ORIGINAL_DOCUMENT_NAME)),
-            String.valueOf(metaData.get(Constants.MIME_TYPE)),
-            String.valueOf(metaData.get(Constants.LAST_MODIFIED_BY))
-        );
+        return PatchDocumentResponse.builder()
+            .ttl(ttl)
+            .createdOn(createdOn)
+            .modifiedOn(modifiedOn)
+            .originalDocumentName(String.valueOf(metaData.get(Constants.ORIGINAL_DOCUMENT_NAME)))
+            .mimeType(String.valueOf(metaData.get(Constants.MIME_TYPE)))
+            .lastModifiedBy(String.valueOf(metaData.get(Constants.LAST_MODIFIED_BY)))
+            .build();
     }
 
     public static void addHateoasLinks(Optional<?> payload, UUID documentId) {

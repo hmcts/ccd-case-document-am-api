@@ -8,10 +8,10 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_DOCUME
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_ID_NOT_VALID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CLASSIFICATION_ID_INVALID;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.HASHTOKEN;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.INPUT_STRING_PATTERN;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.JURISDICTION_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USER_PERMISSION_ERROR;
 import static uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils.SERVICE_AUTHORIZATION;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,6 +45,8 @@ import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
+import uk.gov.hmcts.reform.ccd.documentam.model.GenerateHashCodeResponse;
+import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentMetaDataResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResourceCollection;
@@ -102,16 +103,15 @@ public class CaseDocumentAmController {
         ResponseEntity<StoredDocumentHalResource> responseEntity =
             documentManagementService.getDocumentMetadata(documentId);
 
-        if (documentManagementService.checkServicePermission(responseEntity,
+        documentManagementService.checkServicePermission(responseEntity,
                                                              getServiceNameFromS2SToken(s2sToken),
-                                                             Permission.READ)) {
-            if (documentManagementService.checkUserPermission(responseEntity, documentId, Permission.READ)) {
-                return ResponseEntity.status(HttpStatus.OK).body(responseEntity.getBody());
-            }
-            log.error("User doesn't have read permission on requested document {}", HttpStatus.FORBIDDEN);
-            throw new ForbiddenException(documentId.toString());
+                                                             Permission.READ,
+                                                             SERVICE_PERMISSION_ERROR,
+                                                             documentId.toString());
+        if (documentManagementService.checkUserPermission(responseEntity, documentId, Permission.READ)) {
+            return ResponseEntity.status(HttpStatus.OK).body(responseEntity.getBody());
         }
-        log.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
+        log.error(USER_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -146,15 +146,15 @@ public class CaseDocumentAmController {
         ResponseEntity<StoredDocumentHalResource> documentMetadata =
             documentManagementService.getDocumentMetadata(documentId);
 
-        if (documentManagementService.checkServicePermission(documentMetadata, getServiceNameFromS2SToken(s2sToken),
-                                                              Permission.READ)) {
-            if (documentManagementService.checkUserPermission(documentMetadata, documentId, Permission.READ)) {
-                return documentManagementService.getDocumentBinaryContent(documentId);
-            }
-            log.error("User doesn't have read permission on requested document {}", HttpStatus.FORBIDDEN);
-            throw new ForbiddenException(documentId.toString());
+        documentManagementService.checkServicePermission(documentMetadata,
+                                                         getServiceNameFromS2SToken(s2sToken),
+                                                         Permission.READ,
+                                                         SERVICE_PERMISSION_ERROR,
+                                                         documentId.toString());
+        if (documentManagementService.checkUserPermission(documentMetadata, documentId, Permission.READ)) {
+            return documentManagementService.getDocumentBinaryContent(documentId);
         }
-        log.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
+        log.error(USER_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
         throw new ForbiddenException(documentId.toString());
     }
 
@@ -251,13 +251,13 @@ public class CaseDocumentAmController {
         ResponseEntity<StoredDocumentHalResource> responseEntity =
             documentManagementService.getDocumentMetadata(documentId);
 
-        if (documentManagementService.checkServicePermission(responseEntity, getServiceNameFromS2SToken(s2sToken),
-                                                              Permission.UPDATE)) {
-            ResponseEntity<PatchDocumentResponse> response = documentManagementService.patchDocument(documentId, body);
-            return ResponseEntity.status(HttpStatus.OK).body(response.getBody());
-        }
-        log.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
-        throw new ForbiddenException(documentId.toString());
+        documentManagementService.checkServicePermission(responseEntity,
+                                                             getServiceNameFromS2SToken(s2sToken),
+                                                             Permission.UPDATE,
+                                                             SERVICE_PERMISSION_ERROR,
+                                                             documentId.toString());
+        ResponseEntity<PatchDocumentResponse> response = documentManagementService.patchDocument(documentId, body);
+        return ResponseEntity.status(HttpStatus.OK).body(response.getBody());
     }
 
     @PatchMapping(
@@ -297,7 +297,7 @@ public class CaseDocumentAmController {
             message = CASE_DOCUMENT_NOT_FOUND
         )
     })
-    public ResponseEntity<Object> patchMetaDataOnDocuments(
+    public ResponseEntity<PatchDocumentMetaDataResponse> patchMetaDataOnDocuments(
         @ApiParam(required = true)
         @Valid @RequestBody CaseDocumentsMetadata caseDocumentsMetadata,
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
@@ -316,18 +316,17 @@ public class CaseDocumentAmController {
                     UUID.fromString(caseDocumentsMetadata.getDocumentHashTokens().get(0).getId())
                 );
 
-            if (documentManagementService.checkServicePermission(documentMetadata, getServiceNameFromS2SToken(s2sToken),
-                                                                 Permission.ATTACH)) {
-                documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
-                HashMap<String, String> responseBody = new HashMap<>();
-                responseBody.put("Result", "Success");
-                return ResponseEntity
-                    .status(HttpStatus.OK).body(responseBody);
-            } else {
-                log.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
-                throw new ForbiddenException(caseDocumentsMetadata.getCaseTypeId() + " "
-                    + caseDocumentsMetadata.getJurisdictionId());
-            }
+            documentManagementService.checkServicePermission(
+                documentMetadata,
+                getServiceNameFromS2SToken(s2sToken),
+                Permission.ATTACH,
+                SERVICE_PERMISSION_ERROR,
+                caseDocumentsMetadata.getCaseTypeId() + " " + caseDocumentsMetadata.getJurisdictionId());
+            documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
+
+            return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new PatchDocumentMetaDataResponse("Success"));
         } else {
             throw new BadRequestException(BAD_REQUEST);
         }
@@ -363,12 +362,11 @@ public class CaseDocumentAmController {
         ResponseEntity<StoredDocumentHalResource> responseEntity =
             documentManagementService.getDocumentMetadata(documentId);
 
-        if (documentManagementService.checkServicePermission(responseEntity, getServiceNameFromS2SToken(s2sToken),
-                                                             Permission.UPDATE)) {
-            return documentManagementService.deleteDocument(documentId, permanent);
-        }
-        log.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
-        throw new ForbiddenException(documentId.toString());
+        documentManagementService.checkServicePermission(responseEntity, getServiceNameFromS2SToken(s2sToken),
+                                                             Permission.UPDATE,
+                                                             SERVICE_PERMISSION_ERROR,
+                                                             documentId.toString());
+        return documentManagementService.deleteDocument(documentId, permanent);
     }
 
     @GetMapping(
@@ -391,7 +389,7 @@ public class CaseDocumentAmController {
             message = CASE_DOCUMENT_NOT_FOUND
         )
     })
-    public ResponseEntity<Object> generateHashCode(@PathVariable("documentId") UUID documentId,
+    public ResponseEntity<GenerateHashCodeResponse> generateHashCode(@PathVariable("documentId") UUID documentId,
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) String s2sToken
     ) {
@@ -400,14 +398,14 @@ public class CaseDocumentAmController {
         ResponseEntity<StoredDocumentHalResource> responseEntity =
             documentManagementService.getDocumentMetadata(documentId);
 
-        if (documentManagementService.checkServicePermission(responseEntity, getServiceNameFromS2SToken(s2sToken),
-                                                             Permission.HASHTOKEN)) {
-            HashMap<String, String> responseBody = new HashMap<>();
-            responseBody.put(HASHTOKEN, documentManagementService.generateHashToken(documentId));
-            return new ResponseEntity<>(responseBody, HttpStatus.OK);
-        }
-        log.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
-        throw new ForbiddenException(documentId.toString());
+        documentManagementService.checkServicePermission(responseEntity,
+                                                         getServiceNameFromS2SToken(s2sToken),
+                                                         Permission.HASHTOKEN,
+                                                         SERVICE_PERMISSION_ERROR,
+                                                         documentId.toString());
+        return new ResponseEntity<>(GenerateHashCodeResponse.builder()
+                                        .hashToken(documentManagementService.generateHashToken(documentId))
+                                        .build(), HttpStatus.OK);
     }
 
     private String getServiceNameFromS2SToken(String s2sToken) {
