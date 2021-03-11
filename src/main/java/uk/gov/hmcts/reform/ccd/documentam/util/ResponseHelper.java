@@ -51,12 +51,11 @@ public class ResponseHelper {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            Optional<StoredDocumentHalResource> storedDocumentHalResource = Optional.of(updateResponse.getBody());
-            Map<String, Object> metaData = mapper.convertValue(
-                storedDocumentHalResource.orElseThrow(), new TypeReference<>(){});
-            PatchDocumentResponse updatedMetaData = updateResponseFields(storedDocumentHalResource.get().getTtl(),
-                                                                         storedDocumentHalResource.get().getCreatedOn(),
-                                                                         storedDocumentHalResource.get().getModifiedOn(),
+            Optional<StoredDocumentHalResource> responseBody = Optional.of(updateResponse.getBody());
+            Map<String, Object> metaData = mapper.convertValue(responseBody.orElseThrow(), new TypeReference<>(){});
+            PatchDocumentResponse updatedMetaData = updateResponseFields(responseBody.get().getTtl(),
+                                                                         responseBody.get().getCreatedOn(),
+                                                                         responseBody.get().getModifiedOn(),
                                                                          metaData);
 
             return new ResponseEntity<>(updatedMetaData, convertHeaders(updateResponse.getHeaders()),
