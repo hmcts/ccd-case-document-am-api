@@ -4,3 +4,4 @@ java:
   environment:
     DEFINITION_STORE_HOST: http://ccd-definition-store-api-pr-575.service.core-compute-preview.internal
     CCD_DATA_STORE_URL: http://ccd-data-store-api-pr-1260.service.core-compute-preview.internal
+    HASH_CHECK_ENABLED: true
