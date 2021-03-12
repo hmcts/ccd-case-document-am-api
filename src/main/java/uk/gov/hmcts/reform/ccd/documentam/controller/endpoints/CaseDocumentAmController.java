@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.controller.endpoints;
 
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.BAD_REQUEST;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_DOCUMENT_HASH_TOKEN_INVALID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_DOCUMENT_ID_INVALID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_DOCUMENT_NOT_FOUND;
@@ -42,7 +41,6 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
-import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.GenerateHashCodeResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentMetaDataResponse;
@@ -153,6 +151,7 @@ public class CaseDocumentAmController {
                                                          Permission.READ,
                                                          SERVICE_PERMISSION_ERROR,
                                                          documentId.toString());
+
         documentManagementService.checkUserPermission(documentMetadata,
                                                       documentId,
                                                       Permission.READ,
@@ -307,34 +306,26 @@ public class CaseDocumentAmController {
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) String s2sToken
     ) {
-        if (!validationUtils.validate(caseDocumentsMetadata.getCaseId())) {
-            throw new BadRequestException(CASE_ID_NOT_VALID);
-        }
-        if (caseDocumentsMetadata.getDocumentHashTokens() != null) {
-            caseDocumentsMetadata.getDocumentHashTokens()
-                .forEach(document -> validationUtils.validateDocumentId(document.getId()));
+        validationUtils.validate(caseDocumentsMetadata.getCaseId());
+        documentManagementService.validateHashTokens(caseDocumentsMetadata.getDocumentHashTokens());
 
-            //validate the service authorization for first document in payload
-            ResponseEntity<StoredDocumentHalResource> documentMetadata =
-                documentManagementService.getDocumentMetadata(
-                    UUID.fromString(caseDocumentsMetadata.getDocumentHashTokens().get(0).getId())
-                );
+        //validate the service authorization for first document in payload
+        ResponseEntity<StoredDocumentHalResource> documentMetadata =
+            documentManagementService.getDocumentMetadata(
+                UUID.fromString(caseDocumentsMetadata.getDocumentHashTokens().get(0).getId()));
 
-            documentManagementService.checkServicePermission(
-                documentMetadata,
-                getServiceNameFromS2SToken(s2sToken),
-                Permission.ATTACH,
-                SERVICE_PERMISSION_ERROR,
-                caseDocumentsMetadata.getCaseTypeId() + " " + caseDocumentsMetadata.getJurisdictionId());
+        documentManagementService.checkServicePermission(
+            documentMetadata,
+            getServiceNameFromS2SToken(s2sToken),
+            Permission.ATTACH,
+            SERVICE_PERMISSION_ERROR,
+            caseDocumentsMetadata.getCaseTypeId() + " " + caseDocumentsMetadata.getJurisdictionId());
 
-            documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
+        documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
 
-            return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(new PatchDocumentMetaDataResponse("Success"));
-        } else {
-            throw new BadRequestException(BAD_REQUEST);
-        }
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(new PatchDocumentMetaDataResponse("Success"));
     }
 
     @DeleteMapping(

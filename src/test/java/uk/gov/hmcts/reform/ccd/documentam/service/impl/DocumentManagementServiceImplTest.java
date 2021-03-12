@@ -1322,7 +1322,6 @@ class DocumentManagementServiceImplTest {
                                          HttpStatus.OK);
         ResponseEntity<StoredDocumentHalResource> responseEntity = sut.getDocumentMetadata(matchedDocUUID);
 
-        ;
         assertThrows(ForbiddenException.class, () -> sut.checkUserPermission(responseEntity,
                                                                              UUID.fromString(MATCHED_DOCUMENT_ID),
                                                                              Permission.CREATE,
@@ -1340,4 +1339,34 @@ class DocumentManagementServiceImplTest {
         return storedDocumentHalResource;
     }
 
+    @Test
+    void validateHashTokensSuccessfully() {
+        DocumentHashToken doc = DocumentHashToken.builder()
+            .id(MATCHED_DOCUMENT_ID)
+            .hashToken(ApplicationUtils.generateHashCode(
+                salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2)
+                    .concat(BEFTA_CASETYPE_2))).build();
+
+        List<DocumentHashToken> documentList = new ArrayList<>();
+        documentList.add(doc);
+        sut.validateHashTokens(documentList);
+    }
+
+    @Test
+    void validateHashTokensShouldThrowBadRequestExceptionWithInvalidDocumentId() {
+        DocumentHashToken doc = DocumentHashToken.builder()
+            .id("invalid_id")
+            .hashToken(ApplicationUtils.generateHashCode(
+                salt.concat("invalid_id").concat(BEFTA_JURISDICTION_2)
+                    .concat(BEFTA_CASETYPE_2))).build();
+
+        List<DocumentHashToken> documentList = new ArrayList<>();
+        documentList.add(doc);
+        assertThrows(BadRequestException.class, () -> sut.validateHashTokens(documentList));
+    }
+
+    @Test
+    void validateHashTokensShouldThrowBadRequestExceptionWithNullDocumentsList() {
+        assertThrows(BadRequestException.class, () -> sut.validateHashTokens(null));
+    }
 }

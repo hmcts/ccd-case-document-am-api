@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PATCH;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.BAD_REQUEST;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
@@ -492,7 +493,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             log.error(logMessage, HttpStatus.FORBIDDEN);
             throw new ForbiddenException(exceptionMessage);
         }
-
     }
 
     private boolean validateCaseTypeId(AuthorisedService serviceConfig, String caseTypeId) {
@@ -587,5 +587,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private String formatNotFoundMessage(String resourceId) {
         return Constants.RESOURCE_NOT_FOUND + " " + resourceId;
+    }
+
+    @Override
+    public void validateHashTokens(List<DocumentHashToken> documentList) {
+        if (documentList != null) {
+            documentList.forEach(document -> validationUtils.validateDocumentId(document.getId()));
+        } else {
+            throw new BadRequestException(BAD_REQUEST);
+        }
     }
 }
