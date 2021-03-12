@@ -42,7 +42,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
-import uk.gov.hmcts.reform.ccd.documentam.model.GenerateHashCodeResponse;
+import uk.gov.hmcts.reform.ccd.documentam.model.GeneratedHashCodeResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentMetaDataResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
@@ -387,7 +387,8 @@ public class CaseDocumentAmController {
             message = CASE_DOCUMENT_NOT_FOUND
         )
     })
-    public ResponseEntity<GenerateHashCodeResponse> generateHashCode(@PathVariable("documentId") UUID documentId,
+    public ResponseEntity<GeneratedHashCodeResponse> generateHashCode(
+        @PathVariable("documentId") UUID documentId,
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) String s2sToken
     ) {
@@ -402,7 +403,7 @@ public class CaseDocumentAmController {
                                                          SERVICE_PERMISSION_ERROR,
                                                          documentId.toString());
 
-        return new ResponseEntity<>(GenerateHashCodeResponse.builder()
+        return new ResponseEntity<>(GeneratedHashCodeResponse.builder()
                                         .hashToken(documentManagementService.generateHashToken(documentId))
                                         .build(), HttpStatus.OK);
     }

@@ -7,6 +7,6 @@ import lombok.Data;
 @Data
 @Builder
 @AllArgsConstructor
-public class GenerateHashCodeResponse {
+public class GeneratedHashCodeResponse {
     private String hashToken;
 }
