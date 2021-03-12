@@ -35,14 +35,15 @@ public interface DocumentManagementService {
     ResponseEntity<HttpStatus> deleteDocument(final UUID documentId,  Boolean permanent);
 
 
-    boolean checkUserPermission(ResponseEntity<StoredDocumentHalResource> responseEntity,
-                                UUID documentId, Permission permissionToCheck);
+    void checkUserPermission(ResponseEntity<StoredDocumentHalResource> responseEntity,
+                             UUID documentId, Permission permissionToCheck,
+                             String logMessage, String exceptionMessage);
 
     void checkServicePermission(ResponseEntity<StoredDocumentHalResource> responseEntity,
                                 String serviceId, Permission permission,
                                 String logMessage, String exceptionMessage);
 
-    boolean checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId,
-                                             String serviceId, Permission create);
-
+    void checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId,
+                                          String serviceId, Permission permission,
+                                          String logMessage, String exceptionMessage);
 }

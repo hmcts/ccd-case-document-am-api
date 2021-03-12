@@ -77,6 +77,8 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.LINKS;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.ORIGINAL_FILE_NAME;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SELF;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_AUTHORIZATION;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USER_PERMISSION_ERROR;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USERID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.XUI_WEBAPP;
 
@@ -382,27 +384,6 @@ class DocumentManagementServiceImplTest {
         verifyRestExchangeByteArray();
     }
 
-
-    @Test
-    void checkUserPermission_HappyPath() {
-        mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("1234567890123456", "", ""),
-                                         HttpStatus.OK);
-        ResponseEntity<StoredDocumentHalResource> responseEntity = sut.getDocumentMetadata(matchedDocUUID);
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        List<Permission> permissionsList = new ArrayList<>();
-        permissionsList.add(Permission.READ);
-        DocumentPermissions doc;
-        doc = DocumentPermissions.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList).build();
-        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(), any(UUID.class)))
-               .thenReturn(Optional.of(doc));
-
-        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID, Permission.READ);
-        assertEquals(Boolean.TRUE, result);
-
-        verifyRestExchangeOnStoredDoc();
-        verifyCaseDataServiceGetDocMetadata();
-    }
-
     @Test
     void checkServicePermission_WhenJurisdictionIdIsNull() {
         mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("", "caseTypeId",
@@ -425,38 +406,39 @@ class DocumentManagementServiceImplTest {
     }
 
     @Test
-    void checkServicePermissionForUpload_HappyPath() {
-        Boolean result = sut.checkServicePermissionsForUpload("caseTypeId",
-                                                              "BEFTA_JURISDICTION_2",
-                                                              XUI_WEBAPP, Permission.READ
-        );
-        assertEquals(Boolean.TRUE, result);
-    }
-
-    @Test
     void checkServicePermissionForUpload_WhenServiceIsNotAuthorised() {
-        Boolean result = sut.checkServicePermissionsForUpload("caseTypeId",
-                                                              "BEFTA_JURISDICTION_2",
-                                                              BULK_SCAN_PROCESSOR, Permission.READ
-                                                             );
-        assertEquals(Boolean.FALSE, result);
+        assertThrows(ForbiddenException.class, () -> sut.checkServicePermissionsForUpload(
+            "caseTypeId",
+            "BEFTA_JURISDICTION_2",
+            BULK_SCAN_PROCESSOR,
+            Permission.READ,
+            SERVICE_PERMISSION_ERROR,
+            "exception message"
+        ));
     }
 
     @Test
     void checkServicePermissionForUpload_WhenCaseTypeIsNull() {
-        Boolean result = sut.checkServicePermissionsForUpload("",
-                                                              "BEFTA_JURISDICTION_2",
-                                                              BULK_SCAN_PROCESSOR, Permission.READ
-                                                             );
-        assertEquals(Boolean.FALSE, result);
+        assertThrows(ForbiddenException.class, () -> sut.checkServicePermissionsForUpload(
+            "",
+            "BEFTA_JURISDICTION_2",
+            BULK_SCAN_PROCESSOR,
+            Permission.READ,
+            SERVICE_PERMISSION_ERROR,
+            "exception message"
+        ));
     }
 
     @Test
     void checkServicePermissionForUpload_WhenJurisdictionIdIsNull() {
-        Boolean result = sut.checkServicePermissionsForUpload("caseTypeId",
-                                                              "", BULK_SCAN_PROCESSOR, Permission.READ
-                                                             );
-        assertEquals(Boolean.FALSE, result);
+        assertThrows(ForbiddenException.class, () -> sut.checkServicePermissionsForUpload(
+            "caseTypeId",
+            "",
+            BULK_SCAN_PROCESSOR,
+            Permission.READ,
+            SERVICE_PERMISSION_ERROR,
+            "exception message"
+        ));
     }
 
     @Test
@@ -483,7 +465,11 @@ class DocumentManagementServiceImplTest {
                .thenReturn(null);
 
         assertThrows(Exception.class, () -> {
-            sut.checkUserPermission(responseEntity, matchedDocUUID, Permission.READ);
+            sut.checkUserPermission(responseEntity,
+                                    matchedDocUUID,
+                                    Permission.READ,
+                                    USER_PERMISSION_ERROR,
+                                    "exception string");
         });
 
         verifyRestExchangeOnStoredDoc();
@@ -498,7 +484,11 @@ class DocumentManagementServiceImplTest {
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
         assertThrows(BadRequestException.class, () ->
-            sut.checkUserPermission(responseEntity, matchedDocUUID, Permission.READ));
+            sut.checkUserPermission(responseEntity,
+                                    matchedDocUUID,
+                                    Permission.READ,
+                                    USER_PERMISSION_ERROR,
+                                    "exception string"));
 
         verifyRestExchangeOnStoredDoc();
     }
@@ -516,8 +506,11 @@ class DocumentManagementServiceImplTest {
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(), any(UUID.class)))
                .thenReturn(Optional.ofNullable(doc));
 
-        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID, Permission.READ);
-        assertEquals(Boolean.FALSE, result);
+        assertThrows(ForbiddenException.class, () -> sut.checkUserPermission(responseEntity,
+                                                                             matchedDocUUID,
+                                                                             Permission.READ,
+                                                                             USER_PERMISSION_ERROR,
+                                                                             "exception string"));
 
         verifyRestExchangeOnStoredDoc();
         verifyCaseDataServiceGetDocMetadata();
@@ -538,8 +531,11 @@ class DocumentManagementServiceImplTest {
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(), any(UUID.class)))
                .thenReturn(Optional.ofNullable(doc));
 
-        Boolean result = sut.checkUserPermission(responseEntity, matchedDocUUID, Permission.READ);
-        assertEquals(Boolean.FALSE, result);
+        assertThrows(ForbiddenException.class, () -> sut.checkUserPermission(responseEntity,
+                                                                             matchedDocUUID,
+                                                                             Permission.READ,
+                                                                             USER_PERMISSION_ERROR,
+                                                                             "exception string"));
 
         verifyRestExchangeOnStoredDoc();
         verifyCaseDataServiceGetDocMetadata();
@@ -1273,7 +1269,11 @@ class DocumentManagementServiceImplTest {
         ResponseEntity<StoredDocumentHalResource> responseEntity = sut.getDocumentMetadata(matchedDocUUID);
 
         assertThrows(BadRequestException.class, () ->
-            sut.checkUserPermission(responseEntity, UUID.fromString(MATCHED_DOCUMENT_ID), Permission.CREATE));
+            sut.checkUserPermission(responseEntity,
+                                    UUID.fromString(MATCHED_DOCUMENT_ID),
+                                    Permission.CREATE,
+                                    USER_PERMISSION_ERROR,
+                                    "exception string"));
     }
 
     @Test
@@ -1322,9 +1322,12 @@ class DocumentManagementServiceImplTest {
                                          HttpStatus.OK);
         ResponseEntity<StoredDocumentHalResource> responseEntity = sut.getDocumentMetadata(matchedDocUUID);
 
-        Boolean result = sut.checkUserPermission(responseEntity, UUID.fromString(MATCHED_DOCUMENT_ID),
-                                                 Permission.CREATE);
-        assertEquals(false, result);
+        ;
+        assertThrows(ForbiddenException.class, () -> sut.checkUserPermission(responseEntity,
+                                                                             UUID.fromString(MATCHED_DOCUMENT_ID),
+                                                                             Permission.CREATE,
+                                                                             USER_PERMISSION_ERROR,
+                                                                             "exception string"));
     }
 
     private StoredDocumentHalResource initialiseMetaDataMap(String caseId, String caseTypeId, String jurisdictionId) {

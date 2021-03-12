@@ -40,8 +40,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -56,6 +54,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USER_PERMISSION_ERROR;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.XUI_WEBAPP;
 
 public class CaseDocumentAmControllerTest {
@@ -96,8 +95,12 @@ public class CaseDocumentAmControllerTest {
             )
         ));
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(TRUE).when(documentManagementService)
-            .checkUserPermission(setDocumentMetaData(), getUuid(), Permission.READ);
+        doNothing().when(documentManagementService)
+            .checkUserPermission(setDocumentMetaData(),
+                                 getUuid(),
+                                 Permission.READ,
+                                 USER_PERMISSION_ERROR,
+                                 getUuid().toString());
         doNothing().when(documentManagementService)
             .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
@@ -125,8 +128,12 @@ public class CaseDocumentAmControllerTest {
             )
         ));
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(FALSE).when(documentManagementService)
-            .checkUserPermission(setDocumentMetaData(), getUuid(), Permission.READ);
+        doThrow(ForbiddenException.class).when(documentManagementService)
+            .checkUserPermission(setDocumentMetaData(),
+                                 getUuid(),
+                                 Permission.READ,
+                                 USER_PERMISSION_ERROR,
+                                 getUuid().toString());
         doThrow(ForbiddenException.class).when(documentManagementService)
             .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
@@ -148,8 +155,12 @@ public class CaseDocumentAmControllerTest {
             )
         ));
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(FALSE).when(documentManagementService)
-            .checkUserPermission(setDocumentMetaData(), getUuid(), Permission.READ);
+        doThrow(ForbiddenException.class).when(documentManagementService)
+            .checkUserPermission(setDocumentMetaData(),
+                                 getUuid(),
+                                 Permission.READ,
+                                 USER_PERMISSION_ERROR,
+                                 getUuid().toString());
         doNothing().when(documentManagementService)
             .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
@@ -173,8 +184,12 @@ public class CaseDocumentAmControllerTest {
             )
         ));
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(TRUE).when(documentManagementService)
-            .checkUserPermission(setDocumentMetaData(), getUuid(), Permission.READ);
+        doNothing().when(documentManagementService)
+            .checkUserPermission(setDocumentMetaData(),
+                                 getUuid(),
+                                 Permission.READ,
+                                 USER_PERMISSION_ERROR,
+                                 getUuid().toString());
         doNothing().when(documentManagementService)
             .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
@@ -208,7 +223,7 @@ public class CaseDocumentAmControllerTest {
                                     SERVICE_PERMISSION_ERROR,
                                     getUuid().toString());
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(setDocumentBinaryContent(FORBIDDEN)).when(documentManagementService)
+        doThrow(ForbiddenException.class).when(documentManagementService)
             .getDocumentBinaryContent(getUuid());
 
         Assertions.assertThrows(ForbiddenException.class, () ->
@@ -229,7 +244,7 @@ public class CaseDocumentAmControllerTest {
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
         doReturn(documentPermissions).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
-        doReturn(setDocumentBinaryContent(FORBIDDEN)).when(documentManagementService)
+        doThrow(ForbiddenException.class).when(documentManagementService)
             .getDocumentBinaryContent(getUuid());
         doNothing().when(documentManagementService)
             .checkServicePermission(setDocumentMetaData(),
@@ -281,8 +296,12 @@ public class CaseDocumentAmControllerTest {
                                     Permission.UPDATE,
                                     SERVICE_PERMISSION_ERROR,
                                     getUuid().toString());
-        doReturn(TRUE).when(documentManagementService)
-            .checkUserPermission(setDocumentMetaData(), getUuid(), Permission.UPDATE);
+        doNothing().when(documentManagementService)
+            .checkUserPermission(setDocumentMetaData(),
+                                 getUuid(),
+                                 Permission.UPDATE,
+                                 USER_PERMISSION_ERROR,
+                                 getUuid().toString());
         doReturn(ResponseEntity.status(HttpStatus.NO_CONTENT).build()).when(documentManagementService)
             .deleteDocument(getUuid(), true);
 
@@ -305,8 +324,12 @@ public class CaseDocumentAmControllerTest {
                                     Permission.UPDATE,
                                     SERVICE_PERMISSION_ERROR,
                                     getUuid().toString());
-        doReturn(TRUE).when(documentManagementService)
-            .checkUserPermission(setDocumentMetaData(), getUuid(), Permission.UPDATE);
+        doNothing().when(documentManagementService)
+            .checkUserPermission(setDocumentMetaData(),
+                                 getUuid(),
+                                 Permission.UPDATE,
+                                 USER_PERMISSION_ERROR,
+                                 getUuid().toString());
         doReturn(ResponseEntity.status(HttpStatus.NO_CONTENT).build()).when(documentManagementService)
             .deleteDocument(getUuid(), true);
 
@@ -323,8 +346,12 @@ public class CaseDocumentAmControllerTest {
                                     Permission.UPDATE,
                                     SERVICE_PERMISSION_ERROR,
                                     getUuid().toString());
-        doReturn(TRUE).when(documentManagementService)
-            .checkUserPermission(setDocumentMetaData(), getUuid(), Permission.UPDATE);
+        doNothing().when(documentManagementService)
+            .checkUserPermission(setDocumentMetaData(),
+                                 getUuid(),
+                                 Permission.UPDATE,
+                                 USER_PERMISSION_ERROR,
+                                 getUuid().toString());
 
         UpdateDocumentCommand body = null;
         PatchDocumentResponse patchDocumentResponse = new PatchDocumentResponse();
@@ -352,8 +379,12 @@ public class CaseDocumentAmControllerTest {
                                     Permission.UPDATE,
                                     SERVICE_PERMISSION_ERROR,
                                     getUuid().toString());
-        doReturn(TRUE).when(documentManagementService)
-            .checkUserPermission(setDocumentMetaData(), getUuid(), Permission.READ);
+        doNothing().when(documentManagementService)
+            .checkUserPermission(setDocumentMetaData(),
+                                 getUuid(),
+                                 Permission.READ,
+                                 USER_PERMISSION_ERROR,
+                                 getUuid().toString());
         UpdateDocumentCommand body = null;
         doReturn(setDocumentMetaData()).when(documentManagementService).patchDocument(getUuid(), body);
 
@@ -441,11 +472,13 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should go through happy path")
     public void uploadDocuments_HappyPath() {
-        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload(
-            "BEFTA_CASETYPE_2",
-            "BEFTA_JURISDICTION_2",
-            XUI_WEBAPP,
-            Permission.CREATE
+        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
+            eq("BEFTA_CASETYPE_2"),
+            eq("BEFTA_JURISDICTION_2"),
+            eq(XUI_WEBAPP),
+            eq(Permission.CREATE),
+            eq(SERVICE_PERMISSION_ERROR),
+            anyString()
         );
         List<MultipartFile> multipartFiles = generateMultipartList();
         Mockito.when(documentManagementService.uploadDocuments(
@@ -495,11 +528,13 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when the uploaded file is empty")
     public void shouldThrowBadRequestExceptionWhenUploadedFilesIsNull() {
-        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload(
-            "BEFTA_CASETYPE_2",
-            "BEFTA_JURISDICTION_2",
-            XUI_WEBAPP,
-            Permission.CREATE
+        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
+            eq("BEFTA_CASETYPE_2"),
+            eq("BEFTA_JURISDICTION_2"),
+            eq(XUI_WEBAPP),
+            eq(Permission.CREATE),
+            eq(SERVICE_PERMISSION_ERROR),
+            anyString()
         );
         Assertions.assertThrows(BadRequestException.class, () ->
             testee.uploadDocuments(null, Classification.PUBLIC.name(),
@@ -509,11 +544,13 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when user-roles are empty")
     public void shouldThrowBadRequestExceptionWhenUserRolesAreEmpty() {
-        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload(
-            "BEFTA_CASETYPE_2",
-            "BEFTA@JURISDICTION_2$$$$",
-            XUI_WEBAPP,
-            Permission.CREATE
+        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
+            eq("BEFTA_CASETYPE_2"),
+            eq("BEFTA@JURISDICTION_2$$$$"),
+            eq(XUI_WEBAPP),
+            eq(Permission.CREATE),
+            eq(SERVICE_PERMISSION_ERROR),
+            anyString()
         );
         Assertions.assertThrows(BadRequestException.class, () ->
             testee.uploadDocuments(generateMultipartList(),
@@ -525,11 +562,13 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when caseTypeId input is null")
     public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsNull() {
-        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload(
-            null,
-            "BEFTA_JURISDICTION_2",
-            XUI_WEBAPP,
-            Permission.CREATE
+        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
+            eq(null),
+            eq("BEFTA_JURISDICTION_2"),
+            eq(XUI_WEBAPP),
+            eq(Permission.CREATE),
+            eq(SERVICE_PERMISSION_ERROR),
+            anyString()
         );
         Assertions.assertThrows(BadRequestException.class, () -> testee.uploadDocuments(generateMultipartList(),
                                                                                     Classification.PUBLIC.name(),
@@ -541,11 +580,13 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when caseTypeId input is malformed")
     public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsMalformed() {
-        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload(
-            "BEFTA_CASETYPE_2&&&&&&&&&",
-            "BEFTA_JURISDICTION_2",
-            XUI_WEBAPP,
-            Permission.CREATE
+        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
+            eq("BEFTA_CASETYPE_2&&&&&&&&&"),
+            eq("BEFTA_JURISDICTION_2"),
+            eq(XUI_WEBAPP),
+            eq(Permission.CREATE),
+            eq(SERVICE_PERMISSION_ERROR),
+            anyString()
         );
         Assertions.assertThrows(BadRequestException.class, () -> testee.uploadDocuments(generateMultipartList(),
                                                                                     Classification.PUBLIC.name(),
@@ -558,11 +599,13 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when jurisdictionId input is null")
     public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsNull() {
-        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload(
-            "BEFTA_CASETYPE_2",
-            null,
-            XUI_WEBAPP,
-            Permission.CREATE
+        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
+            eq("BEFTA_CASETYPE_2"),
+            eq(null),
+            eq(XUI_WEBAPP),
+            eq(Permission.CREATE),
+            eq(SERVICE_PERMISSION_ERROR),
+            anyString()
         );
         Assertions.assertThrows(BadRequestException.class, () -> testee.uploadDocuments(generateMultipartList(),
                                                                                     Classification.PUBLIC.name(),
@@ -575,11 +618,13 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when jurisdictionId input is malformed")
     public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsMalformed() {
-        doReturn(TRUE).when(documentManagementService).checkServicePermissionsForUpload(
-            "BEFTA_CASETYPE_2",
-            "BEFTA@JURISDICTION_2$$$$",
-            XUI_WEBAPP,
-            Permission.CREATE
+        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
+            eq("BEFTA_CASETYPE_2"),
+            eq("BEFTA@JURISDICTION_2$$$$"),
+            eq(XUI_WEBAPP),
+            eq(Permission.CREATE),
+            eq(SERVICE_PERMISSION_ERROR),
+            anyString()
         );
         Assertions.assertThrows(BadRequestException.class, () -> testee.uploadDocuments(generateMultipartList(),
                                                                                     Classification.PUBLIC.name(),

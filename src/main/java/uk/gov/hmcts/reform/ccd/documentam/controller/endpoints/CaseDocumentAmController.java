@@ -43,7 +43,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
-import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.GenerateHashCodeResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentMetaDataResponse;
@@ -108,11 +107,14 @@ public class CaseDocumentAmController {
                                                              Permission.READ,
                                                              SERVICE_PERMISSION_ERROR,
                                                              documentId.toString());
-        if (documentManagementService.checkUserPermission(responseEntity, documentId, Permission.READ)) {
-            return ResponseEntity.status(HttpStatus.OK).body(responseEntity.getBody());
-        }
-        log.error(USER_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
-        throw new ForbiddenException(documentId.toString());
+
+        documentManagementService.checkUserPermission(responseEntity,
+                                                      documentId,
+                                                      Permission.READ,
+                                                      USER_PERMISSION_ERROR,
+                                                      documentId.toString());
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseEntity.getBody());
     }
 
     @GetMapping(
@@ -151,11 +153,13 @@ public class CaseDocumentAmController {
                                                          Permission.READ,
                                                          SERVICE_PERMISSION_ERROR,
                                                          documentId.toString());
-        if (documentManagementService.checkUserPermission(documentMetadata, documentId, Permission.READ)) {
-            return documentManagementService.getDocumentBinaryContent(documentId);
-        }
-        log.error(USER_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
-        throw new ForbiddenException(documentId.toString());
+        documentManagementService.checkUserPermission(documentMetadata,
+                                                      documentId,
+                                                      Permission.READ,
+                                                      USER_PERMISSION_ERROR,
+                                                      documentId.toString());
+
+        return documentManagementService.getDocumentBinaryContent(documentId);
     }
 
     @PostMapping(
@@ -208,14 +212,13 @@ public class CaseDocumentAmController {
         validationUtils.isValidSecurityClassification(classification);
         validationUtils.validateLists(files);
 
-        if (documentManagementService.checkServicePermissionsForUpload(caseTypeId, jurisdictionId,
+        documentManagementService.checkServicePermissionsForUpload(caseTypeId, jurisdictionId,
                                                                        getServiceNameFromS2SToken(s2sToken),
-                                                                       Permission.CREATE)) {
-            return documentManagementService.uploadDocuments(files, classification, caseTypeId, jurisdictionId);
-        }
+                                                                       Permission.CREATE,
+                                                                       SERVICE_PERMISSION_ERROR,
+                                                                       caseTypeId + " " + jurisdictionId);
 
-        log.error(SERVICE_PERMISSION_ERROR, HttpStatus.FORBIDDEN);
-        throw new ForbiddenException(caseTypeId + " " + jurisdictionId);
+        return documentManagementService.uploadDocuments(files, classification, caseTypeId, jurisdictionId);
     }
 
     @PatchMapping(
@@ -256,6 +259,7 @@ public class CaseDocumentAmController {
                                                              Permission.UPDATE,
                                                              SERVICE_PERMISSION_ERROR,
                                                              documentId.toString());
+
         ResponseEntity<PatchDocumentResponse> response = documentManagementService.patchDocument(documentId, body);
         return ResponseEntity.status(HttpStatus.OK).body(response.getBody());
     }
@@ -322,6 +326,7 @@ public class CaseDocumentAmController {
                 Permission.ATTACH,
                 SERVICE_PERMISSION_ERROR,
                 caseDocumentsMetadata.getCaseTypeId() + " " + caseDocumentsMetadata.getJurisdictionId());
+
             documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
 
             return ResponseEntity
@@ -362,10 +367,12 @@ public class CaseDocumentAmController {
         ResponseEntity<StoredDocumentHalResource> responseEntity =
             documentManagementService.getDocumentMetadata(documentId);
 
-        documentManagementService.checkServicePermission(responseEntity, getServiceNameFromS2SToken(s2sToken),
-                                                             Permission.UPDATE,
-                                                             SERVICE_PERMISSION_ERROR,
-                                                             documentId.toString());
+        documentManagementService.checkServicePermission(responseEntity,
+                                                         getServiceNameFromS2SToken(s2sToken),
+                                                         Permission.UPDATE,
+                                                         SERVICE_PERMISSION_ERROR,
+                                                         documentId.toString());
+
         return documentManagementService.deleteDocument(documentId, permanent);
     }
 
@@ -403,6 +410,7 @@ public class CaseDocumentAmController {
                                                          Permission.HASHTOKEN,
                                                          SERVICE_PERMISSION_ERROR,
                                                          documentId.toString());
+
         return new ResponseEntity<>(GenerateHashCodeResponse.builder()
                                         .hashToken(documentManagementService.generateHashToken(documentId))
                                         .build(), HttpStatus.OK);

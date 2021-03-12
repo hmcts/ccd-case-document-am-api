@@ -447,9 +447,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public boolean checkUserPermission(ResponseEntity<StoredDocumentHalResource> responseEntity,
-                                       UUID documentId,
-                                       Permission permissionToCheck) {
+    public void checkUserPermission(ResponseEntity<StoredDocumentHalResource> responseEntity,
+                                       UUID documentId, Permission permissionToCheck,
+                                       String logMessage, String exceptionMessage) {
         String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
         validationUtils.validate(caseId);
 
@@ -457,8 +457,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             .getCaseDocumentMetadata(caseId, documentId)
             .orElseThrow(() -> new CaseNotFoundException(caseId));
 
-        return (documentPermissions.getId().equals(documentId.toString())
-            && documentPermissions.getPermissions().contains(permissionToCheck));
+        if (!documentPermissions.getId().equals(documentId.toString())
+            || !documentPermissions.getPermissions().contains(permissionToCheck)) {
+            log.error(logMessage, HttpStatus.FORBIDDEN);
+            throw new ForbiddenException(exceptionMessage);
+        }
     }
 
     @Override
@@ -478,16 +481,18 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public boolean checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId,
-                                                    String serviceId, Permission permission) {
+    public void checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId,
+                                                 String serviceId, Permission permission,
+                                                 String logMessage, String exceptionMessage) {
         AuthorisedService serviceConfig = getServiceDetailsFromJson(serviceId);
-        return validateCaseTypeId(serviceConfig, caseTypeId) && validateJurisdictionId(
-            serviceConfig,
-            jurisdictionId
-        ) && validatePermissions(
-            serviceConfig,
-            permission
-        );
+        if (!validateCaseTypeId(serviceConfig, caseTypeId)
+            || !validateJurisdictionId(serviceConfig, jurisdictionId)
+            || !validatePermissions(serviceConfig, permission)
+        ) {
+            log.error(logMessage, HttpStatus.FORBIDDEN);
+            throw new ForbiddenException(exceptionMessage);
+        }
+
     }
 
     private boolean validateCaseTypeId(AuthorisedService serviceConfig, String caseTypeId) {
