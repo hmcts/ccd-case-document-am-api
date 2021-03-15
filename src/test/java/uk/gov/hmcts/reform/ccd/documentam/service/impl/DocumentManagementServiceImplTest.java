@@ -51,6 +51,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -114,6 +115,7 @@ class DocumentManagementServiceImplTest {
         ReflectionTestUtils.setField(sut, "documentTtl", "600000");
         ReflectionTestUtils.setField(sut, "documentURL", "http://localhost:4506");
         ReflectionTestUtils.setField(sut, "salt", "AAAOA7A2AA6AAAA5");
+        ReflectionTestUtils.setField(sut, "hashCheckEnabled", true);
 
         final HttpHeaders headers = new HttpHeaders();
         headers.add(SERVICE_AUTHORIZATION, "123");
@@ -626,6 +628,36 @@ class DocumentManagementServiceImplTest {
 
         ResponseEntity responseEntity = sut.patchDocumentMetadata(caseDocumentsMetadata);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void shouldThrowForbiddenWhenHashTokenIsNotMatched() {
+        DocumentHashToken doc = DocumentHashToken.builder().id(MATCHED_DOCUMENT_ID)
+            .hashToken(ApplicationUtils.generateHashCode(
+                salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2)
+                    .concat(BEFTA_CASETYPE_2))).build();
+        List<DocumentHashToken> documentList = new ArrayList<>();
+        documentList.add(doc);
+
+        Map<String, String> myMetadata = new HashMap<>();
+        myMetadata.put("jurisdictionId", BEFTA_JURISDICTION_2);
+        // to generate different hashToken
+        myMetadata.put("caseTypeId", "DIFFERENT_CASETYPE");
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        storedDocumentHalResource.setMetadata(myMetadata);
+
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
+
+        CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
+            .caseId(CASE_ID)
+            .caseTypeId(BEFTA_CASETYPE_2)
+            .jurisdictionId(BEFTA_JURISDICTION_2)
+            .documentHashTokens(documentList)
+            .build();
+
+        assertThatExceptionOfType(ForbiddenException.class)
+            .isThrownBy(() -> sut.patchDocumentMetadata(caseDocumentsMetadata))
+            .withMessage(MATCHED_DOCUMENT_ID);
     }
 
 
