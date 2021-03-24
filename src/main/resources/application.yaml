@@ -93,8 +93,8 @@ ccd:
 
 documentTTL: ${DOCUMENT_TTL:3600000}
 
-documentStoreUrl: ${DOCUMENT_STORE_URL:http://localhost:4506}
-caseDataStoreUrl: ${CCD_DATA_STORE_URL:http://localhost:4452}
+documentStoreUrl: ${DM_STORE_BASE_URL:http://localhost:4506}
+caseDataStoreUrl: ${CCD_DATA_STORE_API_BASE_URL:http://localhost:4452}
 swaggerUrl: ${CASE_DOCUMENT_SWAGGER_AM_URL:localhost:4455}
 caseDocumentAmUrl: ${TEST_URL:http://localhost:4455}
 
