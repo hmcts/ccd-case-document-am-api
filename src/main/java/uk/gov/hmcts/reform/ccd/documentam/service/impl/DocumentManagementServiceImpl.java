@@ -202,11 +202,13 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
         for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashTokens()) {
 
-            if (hashCheckEnabled) {
+            if (documentHashToken.getHashToken() != null) {
                 String hashcodeFromStoredDocument = generateHashToken(UUID.fromString(documentHashToken.getId()));
                 if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
                     throw new ForbiddenException(UUID.fromString(documentHashToken.getId()));
                 }
+            } else if (hashCheckEnabled) {
+                throw new ForbiddenException("HashToken is not provided for the document:" + documentHashToken.getId());
             }
 
             Map<String, String> metadataMap = new HashMap<>();
