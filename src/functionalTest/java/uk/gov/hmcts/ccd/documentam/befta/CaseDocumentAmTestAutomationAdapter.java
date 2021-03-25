@@ -3,10 +3,13 @@ package uk.gov.hmcts.ccd.documentam.befta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.gov.hmcts.befta.BeftaTestDataLoader;
+import uk.gov.hmcts.befta.DefaultBeftaTestDataLoader;
 import uk.gov.hmcts.befta.DefaultTestAutomationAdapter;
 import uk.gov.hmcts.befta.dse.ccd.TestDataLoaderToDefinitionStore;
 import uk.gov.hmcts.befta.exception.FunctionalTestException;
 import uk.gov.hmcts.befta.player.BackEndFunctionalTestScenarioContext;
+import uk.gov.hmcts.befta.util.BeftaUtils;
 import uk.gov.hmcts.befta.util.EnvironmentVariableUtils;
 import uk.gov.hmcts.befta.util.ReflectionUtils;
 
@@ -17,9 +20,14 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
     private TestDataLoaderToDefinitionStore loader = new TestDataLoaderToDefinitionStore(this);
 
     @Override
-    public void doLoadTestData() {
-        loader.addCcdRoles();
-        loader.importDefinitions();
+    protected BeftaTestDataLoader buildTestDataLoader() {
+        return new DefaultBeftaTestDataLoader() {
+            @Override
+            public void doLoadTestData() {
+                CaseDocumentAmTestAutomationAdapter.this.loader.addCcdRoles();
+                CaseDocumentAmTestAutomationAdapter.this.loader.importDefinitions();
+            }
+        };
     }
 
     @Override
@@ -51,7 +59,8 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
                 .deepGetFieldInObject(scenarioContext,
                                      "childContexts.S-064_Get_Hash_Token.testData.actualResponse.body.hashToken");
 
-            scenarioContext.getScenario().write("previousHashToken: " + previousHashToken);
+            BeftaUtils.defaultLog(scenarioContext.getCurrentScenarioTag() + " previousHashToken: " + previousHashToken);
+
             if (newHashToken != null && !newHashToken.equalsIgnoreCase(previousHashToken)) {
                 return newHashToken;
             }
@@ -65,7 +74,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
         try {
             String binary = (String) ReflectionUtils.deepGetFieldInObject(scenarioContext,
                                                                           "testData.actualResponse.body.documents[0]._links.binary.href");
-            scenarioContext.getScenario().write("Binary: " + binary);
+            BeftaUtils.defaultLog(scenarioContext.getCurrentScenarioTag() + " Binary: " + binary);
             if (binary != null && binary.startsWith(docAmUrl + "/cases/documents/") && binary.endsWith("/binary")) {
                 return binary;
             }
@@ -79,7 +88,8 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
         try {
             String self = (String) ReflectionUtils.deepGetFieldInObject(scenarioContext,
                                                                         "testData.actualResponse.body.documents[0]._links.self.href");
-            scenarioContext.getScenario().write("Self: " + self);
+            BeftaUtils.defaultLog(scenarioContext.getCurrentScenarioTag() + " Self: " + self);
+
             if (self != null && self.startsWith(docAmUrl + "/cases/documents/")) {
                 return self;
             }
