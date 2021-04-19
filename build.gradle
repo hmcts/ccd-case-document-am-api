@@ -291,7 +291,7 @@ dependencies {
     exclude group: 'junit', module: 'junit'
   }
   
-  testImplementation (group: 'uk.gov.hmcts', name: 'befta-fw', version: '6.14.0-RDM-9765-1') {
+  testImplementation (group: 'uk.gov.hmcts', name: 'befta-fw', version: '6.14.0-RDM-9765-2') {
     exclude group: 'io.rest-assured', module : 'rest-assured'
   }
 
