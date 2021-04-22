@@ -87,9 +87,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private static AuthorisedServices authorisedServices;
 
     static {
-        InputStream inputStream = DocumentManagementServiceImpl.class.getClassLoader()
-            .getResourceAsStream("service_config.json");
-        try {
+        try (InputStream inputStream = DocumentManagementServiceImpl.class.getClassLoader()
+            .getResourceAsStream("service_config.json")) {
             authorisedServices = new ObjectMapper().readValue(inputStream, AuthorisedServices.class);
             log.info("services config loaded {}", authorisedServices);
         } catch (IOException e) {
