@@ -294,7 +294,6 @@ dependencies {
     exclude group: 'io.rest-assured', module : 'rest-assured'
   }
 
-
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '2.2.2.RELEASE'
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
   testImplementation group: 'io.rest-assured', name: 'json-path', version: versions.restAssured
