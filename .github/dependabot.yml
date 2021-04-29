@@ -1,0 +1,68 @@
+version: 2
+updates:
+- package-ecosystem: gradle
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: net.serenity-bdd:serenity-gradle-plugin
+    versions:
+    - 2.3.12
+    - 2.3.13
+    - 2.3.31
+    - 2.4.2
+  - dependency-name: org.apache.tomcat.embed:tomcat-embed-websocket
+    versions:
+    - 10.0.2
+    - 10.0.4
+  - dependency-name: org.apache.tomcat.embed:tomcat-embed-el
+    versions:
+    - 10.0.2
+    - 10.0.4
+  - dependency-name: org.apache.tomcat.embed:tomcat-embed-core
+    versions:
+    - 10.0.2
+    - 10.0.4
+  - dependency-name: org.springframework.boot
+    versions:
+    - 2.4.3
+    - 2.4.4
+  - dependency-name: com.fasterxml.jackson.core:jackson-databind
+    versions:
+    - 2.12.2
+  - dependency-name: com.fasterxml.jackson.datatype:jackson-datatype-jsr310
+    versions:
+    - 2.12.2
+  - dependency-name: org.json:json
+    versions:
+    - "20201115"
+  - dependency-name: uk.gov.hmcts:befta-fw
+    versions:
+    - 20.2.0.rdm.8934.1
+  - dependency-name: org.springframework:spring-tx
+    versions:
+    - 5.3.3
+    - 5.3.4
+  - dependency-name: org.springframework.cloud:spring-cloud-starter-netflix-hystrix
+    versions:
+    - 2.2.6.RELEASE
+    - 2.2.7.RELEASE
+  - dependency-name: io.rest-assured:rest-assured
+    versions:
+    - 4.3.3
+  - dependency-name: com.github.ben-manes.versions
+    versions:
+    - 0.36.0
+  - dependency-name: org.springframework.cloud:spring-cloud-starter-openfeign
+    versions:
+    - 3.0.1
+  - dependency-name: io.rest-assured:xml-path
+    versions:
+    - 4.3.1
+  - dependency-name: io.rest-assured:json-path
+    versions:
+    - 4.3.1
+  - dependency-name: info.solidsoft.gradle.pitest:gradle-pitest-plugin
+    versions:
+    - 1.5.2
