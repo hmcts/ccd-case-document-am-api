@@ -681,8 +681,11 @@ class DocumentManagementServiceImplTest {
 
         assertThatExceptionOfType(ForbiddenException.class)
             .isThrownBy(() -> sut.patchDocumentMetadata(caseDocumentsMetadata))
-            .withMessage(String.format(Constants.FORBIDDEN + ": %s",
-                                       "HashToken is not provided for the document:" + MATCHED_DOCUMENT_ID));
+            .withMessage(String.format(
+                Constants.FORBIDDEN + ": %s",
+                "Hash check is enabled but hashToken hasn't provided for the document:"
+                    + MATCHED_DOCUMENT_ID
+            ));
     }
 
     @Test

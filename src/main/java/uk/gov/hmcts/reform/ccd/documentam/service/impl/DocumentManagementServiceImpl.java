@@ -208,7 +208,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                     throw new ForbiddenException(UUID.fromString(documentHashToken.getId()));
                 }
             } else if (hashCheckEnabled) {
-                throw new ForbiddenException("HashToken is not provided for the document:" + documentHashToken.getId());
+                throw new ForbiddenException("Hash check is enabled but hashToken hasn't provided for the document:"
+                                                 + documentHashToken.getId());
             }
 
             Map<String, String> metadataMap = new HashMap<>();
