@@ -84,6 +84,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Value("${idam.s2s-auth.totp_secret}")
     protected String salt;
 
+    @Value("${hash.check.enabled}")
+    private boolean hashCheckEnabled;
+
     private static AuthorisedServices authorisedServices;
 
     static {
@@ -198,9 +201,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
         for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashTokens()) {
 
-            String hashcodeFromStoredDocument = generateHashToken(UUID.fromString(documentHashToken.getId()));
-            if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
-                throw new ForbiddenException(UUID.fromString(documentHashToken.getId()));
+            if (documentHashToken.getHashToken() != null) {
+                String hashcodeFromStoredDocument = generateHashToken(UUID.fromString(documentHashToken.getId()));
+                if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
+                    throw new ForbiddenException(UUID.fromString(documentHashToken.getId()));
+                }
+            } else if (hashCheckEnabled) {
+                throw new ForbiddenException("Hash check is enabled but hashToken hasn't provided for the document:"
+                                                 + documentHashToken.getId());
             }
 
             Map<String, String> metadataMap = new HashMap<>();
