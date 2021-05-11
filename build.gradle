@@ -19,7 +19,7 @@ plugins {
   id 'uk.gov.hmcts.java' version '0.12.2'
   id 'com.github.ben-manes.versions' version '0.36.0'
   id 'org.sonarqube' version '3.0'
-  id 'com.github.spacialcircumstances.gradle-cucumber-reporting' version '0.1.21'
+  id 'com.github.spacialcircumstances.gradle-cucumber-reporting' version '0.1.23'
 }
 
 apply plugin: 'java'
@@ -104,8 +104,10 @@ task functional(type: Test, description: 'Runs the functional tests.', group: 'V
     javaexec {
       main = "uk.gov.hmcts.ccd.documentam.befta.CaseDocumentAmBeftaMain"
       classpath += configurations.cucumberRuntime + sourceSets.functionalTest.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
-      args = ['--plugin', "json:${rootDir}/target/cucumber.json", '--tags', 'not @Ignore', '--glue',
-              'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features/']
+      args = ['--plugin', "json:${rootDir}/target/cucumber.json",
+              '--plugin', "junit:${buildDir}/test-results/functional/cucumber.xml",
+              '--tags', 'not @Ignore',
+              '--glue', 'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features/']
     }
   }
 
@@ -141,8 +143,10 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
     javaexec {
       main = "uk.gov.hmcts.ccd.documentam.befta.CaseDocumentAmBeftaMain"
       classpath += configurations.cucumberRuntime + sourceSets.functionalTest.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
-      args = ['--plugin', "json:${rootDir}/target/cucumber.json", '--tags', '@Smoke', '--glue',
-              'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features']
+      args = ['--plugin', "json:${rootDir}/target/cucumber.json",
+              '--plugin', "junit:${buildDir}/test-results/smoke/cucumber.xml",
+              '--tags', '@Smoke',
+              '--glue', 'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features']
     }
   }
 
@@ -226,7 +230,7 @@ repositories {
   jcenter()
   mavenCentral()
   maven {
-    url "https://dl.bintray.com/hmcts/hmcts-maven"
+    url "https://jitpack.io"
   }
   maven { url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
 }
@@ -237,6 +241,7 @@ dependencies {
   implementation "com.fasterxml.jackson.core:jackson-databind:2.11.1"
 
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+  implementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
 
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
@@ -286,7 +291,7 @@ dependencies {
   testImplementation (group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot) {
     exclude group: 'junit', module: 'junit'
   }
-  testImplementation (group: 'uk.gov.hmcts', name: 'befta-fw', version: '5.16.1') {
+  testImplementation (group: 'com.github.hmcts', name: 'befta-fw', version: '6.14.2') {
     exclude group: 'io.rest-assured', module : 'rest-assured'
   }
 
