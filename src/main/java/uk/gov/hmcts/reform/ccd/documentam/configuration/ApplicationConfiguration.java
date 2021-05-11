@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Clock;
+
 @Configuration
 public class ApplicationConfiguration {
 
@@ -32,4 +34,10 @@ public class ApplicationConfiguration {
             .setDefaultRequestConfig(config)
             .build();
     }
+
+    @Bean
+    public Clock utcClock() {
+        return Clock.systemUTC();
+    }
+
 }
