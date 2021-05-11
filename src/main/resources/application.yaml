@@ -28,7 +28,7 @@ spring:
   jackson:
     default-property-inclusion: NON_NULL
   config:
-    import: "optional:configtree:/mnt/secrets/ccd"
+    import: "optional:configtree:/mnt/secrets/ccd/"
   cloud:
     discovery:
       client:
