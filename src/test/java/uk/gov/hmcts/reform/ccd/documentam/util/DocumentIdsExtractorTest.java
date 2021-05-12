@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.hmcts.reform.ccd.documentam.TestConstants.RANDOM_UUID;
+import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.RANDOM_DOCUMENT_ID;
 
 class DocumentIdsExtractorTest {
 
@@ -48,7 +48,7 @@ class DocumentIdsExtractorTest {
 
         final List<DocumentHashToken> documentHashTokens = List.of(
             DocumentHashToken.builder()
-                .id(RANDOM_UUID.toString())
+                .id(RANDOM_DOCUMENT_ID)
                 .build()
         );
 
@@ -56,7 +56,7 @@ class DocumentIdsExtractorTest {
 
         assertThat(actualIds)
             .singleElement()
-            .isEqualTo(RANDOM_UUID.toString());
+            .isEqualTo(RANDOM_DOCUMENT_ID);
 
     }
 
@@ -89,7 +89,7 @@ class DocumentIdsExtractorTest {
 
         final List<DocumentHashToken> documentHashTokens = List.of(
             DocumentHashToken.builder()
-                .id(RANDOM_UUID.toString())
+                .id(RANDOM_DOCUMENT_ID)
                 .build(),
             DocumentHashToken.builder()
                 .build()
@@ -99,7 +99,7 @@ class DocumentIdsExtractorTest {
 
         assertThat(actualIds)
             .singleElement()
-            .isEqualTo(RANDOM_UUID.toString());
+            .isEqualTo(RANDOM_DOCUMENT_ID);
 
     }
 

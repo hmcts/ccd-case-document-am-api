@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.hmcts.reform.ccd.documentam.TestConstants.RANDOM_UUID;
+import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.CASE_ID_VALID_1;
+import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.RANDOM_DOCUMENT_ID;
 
 class AuditAspectTest {
 
@@ -37,12 +38,9 @@ class AuditAspectTest {
     @Test
     @DisplayName("Should populate audit context when single IDs")
     void shouldPopulateAuditContextWhenSingleIds() {
-        // GIVEN
-        final UUID documentId = RANDOM_UUID;
-
         // WHEN
         controllerProxy.getDocumentByDocumentId_LogSingleId(
-            documentId
+            RANDOM_DOCUMENT_ID
         );
         final AuditContext context = AuditContextHolder.getAuditContext();
 
@@ -51,7 +49,7 @@ class AuditAspectTest {
             .isNotNull()
             .satisfies(x -> {
                 assertThat(x.getAuditOperationType()).isEqualTo(AuditOperationType.GET_DOCUMENT_BY_DOCUMENT_ID);
-                assertThat(x.getDocumentIds()).singleElement().isEqualTo(documentId.toString());
+                assertThat(x.getDocumentIds()).singleElement().isEqualTo(RANDOM_DOCUMENT_ID);
             });
 
     }
@@ -76,7 +74,7 @@ class AuditAspectTest {
         // WHEN
         controllerProxy.patchMetaDataOnDocuments_LogListOfIds(
             CaseDocumentsMetadata.builder()
-                .caseId(RANDOM_UUID.toString())
+                .caseId(CASE_ID_VALID_1)
                 .documentHashTokens(documentHashTokens)
                 .build()
         );
@@ -88,7 +86,7 @@ class AuditAspectTest {
             .satisfies(x -> {
                 assertThat(x.getAuditOperationType()).isEqualTo(AuditOperationType.PATCH_METADATA_ON_DOCUMENTS);
                 assertThat(x.getDocumentIds()).isEqualTo(List.of(id1.toString(), id2.toString()));
-                assertThat(x.getCaseIds()).isEqualTo(List.of(RANDOM_UUID.toString()));
+                assertThat(x.getCaseIds()).isEqualTo(List.of(CASE_ID_VALID_1));
             });
 
     }
@@ -100,7 +98,7 @@ class AuditAspectTest {
             operationType = AuditOperationType.GET_DOCUMENT_BY_DOCUMENT_ID,
             documentId = "#documentId"
         )
-        public void getDocumentByDocumentId_LogSingleId(final UUID documentId) {
+        public void getDocumentByDocumentId_LogSingleId(final String documentId) {
         }
 
         @LogAudit(

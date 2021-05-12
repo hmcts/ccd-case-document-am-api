@@ -8,6 +8,7 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.util.ReflectionUtils;
 import reactor.util.function.Tuple3;
 import reactor.util.function.Tuples;
+import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -15,13 +16,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
-import static uk.gov.hmcts.reform.ccd.documentam.TestConstants.RANDOM_INT;
-import static uk.gov.hmcts.reform.ccd.documentam.TestConstants.RANDOM_LONG;
-import static uk.gov.hmcts.reform.ccd.documentam.TestConstants.RANDOM_STRING;
-import static uk.gov.hmcts.reform.ccd.documentam.TestConstants.RANDOM_UUID;
-import static uk.gov.hmcts.reform.ccd.documentam.TestConstants.TEST_STRING;
 
-class ExpressionEvaluatorTest {
+class ExpressionEvaluatorTest implements TestFixture {
 
     private final ExpressionEvaluator underTest = new ExpressionEvaluator();
 

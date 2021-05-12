@@ -43,6 +43,8 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
+import uk.gov.hmcts.reform.ccd.documentam.auditlog.LogAudit;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
@@ -95,6 +97,10 @@ public class CaseDocumentAmController {
             message = CASE_DOCUMENT_NOT_FOUND
         )
     })
+    @LogAudit(
+        operationType = AuditOperationType.GET_DOCUMENT_BY_DOCUMENT_ID,
+        documentId = "#documentId"
+    )
     public ResponseEntity<Object> getDocumentbyDocumentId(
         @PathVariable("documentId") UUID documentId,
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
@@ -136,7 +142,10 @@ public class CaseDocumentAmController {
             message = CASE_DOCUMENT_NOT_FOUND
         )
     })
-
+    @LogAudit(
+        operationType = AuditOperationType.GET_DOCUMENT_BINARY_CONTENT_BY_DOCUMENT_ID,
+        documentId = "#documentId"
+    )
     public ResponseEntity<Object> getDocumentBinaryContentbyDocumentId(
         @PathVariable("documentId") UUID documentId,
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
@@ -240,7 +249,10 @@ public class CaseDocumentAmController {
             message = CASE_DOCUMENT_NOT_FOUND
         )
     })
-
+    @LogAudit(
+        operationType = AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
+        documentId = "#documentId"
+    )
     public ResponseEntity<Object> patchDocumentbyDocumentId(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody UpdateDocumentCommand body,
@@ -297,7 +309,11 @@ public class CaseDocumentAmController {
             message = CASE_DOCUMENT_NOT_FOUND
         )
     })
-
+    @LogAudit(
+        operationType = AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
+        documentIds = "T(uk.gov.hmcts.reform.ccd.documentam.util.DocumentIdsExtractor).extractIds(#caseDocumentsMetadata.documentHashTokens)",
+        caseId = "#caseDocumentsMetadata.caseId"
+    )
     public ResponseEntity<Object> patchMetaDataOnDocuments(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody CaseDocumentsMetadata caseDocumentsMetadata,
@@ -350,6 +366,10 @@ public class CaseDocumentAmController {
             message = CASE_DOCUMENT_NOT_FOUND
         )
     })
+    @LogAudit(
+        operationType = AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
+        documentId = "#documentId"
+    )
     public ResponseEntity<Object> deleteDocumentbyDocumentId(
         @PathVariable("documentId") UUID documentId,
         @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false") Boolean permanent,
@@ -387,7 +407,10 @@ public class CaseDocumentAmController {
             message = CASE_DOCUMENT_NOT_FOUND
         )
     })
-
+    @LogAudit(
+        operationType = AuditOperationType.GENERATE_HASH_CODE,
+        documentId = "#documentId"
+    )
     public ResponseEntity<Object> generateHashCode(@PathVariable("documentId") UUID documentId,
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) String s2sToken) {
