@@ -13,6 +13,8 @@ public class AuditEntry {
 
     private String idamId;
     private String invokingService;
+    private String jurisdiction;
+    private String caseType;
 
     private int httpStatus;
     private String httpMethod;

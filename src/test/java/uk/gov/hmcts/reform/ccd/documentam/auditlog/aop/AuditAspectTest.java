@@ -7,6 +7,7 @@ import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.aop.framework.AopProxy;
 import org.springframework.aop.framework.DefaultAopProxyFactory;
 import org.springframework.stereotype.Controller;
+import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.LogAudit;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
@@ -16,10 +17,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.CASE_ID_VALID_1;
-import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.RANDOM_DOCUMENT_ID;
 
-class AuditAspectTest {
+class AuditAspectTest implements TestFixture {
 
     private final AuditAspect aspect = new AuditAspect();
     private TestController controllerProxy;
@@ -39,16 +38,14 @@ class AuditAspectTest {
     @DisplayName("Should populate audit context when single IDs")
     void shouldPopulateAuditContextWhenSingleIds() {
         // WHEN
-        controllerProxy.getDocumentByDocumentId_LogSingleId(
-            RANDOM_DOCUMENT_ID
-        );
+        controllerProxy.getDocumentByDocumentId_LogSingleId(RANDOM_DOCUMENT_ID);
         final AuditContext context = AuditContextHolder.getAuditContext();
 
         // THEN
         assertThat(context)
             .isNotNull()
             .satisfies(x -> {
-                assertThat(x.getAuditOperationType()).isEqualTo(AuditOperationType.GET_DOCUMENT_BY_DOCUMENT_ID);
+                assertThat(x.getAuditOperationType()).isEqualTo(AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID);
                 assertThat(x.getDocumentIds()).singleElement().isEqualTo(RANDOM_DOCUMENT_ID);
             });
 
@@ -92,10 +89,11 @@ class AuditAspectTest {
     }
 
     @Controller
+    @SuppressWarnings("unused")
     static class TestController {
 
         @LogAudit(
-            operationType = AuditOperationType.GET_DOCUMENT_BY_DOCUMENT_ID,
+            operationType = AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
             documentId = "#documentId"
         )
         public void getDocumentByDocumentId_LogSingleId(final String documentId) {
@@ -103,7 +101,8 @@ class AuditAspectTest {
 
         @LogAudit(
             operationType = AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
-            documentIds = "T(uk.gov.hmcts.reform.ccd.documentam.util.DocumentIdsExtractor).extractIds(#caseDocumentsMetadata.documentHashTokens)",
+            documentIds = "T(uk.gov.hmcts.reform.ccd.documentam.util.DocumentIdsExtractor)"
+                + ".extractIds(#caseDocumentsMetadata.documentHashTokens)",
             caseId = "#caseDocumentsMetadata.caseId"
         )
         public void patchMetaDataOnDocuments_LogListOfIds(final CaseDocumentsMetadata caseDocumentsMetadata) {

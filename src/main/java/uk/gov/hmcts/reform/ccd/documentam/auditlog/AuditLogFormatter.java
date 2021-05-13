@@ -16,7 +16,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Component
 public class AuditLogFormatter {
 
-    public static final String TAG = "LA-CPO";
+    private static final String TAG = "LA-CDAM";
 
     private static final String COMMA = ",";
     private static final String COLON = ":";
@@ -37,6 +37,8 @@ public class AuditLogFormatter {
             getPair("endpointCalled", entry.getHttpMethod() + " " + entry.getRequestPath()),
             getPair("operationalOutcome", String.valueOf(entry.getHttpStatus())),
             getPair("documentId", commaSeparatedList(entry.getDocumentIds())),
+            getPair("jurisdiction", entry.getJurisdiction()),
+            getPair("caseType", entry.getCaseType()),
             getPair("caseId", commaSeparatedList(entry.getCaseIds())),
             getPair("X-Request-ID", entry.getRequestId())
         );

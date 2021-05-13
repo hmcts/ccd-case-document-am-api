@@ -34,4 +34,16 @@ public @interface LogAudit {
      */
     String caseIds() default "";
 
+
+    /**
+     * Expression to parse when loading the Jurisdiction ID from a string value.
+     */
+    String jurisdiction() default "";
+
+
+    /**
+     * Expression to parse when loading the Case Type ID from a string value.
+     */
+    String caseType() default "";
+
 }

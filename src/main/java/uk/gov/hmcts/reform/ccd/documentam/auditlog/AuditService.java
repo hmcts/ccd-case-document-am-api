@@ -47,6 +47,8 @@ public class AuditService {
                                    ? auditContext.getAuditOperationType().getLabel() : null);
         entry.setDocumentIds(auditContext.getDocumentIds());
         entry.setCaseIds(auditContext.getCaseIds());
+        entry.setJurisdiction(auditContext.getJurisdiction());
+        entry.setCaseType(auditContext.getCaseType());
 
         auditRepository.save(entry);
     }

@@ -63,7 +63,7 @@ class AuditServiceTest implements TestFixture {
 
         // GIVEN
         final AuditContext auditContext = AuditContext.auditContextWith()
-            .auditOperationType(AuditOperationType.GET_DOCUMENT_BINARY_CONTENT_BY_DOCUMENT_ID)
+            .auditOperationType(AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID)
             .invokingService(INVOKING_SERVICE)
             .httpMethod(HttpMethod.GET.name())
             .httpStatus(HttpStatus.OK.value())

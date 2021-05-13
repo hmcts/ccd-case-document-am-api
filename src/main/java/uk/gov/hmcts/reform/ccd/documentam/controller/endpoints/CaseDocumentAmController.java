@@ -98,7 +98,7 @@ public class CaseDocumentAmController {
         )
     })
     @LogAudit(
-        operationType = AuditOperationType.GET_DOCUMENT_BY_DOCUMENT_ID,
+        operationType = AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
         documentId = "#documentId"
     )
     public ResponseEntity<Object> getDocumentbyDocumentId(
@@ -143,7 +143,7 @@ public class CaseDocumentAmController {
         )
     })
     @LogAudit(
-        operationType = AuditOperationType.GET_DOCUMENT_BINARY_CONTENT_BY_DOCUMENT_ID,
+        operationType = AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
         documentId = "#documentId"
     )
     public ResponseEntity<Object> getDocumentBinaryContentbyDocumentId(
@@ -191,12 +191,16 @@ public class CaseDocumentAmController {
             message = CLASSIFICATION_ID_INVALID
         )
     })
-
+    @LogAudit(
+        operationType = AuditOperationType.UPLOAD_DOCUMENTS,
+        caseType = "#caseTypeId",
+        jurisdiction = "#jurisdictionId"
+    )
     public ResponseEntity<Object> uploadDocuments(
 
         @ApiParam(value = "List of file to be uploaded", required = true)
         @NotNull(message = "Provide some file to be uploaded.")
-        @Size(min = 1, message = "Please provide atleast one file to be uploaded.")
+        @Size(min = 1, message = "Please provide at least one file to be uploaded.")
         @RequestParam(value = "files", required = true) List<MultipartFile> files,
 
         @ApiParam(value = "Security classification for the file", required = true)
@@ -311,7 +315,8 @@ public class CaseDocumentAmController {
     })
     @LogAudit(
         operationType = AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
-        documentIds = "T(uk.gov.hmcts.reform.ccd.documentam.util.DocumentIdsExtractor).extractIds(#caseDocumentsMetadata.documentHashTokens)",
+        documentIds = "T(uk.gov.hmcts.reform.ccd.documentam.util.DocumentIdsExtractor)"
+            + ".extractIds(#caseDocumentsMetadata.documentHashTokens)",
         caseId = "#caseDocumentsMetadata.caseId"
     )
     public ResponseEntity<Object> patchMetaDataOnDocuments(

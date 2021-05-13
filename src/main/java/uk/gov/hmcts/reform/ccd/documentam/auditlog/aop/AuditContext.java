@@ -24,5 +24,7 @@ public class AuditContext {
     private String requestId;
 
     private String invokingService;
+    private String jurisdiction;
+    private String caseType;
 
 }

@@ -19,6 +19,8 @@ public interface TestFixture {
     String REQUEST_ID = "Test Request ID";
     String REQUEST_PATH = "/test_path";
     String CREATED_BY = "createdBy";
+    String JURISDICTION = "Test-Jurisdiction";
+    String CASE_TYPE = "Test-Case-Type";
 
     static String generateRandomString() {
         final byte[] array = new byte[10];
