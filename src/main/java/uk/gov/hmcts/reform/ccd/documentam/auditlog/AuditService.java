@@ -46,7 +46,7 @@ public class AuditService {
         entry.setOperationType(auditContext.getAuditOperationType() != null
                                    ? auditContext.getAuditOperationType().getLabel() : null);
         entry.setDocumentIds(auditContext.getDocumentIds());
-        entry.setCaseIds(auditContext.getCaseIds());
+        entry.setCaseId(auditContext.getCaseId());
         entry.setJurisdiction(auditContext.getJurisdiction());
         entry.setCaseType(auditContext.getCaseType());
 

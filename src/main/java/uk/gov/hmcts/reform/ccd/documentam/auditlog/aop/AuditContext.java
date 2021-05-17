@@ -15,7 +15,7 @@ import java.util.List;
 public class AuditContext {
 
     private List<String> documentIds;
-    private List<String> caseIds;
+    private String caseId;
     private AuditOperationType auditOperationType;
 
     private int httpStatus;

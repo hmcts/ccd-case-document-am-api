@@ -39,7 +39,7 @@ public class AuditLogFormatter {
             getPair("documentId", commaSeparatedList(entry.getDocumentIds())),
             getPair("jurisdiction", entry.getJurisdiction()),
             getPair("caseType", entry.getCaseType()),
-            getPair("caseId", commaSeparatedList(entry.getCaseIds())),
+            getPair("caseId", entry.getCaseId()),
             getPair("X-Request-ID", entry.getRequestId())
         );
 

@@ -71,7 +71,7 @@ class AuditAspectTest implements TestFixture {
         // WHEN
         controllerProxy.patchMetaDataOnDocuments_LogListOfIds(
             CaseDocumentsMetadata.builder()
-                .caseId(CASE_ID_VALID_1)
+                .caseId(VALID_CASE_ID)
                 .documentHashTokens(documentHashTokens)
                 .build()
         );
@@ -83,7 +83,7 @@ class AuditAspectTest implements TestFixture {
             .satisfies(x -> {
                 assertThat(x.getAuditOperationType()).isEqualTo(AuditOperationType.PATCH_METADATA_ON_DOCUMENTS);
                 assertThat(x.getDocumentIds()).isEqualTo(List.of(id1.toString(), id2.toString()));
-                assertThat(x.getCaseIds()).isEqualTo(List.of(CASE_ID_VALID_1));
+                assertThat(x.getCaseId()).isEqualTo(VALID_CASE_ID);
             });
 
     }

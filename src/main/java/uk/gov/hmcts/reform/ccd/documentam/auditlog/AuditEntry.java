@@ -22,6 +22,6 @@ public class AuditEntry {
     private String requestId;
 
     private List<String> documentIds;
-    private List<String> caseIds;
+    private String caseId;
 
 }

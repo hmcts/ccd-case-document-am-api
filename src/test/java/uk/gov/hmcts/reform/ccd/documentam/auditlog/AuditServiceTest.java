@@ -150,10 +150,9 @@ class AuditServiceTest implements TestFixture {
 
         // GIVEN
         final List<String> documentIds = List.of(DOCUMENT_ID_1, DOCUMENT_ID_2);
-        final List<String> caseIds = List.of(CASE_ID_VALID_1, CASE_ID_VALID_2);
         final AuditContext auditContext = AuditContext.auditContextWith()
             .documentIds(documentIds)
-            .caseIds(caseIds)
+            .caseId(VALID_CASE_ID)
             .build();
         given(securityUtils.getUserInfo()).willReturn(userInfo);
 
@@ -168,7 +167,7 @@ class AuditServiceTest implements TestFixture {
             .isNotNull()
             .satisfies(x -> {
                 assertThat(x.getDocumentIds()).hasSameElementsAs(documentIds);
-                assertThat(x.getCaseIds()).hasSameElementsAs(caseIds);
+                assertThat(x.getCaseId()).isEqualTo(VALID_CASE_ID);
             });
     }
 

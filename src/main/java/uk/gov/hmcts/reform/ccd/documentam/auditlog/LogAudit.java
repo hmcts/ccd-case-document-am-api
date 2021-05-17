@@ -30,12 +30,6 @@ public @interface LogAudit {
     String caseId() default "";
 
     /**
-     * Expression to parse when loading a list of Case IDs.
-     */
-    String caseIds() default "";
-
-
-    /**
      * Expression to parse when loading the Jurisdiction ID from a string value.
      */
     String jurisdiction() default "";

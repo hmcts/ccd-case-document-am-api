@@ -51,7 +51,7 @@ class AuditLogFormatterTest implements TestFixture {
         auditEntry.setRequestPath(REQUEST_PATH);
         auditEntry.setDocumentIds(List.of(RANDOM_DOCUMENT_ID));
         auditEntry.setJurisdiction(JURISDICTION);
-        auditEntry.setCaseIds(List.of(CASE_ID_VALID_1));
+        auditEntry.setCaseId(VALID_CASE_ID);
         auditEntry.setCaseType(CASE_TYPE);
         auditEntry.setRequestId(REQUEST_ID);
 
@@ -71,7 +71,7 @@ class AuditLogFormatterTest implements TestFixture {
                            + "documentId:" + RANDOM_DOCUMENT_ID + ","
                            + "jurisdiction:" + JURISDICTION + ","
                            + "caseType:" + CASE_TYPE + ","
-                           + "caseId:" + CASE_ID_VALID_1 + ","
+                           + "caseId:" + VALID_CASE_ID + ","
                            + "X-Request-ID:" + REQUEST_ID);
     }
 
@@ -111,7 +111,7 @@ class AuditLogFormatterTest implements TestFixture {
         auditEntry.setHttpStatus(HttpStatus.OK.value());
         auditEntry.setRequestPath(REQUEST_PATH);
         auditEntry.setDocumentIds(List.of(DOCUMENT_ID_1, DOCUMENT_ID_2));
-        auditEntry.setCaseIds(List.of(CASE_ID_VALID_1, CASE_ID_VALID_2));
+        auditEntry.setCaseId(VALID_CASE_ID);
 
         // WHEN
         final String result = underTest.format(auditEntry);
@@ -125,7 +125,7 @@ class AuditLogFormatterTest implements TestFixture {
                 + "endpointCalled:GET " + REQUEST_PATH + ","
                 + "operationalOutcome:200,"
                 + "documentId:" + DOCUMENT_ID_1 + "," + DOCUMENT_ID_2 + ","
-                + "caseId:" + CASE_ID_VALID_1 + "," + CASE_ID_VALID_2
+                + "caseId:" + VALID_CASE_ID
         );
     }
 
@@ -140,7 +140,7 @@ class AuditLogFormatterTest implements TestFixture {
         auditEntry.setHttpStatus(HttpStatus.OK.value());
         auditEntry.setRequestPath(REQUEST_PATH);
         auditEntry.setDocumentIds(List.of(DOCUMENT_ID_1, DOCUMENT_ID_2, RANDOM_DOCUMENT_ID));
-        auditEntry.setCaseIds(List.of(CASE_ID_VALID_1, CASE_ID_VALID_2, CASE_ID_VALID_3));
+        auditEntry.setCaseId(VALID_CASE_ID);
 
         int auditLogMaxListSize = 2;
         underTest = new AuditLogFormatter(auditLogMaxListSize);
@@ -157,7 +157,7 @@ class AuditLogFormatterTest implements TestFixture {
                 + "endpointCalled:GET " + REQUEST_PATH + ","
                 + "operationalOutcome:200,"
                 + "documentId:" + DOCUMENT_ID_1 + "," + DOCUMENT_ID_2 + ","
-                + "caseId:" + CASE_ID_VALID_1 + "," + CASE_ID_VALID_2
+                + "caseId:" + VALID_CASE_ID
         );
     }
 
