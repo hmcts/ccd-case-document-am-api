@@ -141,8 +141,6 @@ class ExpressionEvaluatorTest implements TestFixture {
         }
     }
 
-    // @Data
-    // @AllArgsConstructor
     @SuppressWarnings("unused")
     private static class SampleBean {
         private final UUID fieldA;
