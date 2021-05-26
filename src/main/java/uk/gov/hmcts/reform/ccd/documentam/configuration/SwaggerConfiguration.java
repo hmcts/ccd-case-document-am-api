@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.ccd.documentam.configuration;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -21,12 +20,6 @@ import java.util.Arrays;
 @EnableSwagger2
 public class SwaggerConfiguration {
 
-    public static final String STRING = "string";
-    public static final String HEADER = "header";
-
-    @Value("${swaggerUrl}")
-    private  String host;
-
     @Bean
     public Docket apiV2() {
         return new Docket(DocumentationType.SWAGGER_2)
@@ -39,7 +32,6 @@ public class SwaggerConfiguration {
             .build()
             .useDefaultResponseMessages(false)
             .apiInfo(apiV2Info())
-            .host(host)
             .globalRequestParameters(Arrays.asList(
                 headerServiceAuthorization(),
                 headerAuthorization()
