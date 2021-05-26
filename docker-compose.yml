@@ -14,7 +14,6 @@ services:
       IDAM_API_URL: http://idam-api:5000
       IDAM_OIDC_URL: http://idam-api:5000
       S2S_URL: http://service-auth-provider-api:8080
-      JAVA_TOOL_OPTIONS: -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
     ports:
       - 4455:4455
     networks:
