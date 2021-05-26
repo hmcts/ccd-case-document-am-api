@@ -56,7 +56,7 @@ idam:
     url: ${IDAM_API_URL:http://localhost:5000}
   s2s-auth:
     microservice: ccd_case_document_am_api
-    totp_secret: ${ccd.ccd-case-document-am-api-s2s-secret:CNTOE7D2NX6XHBKT}
+    totp_secret: ${CASE_DOCUMENT_AM_API_S2S_SECRET:CNTOE7D2NX6XHBKT}
     url: ${S2S_URL:http://localhost:4502}
   s2s-authorised:
     services: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor}

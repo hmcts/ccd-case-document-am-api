@@ -6,8 +6,10 @@ java:
   keyVaults:
     ccd:
       secrets:
-        - ccd-case-document-am-api-s2s-secret
-        - AppInsightsInstrumentationKey
+        - name: AppInsightsInstrumentationKey
+          alias: azure.application-insights.instrumentation-key
+        - name: ccd-case-document-am-api-s2s-secret
+          alias: CASE_DOCUMENT_AM_API_S2S_SECRET
   environment:
     IDAM_API_URL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
     IDAM_OIDC_URL: https://idam-web-public.{{ .Values.global.environment }}.platform.hmcts.net
