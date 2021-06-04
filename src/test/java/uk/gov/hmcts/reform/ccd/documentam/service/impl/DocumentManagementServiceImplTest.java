@@ -21,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
@@ -51,6 +52,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -595,6 +597,79 @@ class DocumentManagementServiceImplTest {
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
+    @Test
+    void shouldThrowForbiddenWhenTokenIsNotMatched() {
+
+        Map<String, String> myMetadata = new HashMap<>();
+        myMetadata.put("jurisdictionId", BEFTA_JURISDICTION_2);
+        // to generate different hashToken
+        myMetadata.put("caseTypeId", "DIFFERENT_CASETYPE");
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        storedDocumentHalResource.setMetadata(myMetadata);
+
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
+
+        DocumentHashToken doc = DocumentHashToken.builder().id(MATCHED_DOCUMENT_ID)
+            .hashToken(ApplicationUtils.generateHashCode(
+                salt.concat(MATCHED_DOCUMENT_ID).concat(BEFTA_JURISDICTION_2)
+                    .concat(BEFTA_CASETYPE_2))).build();
+
+        CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
+            .caseId(CASE_ID)
+            .caseTypeId(BEFTA_CASETYPE_2)
+            .jurisdictionId(BEFTA_JURISDICTION_2)
+            .documentHashTokens(List.of(doc))
+            .build();
+
+        assertThatExceptionOfType(ForbiddenException.class)
+            .isThrownBy(() -> sut.patchDocumentMetadata(caseDocumentsMetadata))
+            .withMessage(MATCHED_DOCUMENT_ID);
+    }
+
+    @Test
+    void shouldThrowForbiddenWhenTokenIsNotPassed_hashCheckEnabled() {
+
+        ReflectionTestUtils.setField(sut, "hashCheckEnabled", true);
+
+        Map<String, String> myMetadata = new HashMap<>();
+        myMetadata.put("jurisdictionId", BEFTA_JURISDICTION_2);
+        myMetadata.put("caseTypeId", BEFTA_CASETYPE_2);
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        storedDocumentHalResource.setMetadata(myMetadata);
+
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
+
+        CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
+            .caseId(CASE_ID)
+            .caseTypeId(BEFTA_CASETYPE_2)
+            .jurisdictionId(BEFTA_JURISDICTION_2)
+            .documentHashTokens(List.of(DocumentHashToken.builder().id(MATCHED_DOCUMENT_ID).build()))
+            .build();
+
+        assertThatExceptionOfType(ForbiddenException.class)
+            .isThrownBy(() -> sut.patchDocumentMetadata(caseDocumentsMetadata))
+            .withMessage(String.format(
+                Constants.FORBIDDEN + ": %s",
+                "Hash check is enabled but hashToken hasn't provided for the document:"
+                    + MATCHED_DOCUMENT_ID
+            ));
+    }
+
+    @Test
+    void shouldPatchMetaDataEvenIfTokenIsNotPassed_hashCheckDisabled() {
+
+        ReflectionTestUtils.setField(sut, "hashCheckEnabled", false);
+
+        CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
+            .caseId(CASE_ID)
+            .caseTypeId(BEFTA_CASETYPE_2)
+            .jurisdictionId(BEFTA_JURISDICTION_2)
+            .documentHashTokens(List.of(DocumentHashToken.builder().id(MATCHED_DOCUMENT_ID).build()))
+            .build();
+
+        ResponseEntity responseEntity = sut.patchDocumentMetadata(caseDocumentsMetadata);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    }
 
     @Test
     void patchDocumentMetadata_Throws_NotFoundException() {

@@ -86,13 +86,15 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     protected String salt;
 
     private final CaseDataStoreService caseDataStoreService;
+    
+   @Value("${hash.check.enabled}")
+    private boolean hashCheckEnabled;
 
     private static AuthorisedServices authorisedServices;
 
     static {
-        InputStream inputStream = DocumentManagementServiceImpl.class.getClassLoader()
-            .getResourceAsStream("service_config.json");
-        try {
+        try (InputStream inputStream = DocumentManagementServiceImpl.class.getClassLoader()
+            .getResourceAsStream("service_config.json")) {
             authorisedServices = new ObjectMapper().readValue(inputStream, AuthorisedServices.class);
             log.info("services config loaded {}", authorisedServices);
         } catch (IOException e) {
@@ -205,9 +207,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
         for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashTokens()) {
 
-            String hashcodeFromStoredDocument = generateHashToken(UUID.fromString(documentHashToken.getId()));
-            if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
-                throw new ForbiddenException(UUID.fromString(documentHashToken.getId()));
+            if (documentHashToken.getHashToken() != null) {
+                String hashcodeFromStoredDocument = generateHashToken(UUID.fromString(documentHashToken.getId()));
+                if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
+                    throw new ForbiddenException(UUID.fromString(documentHashToken.getId()));
+                }
+            } else if (hashCheckEnabled) {
+                throw new ForbiddenException("Hash check is enabled but hashToken hasn't provided for the document:"
+                                                 + documentHashToken.getId());
             }
 
             Map<String, String> metadataMap = new HashMap<>();

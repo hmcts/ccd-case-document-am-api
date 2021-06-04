@@ -4,7 +4,7 @@ Feature: F-002: Get Document Binary Content by Document ID
   Background: Load test data for the scenario
     Given an appropriate test context as detailed in the test data source
 
-  @S-020 @Ignore # see RDM-11396
+  @S-020
   Scenario: must successfully receive a document's binary content
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
     And   a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
@@ -34,7 +34,7 @@ Feature: F-002: Get Document Binary Content by Document ID
     Then a negative response is received,
     And the response has all the details as expected.
 
-  @S-023 @Ignore # see RDM-11396
+  @S-023
   Scenario: must receive an error response for an active caseworker who does not have document access
     Given a user with [an active caseworker profile in CCD with limited permissions on a document field],
     And   a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],

@@ -38,8 +38,8 @@ The following environment variables are required:
       |CCD_DOCUMENT_API_IDAM_KEY|
       |DEFINITION_STORE_HOST|
       |USER_PROFILE_HOST|
-      |DOCUMENT_STORE_URL| http://dm-store:8080|
-      |CCD_DATA_STORE_URL| http://ccd-data-store-api:4452|
+      |DM_STORE_BASE_URL| http://dm-store:8080|
+      |CCD_DATA_STORE_API_BASE_URL| http://ccd-data-store-api:4452|
       |AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY|
       |IDAM_USER_URL| http://idam-api:5000 |
       |IDAM_S2S_URL| http://service-auth-provider-api:8080|
@@ -147,11 +147,11 @@ export BEFTA_S2S_CLIENT_SECRET_OF_CCD_DATA=AAAAAAAAAAAAAAAB
 export CASE_DOCUMENT_AM_URL=http://localhost:4455
 export BEFTA_S2S_CLIENT_ID_OF_BULK_SCAN_PROCESSOR=bulk_scan_processor
 export BEFTA_S2S_CLIENT_SECRET_OF_BULK_SCAN_PROCESSOR=AAAAAAAAAAAAAAAA
-export CCD_DATA_STORE_URL=http://localhost:4452
+export CCD_DATA_STORE_API_BASE_URL=http://localhost:4452
 export CCD_DM_DOMAIN=http://localhost:4455
 export BEFTA_S2S_CLIENT_ID_OF_XUI_WEBAPP=xui_webapp
 export BEFTA_S2S_CLIENT_SECRET_OF_XUI_WEBAPP=AAAAAAAAAAAAAAAA
-export DOCUMENT_STORE_URL=http://localhost:4506
+export DM_STORE_BASE_URL=http://localhost:4506
 ```
 
 These tests also rely on the `CCD_BEFTA_JURISDICTION2.xlsx` file to be already imported. This file should be available in your local environment already.

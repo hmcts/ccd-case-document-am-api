@@ -3,7 +3,7 @@
   "productName": "CCD Data Store",
   "operationName": "Submit case creation as Case worker",
   "method": "POST",
-  "uri": "{{CCD_DATA_STORE_URL}}/case-types/{ctid}/cases",
+  "uri": "{{CCD_DATA_STORE_API_BASE_URL}}/case-types/{ctid}/cases",
   "specs": [
     "by a privileged user with full ACL to create a case of this case type",
     "to create a case of this case type"
