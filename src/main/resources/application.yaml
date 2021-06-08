@@ -1,6 +1,14 @@
 server:
   port: ${PORT:4455}
 
+audit:
+  log:
+    enabled: true
+    ignore:
+      # http statuses with comma separated to ignore audit logs
+      statuses:
+    max-list-size: 10
+
 management:
   endpoint:
     health:
