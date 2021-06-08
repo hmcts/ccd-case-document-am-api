@@ -1,0 +1,25 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/o/userinfo"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "sub": "user@hmcts.net",
+      "uid": "445",
+      "roles": [
+        "caseworker-test",
+        "pui-caa"
+      ],
+      "name": "Cloud Strife",
+      "given_name": "Cloud",
+      "family_name": "Strife"
+    }
+  }
+}
+
+
