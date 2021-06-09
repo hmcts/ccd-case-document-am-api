@@ -81,12 +81,18 @@ public class CaseDocumentAmControllerIT extends BaseTest {
 
     private static final String SERVICE_AUTHORISATION_KEY = "ServiceAuthorization";
     private static final String BEARER = "Bearer ";
-    private static final String TOKEN = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJjY2RfZ3ciLCJleHAiOjE1ODM0NDUyOTd9.WWRzROlKxLQCJw5h0h0dHb9hHfbBhF2Idwv1z4L4FnqSw3VZ38ZRLuDmwr3tj-8oOv6EfLAxV0dJAPtUT203Iw";
+    private static final String TOKEN = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJjY2RfZ3ciLCJleHAiOjE1ODM0NDUyOTd9"
+        + ".WWRzROlKxLQCJw5h0h0dHb9hHfbBhF2Idwv1z4L4FnqSw3VZ38ZRLuDmwr3tj-8oOv6EfLAxV0dJAPtUT203Iw";
     private static final String SERVICE_AUTHORISATION_VALUE = BEARER + TOKEN;
 
 
     @Test
     void shouldSuccessfullyUploadDocument() throws Exception {
+
+        stubDocumentUrl();
+        stubUploadDocument();
+        stubDocumentManagementUploadDocument();
+
         MockMultipartFile firstFile =
             new MockMultipartFile("files", "filename.txt",
                                   "text/plain", "some xml".getBytes());
@@ -96,10 +102,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         MockMultipartFile jsonFile =
             new MockMultipartFile("json", "",
                                   MediaType.APPLICATION_JSON_VALUE, "{\"json\": \"someValue\"}".getBytes());
-
-        stubDocumentUrl();
-        stubUploadDocument();
-        stubDocumentManagementUploadDocument();
 
         MockMvc mockMvcBuilder
             = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
@@ -246,7 +248,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
             .andReturn();
     }
 
-    private static void stubDocumentUrl(){
+    private static void stubDocumentUrl() {
         CaseDocumentMetadata caseDocumentMetadata = new CaseDocumentMetadata();
         caseDocumentMetadata.setCaseId(CASE_ID);
 
@@ -271,7 +273,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         );
     }
 
-    private static void stubUploadDocument(){
+    private static void stubUploadDocument() {
         stubFor(WireMock.post(WireMock.urlPathEqualTo(MAIN_URL))
                     .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
                     .willReturn(aResponse()
@@ -279,7 +281,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                                     .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
     }
 
-    private static void stubDocumentManagementUploadDocument(){
+    private static void stubDocumentManagementUploadDocument() {
         stubFor(WireMock.post(WireMock.urlPathEqualTo("/documents"))
                     .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
                     .willReturn(aResponse()
@@ -333,7 +335,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                                     .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
     }
 
-    private StoredDocumentHalResource getStoredDocumentResource(){
+    private StoredDocumentHalResource getStoredDocumentResource() {
 
         HashMap<String, String> metaData = new HashMap<>();
         metaData.put(CASE_ID_KEY, CASE_ID);
@@ -350,7 +352,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         return storedDocumentHalResource;
     }
 
-    private StoredDocumentHalResource getStoredDocumentResourceToUpdatePatch(Date time){
+    private StoredDocumentHalResource getStoredDocumentResourceToUpdatePatch(Date time) {
         HashMap<String, String> metaData = new HashMap<>();
         metaData.put("size", "10");
         metaData.put("createdBy", USER_ID);
