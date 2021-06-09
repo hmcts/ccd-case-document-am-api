@@ -37,7 +37,9 @@ import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static org.hamcrest.CoreMatchers.is;
@@ -64,7 +66,8 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     private static final String MAIN_URL = "/cases/documents";
     private static final String ATTACH_TO_CASE_URL = "/attachToCase";
     private static final String DOCUMENTS_URL = "/documents/";
-    private static final String SERVICE_NAME = "xui_webapp";
+    private static final String SERVICE_NAME_XUI_WEBAPP = "xui_webapp";
+    private static final String SERVICE_NAME_CCD_DATA = "ccd_data";
 
     private static final String CASE_ID_KEY = "caseId";
     private static final String CLASSIFICATION_KEY = "classification";
@@ -109,13 +112,12 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                             .file(firstFile)
                             .file(secondFile)
                             .file(jsonFile)
-                            .headers(createHttpHeaders(SERVICE_NAME))
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
                             .param(CLASSIFICATION_KEY, CLASSIFICATION)
                             .param(CASE_TYPE_ID_KEY, CASE_TYPE_ID)
                             .param(JURISDICTION_ID_KEY, JURISDICTION_ID)
                             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
-            .andExpect(status().isOk())
-            .andReturn();
+            .andExpect(status().isOk());
     }
 
 
@@ -129,14 +131,13 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         stubGetDocumentMetaData(storedDocumentResource);
 
         mockMvc.perform(get(MAIN_URL + "/" +  DOCUMENT_ID)
-                            .headers(createHttpHeaders(SERVICE_NAME)))
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isOk())
             .andExpect(jsonPath(metaDataJsonExpression + CASE_ID_KEY, is(CASE_ID)))
             .andExpect(jsonPath(metaDataJsonExpression + CASE_TYPE_ID_KEY, is(CASE_TYPE_ID)))
             .andExpect(jsonPath(metaDataJsonExpression + JURISDICTION_ID_KEY, is(JURISDICTION_ID)))
             .andExpect(jsonPath("$._links.self.href",
-                                is("http://localhost" + MAIN_URL + "/" + DOCUMENT_ID)))
-            .andReturn();
+                                is("http://localhost" + MAIN_URL + "/" + DOCUMENT_ID)));
     }
 
     @Test
@@ -148,9 +149,8 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         stubDeleteDocumentByDocumentId();
 
         mockMvc.perform(delete(MAIN_URL + "/" + DOCUMENT_ID)
-                            .headers(createHttpHeaders(SERVICE_NAME)))
-            .andExpect(status().isNoContent())
-            .andReturn();
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+            .andExpect(status().isNoContent());
     }
 
     @Test
@@ -162,9 +162,8 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         stubDocumentBinaryContent();
 
         mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + "/binary")
-                            .headers(createHttpHeaders(SERVICE_NAME)))
-            .andExpect(status().isOk())
-            .andReturn();
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -183,11 +182,10 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         stubPatchDocument(storedDocumentResource);
 
         mockMvc.perform(patch(MAIN_URL + "/" + DOCUMENT_ID)
-                            .headers(createHttpHeaders(SERVICE_NAME))
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(getJsonString(body)))
-            .andExpect(status().isOk())
-            .andReturn();
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -215,11 +213,10 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         stubPatchDocumentMetaData(storedDocumentResource);
 
         mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
-                            .headers(createHttpHeaders("ccd_data"))
+                            .headers(createHttpHeaders(SERVICE_NAME_CCD_DATA))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(getJsonString(body)))
-            .andExpect(status().isOk())
-            .andReturn();
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -241,11 +238,10 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         stubPatchDocumentMetaData(storedDocumentResource);
 
         mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
-                            .headers(createHttpHeaders("ccd_data"))
+                            .headers(createHttpHeaders(SERVICE_NAME_CCD_DATA))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(getJsonString(body)))
-            .andExpect(status().isForbidden())
-            .andReturn();
+            .andExpect(status().isForbidden());
     }
 
     private static void stubDocumentUrl() {
@@ -263,7 +259,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("documentMetadata", caseDocumentMetadata);
 
-        stubFor(WireMock.get(WireMock.urlPathEqualTo("/cases/" + CASE_ID + DOCUMENTS_URL + DOCUMENT_ID))
+        stubFor(WireMock.get(urlPathEqualTo("/cases/" + CASE_ID + DOCUMENTS_URL + DOCUMENT_ID))
                     .withHeader(SERVICE_AUTHORISATION_KEY, equalTo(SERVICE_AUTHORISATION_VALUE))
                     .willReturn(aResponse()
                                     .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -274,7 +270,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     }
 
     private static void stubUploadDocument() {
-        stubFor(WireMock.post(WireMock.urlPathEqualTo(MAIN_URL))
+        stubFor(post(urlPathEqualTo(MAIN_URL))
                     .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
                     .willReturn(aResponse()
                                     .withStatus(HTTP_OK)
@@ -282,7 +278,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     }
 
     private static void stubDocumentManagementUploadDocument() {
-        stubFor(WireMock.post(WireMock.urlPathEqualTo("/documents"))
+        stubFor(post(urlPathEqualTo("/documents"))
                     .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
                     .willReturn(aResponse()
                                     .withStatus(HTTP_OK)
@@ -290,7 +286,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     }
 
     private static void stubGetDocumentMetaData(StoredDocumentHalResource storedDocumentHalResource) {
-        stubFor(WireMock.get(WireMock.urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID))
+        stubFor(WireMock.get(urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID))
                     .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
                     .willReturn(aResponse()
                                     .withStatus(HTTP_OK)
@@ -299,7 +295,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     }
 
     private static void stubDeleteDocumentByDocumentId() {
-        stubFor(WireMock.delete(WireMock.urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID))
+        stubFor(WireMock.delete(urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID))
                     .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
                     .withQueryParam("permanent", equalTo("false"))
                     .willReturn(aResponse()
@@ -307,7 +303,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     }
 
     private static void stubDocumentBinaryContent() {
-        stubFor(WireMock.get(WireMock.urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID + "/binary"))
+        stubFor(WireMock.get(urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID + "/binary"))
                     .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
                     .willReturn(aResponse()
                                     .withStatus(HTTP_OK)
@@ -318,7 +314,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     }
 
     private static void stubPatchDocument(StoredDocumentHalResource storedDocumentHalResource) {
-        stubFor(WireMock.patch(WireMock.urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID))
+        stubFor(WireMock.patch(urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID))
                     .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
                     .willReturn(aResponse()
                                     .withStatus(HTTP_OK)
@@ -327,7 +323,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     }
 
     private static void stubPatchDocumentMetaData(StoredDocumentHalResource storedDocumentHalResource) {
-        stubFor(WireMock.patch(WireMock.urlPathEqualTo("/documents"))
+        stubFor(WireMock.patch(urlPathEqualTo("/documents"))
                     .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
                     .willReturn(aResponse()
                                     .withStatus(HTTP_OK)
