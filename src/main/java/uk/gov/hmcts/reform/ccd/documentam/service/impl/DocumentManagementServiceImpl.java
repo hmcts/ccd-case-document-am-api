@@ -87,7 +87,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private final CaseDataStoreService caseDataStoreService;
     
-   @Value("${hash.check.enabled}")
+    @Value("${hash.check.enabled}")
     private boolean hashCheckEnabled;
 
     private static AuthorisedServices authorisedServices;

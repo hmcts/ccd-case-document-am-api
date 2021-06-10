@@ -44,8 +44,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.LogAudit;
-import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
-import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.GeneratedHashCodeResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentMetaDataResponse;
@@ -100,7 +98,7 @@ public class CaseDocumentAmController {
         operationType = AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
         documentId = "#documentId"
     )
-    public ResponseEntity<Object> getDocumentbyDocumentId(
+    public ResponseEntity<Object> getDocumentByDocumentId(
         @PathVariable("documentId") UUID documentId,
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) String s2sToken
@@ -151,7 +149,7 @@ public class CaseDocumentAmController {
         operationType = AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
         documentId = "#documentId"
     )
-    public ResponseEntity<Object> getDocumentBinaryContentbyDocumentId(
+    public ResponseEntity<ByteArrayResource> getDocumentBinaryContentByDocumentId(
         @PathVariable("documentId") UUID documentId,
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) String s2sToken
@@ -268,7 +266,7 @@ public class CaseDocumentAmController {
         operationType = AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
         documentId = "#documentId"
     )
-    public ResponseEntity<Object> patchDocumentbyDocumentId(
+    public ResponseEntity<Object> patchDocumentByDocumentId(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody UpdateDocumentCommand body,
         @PathVariable("documentId") UUID documentId,
@@ -384,7 +382,7 @@ public class CaseDocumentAmController {
         operationType = AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
         documentId = "#documentId"
     )
-    public ResponseEntity<Object> deleteDocumentbyDocumentId(
+    public ResponseEntity<HttpStatus> deleteDocumentByDocumentId(
         @PathVariable("documentId") UUID documentId,
         @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false") Boolean permanent,
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)

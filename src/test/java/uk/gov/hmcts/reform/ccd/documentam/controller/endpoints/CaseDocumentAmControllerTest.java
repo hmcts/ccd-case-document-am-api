@@ -359,7 +359,7 @@ public class CaseDocumentAmControllerTest {
         doReturn(new ResponseEntity<>(patchDocumentResponse, HttpStatus.OK))
             .when(documentManagementService).patchDocument(getUuid(), body);
 
-        ResponseEntity<PatchDocumentResponse> response = testee.patchDocumentByDocumentId(
+        ResponseEntity<Object> response = testee.patchDocumentByDocumentId(
             body,
             getUuid(),
             TEST_S2S_TOKEN
@@ -704,11 +704,11 @@ public class CaseDocumentAmControllerTest {
         when(documentManagementService.generateHashToken(UUID.fromString(MATCHED_DOCUMENT_ID)))
             .thenReturn("hashToken");
 
-        ResponseEntity<GeneratedHashCodeResponse> responseEntity =
+        ResponseEntity<Object> responseEntity =
             testee.generateHashCode(UUID.fromString(MATCHED_DOCUMENT_ID), TEST_S2S_TOKEN);
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals("hashToken", responseEntity.getBody().getHashToken());
+        assertEquals("hashToken", ((GeneratedHashCodeResponse)responseEntity.getBody()).getHashToken());
     }
 
     @Test
