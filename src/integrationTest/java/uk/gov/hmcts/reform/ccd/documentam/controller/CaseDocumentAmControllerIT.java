@@ -108,8 +108,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
 
     @Test
     void shouldSuccessfullyGetDocumentByDocumentId() throws Exception {
-
-
         StoredDocumentHalResource storedDocumentResource = getStoredDocumentResource();
 
         stubDocumentUrl();
