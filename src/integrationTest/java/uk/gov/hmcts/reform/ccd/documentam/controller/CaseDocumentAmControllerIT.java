@@ -1,26 +1,20 @@
 package uk.gov.hmcts.reform.ccd.documentam.controller;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.documentam.BaseTest;
-import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentMetadata;
+import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
-import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
-import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
 import java.sql.Timestamp;
@@ -29,26 +23,25 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
-import static java.net.HttpURLConnection.HTTP_OK;
 import static org.hamcrest.CoreMatchers.is;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.DOCUMENT_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.getJsonString;
+import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDeleteDocumentByDocumentId;
+import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDocumentBinaryContent;
+import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDocumentManagementUploadDocument;
+import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDocumentUrl;
+import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubGetDocumentMetaData;
+import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubPatchDocument;
+import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubPatchDocumentMetaData;
+import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubUploadDocument;
 
 @RunWith(SpringRunner.class)
 
@@ -60,12 +53,8 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private WebApplicationContext webApplicationContext;
-
     private static final String MAIN_URL = "/cases/documents";
     private static final String ATTACH_TO_CASE_URL = "/attachToCase";
-    private static final String DOCUMENTS_URL = "/documents/";
     private static final String SERVICE_NAME_XUI_WEBAPP = "xui_webapp";
     private static final String SERVICE_NAME_CCD_DATA = "ccd_data";
 
@@ -78,16 +67,8 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     private static final String CASE_TYPE_ID = "BEFTA_CASETYPE_2";
     private static final String JURISDICTION_ID = "BEFTA_JURISDICTION_2";
 
-    private static final UUID DOCUMENT_ID = UUID.randomUUID();
     private static final String CASE_ID = "1584722156538291";
     private static final String USER_ID = "d5566a63-f87c-4658-a4d6-213d949f8415";
-
-    private static final String SERVICE_AUTHORISATION_KEY = "ServiceAuthorization";
-    private static final String BEARER = "Bearer ";
-    private static final String TOKEN = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJjY2RfZ3ciLCJleHAiOjE1ODM0NDUyOTd9"
-        + ".WWRzROlKxLQCJw5h0h0dHb9hHfbBhF2Idwv1z4L4FnqSw3VZ38ZRLuDmwr3tj-8oOv6EfLAxV0dJAPtUT203Iw";
-    private static final String SERVICE_AUTHORISATION_VALUE = BEARER + TOKEN;
-
 
     @Test
     void shouldSuccessfullyUploadDocument() throws Exception {
@@ -106,9 +87,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
             new MockMultipartFile("json", "",
                                   MediaType.APPLICATION_JSON_VALUE, "{\"json\": \"someValue\"}".getBytes());
 
-        MockMvc mockMvcBuilder
-            = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        mockMvcBuilder.perform(MockMvcRequestBuilders.multipart(MAIN_URL)
+        mockMvc.perform(MockMvcRequestBuilders.multipart(MAIN_URL)
                             .file(firstFile)
                             .file(secondFile)
                             .file(jsonFile)
@@ -117,7 +96,13 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                             .param(CASE_TYPE_ID_KEY, CASE_TYPE_ID)
                             .param(JURISDICTION_ID_KEY, JURISDICTION_ID)
                             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.UPLOAD_DOCUMENTS,
+                SERVICE_NAME_XUI_WEBAPP,
+                null,
+                null));
     }
 
 
@@ -130,6 +115,9 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         stubDocumentUrl();
         stubGetDocumentMetaData(storedDocumentResource);
 
+        ArrayList<String> documentIds = new ArrayList<>();
+        documentIds.add(DOCUMENT_ID.toString());
+
         mockMvc.perform(get(MAIN_URL + "/" +  DOCUMENT_ID)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isOk())
@@ -137,7 +125,13 @@ public class CaseDocumentAmControllerIT extends BaseTest {
             .andExpect(jsonPath(metaDataJsonExpression + CASE_TYPE_ID_KEY, is(CASE_TYPE_ID)))
             .andExpect(jsonPath(metaDataJsonExpression + JURISDICTION_ID_KEY, is(JURISDICTION_ID)))
             .andExpect(jsonPath("$._links.self.href",
-                                is("http://localhost" + MAIN_URL + "/" + DOCUMENT_ID)));
+                                is("http://localhost" + MAIN_URL + "/" + DOCUMENT_ID)))
+
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                documentIds,
+                null));
     }
 
     @Test
@@ -148,9 +142,18 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         stubGetDocumentMetaData(storedDocumentResource);
         stubDeleteDocumentByDocumentId();
 
+        ArrayList<String> documentIds = new ArrayList<>();
+        documentIds.add(DOCUMENT_ID.toString());
+
         mockMvc.perform(delete(MAIN_URL + "/" + DOCUMENT_ID)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
-            .andExpect(status().isNoContent());
+            .andExpect(status().isNoContent())
+
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                documentIds,
+                null));
     }
 
     @Test
@@ -161,9 +164,18 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         stubGetDocumentMetaData(storedDocumentResource);
         stubDocumentBinaryContent();
 
+        ArrayList<String> documentIds = new ArrayList<>();
+        documentIds.add(DOCUMENT_ID.toString());
+
         mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + "/binary")
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                documentIds,
+                null));
     }
 
     @Test
@@ -181,11 +193,20 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         stubGetDocumentMetaData(storedDocumentResource);
         stubPatchDocument(storedDocumentResource);
 
+        ArrayList<String> documentIds = new ArrayList<>();
+        documentIds.add(DOCUMENT_ID.toString());
+
         mockMvc.perform(patch(MAIN_URL + "/" + DOCUMENT_ID)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(getJsonString(body)))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                documentIds,
+                null));
     }
 
     @Test
@@ -212,11 +233,20 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         stubGetDocumentMetaData(storedDocumentResource);
         stubPatchDocumentMetaData(storedDocumentResource);
 
+        ArrayList<String> documentIds = new ArrayList<>();
+        documentIds.add(DOCUMENT_ID.toString());
+
         mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
                             .headers(createHttpHeaders(SERVICE_NAME_CCD_DATA))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(getJsonString(body)))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
+                SERVICE_NAME_CCD_DATA,
+                documentIds,
+                body.getCaseId()));
     }
 
     @Test
@@ -237,99 +267,22 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         stubGetDocumentMetaData(storedDocumentResource);
         stubPatchDocumentMetaData(storedDocumentResource);
 
+        ArrayList<String> documentIds = new ArrayList<>();
+        documentIds.add(DOCUMENT_ID.toString());
+
         mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
                             .headers(createHttpHeaders(SERVICE_NAME_CCD_DATA))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(getJsonString(body)))
-            .andExpect(status().isForbidden());
+            .andExpect(status().isForbidden())
+
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
+                SERVICE_NAME_CCD_DATA,
+                documentIds,
+                body.getCaseId()));
     }
 
-    private static void stubDocumentUrl() {
-        CaseDocumentMetadata caseDocumentMetadata = new CaseDocumentMetadata();
-        caseDocumentMetadata.setCaseId(CASE_ID);
-
-        List<Permission> permissionList = new ArrayList<>();
-        permissionList.add(Permission.READ);
-        DocumentPermissions documentPermissions = new DocumentPermissions();
-        documentPermissions.setId(DOCUMENT_ID.toString());
-        documentPermissions.setPermissions(permissionList);
-
-        caseDocumentMetadata.setDocumentPermissions(documentPermissions);
-
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("documentMetadata", caseDocumentMetadata);
-
-        stubFor(WireMock.get(urlPathEqualTo("/cases/" + CASE_ID + DOCUMENTS_URL + DOCUMENT_ID))
-                    .withHeader(SERVICE_AUTHORISATION_KEY, equalTo(SERVICE_AUTHORISATION_VALUE))
-                    .willReturn(aResponse()
-                                    .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                                    .withStatus(HttpStatus.OK.value())
-                                    .withBody(getJsonString(body))
-                    )
-        );
-    }
-
-    private static void stubUploadDocument() {
-        stubFor(post(urlPathEqualTo(MAIN_URL))
-                    .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
-                    .willReturn(aResponse()
-                                    .withStatus(HTTP_OK)
-                                    .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
-    }
-
-    private static void stubDocumentManagementUploadDocument() {
-        stubFor(post(urlPathEqualTo("/documents"))
-                    .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
-                    .willReturn(aResponse()
-                                    .withStatus(HTTP_OK)
-                                    .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
-    }
-
-    private static void stubGetDocumentMetaData(StoredDocumentHalResource storedDocumentHalResource) {
-        stubFor(WireMock.get(urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID))
-                    .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
-                    .willReturn(aResponse()
-                                    .withStatus(HTTP_OK)
-                                    .withBody(getJsonString(storedDocumentHalResource))
-                                    .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
-    }
-
-    private static void stubDeleteDocumentByDocumentId() {
-        stubFor(WireMock.delete(urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID))
-                    .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
-                    .withQueryParam("permanent", equalTo("false"))
-                    .willReturn(aResponse()
-                                    .withStatus(HTTP_NO_CONTENT)));
-    }
-
-    private static void stubDocumentBinaryContent() {
-        stubFor(WireMock.get(urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID + "/binary"))
-                    .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
-                    .willReturn(aResponse()
-                                    .withStatus(HTTP_OK)
-                                    .withHeader("OriginalFileName", "")
-                                    .withHeader("Content-Disposition", "")
-                                    .withHeader("Data-Source", "")
-                                    .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
-    }
-
-    private static void stubPatchDocument(StoredDocumentHalResource storedDocumentHalResource) {
-        stubFor(WireMock.patch(urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID))
-                    .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
-                    .willReturn(aResponse()
-                                    .withStatus(HTTP_OK)
-                                    .withBody(getJsonString(storedDocumentHalResource))
-                                    .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
-    }
-
-    private static void stubPatchDocumentMetaData(StoredDocumentHalResource storedDocumentHalResource) {
-        stubFor(WireMock.patch(urlPathEqualTo("/documents"))
-                    .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
-                    .willReturn(aResponse()
-                                    .withStatus(HTTP_OK)
-                                    .withBody(getJsonString(storedDocumentHalResource))
-                                    .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
-    }
 
     private StoredDocumentHalResource getStoredDocumentResource() {
 
