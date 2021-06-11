@@ -108,7 +108,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
 
     @Test
     void shouldSuccessfullyGetDocumentByDocumentId() throws Exception {
-        String metaDataJsonExpression = "$.metadata.";
+
 
         StoredDocumentHalResource storedDocumentResource = getStoredDocumentResource();
 
@@ -117,7 +117,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
 
         ArrayList<String> documentIds = new ArrayList<>();
         documentIds.add(DOCUMENT_ID.toString());
-
+        String metaDataJsonExpression = "$.metadata.";
         mockMvc.perform(get(MAIN_URL + "/" +  DOCUMENT_ID)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isOk())
