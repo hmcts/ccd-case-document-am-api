@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.service;
 
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
@@ -33,7 +32,7 @@ public interface DocumentManagementService {
     ResponseEntity<PatchDocumentResponse> patchDocument(final UUID documentId,
                                                         UpdateDocumentCommand updateDocumentCommand);
 
-    ResponseEntity<HttpStatus> deleteDocument(final UUID documentId,  Boolean permanent);
+    void deleteDocument(final UUID documentId,  Boolean permanent);
 
 
     void checkUserPermission(ResponseEntity<StoredDocumentHalResource> responseEntity,

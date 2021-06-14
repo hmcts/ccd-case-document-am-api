@@ -382,7 +382,7 @@ public class CaseDocumentAmController {
         operationType = AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
         documentId = "#documentId"
     )
-    public ResponseEntity<HttpStatus> deleteDocumentByDocumentId(
+    public ResponseEntity<Void> deleteDocumentByDocumentId(
         @PathVariable("documentId") UUID documentId,
         @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false") Boolean permanent,
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
@@ -399,7 +399,8 @@ public class CaseDocumentAmController {
                                                          SERVICE_PERMISSION_ERROR,
                                                          documentId.toString());
 
-        return documentManagementService.deleteDocument(documentId, permanent);
+        documentManagementService.deleteDocument(documentId, permanent);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping(

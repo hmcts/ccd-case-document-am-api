@@ -302,8 +302,7 @@ public class CaseDocumentAmControllerTest {
                                  Permission.UPDATE,
                                  USER_PERMISSION_ERROR,
                                  getUuid().toString());
-        doReturn(ResponseEntity.status(HttpStatus.NO_CONTENT).build()).when(documentManagementService)
-            .deleteDocument(getUuid(), true);
+        doNothing().when(documentManagementService).deleteDocument(getUuid(), true);
 
         ResponseEntity response = testee
             .deleteDocumentByDocumentId(getUuid(), true, TEST_S2S_TOKEN);
@@ -330,8 +329,8 @@ public class CaseDocumentAmControllerTest {
                                  Permission.UPDATE,
                                  USER_PERMISSION_ERROR,
                                  getUuid().toString());
-        doReturn(ResponseEntity.status(HttpStatus.NO_CONTENT).build()).when(documentManagementService)
-            .deleteDocument(getUuid(), true);
+
+        doNothing().when(documentManagementService).deleteDocument(getUuid(), true);
 
         Assertions.assertThrows(ForbiddenException.class, () -> testee
             .deleteDocumentByDocumentId(getUuid(), true, TEST_S2S_TOKEN));

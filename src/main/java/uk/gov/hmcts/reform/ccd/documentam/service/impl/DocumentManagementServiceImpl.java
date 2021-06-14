@@ -318,31 +318,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public ResponseEntity<HttpStatus> deleteDocument(UUID documentId, Boolean permanent) {
-        ResponseEntity<HttpStatus> responseResult = new ResponseEntity<>(HttpStatus.OK);
+    public void deleteDocument(UUID documentId, Boolean permanent) {
+        final HttpEntity<HttpHeaders> requestEntity = new HttpEntity<>(getHttpHeaders());
+        String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, documentId, permanent);
         try {
-            final HttpEntity<HttpHeaders> requestEntity = new HttpEntity<>(getHttpHeaders());
-            String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, documentId,
-                permanent);
-            log.info("documentDeleteUrl : {}", documentDeleteUrl);
-            ResponseEntity<HttpStatus> response = restTemplate.exchange(
-                documentDeleteUrl,
-                DELETE,
-                requestEntity,
-                HttpStatus.class
-            );
-            if (HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
-                log.info("Positive response");
-                responseResult = response;
-            } else {
-                log.error("Document doesn't exist for requested document id at Document Store {}", response
-                    .getStatusCode());
-                throw new ResourceNotFoundException(formatNotFoundMessage(documentId.toString()));
-            }
+            restTemplate.exchange(documentDeleteUrl, DELETE, requestEntity, Void.class);
         } catch (HttpClientErrorException exception) {
             handleException(exception, documentId.toString());
         }
-        return responseResult;
     }
 
 

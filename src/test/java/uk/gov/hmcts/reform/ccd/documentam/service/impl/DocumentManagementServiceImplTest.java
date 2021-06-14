@@ -1195,19 +1195,17 @@ class DocumentManagementServiceImplTest {
         Boolean permanent = true;
         HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
         String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, MATCHED_DOCUMENT_ID,
-                                                 permanent);
+                                                 permanent
+        );
 
-        ResponseEntity<HttpStatus> responseEntity = new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        ResponseEntity deletionResponse = new ResponseEntity<>(responseEntity, HttpStatus.NO_CONTENT);
-        when(restTemplateMock.exchange(
+        sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), permanent);
+
+        verify(restTemplateMock).exchange(
             documentDeleteUrl,
             DELETE,
             requestEntity,
-            HttpStatus.class
-                                      )).thenReturn(deletionResponse);
-
-        responseEntity = sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), permanent);
-        assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
+            Void.class
+        );
     }
 
 
@@ -1224,7 +1222,7 @@ class DocumentManagementServiceImplTest {
             documentDeleteUrl,
             DELETE,
             requestEntity,
-            HttpStatus.class
+            Void.class
                                       )).thenThrow(HttpClientErrorException.NotFound.create("woopsie",
                                                                                             HttpStatus.NOT_FOUND,
                                                                                             "404",
@@ -1250,7 +1248,7 @@ class DocumentManagementServiceImplTest {
             documentDeleteUrl,
             DELETE,
             requestEntity,
-            HttpStatus.class
+            Void.class
                                       )).thenThrow(HttpClientErrorException.NotFound.create("woopsie",
                                                                                             HttpStatus.FORBIDDEN,
                                                                                             "404",
@@ -1276,7 +1274,7 @@ class DocumentManagementServiceImplTest {
             documentDeleteUrl,
             DELETE,
             requestEntity,
-            HttpStatus.class
+            Void.class
                                       )).thenThrow(HttpClientErrorException.NotFound.create("woopsie",
                                                                                             HttpStatus.BAD_REQUEST,
                                                                                             "404",
@@ -1302,7 +1300,7 @@ class DocumentManagementServiceImplTest {
             documentDeleteUrl,
             DELETE,
             requestEntity,
-            HttpStatus.class
+            Void.class
                                       )).thenThrow(HttpClientErrorException.NotFound.create("woopsie",
                                                                                             HttpStatus.BAD_GATEWAY,
                                                                                             "404",
@@ -1313,27 +1311,6 @@ class DocumentManagementServiceImplTest {
         assertThrows(ServiceException.class, () -> {
             sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), permanent);
         });
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    void deleteDocument_ResourceNotFound() {
-        Boolean permanent = true;
-
-        HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
-        String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL,
-                                                 MATCHED_DOCUMENT_ID);
-
-        ResponseEntity<HttpStatus> responseEntity = new ResponseEntity<>(HttpStatus.ACCEPTED);
-        ResponseEntity deletionResponse = new ResponseEntity<>(responseEntity, HttpStatus.NOT_FOUND);
-        when(restTemplateMock.exchange(
-            documentDeleteUrl,
-            DELETE,
-            requestEntity,
-            HttpStatus.class)).thenReturn(deletionResponse);
-
-        assertThrows(ResourceNotFoundException.class, () ->
-            sut.deleteDocument(UUID.fromString(MATCHED_DOCUMENT_ID), permanent));
     }
 
     @Test
