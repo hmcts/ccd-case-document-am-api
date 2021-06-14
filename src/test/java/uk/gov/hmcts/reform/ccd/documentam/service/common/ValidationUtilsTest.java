@@ -1,8 +1,5 @@
 package uk.gov.hmcts.reform.ccd.documentam.service.common;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -11,14 +8,18 @@ import java.util.ArrayList;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.service.ValidationUtils;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class ValidationUtilsTest {
 
     ValidationUtils validationUtils = new ValidationUtils();
 
     @Test
     void shouldValidate() {
-        assertTrue(validationUtils.validate("1212121212121212"));
-        assertFalse(validationUtils.validate("2323232323232"));
+        assertDoesNotThrow(() -> validationUtils.validate("1212121212121212"));
+        assertThrows(BadRequestException.class, () -> validationUtils.validate("2323232323232"));
     }
 
     @Test

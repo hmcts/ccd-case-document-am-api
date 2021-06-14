@@ -22,7 +22,7 @@ class ResponseHelperTest {
         StoredDocumentHalResource resource = new StoredDocumentHalResource();
         ResponseEntity<StoredDocumentHalResource> responseEntity = new ResponseEntity<>(resource, getHttpHeaders(),
                                                                                         HttpStatus.OK);
-        ResponseEntity<Object> result = ResponseHelper.toResponseEntity(
+        ResponseEntity<StoredDocumentHalResource> result = ResponseHelper.toResponseEntity(
             responseEntity,
             UUID.fromString("f565abb5-c337-4ccb-ba78-1c43989e3bd6")
         );

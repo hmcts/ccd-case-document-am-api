@@ -6,10 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * CaseDocumentsMetadata.
- */
-
 @Data
 @Builder
 @AllArgsConstructor

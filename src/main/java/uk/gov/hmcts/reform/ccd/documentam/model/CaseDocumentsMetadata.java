@@ -8,10 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * CaseDocumentsMetadata.
- */
-
 @Data
 @Builder
 @AllArgsConstructor

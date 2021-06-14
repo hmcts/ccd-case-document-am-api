@@ -20,9 +20,6 @@
   </suppress>
 
   <suppress until="2021-06-23">
-    <notes>We do not use: Spring Framework  5.2.x prior to 5.2.15 and versions 5.3.x prior to 5.3.7,
-      see https://pivotal.io/security/cve-2021-22118
-    </notes>
     <cve>CVE-2021-22118</cve>
   </suppress>
 
