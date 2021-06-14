@@ -593,8 +593,11 @@ class DocumentManagementServiceImplTest {
                                                                            .documentHashTokens(documentList)
                                                                            .build();
 
-        ResponseEntity responseEntity = sut.patchDocumentMetadata(caseDocumentsMetadata);
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        sut.patchDocumentMetadata(caseDocumentsMetadata);
+
+        verify(restTemplateMock, times(1))
+            .exchange(eq(documentURL + "/documents"), eq(PATCH), any(HttpEntity.class),
+                      eq(Void.class));
     }
 
     @Test
@@ -667,8 +670,11 @@ class DocumentManagementServiceImplTest {
             .documentHashTokens(List.of(DocumentHashToken.builder().id(MATCHED_DOCUMENT_ID).build()))
             .build();
 
-        ResponseEntity responseEntity = sut.patchDocumentMetadata(caseDocumentsMetadata);
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        sut.patchDocumentMetadata(caseDocumentsMetadata);
+
+        verify(restTemplateMock, times(1))
+            .exchange(eq(documentURL + "/documents"), eq(PATCH), any(HttpEntity.class),
+                      eq(Void.class));
     }
 
     @Test

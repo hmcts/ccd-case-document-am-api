@@ -22,7 +22,7 @@ public interface DocumentManagementService {
 
     ResponseEntity<ByteArrayResource> getDocumentBinaryContent(final UUID documentId);
 
-    ResponseEntity<HttpStatus> patchDocumentMetadata(CaseDocumentsMetadata caseDocumentsMetadata);
+    void patchDocumentMetadata(CaseDocumentsMetadata caseDocumentsMetadata);
 
     String generateHashToken(final UUID documentId);
 

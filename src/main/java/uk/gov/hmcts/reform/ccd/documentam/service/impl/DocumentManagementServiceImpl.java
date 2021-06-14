@@ -16,7 +16,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
@@ -86,7 +85,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     protected String salt;
 
     private final CaseDataStoreService caseDataStoreService;
-    
+
     @Value("${hash.check.enabled}")
     private boolean hashCheckEnabled;
 
@@ -117,25 +116,17 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
         try {
             final HttpEntity<String> requestEntity = new HttpEntity<>(getHttpHeaders());
-            log.info("Document Store URL is : {}", documentURL);
             String documentMetadataUrl = String.format("%s/documents/%s", documentURL, documentId);
-            log.info("documentMetadataUrl : {}", documentMetadataUrl);
-
             ResponseEntity<StoredDocumentHalResource> response = restTemplate.exchange(
                 documentMetadataUrl,
                 GET,
                 requestEntity,
                 StoredDocumentHalResource.class
             );
-
-            log.info("response : {}", response.getStatusCode());
-            log.info("response : {}", response.getBody());
-
             ResponseEntity<StoredDocumentHalResource> responseEntity =
                 ResponseHelper.toResponseEntity(response, documentId);
 
             if (HttpStatus.OK.equals(responseEntity.getStatusCode())) {
-                log.info("Positive response");
                 responseResult = responseEntity;
             } else {
                 log.error("Document doesn't exist for requested document id at Document Store {}", responseEntity
@@ -187,19 +178,16 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public ResponseEntity<HttpStatus> patchDocumentMetadata(CaseDocumentsMetadata caseDocumentsMetadata) {
+    public void patchDocumentMetadata(CaseDocumentsMetadata caseDocumentsMetadata) {
         try {
             LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
             prepareRequestForAttachingDocumentToCase(caseDocumentsMetadata, bodyMap);
             HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, getHttpHeaders());
-
-            restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
             String documentUrl = String.format("%s/documents", documentURL);
             restTemplate.exchange(documentUrl, HttpMethod.PATCH, requestEntity, Void.class);
         } catch (HttpClientErrorException exception) {
             handleException(exception);
         }
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private void prepareRequestForAttachingDocumentToCase(CaseDocumentsMetadata caseDocumentsMetadata,
