@@ -31,6 +31,8 @@ public final class Constants {
     public static final String MODIFIED_ON = "modifiedOn";
     public static final String THUMBNAIL = "thumbnail";
     public static final String DOCUMENTS = "documents";
+    public static final String MIME_TYPE = "mimeType";
+    public static final String ORIGINAL_DOCUMENT_NAME = "originalDocumentName";
     public static final String INPUT_STRING_PATTERN = "^[a-zA-Z0-9_-]*$";
     public static final String INPUT_CASE_ID_PATTERN = "^[0-9]*$";
     public static final String CASE_DOCUMENT_NOT_FOUND = "Case document not found";
@@ -47,6 +49,7 @@ public final class Constants {
     public static final String CASE_ID = "caseId";
     public static final String CASE_TYPE_ID = "caseTypeId";
     public static final String JURISDICTION_ID = "jurisdictionId";
+    public static final String USER_PERMISSION_ERROR = "User doesn't have read permission on requested document {}";
     public static final String SERVICE_PERMISSION_ERROR = "Service doesn't have sufficient permission on requested "
         + "API {}";
     public static final String XUI_WEBAPP = "xui_webapp";

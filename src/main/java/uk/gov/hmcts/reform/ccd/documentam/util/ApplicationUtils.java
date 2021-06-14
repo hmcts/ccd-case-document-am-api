@@ -26,16 +26,15 @@ public class ApplicationUtils {
             BigInteger no = new BigInteger(1, messageDigest);
 
             // Convert message digest into hex value
-            StringBuilder hashtext = new StringBuilder();
-            hashtext.append(no.toString(16));
+            StringBuilder hashText = new StringBuilder();
+            hashText.append(no.toString(16));
 
             // Add preceding 0s to make it 32 bit
-            while (hashtext.length() < 32) {
-                hashtext.append("0").append(hashtext);
+            while (hashText.length() < 32) {
+                hashText.append("0").append(hashText);
             }
 
-            // return the HashText
-            return hashtext.toString();
+            return hashText.toString();
         } catch (NoSuchAlgorithmException exception) {
             log.error("Error while generating the hashcode :", exception);
         }
