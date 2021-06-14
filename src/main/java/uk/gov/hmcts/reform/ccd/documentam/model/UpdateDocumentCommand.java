@@ -7,21 +7,12 @@ import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import java.util.Objects;
 
-/**
- * UpdateDocumentCommand.
- */
 @Validated
 public class UpdateDocumentCommand {
     @JsonProperty("ttl")
     private String ttl = null;
 
-    /**
-     * Get ttl.
-     *
-     * @return ttl
-     **/
-    @ApiModelProperty(value = "")
-
+    @ApiModelProperty
     @Valid
     public String getTtl() {
         return ttl;
@@ -30,7 +21,6 @@ public class UpdateDocumentCommand {
     public void setTtl(String ttl) {
         this.ttl = ttl;
     }
-
 
     @Override
     public boolean equals(Object o) {

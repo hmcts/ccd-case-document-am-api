@@ -9,10 +9,6 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
-/**
- * CaseDocumentsMetadata.
- */
-
 @Validated
 @Data
 @Builder

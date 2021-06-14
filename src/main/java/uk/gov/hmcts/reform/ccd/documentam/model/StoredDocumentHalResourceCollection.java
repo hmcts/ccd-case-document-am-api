@@ -9,9 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * StoredDocumentHalResourceCollection.
- */
 @Validated
 public class StoredDocumentHalResourceCollection {
     @JsonProperty("content")
@@ -27,11 +24,6 @@ public class StoredDocumentHalResourceCollection {
         return this;
     }
 
-    /**
-     * The list of StoredDocumentHalResource object.
-     *
-     * @return content
-     **/
     @ApiModelProperty(value = "The list of StoredDocumentHalResource object.")
     @Valid
     public List<StoredDocumentHalResource> getContent() {

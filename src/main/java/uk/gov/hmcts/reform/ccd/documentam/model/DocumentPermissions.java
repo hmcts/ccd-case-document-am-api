@@ -10,9 +10,6 @@ import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 
 import java.util.List;
 
-/**
- * Document.
- */
 @Validated
 @Data
 @Builder
