@@ -45,13 +45,14 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.ACCESS_TOKEN;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertNotNull;
+import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.BEARER;
 import static uk.gov.hmcts.reform.ccd.documentam.security.JwtGrantedAuthoritiesConverter.TOKEN_NAME;
 
 @SpringBootTest(classes = {
     Application.class,
     TestIdamConfiguration.class
 })
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 @AutoConfigureWireMock(port = 0, stubs = "classpath:/wiremock-stubs")
 @ActiveProfiles("itest")
 public class BaseTest {
@@ -68,24 +69,24 @@ public class BaseTest {
     @Inject
     protected AuditRepository auditRepository;
 
-    @Value("${wiremock.server.port}")
-    protected Integer wiremockPort;
-    @Mock
-    protected Authentication authentication;
+//    @Value("${wiremock.server.port}")
+//    protected Integer wiremockPort;
+//    @Mock
+//    protected Authentication authentication;
 
-    @BeforeEach
-    void init() {
-        Jwt jwt = dummyJwt();
-        when(authentication.getPrincipal()).thenReturn(jwt);
-        SecurityContextHolder.setContext(new SecurityContextImpl(authentication));
-    }
-
-    private Jwt dummyJwt() {
-        return Jwt.withTokenValue("a dummy jwt token")
-                .claim("aClaim", "aClaim")
-                .header("aHeader", "aHeader")
-                .build();
-    }
+//    @BeforeEach
+//    void init() {
+//        Jwt jwt = dummyJwt();
+//        when(authentication.getPrincipal()).thenReturn(jwt);
+//        SecurityContextHolder.setContext(new SecurityContextImpl(authentication));
+//    }
+//
+//    private Jwt dummyJwt() {
+//        return Jwt.withTokenValue("a dummy jwt token")
+//                .claim("aClaim", "aClaim")
+//                .header("aHeader", "aHeader")
+//                .build();
+//    }
 
     public static HttpHeaders createHttpHeaders(String serviceName) throws JOSEException {
         return createHttpHeaders(AUTH_TOKEN_TTL, serviceName, AUTH_TOKEN_TTL);
@@ -95,7 +96,8 @@ public class BaseTest {
                                             String serviceName,
                                             long s2sAuthTtlMillis)  throws JOSEException {
         HttpHeaders headers = new HttpHeaders();
-        headers.add(AUTHORIZATION, generateAuthToken(authTtlMillis));
+        String authToken = BEARER + generateAuthToken(authTtlMillis);
+        headers.add(AUTHORIZATION, authToken);
         String s2SToken = generateS2SToken(serviceName, s2sAuthTtlMillis);
         headers.add(SERVICE_AUTHORIZATION, s2SToken);
         headers.add(AuditConfiguration.REQUEST_ID, EXAMPLE_REQUEST_ID);
@@ -111,18 +113,6 @@ public class BaseTest {
                                               invokingService,
                                               documentIds,
                                               caseId);
-    }
-
-    protected void verifyLogAuditValues(MvcResult result,
-                                        AuditOperationType operationType,
-                                        String invokingService,
-                                        String documentId,
-                                        String caseId) {
-        verifyLogAuditValues(result,
-                             operationType,
-                             invokingService,
-                             StringUtils.isNoneBlank(documentId) ? List.of(documentId) : new ArrayList<>(),
-                             StringUtils.isNoneBlank(caseId) ? caseId : "");
     }
 
     protected void verifyLogAuditValues(MvcResult result,
@@ -170,7 +160,7 @@ public class BaseTest {
     private static String generateAuthToken(long ttlMillis) throws JOSEException {
 
         JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder()
-            .subject("CPO_Stub")
+            .subject("API_Stub")
             .issueTime(new Date())
             .claim(TOKEN_NAME, ACCESS_TOKEN)
             .expirationTime(new Date(System.currentTimeMillis() + ttlMillis));

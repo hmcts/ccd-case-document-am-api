@@ -1,14 +1,13 @@
 {
   "request": {
     "method": "GET",
-    "url": "/s2s/details"
+    "url": "/o/jwks"
   },
   "response": {
     "status": 200,
     "headers": {
       "Content-Type": "application/json"
     },
-    "transformers" : [ "dynamic-s2s-details-response-transformer" ]
+    "transformers" : [ "dynamic-oauth-jwk-set-response-transformer" ]
   }
 }
-
