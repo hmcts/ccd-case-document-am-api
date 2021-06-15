@@ -59,6 +59,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.DocumentUpdate;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
@@ -180,9 +181,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Override
     public void patchDocumentMetadata(CaseDocumentsMetadata caseDocumentsMetadata) {
         try {
-            LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
-            prepareRequestForAttachingDocumentToCase(caseDocumentsMetadata, bodyMap);
-            HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, getHttpHeaders());
+            UpdateDocumentsCommand updateDocumentsCommand
+                = prepareRequestForAttachingDocumentToCase(caseDocumentsMetadata);
+            HttpEntity<UpdateDocumentsCommand> requestEntity
+                = new HttpEntity<>(updateDocumentsCommand, getHttpHeaders());
             String documentUrl = String.format("%s/documents", documentURL);
             restTemplate.exchange(documentUrl, HttpMethod.PATCH, requestEntity, Void.class);
         } catch (HttpClientErrorException exception) {
@@ -190,9 +192,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
     }
 
-    private void prepareRequestForAttachingDocumentToCase(CaseDocumentsMetadata caseDocumentsMetadata,
-                                                          LinkedMultiValueMap<String, Object> bodyMap) {
-
+    private UpdateDocumentsCommand prepareRequestForAttachingDocumentToCase(CaseDocumentsMetadata
+                                                                                caseDocumentsMetadata) {
         for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashTokens()) {
 
             if (documentHashToken.getHashToken() != null) {
@@ -224,8 +225,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             documentUpdate.setDocumentId(UUID.fromString(documentHashToken.getId()));
 
             documentUpdate.setMetadata(metadataMap);
-            bodyMap.add("documents", documentUpdate);
         }
+
+        return new UpdateDocumentsCommand(null, null);
     }
 
     @Override
