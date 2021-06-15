@@ -7,9 +7,6 @@ import org.springframework.validation.annotation.Validated;
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
-/**
- * ErrorMap.
- */
 @Validated
 public class ErrorMap {
     @JsonProperty("code")
@@ -18,14 +15,8 @@ public class ErrorMap {
     @JsonProperty("message")
     private String message = null;
 
-    /**
-     * The error code.
-     *
-     * @return code
-     **/
     @ApiModelProperty(required = true, value = "The error code")
     @NotNull
-
     public String getCode() {
         return code;
     }
@@ -34,11 +25,6 @@ public class ErrorMap {
         this.code = code;
     }
 
-    /**
-     * The error message.
-     *
-     * @return message
-     **/
     @ApiModelProperty(required = true, value = "The error message")
     @NotNull
 
@@ -49,7 +35,6 @@ public class ErrorMap {
     public void setMessage(String message) {
         this.message = message;
     }
-
 
     @Override
     public boolean equals(Object o) {

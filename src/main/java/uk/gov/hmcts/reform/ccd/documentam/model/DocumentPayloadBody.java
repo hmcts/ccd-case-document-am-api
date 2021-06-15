@@ -27,7 +27,7 @@ public class DocumentPayloadBody {
     @Valid
     private List<File> files;
 
-    @ApiModelProperty(value = "")
+    @ApiModelProperty
     public String getClassification() {
         return classification;
     }
@@ -36,8 +36,7 @@ public class DocumentPayloadBody {
         this.classification = classification;
     }
 
-    @ApiModelProperty(value = "")
-
+    @ApiModelProperty
     @Valid
     public OffsetDateTime getTtl() {
         return ttl;
@@ -55,8 +54,7 @@ public class DocumentPayloadBody {
         return this;
     }
 
-    @ApiModelProperty(value = "")
-
+    @ApiModelProperty
     public List<String> getRoles() {
         return roles;
     }
@@ -73,7 +71,7 @@ public class DocumentPayloadBody {
         return this;
     }
 
-    @ApiModelProperty(value = "")
+    @ApiModelProperty
     @Valid
     public List<File> getFiles() {
         return files;
