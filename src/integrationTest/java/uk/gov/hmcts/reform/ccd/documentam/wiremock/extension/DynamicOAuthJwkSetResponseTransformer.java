@@ -20,11 +20,9 @@ public class DynamicOAuthJwkSetResponseTransformer extends AbstractDynamicRespon
 
         try {
 
-            String json = "{"
+            return "{"
                 + "   \"keys\": [" +  KeyGenUtil.getRsaJWK().toJSONObject() + "]"
                 + "}";
-
-            return json;
 
         } catch (JOSEException ex) {
             log.error("Failure running RSA JWK Generator", ex);

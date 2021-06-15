@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Date;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.BEARER;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.BEARER;
 
 /*
  * Replaces response body with service name read from supplied token before returning the response

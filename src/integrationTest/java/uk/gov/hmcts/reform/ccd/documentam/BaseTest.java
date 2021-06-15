@@ -35,7 +35,8 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.ACCESS_TOKEN;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertNotNull;
-import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.BEARER;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.BEARER;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_AUTHORIZATION;
 import static uk.gov.hmcts.reform.ccd.documentam.security.JwtGrantedAuthoritiesConverter.TOKEN_NAME;
 
 @SpringBootTest(classes = {
@@ -51,9 +52,6 @@ public class BaseTest {
 
     public static final String IDAM_MOCK_USER_ID = "445";
     private static final String EXAMPLE_REQUEST_ID = "TEST REQUEST ID";
-
-    public static final String SERVICE_AUTHORIZATION = "ServiceAuthorization";
-
 
     @SpyBean
     @Inject
