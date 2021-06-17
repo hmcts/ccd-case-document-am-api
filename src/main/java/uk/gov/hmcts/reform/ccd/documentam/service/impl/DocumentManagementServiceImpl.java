@@ -194,6 +194,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private UpdateDocumentsCommand prepareRequestForAttachingDocumentToCase(CaseDocumentsMetadata
                                                                                 caseDocumentsMetadata) {
+        ArrayList<DocumentUpdate> list = new ArrayList<>();
         for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashTokens()) {
 
             if (documentHashToken.getHashToken() != null) {
@@ -220,14 +221,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                     caseDocumentsMetadata.getJurisdictionId());
                 metadataMap.put(Constants.JURISDICTION_ID, caseDocumentsMetadata.getJurisdictionId());
             }
-
             DocumentUpdate documentUpdate = new DocumentUpdate();
             documentUpdate.setDocumentId(UUID.fromString(documentHashToken.getId()));
-
             documentUpdate.setMetadata(metadataMap);
+
+            list.add(documentUpdate);
         }
 
-        return new UpdateDocumentsCommand(null, null);
+        return new UpdateDocumentsCommand(null, list);
     }
 
     @Override
