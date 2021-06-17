@@ -1,8 +1,5 @@
 package uk.gov.hmcts.reform.ccd.documentam.service;
 
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.INPUT_CASE_ID_PATTERN;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.INPUT_STRING_PATTERN;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -21,20 +18,21 @@ import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_ID_NOT_VALID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.INPUT_CASE_ID_PATTERN;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.INPUT_STRING_PATTERN;
+
 @Named
 @Singleton
 @Slf4j
 public class ValidationUtils {
 
-    /**
-     * Validate a number string using  algorithm.
-     *
-     * @param numberString =null
-     * @return
-     */
-    public boolean validate(String numberString) {
+    public void validate(String numberString) {
         validateInputParams(INPUT_CASE_ID_PATTERN, numberString);
-        return (numberString != null && numberString.length() == 16);
+
+        if (numberString == null || numberString.length() != 16) {
+            throw new BadRequestException(CASE_ID_NOT_VALID);
+        }
     }
 
     public void isValidSecurityClassification(String securityClassification) {
