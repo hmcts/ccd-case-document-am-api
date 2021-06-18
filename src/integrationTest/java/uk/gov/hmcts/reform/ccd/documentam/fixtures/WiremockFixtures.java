@@ -31,7 +31,6 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_AUT
 
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.ExcessiveImports"})
 public class WiremockFixtures {
-
     public static final String MAIN_URL = "/cases/documents";
     public static final String DOCUMENTS_URL = "/documents/";
 
@@ -48,7 +47,7 @@ public class WiremockFixtures {
 
     private WiremockFixtures() {
     }
-
+ 
     private static void stubDocumentUrl(CaseDocumentMetadata caseDocumentMetadata) {
 
         Map<String, Object> body = new LinkedHashMap<>();
