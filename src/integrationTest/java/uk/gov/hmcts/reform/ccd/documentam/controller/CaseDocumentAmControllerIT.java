@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -41,7 +42,8 @@ import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.getJs
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDeleteDocumentByDocumentId;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDocumentBinaryContent;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDocumentManagementUploadDocument;
-import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDocumentUrl;
+import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDocumentUrlNoPermissions;
+import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDocumentUrlWithReadPermissions;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubGetDocumentMetaData;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubPatchDocument;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubPatchDocumentMetaData;
@@ -111,7 +113,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     void shouldSuccessfullyGetDocumentByDocumentId() throws Exception {
         StoredDocumentHalResource storedDocumentResource = getStoredDocumentResource();
 
-        stubDocumentUrl();
+        stubDocumentUrlWithReadPermissions();
         stubGetDocumentMetaData(storedDocumentResource);
 
         ArrayList<String> documentIds = new ArrayList<>();
@@ -157,7 +159,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     void shouldSuccessfullyGetDocumentBinaryContent() throws Exception {
         StoredDocumentHalResource storedDocumentResource = getStoredDocumentResource();
 
-        stubDocumentUrl();
+        stubDocumentUrlWithReadPermissions();
         stubGetDocumentMetaData(storedDocumentResource);
         stubDocumentBinaryContent();
 
@@ -278,6 +280,96 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                 SERVICE_NAME_CCD_DATA,
                 documentIds,
                 body.getCaseId()));
+    }
+
+    @Test
+    void shouldFailToUploadDocumentEmptyFile() throws Exception {
+
+        stubDocumentManagementUploadDocument();
+
+        MockMultipartFile jsonFile1 =
+            new MockMultipartFile("name", null,
+                                  null, new byte[0]);
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart(MAIN_URL)
+                            .file(jsonFile1)
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
+                            .param(CLASSIFICATION, CLASSIFICATION_VALUE)
+                            .param(CASE_TYPE_ID, CASE_TYPE_ID_VALUE)
+                            .param(JURISDICTION_ID, JURISDICTION_ID_VALUE)
+                            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+            .andExpect(status().isInternalServerError())
+
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.UPLOAD_DOCUMENTS,
+                SERVICE_NAME_XUI_WEBAPP,
+                null,
+                null));
+    }
+
+    @Test
+    void shouldBeForbiddenGetDocumentByDocumentIdWithNoPermissions() throws Exception {
+        StoredDocumentHalResource storedDocumentResource = getStoredDocumentResource();
+
+        stubDocumentUrlNoPermissions();
+        stubGetDocumentMetaData(storedDocumentResource);
+
+        ArrayList<String> documentIds = new ArrayList<>();
+        documentIds.add(DOCUMENT_ID.toString());
+        mockMvc.perform(get(MAIN_URL + "/" +  DOCUMENT_ID)
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+            .andExpect(status().isForbidden())
+
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                documentIds,
+                null));
+    }
+
+    @Test
+    void shouldBeForbiddenWhenGettingDocumentBinaryContentWithNoPermissions() throws Exception {
+        StoredDocumentHalResource storedDocumentResource = getStoredDocumentResource();
+
+        stubDocumentUrlNoPermissions();
+        stubGetDocumentMetaData(storedDocumentResource);
+        stubDocumentBinaryContent();
+
+        List<String> documentIds = new ArrayList<>();
+        documentIds.add(DOCUMENT_ID.toString());
+
+        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + "/binary")
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+            .andExpect(status().isForbidden())
+
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                documentIds,
+                null));
+    }
+
+    @Test
+    void shouldNotFindDocumentToDeleteWhenTryingToDeleteDocumentByDocumentId() throws Exception {
+        UUID random = UUID.randomUUID();
+
+        StoredDocumentHalResource storedDocumentResource = getStoredDocumentResource();
+
+        stubGetDocumentMetaData(storedDocumentResource);
+        stubDeleteDocumentByDocumentId();
+
+        List<String> documentIds = new ArrayList<>();
+        documentIds.add(random.toString());
+
+        mockMvc.perform(delete(MAIN_URL + "/" + random)
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+            .andExpect(status().isNotFound())
+
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                documentIds,
+                null));
     }
 
 

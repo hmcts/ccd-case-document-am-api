@@ -49,17 +49,7 @@ public class WiremockFixtures {
     private WiremockFixtures() {
     }
 
-    public static void stubDocumentUrl() {
-        CaseDocumentMetadata caseDocumentMetadata = new CaseDocumentMetadata();
-        caseDocumentMetadata.setCaseId(CASE_ID_VALUE);
-
-        List<Permission> permissionList = new ArrayList<>();
-        permissionList.add(Permission.READ);
-        DocumentPermissions documentPermissions = new DocumentPermissions();
-        documentPermissions.setId(DOCUMENT_ID.toString());
-        documentPermissions.setPermissions(permissionList);
-
-        caseDocumentMetadata.setDocumentPermissions(documentPermissions);
+    private static void stubDocumentUrl(CaseDocumentMetadata caseDocumentMetadata) {
 
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("documentMetadata", caseDocumentMetadata);
@@ -72,6 +62,19 @@ public class WiremockFixtures {
                                     .withBody(getJsonString(body))
                     )
         );
+    }
+
+    public static void stubDocumentUrlWithReadPermissions() {
+        ArrayList<Permission> permissionList = new ArrayList<>();
+        permissionList.add(Permission.READ);
+
+        stubDocumentUrl(getCaseDocumentMetaData(permissionList));
+    }
+
+    public static void stubDocumentUrlNoPermissions() {
+        ArrayList<Permission> permissionList = new ArrayList<>();
+
+        stubDocumentUrl(getCaseDocumentMetaData(permissionList));
     }
 
     public static void stubDocumentManagementUploadDocument() {
@@ -126,6 +129,18 @@ public class WiremockFixtures {
                                     .withStatus(HTTP_OK)
                                     .withBody(getJsonString(response))
                                     .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
+    }
+
+    private static CaseDocumentMetadata getCaseDocumentMetaData(List<Permission> permissionList) {
+        CaseDocumentMetadata caseDocumentMetadata = new CaseDocumentMetadata();
+        caseDocumentMetadata.setCaseId(CASE_ID_VALUE);
+
+        DocumentPermissions documentPermissions = new DocumentPermissions();
+        documentPermissions.setId(DOCUMENT_ID.toString());
+        documentPermissions.setPermissions(permissionList);
+
+        caseDocumentMetadata.setDocumentPermissions(documentPermissions);
+        return caseDocumentMetadata;
     }
 
     @SuppressWarnings({"PMD.AvoidThrowingRawExceptionTypes", "squid:S112"})
