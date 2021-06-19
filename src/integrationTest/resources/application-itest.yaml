@@ -1,0 +1,21 @@
+idam:
+  api:
+    url: http://localhost:${wiremock.server.port}
+  s2s-auth:
+    url: http://localhost:${wiremock.server.port}/s2s
+
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          oidc:
+            issuer-uri: http://localhost:${wiremock.server.port}/o
+
+azure:
+  application-insights:
+    web:
+      enabled: false
+
+documentStoreUrl: http://localhost:${wiremock.server.port}
+caseDataStoreUrl: http://localhost:${wiremock.server.port}
