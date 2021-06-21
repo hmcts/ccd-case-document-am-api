@@ -44,6 +44,9 @@ pmd {
   toolVersion = '6.21.0'
   sourceSets = []
 }
+ext['spring-framework.version'] = '5.3.7'
+ext['spring-security.version'] = '5.4.5'
+
 
 group = 'uk.gov.hmcts.reform.ccd.documentam'
 version = '0.0.1'
@@ -305,6 +308,7 @@ dependencies {
 }
 
 dependencyManagement {
+
   dependencies {
     dependency group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.61'
     // Remove once BEFTA rest-assured is updated
