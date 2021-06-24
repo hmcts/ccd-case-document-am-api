@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -32,6 +33,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
@@ -52,6 +54,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -80,8 +83,8 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.ORIGINAL_FI
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SELF;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_AUTHORIZATION;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USER_PERMISSION_ERROR;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USERID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USER_PERMISSION_ERROR;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.XUI_WEBAPP;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -91,12 +94,10 @@ class DocumentManagementServiceImplTest {
     private static final String CASE_ID = "1582550122096256";
     private static final String BEFTA_CASETYPE_2 = "BEFTA_CASETYPE_2";
     private static final String BEFTA_JURISDICTION_2 = "BEFTA_JURISDICTION_2";
-    private static final String USER_ID = "userId";
     private final RestTemplate restTemplateMock = Mockito.mock(RestTemplate.class);
     private final SecurityUtils securityUtilsMock = mock(SecurityUtils.class);
     private final CaseDataStoreService caseDataStoreServiceMock = mock(CaseDataStoreService.class);
     private final UUID matchedDocUUID = UUID.fromString(MATCHED_DOCUMENT_ID);
-    private final transient String serviceAuthorization = "auth";
     private final HttpEntity<?> requestEntityGlobal = new HttpEntity<>(getHttpHeaders());
     @InjectMocks
     private final DocumentManagementServiceImpl sut = new DocumentManagementServiceImpl(restTemplateMock,
@@ -593,7 +594,21 @@ class DocumentManagementServiceImplTest {
                                                                            .documentHashTokens(documentList)
                                                                            .build();
 
+
+        ArgumentCaptor<HttpEntity> entityCaptor = ArgumentCaptor.forClass(HttpEntity.class);
+
+        // WHEN
         sut.patchDocumentMetadata(caseDocumentsMetadata);
+
+        // THEN
+        verify(restTemplateMock).exchange(eq(documentURL + "/documents"),
+                                          eq(PATCH),
+                                          entityCaptor.capture(),
+                                          eq(Void.class));
+
+        final UpdateDocumentsCommand documentsCommand = (UpdateDocumentsCommand)entityCaptor.getValue().getBody();
+        assertThat(documentsCommand.ttl)
+            .isNull();
 
         verify(restTemplateMock, times(1))
             .exchange(eq(documentURL + "/documents"), eq(PATCH), any(HttpEntity.class),

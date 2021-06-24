@@ -72,6 +72,8 @@ import uk.gov.hmcts.reform.ccd.documentam.util.ResponseHelper;
 @Service
 public class DocumentManagementServiceImpl implements DocumentManagementService {
 
+    private static final Date NULL_TTL = null;
+
     private final RestTemplate restTemplate;
     private final ValidationUtils validationUtils;
     private final SecurityUtils securityUtils;
@@ -194,7 +196,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private UpdateDocumentsCommand prepareRequestForAttachingDocumentToCase(CaseDocumentsMetadata
                                                                                 caseDocumentsMetadata) {
-        ArrayList<DocumentUpdate> list = new ArrayList<>();
+        List<DocumentUpdate> documentsList = new ArrayList<>();
         for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashTokens()) {
 
             if (documentHashToken.getHashToken() != null) {
@@ -225,10 +227,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             documentUpdate.setDocumentId(UUID.fromString(documentHashToken.getId()));
             documentUpdate.setMetadata(metadataMap);
 
-            list.add(documentUpdate);
+            documentsList.add(documentUpdate);
         }
 
-        return new UpdateDocumentsCommand(null, list);
+        return new UpdateDocumentsCommand(NULL_TTL, documentsList);
     }
 
     @Override
