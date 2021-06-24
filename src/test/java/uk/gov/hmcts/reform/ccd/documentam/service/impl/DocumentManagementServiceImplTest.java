@@ -609,10 +609,6 @@ class DocumentManagementServiceImplTest {
         final UpdateDocumentsCommand documentsCommand = (UpdateDocumentsCommand)entityCaptor.getValue().getBody();
         assertThat(documentsCommand.ttl)
             .isNull();
-
-        verify(restTemplateMock, times(1))
-            .exchange(eq(documentURL + "/documents"), eq(PATCH), any(HttpEntity.class),
-                      eq(Void.class));
     }
 
     @Test

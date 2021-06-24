@@ -19,7 +19,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToIgnoreCase;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
@@ -47,7 +49,7 @@ public class WiremockFixtures {
 
     private WiremockFixtures() {
     }
- 
+
     private static void stubDocumentUrl(CaseDocumentMetadata caseDocumentMetadata) {
 
         Map<String, Object> body = new LinkedHashMap<>();
@@ -124,6 +126,7 @@ public class WiremockFixtures {
     public static void stubPatchDocumentMetaData(StoredDocumentHalResource response) {
         stubFor(WireMock.patch(urlPathEqualTo("/documents"))
                     .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
+                    .withRequestBody(containing("\"ttl\":null"))
                     .willReturn(aResponse()
                                     .withStatus(HTTP_OK)
                                     .withBody(getJsonString(response))
