@@ -68,7 +68,7 @@ If you want your code to become available to other Docker projects (e.g. for loc
 docker-compose build
 ```
 
-When the project has been packaged in `target/` directory, 
+When the project has been packaged in `target/` directory,
 you can run it by executing following command:
 
 ```bash
@@ -81,16 +81,16 @@ As a result the following containers will get created and started:
 
 ## Endpoints
 
-Authorization and ServiceAuthorization (S2S) tokens are required in the headers for all endpoints. All APIs are authorised with some service level permissions captured in the the configurables rules under service_config.json file (https://github.com/hmcts/ccd-case-document-am-api/blob/readme_update/src/main/resources/service_config.json). 
+Authorization and ServiceAuthorization (S2S) tokens are required in the headers for all endpoints. All APIs are authorised with some service level permissions captured in the the configurables rules under service_config.json file (https://github.com/hmcts/ccd-case-document-am-api/blob/readme_update/src/main/resources/service_config.json).
 
 ```
 GET /cases/documents/{documentId}
 ```
-- Retrieves json representation of the document metadata from doc-store. 
+- Retrieves json representation of the document metadata from doc-store.
 ```
 GET /cases/documents/{documentId}/binary
 ```
-- Streams contents of the most recent Document Content Version associated with the Stored Document. 
+- Streams contents of the most recent Document Content Version associated with the Stored Document.
 ```
 GET /cases/documents/{documentId}/token
 ```
@@ -108,7 +108,7 @@ POST /cases/documents
 ```
 PATCH /cases/documents/{documentId}
 ```
-- Used to update the TTL(time to live) value for any case related document in doc-store. 
+- Used to update the TTL(time to live) value for any case related document in doc-store.
 
         Also requires a request body containing
         - ttl {string}
@@ -128,7 +128,7 @@ DELETE /cases/documents/{documentId}
         - permanent {boolean}
 
 ### Functional Tests
-The functional tests are located in `functionalTest` folder. These are the tests run against an environment. For example if you would 
+The functional tests are located in `functionalTest` folder. These are the tests run against an environment. For example if you would
 like to test your local environment you'll need to export the following variables on your `.bash_profile` script.
 
 
