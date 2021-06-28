@@ -21,7 +21,7 @@
       {
         "id": "ccd_data",
         "caseTypeId": "*",
-        "jurisdictionId": "BEFTA_JURISDICTION_2",
+        "jurisdictionId": "*",
         "permissions": [
           "ATTACH"
         ]
