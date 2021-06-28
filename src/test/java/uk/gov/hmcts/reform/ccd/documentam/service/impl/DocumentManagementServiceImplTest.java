@@ -607,7 +607,7 @@ class DocumentManagementServiceImplTest {
                                           eq(Void.class));
 
         final UpdateDocumentsCommand documentsCommand = (UpdateDocumentsCommand)entityCaptor.getValue().getBody();
-        assertThat(documentsCommand.ttl)
+        assertThat(documentsCommand.getTtl())
             .isNull();
     }
 
