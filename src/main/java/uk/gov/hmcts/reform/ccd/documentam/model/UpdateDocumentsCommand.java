@@ -9,6 +9,6 @@ import java.util.List;
 @Data
 public class UpdateDocumentsCommand {
 
-    public final Date ttl;
-    public final @NotEmpty List<DocumentUpdate> documents;
+    private final Date ttl;
+    private final @NotEmpty List<DocumentUpdate> documents;
 }
