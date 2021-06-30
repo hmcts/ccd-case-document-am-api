@@ -44,6 +44,7 @@ import java.util.UUID;
 
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
+import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.CaseNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
@@ -252,12 +253,17 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public ResponseEntity<Object> uploadDocuments(List<MultipartFile> files, String classification,
-                                                  String caseTypeId, String jurisdictionId) {
+    public ResponseEntity<Object> uploadDocuments(final List<MultipartFile> files,
+                                                  final DocumentUploadMetadata documentUploadMetadata) {
         ResponseEntity<Object> responseResult = new ResponseEntity<>(HttpStatus.OK);
         try {
             LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
-            HttpHeaders headers = prepareRequestForUpload(classification, caseTypeId, jurisdictionId, bodyMap);
+            final HttpHeaders headers = prepareRequestForUpload(
+                documentUploadMetadata.getClassification(),
+                documentUploadMetadata.getCaseTypeId(),
+                documentUploadMetadata.getJurisdictionId(),
+                bodyMap
+            );
 
             for (MultipartFile file : files) {
                 if (!file.isEmpty()) {
@@ -273,7 +279,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
             if (HttpStatus.OK.equals(uploadedDocumentResponse.getStatusCode())
                 && uploadedDocumentResponse.getBody() != null) {
-                updatedDocumentResponse = formatUploadDocumentResponse(caseTypeId, jurisdictionId,
+                updatedDocumentResponse = formatUploadDocumentResponse(
+                    documentUploadMetadata.getCaseTypeId(),
+                    documentUploadMetadata.getJurisdictionId(),
                     uploadedDocumentResponse);
             }
 

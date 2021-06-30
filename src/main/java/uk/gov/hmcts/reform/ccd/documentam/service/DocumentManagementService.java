@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.ccd.documentam.service;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
@@ -25,9 +26,8 @@ public interface DocumentManagementService {
 
     String generateHashToken(final UUID documentId);
 
-    ResponseEntity<Object> uploadDocuments(List<MultipartFile> files, String classification,
-                                            String caseTypeId,
-                                           String jurisdictionId);
+    ResponseEntity<Object> uploadDocuments(final List<MultipartFile> files,
+                                           final DocumentUploadMetadata documentUploadMetadata);
 
     ResponseEntity<PatchDocumentResponse> patchDocument(final UUID documentId,
                                                         UpdateDocumentCommand updateDocumentCommand);
