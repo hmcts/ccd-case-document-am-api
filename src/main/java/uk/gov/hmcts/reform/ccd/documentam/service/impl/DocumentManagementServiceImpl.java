@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -223,14 +224,30 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                     caseDocumentsMetadata.getJurisdictionId());
                 metadataMap.put(Constants.JURISDICTION_ID, caseDocumentsMetadata.getJurisdictionId());
             }
-            DocumentUpdate documentUpdate = new DocumentUpdate();
-            documentUpdate.setDocumentId(UUID.fromString(documentHashToken.getId()));
-            documentUpdate.setMetadata(metadataMap);
 
-            documentsList.add(documentUpdate);
+            if (isDocumentMovingCases(caseDocumentsMetadata.getCaseTypeId())) {
+                DocumentUpdate documentUpdate = new DocumentUpdate();
+                documentUpdate.setDocumentId(UUID.fromString(documentHashToken.getId()));
+                documentUpdate.setMetadata(metadataMap);
+
+                documentsList.add(documentUpdate);
+            } else {
+                throw new ForbiddenException("Document is not moving cases: " + caseDocumentsMetadata.getCaseId());
+            }
+
         }
 
         return new UpdateDocumentsCommand(NULL_TTL, documentsList);
+    }
+
+    private boolean isDocumentMovingCases(String documentCaseTypeId) {
+        List<String> bulkScanExceptionRecordTypes = Arrays.asList("CMC_ExceptionRecord",
+                                                                  "FINREM_ExceptionRecord",
+                                                                  "SSCS_ExceptionRecord",
+                                                                  "PROBATE_ExceptionRecord",
+                                                                  "PUBLICLAW_ExceptionRecord");
+
+        return  bulkScanExceptionRecordTypes.contains(documentCaseTypeId.trim());
     }
 
     @Override
