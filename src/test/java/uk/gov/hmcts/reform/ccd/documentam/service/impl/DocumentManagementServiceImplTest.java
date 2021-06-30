@@ -409,7 +409,7 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void checkServicePermissionForUpload_WhenServiceIsNotAuthorised() {
-        assertThrows(ForbiddenException.class, () -> sut.checkServicePermissionsForUpload(
+        assertThrows(ForbiddenException.class, () -> sut.checkServicePermission(
             "caseTypeId",
             "BEFTA_JURISDICTION_2",
             BULK_SCAN_PROCESSOR,
@@ -421,7 +421,7 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void checkServicePermissionForUpload_WhenCaseTypeIsNull() {
-        assertThrows(ForbiddenException.class, () -> sut.checkServicePermissionsForUpload(
+        assertThrows(ForbiddenException.class, () -> sut.checkServicePermission(
             "",
             "BEFTA_JURISDICTION_2",
             BULK_SCAN_PROCESSOR,
@@ -433,7 +433,7 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void checkServicePermissionForUpload_WhenJurisdictionIdIsNull() {
-        assertThrows(ForbiddenException.class, () -> sut.checkServicePermissionsForUpload(
+        assertThrows(ForbiddenException.class, () -> sut.checkServicePermission(
             "caseTypeId",
             "",
             BULK_SCAN_PROCESSOR,

@@ -231,11 +231,11 @@ public class CaseDocumentAmController {
         validationUtils.isValidSecurityClassification(classification);
         validationUtils.validateLists(files);
 
-        documentManagementService.checkServicePermissionsForUpload(caseTypeId, jurisdictionId,
-                                                                       getServiceNameFromS2SToken(s2sToken),
-                                                                       Permission.CREATE,
-                                                                       SERVICE_PERMISSION_ERROR,
-                                                                       caseTypeId + " " + jurisdictionId);
+        documentManagementService.checkServicePermission(caseTypeId, jurisdictionId,
+                                                         getServiceNameFromS2SToken(s2sToken),
+                                                         Permission.CREATE,
+                                                         SERVICE_PERMISSION_ERROR,
+                                                         caseTypeId + " " + jurisdictionId);
 
         return documentManagementService.uploadDocuments(files, classification, caseTypeId, jurisdictionId);
     }

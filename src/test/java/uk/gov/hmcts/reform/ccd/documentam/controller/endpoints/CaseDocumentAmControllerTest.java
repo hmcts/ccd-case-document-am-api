@@ -471,7 +471,7 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should go through happy path")
     public void uploadDocuments_HappyPath() {
-        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
+        doNothing().when(documentManagementService).checkServicePermission(
             eq("BEFTA_CASETYPE_2"),
             eq("BEFTA_JURISDICTION_2"),
             eq(XUI_WEBAPP),
@@ -527,7 +527,7 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when the uploaded file is empty")
     public void shouldThrowBadRequestExceptionWhenUploadedFilesIsNull() {
-        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
+        doNothing().when(documentManagementService).checkServicePermission(
             eq("BEFTA_CASETYPE_2"),
             eq("BEFTA_JURISDICTION_2"),
             eq(XUI_WEBAPP),
@@ -543,7 +543,7 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when user-roles are empty")
     public void shouldThrowBadRequestExceptionWhenUserRolesAreEmpty() {
-        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
+        doNothing().when(documentManagementService).checkServicePermission(
             eq("BEFTA_CASETYPE_2"),
             eq("BEFTA@JURISDICTION_2$$$$"),
             eq(XUI_WEBAPP),
@@ -561,7 +561,7 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when caseTypeId input is null")
     public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsNull() {
-        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
+        doNothing().when(documentManagementService).checkServicePermission(
             eq(null),
             eq("BEFTA_JURISDICTION_2"),
             eq(XUI_WEBAPP),
@@ -579,7 +579,7 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when caseTypeId input is malformed")
     public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsMalformed() {
-        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
+        doNothing().when(documentManagementService).checkServicePermission(
             eq("BEFTA_CASETYPE_2&&&&&&&&&"),
             eq("BEFTA_JURISDICTION_2"),
             eq(XUI_WEBAPP),
@@ -598,7 +598,7 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when jurisdictionId input is null")
     public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsNull() {
-        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
+        doNothing().when(documentManagementService).checkServicePermission(
             eq("BEFTA_CASETYPE_2"),
             eq(null),
             eq(XUI_WEBAPP),
@@ -617,7 +617,7 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when jurisdictionId input is malformed")
     public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsMalformed() {
-        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
+        doNothing().when(documentManagementService).checkServicePermission(
             eq("BEFTA_CASETYPE_2"),
             eq("BEFTA@JURISDICTION_2$$$$"),
             eq(XUI_WEBAPP),

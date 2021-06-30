@@ -43,9 +43,9 @@ public interface DocumentManagementService {
                                 String serviceId, Permission permission,
                                 String logMessage, String exceptionMessage);
 
-    void checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId,
-                                          String serviceId, Permission permission,
-                                          String logMessage, String exceptionMessage);
+    void checkServicePermission(String caseTypeId, String jurisdictionId,
+                                String serviceId, Permission permission,
+                                String logMessage, String exceptionMessage);
 
     void validateHashTokens(List<DocumentHashToken> documentList);
 }
