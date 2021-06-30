@@ -69,6 +69,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
 
     private static final String CLASSIFICATION_VALUE = "PUBLIC";
     private static final String CASE_TYPE_ID_VALUE = "BEFTA_CASETYPE_2";
+    private static final String CASE_TYPE_ID_MOVING_CASE_VALUE = "CMC_ExceptionRecord";
     private static final String JURISDICTION_ID_VALUE = "BEFTA_JURISDICTION_2";
     private static final String META_DATA_JSON_EXPRESSION = "$.metadata.";
 
@@ -213,14 +214,14 @@ public class CaseDocumentAmControllerIT extends BaseTest {
             .generateHashCode(salt.concat(DOCUMENT_ID.toString()
                                               .concat(CASE_ID_VALUE)
                                               .concat(JURISDICTION_ID_VALUE)
-                                              .concat(CASE_TYPE_ID_VALUE)));
+                                              .concat(CASE_TYPE_ID_MOVING_CASE_VALUE)));
 
         List<DocumentHashToken> documentHashTokens = new ArrayList<>();
         documentHashTokens.add(new DocumentHashToken(DOCUMENT_ID.toString(), hashToken));
         CaseDocumentsMetadata body = new CaseDocumentsMetadata();
         body.setDocumentHashTokens(documentHashTokens);
         body.setCaseId(CASE_ID_VALUE);
-        body.setCaseTypeId(CASE_TYPE_ID_VALUE);
+        body.setCaseTypeId(CASE_TYPE_ID_MOVING_CASE_VALUE);
         body.setJurisdictionId(JURISDICTION_ID_VALUE);
 
         Date time = Date.from(Instant.now());
@@ -239,6 +240,49 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                                                           .content(getJsonString(body)))
             .andExpect(status().isOk())
             .andExpect(jsonPath(RESPONSE_RESULT_KEY, is(SUCCESS)))
+
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
+                SERVICE_NAME_CCD_DATA,
+                documentIds,
+                body.getCaseId()
+            ));
+    }
+
+    @Test
+    void shouldNotSuccessfullyPatchMetaDataWhenDocumentIsNotMovingCases() throws Exception {
+        String hashToken = ApplicationUtils
+            .generateHashCode(salt.concat(DOCUMENT_ID.toString()
+                                              .concat(CASE_ID_VALUE)
+                                              .concat(JURISDICTION_ID_VALUE)
+                                              .concat(CASE_TYPE_ID_VALUE)));
+
+        List<DocumentHashToken> documentHashTokens = new ArrayList<>();
+        documentHashTokens.add(new DocumentHashToken(DOCUMENT_ID.toString(), hashToken));
+        CaseDocumentsMetadata body = new CaseDocumentsMetadata();
+        body.setDocumentHashTokens(documentHashTokens);
+        body.setCaseId(CASE_ID_VALUE);
+        body.setCaseTypeId(CASE_TYPE_ID);
+        body.setJurisdictionId(JURISDICTION_ID_VALUE);
+
+        Date time = Date.from(Instant.now());
+
+        StoredDocumentHalResource storedDocumentResource = getStoredDocumentResourceToUpdatePatch(time);
+        Map<String, String> updatedMetaData = storedDocumentResource.getMetadata();
+        updatedMetaData.put(CASE_TYPE_ID, CASE_TYPE_ID_MOVING_CASE_VALUE);
+        storedDocumentResource.setMetadata(updatedMetaData);
+
+        stubGetDocumentMetaData(storedDocumentResource);
+        stubPatchDocumentMetaData(storedDocumentResource);
+
+        List<String> documentIds = new ArrayList<>();
+        documentIds.add(DOCUMENT_ID.toString());
+
+        mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
+                            .headers(createHttpHeaders(SERVICE_NAME_CCD_DATA))
+                            .contentType(MediaType.APPLICATION_JSON_VALUE)
+                            .content(getJsonString(body)))
+            .andExpect(status().isForbidden())
 
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
@@ -395,7 +439,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         metaData.put("size", "10");
         metaData.put("createdBy", USER_ID);
         metaData.put(CASE_ID, CASE_ID_VALUE);
-        metaData.put(CASE_TYPE_ID, CASE_TYPE_ID_VALUE);
+        metaData.put(CASE_TYPE_ID, CASE_TYPE_ID_MOVING_CASE_VALUE);
         metaData.put(JURISDICTION_ID, JURISDICTION_ID_VALUE);
         metaData.put(CLASSIFICATION, CLASSIFICATION_VALUE);
         metaData.put("metadata", "");
