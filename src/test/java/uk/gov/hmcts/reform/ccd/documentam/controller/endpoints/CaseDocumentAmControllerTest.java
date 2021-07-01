@@ -55,12 +55,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USER_PERMISSION_ERROR;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.XUI_WEBAPP;
 
 public class CaseDocumentAmControllerTest {
     private static final String MATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9c";
     private static final String UNMATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9d";
     private static final String CASE_ID = "1582550122096256";
+    private static final String XUI_WEBAPP = "xui_webapp";
     private static final String BEFTA_CASETYPE_2 = "BEFTA_CASETYPE_2";
     private static final String BEFTA_JURISDICTION_2 = "BEFTA_JURISDICTION_2";
     private static final String VALID_RESPONSE = "Valid Response from API";
@@ -397,7 +397,8 @@ public class CaseDocumentAmControllerTest {
     @Test
     public void shouldNotPatchMetaDataOnDocuments() {
         doThrow(ForbiddenException.class).when(documentManagementService).checkServicePermission(
-            eq(setDocumentMetaData()),
+            eq(BEFTA_CASETYPE_2),
+            eq(BEFTA_JURISDICTION_2),
             eq(XUI_WEBAPP),
             eq(Permission.ATTACH),
             eq(SERVICE_PERMISSION_ERROR),
@@ -407,8 +408,8 @@ public class CaseDocumentAmControllerTest {
         CaseDocumentsMetadata body = CaseDocumentsMetadata.builder()
             .caseId("1111122222333334")
             .documentHashTokens(Collections.singletonList(document))
-            .caseTypeId("BEFTA_CASETYPE_2_1")
-            .jurisdictionId("BEFTA_JURISDICTION_2")
+            .caseTypeId(BEFTA_CASETYPE_2)
+            .jurisdictionId(BEFTA_JURISDICTION_2)
             .build();
         doReturn(setDocumentMetaData()).when(documentManagementService)
             .getDocumentMetadata(UUID.fromString(body.getDocumentHashTokens().get(
@@ -420,24 +421,13 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     public void shouldNotPatchMetaDataOnDocumentsWhenCaseIdNotValid() {
-        doThrow(ForbiddenException.class).when(documentManagementService).checkServicePermission(
-            eq(setDocumentMetaData()),
-            eq(XUI_WEBAPP),
-            eq(Permission.ATTACH),
-            eq(SERVICE_PERMISSION_ERROR),
-            anyString()
-        );
         DocumentHashToken document = DocumentHashToken.builder().id("cab18c21-8b7c-452b-937c-091225e0cc12").build();
         CaseDocumentsMetadata body = CaseDocumentsMetadata.builder()
             .caseId("111112222233333")
             .documentHashTokens(Collections.singletonList(document))
-            .caseTypeId("BEFTA_CASETYPE_2_1")
-            .jurisdictionId("BEFTA_JURISDICTION_2")
+            .caseTypeId(BEFTA_CASETYPE_2)
+            .jurisdictionId(BEFTA_JURISDICTION_2)
             .build();
-        doReturn(setDocumentMetaData()).when(documentManagementService)
-            .getDocumentMetadata(UUID.fromString(body.getDocumentHashTokens().get(
-            0).getId()));
-
         Assertions.assertThrows(BadRequestException.class, () -> testee.patchMetaDataOnDocuments(body, TEST_S2S_TOKEN));
     }
 
@@ -454,26 +444,30 @@ public class CaseDocumentAmControllerTest {
         CaseDocumentsMetadata body = CaseDocumentsMetadata.builder()
             .caseId("1111122222333334")
             .documentHashTokens(Collections.singletonList(document))
-            .caseTypeId("BEFTA_CASETYPE_2_1")
-            .jurisdictionId("BEFTA_JURISDICTION_2")
+            .caseTypeId(BEFTA_CASETYPE_2)
+            .jurisdictionId(BEFTA_JURISDICTION_2)
             .build();
-        doReturn(setDocumentMetaData()).when(documentManagementService)
-            .getDocumentMetadata(UUID.fromString(body.getDocumentHashTokens().get(
-            0).getId()));
+
         ResponseEntity response = testee.patchMetaDataOnDocuments(body, TEST_S2S_TOKEN);
 
         assertAll(
             () -> assertNotNull(response, VALID_RESPONSE),
-            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE)
+            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE),
+            () -> verify(documentManagementService).checkServicePermission(eq(BEFTA_CASETYPE_2),
+                                                                           eq(BEFTA_JURISDICTION_2),
+                                                                           eq(XUI_WEBAPP),
+                                                                           eq(Permission.ATTACH),
+                                                                           eq(SERVICE_PERMISSION_ERROR),
+                                                                           anyString())
         );
     }
 
     @Test
     @DisplayName("Should go through happy path")
     public void uploadDocuments_HappyPath() {
-        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
-            eq("BEFTA_CASETYPE_2"),
-            eq("BEFTA_JURISDICTION_2"),
+        doNothing().when(documentManagementService).checkServicePermission(
+            eq(BEFTA_CASETYPE_2),
+            eq(BEFTA_JURISDICTION_2),
             eq(XUI_WEBAPP),
             eq(Permission.CREATE),
             eq(SERVICE_PERMISSION_ERROR),
@@ -527,9 +521,9 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when the uploaded file is empty")
     public void shouldThrowBadRequestExceptionWhenUploadedFilesIsNull() {
-        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
-            eq("BEFTA_CASETYPE_2"),
-            eq("BEFTA_JURISDICTION_2"),
+        doNothing().when(documentManagementService).checkServicePermission(
+            eq(BEFTA_CASETYPE_2),
+            eq(BEFTA_JURISDICTION_2),
             eq(XUI_WEBAPP),
             eq(Permission.CREATE),
             eq(SERVICE_PERMISSION_ERROR),
@@ -543,8 +537,8 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when user-roles are empty")
     public void shouldThrowBadRequestExceptionWhenUserRolesAreEmpty() {
-        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
-            eq("BEFTA_CASETYPE_2"),
+        doNothing().when(documentManagementService).checkServicePermission(
+            eq(BEFTA_CASETYPE_2),
             eq("BEFTA@JURISDICTION_2$$$$"),
             eq(XUI_WEBAPP),
             eq(Permission.CREATE),
@@ -561,9 +555,9 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when caseTypeId input is null")
     public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsNull() {
-        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
+        doNothing().when(documentManagementService).checkServicePermission(
             eq(null),
-            eq("BEFTA_JURISDICTION_2"),
+            eq(BEFTA_JURISDICTION_2),
             eq(XUI_WEBAPP),
             eq(Permission.CREATE),
             eq(SERVICE_PERMISSION_ERROR),
@@ -579,9 +573,9 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when caseTypeId input is malformed")
     public void shouldThrowBadRequestExceptionWhenCaseTypeIdIsMalformed() {
-        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
+        doNothing().when(documentManagementService).checkServicePermission(
             eq("BEFTA_CASETYPE_2&&&&&&&&&"),
-            eq("BEFTA_JURISDICTION_2"),
+            eq(BEFTA_JURISDICTION_2),
             eq(XUI_WEBAPP),
             eq(Permission.CREATE),
             eq(SERVICE_PERMISSION_ERROR),
@@ -590,7 +584,7 @@ public class CaseDocumentAmControllerTest {
         Assertions.assertThrows(BadRequestException.class, () -> testee.uploadDocuments(generateMultipartList(),
                                                                                     Classification.PUBLIC.name(),
                                                                                     "BEFTA_CASETYPE_2&&&&&&&&&",
-                                                                                    "BEFTA_JURISDICTION_2",
+                                                                                    BEFTA_JURISDICTION_2,
                                                                                     TEST_S2S_TOKEN
         ));
     }
@@ -598,8 +592,8 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when jurisdictionId input is null")
     public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsNull() {
-        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
-            eq("BEFTA_CASETYPE_2"),
+        doNothing().when(documentManagementService).checkServicePermission(
+            eq(BEFTA_CASETYPE_2),
             eq(null),
             eq(XUI_WEBAPP),
             eq(Permission.CREATE),
@@ -617,8 +611,8 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should throw 400 when jurisdictionId input is malformed")
     public void shouldThrowBadRequestExceptionWhenJurisdictionIdIsMalformed() {
-        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
-            eq("BEFTA_CASETYPE_2"),
+        doNothing().when(documentManagementService).checkServicePermission(
+            eq(BEFTA_CASETYPE_2),
             eq("BEFTA@JURISDICTION_2$$$$"),
             eq(XUI_WEBAPP),
             eq(Permission.CREATE),
