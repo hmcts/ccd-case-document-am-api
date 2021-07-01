@@ -460,9 +460,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public void checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId,
-                                                 String serviceId, Permission permission,
-                                                 String logMessage, String exceptionMessage) {
+    public void checkServicePermission(String caseTypeId, String jurisdictionId,
+                                       String serviceId, Permission permission,
+                                       String logMessage, String exceptionMessage) {
         AuthorisedService serviceConfig = getServiceDetailsFromJson(serviceId);
         if (!validateCaseTypeId(serviceConfig, caseTypeId)
             || !validateJurisdictionId(serviceConfig, jurisdictionId)

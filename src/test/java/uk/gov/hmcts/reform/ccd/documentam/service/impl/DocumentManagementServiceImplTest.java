@@ -67,7 +67,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.PATCH;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.BINARY;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.BULK_SCAN_PROCESSOR;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_LENGTH;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_TYPE;
@@ -82,7 +81,6 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_AUT
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USER_PERMISSION_ERROR;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USERID;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.XUI_WEBAPP;
 
 @RunWith(MockitoJUnitRunner.class)
 class DocumentManagementServiceImplTest {
@@ -91,6 +89,8 @@ class DocumentManagementServiceImplTest {
     private static final String CASE_ID = "1582550122096256";
     private static final String BEFTA_CASETYPE_2 = "BEFTA_CASETYPE_2";
     private static final String BEFTA_JURISDICTION_2 = "BEFTA_JURISDICTION_2";
+    private static final String XUI_WEBAPP = "xui_webapp";
+    private static final String BULK_SCAN_PROCESSOR = "bulk_scan_processor";
     private static final String USER_ID = "userId";
     private final RestTemplate restTemplateMock = Mockito.mock(RestTemplate.class);
     private final SecurityUtils securityUtilsMock = mock(SecurityUtils.class);
@@ -409,7 +409,7 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void checkServicePermissionForUpload_WhenServiceIsNotAuthorised() {
-        assertThrows(ForbiddenException.class, () -> sut.checkServicePermissionsForUpload(
+        assertThrows(ForbiddenException.class, () -> sut.checkServicePermission(
             "caseTypeId",
             "BEFTA_JURISDICTION_2",
             BULK_SCAN_PROCESSOR,
@@ -421,7 +421,7 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void checkServicePermissionForUpload_WhenCaseTypeIsNull() {
-        assertThrows(ForbiddenException.class, () -> sut.checkServicePermissionsForUpload(
+        assertThrows(ForbiddenException.class, () -> sut.checkServicePermission(
             "",
             "BEFTA_JURISDICTION_2",
             BULK_SCAN_PROCESSOR,
@@ -433,7 +433,7 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void checkServicePermissionForUpload_WhenJurisdictionIdIsNull() {
-        assertThrows(ForbiddenException.class, () -> sut.checkServicePermissionsForUpload(
+        assertThrows(ForbiddenException.class, () -> sut.checkServicePermission(
             "caseTypeId",
             "",
             BULK_SCAN_PROCESSOR,
