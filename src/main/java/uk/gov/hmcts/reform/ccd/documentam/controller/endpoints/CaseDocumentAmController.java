@@ -231,11 +231,11 @@ public class CaseDocumentAmController {
         validationUtils.isValidSecurityClassification(classification);
         validationUtils.validateLists(files);
 
-        documentManagementService.checkServicePermissionsForUpload(caseTypeId, jurisdictionId,
-                                                                       getServiceNameFromS2SToken(s2sToken),
-                                                                       Permission.CREATE,
-                                                                       SERVICE_PERMISSION_ERROR,
-                                                                       caseTypeId + " " + jurisdictionId);
+        documentManagementService.checkServicePermission(caseTypeId, jurisdictionId,
+                                                         getServiceNameFromS2SToken(s2sToken),
+                                                         Permission.CREATE,
+                                                         SERVICE_PERMISSION_ERROR,
+                                                         caseTypeId + " " + jurisdictionId);
 
         return documentManagementService.uploadDocuments(files, classification, caseTypeId, jurisdictionId);
     }
@@ -340,13 +340,9 @@ public class CaseDocumentAmController {
         validationUtils.validate(caseDocumentsMetadata.getCaseId());
         documentManagementService.validateHashTokens(caseDocumentsMetadata.getDocumentHashTokens());
 
-        //validate the service authorization for first document in payload
-        ResponseEntity<StoredDocumentHalResource> documentMetadata =
-            documentManagementService.getDocumentMetadata(
-                UUID.fromString(caseDocumentsMetadata.getDocumentHashTokens().get(0).getId()));
-
         documentManagementService.checkServicePermission(
-            documentMetadata,
+            caseDocumentsMetadata.getCaseTypeId(),
+            caseDocumentsMetadata.getJurisdictionId(),
             getServiceNameFromS2SToken(s2sToken),
             Permission.ATTACH,
             SERVICE_PERMISSION_ERROR,
