@@ -293,7 +293,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
             .build();
 
         mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
-                            .headers(createHttpHeaders("xui_webapp"))
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(getJsonString(metadata)))
             .andExpect(status().isForbidden())
