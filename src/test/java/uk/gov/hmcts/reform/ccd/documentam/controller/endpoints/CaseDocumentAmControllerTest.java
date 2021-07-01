@@ -397,7 +397,8 @@ public class CaseDocumentAmControllerTest {
     @Test
     public void shouldNotPatchMetaDataOnDocuments() {
         doThrow(ForbiddenException.class).when(documentManagementService).checkServicePermission(
-            eq(setDocumentMetaData()),
+            eq("BEFTA_CASETYPE_2_1"),
+            eq("BEFTA_JURISDICTION_2"),
             eq(XUI_WEBAPP),
             eq(Permission.ATTACH),
             eq(SERVICE_PERMISSION_ERROR),
@@ -420,13 +421,6 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     public void shouldNotPatchMetaDataOnDocumentsWhenCaseIdNotValid() {
-        doThrow(ForbiddenException.class).when(documentManagementService).checkServicePermission(
-            eq(setDocumentMetaData()),
-            eq(XUI_WEBAPP),
-            eq(Permission.ATTACH),
-            eq(SERVICE_PERMISSION_ERROR),
-            anyString()
-        );
         DocumentHashToken document = DocumentHashToken.builder().id("cab18c21-8b7c-452b-937c-091225e0cc12").build();
         CaseDocumentsMetadata body = CaseDocumentsMetadata.builder()
             .caseId("111112222233333")
@@ -434,10 +428,6 @@ public class CaseDocumentAmControllerTest {
             .caseTypeId("BEFTA_CASETYPE_2_1")
             .jurisdictionId("BEFTA_JURISDICTION_2")
             .build();
-        doReturn(setDocumentMetaData()).when(documentManagementService)
-            .getDocumentMetadata(UUID.fromString(body.getDocumentHashTokens().get(
-            0).getId()));
-
         Assertions.assertThrows(BadRequestException.class, () -> testee.patchMetaDataOnDocuments(body, TEST_S2S_TOKEN));
     }
 
@@ -457,14 +447,18 @@ public class CaseDocumentAmControllerTest {
             .caseTypeId("BEFTA_CASETYPE_2_1")
             .jurisdictionId("BEFTA_JURISDICTION_2")
             .build();
-        doReturn(setDocumentMetaData()).when(documentManagementService)
-            .getDocumentMetadata(UUID.fromString(body.getDocumentHashTokens().get(
-            0).getId()));
+
         ResponseEntity response = testee.patchMetaDataOnDocuments(body, TEST_S2S_TOKEN);
 
         assertAll(
             () -> assertNotNull(response, VALID_RESPONSE),
-            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE)
+            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE),
+            () -> verify(documentManagementService).checkServicePermission(eq("BEFTA_CASETYPE_2_1"),
+                                                                           eq("BEFTA_JURISDICTION_2"),
+                                                                           eq(XUI_WEBAPP),
+                                                                           eq(Permission.ATTACH),
+                                                                           eq(SERVICE_PERMISSION_ERROR),
+                                                                           anyString())
         );
     }
 

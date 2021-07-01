@@ -283,6 +283,25 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     }
 
     @Test
+    void shouldBeForbiddenWhenPatchingMetaDataOnDocumentWithIncorrectS2SService() throws Exception {
+
+        CaseDocumentsMetadata metadata = CaseDocumentsMetadata.builder()
+            .caseId(CASE_ID_VALUE)
+            .caseTypeId(CASE_TYPE_ID_VALUE)
+            .jurisdictionId(JURISDICTION_ID_VALUE)
+            .documentHashTokens(List.of(new DocumentHashToken(DOCUMENT_ID.toString(), "567890976546789")))
+            .build();
+
+        mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
+                            .headers(createHttpHeaders("xui_webapp"))
+                            .contentType(MediaType.APPLICATION_JSON_VALUE)
+                            .content(getJsonString(metadata)))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath(RESPONSE_ERROR_KEY, is(ERROR_403)));
+
+    }
+
+    @Test
     void shouldFailToUploadDocumentEmptyFile() throws Exception {
 
         stubDocumentManagementUploadDocument();
