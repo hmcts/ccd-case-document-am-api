@@ -18,6 +18,15 @@
           "HASHTOKEN"
         ]
       },
+       {
+        "id": "sscs",
+        "caseTypeId": "*",
+        "jurisdictionId": "SSCS",
+        "permissions": [
+          "CREATE",
+          "READ"
+        ]
+      },                     
       {
         "id": "ccd_data",
         "caseTypeId": "*",
