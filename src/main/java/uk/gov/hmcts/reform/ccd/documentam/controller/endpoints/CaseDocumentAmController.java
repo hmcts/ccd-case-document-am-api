@@ -49,8 +49,8 @@ import uk.gov.hmcts.reform.ccd.documentam.model.GeneratedHashCodeResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentMetaDataResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
-import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResourceCollection;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
@@ -184,7 +184,7 @@ public class CaseDocumentAmController {
         @ApiResponse(
             code = 200,
             message = "Created",
-            response = StoredDocumentHalResourceCollection.class
+            response = UploadResponse.class
         ),
         @ApiResponse(
             code = 400,
@@ -205,7 +205,7 @@ public class CaseDocumentAmController {
         caseType = "#caseTypeId",
         jurisdiction = "#jurisdictionId"
     )
-    public ResponseEntity<Object> uploadDocuments(
+    public UploadResponse uploadDocuments(
         @ApiParam(value = "List of file to be uploaded", required = true)
         @NotNull(message = "Provide some file to be uploaded.")
 

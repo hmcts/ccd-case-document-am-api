@@ -16,6 +16,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
+import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.GeneratedHashCodeResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
@@ -465,6 +467,9 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("Should go through happy path")
     public void uploadDocuments_HappyPath() {
+
+        UploadResponse mockResponse = new UploadResponse(List.of(Document.builder().build()));
+
         doNothing().when(documentManagementService).checkServicePermission(
             eq(BEFTA_CASETYPE_2),
             eq(BEFTA_JURISDICTION_2),
@@ -480,13 +485,13 @@ public class CaseDocumentAmControllerTest {
             BEFTA_CASETYPE_2,
             BEFTA_JURISDICTION_2
         ))
-            .thenReturn(new ResponseEntity<>(generateEmbeddedLinkedHashMap(), HttpStatus.OK));
+            .thenReturn(mockResponse);
 
-        ResponseEntity<Object> responseEntity = testee.uploadDocuments(multipartFiles, Classification.PUBLIC.name(),
+        UploadResponse finalResponse = testee.uploadDocuments(multipartFiles, Classification.PUBLIC.name(),
                                                                        BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2,
                                                                        TEST_S2S_TOKEN
         );
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(finalResponse, mockResponse);
     }
 
     @SuppressWarnings("unchecked")
