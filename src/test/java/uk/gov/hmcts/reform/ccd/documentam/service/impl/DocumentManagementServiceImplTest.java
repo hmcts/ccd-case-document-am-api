@@ -13,25 +13,25 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
+import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
-import uk.gov.hmcts.reform.ccd.documentam.exception.ResponseFormatException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
+import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
+import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
@@ -45,13 +45,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -66,17 +66,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.PATCH;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.BINARY;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_LENGTH;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_TYPE;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DATA_SOURCE;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DOCUMENTS;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.EMBEDDED;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.HREF;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.LINKS;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.ORIGINAL_FILE_NAME;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SELF;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_AUTHORIZATION;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USER_PERMISSION_ERROR;
@@ -85,19 +79,24 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USERID;
 @RunWith(MockitoJUnitRunner.class)
 class DocumentManagementServiceImplTest {
 
+    private static final String ORIGINAL_DOCUMENT_NAME = "filename.txt";
+    private static final String MIME_TYPE = "application/octet-stream";
+    private static final String DOCUMENT_ID_FROM_LINK = "80e9471e-0f67-42ef-8739-170aa1942363";
+    private static final String SELF_LINK = "http://dm-store:8080/documents/80e9471e-0f67-42ef-8739-170aa1942363";
+    private static final String BINARY_LINK = "http://dm-store:8080/documents/80e9471e-0f67-42ef-8739-170aa1942363/binary";
+
     private static final String MATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9c";
     private static final String CASE_ID = "1582550122096256";
     private static final String BEFTA_CASETYPE_2 = "BEFTA_CASETYPE_2";
     private static final String BEFTA_JURISDICTION_2 = "BEFTA_JURISDICTION_2";
     private static final String XUI_WEBAPP = "xui_webapp";
     private static final String BULK_SCAN_PROCESSOR = "bulk_scan_processor";
-    private static final String USER_ID = "userId";
     private final RestTemplate restTemplateMock = Mockito.mock(RestTemplate.class);
     private final SecurityUtils securityUtilsMock = mock(SecurityUtils.class);
     private final CaseDataStoreService caseDataStoreServiceMock = mock(CaseDataStoreService.class);
     private final UUID matchedDocUUID = UUID.fromString(MATCHED_DOCUMENT_ID);
-    private final transient String serviceAuthorization = "auth";
     private final HttpEntity<?> requestEntityGlobal = new HttpEntity<>(getHttpHeaders());
+
     @InjectMocks
     private final DocumentManagementServiceImpl sut = new DocumentManagementServiceImpl(restTemplateMock,
                                                                                         securityUtilsMock,
@@ -867,54 +866,60 @@ class DocumentManagementServiceImplTest {
     @SuppressWarnings("unchecked")
     void uploadDocuments_HappyPath() {
 
-        HashMap<String, String> binaryHash = new HashMap<>();
-        HashMap<String, String> selfHash = new HashMap<>();
-        selfHash.put(HREF, "http://localhost:4455/cases/documents/35471d43-0dad-42c1-b05a-4821028f50a2");
-        binaryHash.put(HREF, "http://localhost:4455/cases/documents/35471d43-0dad-42c1-b05a-4821028f50a2/binary");
+        Document.Links links = getLinks();
 
-        LinkedHashMap<String, Object> linksLinkedHashMap = new LinkedHashMap<>();
-        LinkedHashMap<String, Object> binarySelfLinkedHashMap = new LinkedHashMap<>();
+        Document document = Document.builder()
+            .size(1000L)
+            .mimeType(MIME_TYPE)
+            .originalDocumentName(ORIGINAL_DOCUMENT_NAME)
+            .classification(Classification.PUBLIC)
+            .links(links)
+            .build();
 
-        binarySelfLinkedHashMap.put(BINARY, binaryHash);
-        binarySelfLinkedHashMap.put(SELF, selfHash);
-        linksLinkedHashMap.put(LINKS, binarySelfLinkedHashMap);
+        DmUploadResponse dmUploadResponse = DmUploadResponse.builder()
+            .embedded(DmUploadResponse.Embedded.builder().documents(List.of(document)).build())
+            .build();
 
-        ArrayList arrayList = new ArrayList();
-        arrayList.add(linksLinkedHashMap);
+        Mockito.when(restTemplateMock.postForObject(anyString(), any(HttpEntity.class), eq(DmUploadResponse.class)))
+            .thenReturn(dmUploadResponse);
 
-        LinkedHashMap<String, Object> documentsLinkedHashMap = new LinkedHashMap<>();
-        documentsLinkedHashMap.put(DOCUMENTS, arrayList);
+        String expectedHash = ApplicationUtils
+            .generateHashCode(salt.concat(DOCUMENT_ID_FROM_LINK
+                                              .concat(BEFTA_JURISDICTION_2)
+                                              .concat(BEFTA_CASETYPE_2)));
 
-        LinkedHashMap<String, Object> embeddedLinkedHashMap = new LinkedHashMap<>();
-        embeddedLinkedHashMap.put(EMBEDDED, documentsLinkedHashMap);
+        UploadResponse response = sut.uploadDocuments(
+            List.of(new MockMultipartFile("afile", "some".getBytes())),
+            Classification.PUBLIC.name(),
+            BEFTA_CASETYPE_2,
+            BEFTA_JURISDICTION_2
+        );
 
-        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any()))
-               .thenReturn(new ResponseEntity<>(embeddedLinkedHashMap, HttpStatus.OK));
+        assertThat(response.getDocuments())
+            .hasSize(1)
+            .first()
+            .satisfies(doc -> {
+                assertThat(doc.getClassification()).isEqualTo(Classification.PUBLIC);
+                assertThat(doc.getSize()).isEqualTo(1000);
+                assertThat(doc.getMimeType()).isEqualTo(MIME_TYPE);
+                assertThat(doc.getOriginalDocumentName()).isEqualTo(ORIGINAL_DOCUMENT_NAME);
+                assertThat(doc.getHashToken()).isEqualTo(expectedHash);
+                assertThat(doc.getLinks().binary.href).isEqualTo(BINARY_LINK);
+                assertThat(doc.getLinks().self.href).isEqualTo(SELF_LINK);
+            }
+            );
 
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
-
-        MockMultipartFile multipartFile = mock(MockMultipartFile.class);
-        List<MultipartFile> files = new ArrayList<>();
-        files.add(multipartFile);
-
-        ResponseEntity<Object> responseEntity = sut.uploadDocuments(files, "classification",
-                                                                    BEFTA_CASETYPE_2,
-                                                                    BEFTA_JURISDICTION_2);
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
     @Test
     @SuppressWarnings("unchecked")
     void uploadDocuments_Throw_ServiceException() {
 
-        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any()))
-               .thenThrow(HttpClientErrorException.create(
-                   HttpStatus.BAD_GATEWAY, "woopsie", new HttpHeaders(), null, null));
+        Mockito.when(restTemplateMock.postForObject(anyString(), any(HttpEntity.class), eq(DmUploadResponse.class)))
+            .thenThrow(HttpClientErrorException.create(
+                HttpStatus.BAD_GATEWAY, "woopsie", new HttpHeaders(), null, null));
 
         List<MultipartFile> files = new ArrayList<>();
-        List<String> roles = new ArrayList<>();
-        roles.add("Role");
 
         assertThrows(ServiceException.class, () -> {
             sut.uploadDocuments(
@@ -929,13 +934,11 @@ class DocumentManagementServiceImplTest {
     @SuppressWarnings("unchecked")
     void uploadDocuments_Throw_ForbiddenException() {
 
-        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any()))
+        Mockito.when(restTemplateMock.postForObject(anyString(), any(HttpEntity.class), eq(DmUploadResponse.class)))
                .thenThrow(HttpClientErrorException.create(
                    HttpStatus.FORBIDDEN, "woopsie", new HttpHeaders(), null, null));
 
         List<MultipartFile> files = new ArrayList<>();
-        List<String> roles = new ArrayList<>();
-        roles.add("Role");
 
         assertThrows(ForbiddenException.class, () -> {
             sut.uploadDocuments(
@@ -950,13 +953,11 @@ class DocumentManagementServiceImplTest {
     @SuppressWarnings("unchecked")
     void uploadDocuments_Throw_BadRequestException() {
 
-        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any()))
+        Mockito.when(restTemplateMock.postForObject(anyString(), any(HttpEntity.class), eq(DmUploadResponse.class)))
                .thenThrow(HttpClientErrorException.create(
                    HttpStatus.BAD_REQUEST, "woopsie", new HttpHeaders(), null, null));
 
         List<MultipartFile> files = new ArrayList<>();
-        List<String> roles = new ArrayList<>();
-        roles.add("Role");
 
         assertThrows(BadRequestException.class, () -> {
             sut.uploadDocuments(
@@ -971,13 +972,11 @@ class DocumentManagementServiceImplTest {
     @SuppressWarnings("unchecked")
     void uploadDocuments_Throw_NotFoundException() {
 
-        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any()))
+        Mockito.when(restTemplateMock.postForObject(anyString(), any(HttpEntity.class), eq(DmUploadResponse.class)))
                .thenThrow(HttpClientErrorException.create(
                    HttpStatus.NOT_FOUND, "woopsie", new HttpHeaders(), null, null));
 
         List<MultipartFile> files = new ArrayList<>();
-        List<String> roles = new ArrayList<>();
-        roles.add("Role");
 
         assertThrows(ResourceNotFoundException.class, () -> {
             sut.uploadDocuments(
@@ -985,39 +984,6 @@ class DocumentManagementServiceImplTest {
                 "classification",
                 BEFTA_CASETYPE_2,
                 BEFTA_JURISDICTION_2);
-        });
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    void uploadDocuments_NoLinksExceptionThrow() {
-
-        HashMap<String, String> binaryHash = new HashMap<>();
-        HashMap<String, String> selfHash = new HashMap<>();
-        selfHash.put(HREF, "http://localhost:4455/cases/documents/35471d43-0dad-42c1-b05a-4821028f50a2");
-        binaryHash.put(HREF, "http://localhost:4455/cases/documents/35471d43-0dad-42c1-b05a-4821028f50a2/binary");
-
-        LinkedHashMap<String, Object> linksLinkedHashMap = new LinkedHashMap<>();
-
-        ArrayList arrayList = new ArrayList();
-        arrayList.add(linksLinkedHashMap);
-
-        LinkedHashMap<String, Object> documentsLinkedHashMap = new LinkedHashMap<>();
-        documentsLinkedHashMap.put(DOCUMENTS, arrayList);
-
-        LinkedHashMap<String, Object> embeddedLinkedHashMap = new LinkedHashMap<>();
-        embeddedLinkedHashMap.put(EMBEDDED, documentsLinkedHashMap);
-
-        Mockito.when(restTemplateMock.postForEntity(anyString(), any(), any()))
-               .thenReturn(new ResponseEntity<>(embeddedLinkedHashMap, HttpStatus.OK));
-
-        List<MultipartFile> files = new ArrayList<>();
-
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
-
-        assertThrows(ResponseFormatException.class, () -> {
-            sut.uploadDocuments(files, "classification", BEFTA_CASETYPE_2, BEFTA_JURISDICTION_2);
         });
     }
 
@@ -1426,5 +1392,18 @@ class DocumentManagementServiceImplTest {
     @Test
     void validateHashTokensShouldThrowBadRequestExceptionWithNullDocumentsList() {
         assertThrows(BadRequestException.class, () -> sut.validateHashTokens(null));
+    }
+
+    private Document.Links getLinks() {
+        Document.Links links = new Document.Links();
+
+        Document.Link self = new Document.Link();
+        Document.Link binary = new Document.Link();
+        self.href = SELF_LINK;
+        binary.href = BINARY_LINK;
+
+        links.self = self;
+        links.binary = binary;
+        return links;
     }
 }
