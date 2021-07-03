@@ -121,7 +121,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
             .andExpect(jsonPath("$.documents[0].originalDocumentName", is(FILENAME_TXT)))
             .andExpect(jsonPath("$.documents[0].classification", is(Classification.PUBLIC.name())))
             .andExpect(jsonPath("$.documents[0].size", is(1000)))
-            .andExpect(jsonPath("$.documents[0].hasToken", is(expectedHash)))
+            .andExpect(jsonPath("$.documents[0].hashToken", is(expectedHash)))
             .andExpect(jsonPath("$.documents[0]._links.self.href", is(SELF_LINK)))
             .andExpect(jsonPath("$.documents[0]._links.binary.href", is(BINARY_LINK)))
 
