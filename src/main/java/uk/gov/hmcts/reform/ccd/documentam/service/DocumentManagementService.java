@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 
 import java.util.List;
@@ -25,9 +26,9 @@ public interface DocumentManagementService {
 
     String generateHashToken(final UUID documentId);
 
-    ResponseEntity<Object> uploadDocuments(List<MultipartFile> files, String classification,
-                                            String caseTypeId,
-                                           String jurisdictionId);
+    UploadResponse uploadDocuments(List<MultipartFile> files, String classification,
+                                   String caseTypeId,
+                                   String jurisdictionId);
 
     ResponseEntity<PatchDocumentResponse> patchDocument(final UUID documentId,
                                                         UpdateDocumentCommand updateDocumentCommand);
