@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
@@ -73,8 +75,8 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DATA_SOURCE
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.ORIGINAL_FILE_NAME;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_AUTHORIZATION;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USER_PERMISSION_ERROR;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USERID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USER_PERMISSION_ERROR;
 
 @RunWith(MockitoJUnitRunner.class)
 class DocumentManagementServiceImplTest {
@@ -592,11 +594,21 @@ class DocumentManagementServiceImplTest {
                                                                            .documentHashTokens(documentList)
                                                                            .build();
 
+
+        ArgumentCaptor<HttpEntity> entityCaptor = ArgumentCaptor.forClass(HttpEntity.class);
+
+        // WHEN
         sut.patchDocumentMetadata(caseDocumentsMetadata);
 
-        verify(restTemplateMock, times(1))
-            .exchange(eq(documentURL + "/documents"), eq(PATCH), any(HttpEntity.class),
-                      eq(Void.class));
+        // THEN
+        verify(restTemplateMock).exchange(eq(documentURL + "/documents"),
+                                          eq(PATCH),
+                                          entityCaptor.capture(),
+                                          eq(Void.class));
+
+        final UpdateDocumentsCommand documentsCommand = (UpdateDocumentsCommand)entityCaptor.getValue().getBody();
+        assertThat(documentsCommand.getTtl())
+            .isNull();
     }
 
     @Test

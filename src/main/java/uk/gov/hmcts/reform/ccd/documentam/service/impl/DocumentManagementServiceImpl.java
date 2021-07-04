@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -54,6 +55,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.DocumentUpdate;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
@@ -66,6 +68,8 @@ import uk.gov.hmcts.reform.ccd.documentam.util.ResponseHelper;
 @Slf4j
 @Service
 public class DocumentManagementServiceImpl implements DocumentManagementService {
+
+    private static final Date NULL_TTL = null;
 
     private final RestTemplate restTemplate;
     private final ValidationUtils validationUtils;
@@ -176,9 +180,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Override
     public void patchDocumentMetadata(CaseDocumentsMetadata caseDocumentsMetadata) {
         try {
-            LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
-            prepareRequestForAttachingDocumentToCase(caseDocumentsMetadata, bodyMap);
-            HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, getHttpHeaders());
+            UpdateDocumentsCommand updateDocumentsCommand
+                = prepareRequestForAttachingDocumentToCase(caseDocumentsMetadata);
+            HttpEntity<UpdateDocumentsCommand> requestEntity
+                = new HttpEntity<>(updateDocumentsCommand, getHttpHeaders());
             String documentUrl = String.format("%s/documents", documentURL);
             restTemplate.exchange(documentUrl, HttpMethod.PATCH, requestEntity, Void.class);
         } catch (HttpClientErrorException exception) {
@@ -186,9 +191,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
     }
 
-    private void prepareRequestForAttachingDocumentToCase(CaseDocumentsMetadata caseDocumentsMetadata,
-                                                          LinkedMultiValueMap<String, Object> bodyMap) {
-
+    private UpdateDocumentsCommand prepareRequestForAttachingDocumentToCase(CaseDocumentsMetadata
+                                                                                caseDocumentsMetadata) {
+        List<DocumentUpdate> documentsList = new ArrayList<>();
         for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashTokens()) {
 
             if (documentHashToken.getHashToken() != null) {
@@ -215,13 +220,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                     caseDocumentsMetadata.getJurisdictionId());
                 metadataMap.put(Constants.JURISDICTION_ID, caseDocumentsMetadata.getJurisdictionId());
             }
-
             DocumentUpdate documentUpdate = new DocumentUpdate();
             documentUpdate.setDocumentId(UUID.fromString(documentHashToken.getId()));
-
             documentUpdate.setMetadata(metadataMap);
-            bodyMap.add("documents", documentUpdate);
+
+            documentsList.add(documentUpdate);
         }
+
+        return new UpdateDocumentsCommand(NULL_TTL, documentsList);
     }
 
     @Override
