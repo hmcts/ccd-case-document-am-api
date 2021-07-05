@@ -93,6 +93,7 @@ class DocumentManagementServiceImplTest {
     private static final String MATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9c";
     private static final String CASE_ID = "1582550122096256";
     private static final String BEFTA_CASETYPE_2 = "BEFTA_CASETYPE_2";
+    private static final String BEFTA_EXCEPTION_CASETYPE_2 = "CMC_ExceptionRecord";
     private static final String BEFTA_JURISDICTION_2 = "BEFTA_JURISDICTION_2";
     private final RestTemplate restTemplateMock = Mockito.mock(RestTemplate.class);
     private final SecurityUtils securityUtilsMock = mock(SecurityUtils.class);
@@ -108,6 +109,13 @@ class DocumentManagementServiceImplTest {
     private final String documentURL = "http://localhost:4506";
     private final String documentTTL = "600000";
     private final String salt = "AAAOA7A2AA6AAAA5";
+    private final String[] bulkScanExceptionRecordTypes = {
+        "CMC_ExceptionRecord",
+        "FINREM_ExceptionRecord",
+        "SSCS_ExceptionRecord",
+        "PROBATE_ExceptionRecord",
+        "PUBLICLAW_ExceptionRecord"
+    };
 
     @Test
     void documentMetadataInstantiation() {
@@ -116,9 +124,10 @@ class DocumentManagementServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(sut, "documentTtl", "600000");
-        ReflectionTestUtils.setField(sut, "documentURL", "http://localhost:4506");
-        ReflectionTestUtils.setField(sut, "salt", "AAAOA7A2AA6AAAA5");
+        ReflectionTestUtils.setField(sut, "documentTtl", documentTTL);
+        ReflectionTestUtils.setField(sut, "documentURL", documentURL);
+        ReflectionTestUtils.setField(sut, "salt", salt);
+        ReflectionTestUtils.setField(sut, "bulkScanExceptionRecordTypes", bulkScanExceptionRecordTypes);
 
         final HttpHeaders headers = new HttpHeaders();
         headers.add(SERVICE_AUTHORIZATION, "123");
@@ -681,11 +690,53 @@ class DocumentManagementServiceImplTest {
             .documentHashTokens(List.of(DocumentHashToken.builder().id(MATCHED_DOCUMENT_ID).build()))
             .build();
 
+        Map<String, String> myMetadata = new HashMap<>();
+        myMetadata.put("jurisdictionId", BEFTA_JURISDICTION_2);
+        myMetadata.put("caseTypeId", BEFTA_EXCEPTION_CASETYPE_2);
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        storedDocumentHalResource.setMetadata(myMetadata);
+
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
+
         sut.patchDocumentMetadata(caseDocumentsMetadata);
 
         verify(restTemplateMock, times(1))
             .exchange(eq(documentURL + "/documents"), eq(PATCH), any(HttpEntity.class),
                       eq(Void.class));
+    }
+
+    @Test
+    void shouldNotPatchMetaDataWhenDocumentNotMovingCase_noExceptionRecordType() {
+
+        ReflectionTestUtils.setField(sut, "hashCheckEnabled", false);
+
+        CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
+            .caseId(CASE_ID)
+            .caseTypeId(BEFTA_CASETYPE_2)
+            .jurisdictionId(BEFTA_JURISDICTION_2)
+            .documentHashTokens(List.of(DocumentHashToken.builder().id(MATCHED_DOCUMENT_ID).build()))
+            .build();
+
+        Map<String, String> myMetadata = new HashMap<>();
+        myMetadata.put("jurisdictionId", BEFTA_JURISDICTION_2);
+        myMetadata.put("caseTypeId", BEFTA_CASETYPE_2);
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        storedDocumentHalResource.setMetadata(myMetadata);
+
+        mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
+
+        Mockito.when(restTemplateMock.exchange(
+            anyString(),
+            any(HttpMethod.class),
+            any(HttpEntity.class),
+            eq(Void.class)))
+            .thenThrow(HttpClientErrorException.create(HttpStatus.BAD_REQUEST, "woopsie",
+                                                       new HttpHeaders(), null,
+                                                       null));
+
+        assertThrows(BadRequestException.class, () -> {
+            sut.patchDocumentMetadata(caseDocumentsMetadata);
+        });
     }
 
     @Test

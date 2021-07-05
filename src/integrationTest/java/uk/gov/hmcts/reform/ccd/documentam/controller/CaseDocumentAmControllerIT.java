@@ -293,6 +293,49 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     }
 
     @Test
+    void shouldThrowHTTPClientError() throws Exception {
+        String hashToken = ApplicationUtils
+            .generateHashCode(salt.concat(DOCUMENT_ID.toString()
+                                              .concat(CASE_ID_VALUE)
+                                              .concat(JURISDICTION_ID_VALUE)
+                                              .concat(CASE_TYPE_ID_VALUE)));
+
+        List<DocumentHashToken> documentHashTokens = new ArrayList<>();
+        documentHashTokens.add(new DocumentHashToken(DOCUMENT_ID.toString(), hashToken));
+        CaseDocumentsMetadata body = new CaseDocumentsMetadata();
+        body.setDocumentHashTokens(documentHashTokens);
+        body.setCaseId(CASE_ID_VALUE);
+        body.setCaseTypeId(CASE_TYPE_ID);
+        body.setJurisdictionId(JURISDICTION_ID_VALUE);
+
+        Date time = Date.from(Instant.now());
+
+        StoredDocumentHalResource storedDocumentResource = getStoredDocumentResourceToUpdatePatch(time);
+        Map<String, String> updatedMetaData = storedDocumentResource.getMetadata();
+        updatedMetaData.put(CASE_TYPE_ID, CASE_TYPE_ID_MOVING_CASE_VALUE);
+        storedDocumentResource.setMetadata(updatedMetaData);
+
+        stubGetDocumentMetaData(storedDocumentResource);
+        stubPatchDocumentMetaData(storedDocumentResource);
+
+        List<String> documentIds = new ArrayList<>();
+        documentIds.add(DOCUMENT_ID.toString());
+
+        mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
+                            .headers(createHttpHeaders(SERVICE_NAME_CCD_DATA))
+                            .contentType(MediaType.APPLICATION_JSON_VALUE)
+                            .content(getJsonString(body)))
+            .andExpect(status().isForbidden())
+
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
+                SERVICE_NAME_CCD_DATA,
+                documentIds,
+                body.getCaseId()
+            ));
+    }
+
+    @Test
     void shouldBeForbiddenWhenPatchingMetaDataOnDocumentWithIncorrectDocumentHashToken() throws Exception {
         List<DocumentHashToken> documentHashTokens = new ArrayList<>();
         documentHashTokens.add(new DocumentHashToken(DOCUMENT_ID.toString(), "567890976546789"));

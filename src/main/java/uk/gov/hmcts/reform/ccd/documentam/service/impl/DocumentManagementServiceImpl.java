@@ -4,6 +4,7 @@ import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PATCH;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.BAD_REQUEST;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
@@ -92,6 +93,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Value("${hash.check.enabled}")
     private boolean hashCheckEnabled;
+
+    @Value("${bulkscan.exception.record.types}")
+    private String[] bulkScanExceptionRecordTypes;
 
     private static AuthorisedServices authorisedServices;
 
@@ -200,14 +204,28 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         List<DocumentUpdate> documentsList = new ArrayList<>();
         for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashTokens()) {
 
+            ResponseEntity<StoredDocumentHalResource> documentMetadata = Optional.ofNullable(
+                getDocumentMetadata(UUID.fromString(documentHashToken.getId())))
+                .orElse(new ResponseEntity<>(HttpStatus.OK));
+
             if (documentHashToken.getHashToken() != null) {
                 String hashcodeFromStoredDocument = generateHashToken(UUID.fromString(documentHashToken.getId()));
                 if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
                     throw new ForbiddenException(UUID.fromString(documentHashToken.getId()));
                 }
+            // Token is not provided by CCD
             } else if (hashCheckEnabled) {
                 throw new ForbiddenException("Hash check is enabled but hashToken hasn't provided for the document:"
                                                  + documentHashToken.getId());
+            } else {
+                // document metadata does not exist and document is not a moving case
+                if (documentMetadata.getBody() != null
+                    && !documentMetadata.getBody().getMetadata().isEmpty()
+                    && !isDocumentMovingCases(documentMetadata.getBody().getMetadata().get(CASE_TYPE_ID))) {
+                        throw new BadRequestException(String.format(
+                            "Document is not a moving case: %s",
+                            UUID.fromString(documentHashToken.getId())));
+                }
             }
 
             Map<String, String> metadataMap = new HashMap<>();
@@ -225,29 +243,19 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 metadataMap.put(Constants.JURISDICTION_ID, caseDocumentsMetadata.getJurisdictionId());
             }
 
-            if (isDocumentMovingCases(caseDocumentsMetadata.getCaseTypeId())) {
-                DocumentUpdate documentUpdate = new DocumentUpdate();
-                documentUpdate.setDocumentId(UUID.fromString(documentHashToken.getId()));
-                documentUpdate.setMetadata(metadataMap);
+            DocumentUpdate documentUpdate = new DocumentUpdate();
+            documentUpdate.setDocumentId(UUID.fromString(documentHashToken.getId()));
+            documentUpdate.setMetadata(metadataMap);
 
-                documentsList.add(documentUpdate);
-            } else {
-                throw new ForbiddenException("Document is not moving cases: " + caseDocumentsMetadata.getCaseId());
-            }
-
+            documentsList.add(documentUpdate);
         }
 
         return new UpdateDocumentsCommand(NULL_TTL, documentsList);
     }
 
     private boolean isDocumentMovingCases(String documentCaseTypeId) {
-        List<String> bulkScanExceptionRecordTypes = Arrays.asList("CMC_ExceptionRecord",
-                                                                  "FINREM_ExceptionRecord",
-                                                                  "SSCS_ExceptionRecord",
-                                                                  "PROBATE_ExceptionRecord",
-                                                                  "PUBLICLAW_ExceptionRecord");
-
-        return  bulkScanExceptionRecordTypes.contains(documentCaseTypeId.trim());
+        List<String> bulkScanExceptionRecordTypes = Arrays.asList(this.bulkScanExceptionRecordTypes);
+        return bulkScanExceptionRecordTypes.contains(documentCaseTypeId.trim());
     }
 
     @Override

@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface DocumentManagementService {
