@@ -9,10 +9,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.documentam.BaseTest;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
+import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
+import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
 import java.sql.Timestamp;
@@ -50,6 +53,11 @@ import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubP
 
 public class CaseDocumentAmControllerIT extends BaseTest {
 
+    private static final String FILENAME_TXT = "filename.txt";
+    private static final String DOCUMENT_ID_FROM_LINK = "80e9471e-0f67-42ef-8739-170aa1942363";
+    private static final String SELF_LINK = "http://dm-store:8080/documents/80e9471e-0f67-42ef-8739-170aa1942363";
+    private static final String BINARY_LINK = "http://dm-store:8080/documents/80e9471e-0f67-42ef-8739-170aa1942363/binary";
+
     @Value("${idam.s2s-auth.totp_secret}")
     protected String salt;
 
@@ -79,28 +87,44 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     @Test
     void shouldSuccessfullyUploadDocument() throws Exception {
 
-        stubDocumentManagementUploadDocument();
+        Document.Links links = getLinks();
+
+        Document document = Document.builder()
+            .originalDocumentName(FILENAME_TXT)
+            .size(1000L)
+            .classification(Classification.PUBLIC)
+            .links(links)
+            .build();
+
+        DmUploadResponse dmUploadResponse = DmUploadResponse.builder()
+            .embedded(DmUploadResponse.Embedded.builder().documents(List.of(document)).build())
+            .build();
+
+        stubDocumentManagementUploadDocument(dmUploadResponse);
 
         MockMultipartFile firstFile =
-            new MockMultipartFile("files", "filename.txt",
+            new MockMultipartFile("files", FILENAME_TXT,
                                   "text/plain", "some xml".getBytes());
-        MockMultipartFile secondFile =
-            new MockMultipartFile("data", "other-file-name.data",
-                                  "text/plain", "some other type".getBytes());
-        MockMultipartFile jsonFile =
-            new MockMultipartFile("json", "",
-                                  MediaType.APPLICATION_JSON_VALUE, "{\"json\": \"someValue\"}".getBytes());
+
+        String expectedHash = ApplicationUtils
+            .generateHashCode(salt.concat(DOCUMENT_ID_FROM_LINK
+                                              .concat(JURISDICTION_ID_VALUE)
+                                              .concat(CASE_TYPE_ID_VALUE)));
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(MAIN_URL)
                             .file(firstFile)
-                            .file(secondFile)
-                            .file(jsonFile)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
                             .param(CLASSIFICATION, CLASSIFICATION_VALUE)
                             .param(CASE_TYPE_ID, CASE_TYPE_ID_VALUE)
                             .param(JURISDICTION_ID, JURISDICTION_ID_VALUE)
                             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.documents[0].originalDocumentName", is(FILENAME_TXT)))
+            .andExpect(jsonPath("$.documents[0].classification", is(Classification.PUBLIC.name())))
+            .andExpect(jsonPath("$.documents[0].size", is(1000)))
+            .andExpect(jsonPath("$.documents[0].hashToken", is(expectedHash)))
+            .andExpect(jsonPath("$.documents[0]._links.self.href", is(SELF_LINK)))
+            .andExpect(jsonPath("$.documents[0]._links.binary.href", is(BINARY_LINK)))
 
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.UPLOAD_DOCUMENTS,
@@ -108,7 +132,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                 null,
                 null));
     }
-
 
     @Test
     void shouldSuccessfullyGetDocumentByDocumentId() throws Exception {
@@ -293,49 +316,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     }
 
     @Test
-    void shouldThrowHTTPClientError() throws Exception {
-        String hashToken = ApplicationUtils
-            .generateHashCode(salt.concat(DOCUMENT_ID.toString()
-                                              .concat(CASE_ID_VALUE)
-                                              .concat(JURISDICTION_ID_VALUE)
-                                              .concat(CASE_TYPE_ID_VALUE)));
-
-        List<DocumentHashToken> documentHashTokens = new ArrayList<>();
-        documentHashTokens.add(new DocumentHashToken(DOCUMENT_ID.toString(), hashToken));
-        CaseDocumentsMetadata body = new CaseDocumentsMetadata();
-        body.setDocumentHashTokens(documentHashTokens);
-        body.setCaseId(CASE_ID_VALUE);
-        body.setCaseTypeId(CASE_TYPE_ID);
-        body.setJurisdictionId(JURISDICTION_ID_VALUE);
-
-        Date time = Date.from(Instant.now());
-
-        StoredDocumentHalResource storedDocumentResource = getStoredDocumentResourceToUpdatePatch(time);
-        Map<String, String> updatedMetaData = storedDocumentResource.getMetadata();
-        updatedMetaData.put(CASE_TYPE_ID, CASE_TYPE_ID_MOVING_CASE_VALUE);
-        storedDocumentResource.setMetadata(updatedMetaData);
-
-        stubGetDocumentMetaData(storedDocumentResource);
-        stubPatchDocumentMetaData(storedDocumentResource);
-
-        List<String> documentIds = new ArrayList<>();
-        documentIds.add(DOCUMENT_ID.toString());
-
-        mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
-                            .headers(createHttpHeaders(SERVICE_NAME_CCD_DATA))
-                            .contentType(MediaType.APPLICATION_JSON_VALUE)
-                            .content(getJsonString(body)))
-            .andExpect(status().isForbidden())
-
-            .andExpect(hasGeneratedLogAudit(
-                AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
-                SERVICE_NAME_CCD_DATA,
-                documentIds,
-                body.getCaseId()
-            ));
-    }
-
-    @Test
     void shouldBeForbiddenWhenPatchingMetaDataOnDocumentWithIncorrectDocumentHashToken() throws Exception {
         List<DocumentHashToken> documentHashTokens = new ArrayList<>();
         documentHashTokens.add(new DocumentHashToken(DOCUMENT_ID.toString(), "567890976546789"));
@@ -370,9 +350,26 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     }
 
     @Test
-    void shouldFailToUploadDocumentEmptyFile() throws Exception {
+    void shouldBeForbiddenWhenPatchingMetaDataOnDocumentWithIncorrectS2SService() throws Exception {
 
-        stubDocumentManagementUploadDocument();
+        CaseDocumentsMetadata metadata = CaseDocumentsMetadata.builder()
+            .caseId(CASE_ID_VALUE)
+            .caseTypeId(CASE_TYPE_ID_VALUE)
+            .jurisdictionId(JURISDICTION_ID_VALUE)
+            .documentHashTokens(List.of(new DocumentHashToken(DOCUMENT_ID.toString(), "567890976546789")))
+            .build();
+
+        mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
+                            .contentType(MediaType.APPLICATION_JSON_VALUE)
+                            .content(getJsonString(metadata)))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath(RESPONSE_ERROR_KEY, is(ERROR_403)));
+
+    }
+
+    @Test
+    void shouldFailToUploadDocumentEmptyFile() throws Exception {
 
         MockMultipartFile jsonFile1 =
             new MockMultipartFile("name", null,
@@ -499,6 +496,19 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         storedDocumentHalResource.setMetadata(metaData);
 
         return storedDocumentHalResource;
+    }
+
+    private Document.Links getLinks() {
+        Document.Links links = new Document.Links();
+
+        Document.Link self = new Document.Link();
+        Document.Link binary = new Document.Link();
+        self.href = SELF_LINK;
+        binary.href = BINARY_LINK;
+
+        links.self = self;
+        links.binary = binary;
+        return links;
     }
 
 }

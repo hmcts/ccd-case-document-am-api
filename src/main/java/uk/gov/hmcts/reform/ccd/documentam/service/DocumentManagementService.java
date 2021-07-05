@@ -8,10 +8,10 @@ import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface DocumentManagementService {
@@ -26,9 +26,9 @@ public interface DocumentManagementService {
 
     String generateHashToken(final UUID documentId);
 
-    ResponseEntity<Object> uploadDocuments(List<MultipartFile> files, String classification,
-                                            String caseTypeId,
-                                           String jurisdictionId);
+    UploadResponse uploadDocuments(List<MultipartFile> files, String classification,
+                                   String caseTypeId,
+                                   String jurisdictionId);
 
     ResponseEntity<PatchDocumentResponse> patchDocument(final UUID documentId,
                                                         UpdateDocumentCommand updateDocumentCommand);
@@ -44,9 +44,9 @@ public interface DocumentManagementService {
                                 String serviceId, Permission permission,
                                 String logMessage, String exceptionMessage);
 
-    void checkServicePermissionsForUpload(String caseTypeId, String jurisdictionId,
-                                          String serviceId, Permission permission,
-                                          String logMessage, String exceptionMessage);
+    void checkServicePermission(String caseTypeId, String jurisdictionId,
+                                String serviceId, Permission permission,
+                                String logMessage, String exceptionMessage);
 
     void validateHashTokens(List<DocumentHashToken> documentList);
 }

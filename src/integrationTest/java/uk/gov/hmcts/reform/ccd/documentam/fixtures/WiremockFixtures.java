@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
@@ -24,7 +25,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -78,12 +78,13 @@ public class WiremockFixtures {
         stubDocumentUrl(getCaseDocumentMetaData(permissionList));
     }
 
-    public static void stubDocumentManagementUploadDocument() {
+    public static void stubDocumentManagementUploadDocument(DmUploadResponse dmUploadResponse) {
         stubFor(post(urlPathEqualTo("/documents"))
                     .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
                     .willReturn(aResponse()
                                     .withStatus(HTTP_OK)
-                                    .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
+                                    .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                                    .withBody(getJsonString(dmUploadResponse))));
     }
 
     public static void stubGetDocumentMetaData(StoredDocumentHalResource storedDocumentHalResource) {
