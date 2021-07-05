@@ -447,7 +447,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
 
         mockMvc.perform(delete(MAIN_URL + "/" + random)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
-            .andExpect(status().isNotFound())
+            .andExpect(status().isInternalServerError())
 
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,

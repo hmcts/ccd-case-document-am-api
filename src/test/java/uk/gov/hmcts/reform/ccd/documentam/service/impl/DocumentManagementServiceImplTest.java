@@ -187,9 +187,10 @@ class DocumentManagementServiceImplTest {
             HttpMethod.GET, requestEntityGlobal,
             StoredDocumentHalResource.class))
                .thenThrow(httpClientErrorException);
-        assertThrows(ResourceNotFoundException.class, () -> {
-            sut.getDocumentMetadata(matchedDocUUID);
-        });
+
+        ResponseEntity<StoredDocumentHalResource> responseEntity = sut.getDocumentMetadata(matchedDocUUID);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+
         verifyRestExchangeOnStoredDoc();
     }
 

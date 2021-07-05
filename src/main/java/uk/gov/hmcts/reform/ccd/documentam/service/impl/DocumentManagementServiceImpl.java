@@ -139,6 +139,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 throw new ResourceNotFoundException(formatNotFoundMessage(documentId.toString()));
             }
         } catch (HttpClientErrorException exception) {
+            if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
+                return Optional.ofNullable(responseResult).orElse(new ResponseEntity<>(HttpStatus.OK));
+            }
             handleException(exception, documentId.toString());
         }
         return responseResult;
@@ -201,9 +204,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         List<DocumentUpdate> documentsList = new ArrayList<>();
         for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashTokens()) {
 
-            ResponseEntity<StoredDocumentHalResource> documentMetadata = Optional.ofNullable(
-                getDocumentMetadata(UUID.fromString(documentHashToken.getId())))
-                .orElse(new ResponseEntity<>(HttpStatus.OK));
+            Optional<ResponseEntity<StoredDocumentHalResource>> documentMetadata = Optional.ofNullable(
+                getDocumentMetadata(UUID.fromString(documentHashToken.getId())));
 
             if (documentHashToken.getHashToken() != null) {
                 String hashcodeFromStoredDocument = generateHashToken(UUID.fromString(documentHashToken.getId()));
@@ -216,9 +218,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                                  + documentHashToken.getId());
             } else {
                 // document metadata does not exist and document is not a moving case
-                if (documentMetadata.getBody() != null
-                    && !documentMetadata.getBody().getMetadata().isEmpty()
-                    && !isDocumentMovingCases(documentMetadata.getBody().getMetadata().get(CASE_TYPE_ID))) {
+                if (documentMetadata.isPresent()
+                    && !documentMetadata.get().getBody().getMetadata().isEmpty()
+                    && !isDocumentMovingCases(documentMetadata.get().getBody().getMetadata().get(CASE_TYPE_ID))) {
                     throw new BadRequestException(String.format(
                         "Document is not a moving case: %s",
                         UUID.fromString(documentHashToken.getId())));
