@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.controller.endpoints;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,21 +13,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
-import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
-import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadMetadata;
+import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
-import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
+import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
+import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.model.GeneratedHashCodeResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
+import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,12 +56,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USER_PERMISSION_ERROR;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.XUI_WEBAPP;
 
 public class CaseDocumentAmControllerTest {
     private static final String MATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9c";
     private static final String UNMATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9d";
     private static final String CASE_ID = "1582550122096256";
+    private static final String XUI_WEBAPP = "xui_webapp";
     private static final String BEFTA_CASETYPE_2 = "BEFTA_CASETYPE_2";
     private static final String BEFTA_JURISDICTION_2 = "BEFTA_JURISDICTION_2";
     private static final String VALID_RESPONSE = "Valid Response from API";
@@ -395,7 +398,8 @@ public class CaseDocumentAmControllerTest {
     @Test
     public void shouldNotPatchMetaDataOnDocuments() {
         doThrow(ForbiddenException.class).when(documentManagementService).checkServicePermission(
-            eq(setDocumentMetaData()),
+            eq(BEFTA_CASETYPE_2),
+            eq(BEFTA_JURISDICTION_2),
             eq(XUI_WEBAPP),
             eq(Permission.ATTACH),
             eq(SERVICE_PERMISSION_ERROR),
@@ -405,14 +409,15 @@ public class CaseDocumentAmControllerTest {
         CaseDocumentsMetadata body = CaseDocumentsMetadata.builder()
             .caseId("1111122222333334")
             .documentHashTokens(Collections.singletonList(document))
-            .caseTypeId("BEFTA_CASETYPE_2_1")
-            .jurisdictionId("BEFTA_JURISDICTION_2")
+            .caseTypeId(BEFTA_CASETYPE_2)
+            .jurisdictionId(BEFTA_JURISDICTION_2)
             .build();
         doReturn(setDocumentMetaData()).when(documentManagementService)
             .getDocumentMetadata(UUID.fromString(body.getDocumentHashTokens().get(
             0).getId()));
 
         assertThrows(ForbiddenException.class, () -> testee.patchMetaDataOnDocuments(body, TEST_S2S_TOKEN));
+        Assertions.assertThrows(ForbiddenException.class, () -> testee.patchMetaDataOnDocuments(body, TEST_S2S_TOKEN));
     }
 
     @Test
@@ -428,49 +433,59 @@ public class CaseDocumentAmControllerTest {
         CaseDocumentsMetadata body = CaseDocumentsMetadata.builder()
             .caseId("1111122222333334")
             .documentHashTokens(Collections.singletonList(document))
-            .caseTypeId("BEFTA_CASETYPE_2_1")
-            .jurisdictionId("BEFTA_JURISDICTION_2")
+            .caseTypeId(BEFTA_CASETYPE_2)
+            .jurisdictionId(BEFTA_JURISDICTION_2)
             .build();
-        doReturn(setDocumentMetaData()).when(documentManagementService)
-            .getDocumentMetadata(UUID.fromString(body.getDocumentHashTokens().get(
-            0).getId()));
+
         ResponseEntity response = testee.patchMetaDataOnDocuments(body, TEST_S2S_TOKEN);
 
         assertAll(
             () -> assertNotNull(response, VALID_RESPONSE),
-            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE)
+            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE),
+            () -> verify(documentManagementService).checkServicePermission(eq(BEFTA_CASETYPE_2),
+                                                                           eq(BEFTA_JURISDICTION_2),
+                                                                           eq(XUI_WEBAPP),
+                                                                           eq(Permission.ATTACH),
+                                                                           eq(SERVICE_PERMISSION_ERROR),
+                                                                           anyString())
         );
     }
 
     @Test
     @DisplayName("Should go through happy path")
     public void uploadDocuments_HappyPath() {
-        doNothing().when(documentManagementService).checkServicePermissionsForUpload(
-            eq("BEFTA_CASETYPE_2"),
-            eq("BEFTA_JURISDICTION_2"),
+
+        UploadResponse mockResponse = new UploadResponse(List.of(Document.builder().build()));
+
+        doNothing().when(documentManagementService).checkServicePermission(
+            eq(BEFTA_CASETYPE_2),
+            eq(BEFTA_JURISDICTION_2),
             eq(XUI_WEBAPP),
             eq(Permission.CREATE),
             eq(SERVICE_PERMISSION_ERROR),
             anyString()
         );
         List<MultipartFile> multipartFiles = generateMultipartList();
-
-        final DocumentUploadMetadata documentUploadMetadata = new DocumentUploadMetadata(
+        doReturn(mockResponse).when(documentManagementService).uploadDocuments(
+            multipartFiles,
             Classification.PUBLIC.name(),
             BEFTA_CASETYPE_2,
             BEFTA_JURISDICTION_2
         );
 
-        when(documentManagementService.uploadDocuments(multipartFiles, documentUploadMetadata))
-            .thenReturn(new ResponseEntity<>(generateEmbeddedLinkedHashMap(), HttpStatus.OK));
-
-        final ResponseEntity<Object> responseEntity = testee.uploadDocuments(
+        final DocumentUploadRequest documentUploadRequest = new DocumentUploadRequest(
             multipartFiles,
-            documentUploadMetadata,
+            Classification.PUBLIC.name(),
+            BEFTA_CASETYPE_2,
+            BEFTA_JURISDICTION_2
+        );
+
+        UploadResponse finalResponse = testee.uploadDocuments(
+            documentUploadRequest,
             TEST_S2S_TOKEN
         );
 
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(finalResponse, mockResponse);
     }
 
     @SuppressWarnings("unchecked")

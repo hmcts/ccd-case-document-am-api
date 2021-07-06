@@ -7,8 +7,6 @@ public final class Constants {
     public static final String FORBIDDEN = "Forbidden: Insufficient permissions";
     public static final String APPLICATION_JSON = "application/json";
     public static final String SERVICE_AUTHORIZATION = "serviceauthorization";
-    public static final String AUTHORIZATION = "Authorization";
-    public static final String SERVICE_AUTHORIZATION2 = "ServiceAuthorization";
     public static final String BEARER = "Bearer ";
     public static final String ORIGINAL_FILE_NAME = "OriginalFileName";
     public static final String CONTENT_DISPOSITION = "Content-Disposition";
@@ -52,15 +50,9 @@ public final class Constants {
     public static final String USER_PERMISSION_ERROR = "User doesn't have read permission on requested document {}";
     public static final String SERVICE_PERMISSION_ERROR = "Service doesn't have sufficient permission on requested "
         + "API {}";
-    public static final String XUI_WEBAPP = "xui_webapp";
-    public static final String BULK_SCAN_PROCESSOR = "bulk_scan_processor";
-    public static final String SIZE = "size";
-    public static final String METADATA = "metadata";
-    public static final String ROLES = "roles";
-    public static final String TTL = "ttl";
-    public static final String CREATED_ON = "createdOn";
-    public static final String DOCUMENT_LINKS = "links";
     public static final String EXCEPTION_SERVICE_ID_NOT_AUTHORISED = "Service Id is not authorized to access API: %s ";
+
+    public static final String INPUT_STRING_MESSAGE = "The input parameter does not comply with the required pattern";
 
     private Constants() {
     }
