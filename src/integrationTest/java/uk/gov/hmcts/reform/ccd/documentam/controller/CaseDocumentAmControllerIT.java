@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.ccd.documentam.controller;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -10,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.mock.web.MockPart;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.documentam.BaseTest;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
@@ -45,6 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CLASSIFICATION;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.FILES;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.JURISDICTION_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.CASE_ID_VALUE;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.DOCUMENT_ID;
@@ -92,7 +94,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     private static final String USER_ID = "d5566a63-f87c-4658-a4d6-213d949f8415";
 
     @Test
-    @Disabled
     void shouldSuccessfullyUploadDocument() throws Exception {
 
         Document.Links links = getLinks();
@@ -110,23 +111,17 @@ public class CaseDocumentAmControllerIT extends BaseTest {
 
         stubDocumentManagementUploadDocument(dmUploadResponse);
 
-        MockMultipartFile firstFile = new MockMultipartFile(
-            "files", FILENAME_TXT,
-            "text/plain",
-            "some xml".getBytes()
+        final String expectedHash = ApplicationUtils.generateHashCode(
+            salt.concat(DOCUMENT_ID_FROM_LINK.concat(JURISDICTION_ID_VALUE).concat(CASE_TYPE_ID_VALUE))
         );
 
-        String expectedHash = ApplicationUtils
-            .generateHashCode(salt.concat(DOCUMENT_ID_FROM_LINK
-                                              .concat(JURISDICTION_ID_VALUE)
-                                              .concat(CASE_TYPE_ID_VALUE)));
-
         mockMvc.perform(MockMvcRequestBuilders.multipart(MAIN_URL)
-                            .file(firstFile)
+                            .part(new MockPart(FILES, "file1", "some xml".getBytes()))
+                            .part(new MockPart(FILES, "file2", "another document".getBytes()))
+                            .part(new MockPart(CLASSIFICATION, CLASSIFICATION_VALUE.getBytes()))
+                            .part(new MockPart(CASE_TYPE_ID, CASE_TYPE_ID_VALUE.getBytes()))
+                            .part(new MockPart(JURISDICTION_ID, JURISDICTION_ID_VALUE.getBytes()))
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
-                            .param(CLASSIFICATION, CLASSIFICATION_VALUE)
-                            .param(CASE_TYPE_ID, CASE_TYPE_ID_VALUE)
-                            .param(JURISDICTION_ID, JURISDICTION_ID_VALUE)
                             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.documents[0].originalDocumentName", is(FILENAME_TXT)))
@@ -143,26 +138,13 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                 null));
     }
 
-    @Disabled
     @ParameterizedTest
     @MethodSource("provideDocumentUploadParameters")
     public void testShouldRaiseExceptionWhenUploadingDocumentsWithInvalidValues(
-        final String classification,
-        final String caseTypeId,
-        final String jurisdiction) throws Exception {
+        final MockMultipartHttpServletRequestBuilder requestBuilder
+    ) throws Exception {
 
-        final MockMultipartFile testFile = new MockMultipartFile(
-            "files",
-            "filename.txt",
-            "text/plain",
-            "some xml".getBytes()
-        );
-
-        mockMvc.perform(MockMvcRequestBuilders.multipart(MAIN_URL)
-                            .file(testFile)
-                            .param(CLASSIFICATION, classification)
-                            .param(CASE_TYPE_ID, caseTypeId)
-                            .param(JURISDICTION_ID, jurisdiction)
+        mockMvc.perform(requestBuilder
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
                             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
             .andExpect(status().isBadRequest())
@@ -618,36 +600,55 @@ public class CaseDocumentAmControllerIT extends BaseTest {
 
     @SuppressWarnings("unused")
     private static Stream<Arguments> provideDocumentUploadParameters() {
+        final MockMultipartHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.multipart(MAIN_URL);
+
+        final byte[] fileContent = "Some content".getBytes();
+
         return Stream.of(
             Arguments.of(
-                "GUARDED",
-                CASE_TYPE_ID_VALUE,
-                JURISDICTION_ID_VALUE
+                requestBuilder
+                    .part(new MockPart(CLASSIFICATION, CLASSIFICATION_VALUE.getBytes()))
+                    .part(new MockPart(CASE_TYPE_ID, CASE_TYPE_ID_VALUE.getBytes()))
+                    .part(new MockPart(JURISDICTION_ID, JURISDICTION_ID_VALUE.getBytes()))
             ),
             Arguments.of(
-                null,
-                CASE_TYPE_ID_VALUE,
-                JURISDICTION_ID_VALUE
+                requestBuilder
+                    .part(new MockPart(FILES, "file1", fileContent))
+                    .part(new MockPart(CLASSIFICATION, "GUARDED".getBytes()))
+                    .part(new MockPart(CASE_TYPE_ID, CASE_TYPE_ID_VALUE.getBytes()))
+                    .part(new MockPart(JURISDICTION_ID, JURISDICTION_ID_VALUE.getBytes()))
             ),
             Arguments.of(
-                CLASSIFICATION_VALUE,
-                "BEFTA_CASETYPE_2&&&&&&&&&",
-                JURISDICTION_ID_VALUE
+                requestBuilder
+                    .part(new MockPart(FILES, "file1", fileContent))
+                    .part(new MockPart(CASE_TYPE_ID, CASE_TYPE_ID_VALUE.getBytes()))
+                    .part(new MockPart(JURISDICTION_ID, JURISDICTION_ID_VALUE.getBytes()))
             ),
             Arguments.of(
-                CLASSIFICATION_VALUE,
-                null,
-                JURISDICTION_ID_VALUE
+                requestBuilder
+                    .part(new MockPart(FILES, "file1", fileContent))
+                    .part(new MockPart(CLASSIFICATION, CLASSIFICATION_VALUE.getBytes()))
+                    .part(new MockPart(CASE_TYPE_ID, "BEFTA_CASETYPE_2&&&&&&&&&".getBytes()))
+                    .part(new MockPart(JURISDICTION_ID, JURISDICTION_ID_VALUE.getBytes()))
             ),
             Arguments.of(
-                CLASSIFICATION_VALUE,
-                CASE_TYPE_ID_VALUE,
-                "BEFTA@JURISDICTION_2$$$$"
+                requestBuilder
+                    .part(new MockPart(FILES, "file1", fileContent))
+                    .part(new MockPart(CLASSIFICATION, CLASSIFICATION_VALUE.getBytes()))
+                    .part(new MockPart(JURISDICTION_ID, JURISDICTION_ID_VALUE.getBytes()))
             ),
             Arguments.of(
-                CLASSIFICATION_VALUE,
-                CASE_TYPE_ID_VALUE,
-                null
+                requestBuilder
+                    .part(new MockPart(FILES, "file1", fileContent))
+                    .part(new MockPart(CLASSIFICATION, CLASSIFICATION_VALUE.getBytes()))
+                    .part(new MockPart(CASE_TYPE_ID, CASE_TYPE_ID_VALUE.getBytes()))
+                    .part(new MockPart(JURISDICTION_ID, "BEFTA@JURISDICTION_2$$$$".getBytes()))
+            ),
+            Arguments.of(
+                requestBuilder
+                    .part(new MockPart(FILES, "file1", fileContent))
+                    .part(new MockPart(CLASSIFICATION, CLASSIFICATION_VALUE.getBytes()))
+                    .part(new MockPart(CASE_TYPE_ID, CASE_TYPE_ID_VALUE.getBytes()))
             )
         );
     }

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+//import org.springframework.web.bind.MethodArgumentNotValidException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.InvalidRequest;
 import uk.gov.hmcts.reform.ccd.documentam.exception.RequiredFieldMissingException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
@@ -48,14 +48,15 @@ public class CaseDocumentControllerAdviceTest {
         assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
     }
 
-    @Test
-    public void handleMethodArgumentNotValidException() {
-        MethodArgumentNotValidException methodArgumentNotValidException = mock(MethodArgumentNotValidException.class);
-        ResponseEntity<Object> responseEntity = csda
-            .handleMethodArgumentNotValidException(methodArgumentNotValidException);
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
-    }
+    //    @Test
+    //    public void handleMethodArgumentNotValidException() {
+    //        MethodArgumentNotValidException methodArgumentNotValidException =
+    //        mock(MethodArgumentNotValidException.class);
+    //        ResponseEntity<Object> responseEntity = csda
+    //            .handleMethodArgumentNotValidException(methodArgumentNotValidException);
+    //        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    //        assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
+    //    }
 
     @Test
     public void handleResourceNotFoundException() {
