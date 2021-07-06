@@ -329,12 +329,13 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private Document documentWithHashToken(Document dmDocument, String caseTypeId, String jurisdictionId) {
         String href = dmDocument.getLinks().self.href;
-        log.info("document to string:{}", dmDocument.toString());
         String hashToken = ApplicationUtils.generateHashCode(salt.concat(
             href.substring(href.length() - 36)
                 .concat(jurisdictionId)
                 .concat(caseTypeId)));
-        return dmDocument.toBuilder().hashToken(hashToken).build();
+        Document document = dmDocument.toBuilder().hashToken(hashToken).build();
+        log.info("document to string:{}", document.toString());
+        return document;
     }
 
     private HttpHeaders prepareRequestForUpload(String classification,
