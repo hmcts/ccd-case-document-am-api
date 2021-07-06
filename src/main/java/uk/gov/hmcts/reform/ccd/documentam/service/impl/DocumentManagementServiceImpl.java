@@ -274,7 +274,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                         .concat(resource.getMetadata().get(Constants.CASE_TYPE_ID))));
             }
         } else {
-            throw new ResourceNotFoundException("Meta data not found");
+            throw new ResourceNotFoundException("Meta data not found for:" + documentId);
         }
         return hashcodeFromStoredDocument;
     }
