@@ -333,9 +333,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             href.substring(href.length() - 36)
                 .concat(jurisdictionId)
                 .concat(caseTypeId)));
-        Document document = dmDocument.toBuilder().hashToken(hashToken).build();
-        log.info("document to string:{}", document.toString());
-        return document;
+        return dmDocument.toBuilder().hashToken(hashToken).build();
     }
 
     private HttpHeaders prepareRequestForUpload(String classification,

@@ -15,7 +15,7 @@ import java.util.Map;
 @Jacksonized
 @Value
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.ALWAYS)
+@JsonInclude
 public class Document {
 
     private Classification classification;
