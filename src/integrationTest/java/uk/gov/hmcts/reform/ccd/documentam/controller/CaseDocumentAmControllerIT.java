@@ -422,29 +422,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     }
 
     @Test
-    void shouldFailToUploadDocumentEmptyFile() throws Exception {
-
-        MockMultipartFile jsonFile1 =
-            new MockMultipartFile("name", null,
-                                  null, new byte[0]);
-
-        mockMvc.perform(MockMvcRequestBuilders.multipart(MAIN_URL)
-                            .file(jsonFile1)
-                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
-                            .param(CLASSIFICATION, CLASSIFICATION_VALUE)
-                            .param(CASE_TYPE_ID, CASE_TYPE_ID_VALUE)
-                            .param(JURISDICTION_ID, JURISDICTION_ID_VALUE)
-                            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
-            .andExpect(status().isInternalServerError())
-
-            .andExpect(hasGeneratedLogAudit(
-                AuditOperationType.UPLOAD_DOCUMENTS,
-                SERVICE_NAME_XUI_WEBAPP,
-                null,
-                null));
-    }
-
-    @Test
     void shouldBeForbiddenGetDocumentByDocumentIdWithNoPermissions() throws Exception {
         StoredDocumentHalResource storedDocumentResource = getStoredDocumentResource();
 
