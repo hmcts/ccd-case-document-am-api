@@ -10,7 +10,6 @@
     "jurisdictionId": "BEFTA_JURISDICTION_2"
   },
   "hashToken": "[[ANYTHING_PRESENT]]",
-  "ttl": "[[ANYTHING_PRESENT]]",
   "_links": {
     "self": {
       "href": "[[ANYTHING_PRESENT]]"
