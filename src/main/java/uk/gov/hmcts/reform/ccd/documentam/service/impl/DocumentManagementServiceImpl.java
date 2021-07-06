@@ -49,7 +49,6 @@ import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -90,7 +89,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private boolean hashCheckEnabled;
 
     @Value("${bulkscan.exception.record.types}")
-    private String[] bulkScanExceptionRecordTypes;
+    private List<String> bulkScanExceptionRecordTypes;
 
     private static AuthorisedServices authorisedServices;
 
@@ -205,7 +204,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 getDocumentMetadata(UUID.fromString(documentHashToken.getId()));
 
             if (documentHashToken.getHashToken() != null) {
-                String hashcodeFromStoredDocument = generateHashToken(UUID.fromString(documentHashToken.getId()));
+                String hashcodeFromStoredDocument =
+                    generateHashToken(UUID.fromString(documentHashToken.getId()), documentMetadata);
                 if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
                     throw new ForbiddenException(UUID.fromString(documentHashToken.getId()));
                 }
@@ -219,7 +219,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                     && !documentMetadata.get().getMetadata().isEmpty()
                     && !isDocumentMovingCases(documentMetadata.get().getMetadata().get(CASE_TYPE_ID))) {
                     throw new BadRequestException(String.format(
-                        "Document is not a moving case: %s",
+                        "Document metadata exists but the case type is not a moving case type: %s",
                         UUID.fromString(documentHashToken.getId())));
                 }
             }
@@ -249,17 +249,15 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     private boolean isDocumentMovingCases(String documentCaseTypeId) {
-        List<String> bulkScanExceptionRecordTypes = Arrays.asList(this.bulkScanExceptionRecordTypes);
         return bulkScanExceptionRecordTypes.contains(documentCaseTypeId.trim());
     }
 
     @Override
-    public String generateHashToken(UUID documentId) {
-        Optional<?> documentResourceOptional = getDocumentMetadata(documentId);
+    public String generateHashToken(UUID documentId, Optional<StoredDocumentHalResource> documentMetaData) {
         String hashcodeFromStoredDocument = "";
 
-        if (documentResourceOptional.isPresent()) {
-            StoredDocumentHalResource resource = (StoredDocumentHalResource) documentResourceOptional.get();
+        if (documentMetaData.isPresent()) {
+            StoredDocumentHalResource resource = documentMetaData.get();
 
             if (resource.getMetadata().get(Constants.CASE_ID) == null) {
                 hashcodeFromStoredDocument = ApplicationUtils

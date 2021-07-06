@@ -450,7 +450,8 @@ public class CaseDocumentAmController {
                                                          documentId.toString());
 
         return new ResponseEntity<>(GeneratedHashCodeResponse.builder()
-                                        .hashToken(documentManagementService.generateHashToken(documentId))
+                                        .hashToken(
+                                            documentManagementService.generateHashToken(documentId, documentMetadata))
                                         .build(), HttpStatus.OK);
     }
 

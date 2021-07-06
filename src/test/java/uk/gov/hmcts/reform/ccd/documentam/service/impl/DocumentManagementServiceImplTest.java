@@ -44,7 +44,9 @@ import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -69,10 +71,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.PATCH;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_LENGTH;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_TYPE;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DATA_SOURCE;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.JURISDICTION_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.ORIGINAL_FILE_NAME;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_AUTHORIZATION;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
@@ -87,6 +91,8 @@ class DocumentManagementServiceImplTest {
     private static final String DOCUMENT_ID_FROM_LINK = "80e9471e-0f67-42ef-8739-170aa1942363";
     private static final String SELF_LINK = "http://dm-store:8080/documents/80e9471e-0f67-42ef-8739-170aa1942363";
     private static final String BINARY_LINK = "http://dm-store:8080/documents/80e9471e-0f67-42ef-8739-170aa1942363/binary";
+
+    private static final String USER_ID = "d5566a63-f87c-4658-a4d6-213d949f8415";
 
     private static final String MATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9c";
     private static final String CASE_ID = "1582550122096256";
@@ -110,13 +116,13 @@ class DocumentManagementServiceImplTest {
     private final String documentURL = "http://localhost:4506";
     private final String documentTTL = "600000";
     private final String salt = "AAAOA7A2AA6AAAA5";
-    private final String[] bulkScanExceptionRecordTypes = {
+    private final List<String> bulkScanExceptionRecordTypes = Arrays.asList(
         "CMC_ExceptionRecord",
         "FINREM_ExceptionRecord",
         "SSCS_ExceptionRecord",
         "PROBATE_ExceptionRecord",
         "PUBLICLAW_ExceptionRecord"
-    };
+    );
 
     @Test
     void documentMetadataInstantiation() {
@@ -1382,7 +1388,8 @@ class DocumentManagementServiceImplTest {
             initialiseMetaDataMap(null, "BEFTA_CASETYPE_2_2", "BEFTA_JURISDICTION_2"),
             HttpStatus.OK
         );
-        String result = sut.generateHashToken(UUID.fromString(MATCHED_DOCUMENT_ID));
+        String result =
+            sut.generateHashToken(UUID.fromString(MATCHED_DOCUMENT_ID), Optional.of(getStoredDocumentResource()));
         assertNotNull(result);
     }
 
@@ -1399,7 +1406,8 @@ class DocumentManagementServiceImplTest {
             HttpStatus.OK
         );
 
-        String result = sut.generateHashToken(UUID.fromString(MATCHED_DOCUMENT_ID));
+        String result =
+            sut.generateHashToken(UUID.fromString(MATCHED_DOCUMENT_ID), Optional.of(getStoredDocumentResource()));
         assertNotNull(result);
     }
 
@@ -1462,6 +1470,25 @@ class DocumentManagementServiceImplTest {
     @Test
     void validateHashTokensShouldThrowBadRequestExceptionWithNullDocumentsList() {
         assertThrows(BadRequestException.class, () -> sut.validateHashTokens(null));
+    }
+
+    private StoredDocumentHalResource getStoredDocumentResource() {
+
+        Map<String, String> metaData = new HashMap<>();
+        metaData.put(CASE_ID, CASE_ID);
+        metaData.put(CASE_TYPE_ID, BEFTA_CASETYPE_2);
+        metaData.put(JURISDICTION_ID, BEFTA_JURISDICTION_2);
+
+        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
+        storedDocumentHalResource.setClassification(StoredDocumentHalResource.ClassificationEnum.PUBLIC);
+        storedDocumentHalResource.setCreatedBy(USER_ID);
+        storedDocumentHalResource.setCreatedOn(Date.from(Instant.now()));
+        storedDocumentHalResource.setLastModifiedBy(USER_ID);
+        storedDocumentHalResource.setMetadata(metaData);
+
+        storedDocumentHalResource.addLinks(UUID.fromString(MATCHED_DOCUMENT_ID));
+
+        return storedDocumentHalResource;
     }
 
     private Document.Links getLinks() {

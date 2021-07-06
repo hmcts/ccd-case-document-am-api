@@ -692,15 +692,16 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     void generateHashCode_HappyPath() {
+        Optional<StoredDocumentHalResource> documentMetadata = setDocumentMetaData();
 
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(documentMetadata).when(documentManagementService).getDocumentMetadata(getUuid());
         doNothing().when(documentManagementService)
             .checkServicePermission(setDocumentMetaData().get(),
                                     XUI_WEBAPP,
                                     Permission.HASHTOKEN,
                                     SERVICE_PERMISSION_ERROR,
                                     getUuid().toString());
-        when(documentManagementService.generateHashToken(UUID.fromString(MATCHED_DOCUMENT_ID)))
+        when(documentManagementService.generateHashToken(UUID.fromString(MATCHED_DOCUMENT_ID), documentMetadata))
             .thenReturn("hashToken");
 
         ResponseEntity<Object> responseEntity =
@@ -719,15 +720,16 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     void generateHashCode_BadRequestWhenServiceIsNotAuthorised() {
+        Optional<StoredDocumentHalResource> documentMetadata = setDocumentMetaData();
 
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(documentMetadata).when(documentManagementService).getDocumentMetadata(getUuid());
         doThrow(ForbiddenException.class).when(documentManagementService)
             .checkServicePermission(setDocumentMetaData().get(),
                                     XUI_WEBAPP,
                                     Permission.HASHTOKEN,
                                     SERVICE_PERMISSION_ERROR,
                                     getUuid().toString());
-        when(documentManagementService.generateHashToken(UUID.fromString(MATCHED_DOCUMENT_ID)))
+        when(documentManagementService.generateHashToken(UUID.fromString(MATCHED_DOCUMENT_ID), documentMetadata))
             .thenReturn("hashToken");
 
         Assertions.assertThrows(ForbiddenException.class, () ->
