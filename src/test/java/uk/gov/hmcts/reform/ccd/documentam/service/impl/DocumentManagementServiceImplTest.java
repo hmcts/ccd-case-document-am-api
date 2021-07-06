@@ -59,6 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -140,8 +141,8 @@ class DocumentManagementServiceImplTest {
     void getDocumentMetadata_HappyPath() {
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
         mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
-        ResponseEntity responseEntity = sut.getDocumentMetadata(matchedDocUUID);
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        Optional documentMetadata = sut.getDocumentMetadata(matchedDocUUID);
+        assertTrue(documentMetadata.isPresent());
 
         verifyRestExchangeOnStoredDoc();
     }
@@ -188,8 +189,8 @@ class DocumentManagementServiceImplTest {
             StoredDocumentHalResource.class))
                .thenThrow(httpClientErrorException);
 
-        ResponseEntity<StoredDocumentHalResource> responseEntity = sut.getDocumentMetadata(matchedDocUUID);
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        Optional<StoredDocumentHalResource> documentMetadata = sut.getDocumentMetadata(matchedDocUUID);
+        assertTrue(documentMetadata.isEmpty());
 
         verifyRestExchangeOnStoredDoc();
     }
@@ -248,10 +249,11 @@ class DocumentManagementServiceImplTest {
     void extractCaseIdFromMetadata_HappyPath() {
         mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("1234qwer1234qwer", "", ""),
                                          HttpStatus.OK);
-        ResponseEntity<StoredDocumentHalResource> responseEntity = sut.getDocumentMetadata(matchedDocUUID);
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        Optional<StoredDocumentHalResource> documentMetadata = sut.getDocumentMetadata(matchedDocUUID);
+        assertTrue(documentMetadata.isPresent());
 
-        String caseId = sut.extractCaseIdFromMetadata(responseEntity.getBody());
+
+        String caseId = sut.extractCaseIdFromMetadata(documentMetadata.get());
         assertEquals("1234qwer1234qwer", caseId);
         verifyRestExchangeOnStoredDoc();
     }
@@ -402,7 +404,7 @@ class DocumentManagementServiceImplTest {
         mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("", "caseTypeId",
                                                                ""), HttpStatus.OK);
         assertThrows(NullPointerException.class, () ->
-            sut.checkServicePermission(new ResponseEntity<>(HttpStatus.OK),
+            sut.checkServicePermission(new StoredDocumentHalResource(),
                                        XUI_WEBAPP,
                                        Permission.READ,
                                        "log string",
@@ -459,7 +461,7 @@ class DocumentManagementServiceImplTest {
         mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("1234567812345678", "caseTypeId",
                                                                "BEFTA_JURISDICTION_2"), HttpStatus.OK);
         assertThrows(ForbiddenException.class, () -> sut.checkServicePermission(
-            new ResponseEntity<>(HttpStatus.OK),
+            new StoredDocumentHalResource(),
             "bad_Service_name",
             Permission.READ,
             "log string",
@@ -470,15 +472,16 @@ class DocumentManagementServiceImplTest {
     void checkUserPermission_Throws_CaseNotFoundException() {
         mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("1234567890123456",
                                                                "", ""), HttpStatus.OK);
-        ResponseEntity<StoredDocumentHalResource> responseEntity = sut.getDocumentMetadata(matchedDocUUID);
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        Optional<StoredDocumentHalResource> documentMetadata = sut.getDocumentMetadata(matchedDocUUID);
+        assertTrue(documentMetadata.isPresent());
+
         List<Permission> permissionsList = new ArrayList<>();
         permissionsList.add(Permission.READ);
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(), any(UUID.class)))
                .thenReturn(null);
 
         assertThrows(Exception.class, () -> {
-            sut.checkUserPermission(responseEntity,
+            sut.checkUserPermission(documentMetadata.get(),
                                     matchedDocUUID,
                                     Permission.READ,
                                     USER_PERMISSION_ERROR,
@@ -493,11 +496,12 @@ class DocumentManagementServiceImplTest {
     void checkUserPermission_Throws_InvalidCaseId_BadRequestException() {
         mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("123456789012345@",
                                                                "", ""), HttpStatus.OK);
-        ResponseEntity<StoredDocumentHalResource> responseEntity = sut.getDocumentMetadata(matchedDocUUID);
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        Optional<StoredDocumentHalResource> documentMetadata = sut.getDocumentMetadata(matchedDocUUID);
+        assertTrue(documentMetadata.isPresent());
+
 
         assertThrows(BadRequestException.class, () ->
-            sut.checkUserPermission(responseEntity,
+            sut.checkUserPermission(documentMetadata.get(),
                                     matchedDocUUID,
                                     Permission.READ,
                                     USER_PERMISSION_ERROR,
@@ -511,15 +515,16 @@ class DocumentManagementServiceImplTest {
     void checkUserPermission_ReturnsFalse_Scenario1() {
         mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("1234567890123456",
                                                                "", ""), HttpStatus.OK);
-        ResponseEntity<StoredDocumentHalResource> responseEntity = sut.getDocumentMetadata(matchedDocUUID);
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        Optional<StoredDocumentHalResource> documentMetadata = sut.getDocumentMetadata(matchedDocUUID);
+        assertTrue(documentMetadata.isPresent());
+
         List<Permission> permissionsList = new ArrayList<>();
         DocumentPermissions doc;
         doc = DocumentPermissions.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList).build();
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(), any(UUID.class)))
                .thenReturn(Optional.ofNullable(doc));
 
-        assertThrows(ForbiddenException.class, () -> sut.checkUserPermission(responseEntity,
+        assertThrows(ForbiddenException.class, () -> sut.checkUserPermission(documentMetadata.get(),
                                                                              matchedDocUUID,
                                                                              Permission.READ,
                                                                              USER_PERMISSION_ERROR,
@@ -534,8 +539,9 @@ class DocumentManagementServiceImplTest {
     void checkUserPermission_ReturnsFalse_Scenario2() {
         mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("1234567890123456",
                                                                "", ""), HttpStatus.OK);
-        ResponseEntity<StoredDocumentHalResource> responseEntity = sut.getDocumentMetadata(matchedDocUUID);
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        Optional<StoredDocumentHalResource> documentMetadata = sut.getDocumentMetadata(matchedDocUUID);
+        assertTrue(documentMetadata.isPresent());
+
         List<Permission> permissionsList = new ArrayList<>();
         DocumentPermissions doc;
         doc =
@@ -544,7 +550,7 @@ class DocumentManagementServiceImplTest {
         Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(), any(UUID.class)))
                .thenReturn(Optional.ofNullable(doc));
 
-        assertThrows(ForbiddenException.class, () -> sut.checkUserPermission(responseEntity,
+        assertThrows(ForbiddenException.class, () -> sut.checkUserPermission(documentMetadata.get(),
                                                                              matchedDocUUID,
                                                                              Permission.READ,
                                                                              USER_PERMISSION_ERROR,
@@ -1354,10 +1360,10 @@ class DocumentManagementServiceImplTest {
 
         mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("!!VCB12", "", ""),
                                          HttpStatus.OK);
-        ResponseEntity<StoredDocumentHalResource> responseEntity = sut.getDocumentMetadata(matchedDocUUID);
+        Optional<StoredDocumentHalResource> documentMetadata = sut.getDocumentMetadata(matchedDocUUID);
 
         assertThrows(BadRequestException.class, () ->
-            sut.checkUserPermission(responseEntity,
+            sut.checkUserPermission(documentMetadata.get(),
                                     UUID.fromString(MATCHED_DOCUMENT_ID),
                                     Permission.CREATE,
                                     USER_PERMISSION_ERROR,
@@ -1408,9 +1414,9 @@ class DocumentManagementServiceImplTest {
 
         mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("1234567890123456", "", ""),
                                          HttpStatus.OK);
-        ResponseEntity<StoredDocumentHalResource> responseEntity = sut.getDocumentMetadata(matchedDocUUID);
+        Optional<StoredDocumentHalResource> documentMetadata = sut.getDocumentMetadata(matchedDocUUID);
 
-        assertThrows(ForbiddenException.class, () -> sut.checkUserPermission(responseEntity,
+        assertThrows(ForbiddenException.class, () -> sut.checkUserPermission(documentMetadata.get(),
                                                                              UUID.fromString(MATCHED_DOCUMENT_ID),
                                                                              Permission.CREATE,
                                                                              USER_PERMISSION_ERROR,

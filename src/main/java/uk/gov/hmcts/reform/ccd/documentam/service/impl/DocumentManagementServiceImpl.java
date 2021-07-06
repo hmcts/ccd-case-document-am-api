@@ -1,11 +1,7 @@
 package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 
-import static org.springframework.http.HttpMethod.DELETE;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.PATCH;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.BAD_REQUEST;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,25 +17,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
@@ -66,6 +43,27 @@ import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.documentam.service.ValidationUtils;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.documentam.util.ResponseHelper;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.PATCH;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.BAD_REQUEST;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
 
 @Slf4j
 @Service
@@ -116,7 +114,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public ResponseEntity<StoredDocumentHalResource> getDocumentMetadata(UUID documentId) {
+    public Optional<StoredDocumentHalResource> getDocumentMetadata(UUID documentId) {
         ResponseEntity<StoredDocumentHalResource> responseResult = new ResponseEntity<>(HttpStatus.OK);
 
         try {
@@ -140,12 +138,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             }
         } catch (HttpClientErrorException exception) {
             if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-                return Optional.ofNullable(responseResult).orElse(new ResponseEntity<>(HttpStatus.OK));
+                return Optional.empty();
             }
             handleException(exception, documentId.toString());
         }
-        return responseResult;
-
+        return Optional.of(responseResult.getBody());
     }
 
     @Override
@@ -204,8 +201,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         List<DocumentUpdate> documentsList = new ArrayList<>();
         for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashTokens()) {
 
-            Optional<ResponseEntity<StoredDocumentHalResource>> documentMetadata = Optional.ofNullable(
-                getDocumentMetadata(UUID.fromString(documentHashToken.getId())));
+            Optional<StoredDocumentHalResource> documentMetadata =
+                getDocumentMetadata(UUID.fromString(documentHashToken.getId()));
 
             if (documentHashToken.getHashToken() != null) {
                 String hashcodeFromStoredDocument = generateHashToken(UUID.fromString(documentHashToken.getId()));
@@ -219,8 +216,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             } else {
                 // document metadata does not exist and document is not a moving case
                 if (documentMetadata.isPresent()
-                    && !documentMetadata.get().getBody().getMetadata().isEmpty()
-                    && !isDocumentMovingCases(documentMetadata.get().getBody().getMetadata().get(CASE_TYPE_ID))) {
+                    && !documentMetadata.get().getMetadata().isEmpty()
+                    && !isDocumentMovingCases(documentMetadata.get().getMetadata().get(CASE_TYPE_ID))) {
                     throw new BadRequestException(String.format(
                         "Document is not a moving case: %s",
                         UUID.fromString(documentHashToken.getId())));
@@ -258,10 +255,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Override
     public String generateHashToken(UUID documentId) {
-        ResponseEntity<?> responseEntity = getDocumentMetadata(documentId);
+        Optional<?> documentResourceOptional = getDocumentMetadata(documentId);
         String hashcodeFromStoredDocument = "";
-        if (responseEntity.getStatusCode().equals(HttpStatus.OK) && responseEntity.getBody() != null) {
-            StoredDocumentHalResource resource = (StoredDocumentHalResource) responseEntity.getBody();
+
+        if (documentResourceOptional.isPresent()) {
+            StoredDocumentHalResource resource = (StoredDocumentHalResource) documentResourceOptional.get();
 
             if (resource.getMetadata().get(Constants.CASE_ID) == null) {
                 hashcodeFromStoredDocument = ApplicationUtils
@@ -275,6 +273,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                         .concat(resource.getMetadata().get(Constants.JURISDICTION_ID))
                         .concat(resource.getMetadata().get(Constants.CASE_TYPE_ID))));
             }
+        } else {
+            throw new ResourceNotFoundException("Meta data not found");
         }
         return hashcodeFromStoredDocument;
     }
@@ -391,10 +391,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public void checkUserPermission(ResponseEntity<StoredDocumentHalResource> responseEntity,
+    public void checkUserPermission(StoredDocumentHalResource documentMetadata,
                                        UUID documentId, Permission permissionToCheck,
                                        String logMessage, String exceptionMessage) {
-        String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
+        String caseId = extractCaseIdFromMetadata(documentMetadata);
         validationUtils.validate(caseId);
 
         DocumentPermissions documentPermissions = caseDataStoreService
@@ -409,12 +409,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public void checkServicePermission(ResponseEntity<StoredDocumentHalResource> responseEntity,
+    public void checkServicePermission(StoredDocumentHalResource documentMetadata,
                                        String serviceId, Permission permission,
                                        String logMessage, String exceptionMessage) {
         AuthorisedService serviceConfig = getServiceDetailsFromJson(serviceId);
-        String caseTypeId = extractCaseTypeIdFromMetadata(responseEntity.getBody());
-        String jurisdictionId = extractJurisdictionIdFromMetadata(responseEntity.getBody());
+        String caseTypeId = extractCaseTypeIdFromMetadata(documentMetadata);
+        String jurisdictionId = extractJurisdictionIdFromMetadata(documentMetadata);
         if (!validateCaseTypeId(serviceConfig, caseTypeId)
             || !validateJurisdictionId(serviceConfig, jurisdictionId)
             || !validatePermissions(serviceConfig, permission)

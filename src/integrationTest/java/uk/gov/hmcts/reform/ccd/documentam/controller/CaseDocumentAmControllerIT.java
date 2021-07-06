@@ -447,7 +447,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
 
         mockMvc.perform(delete(MAIN_URL + "/" + random)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
-            .andExpect(status().isInternalServerError())
+            .andExpect(status().isNotFound())
 
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
@@ -470,6 +470,8 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         storedDocumentHalResource.setCreatedOn(Date.from(Instant.now()));
         storedDocumentHalResource.setLastModifiedBy(USER_ID);
         storedDocumentHalResource.setMetadata(metaData);
+
+        storedDocumentHalResource.addLinks(DOCUMENT_ID);
 
         return storedDocumentHalResource;
     }
