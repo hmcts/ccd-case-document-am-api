@@ -216,7 +216,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             // Token is not provided by CCD
             } else if (hashCheckEnabled) {
                 throw new ForbiddenException(
-                    String.format("Hash check is enabled but hashToken hasn't provided for the document:%s",
+                    String.format("Hash check is enabled but hashToken wasn't provided for the document:%s",
                                   documentHashToken.getId()));
             } else {
                 // document metadata does not exist and document is not a moving case

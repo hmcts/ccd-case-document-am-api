@@ -85,11 +85,11 @@ public class CaseDocumentAmControllerTest {
         MockitoAnnotations.openMocks(this);
         testee = new CaseDocumentAmController(documentManagementService, new ValidationUtils(), securityUtils);
         when(securityUtils.getServiceNameFromS2SToken(TEST_S2S_TOKEN)).thenReturn(XUI_WEBAPP);
+        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
     }
 
     @Test
     public void shouldGetValidMetaDataResponse() {
-        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
         doNothing().when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),
                                  getUuid(),
@@ -115,7 +115,6 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     public void shouldNotGetValidMetaDataResponseWhenServiceNotAuthorised() {
-        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
         doThrow(ForbiddenException.class).when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),
                                  getUuid(),
@@ -135,7 +134,6 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     public void shouldNotGetValidMetaDataResponseWhenUserNotAuthorised() {
-        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
         doThrow(ForbiddenException.class).when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),
                                  getUuid(),
@@ -157,7 +155,6 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("should get 200 document binary content")
     public void shouldGetDocumentBinaryContent() {
-        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
         doNothing().when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),
                                  getUuid(),
@@ -192,7 +189,6 @@ public class CaseDocumentAmControllerTest {
                                     Permission.READ,
                                     SERVICE_PERMISSION_ERROR,
                                     getUuid().toString());
-        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
         doThrow(ForbiddenException.class).when(documentManagementService)
             .getDocumentBinaryContent(getUuid());
 
@@ -211,7 +207,6 @@ public class CaseDocumentAmControllerTest {
                 Permission.READ
             )
         ));
-        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData());
         doReturn(documentPermissions).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
         doThrow(ForbiddenException.class).when(documentManagementService)
@@ -238,7 +233,6 @@ public class CaseDocumentAmControllerTest {
                 Permission.READ
             )
         ));
-        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
         doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData());
         doReturn(documentPermissions).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
         doReturn(setDocumentBinaryContent(FORBIDDEN)).when(documentManagementService)
@@ -259,7 +253,6 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("should get 204 when document delete is successful")
     public void shouldDeleteDocumentByDocumentId() {
-        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
         doNothing().when(documentManagementService)
             .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
@@ -286,7 +279,6 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("should get 403 when service is not authorised")
     public void shouldNotAllowDeleteDocumentByDocumentIdWhenServiceIsNotAuthorised() {
-        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
         doThrow(ForbiddenException.class).when(documentManagementService)
             .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
@@ -308,7 +300,6 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     public void shouldPatchDocumentByDocumentId() {
-        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
         doNothing().when(documentManagementService)
             .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
@@ -341,7 +332,6 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     public void shouldNotAllowPatchDocumentByDocumentIdWhenServiceIsNotAuthorised() {
-        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
         doThrow(ForbiddenException.class).when(documentManagementService)
             .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
