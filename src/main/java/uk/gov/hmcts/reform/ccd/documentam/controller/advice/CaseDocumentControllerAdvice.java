@@ -70,8 +70,7 @@ public class CaseDocumentControllerAdvice {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    protected ResponseEntity<Object> handleMethodArgumentNotValidException(
-        MethodArgumentNotValidException exception) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
         return errorDetailsResponseEntity(
             exception,
             BAD_REQUEST,
