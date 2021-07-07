@@ -449,7 +449,8 @@ public class CaseDocumentAmController {
 
     private void checkMetadataExists(Optional<StoredDocumentHalResource> documentMetadata, UUID documentId) {
         if (documentMetadata.isEmpty()) {
-            throw new ResourceNotFoundException(String.format("Meta data does not exist for documentId: %s", documentId.toString()));
+            throw new ResourceNotFoundException(String.format("Meta data does not exist for documentId: %s",
+                                                              documentId.toString()));
         }
     }
 

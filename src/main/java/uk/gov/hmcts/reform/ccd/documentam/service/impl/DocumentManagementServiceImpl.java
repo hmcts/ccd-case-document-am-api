@@ -205,7 +205,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
             if (documentHashToken.getHashToken() != null) {
                 if (documentMetadata.isEmpty()) {
-                    throw new ResourceNotFoundException(String.format("Meta data does not exist for documentId: %s", documentHashToken.getId()));
+                    throw new ResourceNotFoundException(String.format("Meta data does not exist for documentId: %s",
+                                                                      documentHashToken.getId()));
                 }
                 String hashcodeFromStoredDocument =
                     generateHashToken(UUID.fromString(documentHashToken.getId()), documentMetadata.get());
