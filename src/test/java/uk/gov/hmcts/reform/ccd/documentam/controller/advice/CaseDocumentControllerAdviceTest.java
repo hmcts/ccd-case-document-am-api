@@ -44,10 +44,7 @@ public class CaseDocumentControllerAdviceTest {
     public void handleBadRequestExceptionException() {
         final BadRequestException badRequestException = mock(BadRequestException.class);
 
-        final ResponseEntity<Object> responseEntity = underTest.handleBadRequestException(badRequestException);
-
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
+        testBadRequest(badRequestException);
     }
 
     @Test
@@ -55,11 +52,7 @@ public class CaseDocumentControllerAdviceTest {
         final MissingServletRequestParameterException missingServletRequestParameterException =
             mock(MissingServletRequestParameterException.class);
 
-        final ResponseEntity<Object> responseEntity =
-            underTest.handleMissingRequestParameterException(missingServletRequestParameterException);
-
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
+        testBadRequest(missingServletRequestParameterException);
     }
 
     @Test
@@ -67,38 +60,37 @@ public class CaseDocumentControllerAdviceTest {
         final MethodArgumentTypeMismatchException methodArgumentTypeMismatchException =
             mock(MethodArgumentTypeMismatchException.class);
 
-        final ResponseEntity<Object> responseEntity =
-            underTest.handleMethodArgumentTypeMismatchException(methodArgumentTypeMismatchException);
-
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
+        testBadRequest(methodArgumentTypeMismatchException);
     }
 
     @Test
     public void handleRequiredFieldMissingException() {
-        RequiredFieldMissingException requiredFieldMissingException = mock(RequiredFieldMissingException.class);
-        ResponseEntity<Object> responseEntity = underTest
-            .handleRequiredFieldMissingException(requiredFieldMissingException);
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
+        final RequiredFieldMissingException requiredFieldMissingException = mock(RequiredFieldMissingException.class);
+
+        testBadRequest(requiredFieldMissingException);
     }
 
     @Test
     public void customValidationError() {
-        InvalidRequest invalidRequestException = mock(InvalidRequest.class);
-        ResponseEntity<Object> responseEntity = underTest.customValidationError(invalidRequestException);
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
+        final InvalidRequest invalidRequestException = mock(InvalidRequest.class);
+
+        testBadRequest(invalidRequestException);
     }
 
     @Test
     public void handleMethodArgumentNotValidException() {
-        MethodArgumentNotValidException methodArgumentNotValidException =
+        final MethodArgumentNotValidException methodArgumentNotValidException =
             mock(MethodArgumentNotValidException.class);
-        ResponseEntity<Object> responseEntity = underTest
-            .handleMethodArgumentNotValidException(methodArgumentNotValidException);
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
+
+        testBadRequest(methodArgumentNotValidException);
+    }
+
+    @Test
+    public void handleHttpMessageConversionException() {
+        final HttpMessageConversionException httpMessageConversionException =
+            mock(HttpMessageConversionException.class);
+
+        testBadRequest(httpMessageConversionException);
     }
 
     @Test
@@ -111,20 +103,17 @@ public class CaseDocumentControllerAdviceTest {
     }
 
     @Test
-    public void handleHttpMessageConversionException() {
-        HttpMessageConversionException httpMessageConversionException = mock(HttpMessageConversionException.class);
-        ResponseEntity<Object> responseEntity = underTest
-            .handleHttpMessageConversionException(httpMessageConversionException);
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
-    }
-
-    @Test
     public void handleUnknownException() {
         Exception exception = mock(Exception.class);
         ResponseEntity<Object> responseEntity = underTest.handleUnknownException(exception);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
+    }
 
+    private void testBadRequest(final Exception exceptionClazz) {
+        final ResponseEntity<Object> responseEntity = underTest.handleBadRequestException(exceptionClazz);
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
     }
 }

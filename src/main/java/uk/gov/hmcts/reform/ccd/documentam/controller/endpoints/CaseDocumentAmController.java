@@ -194,8 +194,8 @@ public class CaseDocumentAmController {
 
     @LogAudit(
         operationType = AuditOperationType.UPLOAD_DOCUMENTS,
-        caseType = "#metadata.caseTypeId",
-        jurisdiction = "#metadata.jurisdictionId"
+        caseType = "#documentUploadRequest.caseTypeId",
+        jurisdiction = "#documentUploadRequest.jurisdictionId"
     )
     public UploadResponse uploadDocuments(
         @ApiParam(value = "List of documents to be uploaded and their metadata", required = true)

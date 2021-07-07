@@ -18,9 +18,9 @@ public class EnumValueValidator implements ConstraintValidator<EnumValue, CharSe
     }
 
     @Override
-    public boolean isValid(CharSequence value, ConstraintValidatorContext context) {
+    public boolean isValid(final CharSequence value, final ConstraintValidatorContext context) {
         return Optional.ofNullable(value)
-            .map(x -> acceptedValues.contains(x.toString()))
+            .map(input -> acceptedValues.contains(input.toString()))
             .orElse(true);
     }
 }

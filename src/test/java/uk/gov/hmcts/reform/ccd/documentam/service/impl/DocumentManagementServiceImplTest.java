@@ -935,7 +935,8 @@ class DocumentManagementServiceImplTest {
         when(restTemplateMock.postForObject(anyString(), any(HttpEntity.class), eq(DmUploadResponse.class)))
             .thenThrow(HttpClientErrorException.create(status, "woopsie", new HttpHeaders(), null, null));
 
-        assertThrows(clazz, () -> sut.uploadDocuments(emptyList(),             "classification",
+        assertThrows(clazz, () -> sut.uploadDocuments(emptyList(),
+                                                      "classification",
                                                       BEFTA_CASETYPE_2,
                                                       BEFTA_JURISDICTION_2
         ));
