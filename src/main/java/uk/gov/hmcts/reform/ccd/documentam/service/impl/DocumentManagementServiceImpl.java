@@ -204,15 +204,19 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 getDocumentMetadata(UUID.fromString(documentHashToken.getId()));
 
             if (documentHashToken.getHashToken() != null) {
+                if (documentMetadata.isEmpty()) {
+                    throw new ResourceNotFoundException(String.format("Meta data does not exist for documentId: %s", documentHashToken.getId()));
+                }
                 String hashcodeFromStoredDocument =
-                    generateHashToken(UUID.fromString(documentHashToken.getId()), documentMetadata);
+                    generateHashToken(UUID.fromString(documentHashToken.getId()), documentMetadata.get());
                 if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
                     throw new ForbiddenException(UUID.fromString(documentHashToken.getId()));
                 }
             // Token is not provided by CCD
             } else if (hashCheckEnabled) {
-                throw new ForbiddenException("Hash check is enabled but hashToken hasn't provided for the document:"
-                                                 + documentHashToken.getId());
+                throw new ForbiddenException(
+                    String.format("Hash check is enabled but hashToken hasn't provided for the document:%s",
+                                  documentHashToken.getId()));
             } else {
                 // document metadata does not exist and document is not a moving case
                 if (documentMetadata.isPresent()
@@ -249,31 +253,26 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     private boolean isDocumentMovingCases(String documentCaseTypeId) {
-        return bulkScanExceptionRecordTypes.contains(documentCaseTypeId.trim());
+        return bulkScanExceptionRecordTypes.contains(documentCaseTypeId);
     }
 
     @Override
-    public String generateHashToken(UUID documentId, Optional<StoredDocumentHalResource> documentMetaData) {
+    public String generateHashToken(UUID documentId, StoredDocumentHalResource documentMetaData) {
         String hashcodeFromStoredDocument = "";
 
-        if (documentMetaData.isPresent()) {
-            StoredDocumentHalResource resource = documentMetaData.get();
-
-            if (resource.getMetadata().get(Constants.CASE_ID) == null) {
-                hashcodeFromStoredDocument = ApplicationUtils
-                    .generateHashCode(salt.concat(documentId.toString()
-                        .concat(resource.getMetadata().get(Constants.JURISDICTION_ID))
-                        .concat(resource.getMetadata().get(Constants.CASE_TYPE_ID))));
-            } else {
-                hashcodeFromStoredDocument = ApplicationUtils
-                    .generateHashCode(salt.concat(documentId.toString()
-                        .concat(resource.getMetadata().get(Constants.CASE_ID))
-                        .concat(resource.getMetadata().get(Constants.JURISDICTION_ID))
-                        .concat(resource.getMetadata().get(Constants.CASE_TYPE_ID))));
-            }
+        if (documentMetaData.getMetadata().get(Constants.CASE_ID) == null) {
+            hashcodeFromStoredDocument = ApplicationUtils
+                .generateHashCode(salt.concat(documentId.toString()
+                    .concat(documentMetaData.getMetadata().get(Constants.JURISDICTION_ID))
+                    .concat(documentMetaData.getMetadata().get(Constants.CASE_TYPE_ID))));
         } else {
-            throw new ResourceNotFoundException("Meta data not found for:" + documentId);
+            hashcodeFromStoredDocument = ApplicationUtils
+                .generateHashCode(salt.concat(documentId.toString()
+                    .concat(documentMetaData.getMetadata().get(Constants.CASE_ID))
+                    .concat(documentMetaData.getMetadata().get(Constants.JURISDICTION_ID))
+                    .concat(documentMetaData.getMetadata().get(Constants.CASE_TYPE_ID))));
         }
+
         return hashcodeFromStoredDocument;
     }
 

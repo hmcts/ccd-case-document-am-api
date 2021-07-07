@@ -1389,7 +1389,7 @@ class DocumentManagementServiceImplTest {
             HttpStatus.OK
         );
         String result =
-            sut.generateHashToken(UUID.fromString(MATCHED_DOCUMENT_ID), Optional.of(getStoredDocumentResource()));
+            sut.generateHashToken(UUID.fromString(MATCHED_DOCUMENT_ID), getStoredDocumentResource());
         assertNotNull(result);
     }
 
@@ -1407,7 +1407,7 @@ class DocumentManagementServiceImplTest {
         );
 
         String result =
-            sut.generateHashToken(UUID.fromString(MATCHED_DOCUMENT_ID), Optional.of(getStoredDocumentResource()));
+            sut.generateHashToken(UUID.fromString(MATCHED_DOCUMENT_ID), getStoredDocumentResource());
         assertNotNull(result);
     }
 

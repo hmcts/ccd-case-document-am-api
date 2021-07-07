@@ -25,7 +25,7 @@ public interface DocumentManagementService {
 
     void patchDocumentMetadata(CaseDocumentsMetadata caseDocumentsMetadata);
 
-    String generateHashToken(final UUID documentId, Optional<StoredDocumentHalResource> documentMetadata);
+    String generateHashToken(final UUID documentId, StoredDocumentHalResource documentMetadata);
 
     UploadResponse uploadDocuments(List<MultipartFile> files, String classification,
                                    String caseTypeId,

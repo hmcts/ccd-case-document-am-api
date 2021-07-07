@@ -104,26 +104,21 @@ public class CaseDocumentAmController {
     ) {
         validationUtils.validateDocumentId(documentId.toString());
 
-        Optional<StoredDocumentHalResource> documentMetadata =
-            documentManagementService.getDocumentMetadata(documentId);
+        StoredDocumentHalResource documentMetadata = getDocumentMetadata(documentId);
 
-        if (documentMetadata.isEmpty()) {
-            throw new ResourceNotFoundException("Meta data not found");
-        }
-
-        documentManagementService.checkServicePermission(documentMetadata.get(),
+        documentManagementService.checkServicePermission(documentMetadata,
                                                              getServiceNameFromS2SToken(s2sToken),
                                                              Permission.READ,
                                                              SERVICE_PERMISSION_ERROR,
                                                              documentId.toString());
 
-        documentManagementService.checkUserPermission(documentMetadata.get(),
+        documentManagementService.checkUserPermission(documentMetadata,
                                                       documentId,
                                                       Permission.READ,
                                                       USER_PERMISSION_ERROR,
                                                       documentId.toString());
 
-        return ResponseEntity.status(HttpStatus.OK).body(documentMetadata.get());
+        return ResponseEntity.status(HttpStatus.OK).body(documentMetadata);
     }
 
     @GetMapping(
@@ -159,18 +154,15 @@ public class CaseDocumentAmController {
     ) {
         validationUtils.validateDocumentId(documentId.toString());
 
-        Optional<StoredDocumentHalResource> documentMetadata =
-            documentManagementService.getDocumentMetadata(documentId);
+        StoredDocumentHalResource documentMetadata = getDocumentMetadata(documentId);
 
-        checkMetadataExists(documentMetadata);
-
-        documentManagementService.checkServicePermission(documentMetadata.get(),
+        documentManagementService.checkServicePermission(documentMetadata,
                                                          getServiceNameFromS2SToken(s2sToken),
                                                          Permission.READ,
                                                          SERVICE_PERMISSION_ERROR,
                                                          documentId.toString());
 
-        documentManagementService.checkUserPermission(documentMetadata.get(),
+        documentManagementService.checkUserPermission(documentMetadata,
                                                       documentId,
                                                       Permission.READ,
                                                       USER_PERMISSION_ERROR,
@@ -280,12 +272,9 @@ public class CaseDocumentAmController {
     ) {
         validationUtils.validateDocumentId(documentId.toString());
 
-        Optional<StoredDocumentHalResource> documentMetadata =
-            documentManagementService.getDocumentMetadata(documentId);
+        StoredDocumentHalResource documentMetadata = getDocumentMetadata(documentId);
 
-        checkMetadataExists(documentMetadata);
-
-        documentManagementService.checkServicePermission(documentMetadata.get(),
+        documentManagementService.checkServicePermission(documentMetadata,
                                                              getServiceNameFromS2SToken(s2sToken),
                                                              Permission.UPDATE,
                                                              SERVICE_PERMISSION_ERROR,
@@ -393,12 +382,9 @@ public class CaseDocumentAmController {
     ) {
         validationUtils.validateDocumentId(documentId.toString());
 
-        Optional<StoredDocumentHalResource> documentMetadata =
-            documentManagementService.getDocumentMetadata(documentId);
+        StoredDocumentHalResource documentMetadata = getDocumentMetadata(documentId);
 
-        checkMetadataExists(documentMetadata);
-
-        documentManagementService.checkServicePermission(documentMetadata.get(),
+        documentManagementService.checkServicePermission(documentMetadata,
                                                          getServiceNameFromS2SToken(s2sToken),
                                                          Permission.UPDATE,
                                                          SERVICE_PERMISSION_ERROR,
@@ -438,12 +424,9 @@ public class CaseDocumentAmController {
     ) {
         validationUtils.validateDocumentId(documentId.toString());
 
-        Optional<StoredDocumentHalResource> documentMetadata =
-            documentManagementService.getDocumentMetadata(documentId);
+        StoredDocumentHalResource documentMetadata = getDocumentMetadata(documentId);
 
-        checkMetadataExists(documentMetadata);
-
-        documentManagementService.checkServicePermission(documentMetadata.get(),
+        documentManagementService.checkServicePermission(documentMetadata,
                                                          getServiceNameFromS2SToken(s2sToken),
                                                          Permission.HASHTOKEN,
                                                          SERVICE_PERMISSION_ERROR,
@@ -455,9 +438,18 @@ public class CaseDocumentAmController {
                                         .build(), HttpStatus.OK);
     }
 
-    private void checkMetadataExists(Optional<StoredDocumentHalResource> documentMetadata) {
+    private StoredDocumentHalResource getDocumentMetadata(UUID documentId) {
+        Optional<StoredDocumentHalResource> documentMetadata =
+            documentManagementService.getDocumentMetadata(documentId);
+
+        checkMetadataExists(documentMetadata, documentId);
+
+        return documentMetadata.get();
+    }
+
+    private void checkMetadataExists(Optional<StoredDocumentHalResource> documentMetadata, UUID documentId) {
         if (documentMetadata.isEmpty()) {
-            throw new ResourceNotFoundException("Meta data not found");
+            throw new ResourceNotFoundException(String.format("Meta data does not exist for documentId: %s", documentId.toString()));
         }
     }
 

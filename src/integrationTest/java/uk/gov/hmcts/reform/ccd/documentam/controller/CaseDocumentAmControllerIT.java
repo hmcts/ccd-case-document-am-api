@@ -125,7 +125,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
             .andExpect(jsonPath("$.documents[0].hashToken", is(expectedHash)))
             .andExpect(jsonPath("$.documents[0]._links.self.href", is(SELF_LINK)))
             .andExpect(jsonPath("$.documents[0]._links.binary.href", is(BINARY_LINK)))
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.UPLOAD_DOCUMENTS,
                 SERVICE_NAME_XUI_WEBAPP,
@@ -150,7 +149,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
             .andExpect(jsonPath(META_DATA_JSON_EXPRESSION + JURISDICTION_ID, is(JURISDICTION_ID_VALUE)))
             .andExpect(jsonPath("$._links.self.href",
                                 is("http://localhost" + MAIN_URL + "/" + DOCUMENT_ID)))
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
                 SERVICE_NAME_XUI_WEBAPP,
@@ -171,7 +169,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         mockMvc.perform(delete(MAIN_URL + "/" + DOCUMENT_ID)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isNoContent())
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
                 SERVICE_NAME_XUI_WEBAPP,
@@ -193,7 +190,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + "/binary")
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isOk())
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
                 SERVICE_NAME_XUI_WEBAPP,
@@ -223,7 +219,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(getJsonString(body)))
             .andExpect(status().isOk())
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
                 SERVICE_NAME_XUI_WEBAPP,
@@ -263,7 +258,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                                                           .content(getJsonString(body)))
             .andExpect(status().isOk())
             .andExpect(jsonPath(RESPONSE_RESULT_KEY, is(SUCCESS)))
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
                 SERVICE_NAME_CCD_DATA,
@@ -306,7 +300,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(getJsonString(body)))
             .andExpect(status().isForbidden())
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
                 SERVICE_NAME_CCD_DATA,
@@ -341,7 +334,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                             .content(getJsonString(body)))
             .andExpect(status().isForbidden())
             .andExpect(jsonPath(RESPONSE_ERROR_KEY, is(ERROR_403)))
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
                 SERVICE_NAME_CCD_DATA,
@@ -383,7 +375,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                             .param(JURISDICTION_ID, JURISDICTION_ID_VALUE)
                             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
             .andExpect(status().isInternalServerError())
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.UPLOAD_DOCUMENTS,
                 SERVICE_NAME_XUI_WEBAPP,
@@ -403,7 +394,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         mockMvc.perform(get(MAIN_URL + "/" +  DOCUMENT_ID)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isForbidden())
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
                 SERVICE_NAME_XUI_WEBAPP,
@@ -425,7 +415,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + "/binary")
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isForbidden())
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
                 SERVICE_NAME_XUI_WEBAPP,
@@ -448,7 +437,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         mockMvc.perform(delete(MAIN_URL + "/" + random)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isNotFound())
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
                 SERVICE_NAME_XUI_WEBAPP,

@@ -89,22 +89,15 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     public void shouldGetValidMetaDataResponse() {
-        Optional<DocumentPermissions> documentPermissions = Optional.ofNullable(getDocumentPermissions(
-            MATCHED_DOCUMENT_ID,
-            Arrays.asList(
-                Permission.CREATE,
-                Permission.READ
-            )
-        ));
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
         doNothing().when(documentManagementService)
-            .checkUserPermission(setDocumentMetaData().get(),
+            .checkUserPermission(setDocumentMetaData(),
                                  getUuid(),
                                  Permission.READ,
                                  USER_PERMISSION_ERROR,
                                  getUuid().toString());
         doNothing().when(documentManagementService)
-            .checkServicePermission(setDocumentMetaData().get(),
+            .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
                                     Permission.READ,
                                     SERVICE_PERMISSION_ERROR,
@@ -122,22 +115,15 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     public void shouldNotGetValidMetaDataResponseWhenServiceNotAuthorised() {
-        Optional<DocumentPermissions> documentPermissions = Optional.ofNullable(getDocumentPermissions(
-            UNMATCHED_DOCUMENT_ID,
-            Arrays.asList(
-                Permission.CREATE,
-                Permission.READ
-            )
-        ));
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
         doThrow(ForbiddenException.class).when(documentManagementService)
-            .checkUserPermission(setDocumentMetaData().get(),
+            .checkUserPermission(setDocumentMetaData(),
                                  getUuid(),
                                  Permission.READ,
                                  USER_PERMISSION_ERROR,
                                  getUuid().toString());
         doThrow(ForbiddenException.class).when(documentManagementService)
-            .checkServicePermission(setDocumentMetaData().get(),
+            .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
                                     Permission.READ,
                                     SERVICE_PERMISSION_ERROR,
@@ -149,22 +135,15 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     public void shouldNotGetValidMetaDataResponseWhenUserNotAuthorised() {
-        Optional<DocumentPermissions> documentPermissions = Optional.ofNullable(getDocumentPermissions(
-            UNMATCHED_DOCUMENT_ID,
-            Arrays.asList(
-                Permission.CREATE,
-                Permission.READ
-            )
-        ));
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
         doThrow(ForbiddenException.class).when(documentManagementService)
-            .checkUserPermission(setDocumentMetaData().get(),
+            .checkUserPermission(setDocumentMetaData(),
                                  getUuid(),
                                  Permission.READ,
                                  USER_PERMISSION_ERROR,
                                  getUuid().toString());
         doNothing().when(documentManagementService)
-            .checkServicePermission(setDocumentMetaData().get(),
+            .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
                                     Permission.READ,
                                     SERVICE_PERMISSION_ERROR,
@@ -178,22 +157,15 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("should get 200 document binary content")
     public void shouldGetDocumentBinaryContent() {
-        Optional<DocumentPermissions> documentPermissions = Optional.ofNullable(getDocumentPermissions(
-            MATCHED_DOCUMENT_ID,
-            Arrays.asList(
-                Permission.CREATE,
-                Permission.READ
-            )
-        ));
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
         doNothing().when(documentManagementService)
-            .checkUserPermission(setDocumentMetaData().get(),
+            .checkUserPermission(setDocumentMetaData(),
                                  getUuid(),
                                  Permission.READ,
                                  USER_PERMISSION_ERROR,
                                  getUuid().toString());
         doNothing().when(documentManagementService)
-            .checkServicePermission(setDocumentMetaData().get(),
+            .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
                                     Permission.READ,
                                     SERVICE_PERMISSION_ERROR,
@@ -214,17 +186,13 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("should throw 403 forbidden  when the requested document does not have read permission")
     public void shouldThrowForbiddenWhenDocumentDoesNotHaveReadPermission() {
-        Optional<DocumentPermissions> documentPermissions = Optional.ofNullable(getDocumentPermissions(
-            MATCHED_DOCUMENT_ID,
-            Collections.singletonList(Permission.CREATE)
-        ));
         doNothing().when(documentManagementService)
-            .checkServicePermission(setDocumentMetaData().get(),
+            .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
                                     Permission.READ,
                                     SERVICE_PERMISSION_ERROR,
                                     getUuid().toString());
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
         doThrow(ForbiddenException.class).when(documentManagementService)
             .getDocumentBinaryContent(getUuid());
 
@@ -243,13 +211,13 @@ public class CaseDocumentAmControllerTest {
                 Permission.READ
             )
         ));
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().get());
+        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData());
         doReturn(documentPermissions).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
         doThrow(ForbiddenException.class).when(documentManagementService)
             .getDocumentBinaryContent(getUuid());
         doNothing().when(documentManagementService)
-            .checkServicePermission(setDocumentMetaData().get(),
+            .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
                                     Permission.READ,
                                     SERVICE_PERMISSION_ERROR,
@@ -270,13 +238,13 @@ public class CaseDocumentAmControllerTest {
                 Permission.READ
             )
         ));
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().get());
+        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData());
         doReturn(documentPermissions).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
         doReturn(setDocumentBinaryContent(FORBIDDEN)).when(documentManagementService)
             .getDocumentBinaryContent(getUuid());
         doThrow(ForbiddenException.class).when(documentManagementService)
-            .checkServicePermission(setDocumentMetaData().get(),
+            .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
                                     Permission.READ,
                                     SERVICE_PERMISSION_ERROR,
@@ -291,15 +259,15 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("should get 204 when document delete is successful")
     public void shouldDeleteDocumentByDocumentId() {
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
         doNothing().when(documentManagementService)
-            .checkServicePermission(setDocumentMetaData().get(),
+            .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
                                     Permission.UPDATE,
                                     SERVICE_PERMISSION_ERROR,
                                     getUuid().toString());
         doNothing().when(documentManagementService)
-            .checkUserPermission(setDocumentMetaData().get(),
+            .checkUserPermission(setDocumentMetaData(),
                                  getUuid(),
                                  Permission.UPDATE,
                                  USER_PERMISSION_ERROR,
@@ -318,15 +286,15 @@ public class CaseDocumentAmControllerTest {
     @Test
     @DisplayName("should get 403 when service is not authorised")
     public void shouldNotAllowDeleteDocumentByDocumentIdWhenServiceIsNotAuthorised() {
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
         doThrow(ForbiddenException.class).when(documentManagementService)
-            .checkServicePermission(setDocumentMetaData().get(),
+            .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
                                     Permission.UPDATE,
                                     SERVICE_PERMISSION_ERROR,
                                     getUuid().toString());
         doNothing().when(documentManagementService)
-            .checkUserPermission(setDocumentMetaData().get(),
+            .checkUserPermission(setDocumentMetaData(),
                                  getUuid(),
                                  Permission.UPDATE,
                                  USER_PERMISSION_ERROR,
@@ -340,15 +308,15 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     public void shouldPatchDocumentByDocumentId() {
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
         doNothing().when(documentManagementService)
-            .checkServicePermission(setDocumentMetaData().get(),
+            .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
                                     Permission.UPDATE,
                                     SERVICE_PERMISSION_ERROR,
                                     getUuid().toString());
         doNothing().when(documentManagementService)
-            .checkUserPermission(setDocumentMetaData().get(),
+            .checkUserPermission(setDocumentMetaData(),
                                  getUuid(),
                                  Permission.UPDATE,
                                  USER_PERMISSION_ERROR,
@@ -373,15 +341,15 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     public void shouldNotAllowPatchDocumentByDocumentIdWhenServiceIsNotAuthorised() {
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(getUuid());
         doThrow(ForbiddenException.class).when(documentManagementService)
-            .checkServicePermission(setDocumentMetaData().get(),
+            .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
                                     Permission.UPDATE,
                                     SERVICE_PERMISSION_ERROR,
                                     getUuid().toString());
         doNothing().when(documentManagementService)
-            .checkUserPermission(setDocumentMetaData().get(),
+            .checkUserPermission(setDocumentMetaData(),
                                  getUuid(),
                                  Permission.READ,
                                  USER_PERMISSION_ERROR,
@@ -414,7 +382,7 @@ public class CaseDocumentAmControllerTest {
             .caseTypeId(BEFTA_CASETYPE_2)
             .jurisdictionId(BEFTA_JURISDICTION_2)
             .build();
-        doReturn(setDocumentMetaData()).when(documentManagementService)
+        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService)
             .getDocumentMetadata(UUID.fromString(body.getDocumentHashTokens().get(
             0).getId()));
 
@@ -437,7 +405,7 @@ public class CaseDocumentAmControllerTest {
     @Test
     public void shouldPatchMetaDataOnDocuments() {
         doNothing().when(documentManagementService).checkServicePermission(
-            eq(setDocumentMetaData().get()),
+            eq(setDocumentMetaData()),
             eq(XUI_WEBAPP),
             eq(Permission.ATTACH),
             eq(SERVICE_PERMISSION_ERROR),
@@ -633,11 +601,11 @@ public class CaseDocumentAmControllerTest {
         ));
     }
 
-    private Optional<StoredDocumentHalResource> setDocumentMetaData() {
+    private StoredDocumentHalResource setDocumentMetaData() {
         StoredDocumentHalResource resource = new StoredDocumentHalResource();
         resource.setCreatedBy("test");
         resource.setOriginalDocumentName("test.png");
-        return Optional.of(resource);
+        return resource;
     }
 
     private UUID getUuid() {
@@ -692,11 +660,11 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     void generateHashCode_HappyPath() {
-        Optional<StoredDocumentHalResource> documentMetadata = setDocumentMetaData();
+        StoredDocumentHalResource documentMetadata = setDocumentMetaData();
 
-        doReturn(documentMetadata).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(Optional.of(documentMetadata)).when(documentManagementService).getDocumentMetadata(getUuid());
         doNothing().when(documentManagementService)
-            .checkServicePermission(setDocumentMetaData().get(),
+            .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
                                     Permission.HASHTOKEN,
                                     SERVICE_PERMISSION_ERROR,
@@ -720,11 +688,11 @@ public class CaseDocumentAmControllerTest {
 
     @Test
     void generateHashCode_BadRequestWhenServiceIsNotAuthorised() {
-        Optional<StoredDocumentHalResource> documentMetadata = setDocumentMetaData();
+        StoredDocumentHalResource documentMetadata = setDocumentMetaData();
 
-        doReturn(documentMetadata).when(documentManagementService).getDocumentMetadata(getUuid());
+        doReturn(Optional.of(documentMetadata)).when(documentManagementService).getDocumentMetadata(getUuid());
         doThrow(ForbiddenException.class).when(documentManagementService)
-            .checkServicePermission(setDocumentMetaData().get(),
+            .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
                                     Permission.HASHTOKEN,
                                     SERVICE_PERMISSION_ERROR,
