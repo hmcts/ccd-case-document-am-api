@@ -6,10 +6,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
+import org.springframework.validation.BindException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.InvalidRequest;
@@ -26,7 +28,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @Slf4j
 @ControllerAdvice
 // FIXME : https://tools.hmcts.net/jira/browse/RDM-11324
-public class CaseDocumentControllerAdvice extends ResponseEntityExceptionHandler {
+public class CaseDocumentControllerAdvice {
 
     private static final String LOG_STRING = "handling exception: ";
     private static final Logger logger = LoggerFactory.getLogger(CaseDocumentControllerAdvice.class);
@@ -68,22 +70,27 @@ public class CaseDocumentControllerAdvice extends ResponseEntityExceptionHandler
             ErrorConstants.BAD_REQUEST.getErrorCode(), ErrorConstants.BAD_REQUEST.getErrorMessage());
     }
 
-    //    @ExceptionHandler(MethodArgumentNotValidException.class)
-    //    protected ResponseEntity<Object> handleMethodArgumentNotValidException(
-    //    MethodArgumentNotValidException exception) {
-    //        return errorDetailsResponseEntity(exception, BAD_REQUEST,
-    //            ErrorConstants.BAD_REQUEST.getErrorCode(), ErrorConstants.BAD_REQUEST.getErrorMessage());
-    //    }
-    //
-    //    @ExceptionHandler(MissingServletRequestParameterException.class)
-    //    protected ResponseEntity<Object> handleMissingRequestParameterException(
-    //        MissingServletRequestParameterException exception) {
-    //        return errorDetailsResponseEntity(exception,
-    //                                          BAD_REQUEST,
-    //                                          ErrorConstants.BAD_REQUEST.getErrorCode(),
-    //                                          ErrorConstants.BAD_REQUEST.getErrorMessage()
-    //        );
-    //    }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    protected ResponseEntity<Object> handleMethodArgumentNotValidException(
+        MethodArgumentNotValidException exception) {
+        return errorDetailsResponseEntity(
+            exception,
+            BAD_REQUEST,
+            ErrorConstants.BAD_REQUEST.getErrorCode(),
+            ErrorConstants.BAD_REQUEST.getErrorMessage()
+        );
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    protected ResponseEntity<Object> handleMissingRequestParameterException(
+        MissingServletRequestParameterException exception) {
+        return errorDetailsResponseEntity(
+            exception,
+            BAD_REQUEST,
+            ErrorConstants.BAD_REQUEST.getErrorCode(),
+            ErrorConstants.BAD_REQUEST.getErrorMessage()
+        );
+    }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     protected ResponseEntity<Object> handleMethodArgumentTypeMismatchException(
@@ -108,13 +115,15 @@ public class CaseDocumentControllerAdvice extends ResponseEntityExceptionHandler
             ErrorConstants.BAD_REQUEST.getErrorCode(), ErrorConstants.BAD_REQUEST.getErrorMessage());
     }
 
-    //    @ExceptionHandler(BindException.class)
-    //    protected ResponseEntity<Object> handleBindException(BindException exception) {
-    //        return errorDetailsResponseEntity(exception,
-    //                                          BAD_REQUEST,
-    //                                          ErrorConstants.BAD_REQUEST.getErrorCode(),
-    //                                          ErrorConstants.BAD_REQUEST.getErrorMessage());
-    //    }
+    @ExceptionHandler(BindException.class)
+    protected ResponseEntity<Object> handleBindException(BindException exception) {
+        return errorDetailsResponseEntity(
+            exception,
+            BAD_REQUEST,
+            ErrorConstants.BAD_REQUEST.getErrorCode(),
+            ErrorConstants.BAD_REQUEST.getErrorMessage()
+        );
+    }
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<Object> handleUnknownException(Exception exception) {
