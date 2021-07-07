@@ -23,7 +23,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "Meta data not found for: ${[documentId]}"
+      "errorDescription": "Meta data not found for: ${[scenarioContext][testData][request][body][documentHashTokens][0][id]}"
     }
   }
 }
