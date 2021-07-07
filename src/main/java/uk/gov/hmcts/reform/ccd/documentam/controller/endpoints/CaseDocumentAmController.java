@@ -315,9 +315,14 @@ public class CaseDocumentAmController {
     public ResponseEntity<PatchDocumentMetaDataResponse> patchMetaDataOnDocuments(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody final CaseDocumentsMetadata caseDocumentsMetadata,
+
+        final BindingResult bindingResult,
+
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
-        @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken
-    ) {
+        @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken) {
+
+        handleErrors(bindingResult);
+
         documentManagementService.validateHashTokens(caseDocumentsMetadata.getDocumentHashTokens());
 
         //validate the service authorization for first document in payload

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.ccd.documentam.controller.endpoints;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.model.GeneratedHashCodeResponse;
+import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentMetaDataResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
@@ -409,7 +409,7 @@ public class CaseDocumentAmControllerTest {
             anyString()
         );
         DocumentHashToken document = DocumentHashToken.builder().id("cab18c21-8b7c-452b-937c-091225e0cc12").build();
-        CaseDocumentsMetadata body = CaseDocumentsMetadata.builder()
+        final CaseDocumentsMetadata body = CaseDocumentsMetadata.builder()
             .caseId("1111122222333334")
             .documentHashTokens(Collections.singletonList(document))
             .caseTypeId(BEFTA_CASETYPE_2)
@@ -417,10 +417,12 @@ public class CaseDocumentAmControllerTest {
             .build();
         doReturn(setDocumentMetaData()).when(documentManagementService)
             .getDocumentMetadata(UUID.fromString(body.getDocumentHashTokens().get(
-            0).getId()));
+                0).getId()));
 
-        assertThrows(ForbiddenException.class, () -> testee.patchMetaDataOnDocuments(body, TEST_S2S_TOKEN));
-        Assertions.assertThrows(ForbiddenException.class, () -> testee.patchMetaDataOnDocuments(body, TEST_S2S_TOKEN));
+        assertThrows(
+            ForbiddenException.class,
+            () -> testee.patchMetaDataOnDocuments(body, bindingResult, TEST_S2S_TOKEN)
+        );
     }
 
     @Test
@@ -440,7 +442,11 @@ public class CaseDocumentAmControllerTest {
             .jurisdictionId(BEFTA_JURISDICTION_2)
             .build();
 
-        ResponseEntity response = testee.patchMetaDataOnDocuments(body, TEST_S2S_TOKEN);
+        final ResponseEntity<PatchDocumentMetaDataResponse> response = testee.patchMetaDataOnDocuments(
+            body,
+            bindingResult,
+            TEST_S2S_TOKEN
+        );
 
         assertAll(
             () -> assertNotNull(response, VALID_RESPONSE),
