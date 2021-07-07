@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
-import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -113,16 +112,6 @@ public class CaseDocumentControllerAdvice {
     protected ResponseEntity<Object> handleHttpMessageConversionException(HttpMessageConversionException exception) {
         return errorDetailsResponseEntity(exception, BAD_REQUEST,
             ErrorConstants.BAD_REQUEST.getErrorCode(), ErrorConstants.BAD_REQUEST.getErrorMessage());
-    }
-
-    @ExceptionHandler(BindException.class)
-    protected ResponseEntity<Object> handleBindException(BindException exception) {
-        return errorDetailsResponseEntity(
-            exception,
-            BAD_REQUEST,
-            ErrorConstants.BAD_REQUEST.getErrorCode(),
-            ErrorConstants.BAD_REQUEST.getErrorMessage()
-        );
     }
 
     @ExceptionHandler(Exception.class)

@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
@@ -78,6 +79,8 @@ public class CaseDocumentAmControllerTest {
     private CaseDataStoreService caseDataStoreService;
     @Mock
     private SecurityUtils securityUtils;
+    @Mock
+    private BindingResult bindingResult;
 
     @BeforeEach
     public void setUp() {
@@ -482,6 +485,7 @@ public class CaseDocumentAmControllerTest {
 
         UploadResponse finalResponse = testee.uploadDocuments(
             documentUploadRequest,
+            bindingResult,
             TEST_S2S_TOKEN
         );
 

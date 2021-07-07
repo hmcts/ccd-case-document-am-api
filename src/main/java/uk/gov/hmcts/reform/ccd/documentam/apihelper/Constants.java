@@ -52,8 +52,6 @@ public final class Constants {
         + "API {}";
     public static final String EXCEPTION_SERVICE_ID_NOT_AUTHORISED = "Service Id is not authorized to access API: %s ";
 
-    public static final String INPUT_STRING_MESSAGE = "The input parameter does not comply with the required pattern";
-
     private Constants() {
     }
 }

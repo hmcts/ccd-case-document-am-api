@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.documentam.BaseTest;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
 import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DmUploadResponse;
+import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
@@ -36,6 +37,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -140,13 +142,41 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     @ParameterizedTest
     @MethodSource("provideDocumentUploadParameters")
     public void testShouldRaiseExceptionWhenUploadingDocumentsWithInvalidValues(
-        final MockMultipartHttpServletRequestBuilder requestBuilder
+        final String fileContent,
+        final String classification,
+        final String caseTypeId,
+        final String jurisdictionId,
+        final String errorMessage
     ) throws Exception {
+        final MockMultipartHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.multipart(MAIN_URL);
+        if (fileContent != null) {
+            requestBuilder
+                .part(new MockPart(FILES, "file1", fileContent.getBytes()));
+        }
+        if (classification != null) {
+            requestBuilder
+                .part(new MockPart(CLASSIFICATION, classification.getBytes()));
+        }
+        if (caseTypeId != null) {
+            requestBuilder
+                .part(new MockPart(CASE_TYPE_ID, caseTypeId.getBytes()));
+        }
+        if (jurisdictionId != null) {
+            requestBuilder
+                .part(new MockPart(JURISDICTION_ID, jurisdictionId.getBytes()));
+        }
 
         mockMvc.perform(requestBuilder
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
                             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
             .andExpect(status().isBadRequest())
+            .andExpect(result -> assertThat(result.getResolvedException())
+                .isNotNull()
+                .satisfies(throwable -> {
+                    assertThat(throwable).isInstanceOf(BadRequestException.class);
+                    assertThat(throwable.getLocalizedMessage()).isEqualTo(errorMessage);
+                })
+            )
 
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.UPLOAD_DOCUMENTS,
@@ -576,55 +606,64 @@ public class CaseDocumentAmControllerIT extends BaseTest {
 
     @SuppressWarnings("unused")
     private static Stream<Arguments> provideDocumentUploadParameters() {
-        final MockMultipartHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.multipart(MAIN_URL);
-
-        final byte[] fileContent = "Some content".getBytes();
+        final String fileContent = "Some content";
 
         return Stream.of(
             Arguments.of(
-                requestBuilder
-                    .part(new MockPart(CLASSIFICATION, CLASSIFICATION_VALUE.getBytes()))
-                    .part(new MockPart(CASE_TYPE_ID, CASE_TYPE_ID_VALUE.getBytes()))
-                    .part(new MockPart(JURISDICTION_ID, JURISDICTION_ID_VALUE.getBytes()))
+                null,
+                CLASSIFICATION_VALUE,
+                CASE_TYPE_ID_VALUE,
+                JURISDICTION_ID_VALUE,
+                "Provide some file to be uploaded"
             ),
             Arguments.of(
-                requestBuilder
-                    .part(new MockPart(FILES, "file1", fileContent))
-                    .part(new MockPart(CLASSIFICATION, "GUARDED".getBytes()))
-                    .part(new MockPart(CASE_TYPE_ID, CASE_TYPE_ID_VALUE.getBytes()))
-                    .part(new MockPart(JURISDICTION_ID, JURISDICTION_ID_VALUE.getBytes()))
+                fileContent,
+                "GUARDED",
+                CASE_TYPE_ID_VALUE,
+                JURISDICTION_ID_VALUE,
+                "The Security Classification is not valid"
             ),
             Arguments.of(
-                requestBuilder
-                    .part(new MockPart(FILES, "file1", fileContent))
-                    .part(new MockPart(CASE_TYPE_ID, CASE_TYPE_ID_VALUE.getBytes()))
-                    .part(new MockPart(JURISDICTION_ID, JURISDICTION_ID_VALUE.getBytes()))
+                fileContent,
+                "GUARDED@&%",
+                CASE_TYPE_ID_VALUE,
+                JURISDICTION_ID_VALUE,
+                "The Security Classification is not valid"
             ),
             Arguments.of(
-                requestBuilder
-                    .part(new MockPart(FILES, "file1", fileContent))
-                    .part(new MockPart(CLASSIFICATION, CLASSIFICATION_VALUE.getBytes()))
-                    .part(new MockPart(CASE_TYPE_ID, "BEFTA_CASETYPE_2&&&&&&&&&".getBytes()))
-                    .part(new MockPart(JURISDICTION_ID, JURISDICTION_ID_VALUE.getBytes()))
+                fileContent,
+                null,
+                CASE_TYPE_ID_VALUE,
+                JURISDICTION_ID_VALUE,
+                "Please provide Classification"
             ),
             Arguments.of(
-                requestBuilder
-                    .part(new MockPart(FILES, "file1", fileContent))
-                    .part(new MockPart(CLASSIFICATION, CLASSIFICATION_VALUE.getBytes()))
-                    .part(new MockPart(JURISDICTION_ID, JURISDICTION_ID_VALUE.getBytes()))
+                fileContent,
+                CLASSIFICATION_VALUE,
+                "BEFTA_CASETYPE_2&&&&&&&&&",
+                JURISDICTION_ID_VALUE,
+                "The Case Type ID is not valid"
             ),
             Arguments.of(
-                requestBuilder
-                    .part(new MockPart(FILES, "file1", fileContent))
-                    .part(new MockPart(CLASSIFICATION, CLASSIFICATION_VALUE.getBytes()))
-                    .part(new MockPart(CASE_TYPE_ID, CASE_TYPE_ID_VALUE.getBytes()))
-                    .part(new MockPart(JURISDICTION_ID, "BEFTA@JURISDICTION_2$$$$".getBytes()))
+                fileContent,
+                CLASSIFICATION_VALUE,
+                null,
+                JURISDICTION_ID_VALUE,
+                "Provide the Case Type ID"
             ),
             Arguments.of(
-                requestBuilder
-                    .part(new MockPart(FILES, "file1", fileContent))
-                    .part(new MockPart(CLASSIFICATION, CLASSIFICATION_VALUE.getBytes()))
-                    .part(new MockPart(CASE_TYPE_ID, CASE_TYPE_ID_VALUE.getBytes()))
+                fileContent,
+                CLASSIFICATION_VALUE,
+                CASE_TYPE_ID_VALUE,
+                "BEFTA@JURISDICTION_2$$$$",
+                "The Jurisdiction ID is not valid"
+            ),
+            Arguments.of(
+                fileContent,
+                CLASSIFICATION_VALUE,
+                CASE_TYPE_ID_VALUE,
+                null,
+                "Provide the Jurisdiction ID"
             )
         );
     }

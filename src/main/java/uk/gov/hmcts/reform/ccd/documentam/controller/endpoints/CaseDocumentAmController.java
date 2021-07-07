@@ -13,9 +13,11 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USER_PERMIS
 import static uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils.SERVICE_AUTHORIZATION;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -40,6 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.LogAudit;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
+import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.GeneratedHashCodeResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentMetaDataResponse;
@@ -198,9 +201,13 @@ public class CaseDocumentAmController {
         @ApiParam(value = "List of documents to be uploaded and their metadata", required = true)
         @Valid DocumentUploadRequest documentUploadRequest,
 
+        final BindingResult bindingResult,
+
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
-        @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken
-    ) {
+        @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken) {
+
+        handleErrors(bindingResult);
+
         final String permissionFailureMessage = documentUploadRequest.getCaseTypeId() + " "
             + documentUploadRequest.getJurisdictionId();
 
@@ -419,5 +426,17 @@ public class CaseDocumentAmController {
 
     private String getServiceNameFromS2SToken(String s2sToken) {
         return securityUtils.getServiceNameFromS2SToken(s2sToken);
+    }
+
+    private void handleErrors(final BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            final String message = bindingResult.getAllErrors()
+                .stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .findFirst()
+                .orElse(null);
+
+            throw new BadRequestException(message);
+        }
     }
 }

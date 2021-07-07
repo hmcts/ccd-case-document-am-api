@@ -20,7 +20,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Constraint(validatedBy = EnumValueValidator.class)
 public @interface EnumValue {
     Class<? extends Enum<?>> enumClass();
-    String message() default "Value must be any of enum {enumClass}";
+    String message() default "The Security Classification is not valid";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }
