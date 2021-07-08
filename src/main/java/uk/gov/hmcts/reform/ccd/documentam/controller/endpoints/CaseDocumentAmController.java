@@ -325,11 +325,6 @@ public class CaseDocumentAmController {
 
         documentManagementService.validateHashTokens(caseDocumentsMetadata.getDocumentHashTokens());
 
-        //validate the service authorization for first document in payload
-        final ResponseEntity<StoredDocumentHalResource> documentMetadata =
-            documentManagementService.getDocumentMetadata(
-                UUID.fromString(caseDocumentsMetadata.getDocumentHashTokens().get(0).getId()));
-
         documentManagementService.checkServicePermission(
             caseDocumentsMetadata.getCaseTypeId(),
             caseDocumentsMetadata.getJurisdictionId(),
