@@ -134,16 +134,18 @@ public class WiremockFixtures {
                                     .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
     }
 
-    private static CaseDocumentMetadata getCaseDocumentMetaData(List<Permission> permissionList) {
-        CaseDocumentMetadata caseDocumentMetadata = new CaseDocumentMetadata();
-        caseDocumentMetadata.setCaseId(CASE_ID_VALUE);
+    private static CaseDocumentMetadata getCaseDocumentMetaData(final List<Permission> permissionList) {
+        final DocumentPermissions documentPermissions = DocumentPermissions
+            .builder()
+            .id(DOCUMENT_ID.toString())
+            .permissions(permissionList)
+            .build();
 
-        DocumentPermissions documentPermissions = new DocumentPermissions();
-        documentPermissions.setId(DOCUMENT_ID.toString());
-        documentPermissions.setPermissions(permissionList);
-
-        caseDocumentMetadata.setDocumentPermissions(documentPermissions);
-        return caseDocumentMetadata;
+        return CaseDocumentMetadata
+            .builder()
+            .caseId(CASE_ID_VALUE)
+            .documentPermissions(documentPermissions)
+            .build();
     }
 
     @SuppressWarnings({"PMD.AvoidThrowingRawExceptionTypes", "squid:S112"})

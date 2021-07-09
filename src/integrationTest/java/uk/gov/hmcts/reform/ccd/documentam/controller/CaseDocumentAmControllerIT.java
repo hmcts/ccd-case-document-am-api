@@ -1,15 +1,21 @@
 package uk.gov.hmcts.reform.ccd.documentam.controller;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.mock.web.MockPart;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.documentam.BaseTest;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
 import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DmUploadResponse;
+import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
@@ -18,9 +24,10 @@ import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,7 +35,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -38,6 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CLASSIFICATION;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.FILES;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.JURISDICTION_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.CASE_ID_VALUE;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.DOCUMENT_ID;
@@ -80,6 +90,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     private static final String JURISDICTION_ID_VALUE = "BEFTA_JURISDICTION_2";
     private static final String META_DATA_JSON_EXPRESSION = "$.metadata.";
 
+    private static final String INVALID_DOCUMENT_ID = "not a uuid";
 
     private static final String USER_ID = "d5566a63-f87c-4658-a4d6-213d949f8415";
 
@@ -101,21 +112,17 @@ public class CaseDocumentAmControllerIT extends BaseTest {
 
         stubDocumentManagementUploadDocument(dmUploadResponse);
 
-        MockMultipartFile firstFile =
-            new MockMultipartFile("files", FILENAME_TXT,
-                                  "text/plain", "some xml".getBytes());
-
-        String expectedHash = ApplicationUtils
-            .generateHashCode(salt.concat(DOCUMENT_ID_FROM_LINK
-                                              .concat(JURISDICTION_ID_VALUE)
-                                              .concat(CASE_TYPE_ID_VALUE)));
+        final String expectedHash = ApplicationUtils.generateHashCode(
+            salt.concat(DOCUMENT_ID_FROM_LINK.concat(JURISDICTION_ID_VALUE).concat(CASE_TYPE_ID_VALUE))
+        );
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(MAIN_URL)
-                            .file(firstFile)
+                            .part(new MockPart(FILES, "file1", "some xml".getBytes()))
+                            .part(new MockPart(FILES, "file2", "another document".getBytes()))
+                            .part(new MockPart(CLASSIFICATION, CLASSIFICATION_VALUE.getBytes()))
+                            .part(new MockPart(CASE_TYPE_ID, CASE_TYPE_ID_VALUE.getBytes()))
+                            .part(new MockPart(JURISDICTION_ID, JURISDICTION_ID_VALUE.getBytes()))
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
-                            .param(CLASSIFICATION, CLASSIFICATION_VALUE)
-                            .param(CASE_TYPE_ID, CASE_TYPE_ID_VALUE)
-                            .param(JURISDICTION_ID, JURISDICTION_ID_VALUE)
                             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.documents[0].originalDocumentName", is(FILENAME_TXT)))
@@ -124,7 +131,47 @@ public class CaseDocumentAmControllerIT extends BaseTest {
             .andExpect(jsonPath("$.documents[0].hashToken", is(expectedHash)))
             .andExpect(jsonPath("$.documents[0]._links.self.href", is(SELF_LINK)))
             .andExpect(jsonPath("$.documents[0]._links.binary.href", is(BINARY_LINK)))
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.UPLOAD_DOCUMENTS,
+                SERVICE_NAME_XUI_WEBAPP,
+                null,
+                null));
+    }
 
+    @ParameterizedTest
+    @MethodSource("provideDocumentUploadParameters")
+    public void testShouldRaiseExceptionWhenUploadingDocumentsWithInvalidValues(
+        final String fileContent,
+        final String classification,
+        final String caseTypeId,
+        final String jurisdictionId,
+        final String errorMessage
+    ) throws Exception {
+        final MockMultipartHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.multipart(MAIN_URL);
+        if (fileContent != null) {
+            requestBuilder.part(new MockPart(FILES, "file1", fileContent.getBytes()));
+        }
+        if (classification != null) {
+            requestBuilder.part(new MockPart(CLASSIFICATION, classification.getBytes()));
+        }
+        if (caseTypeId != null) {
+            requestBuilder.part(new MockPart(CASE_TYPE_ID, caseTypeId.getBytes()));
+        }
+        if (jurisdictionId != null) {
+            requestBuilder.part(new MockPart(JURISDICTION_ID, jurisdictionId.getBytes()));
+        }
+
+        mockMvc.perform(requestBuilder
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
+                            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+            .andExpect(status().isBadRequest())
+            .andExpect(result -> assertThat(result.getResolvedException())
+                .isNotNull()
+                .satisfies(throwable -> {
+                    assertThat(throwable).isInstanceOf(BadRequestException.class);
+                    assertThat(throwable.getLocalizedMessage()).isEqualTo(errorMessage);
+                })
+            )
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.UPLOAD_DOCUMENTS,
                 SERVICE_NAME_XUI_WEBAPP,
@@ -149,7 +196,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
             .andExpect(jsonPath(META_DATA_JSON_EXPRESSION + JURISDICTION_ID, is(JURISDICTION_ID_VALUE)))
             .andExpect(jsonPath("$._links.self.href",
                                 is("http://localhost" + MAIN_URL + "/" + DOCUMENT_ID)))
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
                 SERVICE_NAME_XUI_WEBAPP,
@@ -170,11 +216,22 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         mockMvc.perform(delete(MAIN_URL + "/" + DOCUMENT_ID)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isNoContent())
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
                 SERVICE_NAME_XUI_WEBAPP,
                 documentIds,
+                null));
+    }
+
+    @Test
+    void testShouldRaiseBadRequestWhenDeleteDocumentByDocumentIdWithInvalidUUID() throws Exception {
+        mockMvc.perform(delete(MAIN_URL + "/" + INVALID_DOCUMENT_ID)
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+            .andExpect(status().isBadRequest())
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                List.of(INVALID_DOCUMENT_ID),
                 null));
     }
 
@@ -192,7 +249,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + "/binary")
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isOk())
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
                 SERVICE_NAME_XUI_WEBAPP,
@@ -201,10 +257,21 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     }
 
     @Test
+    void testShouldRaiseBadRequestWhenGetDocumentBinaryWithInvalidUUID() throws Exception {
+        mockMvc.perform(get(MAIN_URL + "/" + INVALID_DOCUMENT_ID + "/binary")
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+            .andExpect(status().isBadRequest())
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                List.of(INVALID_DOCUMENT_ID),
+                null));
+    }
+
+    @Test
     void shouldSuccessfullyPatchDocumentByDocumentId() throws Exception {
         UpdateDocumentCommand body = new UpdateDocumentCommand();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
-        String formattedTTL = dateFormat.format(new Timestamp(new Date().getTime() + Long.parseLong("600000")));
+        String formattedTTL = getTenMinuteTtl();
         body.setTtl(formattedTTL);
 
         Date time = Date.from(Instant.now());
@@ -222,11 +289,28 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(getJsonString(body)))
             .andExpect(status().isOk())
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
                 SERVICE_NAME_XUI_WEBAPP,
                 documentIds,
+                null));
+    }
+
+    @Test
+    void testShouldRaiseBadRequestWhenPatchDocumentByDocumentIdWithInvalidUUID() throws Exception {
+        UpdateDocumentCommand body = new UpdateDocumentCommand();
+        final String formattedTTL = getTenMinuteTtl();
+        body.setTtl(formattedTTL);
+
+        mockMvc.perform(patch(MAIN_URL + "/" + INVALID_DOCUMENT_ID)
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
+                            .contentType(MediaType.APPLICATION_JSON_VALUE)
+                            .content(getJsonString(body)))
+            .andExpect(status().isBadRequest())
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                List.of(INVALID_DOCUMENT_ID),
                 null));
     }
 
@@ -262,11 +346,40 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                                                           .content(getJsonString(body)))
             .andExpect(status().isOk())
             .andExpect(jsonPath(RESPONSE_RESULT_KEY, is(SUCCESS)))
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
                 SERVICE_NAME_CCD_DATA,
                 documentIds,
+                body.getCaseId()
+            ));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "    ", "111112222233333", "11111222223333344", "A111112222233333", "1111$%2222333334"})
+    void testShouldReturnBadRequestWhenPatchMetaDataOnDocumentWithBadCaseId(final String caseId) throws Exception {
+        final String hashToken = ApplicationUtils.generateHashCode(
+            salt.concat(DOCUMENT_ID.toString()
+                            .concat(CASE_ID_VALUE)
+                            .concat(JURISDICTION_ID_VALUE)
+                            .concat(CASE_TYPE_ID_VALUE))
+        );
+
+        final CaseDocumentsMetadata body = new CaseDocumentsMetadata(
+            caseId,
+            CASE_TYPE_ID_VALUE,
+            JURISDICTION_ID_VALUE,
+            List.of(new DocumentHashToken(DOCUMENT_ID.toString(), hashToken))
+        );
+
+        mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
+                            .headers(createHttpHeaders(SERVICE_NAME_CCD_DATA))
+                            .contentType(MediaType.APPLICATION_JSON_VALUE)
+                            .content(getJsonString(body)))
+            .andExpect(status().isBadRequest())
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
+                SERVICE_NAME_CCD_DATA,
+                List.of(DOCUMENT_ID.toString()),
                 body.getCaseId()
             ));
     }
@@ -297,7 +410,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                             .content(getJsonString(body)))
             .andExpect(status().isForbidden())
             .andExpect(jsonPath(RESPONSE_ERROR_KEY, is(ERROR_403)))
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
                 SERVICE_NAME_CCD_DATA,
@@ -325,29 +437,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     }
 
     @Test
-    void shouldFailToUploadDocumentEmptyFile() throws Exception {
-
-        MockMultipartFile jsonFile1 =
-            new MockMultipartFile("name", null,
-                                  null, new byte[0]);
-
-        mockMvc.perform(MockMvcRequestBuilders.multipart(MAIN_URL)
-                            .file(jsonFile1)
-                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
-                            .param(CLASSIFICATION, CLASSIFICATION_VALUE)
-                            .param(CASE_TYPE_ID, CASE_TYPE_ID_VALUE)
-                            .param(JURISDICTION_ID, JURISDICTION_ID_VALUE)
-                            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
-            .andExpect(status().isInternalServerError())
-
-            .andExpect(hasGeneratedLogAudit(
-                AuditOperationType.UPLOAD_DOCUMENTS,
-                SERVICE_NAME_XUI_WEBAPP,
-                null,
-                null));
-    }
-
-    @Test
     void shouldBeForbiddenGetDocumentByDocumentIdWithNoPermissions() throws Exception {
         StoredDocumentHalResource storedDocumentResource = getStoredDocumentResource();
 
@@ -359,11 +448,22 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         mockMvc.perform(get(MAIN_URL + "/" +  DOCUMENT_ID)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isForbidden())
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
                 SERVICE_NAME_XUI_WEBAPP,
                 documentIds,
+                null));
+    }
+
+    @Test
+    void testShouldRaiseBadRequestWhenGetDocumentByDocumentIdWithInvalidUUID() throws Exception {
+        mockMvc.perform(get(MAIN_URL + "/" + INVALID_DOCUMENT_ID)
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+            .andExpect(status().isBadRequest())
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                List.of(INVALID_DOCUMENT_ID),
                 null));
     }
 
@@ -381,7 +481,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + "/binary")
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isForbidden())
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
                 SERVICE_NAME_XUI_WEBAPP,
@@ -404,7 +503,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         mockMvc.perform(delete(MAIN_URL + "/" + random)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isNotFound())
-
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
                 SERVICE_NAME_XUI_WEBAPP,
@@ -412,6 +510,27 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                 null));
     }
 
+    @Test
+    void testShouldRaiseBadRequestWhenCallToGenerateHashCodeWithInvalidUUID() throws Exception {
+        mockMvc.perform(get(MAIN_URL + "/" + INVALID_DOCUMENT_ID + "/token")
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+            .andExpect(status().isBadRequest())
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.GENERATE_HASH_CODE,
+                SERVICE_NAME_XUI_WEBAPP,
+                List.of(INVALID_DOCUMENT_ID),
+                null));
+    }
+
+    private String getTenMinuteTtl() {
+        final String timestampPattern = "yyyy-MM-dd'T'HH:mm:ssZ";
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(timestampPattern, Locale.ENGLISH)
+            .withZone(ZoneOffset.UTC);
+
+        final Instant now = Instant.now(Clock.systemUTC());
+
+        return formatter.format(now.plusSeconds(600));
+    }
 
     private StoredDocumentHalResource getStoredDocumentResource() {
 
@@ -465,6 +584,70 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         links.self = self;
         links.binary = binary;
         return links;
+    }
+
+    @SuppressWarnings("unused")
+    private static Stream<Arguments> provideDocumentUploadParameters() {
+        final String fileContent = "Some content";
+
+        return Stream.of(
+            Arguments.of(
+                null,
+                CLASSIFICATION_VALUE,
+                CASE_TYPE_ID_VALUE,
+                JURISDICTION_ID_VALUE,
+                "Provide some file to be uploaded"
+            ),
+            Arguments.of(
+                fileContent,
+                "GUARDED",
+                CASE_TYPE_ID_VALUE,
+                JURISDICTION_ID_VALUE,
+                "The Security Classification is not valid"
+            ),
+            Arguments.of(
+                fileContent,
+                "GUARDED@&%",
+                CASE_TYPE_ID_VALUE,
+                JURISDICTION_ID_VALUE,
+                "The Security Classification is not valid"
+            ),
+            Arguments.of(
+                fileContent,
+                null,
+                CASE_TYPE_ID_VALUE,
+                JURISDICTION_ID_VALUE,
+                "Please provide Classification"
+            ),
+            Arguments.of(
+                fileContent,
+                CLASSIFICATION_VALUE,
+                "BEFTA_CASETYPE_2&&&&&&&&&",
+                JURISDICTION_ID_VALUE,
+                "The Case Type ID is not valid"
+            ),
+            Arguments.of(
+                fileContent,
+                CLASSIFICATION_VALUE,
+                null,
+                JURISDICTION_ID_VALUE,
+                "Provide the Case Type ID"
+            ),
+            Arguments.of(
+                fileContent,
+                CLASSIFICATION_VALUE,
+                CASE_TYPE_ID_VALUE,
+                "BEFTA@JURISDICTION_2$$$$",
+                "The Jurisdiction ID is not valid"
+            ),
+            Arguments.of(
+                fileContent,
+                CLASSIFICATION_VALUE,
+                CASE_TYPE_ID_VALUE,
+                null,
+                "Provide the Jurisdiction ID"
+            )
+        );
     }
 
 }

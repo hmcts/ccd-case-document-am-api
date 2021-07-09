@@ -49,45 +49,14 @@ public class CaseDocumentControllerAdvice {
         );
     }
 
-    @ExceptionHandler(BadRequestException.class)
-    protected ResponseEntity<Object> handleBadRequestException(BadRequestException ex) {
-        return errorDetailsResponseEntity(ex, BAD_REQUEST,
-                                          ErrorConstants.BAD_REQUEST.getErrorCode(),
-                                          ErrorConstants.BAD_REQUEST.getErrorMessage()
-        );
-    }
-
-    @ExceptionHandler(RequiredFieldMissingException.class)
-    protected ResponseEntity<Object> handleRequiredFieldMissingException(RequiredFieldMissingException exception) {
-        return errorDetailsResponseEntity(exception, BAD_REQUEST,
-            ErrorConstants.BAD_REQUEST.getErrorCode(), ErrorConstants.BAD_REQUEST.getErrorMessage());
-    }
-
-    @ExceptionHandler(InvalidRequest.class)
-    public ResponseEntity<Object> customValidationError(InvalidRequest ex) {
-        return errorDetailsResponseEntity(ex, BAD_REQUEST,
-            ErrorConstants.BAD_REQUEST.getErrorCode(), ErrorConstants.BAD_REQUEST.getErrorMessage());
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    protected ResponseEntity<Object> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
-        return errorDetailsResponseEntity(exception, BAD_REQUEST,
-            ErrorConstants.BAD_REQUEST.getErrorCode(), ErrorConstants.BAD_REQUEST.getErrorMessage());
-    }
-
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    protected ResponseEntity<Object> handleMissingRequestParameterException(
-        MissingServletRequestParameterException exception) {
-        return errorDetailsResponseEntity(exception,
-                                          BAD_REQUEST,
-                                          ErrorConstants.BAD_REQUEST.getErrorCode(),
-                                          ErrorConstants.BAD_REQUEST.getErrorMessage()
-        );
-    }
-
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    protected ResponseEntity<Object> handleMethodArgumentTypeMismatchException(
-        MethodArgumentTypeMismatchException exception) {
+    @ExceptionHandler({BadRequestException.class,
+        RequiredFieldMissingException.class,
+        InvalidRequest.class,
+        MethodArgumentNotValidException.class,
+        MissingServletRequestParameterException.class,
+        MethodArgumentTypeMismatchException.class,
+        HttpMessageConversionException.class})
+    protected ResponseEntity<Object> handleBadRequestException(final Exception exception) {
         return errorDetailsResponseEntity(
             exception,
             BAD_REQUEST,
@@ -102,12 +71,6 @@ public class CaseDocumentControllerAdvice {
             ErrorConstants.NOT_FOUND.getErrorCode(), ErrorConstants.NOT_FOUND.getErrorMessage());
     }
 
-    @ExceptionHandler(HttpMessageConversionException.class)
-    protected ResponseEntity<Object> handleHttpMessageConversionException(HttpMessageConversionException exception) {
-        return errorDetailsResponseEntity(exception, BAD_REQUEST,
-            ErrorConstants.BAD_REQUEST.getErrorCode(), ErrorConstants.BAD_REQUEST.getErrorMessage());
-    }
-
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<Object> handleUnknownException(Exception exception) {
         return errorDetailsResponseEntity(exception,
@@ -119,17 +82,18 @@ public class CaseDocumentControllerAdvice {
         return new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS", Locale.ENGLISH).format(new Date());
     }
 
-    private ResponseEntity<Object> errorDetailsResponseEntity(Exception ex, HttpStatus httpStatus, int errorCode,
-                                                              String errorMsg) {
-
+    private ResponseEntity<Object> errorDetailsResponseEntity(final Exception ex,
+                                                              final HttpStatus httpStatus,
+                                                              final int errorCode,
+                                                              final String errorMsg) {
         logger.error(LOG_STRING, ex);
-        ErrorResponse errorDetails = ErrorResponse.builder()
+        final ErrorResponse errorDetails = ErrorResponse.builder()
             .errorCode(errorCode)
             .errorMessage(errorMsg)
             .errorDescription(ex.getLocalizedMessage())
             .timeStamp(getTimeStamp())
             .build();
-        return new ResponseEntity<>(
-            errorDetails, httpStatus);
+
+        return new ResponseEntity<>(errorDetails, httpStatus);
     }
 }

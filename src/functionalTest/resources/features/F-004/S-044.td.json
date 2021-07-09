@@ -30,7 +30,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "Required request parameter 'jurisdictionId' for method parameter type String is not present"
+      "errorDescription": "Provide the Jurisdiction ID"
     }
   }
 }

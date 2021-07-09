@@ -2,6 +2,9 @@ package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -18,7 +21,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
@@ -52,8 +54,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -140,7 +144,7 @@ class DocumentManagementServiceImplTest {
     @Test
     void getDocumentMetadata_ServiceException() {
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
-        Mockito.when(restTemplateMock.exchange(
+        when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID,
             HttpMethod.GET, requestEntityGlobal,
             StoredDocumentHalResource.class))
@@ -173,7 +177,7 @@ class DocumentManagementServiceImplTest {
                                                                                             new HttpHeaders(),
                                                                                             null,
                                                                                             null);
-        Mockito.when(restTemplateMock.exchange(
+        when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID,
             HttpMethod.GET, requestEntityGlobal,
             StoredDocumentHalResource.class))
@@ -191,7 +195,7 @@ class DocumentManagementServiceImplTest {
                                                                                             new HttpHeaders(),
                                                                                             null,
                                                                                             null);
-        Mockito.when(restTemplateMock.exchange(
+        when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID,
             HttpMethod.GET, requestEntityGlobal,
             StoredDocumentHalResource.class))
@@ -209,7 +213,7 @@ class DocumentManagementServiceImplTest {
                                                                                             new HttpHeaders(),
                                                                                             null,
                                                                                             null);
-        Mockito.when(restTemplateMock.exchange(
+        when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID,
             HttpMethod.GET, requestEntityGlobal,
             StoredDocumentHalResource.class))
@@ -222,7 +226,7 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void getDocumentMetadata_Throws_HttpClientErrorException_ServiceException() {
-        Mockito.when(restTemplateMock.exchange(
+        when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID,
             HttpMethod.GET, requestEntityGlobal,
             StoredDocumentHalResource.class))
@@ -260,7 +264,7 @@ class DocumentManagementServiceImplTest {
         headers.add(DATA_SOURCE, "source");
         headers.add(CONTENT_TYPE, "type");
 
-        Mockito.when(restTemplateMock.exchange(
+        when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID + "/binary",
             HttpMethod.GET,
             requestEntityGlobal,
@@ -284,7 +288,7 @@ class DocumentManagementServiceImplTest {
         headers.add(CONTENT_TYPE, "type");
         headers.add(CONTENT_LENGTH, "length");
 
-        Mockito.when(restTemplateMock.exchange(
+        when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID + "/binary",
             HttpMethod.GET,
             requestEntityGlobal,
@@ -306,7 +310,7 @@ class DocumentManagementServiceImplTest {
     @Test
     void getDocumentBinaryContent_Try_ResponseNotOK() {
         ByteArrayResource byteArrayResource = mock(ByteArrayResource.class);
-        Mockito.when(restTemplateMock.exchange(
+        when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID + "/binary",
             HttpMethod.GET, requestEntityGlobal, ByteArrayResource.class))
                .thenReturn(new ResponseEntity<ByteArrayResource>(byteArrayResource, HttpStatus.BAD_REQUEST));
@@ -365,7 +369,7 @@ class DocumentManagementServiceImplTest {
     }
 
     private void mockitoWhenRestExchangeByteArrayThenThrow(HttpClientErrorException httpClientErrorException) {
-        Mockito.when(restTemplateMock.exchange(
+        when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID + "/binary",
             HttpMethod.GET, requestEntityGlobal,
             ByteArrayResource.class))
@@ -374,7 +378,7 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void getDocumentBinaryContent_Throws_HttpClientErrorException_ServiceException() {
-        Mockito.when(restTemplateMock.exchange(
+        when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID + "/binary",
             HttpMethod.GET, requestEntityGlobal,
             ByteArrayResource.class))
@@ -464,7 +468,7 @@ class DocumentManagementServiceImplTest {
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         List<Permission> permissionsList = new ArrayList<>();
         permissionsList.add(Permission.READ);
-        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(), any(UUID.class)))
+        when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(), any(UUID.class)))
                .thenReturn(null);
 
         assertThrows(Exception.class, () -> {
@@ -506,7 +510,7 @@ class DocumentManagementServiceImplTest {
         List<Permission> permissionsList = new ArrayList<>();
         DocumentPermissions doc;
         doc = DocumentPermissions.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList).build();
-        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(), any(UUID.class)))
+        when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(), any(UUID.class)))
                .thenReturn(Optional.ofNullable(doc));
 
         assertThrows(ForbiddenException.class, () -> sut.checkUserPermission(responseEntity,
@@ -531,7 +535,7 @@ class DocumentManagementServiceImplTest {
         doc =
             DocumentPermissions.builder().id("40000a2b-00ce-00eb-0068-2d00a700be9c").permissions(permissionsList)
                                .build();
-        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(), any(UUID.class)))
+        when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(), any(UUID.class)))
                .thenReturn(Optional.ofNullable(doc));
 
         assertThrows(ForbiddenException.class, () -> sut.checkUserPermission(responseEntity,
@@ -546,7 +550,7 @@ class DocumentManagementServiceImplTest {
 
     private void mockitoWhenRestExchangeThenThrow(StoredDocumentHalResource storedDocumentHalResource,
                                                   HttpStatus httpStatus) {
-        Mockito.when(restTemplateMock.exchange(
+        when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID,
             HttpMethod.GET, requestEntityGlobal,
             StoredDocumentHalResource.class))
@@ -704,7 +708,7 @@ class DocumentManagementServiceImplTest {
         storedDocumentHalResource.setMetadata(myMetadata);
         mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
 
-        Mockito.when(restTemplateMock.exchange(
+        when(restTemplateMock.exchange(
             anyString(),
             any(HttpMethod.class),
             any(HttpEntity.class),
@@ -741,7 +745,7 @@ class DocumentManagementServiceImplTest {
         storedDocumentHalResource.setMetadata(myMetadata);
         mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
 
-        Mockito.when(restTemplateMock.exchange(
+        when(restTemplateMock.exchange(
             anyString(),
             any(HttpMethod.class),
             any(HttpEntity.class),
@@ -778,7 +782,7 @@ class DocumentManagementServiceImplTest {
         storedDocumentHalResource.setMetadata(myMetadata);
         mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
 
-        Mockito.when(restTemplateMock.exchange(
+        when(restTemplateMock.exchange(
             anyString(),
             any(HttpMethod.class),
             any(HttpEntity.class),
@@ -816,7 +820,7 @@ class DocumentManagementServiceImplTest {
         storedDocumentHalResource.setMetadata(myMetadata);
         mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
 
-        Mockito.when(restTemplateMock.exchange(
+        when(restTemplateMock.exchange(
             anyString(),
             any(HttpMethod.class),
             any(HttpEntity.class),
@@ -853,7 +857,7 @@ class DocumentManagementServiceImplTest {
         storedDocumentHalResource.setMetadata(myMetadata);
         mockitoWhenRestExchangeThenThrow(storedDocumentHalResource, HttpStatus.OK);
 
-        Mockito.when(restTemplateMock.exchange(
+        when(restTemplateMock.exchange(
             anyString(),
             any(HttpMethod.class),
             any(HttpEntity.class),
@@ -923,80 +927,29 @@ class DocumentManagementServiceImplTest {
 
     }
 
-    @Test
-    @SuppressWarnings("unchecked")
-    void uploadDocuments_Throw_ServiceException() {
+    @ParameterizedTest
+    @MethodSource("provideDocumentUploadParameters")
+    void uploadDocuments_Throw_ServiceException(final HttpStatus status,
+                                                final Class<Throwable> clazz) {
 
-        Mockito.when(restTemplateMock.postForObject(anyString(), any(HttpEntity.class), eq(DmUploadResponse.class)))
-            .thenThrow(HttpClientErrorException.create(
-                HttpStatus.BAD_GATEWAY, "woopsie", new HttpHeaders(), null, null));
+        when(restTemplateMock.postForObject(anyString(), any(HttpEntity.class), eq(DmUploadResponse.class)))
+            .thenThrow(HttpClientErrorException.create(status, "woopsie", new HttpHeaders(), null, null));
 
-        List<MultipartFile> files = new ArrayList<>();
-
-        assertThrows(ServiceException.class, () -> {
-            sut.uploadDocuments(
-                files,
-                "classification",
-                BEFTA_CASETYPE_2,
-                BEFTA_JURISDICTION_2);
-        });
+        assertThrows(clazz, () -> sut.uploadDocuments(emptyList(),
+                                                      "classification",
+                                                      BEFTA_CASETYPE_2,
+                                                      BEFTA_JURISDICTION_2
+        ));
     }
 
-    @Test
-    @SuppressWarnings("unchecked")
-    void uploadDocuments_Throw_ForbiddenException() {
-
-        Mockito.when(restTemplateMock.postForObject(anyString(), any(HttpEntity.class), eq(DmUploadResponse.class)))
-               .thenThrow(HttpClientErrorException.create(
-                   HttpStatus.FORBIDDEN, "woopsie", new HttpHeaders(), null, null));
-
-        List<MultipartFile> files = new ArrayList<>();
-
-        assertThrows(ForbiddenException.class, () -> {
-            sut.uploadDocuments(
-                files,
-                "classification",
-                BEFTA_CASETYPE_2,
-                BEFTA_JURISDICTION_2);
-        });
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    void uploadDocuments_Throw_BadRequestException() {
-
-        Mockito.when(restTemplateMock.postForObject(anyString(), any(HttpEntity.class), eq(DmUploadResponse.class)))
-               .thenThrow(HttpClientErrorException.create(
-                   HttpStatus.BAD_REQUEST, "woopsie", new HttpHeaders(), null, null));
-
-        List<MultipartFile> files = new ArrayList<>();
-
-        assertThrows(BadRequestException.class, () -> {
-            sut.uploadDocuments(
-                files,
-                "classification",
-                BEFTA_CASETYPE_2,
-                BEFTA_JURISDICTION_2);
-        });
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    void uploadDocuments_Throw_NotFoundException() {
-
-        Mockito.when(restTemplateMock.postForObject(anyString(), any(HttpEntity.class), eq(DmUploadResponse.class)))
-               .thenThrow(HttpClientErrorException.create(
-                   HttpStatus.NOT_FOUND, "woopsie", new HttpHeaders(), null, null));
-
-        List<MultipartFile> files = new ArrayList<>();
-
-        assertThrows(ResourceNotFoundException.class, () -> {
-            sut.uploadDocuments(
-                files,
-                "classification",
-                BEFTA_CASETYPE_2,
-                BEFTA_JURISDICTION_2);
-        });
+    @SuppressWarnings("unused")
+    private static Stream<Arguments> provideDocumentUploadParameters() {
+        return Stream.of(
+            Arguments.of(HttpStatus.BAD_GATEWAY, ServiceException.class),
+            Arguments.of(HttpStatus.FORBIDDEN, ForbiddenException.class),
+            Arguments.of(HttpStatus.BAD_REQUEST, BadRequestException.class),
+            Arguments.of(HttpStatus.NOT_FOUND, ResourceNotFoundException.class)
+        );
     }
 
     private String getEffectiveTTL() {
@@ -1297,7 +1250,7 @@ class DocumentManagementServiceImplTest {
         permissionsList.add(Permission.READ);
         DocumentPermissions doc;
         doc = DocumentPermissions.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList).build();
-        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(), any(UUID.class)))
+        when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(), any(UUID.class)))
                .thenReturn(Optional.of(doc));
 
         mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("!!VCB12", "", ""),
@@ -1318,7 +1271,7 @@ class DocumentManagementServiceImplTest {
         permissionsList.add(Permission.READ);
         DocumentPermissions doc;
         doc = DocumentPermissions.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList).build();
-        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),
+        when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),
                                                                       any(UUID.class))).thenReturn(Optional.of(doc));
         mockitoWhenRestExchangeThenThrow(
             initialiseMetaDataMap(null, "BEFTA_CASETYPE_2_2", "BEFTA_JURISDICTION_2"),
@@ -1334,7 +1287,7 @@ class DocumentManagementServiceImplTest {
         permissionsList.add(Permission.READ);
         DocumentPermissions doc;
         doc = DocumentPermissions.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList).build();
-        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),
+        when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(),
                                                                       any(UUID.class))).thenReturn(Optional.of(doc));
         mockitoWhenRestExchangeThenThrow(
             initialiseMetaDataMap(null, "BEFTA_CASETYPE_2_2", "BEFTA_JURISDICTION_2"),
@@ -1351,7 +1304,7 @@ class DocumentManagementServiceImplTest {
         permissionsList.add(Permission.READ);
         DocumentPermissions doc;
         doc = DocumentPermissions.builder().id(MATCHED_DOCUMENT_ID).permissions(permissionsList).build();
-        Mockito.when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(), any(UUID.class)))
+        when(caseDataStoreServiceMock.getCaseDocumentMetadata(anyString(), any(UUID.class)))
                .thenReturn(Optional.of(doc));
 
         mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("1234567890123456", "", ""),
