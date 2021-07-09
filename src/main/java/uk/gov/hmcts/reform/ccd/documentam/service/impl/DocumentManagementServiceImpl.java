@@ -203,29 +203,23 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             Optional<StoredDocumentHalResource> documentMetadata =
                 getDocumentMetadata(UUID.fromString(documentHashToken.getId()));
 
-            if (documentHashToken.getHashToken() != null) {
-                if (documentMetadata.isEmpty()) {
-                    throw new ResourceNotFoundException(String.format("Meta data does not exist for documentId: %s",
-                                                                      documentHashToken.getId()));
-                }
-                String hashcodeFromStoredDocument =
-                    generateHashToken(UUID.fromString(documentHashToken.getId()), documentMetadata.get());
-                if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
-                    throw new ForbiddenException(UUID.fromString(documentHashToken.getId()));
-                }
-            // Token is not provided by CCD
-            } else if (hashCheckEnabled) {
-                throw new ForbiddenException(
-                    String.format("Hash check is enabled but hashToken wasn't provided for the document:%s",
-                                  documentHashToken.getId()));
-            } else {
-                // document metadata does not exist and document is not a moving case
-                if (documentMetadata.isPresent()
-                    && !documentMetadata.get().getMetadata().isEmpty()
-                    && !isDocumentMovingCases(documentMetadata.get().getMetadata().get(CASE_TYPE_ID))) {
-                    throw new BadRequestException(String.format(
-                        "Document metadata exists but the case type is not a moving case type: %s",
-                        UUID.fromString(documentHashToken.getId())));
+            if (calculateAndCheckHashTokenValidity(documentHashToken, documentMetadata)) {
+                if (hashCheckEnabled) {
+                    throw new ForbiddenException(
+                        String.format(
+                            "Hash check is enabled but hashToken wasn't provided for the document:%s",
+                            documentHashToken.getId()
+                        ));
+                } else {
+                    // document metadata does not exist and document is not a moving case
+                    if (documentMetadata.isPresent()
+                        && !documentMetadata.get().getMetadata().isEmpty()
+                        && !isDocumentMovingCases(documentMetadata.get().getMetadata().get(CASE_TYPE_ID))) {
+                        throw new BadRequestException(String.format(
+                            "Document metadata exists but the case type is not a moving case type: %s",
+                            UUID.fromString(documentHashToken.getId())
+                        ));
+                    }
                 }
             }
 
@@ -251,6 +245,24 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
 
         return new UpdateDocumentsCommand(NULL_TTL, documentsList);
+    }
+
+    private boolean calculateAndCheckHashTokenValidity(DocumentHashToken documentHashToken,
+                                                       Optional<StoredDocumentHalResource> documentMetadata) {
+        if (documentHashToken.getHashToken() != null) {
+            if (documentMetadata.isEmpty()) {
+                throw new ResourceNotFoundException(String.format("Meta data does not exist for documentId: %s",
+                                                                  documentHashToken.getId()));
+            }
+            String hashcodeFromStoredDocument =
+                generateHashToken(UUID.fromString(documentHashToken.getId()), documentMetadata.get());
+            if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
+                throw new ForbiddenException(UUID.fromString(documentHashToken.getId()));
+            }
+            // Token is not provided by CCD
+            return false;
+        }
+        return true;
     }
 
     private boolean isDocumentMovingCases(String documentCaseTypeId) {

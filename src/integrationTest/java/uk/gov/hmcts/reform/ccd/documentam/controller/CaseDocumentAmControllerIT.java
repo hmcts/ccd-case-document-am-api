@@ -66,9 +66,13 @@ public class CaseDocumentAmControllerIT extends BaseTest {
 
     public static final String RESPONSE_RESULT_KEY = "Result";
     public static final String RESPONSE_ERROR_KEY = "errorCode";
+    public static final String RESPONSE_ERROR_DESCRIPTION_KEY = "errorDescription";
 
     public static final String SUCCESS = "Success";
     public static final int ERROR_403 = 403;
+    public static final String PATCH_ERROR_DESCRIPTION_NOT_FOUND = "Meta data does not exist for documentId: ";
+    public static final String PATCH_ERROR_DESCRIPTION_BAD_REQUEST = "Document metadata exists but the "
+        + "case type is not a moving case type: ";
 
     private static final String MAIN_URL = "/cases/documents";
     private static final String ATTACH_TO_CASE_URL = "/attachToCase";
@@ -206,7 +210,8 @@ public class CaseDocumentAmControllerIT extends BaseTest {
 
         Date time = Date.from(Instant.now());
 
-        StoredDocumentHalResource storedDocumentResource = getStoredDocumentResourceToUpdatePatch(time);
+        StoredDocumentHalResource storedDocumentResource =
+            getStoredDocumentResourceToUpdatePatch(time, CASE_TYPE_ID_MOVING_CASE_VALUE);
 
         stubGetDocumentMetaData(storedDocumentResource);
         stubPatchDocument(storedDocumentResource);
@@ -244,7 +249,8 @@ public class CaseDocumentAmControllerIT extends BaseTest {
 
         Date time = Date.from(Instant.now());
 
-        StoredDocumentHalResource storedDocumentResource = getStoredDocumentResourceToUpdatePatch(time);
+        StoredDocumentHalResource storedDocumentResource =
+            getStoredDocumentResourceToUpdatePatch(time, CASE_TYPE_ID_MOVING_CASE_VALUE);
 
         stubGetDocumentMetaData(storedDocumentResource);
         stubPatchDocumentMetaData(storedDocumentResource);
@@ -268,25 +274,20 @@ public class CaseDocumentAmControllerIT extends BaseTest {
 
     @Test
     void shouldNotSuccessfullyPatchMetaDataWhenDocumentIsNotMovingCases() throws Exception {
-        String hashToken = ApplicationUtils
-            .generateHashCode(salt.concat(DOCUMENT_ID.toString()
-                                              .concat(CASE_ID_VALUE)
-                                              .concat(JURISDICTION_ID_VALUE)
-                                              .concat(CASE_TYPE_ID_VALUE)));
-
         List<DocumentHashToken> documentHashTokens = new ArrayList<>();
-        documentHashTokens.add(new DocumentHashToken(DOCUMENT_ID.toString(), hashToken));
+        documentHashTokens.add(new DocumentHashToken(DOCUMENT_ID.toString(), null));
         CaseDocumentsMetadata body = new CaseDocumentsMetadata();
         body.setDocumentHashTokens(documentHashTokens);
         body.setCaseId(CASE_ID_VALUE);
-        body.setCaseTypeId(CASE_TYPE_ID);
+        body.setCaseTypeId(CASE_TYPE_ID_VALUE);
         body.setJurisdictionId(JURISDICTION_ID_VALUE);
 
         Date time = Date.from(Instant.now());
 
-        StoredDocumentHalResource storedDocumentResource = getStoredDocumentResourceToUpdatePatch(time);
+        StoredDocumentHalResource storedDocumentResource =
+            getStoredDocumentResourceToUpdatePatch(time, CASE_TYPE_ID_VALUE);
         Map<String, String> updatedMetaData = storedDocumentResource.getMetadata();
-        updatedMetaData.put(CASE_TYPE_ID, CASE_TYPE_ID_MOVING_CASE_VALUE);
+        updatedMetaData.put(CASE_TYPE_ID, CASE_TYPE_ID_VALUE);
         storedDocumentResource.setMetadata(updatedMetaData);
 
         stubGetDocumentMetaData(storedDocumentResource);
@@ -299,7 +300,54 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                             .headers(createHttpHeaders(SERVICE_NAME_CCD_DATA))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(getJsonString(body)))
-            .andExpect(status().isForbidden())
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath(RESPONSE_ERROR_DESCRIPTION_KEY,
+                                is(PATCH_ERROR_DESCRIPTION_BAD_REQUEST + DOCUMENT_ID)))
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
+                SERVICE_NAME_CCD_DATA,
+                documentIds,
+                body.getCaseId()
+            ));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenMetaDataIsEmptyAndPatchingMetaData() throws Exception {
+        String hashToken = ApplicationUtils
+            .generateHashCode(salt.concat(DOCUMENT_ID.toString()
+                                              .concat(CASE_ID_VALUE)
+                                              .concat(JURISDICTION_ID_VALUE)
+                                              .concat(CASE_TYPE_ID_VALUE)));
+
+        List<DocumentHashToken> documentHashTokens = new ArrayList<>();
+        documentHashTokens.add(new DocumentHashToken(DOCUMENT_ID_FROM_LINK, hashToken));
+        CaseDocumentsMetadata body = new CaseDocumentsMetadata();
+        body.setDocumentHashTokens(documentHashTokens);
+        body.setCaseId(CASE_ID_VALUE);
+        body.setCaseTypeId(CASE_TYPE_ID_VALUE);
+        body.setJurisdictionId(JURISDICTION_ID_VALUE);
+
+        Date time = Date.from(Instant.now());
+
+        StoredDocumentHalResource storedDocumentResource =
+            getStoredDocumentResourceToUpdatePatch(time, CASE_TYPE_ID_VALUE);
+        Map<String, String> updatedMetaData = storedDocumentResource.getMetadata();
+        updatedMetaData.put(CASE_TYPE_ID, CASE_TYPE_ID_VALUE);
+        storedDocumentResource.setMetadata(updatedMetaData);
+
+        stubGetDocumentMetaData(storedDocumentResource);
+        stubPatchDocumentMetaData(storedDocumentResource);
+
+        List<String> documentIds = new ArrayList<>();
+        documentIds.add(DOCUMENT_ID_FROM_LINK);
+
+        mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
+                            .headers(createHttpHeaders(SERVICE_NAME_CCD_DATA))
+                            .contentType(MediaType.APPLICATION_JSON_VALUE)
+                            .content(getJsonString(body)))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath(RESPONSE_ERROR_DESCRIPTION_KEY,
+                                is(PATCH_ERROR_DESCRIPTION_NOT_FOUND + DOCUMENT_ID_FROM_LINK)))
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
                 SERVICE_NAME_CCD_DATA,
@@ -320,7 +368,8 @@ public class CaseDocumentAmControllerIT extends BaseTest {
 
         Date time = Date.from(Instant.now());
 
-        StoredDocumentHalResource storedDocumentResource = getStoredDocumentResourceToUpdatePatch(time);
+        StoredDocumentHalResource storedDocumentResource =
+            getStoredDocumentResourceToUpdatePatch(time, CASE_TYPE_ID_MOVING_CASE_VALUE);
 
         stubGetDocumentMetaData(storedDocumentResource);
         stubPatchDocumentMetaData(storedDocumentResource);
@@ -464,12 +513,12 @@ public class CaseDocumentAmControllerIT extends BaseTest {
         return storedDocumentHalResource;
     }
 
-    private StoredDocumentHalResource getStoredDocumentResourceToUpdatePatch(Date time) {
+    private StoredDocumentHalResource getStoredDocumentResourceToUpdatePatch(Date time, String caseTypeId) {
         Map<String, String> metaData = new HashMap<>();
         metaData.put("size", "10");
         metaData.put("createdBy", USER_ID);
         metaData.put(CASE_ID, CASE_ID_VALUE);
-        metaData.put(CASE_TYPE_ID, CASE_TYPE_ID_MOVING_CASE_VALUE);
+        metaData.put(CASE_TYPE_ID, caseTypeId);
         metaData.put(JURISDICTION_ID, JURISDICTION_ID_VALUE);
         metaData.put(CLASSIFICATION, CLASSIFICATION_VALUE);
         metaData.put("metadata", "");
