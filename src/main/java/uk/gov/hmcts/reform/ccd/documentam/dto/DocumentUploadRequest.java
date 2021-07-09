@@ -3,8 +3,7 @@ package uk.gov.hmcts.reform.ccd.documentam.dto;
 import io.swagger.annotations.ApiParam;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
-import uk.gov.hmcts.reform.ccd.documentam.dto.validation.EnumValue;
-import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
+import uk.gov.hmcts.reform.ccd.documentam.dto.validation.ClassificationValue;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -23,7 +22,7 @@ public class DocumentUploadRequest {
 
     @ApiParam(value = "Security classification for the file", required = true)
     @NotNull(message = "Please provide Classification")
-    @EnumValue(enumClass = Classification.class)
+    @ClassificationValue
     private final String classification;
 
     @ApiParam(value = "CaseType identifier for the case document.", required = true)

@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.ccd.documentam.dto.validation;
 
+import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
+
 import javax.validation.Constraint;
 import javax.validation.Payload;
 import java.lang.annotation.Documented;
@@ -17,9 +19,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE})
 @Retention(RUNTIME)
 @Documented
-@Constraint(validatedBy = EnumValueValidator.class)
-public @interface EnumValue {
-    Class<? extends Enum<?>> enumClass();
+@Constraint(validatedBy = ClassificationValueValidator.class)
+public @interface ClassificationValue {
+    Class<Classification> enumClass() default Classification.class;
     String message() default "The Security Classification is not valid";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};

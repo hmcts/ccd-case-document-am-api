@@ -7,11 +7,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class EnumValueValidator implements ConstraintValidator<EnumValue, CharSequence> {
+public class ClassificationValueValidator implements ConstraintValidator<ClassificationValue, CharSequence> {
     private Set<String> acceptedValues;
 
     @Override
-    public void initialize(EnumValue constraintAnnotation) {
+    public void initialize(ClassificationValue constraintAnnotation) {
         acceptedValues = Stream.of(constraintAnnotation.enumClass().getEnumConstants())
             .map(Enum::name)
             .collect(Collectors.toUnmodifiableSet());

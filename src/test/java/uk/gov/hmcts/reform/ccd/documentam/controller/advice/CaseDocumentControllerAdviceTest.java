@@ -17,12 +17,12 @@ import uk.gov.hmcts.reform.ccd.documentam.exception.RequiredFieldMissingExceptio
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.UnauthorizedException;
 
-public class CaseDocumentControllerAdviceTest {
+class CaseDocumentControllerAdviceTest {
 
     private final CaseDocumentControllerAdvice underTest = new CaseDocumentControllerAdvice();
 
     @Test
-    public void handleUnauthorizedExceptionException() {
+    void handleUnauthorizedExceptionException() {
         UnauthorizedException unauthorizedException = mock(UnauthorizedException.class);
         ResponseEntity<Object> responseEntity = underTest
             .handleUnauthorizedException(unauthorizedException);
@@ -31,7 +31,7 @@ public class CaseDocumentControllerAdviceTest {
     }
 
     @Test
-    public void handleForbiddenExceptionException() {
+    void handleForbiddenExceptionException() {
         final ForbiddenException forbiddenException = mock(ForbiddenException.class);
 
         final ResponseEntity<Object> responseEntity = underTest.handleForbiddenException(forbiddenException);
@@ -41,14 +41,14 @@ public class CaseDocumentControllerAdviceTest {
     }
 
     @Test
-    public void handleBadRequestExceptionException() {
+    void handleBadRequestExceptionException() {
         final BadRequestException badRequestException = mock(BadRequestException.class);
 
         testBadRequest(badRequestException);
     }
 
     @Test
-    public void handleMissingRequestParameterExceptionException() {
+    void handleMissingRequestParameterExceptionException() {
         final MissingServletRequestParameterException missingServletRequestParameterException =
             mock(MissingServletRequestParameterException.class);
 
@@ -56,7 +56,7 @@ public class CaseDocumentControllerAdviceTest {
     }
 
     @Test
-    public void handleMethodArgumentTypeMismatchExceptionException() {
+    void handleMethodArgumentTypeMismatchExceptionException() {
         final MethodArgumentTypeMismatchException methodArgumentTypeMismatchException =
             mock(MethodArgumentTypeMismatchException.class);
 
@@ -64,21 +64,21 @@ public class CaseDocumentControllerAdviceTest {
     }
 
     @Test
-    public void handleRequiredFieldMissingException() {
+    void handleRequiredFieldMissingException() {
         final RequiredFieldMissingException requiredFieldMissingException = mock(RequiredFieldMissingException.class);
 
         testBadRequest(requiredFieldMissingException);
     }
 
     @Test
-    public void customValidationError() {
+    void customValidationError() {
         final InvalidRequest invalidRequestException = mock(InvalidRequest.class);
 
         testBadRequest(invalidRequestException);
     }
 
     @Test
-    public void handleMethodArgumentNotValidException() {
+    void handleMethodArgumentNotValidException() {
         final MethodArgumentNotValidException methodArgumentNotValidException =
             mock(MethodArgumentNotValidException.class);
 
@@ -86,7 +86,7 @@ public class CaseDocumentControllerAdviceTest {
     }
 
     @Test
-    public void handleHttpMessageConversionException() {
+    void handleHttpMessageConversionException() {
         final HttpMessageConversionException httpMessageConversionException =
             mock(HttpMessageConversionException.class);
 
@@ -94,7 +94,7 @@ public class CaseDocumentControllerAdviceTest {
     }
 
     @Test
-    public void handleResourceNotFoundException() {
+    void handleResourceNotFoundException() {
         ResourceNotFoundException resourceNotFoundException = mock(ResourceNotFoundException.class);
         ResponseEntity<Object> responseEntity = underTest
             .handleResourceNotFoundException(resourceNotFoundException);
@@ -103,7 +103,7 @@ public class CaseDocumentControllerAdviceTest {
     }
 
     @Test
-    public void handleUnknownException() {
+    void handleUnknownException() {
         Exception exception = mock(Exception.class);
         ResponseEntity<Object> responseEntity = underTest.handleUnknownException(exception);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
