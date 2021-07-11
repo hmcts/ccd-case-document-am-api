@@ -24,15 +24,11 @@ import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
-import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -44,6 +40,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.buildUpdateDocumentCommand;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CLASSIFICATION;
@@ -270,9 +267,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
 
     @Test
     void shouldSuccessfullyPatchDocumentByDocumentId() throws Exception {
-        UpdateDocumentCommand body = new UpdateDocumentCommand();
-        String formattedTTL = getTenMinuteTtl();
-        body.setTtl(formattedTTL);
+        final UpdateDocumentCommand body = buildUpdateDocumentCommand();
 
         Date time = Date.from(Instant.now());
 
@@ -280,9 +275,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
 
         stubGetDocumentMetaData(storedDocumentResource);
         stubPatchDocument(storedDocumentResource);
-
-        List<String> documentIds = new ArrayList<>();
-        documentIds.add(DOCUMENT_ID.toString());
 
         mockMvc.perform(patch(MAIN_URL + "/" + DOCUMENT_ID)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
@@ -292,15 +284,13 @@ public class CaseDocumentAmControllerIT extends BaseTest {
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
                 SERVICE_NAME_XUI_WEBAPP,
-                documentIds,
+                List.of(DOCUMENT_ID.toString()),
                 null));
     }
 
     @Test
     void testShouldRaiseBadRequestWhenPatchDocumentByDocumentIdWithInvalidUUID() throws Exception {
-        UpdateDocumentCommand body = new UpdateDocumentCommand();
-        final String formattedTTL = getTenMinuteTtl();
-        body.setTtl(formattedTTL);
+        final UpdateDocumentCommand body = buildUpdateDocumentCommand();
 
         mockMvc.perform(patch(MAIN_URL + "/" + INVALID_DOCUMENT_ID)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
@@ -311,6 +301,21 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                 AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
                 SERVICE_NAME_XUI_WEBAPP,
                 List.of(INVALID_DOCUMENT_ID),
+                null));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "    ", "{\"ttl\":\"\"}", "{\"ttl\":\"6000\"}"})
+    void testShouldRaiseBadRequestExceptionWhenPatchDocumentWithInvalidTtl(final String payload) throws Exception {
+        mockMvc.perform(patch(MAIN_URL + "/" + DOCUMENT_ID)
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
+                            .contentType(MediaType.APPLICATION_JSON_VALUE)
+                            .content(payload))
+            .andExpect(status().isBadRequest())
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                List.of(DOCUMENT_ID.toString()),
                 null));
     }
 
@@ -522,16 +527,6 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                 null));
     }
 
-    private String getTenMinuteTtl() {
-        final String timestampPattern = "yyyy-MM-dd'T'HH:mm:ssZ";
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(timestampPattern, Locale.ENGLISH)
-            .withZone(ZoneOffset.UTC);
-
-        final Instant now = Instant.now(Clock.systemUTC());
-
-        return formatter.format(now.plusSeconds(600));
-    }
-
     private StoredDocumentHalResource getStoredDocumentResource() {
 
         Map<String, String> metaData = new HashMap<>();
@@ -603,28 +598,28 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                 "GUARDED",
                 CASE_TYPE_ID_VALUE,
                 JURISDICTION_ID_VALUE,
-                "The Security Classification is not valid"
+                "Classification is not valid"
             ),
             Arguments.of(
                 fileContent,
                 "GUARDED@&%",
                 CASE_TYPE_ID_VALUE,
                 JURISDICTION_ID_VALUE,
-                "The Security Classification is not valid"
+                "Classification is not valid"
             ),
             Arguments.of(
                 fileContent,
                 null,
                 CASE_TYPE_ID_VALUE,
                 JURISDICTION_ID_VALUE,
-                "Please provide Classification"
+                "Provide the Classification"
             ),
             Arguments.of(
                 fileContent,
                 CLASSIFICATION_VALUE,
                 "BEFTA_CASETYPE_2&&&&&&&&&",
                 JURISDICTION_ID_VALUE,
-                "The Case Type ID is not valid"
+                "Case Type ID is not valid"
             ),
             Arguments.of(
                 fileContent,
@@ -638,7 +633,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
                 CLASSIFICATION_VALUE,
                 CASE_TYPE_ID_VALUE,
                 "BEFTA@JURISDICTION_2$$$$",
-                "The Jurisdiction ID is not valid"
+                "Jurisdiction ID is not valid"
             ),
             Arguments.of(
                 fileContent,

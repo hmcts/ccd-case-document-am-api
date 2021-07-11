@@ -52,16 +52,16 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.BEFTA_CASETYPE_2;
+import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.BEFTA_JURISDICTION_2;
+import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.CASE_ID_TEST_VALUE;
+import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.MATCHED_DOCUMENT_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.UNMATCHED_DOCUMENT_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USER_PERMISSION_ERROR;
 
 public class CaseDocumentAmControllerTest {
-    private static final String MATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9c";
-    private static final String UNMATCHED_DOCUMENT_ID = "41334a2b-79ce-44eb-9168-2d49a744be9d";
-    private static final String CASE_ID = "1582550122096256";
     private static final String XUI_WEBAPP = "xui_webapp";
-    private static final String BEFTA_CASETYPE_2 = "BEFTA_CASETYPE_2";
-    private static final String BEFTA_JURISDICTION_2 = "BEFTA_JURISDICTION_2";
     private static final String VALID_RESPONSE = "Valid Response from API";
     private static final String RESPONSE_CODE = "Status code is OK";
     private static final String NO_CONTENT_RESPONSE_CODE = "Status code is No Content";
@@ -210,8 +210,9 @@ public class CaseDocumentAmControllerTest {
             )
         ));
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
-        doReturn(documentPermissions).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
+        doReturn(CASE_ID_TEST_VALUE)
+            .when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
+        doReturn(documentPermissions).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID_TEST_VALUE, getUuid());
         doThrow(ForbiddenException.class).when(documentManagementService)
             .getDocumentBinaryContent(getUuid());
         doNothing().when(documentManagementService)
@@ -236,8 +237,9 @@ public class CaseDocumentAmControllerTest {
             )
         ));
         doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(getUuid());
-        doReturn(CASE_ID).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
-        doReturn(documentPermissions).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID, getUuid());
+        doReturn(CASE_ID_TEST_VALUE)
+            .when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
+        doReturn(documentPermissions).when(caseDataStoreService).getCaseDocumentMetadata(CASE_ID_TEST_VALUE, getUuid());
         doReturn(setDocumentBinaryContent(FORBIDDEN)).when(documentManagementService)
             .getDocumentBinaryContent(getUuid());
         doThrow(ForbiddenException.class).when(documentManagementService)
@@ -325,6 +327,7 @@ public class CaseDocumentAmControllerTest {
 
         final ResponseEntity<PatchDocumentResponse> response = testee.patchDocumentByDocumentId(
             body,
+            bindingResult,
             getUuid(),
             TEST_S2S_TOKEN
         );
@@ -353,7 +356,7 @@ public class CaseDocumentAmControllerTest {
         doReturn(setDocumentMetaData()).when(documentManagementService).patchDocument(getUuid(), body);
 
         assertThatExceptionOfType(ForbiddenException.class)
-            .isThrownBy(() -> testee.patchDocumentByDocumentId(body, getUuid(), TEST_S2S_TOKEN));
+            .isThrownBy(() -> testee.patchDocumentByDocumentId(body, bindingResult, getUuid(), TEST_S2S_TOKEN));
     }
 
     @Test

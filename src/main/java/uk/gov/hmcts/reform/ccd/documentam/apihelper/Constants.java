@@ -38,9 +38,9 @@ public final class Constants {
     public static final String CASE_ID_NOT_VALID = "Case Id is not valid";
     public static final String CASE_DOCUMENT_HASH_TOKEN_INVALID = "Case document hash-token is not valid for document"
         + " Id : %s";
-    public static final String CASE_TYPE_ID_INVALID = "Case Type Id Id is not valid";
-    public static final String JURISDICTION_ID_INVALID = "Jurisdiction Id is not valid";
-    public static final String CLASSIFICATION_ID_INVALID = "Jurisdiction Id is not valid";
+    public static final String CASE_TYPE_ID_INVALID = "Case Type ID is not valid";
+    public static final String JURISDICTION_ID_INVALID = "Jurisdiction ID is not valid";
+    public static final String CLASSIFICATION_ID_INVALID = "Classification is not valid";
     public static final String EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE = "Exception occurred with operation on document "
         + "id: %s";
     public static final String EXCEPTION_ERROR_MESSAGE = "Exception occurred with operation";
@@ -51,6 +51,13 @@ public final class Constants {
     public static final String SERVICE_PERMISSION_ERROR = "Service doesn't have sufficient permission on requested "
         + "API {}";
     public static final String EXCEPTION_SERVICE_ID_NOT_AUTHORISED = "Service Id is not authorized to access API: %s ";
+
+    public static final String CASE_ID_MISSING = "Provide the Case ID";
+    public static final String CASE_TYPE_ID_MISSING = "Provide the Case Type ID";
+    public static final String JURISDICTION_ID_MISSING = "Provide the Jurisdiction ID";
+    public static final String CLASSIFICATION_MISSING = "Provide the Classification";
+
+    public static final String TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
 
     private Constants() {
     }

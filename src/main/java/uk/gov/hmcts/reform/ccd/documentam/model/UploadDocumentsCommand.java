@@ -13,6 +13,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.TIMESTAMP_FORMAT;
+
 
 @Data
 public class UploadDocumentsCommand {
@@ -34,7 +36,7 @@ public class UploadDocumentsCommand {
 
     @Getter
     @Setter
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssZ")
+    @DateTimeFormat(pattern = TIMESTAMP_FORMAT)
     private Date ttl;
 
 }

@@ -253,10 +253,16 @@ public class CaseDocumentAmController {
     public ResponseEntity<PatchDocumentResponse> patchDocumentByDocumentId(
         @ApiParam(value = "", required = true)
         @Valid @RequestBody final UpdateDocumentCommand body,
+
+        final BindingResult bindingResult,
+
         @PathVariable("documentId") final UUID documentId,
+
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
-        @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken
-    ) {
+        @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken) {
+
+        handleErrors(bindingResult);
+
         final ResponseEntity<StoredDocumentHalResource> responseEntity =
             documentManagementService.getDocumentMetadata(documentId);
 

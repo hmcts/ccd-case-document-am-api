@@ -202,7 +202,7 @@ sonarqube {
     property "sonar.pitest.reportsDirectory", "build/reports/pitest"
     // FIXME : RDM-11309
     property "sonar.exclusions",  "**/service/impl/DocumentManagementServiceImpl.java,"
-    property "sonar.coverage.exclusions", "**/configuration/*.java,**/advice/exception/*.java,**/apihelper/*.java,**/ErrorConstants.java,**/EnumValueValidator.java"
+    property "sonar.coverage.exclusions", "**/configuration/*.java,**/advice/exception/*.java,**/apihelper/*.java,**/ErrorConstants.java,**/EnumValueValidator.java,**/UpdateDocumentCommand.java"
     property "sonar.junit.reportPaths", "${project.buildDir}/test-results/junit-platform"
   }
 }

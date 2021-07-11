@@ -33,7 +33,6 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_AUT
 
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.ExcessiveImports"})
 public class WiremockFixtures {
-    public static final String MAIN_URL = "/cases/documents";
     public static final String DOCUMENTS_URL = "/documents/";
 
     public static final UUID DOCUMENT_ID = UUID.randomUUID();
@@ -132,6 +131,13 @@ public class WiremockFixtures {
                                     .withStatus(HTTP_OK)
                                     .withBody(getJsonString(response))
                                     .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
+    }
+
+    public static void stubGetGreeting() {
+        stubFor(WireMock.get(urlPathEqualTo("/greeting"))
+                    .willReturn(aResponse()
+                                    .withStatus(HTTP_OK)
+                                    .withBody("Hello World!")));
     }
 
     private static CaseDocumentMetadata getCaseDocumentMetaData(final List<Permission> permissionList) {

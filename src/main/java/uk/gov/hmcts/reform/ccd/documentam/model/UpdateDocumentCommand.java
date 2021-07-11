@@ -1,58 +1,26 @@
 package uk.gov.hmcts.reform.ccd.documentam.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.validation.Valid;
-import java.util.Objects;
+import javax.validation.constraints.NotNull;
+import java.util.Date;
 
-@Validated
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.TIMESTAMP_FORMAT;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class UpdateDocumentCommand {
-    @JsonProperty("ttl")
-    private String ttl = null;
-
     @ApiModelProperty
-    @Valid
-    public String getTtl() {
-        return ttl;
-    }
-
-    public void setTtl(String ttl) {
-        this.ttl = ttl;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        UpdateDocumentCommand updateDocumentCommand = (UpdateDocumentCommand) o;
-        return Objects.equals(this.ttl, updateDocumentCommand.ttl);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(ttl);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("class UpdateDocumentCommand {\n");
-
-        sb.append("    ttl: ").append(toIndentedString(ttl)).append("\n");
-        sb.append("}");
-        return sb.toString();
-    }
-
-    private String toIndentedString(Object o) {
-        if (o == null) {
-            return "null";
-        }
-        return o.toString().replace("\n", "\n    ");
-    }
+    @JsonProperty("ttl")
+    @NotNull(message = "Provide the TTL")
+    @JsonFormat(pattern = TIMESTAMP_FORMAT)
+    @DateTimeFormat(pattern = TIMESTAMP_FORMAT)
+    private Date ttl;
 }

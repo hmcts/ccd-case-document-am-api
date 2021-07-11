@@ -69,8 +69,6 @@ import uk.gov.hmcts.reform.ccd.documentam.util.ResponseHelper;
 @Service
 public class DocumentManagementServiceImpl implements DocumentManagementService {
 
-    private static final Date NULL_TTL = null;
-
     private final RestTemplate restTemplate;
     private final ValidationUtils validationUtils;
     private final SecurityUtils securityUtils;
@@ -227,7 +225,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             documentsList.add(documentUpdate);
         }
 
-        return new UpdateDocumentsCommand(NULL_TTL, documentsList);
+        return new UpdateDocumentsCommand(documentsList);
     }
 
     @Override
@@ -279,11 +277,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Override
     public ResponseEntity<PatchDocumentResponse> patchDocument(UUID documentId, UpdateDocumentCommand ttl) {
         ResponseEntity<PatchDocumentResponse> responseResult = new ResponseEntity<>(HttpStatus.OK);
-        if (!validationUtils.validateTTL(ttl.getTtl())) {
-            throw new BadRequestException(String.format(
-                "Incorrect date format %s",
-                ttl.getTtl()));
-        }
+
         try {
             final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(ttl, getHttpHeaders());
             String patchTTLUrl = String.format("%s/documents/%s", documentURL, documentId);

@@ -44,13 +44,9 @@ import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.nio.charset.Charset;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -72,6 +68,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.PATCH;
+import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.buildUpdateDocumentCommand;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_LENGTH;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_TYPE;
@@ -110,7 +107,6 @@ class DocumentManagementServiceImplTest {
                                                                                         new ValidationUtils());
 
     private final String documentURL = "http://localhost:4506";
-    private final String documentTTL = "600000";
     private final String salt = "AAAOA7A2AA6AAAA5";
 
     @Test
@@ -952,16 +948,9 @@ class DocumentManagementServiceImplTest {
         );
     }
 
-    private String getEffectiveTTL() {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
-        return format.format(new Timestamp(new Date().getTime() + Long.parseLong(documentTTL)));
-    }
-
     @Test
     void patchDocument_HappyPath() {
-        UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
-        String effectiveTTL = getEffectiveTTL();
-        updateDocumentCommand.setTtl(effectiveTTL);
+        final UpdateDocumentCommand updateDocumentCommand = buildUpdateDocumentCommand();
         final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand,
                                                                                  getHttpHeaders());
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
@@ -980,9 +969,7 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void patchDocument_ResourceNotFound() {
-        UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
-        String effectiveTTL = getEffectiveTTL();
-        updateDocumentCommand.setTtl(effectiveTTL);
+        final UpdateDocumentCommand updateDocumentCommand = buildUpdateDocumentCommand();
         final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand,
                                                                                  getHttpHeaders());
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
@@ -1003,9 +990,7 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void patchDocument_BadRequest() {
-        UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
-        String effectiveTTL = getEffectiveTTL();
-        updateDocumentCommand.setTtl(effectiveTTL);
+        final UpdateDocumentCommand updateDocumentCommand = buildUpdateDocumentCommand();
         final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand,
                                                                                  getHttpHeaders());
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
@@ -1027,9 +1012,7 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void patchDocument_Forbidden() {
-        UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
-        String effectiveTTL = getEffectiveTTL();
-        updateDocumentCommand.setTtl(effectiveTTL);
+        final UpdateDocumentCommand updateDocumentCommand = buildUpdateDocumentCommand();
         final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand,
                                                                                  getHttpHeaders());
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
@@ -1052,9 +1035,7 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void patchDocument_HttpClientErrorException() {
-        UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
-        String effectiveTTL = getEffectiveTTL();
-        updateDocumentCommand.setTtl(effectiveTTL);
+        final UpdateDocumentCommand updateDocumentCommand = buildUpdateDocumentCommand();
         final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand,
                                                                                  getHttpHeaders());
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
@@ -1077,9 +1058,7 @@ class DocumentManagementServiceImplTest {
 
     @Test
     void patchDocument_ServiceException() {
-        UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
-        String effectiveTTL = getEffectiveTTL();
-        updateDocumentCommand.setTtl(effectiveTTL);
+        final UpdateDocumentCommand updateDocumentCommand = buildUpdateDocumentCommand();
         final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand,
                                                                                  getHttpHeaders());
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
@@ -1107,17 +1086,6 @@ class DocumentManagementServiceImplTest {
         headers.set(USERID, "123");
         headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
-    }
-
-    @Test
-    void patchDocument_BadRequestTTL() {
-        List<String> roles = new ArrayList<>();
-        roles.add("Role");
-        UpdateDocumentCommand updateDocumentCommand = new UpdateDocumentCommand();
-        updateDocumentCommand.setTtl("600000");
-        assertThrows(BadRequestException.class, () -> {
-            sut.patchDocument(UUID.fromString(MATCHED_DOCUMENT_ID), updateDocumentCommand);
-        });
     }
 
     @Test
