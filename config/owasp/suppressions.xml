@@ -19,4 +19,8 @@
     <cve>CVE-2020-29245</cve>
   </suppress>
 
+  <suppress until="2021-07-25">
+    <cve>CVE-2021-27568</cve>
+  </suppress>
+
 </suppressions>
