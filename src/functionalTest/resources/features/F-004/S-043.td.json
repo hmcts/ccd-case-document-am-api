@@ -34,7 +34,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "The input parameter: \"BEFTA_@?$%^&_JURISDICTION_2\", does not comply with the required pattern"
+      "errorDescription": "The Jurisdiction ID is not valid"
     }
   }
 }

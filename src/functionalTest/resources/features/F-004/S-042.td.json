@@ -30,7 +30,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "Required request parameter 'caseTypeId' for method parameter type String is not present"
+      "errorDescription": "Provide the Case Type ID"
     }
   }
 }
