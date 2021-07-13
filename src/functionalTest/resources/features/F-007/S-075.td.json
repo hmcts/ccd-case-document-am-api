@@ -24,7 +24,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "The input parameter: \"${[scenarioContext][testData][request][body][jurisdictionId]}\", does not comply with the required pattern"
+      "errorDescription": "Jurisdiction ID is not valid"
     }
   }
 }
