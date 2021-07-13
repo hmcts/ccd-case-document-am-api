@@ -19,8 +19,7 @@
     <cve>CVE-2020-29245</cve>
   </suppress>
 
-  <suppress until="2021-08-23">
-    <notes>An issue was discovered in netplex json-smart-v1 through 2015-10-23 and json-smart-v2 through 2.4.</notes>
+  <suppress until="2021-07-25">
     <cve>CVE-2021-27568</cve>
   </suppress>
 
