@@ -75,19 +75,6 @@ azure:
   application-insights:
     instrumentation-key: ${ccd.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
 
-feign:
-  client:
-    config:
-      default:
-        connectTimeout: 5000
-        readTimeout: 5000
-  allow:
-    headers:
-      - authorization
-      - serviceauthorization
-      - user-roles
-      - user-id
-
 documentTtlInDays: ${DOCUMENT_TTL_IN_DAYS:7}
 
 documentStoreUrl: ${DM_STORE_BASE_URL:http://localhost:4506}
