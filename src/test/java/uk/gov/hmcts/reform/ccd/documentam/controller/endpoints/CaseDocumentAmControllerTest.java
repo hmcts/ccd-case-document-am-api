@@ -327,7 +327,6 @@ public class CaseDocumentAmControllerTest {
 
         final ResponseEntity<PatchDocumentResponse> response = testee.patchDocumentByDocumentId(
             body,
-            bindingResult,
             getUuid(),
             TEST_S2S_TOKEN
         );
@@ -356,7 +355,7 @@ public class CaseDocumentAmControllerTest {
         doReturn(setDocumentMetaData()).when(documentManagementService).patchDocument(getUuid(), body);
 
         assertThatExceptionOfType(ForbiddenException.class)
-            .isThrownBy(() -> testee.patchDocumentByDocumentId(body, bindingResult, getUuid(), TEST_S2S_TOKEN));
+            .isThrownBy(() -> testee.patchDocumentByDocumentId(body, getUuid(), TEST_S2S_TOKEN));
     }
 
     @Test
@@ -381,7 +380,7 @@ public class CaseDocumentAmControllerTest {
                 0).getId()));
 
         assertThatExceptionOfType(ForbiddenException.class)
-            .isThrownBy(() -> testee.patchMetaDataOnDocuments(body, bindingResult, TEST_S2S_TOKEN));
+            .isThrownBy(() -> testee.patchMetaDataOnDocuments(body, TEST_S2S_TOKEN));
     }
 
     @Test
@@ -403,7 +402,6 @@ public class CaseDocumentAmControllerTest {
 
         final ResponseEntity<PatchDocumentMetaDataResponse> response = testee.patchMetaDataOnDocuments(
             body,
-            bindingResult,
             TEST_S2S_TOKEN
         );
 

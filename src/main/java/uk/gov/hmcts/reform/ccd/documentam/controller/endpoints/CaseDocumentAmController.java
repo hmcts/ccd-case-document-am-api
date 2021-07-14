@@ -254,14 +254,10 @@ public class CaseDocumentAmController {
         @ApiParam(value = "", required = true)
         @Valid @RequestBody final UpdateDocumentCommand body,
 
-        final BindingResult bindingResult,
-
         @PathVariable("documentId") final UUID documentId,
 
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken) {
-
-        handleErrors(bindingResult);
 
         final ResponseEntity<StoredDocumentHalResource> responseEntity =
             documentManagementService.getDocumentMetadata(documentId);
@@ -322,12 +318,8 @@ public class CaseDocumentAmController {
         @ApiParam(value = "", required = true)
         @Valid @RequestBody final CaseDocumentsMetadata caseDocumentsMetadata,
 
-        final BindingResult bindingResult,
-
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken) {
-
-        handleErrors(bindingResult);
 
         documentManagementService.validateHashTokens(caseDocumentsMetadata.getDocumentHashTokens());
 
