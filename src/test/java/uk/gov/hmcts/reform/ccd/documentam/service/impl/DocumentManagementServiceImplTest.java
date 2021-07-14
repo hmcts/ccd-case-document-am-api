@@ -116,7 +116,7 @@ class DocumentManagementServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(sut, "documentTtl", "600000");
+        ReflectionTestUtils.setField(sut, "documentTtlInDays", 1);
         ReflectionTestUtils.setField(sut, "documentURL", "http://localhost:4506");
         ReflectionTestUtils.setField(sut, "salt", "AAAOA7A2AA6AAAA5");
 

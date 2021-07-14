@@ -252,6 +252,10 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-hateoas'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-cache'
+
+  implementation group: 'org.springframework', name: 'spring-context-support', version: '5.3.7'
+  implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.7.0'
 
   implementation group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
   implementation group: 'org.json', name: 'json', version: '20200518'
@@ -277,7 +281,6 @@ dependencies {
   implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
   implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '11.0'
   implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
-  implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.7.0'
 
   implementation group: 'javax.inject', name: 'javax.inject', version: '1'
   implementation group: 'io.springfox', name: 'springfox-boot-starter', version: versions.springfoxSwagger
