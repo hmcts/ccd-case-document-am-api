@@ -133,13 +133,6 @@ public class WiremockFixtures {
                                     .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
     }
 
-    public static void stubGetGreeting() {
-        stubFor(WireMock.get(urlPathEqualTo("/greeting"))
-                    .willReturn(aResponse()
-                                    .withStatus(HTTP_OK)
-                                    .withBody("Hello World!")));
-    }
-
     private static CaseDocumentMetadata getCaseDocumentMetaData(final List<Permission> permissionList) {
         final DocumentPermissions documentPermissions = DocumentPermissions
             .builder()
