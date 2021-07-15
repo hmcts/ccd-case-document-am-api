@@ -4,7 +4,6 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
-import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
@@ -48,5 +47,4 @@ public interface DocumentManagementService {
                                 String serviceId, Permission permission,
                                 String logMessage, String exceptionMessage);
 
-    void validateHashTokens(List<DocumentHashToken> documentList);
 }

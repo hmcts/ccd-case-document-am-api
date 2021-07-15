@@ -35,7 +35,7 @@ public final class Constants {
     public static final String INPUT_CASE_ID_PATTERN = "^[0-9]*$";
     public static final String CASE_DOCUMENT_NOT_FOUND = "Case document not found";
     public static final String CASE_DOCUMENT_ID_INVALID = "Case document Id is not valid";
-    public static final String CASE_ID_NOT_VALID = "Case Id is not valid";
+    public static final String CASE_ID_NOT_VALID = "Case ID is not valid";
     public static final String CASE_DOCUMENT_HASH_TOKEN_INVALID = "Case document hash-token is not valid for document"
         + " Id : %s";
     public static final String CASE_TYPE_ID_INVALID = "Case Type ID is not valid";

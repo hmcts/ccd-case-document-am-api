@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.UUID;
+
 @Validated
 @Data
 @Builder
@@ -15,7 +17,7 @@ import org.springframework.validation.annotation.Validated;
 public class DocumentHashToken {
 
     @JsonProperty("id")
-    private String id;
+    private UUID id;
 
     @JsonProperty("hashToken")
     private String hashToken;

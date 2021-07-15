@@ -251,10 +251,10 @@ public class CaseDocumentAmController {
         documentId = "#documentId"
     )
     public ResponseEntity<PatchDocumentResponse> patchDocumentByDocumentId(
+        @PathVariable("documentId") final UUID documentId,
+
         @ApiParam(value = "", required = true)
         @Valid @RequestBody final UpdateDocumentCommand body,
-
-        @PathVariable("documentId") final UUID documentId,
 
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken) {
@@ -320,8 +320,6 @@ public class CaseDocumentAmController {
 
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken) {
-
-        documentManagementService.validateHashTokens(caseDocumentsMetadata.getDocumentHashTokens());
 
         documentManagementService.checkServicePermission(
             caseDocumentsMetadata.getCaseTypeId(),

@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 
 import java.util.List;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,7 +37,7 @@ class AuditAspectTest implements TestFixture {
     @DisplayName("Should populate audit context when single IDs")
     void shouldPopulateAuditContextWhenSingleIds() {
         // WHEN
-        controllerProxy.getDocumentByDocumentId_LogSingleId(RANDOM_DOCUMENT_ID);
+        controllerProxy.getDocumentByDocumentId_LogSingleId(DOCUMENT_ID.toString());
         final AuditContext context = AuditContextHolder.getAuditContext();
 
         // THEN
@@ -46,7 +45,7 @@ class AuditAspectTest implements TestFixture {
             .isNotNull()
             .satisfies(x -> {
                 assertThat(x.getAuditOperationType()).isEqualTo(AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID);
-                assertThat(x.getDocumentIds()).singleElement().isEqualTo(RANDOM_DOCUMENT_ID);
+                assertThat(x.getDocumentIds()).singleElement().isEqualTo(DOCUMENT_ID.toString());
             });
 
     }
@@ -55,23 +54,19 @@ class AuditAspectTest implements TestFixture {
     @DisplayName("Should populate audit context when single and list of IDs")
     void shouldPopulateAuditContextWhenSingleAndListOfIds() {
 
-        // GIVEN
-        final UUID id1 = UUID.randomUUID();
-        final UUID id2 = UUID.randomUUID();
-
         final List<DocumentHashToken> documentHashTokens = List.of(
             DocumentHashToken.builder()
-                .id(id1.toString())
+                .id(DOCUMENT_ID_1)
                 .build(),
             DocumentHashToken.builder()
-                .id(id2.toString())
+                .id(DOCUMENT_ID_2)
                 .build()
         );
 
         // WHEN
         controllerProxy.patchMetaDataOnDocuments_LogListOfIds(
             CaseDocumentsMetadata.builder()
-                .caseId(VALID_CASE_ID)
+                .caseId(CASE_ID_VALUE)
                 .documentHashTokens(documentHashTokens)
                 .build()
         );
@@ -82,8 +77,8 @@ class AuditAspectTest implements TestFixture {
             .isNotNull()
             .satisfies(x -> {
                 assertThat(x.getAuditOperationType()).isEqualTo(AuditOperationType.PATCH_METADATA_ON_DOCUMENTS);
-                assertThat(x.getDocumentIds()).isEqualTo(List.of(id1.toString(), id2.toString()));
-                assertThat(x.getCaseId()).isEqualTo(VALID_CASE_ID);
+                assertThat(x.getDocumentIds()).isEqualTo(List.of(DOCUMENT_ID_1.toString(), DOCUMENT_ID_2.toString()));
+                assertThat(x.getCaseId()).isEqualTo(CASE_ID_VALUE);
             });
 
     }

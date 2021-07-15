@@ -113,7 +113,7 @@ class ExpressionEvaluatorTest implements TestFixture {
     }
 
     private Tuple3<SampleBean, EvaluationContext, AnnotatedElementKey> preamble() {
-        final SampleBean sampleBean = new SampleBean(RANDOM_UUID, RANDOM_LONG, RANDOM_STRING);
+        final SampleBean sampleBean = new SampleBean(DOCUMENT_ID, RANDOM_LONG, RANDOM_STRING);
 
         final Method method = ReflectionUtils.findMethod(SampleMethods.class, "hello", String.class, SampleBean.class);
 

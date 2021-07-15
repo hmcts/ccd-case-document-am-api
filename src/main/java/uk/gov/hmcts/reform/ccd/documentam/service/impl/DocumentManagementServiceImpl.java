@@ -4,7 +4,6 @@ import static java.time.format.DateTimeFormatter.ofPattern;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PATCH;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.BAD_REQUEST;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +60,6 @@ import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
-import uk.gov.hmcts.reform.ccd.documentam.service.ValidationUtils;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.documentam.util.ResponseHelper;
 
@@ -72,7 +70,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private static final Date NULL_TTL = null;
     private static final DateTimeFormatter DATE_TIME_FORMATTER = ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
     private final RestTemplate restTemplate;
-    private final ValidationUtils validationUtils;
     private final SecurityUtils securityUtils;
 
     @Value("${documentStoreUrl}")
@@ -103,11 +100,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Autowired
     public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils,
-                                         CaseDataStoreService caseDataStoreService, ValidationUtils validationUtils) {
+                                         CaseDataStoreService caseDataStoreService) {
         this.restTemplate = restTemplate;
         this.securityUtils = securityUtils;
         this.caseDataStoreService = caseDataStoreService;
-        this.validationUtils = validationUtils;
     }
 
     @Override
@@ -197,9 +193,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashTokens()) {
 
             if (documentHashToken.getHashToken() != null) {
-                String hashcodeFromStoredDocument = generateHashToken(UUID.fromString(documentHashToken.getId()));
+                String hashcodeFromStoredDocument = generateHashToken(documentHashToken.getId());
                 if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
-                    throw new ForbiddenException(UUID.fromString(documentHashToken.getId()));
+                    throw new ForbiddenException(documentHashToken.getId());
                 }
             } else if (hashCheckEnabled) {
                 throw new ForbiddenException("Hash check is enabled but hashToken hasn't provided for the document:"
@@ -209,19 +205,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             Map<String, String> metadataMap = new HashMap<>();
             metadataMap.put(Constants.CASE_ID, caseDocumentsMetadata.getCaseId());
 
-            if (caseDocumentsMetadata.getCaseTypeId() != null) {
-                validationUtils.validateInputParams(Constants.INPUT_STRING_PATTERN,
-                    caseDocumentsMetadata.getCaseTypeId());
-                metadataMap.put(Constants.CASE_TYPE_ID, caseDocumentsMetadata.getCaseTypeId());
-            }
-
-            if (caseDocumentsMetadata.getJurisdictionId() != null) {
-                validationUtils.validateInputParams(Constants.INPUT_STRING_PATTERN,
-                    caseDocumentsMetadata.getJurisdictionId());
-                metadataMap.put(Constants.JURISDICTION_ID, caseDocumentsMetadata.getJurisdictionId());
-            }
             DocumentUpdate documentUpdate = new DocumentUpdate();
-            documentUpdate.setDocumentId(UUID.fromString(documentHashToken.getId()));
+            documentUpdate.setDocumentId(documentHashToken.getId());
             documentUpdate.setMetadata(metadataMap);
 
             documentsList.add(documentUpdate);
@@ -306,7 +291,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Override
     public void deleteDocument(UUID documentId, Boolean permanent) {
         final HttpEntity<HttpHeaders> requestEntity = new HttpEntity<>(getHttpHeaders());
-        String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, documentId, permanent);
+        final String documentDeleteUrl = String.format(
+            "%s/documents/%s?permanent=%s",
+            documentURL,
+            documentId,
+            permanent
+        );
         try {
             restTemplate.exchange(documentDeleteUrl, DELETE, requestEntity, Void.class);
         } catch (HttpClientErrorException exception) {
@@ -364,14 +354,13 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public void checkUserPermission(ResponseEntity<StoredDocumentHalResource> responseEntity,
                                        UUID documentId, Permission permissionToCheck,
                                        String logMessage, String exceptionMessage) {
-        String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
-        validationUtils.validate(caseId);
+        final String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
 
-        DocumentPermissions documentPermissions = caseDataStoreService
+        final DocumentPermissions documentPermissions = caseDataStoreService
             .getCaseDocumentMetadata(caseId, documentId)
             .orElseThrow(() -> new CaseNotFoundException(caseId));
 
-        if (!documentPermissions.getId().equals(documentId.toString())
+        if (!documentPermissions.getId().equals(documentId)
             || !documentPermissions.getPermissions().contains(permissionToCheck)) {
             log.error(logMessage, HttpStatus.FORBIDDEN);
             throw new ForbiddenException(exceptionMessage);
@@ -500,14 +489,5 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private String formatNotFoundMessage(String resourceId) {
         return Constants.RESOURCE_NOT_FOUND + " " + resourceId;
-    }
-
-    @Override
-    public void validateHashTokens(List<DocumentHashToken> documentList) {
-        if (documentList != null) {
-            documentList.forEach(document -> validationUtils.validateDocumentId(document.getId()));
-        } else {
-            throw new BadRequestException(BAD_REQUEST);
-        }
     }
 }

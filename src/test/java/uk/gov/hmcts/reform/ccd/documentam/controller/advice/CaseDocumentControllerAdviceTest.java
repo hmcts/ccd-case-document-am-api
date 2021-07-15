@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
@@ -75,14 +74,6 @@ class CaseDocumentControllerAdviceTest {
         final InvalidRequest invalidRequestException = mock(InvalidRequest.class);
 
         testBadRequest(invalidRequestException);
-    }
-
-    @Test
-    void handleMethodArgumentNotValidException() {
-        final MethodArgumentNotValidException methodArgumentNotValidException =
-            mock(MethodArgumentNotValidException.class);
-
-        testBadRequest(methodArgumentNotValidException);
     }
 
     @Test

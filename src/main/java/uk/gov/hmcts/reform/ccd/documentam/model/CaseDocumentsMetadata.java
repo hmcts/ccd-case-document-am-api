@@ -43,6 +43,7 @@ public class CaseDocumentsMetadata {
     private String jurisdictionId;
 
     @JsonProperty("documentHashTokens")
+    @Size(min = 1, message = "At least one document should be provided")
     private List<DocumentHashToken> documentHashTokens;
 
 }
