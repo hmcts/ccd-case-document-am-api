@@ -1,22 +1,37 @@
 package uk.gov.hmcts.reform.ccd.documentam.controller.advice;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
+import uk.gov.hmcts.reform.ccd.documentam.controller.endpoints.CaseDocumentAmController;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.InvalidRequest;
 import uk.gov.hmcts.reform.ccd.documentam.exception.RequiredFieldMissingException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.UnauthorizedException;
+import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
+import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
+import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 
-class CaseDocumentControllerAdviceTest {
+import static java.util.Collections.emptyList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+class CaseDocumentControllerAdviceTest implements TestFixture {
 
     private final CaseDocumentControllerAdvice underTest = new CaseDocumentControllerAdvice();
 
@@ -106,5 +121,33 @@ class CaseDocumentControllerAdviceTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
         assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
+    }
+
+    @Test
+    void testHandleMethodArgumentNotValidException() throws Exception {
+        final CaseDocumentAmController controller = new CaseDocumentAmController(
+            mock(DocumentManagementService.class),
+            mock(SecurityUtils.class)
+        );
+
+        final MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller)
+            .setControllerAdvice(underTest)
+            .build();
+
+        final CaseDocumentsMetadata body = new CaseDocumentsMetadata(
+            CASE_ID_VALUE,
+            BEFTA_CASETYPE_2,
+            BEFTA_JURISDICTION_2,
+            emptyList()
+        );
+
+        mockMvc.perform(patch("/cases/documents/attachToCase")
+                                                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                                        .content(TestFixture.objectToJsonString(body)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.errorDescription", is("At least one document should be provided")))
+            .andExpect(result -> assertThat(result.getResolvedException())
+                .isNotNull()
+                .satisfies(throwable -> assertThat(throwable).isInstanceOf(MethodArgumentNotValidException.class)));
     }
 }

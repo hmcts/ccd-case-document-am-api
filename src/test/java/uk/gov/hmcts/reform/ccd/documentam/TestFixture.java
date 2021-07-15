@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.ccd.documentam;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -45,6 +47,13 @@ public interface TestFixture {
         final LocalDateTime ttl = makeTtlInMinutes(10);
 
         return new UpdateDocumentCommand(ttl);
+    }
+
+    static String objectToJsonString(final Object object) throws IOException {
+        final ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
+
+        return objectMapper.writeValueAsString(object);
     }
 
 }
