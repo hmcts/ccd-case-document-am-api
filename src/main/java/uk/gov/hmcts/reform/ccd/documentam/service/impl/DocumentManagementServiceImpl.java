@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 
+import static java.time.format.DateTimeFormatter.ofPattern;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PATCH;
@@ -25,13 +26,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -70,7 +70,7 @@ import uk.gov.hmcts.reform.ccd.documentam.util.ResponseHelper;
 public class DocumentManagementServiceImpl implements DocumentManagementService {
 
     private static final Date NULL_TTL = null;
-
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
     private final RestTemplate restTemplate;
     private final ValidationUtils validationUtils;
     private final SecurityUtils securityUtils;
@@ -78,8 +78,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Value("${documentStoreUrl}")
     protected String documentURL;
 
-    @Value("${documentTTL}")
-    protected String documentTtl;
+    @Value("${documentTtlInDays}")
+    protected int documentTtlInDays;
 
     @Value("${idam.s2s-auth.totp_secret}")
     protected String salt;
@@ -350,8 +350,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     private String getEffectiveTTL() {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
-        return format.format(new Timestamp(new Date().getTime() + Long.parseLong(documentTtl)));
+        ZonedDateTime currentDateTime = ZonedDateTime.now();
+        return currentDateTime.plusDays(documentTtlInDays).format(DATE_TIME_FORMATTER);
     }
 
     private HttpHeaders getHeaders(ResponseEntity<ByteArrayResource> response) {
