@@ -24,7 +24,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.GeneratedHashCodeResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentMetaDataResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
-import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.documentam.model.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
@@ -316,7 +316,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
                                  USER_PERMISSION_ERROR,
                                  MATCHED_DOCUMENT_ID.toString());
 
-        final UpdateDocumentCommand body = new UpdateDocumentCommand(null);
+        final UpdateTtlRequest body = new UpdateTtlRequest(null);
         PatchDocumentResponse patchDocumentResponse = new PatchDocumentResponse();
         patchDocumentResponse.setOriginalDocumentName("test.png");
         doReturn(new ResponseEntity<>(patchDocumentResponse, HttpStatus.OK))
@@ -344,7 +344,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
             SERVICE_PERMISSION_ERROR,
             DOCUMENT_ID.toString()
         );
-        final UpdateDocumentCommand body = new UpdateDocumentCommand();
+        final UpdateTtlRequest body = new UpdateTtlRequest();
 
         assertThatExceptionOfType(ForbiddenException.class)
             .isThrownBy(() -> testee.patchDocumentByDocumentId(DOCUMENT_ID, body, TEST_S2S_TOKEN));

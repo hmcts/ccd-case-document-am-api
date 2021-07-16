@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.ccd.documentam;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.documentam.model.UpdateTtlRequest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -43,10 +43,10 @@ public interface TestFixture {
             .plus(minutes, ChronoUnit.MINUTES);
     }
 
-    static UpdateDocumentCommand buildUpdateDocumentCommand() {
+    static UpdateTtlRequest buildUpdateDocumentCommand() {
         final LocalDateTime ttl = makeTtlInMinutes(10);
 
-        return new UpdateDocumentCommand(ttl);
+        return new UpdateTtlRequest(ttl);
     }
 
     static String objectToJsonString(final Object object) throws IOException {

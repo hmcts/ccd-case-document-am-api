@@ -32,7 +32,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
-import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.documentam.model.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
@@ -908,8 +908,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
     @Test
     void patchDocument_HappyPath() {
-        final UpdateDocumentCommand updateDocumentCommand = buildUpdateDocumentCommand();
-        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand);
+        final UpdateTtlRequest updateDocumentCommand = buildUpdateDocumentCommand();
+        final HttpEntity<UpdateTtlRequest> requestEntity = new HttpEntity<>(updateDocumentCommand);
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
 
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
@@ -926,8 +926,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
     @Test
     void patchDocument_ResourceNotFound() {
-        final UpdateDocumentCommand updateDocumentCommand = buildUpdateDocumentCommand();
-        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand);
+        final UpdateTtlRequest updateDocumentCommand = buildUpdateDocumentCommand();
+        final HttpEntity<UpdateTtlRequest> requestEntity = new HttpEntity<>(updateDocumentCommand);
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
 
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
@@ -946,8 +946,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
     @Test
     void patchDocument_BadRequest() {
-        final UpdateDocumentCommand updateDocumentCommand = buildUpdateDocumentCommand();
-        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand);
+        final UpdateTtlRequest updateDocumentCommand = buildUpdateDocumentCommand();
+        final HttpEntity<UpdateTtlRequest> requestEntity = new HttpEntity<>(updateDocumentCommand);
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
 
         when(restTemplateMock.exchange(
@@ -967,8 +967,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
     @Test
     void patchDocument_Forbidden() {
-        final UpdateDocumentCommand updateDocumentCommand = buildUpdateDocumentCommand();
-        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand);
+        final UpdateTtlRequest updateDocumentCommand = buildUpdateDocumentCommand();
+        final HttpEntity<UpdateTtlRequest> requestEntity = new HttpEntity<>(updateDocumentCommand);
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
 
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
@@ -989,8 +989,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
     @Test
     void patchDocument_HttpClientErrorException() {
-        final UpdateDocumentCommand updateDocumentCommand = buildUpdateDocumentCommand();
-        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand);
+        final UpdateTtlRequest updateDocumentCommand = buildUpdateDocumentCommand();
+        final HttpEntity<UpdateTtlRequest> requestEntity = new HttpEntity<>(updateDocumentCommand);
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
 
         when(restTemplateMock.exchange(
@@ -1011,8 +1011,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
     @Test
     void patchDocument_ServiceException() {
-        final UpdateDocumentCommand updateDocumentCommand = buildUpdateDocumentCommand();
-        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand);
+        final UpdateTtlRequest updateDocumentCommand = buildUpdateDocumentCommand();
+        final HttpEntity<UpdateTtlRequest> requestEntity = new HttpEntity<>(updateDocumentCommand);
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
 
         when(restTemplateMock.exchange(

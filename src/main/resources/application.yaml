@@ -33,8 +33,6 @@ spring:
       maxFileSize: 4GB
       maxRequestSize: 4GB
       enabled: true
-  jackson:
-    default-property-inclusion: NON_NULL
   config:
     import: "optional:configtree:/mnt/secrets/ccd/"
   cloud:
