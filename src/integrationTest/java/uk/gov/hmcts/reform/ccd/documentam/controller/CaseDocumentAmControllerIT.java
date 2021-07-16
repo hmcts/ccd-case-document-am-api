@@ -302,7 +302,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "    ", "{\"ttl\":\"\"}", "{\"ttl\":\"6000\"}", "{\"ttl\":\"2021-13-14T12:14:39\"}"})
+    @ValueSource(strings = {"", "    ", "{\"ttl\":\"6000\"}", "{\"ttl\":\"2021-13-14T12:14:39\"}"})
     void testShouldRaiseExceptionWhenPatchDocumentWithInvalidTtl(final String payload) throws Exception {
         mockMvc.perform(patch(MAIN_URL + "/" + DOCUMENT_ID)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
