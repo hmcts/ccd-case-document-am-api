@@ -20,7 +20,6 @@
   </suppress>
 
   <suppress until="2021-08-23">
-    <cve>CVE-2021-27568</cve>
     <cve>CVE-2021-33037</cve>
   </suppress>
 
