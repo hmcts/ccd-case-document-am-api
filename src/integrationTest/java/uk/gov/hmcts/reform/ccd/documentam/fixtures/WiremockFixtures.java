@@ -143,6 +143,13 @@ public class WiremockFixtures implements TestFixture {
             .build();
     }
 
+    public static void stubGetGreeting() {
+        stubFor(WireMock.get(urlPathEqualTo("/greeting"))
+                    .willReturn(aResponse()
+                                    .withStatus(HTTP_OK)
+                                    .withBody("Hello World!")));
+    }
+
     @SuppressWarnings({"PMD.AvoidThrowingRawExceptionTypes", "squid:S112"})
     // Required as wiremock's Json.getObjectMapper().registerModule(..); not working
     // see https://github.com/tomakehurst/wiremock/issues/1127

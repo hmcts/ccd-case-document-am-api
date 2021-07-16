@@ -57,7 +57,6 @@ import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
-import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
@@ -68,9 +67,8 @@ import uk.gov.hmcts.reform.ccd.documentam.util.ResponseHelper;
 public class DocumentManagementServiceImpl implements DocumentManagementService {
 
     private static final Date NULL_TTL = null;
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER_WITH_OFFSET = ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
     private final RestTemplate restTemplate;
-    private final SecurityUtils securityUtils;
 
     @Value("${documentStoreUrl}")
     protected String documentURL;
@@ -88,6 +86,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private static AuthorisedServices authorisedServices;
 
+    private static final HttpEntity<Object> NULL_REQUEST_ENTITY = null;
+
     static {
         try (InputStream inputStream = DocumentManagementServiceImpl.class.getClassLoader()
             .getResourceAsStream("service_config.json")) {
@@ -99,10 +99,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Autowired
-    public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils,
-                                         CaseDataStoreService caseDataStoreService) {
+    public DocumentManagementServiceImpl(RestTemplate restTemplate, CaseDataStoreService caseDataStoreService) {
         this.restTemplate = restTemplate;
-        this.securityUtils = securityUtils;
         this.caseDataStoreService = caseDataStoreService;
     }
 
@@ -111,12 +109,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         ResponseEntity<StoredDocumentHalResource> responseResult = new ResponseEntity<>(HttpStatus.OK);
 
         try {
-            final HttpEntity<String> requestEntity = new HttpEntity<>(getHttpHeaders());
             String documentMetadataUrl = String.format("%s/documents/%s", documentURL, documentId);
             ResponseEntity<StoredDocumentHalResource> response = restTemplate.exchange(
                 documentMetadataUrl,
                 GET,
-                requestEntity,
+                NULL_REQUEST_ENTITY,
                 StoredDocumentHalResource.class
             );
             ResponseEntity<StoredDocumentHalResource> responseEntity =
@@ -149,12 +146,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public ResponseEntity<ByteArrayResource> getDocumentBinaryContent(UUID documentId) {
         ResponseEntity<ByteArrayResource> responseResult = new ResponseEntity<>(HttpStatus.OK);
         try {
-            final HttpEntity<HttpHeaders> requestEntity = new HttpEntity<>(getHttpHeaders());
             String documentBinaryUrl = String.format("%s/documents/%s/binary", documentURL, documentId);
             ResponseEntity<ByteArrayResource> response = restTemplate.exchange(
                 documentBinaryUrl,
                 GET,
-                requestEntity,
+                NULL_REQUEST_ENTITY,
                 ByteArrayResource.class
             );
             if (HttpStatus.OK.equals(response.getStatusCode())) {
@@ -178,8 +174,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         try {
             UpdateDocumentsCommand updateDocumentsCommand
                 = prepareRequestForAttachingDocumentToCase(caseDocumentsMetadata);
-            HttpEntity<UpdateDocumentsCommand> requestEntity
-                = new HttpEntity<>(updateDocumentsCommand, getHttpHeaders());
+            HttpEntity<UpdateDocumentsCommand> requestEntity = new HttpEntity<>(updateDocumentsCommand);
             String documentUrl = String.format("%s/documents", documentURL);
             restTemplate.exchange(documentUrl, HttpMethod.PATCH, requestEntity, Void.class);
         } catch (HttpClientErrorException exception) {
@@ -266,7 +261,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         ResponseEntity<PatchDocumentResponse> responseResult = new ResponseEntity<>(HttpStatus.OK);
 
         try {
-            final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(ttl, getHttpHeaders());
+            final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(ttl);
             String patchTTLUrl = String.format("%s/documents/%s", documentURL, documentId);
             ResponseEntity<StoredDocumentHalResource> response = restTemplate.exchange(
                 patchTTLUrl,
@@ -290,7 +285,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Override
     public void deleteDocument(UUID documentId, Boolean permanent) {
-        final HttpEntity<HttpHeaders> requestEntity = new HttpEntity<>(getHttpHeaders());
         final String documentDeleteUrl = String.format(
             "%s/documents/%s?permanent=%s",
             documentURL,
@@ -298,7 +292,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             permanent
         );
         try {
-            restTemplate.exchange(documentDeleteUrl, DELETE, requestEntity, Void.class);
+            restTemplate.exchange(documentDeleteUrl, DELETE, NULL_REQUEST_ENTITY, Void.class);
         } catch (HttpClientErrorException exception) {
             handleException(exception, documentId.toString());
         }
@@ -330,14 +324,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         bodyMap.set("metadata[caseTypeId]", caseTypeId);
         bodyMap.set("ttl", getEffectiveTTL());
 
-        HttpHeaders headers = getHttpHeaders();
+        HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         return headers;
     }
 
     private String getEffectiveTTL() {
         ZonedDateTime currentDateTime = ZonedDateTime.now();
-        return currentDateTime.plusDays(documentTtlInDays).format(DATE_TIME_FORMATTER);
+        return currentDateTime.plusDays(documentTtlInDays).format(DATE_TIME_FORMATTER_WITH_OFFSET);
     }
 
     private HttpHeaders getHeaders(ResponseEntity<ByteArrayResource> response) {
@@ -453,13 +447,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             return metadata.get(Constants.JURISDICTION_ID);
         }
         return null;
-    }
-
-    private HttpHeaders getHttpHeaders() {
-        HttpHeaders headers = securityUtils.serviceAuthorizationHeaders();
-        headers.set(Constants.USERID, securityUtils.getUserInfo().getUid());
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return headers;
     }
 
     private void handleException(HttpClientErrorException exception, String messageParam) {

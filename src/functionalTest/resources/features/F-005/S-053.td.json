@@ -10,7 +10,7 @@
       "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
     },
     "body": {
-      "ttl": "2021-12-30T1@:10:10+0000"
+      "ttl": "2021-12-30T1@:10:10"
     }
   },
   "expectedResponse": {

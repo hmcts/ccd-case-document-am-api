@@ -1,10 +1,11 @@
 package uk.gov.hmcts.reform.ccd.documentam.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.OptBoolean;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -17,6 +18,6 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.TIMESTAMP_F
 public class UpdateDocumentCommand {
     @ApiModelProperty
     @NotNull(message = "Provide the TTL")
-    @DateTimeFormat(pattern = TIMESTAMP_FORMAT)
+    @JsonFormat(pattern = TIMESTAMP_FORMAT, lenient = OptBoolean.FALSE)
     private LocalDateTime ttl;
 }

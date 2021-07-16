@@ -15,7 +15,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -38,10 +37,8 @@ import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
-import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
-import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -75,9 +72,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_LEN
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_TYPE;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DATA_SOURCE;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.ORIGINAL_FILE_NAME;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_AUTHORIZATION;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USERID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USER_PERMISSION_ERROR;
 
 @ExtendWith(MockitoExtension.class)
@@ -91,13 +86,12 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
     private static final String BULK_SCAN_PROCESSOR = "bulk_scan_processor";
     private final RestTemplate restTemplateMock = Mockito.mock(RestTemplate.class);
-    private final SecurityUtils securityUtilsMock = mock(SecurityUtils.class);
     private final CaseDataStoreService caseDataStoreServiceMock = mock(CaseDataStoreService.class);
-    private final HttpEntity<?> requestEntityGlobal = new HttpEntity<>(getHttpHeaders());
+
+    private static final HttpEntity<Object> NULL_REQUEST_ENTITY = null;
 
     @InjectMocks
     private final DocumentManagementServiceImpl sut = new DocumentManagementServiceImpl(restTemplateMock,
-                                                                                        securityUtilsMock,
                                                                                         caseDataStoreServiceMock);
 
     private final String documentURL = "http://localhost:4506";
@@ -113,12 +107,6 @@ class DocumentManagementServiceImplTest implements TestFixture {
         ReflectionTestUtils.setField(sut, "documentTtlInDays", 1);
         ReflectionTestUtils.setField(sut, "documentURL", "http://localhost:4506");
         ReflectionTestUtils.setField(sut, "salt", "AAAOA7A2AA6AAAA5");
-
-        final HttpHeaders headers = new HttpHeaders();
-        headers.add(SERVICE_AUTHORIZATION, "123");
-        when(securityUtilsMock.serviceAuthorizationHeaders()).thenReturn(headers);
-        UserInfo userInfo = UserInfo.builder().uid("123").build();
-        when(securityUtilsMock.getUserInfo()).thenReturn(userInfo);
     }
 
     @Test
@@ -133,10 +121,9 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
     @Test
     void getDocumentMetadata_ServiceException() {
-        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
         when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID,
-            HttpMethod.GET, requestEntityGlobal,
+            HttpMethod.GET, NULL_REQUEST_ENTITY,
             StoredDocumentHalResource.class))
                .thenThrow(HttpClientErrorException.create("woopsie", HttpStatus.BAD_GATEWAY, "404",
                                                           new HttpHeaders(),
@@ -169,7 +156,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
                                                                                             null);
         when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID,
-            HttpMethod.GET, requestEntityGlobal,
+            HttpMethod.GET, NULL_REQUEST_ENTITY,
             StoredDocumentHalResource.class))
                .thenThrow(httpClientErrorException);
         assertThrows(ResourceNotFoundException.class, () -> sut.getDocumentMetadata(MATCHED_DOCUMENT_ID));
@@ -185,7 +172,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
                                                                                             null);
         when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID,
-            HttpMethod.GET, requestEntityGlobal,
+            HttpMethod.GET, NULL_REQUEST_ENTITY,
             StoredDocumentHalResource.class))
                .thenThrow(httpClientErrorException);
         assertThrows(ForbiddenException.class, () -> sut.getDocumentMetadata(MATCHED_DOCUMENT_ID));
@@ -201,7 +188,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
                                                                                             null);
         when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID,
-            HttpMethod.GET, requestEntityGlobal,
+            HttpMethod.GET, NULL_REQUEST_ENTITY,
             StoredDocumentHalResource.class))
                .thenThrow(httpClientErrorException);
         assertThrows(BadRequestException.class, () -> {
@@ -214,7 +201,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     void getDocumentMetadata_Throws_HttpClientErrorException_ServiceException() {
         when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID,
-            HttpMethod.GET, requestEntityGlobal,
+            HttpMethod.GET, NULL_REQUEST_ENTITY,
             StoredDocumentHalResource.class))
                .thenThrow(HttpClientErrorException.class);
 
@@ -251,7 +238,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
         when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID + "/binary",
             HttpMethod.GET,
-            requestEntityGlobal,
+            NULL_REQUEST_ENTITY,
             ByteArrayResource.class
                                               )).thenReturn(new ResponseEntity<ByteArrayResource>(headers,
                                                                                                   HttpStatus.OK));
@@ -275,7 +262,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
         when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID + "/binary",
             HttpMethod.GET,
-            requestEntityGlobal,
+            NULL_REQUEST_ENTITY,
             ByteArrayResource.class
                                               )).thenThrow(HttpClientErrorException.create("woopsie",
                                                                                            HttpStatus.BAD_GATEWAY,
@@ -294,7 +281,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
         ByteArrayResource byteArrayResource = mock(ByteArrayResource.class);
         when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID + "/binary",
-            HttpMethod.GET, requestEntityGlobal, ByteArrayResource.class))
+            HttpMethod.GET, NULL_REQUEST_ENTITY, ByteArrayResource.class))
                .thenReturn(new ResponseEntity<ByteArrayResource>(byteArrayResource, HttpStatus.BAD_REQUEST));
         ResponseEntity responseEntity = sut.getDocumentBinaryContent(MATCHED_DOCUMENT_ID);
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
@@ -347,7 +334,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     private void mockitoWhenRestExchangeByteArrayThenThrow(HttpClientErrorException httpClientErrorException) {
         when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID + "/binary",
-            HttpMethod.GET, requestEntityGlobal,
+            HttpMethod.GET, NULL_REQUEST_ENTITY,
             ByteArrayResource.class))
                .thenThrow(httpClientErrorException);
     }
@@ -356,7 +343,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     void getDocumentBinaryContent_Throws_HttpClientErrorException_ServiceException() {
         when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID + "/binary",
-            HttpMethod.GET, requestEntityGlobal,
+            HttpMethod.GET, NULL_REQUEST_ENTITY,
             ByteArrayResource.class))
                .thenThrow(HttpClientErrorException.class);
 
@@ -513,21 +500,21 @@ class DocumentManagementServiceImplTest implements TestFixture {
                                                   HttpStatus httpStatus) {
         when(restTemplateMock.exchange(
             documentURL + "/documents/" + MATCHED_DOCUMENT_ID,
-            HttpMethod.GET, requestEntityGlobal,
+            HttpMethod.GET, NULL_REQUEST_ENTITY,
             StoredDocumentHalResource.class))
                .thenReturn(new ResponseEntity<>(storedDocumentHalResource, httpStatus));
     }
 
     private void verifyRestExchangeOnStoredDoc() {
         verify(restTemplateMock, times(1))
-            .exchange(documentURL + "/documents/" + MATCHED_DOCUMENT_ID, HttpMethod.GET, requestEntityGlobal,
+            .exchange(documentURL + "/documents/" + MATCHED_DOCUMENT_ID, HttpMethod.GET, NULL_REQUEST_ENTITY,
                       StoredDocumentHalResource.class);
     }
 
     private void verifyRestExchangeByteArray() {
         verify(restTemplateMock, times(1))
             .exchange(documentURL + "/documents/" + MATCHED_DOCUMENT_ID + "/binary", HttpMethod.GET,
-                      requestEntityGlobal, ByteArrayResource.class);
+                      NULL_REQUEST_ENTITY, ByteArrayResource.class);
     }
 
     private void verifyCaseDataServiceGetDocMetadata() {
@@ -922,8 +909,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @Test
     void patchDocument_HappyPath() {
         final UpdateDocumentCommand updateDocumentCommand = buildUpdateDocumentCommand();
-        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand,
-                                                                                 getHttpHeaders());
+        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand);
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
 
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
@@ -941,8 +927,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @Test
     void patchDocument_ResourceNotFound() {
         final UpdateDocumentCommand updateDocumentCommand = buildUpdateDocumentCommand();
-        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand,
-                                                                                 getHttpHeaders());
+        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand);
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
 
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
@@ -962,8 +947,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @Test
     void patchDocument_BadRequest() {
         final UpdateDocumentCommand updateDocumentCommand = buildUpdateDocumentCommand();
-        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand,
-                                                                                 getHttpHeaders());
+        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand);
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
 
         when(restTemplateMock.exchange(
@@ -984,8 +968,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @Test
     void patchDocument_Forbidden() {
         final UpdateDocumentCommand updateDocumentCommand = buildUpdateDocumentCommand();
-        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand,
-                                                                                 getHttpHeaders());
+        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand);
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
 
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
@@ -1007,8 +990,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @Test
     void patchDocument_HttpClientErrorException() {
         final UpdateDocumentCommand updateDocumentCommand = buildUpdateDocumentCommand();
-        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand,
-                                                                                 getHttpHeaders());
+        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand);
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
 
         when(restTemplateMock.exchange(
@@ -1030,8 +1012,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @Test
     void patchDocument_ServiceException() {
         final UpdateDocumentCommand updateDocumentCommand = buildUpdateDocumentCommand();
-        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand,
-                                                                                 getHttpHeaders());
+        final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(updateDocumentCommand);
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
 
         when(restTemplateMock.exchange(
@@ -1051,19 +1032,10 @@ class DocumentManagementServiceImplTest implements TestFixture {
         });
     }
 
-    private HttpHeaders getHttpHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(SERVICE_AUTHORIZATION, "123");
-        headers.set(USERID, "123");
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return headers;
-    }
-
     @Test
     @SuppressWarnings("unchecked")
     void deleteDocument_HappyPath() {
         Boolean permanent = true;
-        HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
         String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, MATCHED_DOCUMENT_ID,
                                                  permanent
         );
@@ -1073,7 +1045,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
         verify(restTemplateMock).exchange(
             documentDeleteUrl,
             DELETE,
-            requestEntity,
+            NULL_REQUEST_ENTITY,
             Void.class
         );
     }
@@ -1084,14 +1056,13 @@ class DocumentManagementServiceImplTest implements TestFixture {
     void deleteDocument_NotFoundException() {
         Boolean permanent = true;
 
-        HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
         String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL,
                                                  MATCHED_DOCUMENT_ID);
 
         when(restTemplateMock.exchange(
             documentDeleteUrl,
             DELETE,
-            requestEntity,
+            NULL_REQUEST_ENTITY,
             Void.class
                                       )).thenThrow(HttpClientErrorException.NotFound.create("woopsie",
                                                                                             HttpStatus.NOT_FOUND,
@@ -1110,14 +1081,13 @@ class DocumentManagementServiceImplTest implements TestFixture {
     void deleteDocument_ForbiddenException() {
         Boolean permanent = true;
 
-        HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
         String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL,
                                                  MATCHED_DOCUMENT_ID);
 
         when(restTemplateMock.exchange(
             documentDeleteUrl,
             DELETE,
-            requestEntity,
+            NULL_REQUEST_ENTITY,
             Void.class
                                       )).thenThrow(HttpClientErrorException.NotFound.create("woopsie",
                                                                                             HttpStatus.FORBIDDEN,
@@ -1136,14 +1106,13 @@ class DocumentManagementServiceImplTest implements TestFixture {
     void deleteDocument_BadRequestException() {
         Boolean permanent = true;
 
-        HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
         String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL,
                                                  MATCHED_DOCUMENT_ID);
 
         when(restTemplateMock.exchange(
             documentDeleteUrl,
             DELETE,
-            requestEntity,
+            NULL_REQUEST_ENTITY,
             Void.class
                                       )).thenThrow(HttpClientErrorException.NotFound.create("woopsie",
                                                                                             HttpStatus.BAD_REQUEST,
@@ -1162,7 +1131,6 @@ class DocumentManagementServiceImplTest implements TestFixture {
     void deleteDocument_ServiceException() {
         final Boolean permanent = true;
 
-        HttpEntity requestEntity = new HttpEntity(getHttpHeaders());
         String documentDeleteUrl = String.format("%s/documents/%s?permanent=" + permanent, documentURL,
                                                  MATCHED_DOCUMENT_ID);
 
@@ -1179,7 +1147,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .when(restTemplateMock).exchange(
                 documentDeleteUrl,
                 DELETE,
-                requestEntity,
+                NULL_REQUEST_ENTITY,
                 Void.class
             );
 
