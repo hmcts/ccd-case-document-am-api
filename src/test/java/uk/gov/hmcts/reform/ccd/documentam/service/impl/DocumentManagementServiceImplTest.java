@@ -125,7 +125,8 @@ class DocumentManagementServiceImplTest {
         "FINREM_ExceptionRecord",
         "SSCS_ExceptionRecord",
         "PROBATE_ExceptionRecord",
-        "PUBLICLAW_ExceptionRecord"
+        "PUBLICLAW_ExceptionRecord",
+        "DIVORCE_ExceptionRecord"
     );
 
     @Test
@@ -135,7 +136,7 @@ class DocumentManagementServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(sut, "documentTtl", documentTTL);
+        ReflectionTestUtils.setField(sut, "documentTtlInDays", 1);
         ReflectionTestUtils.setField(sut, "documentURL", documentURL);
         ReflectionTestUtils.setField(sut, "salt", salt);
         ReflectionTestUtils.setField(sut, "bulkScanExceptionRecordTypes", bulkScanExceptionRecordTypes);
