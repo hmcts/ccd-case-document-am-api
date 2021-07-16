@@ -47,6 +47,7 @@ import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedServices;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
+import uk.gov.hmcts.reform.ccd.documentam.model.DmTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
@@ -261,7 +262,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         ResponseEntity<PatchDocumentResponse> responseResult = new ResponseEntity<>(HttpStatus.OK);
 
         try {
-            final HttpEntity<UpdateTtlRequest> requestEntity = new HttpEntity<>(ttl);
+            DmTtlRequest dmTtlRequest = new DmTtlRequest(ttl.getTtl());
+            final HttpEntity<DmTtlRequest> requestEntity = new HttpEntity<>(dmTtlRequest);
             String patchTTLUrl = String.format("%s/documents/%s", documentURL, documentId);
             ResponseEntity<StoredDocumentHalResource> response = restTemplate.exchange(
                 patchTTLUrl,

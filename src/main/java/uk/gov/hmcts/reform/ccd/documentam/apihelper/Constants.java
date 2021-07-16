@@ -57,7 +57,6 @@ public final class Constants {
     public static final String JURISDICTION_ID_MISSING = "Provide the Jurisdiction ID";
     public static final String CLASSIFICATION_MISSING = "Provide the Classification";
 
-    public static final String TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
     private Constants() {
     }
