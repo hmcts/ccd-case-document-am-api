@@ -664,7 +664,8 @@ class DocumentManagementServiceImplTest {
 
         assertThatExceptionOfType(ForbiddenException.class)
             .isThrownBy(() -> sut.patchDocumentMetadata(caseDocumentsMetadata))
-            .withMessage(MATCHED_DOCUMENT_ID);
+            .withMessage("Forbidden: Insufficient permissions: Hash token check failed for the document: "
+                             + MATCHED_DOCUMENT_ID);
     }
 
     @Test

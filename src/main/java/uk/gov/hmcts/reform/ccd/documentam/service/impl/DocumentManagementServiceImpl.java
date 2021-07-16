@@ -258,7 +258,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         String hashcodeFromStoredDocument =
             generateHashToken(UUID.fromString(documentHashToken.getId()), documentMetadata);
         if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
-            throw new ForbiddenException(UUID.fromString(documentHashToken.getId()));
+            throw new ForbiddenException(String.format("Hash token check failed for the document: %s",
+                                                       UUID.fromString(documentHashToken.getId())));
         }
     }
 
