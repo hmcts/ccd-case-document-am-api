@@ -1,5 +1,9 @@
 package uk.gov.hmcts.reform.ccd.documentam.apihelper;
 
+import java.time.format.DateTimeFormatter;
+
+import static java.time.format.DateTimeFormatter.ofPattern;
+
 public final class Constants {
 
     public static final String BAD_REQUEST = "Bad Request";
@@ -57,6 +61,9 @@ public final class Constants {
     public static final String JURISDICTION_ID_MISSING = "Provide the Jurisdiction ID";
     public static final String CLASSIFICATION_MISSING = "Provide the Classification";
 
+    public static final String DM_ZONED_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
+
+    public static final DateTimeFormatter DM_DATE_TIME_FORMATTER = ofPattern(DM_ZONED_DATE_TIME_FORMAT);
 
     private Constants() {
     }

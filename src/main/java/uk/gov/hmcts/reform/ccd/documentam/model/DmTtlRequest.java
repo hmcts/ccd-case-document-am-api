@@ -5,15 +5,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DM_ZONED_DATE_TIME_FORMAT;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class DmTtlRequest {
 
-    public static final String UTIL_DATE_TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+    @JsonFormat(pattern = DM_ZONED_DATE_TIME_FORMAT)
+    private ZonedDateTime ttl;
 
-    @JsonFormat(pattern = UTIL_DATE_TIMESTAMP_FORMAT)
-    private LocalDateTime ttl;
 }

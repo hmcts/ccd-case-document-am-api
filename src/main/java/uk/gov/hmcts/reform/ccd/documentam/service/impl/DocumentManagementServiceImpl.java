@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 
-import static java.time.format.DateTimeFormatter.ofPattern;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PATCH;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DM_DATE_TIME_FORMATTER;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -68,7 +68,7 @@ import uk.gov.hmcts.reform.ccd.documentam.util.ResponseHelper;
 public class DocumentManagementServiceImpl implements DocumentManagementService {
 
     private static final Date NULL_TTL = null;
-    private static final DateTimeFormatter DATE_TIME_FORMATTER_WITH_OFFSET = ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+
     private final RestTemplate restTemplate;
 
     @Value("${documentStoreUrl}")
@@ -262,7 +262,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         ResponseEntity<PatchDocumentResponse> responseResult = new ResponseEntity<>(HttpStatus.OK);
 
         try {
-            DmTtlRequest dmTtlRequest = new DmTtlRequest(ttl.getTtl());
+            DmTtlRequest dmTtlRequest = new DmTtlRequest(ttl.getTtl().atZone(ZoneId.systemDefault()));
             final HttpEntity<DmTtlRequest> requestEntity = new HttpEntity<>(dmTtlRequest);
             String patchTTLUrl = String.format("%s/documents/%s", documentURL, documentId);
             ResponseEntity<StoredDocumentHalResource> response = restTemplate.exchange(
@@ -333,7 +333,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private String getEffectiveTTL() {
         ZonedDateTime currentDateTime = ZonedDateTime.now();
-        return currentDateTime.plusDays(documentTtlInDays).format(DATE_TIME_FORMATTER_WITH_OFFSET);
+        return currentDateTime.plusDays(documentTtlInDays).format(DM_DATE_TIME_FORMATTER);
     }
 
     private HttpHeaders getHeaders(ResponseEntity<ByteArrayResource> response) {

@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
 import java.nio.charset.Charset;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -910,7 +911,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @Test
     void patchDocument_HappyPath() {
         final UpdateTtlRequest ttlRequest = buildUpdateDocumentCommand();
-        final HttpEntity<DmTtlRequest> requestEntity = new HttpEntity<>(new DmTtlRequest(ttlRequest.getTtl()));
+        final HttpEntity<DmTtlRequest> requestEntity = getTtlRequestEntity(ttlRequest);
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
 
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
@@ -928,7 +929,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @Test
     void patchDocument_ResourceNotFound() {
         final UpdateTtlRequest ttlRequest = buildUpdateDocumentCommand();
-        final HttpEntity<DmTtlRequest> requestEntity = new HttpEntity<>(new DmTtlRequest(ttlRequest.getTtl()));
+        final HttpEntity<DmTtlRequest> requestEntity = getTtlRequestEntity(ttlRequest);
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
 
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
@@ -948,7 +949,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @Test
     void patchDocument_BadRequest() {
         final UpdateTtlRequest ttlRequest = buildUpdateDocumentCommand();
-        final HttpEntity<DmTtlRequest> requestEntity = new HttpEntity<>(new DmTtlRequest(ttlRequest.getTtl()));
+        final HttpEntity<DmTtlRequest> requestEntity = getTtlRequestEntity(ttlRequest);
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
 
         when(restTemplateMock.exchange(
@@ -969,7 +970,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @Test
     void patchDocument_Forbidden() {
         final UpdateTtlRequest ttlRequest = buildUpdateDocumentCommand();
-        final HttpEntity<DmTtlRequest> requestEntity = new HttpEntity<>(new DmTtlRequest(ttlRequest.getTtl()));
+        final HttpEntity<DmTtlRequest> requestEntity = getTtlRequestEntity(ttlRequest);
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
 
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
@@ -991,7 +992,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @Test
     void patchDocument_HttpClientErrorException() {
         final UpdateTtlRequest ttlRequest = buildUpdateDocumentCommand();
-        final HttpEntity<DmTtlRequest> requestEntity = new HttpEntity<>(new DmTtlRequest(ttlRequest.getTtl()));
+        final HttpEntity<DmTtlRequest> requestEntity = getTtlRequestEntity(ttlRequest);
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
 
         when(restTemplateMock.exchange(
@@ -1013,7 +1014,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @Test
     void patchDocument_ServiceException() {
         final UpdateTtlRequest ttlRequest = buildUpdateDocumentCommand();
-        final HttpEntity<DmTtlRequest> requestEntity = new HttpEntity<>(new DmTtlRequest(ttlRequest.getTtl()));
+        final HttpEntity<DmTtlRequest> requestEntity = getTtlRequestEntity(ttlRequest);
         String patchTTLUrl = String.format("%s/documents/%s", documentURL, MATCHED_DOCUMENT_ID);
 
         when(restTemplateMock.exchange(
@@ -1031,6 +1032,11 @@ class DocumentManagementServiceImplTest implements TestFixture {
         assertThrows(ServiceException.class, () -> {
             sut.patchDocument(MATCHED_DOCUMENT_ID, ttlRequest);
         });
+    }
+
+    private HttpEntity<DmTtlRequest> getTtlRequestEntity(UpdateTtlRequest ttlRequest) {
+        return new HttpEntity<>(new DmTtlRequest(ttlRequest.getTtl().atZone(
+            ZoneId.systemDefault())));
     }
 
     @Test
