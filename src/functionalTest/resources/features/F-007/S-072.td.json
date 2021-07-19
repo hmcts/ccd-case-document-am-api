@@ -23,7 +23,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "Resource not found ${[scenarioContext][testData][request][body][documentHashTokens][0][id]}"
+      "errorDescription": "Meta data does not exist for documentId: ${[scenarioContext][testData][request][body][documentHashTokens][0][id]}"
     }
   }
 }
