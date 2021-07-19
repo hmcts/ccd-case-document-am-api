@@ -78,11 +78,12 @@ public class CaseDocumentAmControllerTest implements TestFixture {
         MockitoAnnotations.openMocks(this);
         testee = new CaseDocumentAmController(documentManagementService, securityUtils);
         when(securityUtils.getServiceNameFromS2SToken(TEST_S2S_TOKEN)).thenReturn(XUI_WEBAPP);
+        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService).getDocumentMetadata(
+            MATCHED_DOCUMENT_ID);
     }
 
     @Test
     void shouldGetValidMetaDataResponse() {
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
         doNothing().when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),
                                  MATCHED_DOCUMENT_ID,
@@ -108,7 +109,6 @@ public class CaseDocumentAmControllerTest implements TestFixture {
 
     @Test
     void shouldNotGetValidMetaDataResponseWhenServiceNotAuthorised() {
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
         doThrow(ForbiddenException.class).when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),
                                  MATCHED_DOCUMENT_ID,
@@ -128,7 +128,6 @@ public class CaseDocumentAmControllerTest implements TestFixture {
 
     @Test
     void shouldNotGetValidMetaDataResponseWhenUserNotAuthorised() {
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
         doThrow(ForbiddenException.class).when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),
                                  MATCHED_DOCUMENT_ID,
@@ -149,7 +148,6 @@ public class CaseDocumentAmControllerTest implements TestFixture {
     @Test
     @DisplayName("should get 200 document binary content")
     void shouldGetDocumentBinaryContent() {
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
         doNothing().when(documentManagementService)
             .checkUserPermission(setDocumentMetaData(),
                                  MATCHED_DOCUMENT_ID,
@@ -178,14 +176,13 @@ public class CaseDocumentAmControllerTest implements TestFixture {
 
     @Test
     @DisplayName("should throw 403 forbidden  when the requested document does not have read permission")
-    void shouldThrowForbiddenWhenDocumentDoesNotHaveReadPermission() {
+    public void shouldThrowForbiddenWhenDocumentDoesNotHaveReadPermission() {
         doNothing().when(documentManagementService)
             .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
                                     Permission.READ,
                                     SERVICE_PERMISSION_ERROR,
                                     MATCHED_DOCUMENT_ID.toString());
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
         doThrow(ForbiddenException.class).when(documentManagementService)
             .getDocumentBinaryContent(MATCHED_DOCUMENT_ID);
 
@@ -204,9 +201,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
                 Permission.READ
             )
         ));
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
-        doReturn(CASE_ID_VALUE)
-            .when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
+        doReturn(CASE_ID_VALUE).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData());
         doReturn(documentPermissions).when(caseDataStoreService)
             .getCaseDocumentMetadata(CASE_ID_VALUE, MATCHED_DOCUMENT_ID);
         doThrow(ForbiddenException.class).when(documentManagementService)
@@ -232,9 +227,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
                 Permission.READ
             )
         ));
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
-        doReturn(CASE_ID_VALUE)
-            .when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData().getBody());
+        doReturn(CASE_ID_VALUE).when(documentManagementService).extractCaseIdFromMetadata(setDocumentMetaData());
         doReturn(documentPermissions).when(caseDataStoreService)
             .getCaseDocumentMetadata(CASE_ID_VALUE, MATCHED_DOCUMENT_ID);
         doReturn(setDocumentBinaryContent(FORBIDDEN)).when(documentManagementService)
@@ -253,7 +246,6 @@ public class CaseDocumentAmControllerTest implements TestFixture {
     @Test
     @DisplayName("should get 204 when document delete is successful")
     void shouldDeleteDocumentByDocumentId() {
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
         doNothing().when(documentManagementService)
             .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
@@ -280,7 +272,6 @@ public class CaseDocumentAmControllerTest implements TestFixture {
     @Test
     @DisplayName("should get 403 when service is not authorised")
     void shouldNotAllowDeleteDocumentByDocumentIdWhenServiceIsNotAuthorised() {
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
         doThrow(ForbiddenException.class).when(documentManagementService)
             .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
@@ -302,7 +293,6 @@ public class CaseDocumentAmControllerTest implements TestFixture {
 
     @Test
     void shouldPatchDocumentByDocumentId() {
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
         doNothing().when(documentManagementService)
             .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
@@ -335,8 +325,8 @@ public class CaseDocumentAmControllerTest implements TestFixture {
 
     @Test
     void shouldNotAllowPatchDocumentByDocumentIdWhenServiceIsNotAuthorised() {
-        final ResponseEntity<StoredDocumentHalResource> documentMetaData = setDocumentMetaData();
-        doReturn(documentMetaData).when(documentManagementService).getDocumentMetadata(DOCUMENT_ID);
+        final StoredDocumentHalResource documentMetaData = setDocumentMetaData();
+        doReturn(Optional.of(documentMetaData)).when(documentManagementService).getDocumentMetadata(DOCUMENT_ID);
         doThrow(ForbiddenException.class).when(documentManagementService).checkServicePermission(
             documentMetaData,
             XUI_WEBAPP,
@@ -360,10 +350,19 @@ public class CaseDocumentAmControllerTest implements TestFixture {
             eq(SERVICE_PERMISSION_ERROR),
             anyString()
         );
-        final CaseDocumentsMetadata body = CaseDocumentsMetadata.builder()
-            .caseTypeId("")
-            .jurisdictionId("")
+
+        DocumentHashToken document = DocumentHashToken.builder()
+            .id(UUID.fromString("cab18c21-8b7c-452b-937c-091225e0cc12"))
             .build();
+        CaseDocumentsMetadata body = CaseDocumentsMetadata.builder()
+            .caseId("1111122222333334")
+            .documentHashTokens(Collections.singletonList(document))
+            .caseTypeId(BEFTA_CASETYPE_2)
+            .jurisdictionId(BEFTA_JURISDICTION_2)
+            .build();
+
+        doReturn(Optional.of(setDocumentMetaData())).when(documentManagementService)
+            .getDocumentMetadata(body.getDocumentHashTokens().get(0).getId());
 
         assertThatExceptionOfType(ForbiddenException.class)
             .isThrownBy(() -> testee.patchMetaDataOnDocuments(body, TEST_S2S_TOKEN));
@@ -458,11 +457,11 @@ public class CaseDocumentAmControllerTest implements TestFixture {
             .isThrownBy(() -> testee.uploadDocuments(documentUploadRequest, bindingResult, TEST_S2S_TOKEN));
     }
 
-    private ResponseEntity<StoredDocumentHalResource> setDocumentMetaData() {
+    private StoredDocumentHalResource setDocumentMetaData() {
         StoredDocumentHalResource resource = new StoredDocumentHalResource();
         resource.setCreatedBy("test");
         resource.setOriginalDocumentName("test.png");
-        return new ResponseEntity<>(resource, HttpStatus.OK);
+        return resource;
     }
 
     private DocumentPermissions getDocumentPermissions(UUID docId, List<Permission> permission) {
@@ -511,15 +510,17 @@ public class CaseDocumentAmControllerTest implements TestFixture {
 
     @Test
     void generateHashCode_HappyPath() {
+        StoredDocumentHalResource documentMetadata = setDocumentMetaData();
 
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
+        doReturn(Optional.of(documentMetadata)).when(documentManagementService)
+            .getDocumentMetadata(MATCHED_DOCUMENT_ID);
         doNothing().when(documentManagementService)
             .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
                                     Permission.HASHTOKEN,
                                     SERVICE_PERMISSION_ERROR,
                                     MATCHED_DOCUMENT_ID.toString());
-        when(documentManagementService.generateHashToken(MATCHED_DOCUMENT_ID))
+        when(documentManagementService.generateHashToken(MATCHED_DOCUMENT_ID, documentMetadata))
             .thenReturn("hashToken");
 
         final ResponseEntity<GeneratedHashCodeResponse> responseEntity =
@@ -538,18 +539,21 @@ public class CaseDocumentAmControllerTest implements TestFixture {
 
     @Test
     void generateHashCode_BadRequestWhenServiceIsNotAuthorised() {
+        StoredDocumentHalResource documentMetadata = setDocumentMetaData();
 
-        doReturn(setDocumentMetaData()).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
+        doReturn(Optional.of(documentMetadata)).when(documentManagementService)
+            .getDocumentMetadata(MATCHED_DOCUMENT_ID);
         doThrow(ForbiddenException.class).when(documentManagementService)
             .checkServicePermission(setDocumentMetaData(),
                                     XUI_WEBAPP,
                                     Permission.HASHTOKEN,
                                     SERVICE_PERMISSION_ERROR,
                                     MATCHED_DOCUMENT_ID.toString());
-        when(documentManagementService.generateHashToken(MATCHED_DOCUMENT_ID))
+        when(documentManagementService.generateHashToken(MATCHED_DOCUMENT_ID, documentMetadata))
             .thenReturn("hashToken");
 
         assertThatExceptionOfType(ForbiddenException.class)
             .isThrownBy(() -> testee.generateHashCode(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN));
     }
+
 }

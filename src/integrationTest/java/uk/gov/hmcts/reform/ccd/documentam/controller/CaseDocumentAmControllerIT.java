@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.mock.web.MockPart;
 import org.springframework.test.web.servlet.MockMvc;
@@ -74,9 +75,13 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     public static final String RESPONSE_RESULT_KEY = "Result";
     public static final String RESPONSE_ERROR_KEY = "errorCode";
+    public static final String RESPONSE_ERROR_DESCRIPTION_KEY = "errorDescription";
 
     public static final String SUCCESS = "Success";
     public static final int ERROR_403 = 403;
+    public static final String PATCH_ERROR_DESCRIPTION_NOT_FOUND = "Meta data does not exist for documentId: ";
+    public static final String PATCH_ERROR_DESCRIPTION_BAD_REQUEST = "Document metadata exists but the "
+        + "case type is not a moving case type: ";
 
     private static final String MAIN_URL = "/cases/documents";
     private static final String ATTACH_TO_CASE_URL = "/attachToCase";
@@ -85,6 +90,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     private static final String CLASSIFICATION_VALUE = "PUBLIC";
     private static final String CASE_TYPE_ID_VALUE = "BEFTA_CASETYPE_2";
+    private static final String CASE_TYPE_ID_MOVING_CASE_VALUE = "CMC_ExceptionRecord";
     private static final String JURISDICTION_ID_VALUE = "BEFTA_JURISDICTION_2";
     private static final String META_DATA_JSON_EXPRESSION = "$.metadata.";
 
@@ -268,7 +274,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     void shouldSuccessfullyPatchDocumentByDocumentId() throws Exception {
         final Date time = Date.from(Instant.now());
 
-        final StoredDocumentHalResource storedDocumentResource = getStoredDocumentResourceToUpdatePatch(time);
+        StoredDocumentHalResource storedDocumentResource =
+            getStoredDocumentResourceToUpdatePatch(time, CASE_TYPE_ID_MOVING_CASE_VALUE);
 
         stubGetDocumentMetaData(storedDocumentResource);
         stubPatchDocument(storedDocumentResource);
@@ -347,19 +354,20 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
             .generateHashCode(salt.concat(DOCUMENT_ID.toString()
                                               .concat(CASE_ID_VALUE)
                                               .concat(JURISDICTION_ID_VALUE)
-                                              .concat(CASE_TYPE_ID_VALUE)));
+                                              .concat(CASE_TYPE_ID_MOVING_CASE_VALUE)));
 
         List<DocumentHashToken> documentHashTokens = new ArrayList<>();
         documentHashTokens.add(new DocumentHashToken(DOCUMENT_ID, hashToken));
         CaseDocumentsMetadata body = new CaseDocumentsMetadata();
         body.setDocumentHashTokens(documentHashTokens);
         body.setCaseId(CASE_ID_VALUE);
-        body.setCaseTypeId(CASE_TYPE_ID_VALUE);
+        body.setCaseTypeId(CASE_TYPE_ID_MOVING_CASE_VALUE);
         body.setJurisdictionId(JURISDICTION_ID_VALUE);
 
         Date time = Date.from(Instant.now());
 
-        StoredDocumentHalResource storedDocumentResource = getStoredDocumentResourceToUpdatePatch(time);
+        StoredDocumentHalResource storedDocumentResource =
+            getStoredDocumentResourceToUpdatePatch(time, CASE_TYPE_ID_MOVING_CASE_VALUE);
 
         stubGetDocumentMetaData(storedDocumentResource);
         stubPatchDocumentMetaData(storedDocumentResource);
@@ -373,6 +381,90 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                                                           .content(getJsonString(body)))
             .andExpect(status().isOk())
             .andExpect(jsonPath(RESPONSE_RESULT_KEY, is(SUCCESS)))
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
+                SERVICE_NAME_CCD_DATA,
+                documentIds,
+                body.getCaseId()
+            ));
+    }
+
+    @Test
+    void shouldNotSuccessfullyPatchMetaDataWhenDocumentIsNotMovingCases() throws Exception {
+        List<DocumentHashToken> documentHashTokens = new ArrayList<>();
+        documentHashTokens.add(new DocumentHashToken(DOCUMENT_ID, null));
+        CaseDocumentsMetadata body = new CaseDocumentsMetadata();
+        body.setDocumentHashTokens(documentHashTokens);
+        body.setCaseId(CASE_ID_VALUE);
+        body.setCaseTypeId(CASE_TYPE_ID_VALUE);
+        body.setJurisdictionId(JURISDICTION_ID_VALUE);
+
+        Date time = Date.from(Instant.now());
+
+        StoredDocumentHalResource storedDocumentResource =
+            getStoredDocumentResourceToUpdatePatch(time, CASE_TYPE_ID_VALUE);
+        Map<String, String> updatedMetaData = storedDocumentResource.getMetadata();
+        updatedMetaData.put(CASE_TYPE_ID, CASE_TYPE_ID_VALUE);
+        storedDocumentResource.setMetadata(updatedMetaData);
+
+        stubGetDocumentMetaData(storedDocumentResource);
+        stubPatchDocumentMetaData(storedDocumentResource);
+
+        List<String> documentIds = new ArrayList<>();
+        documentIds.add(DOCUMENT_ID.toString());
+
+        mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
+                            .headers(createHttpHeaders(SERVICE_NAME_CCD_DATA))
+                            .contentType(MediaType.APPLICATION_JSON_VALUE)
+                            .content(getJsonString(body)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath(RESPONSE_ERROR_DESCRIPTION_KEY,
+                                is(PATCH_ERROR_DESCRIPTION_BAD_REQUEST + DOCUMENT_ID)))
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
+                SERVICE_NAME_CCD_DATA,
+                documentIds,
+                body.getCaseId()
+            ));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenMetaDataIsEmptyAndPatchingMetaData() throws Exception {
+        String hashToken = ApplicationUtils
+            .generateHashCode(salt.concat(DOCUMENT_ID.toString()
+                                              .concat(CASE_ID_VALUE)
+                                              .concat(JURISDICTION_ID_VALUE)
+                                              .concat(CASE_TYPE_ID_VALUE)));
+
+        List<DocumentHashToken> documentHashTokens = new ArrayList<>();
+        documentHashTokens.add(new DocumentHashToken(UUID.fromString(DOCUMENT_ID_FROM_LINK), hashToken));
+        CaseDocumentsMetadata body = new CaseDocumentsMetadata();
+        body.setDocumentHashTokens(documentHashTokens);
+        body.setCaseId(CASE_ID_VALUE);
+        body.setCaseTypeId(CASE_TYPE_ID_VALUE);
+        body.setJurisdictionId(JURISDICTION_ID_VALUE);
+
+        Date time = Date.from(Instant.now());
+
+        StoredDocumentHalResource storedDocumentResource =
+            getStoredDocumentResourceToUpdatePatch(time, CASE_TYPE_ID_VALUE);
+        Map<String, String> updatedMetaData = storedDocumentResource.getMetadata();
+        updatedMetaData.put(CASE_TYPE_ID, CASE_TYPE_ID_VALUE);
+        storedDocumentResource.setMetadata(updatedMetaData);
+
+        stubGetDocumentMetaData(storedDocumentResource);
+        stubPatchDocumentMetaData(storedDocumentResource);
+
+        List<String> documentIds = new ArrayList<>();
+        documentIds.add(DOCUMENT_ID_FROM_LINK);
+
+        mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
+                            .headers(createHttpHeaders(SERVICE_NAME_CCD_DATA))
+                            .contentType(MediaType.APPLICATION_JSON_VALUE)
+                            .content(getJsonString(body)))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath(RESPONSE_ERROR_DESCRIPTION_KEY,
+                                is(PATCH_ERROR_DESCRIPTION_NOT_FOUND + DOCUMENT_ID_FROM_LINK)))
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
                 SERVICE_NAME_CCD_DATA,
@@ -433,7 +525,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
         Date time = Date.from(Instant.now());
 
-        StoredDocumentHalResource storedDocumentResource = getStoredDocumentResourceToUpdatePatch(time);
+        StoredDocumentHalResource storedDocumentResource =
+            getStoredDocumentResourceToUpdatePatch(time, CASE_TYPE_ID_MOVING_CASE_VALUE);
 
         stubGetDocumentMetaData(storedDocumentResource);
         stubPatchDocumentMetaData(storedDocumentResource);
@@ -471,6 +564,28 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
             .andExpect(status().isForbidden())
             .andExpect(jsonPath(RESPONSE_ERROR_KEY, is(ERROR_403)));
 
+    }
+
+    @Test
+    void shouldFailToUploadDocumentEmptyFile() throws Exception {
+
+        MockMultipartFile jsonFile1 =
+            new MockMultipartFile("name", null,
+                                  null, new byte[0]);
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart(MAIN_URL)
+                            .file(jsonFile1)
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
+                            .param(CLASSIFICATION, CLASSIFICATION_VALUE)
+                            .param(CASE_TYPE_ID, CASE_TYPE_ID_VALUE)
+                            .param(JURISDICTION_ID, JURISDICTION_ID_VALUE)
+                            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+            .andExpect(status().isBadRequest())
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.UPLOAD_DOCUMENTS,
+                SERVICE_NAME_XUI_WEBAPP,
+                null,
+                null));
     }
 
     @Test
@@ -573,15 +688,17 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         storedDocumentHalResource.setLastModifiedBy(USER_ID);
         storedDocumentHalResource.setMetadata(metaData);
 
+        storedDocumentHalResource.addLinks(DOCUMENT_ID);
+
         return storedDocumentHalResource;
     }
 
-    private StoredDocumentHalResource getStoredDocumentResourceToUpdatePatch(Date time) {
+    private StoredDocumentHalResource getStoredDocumentResourceToUpdatePatch(Date time, String caseTypeId) {
         Map<String, String> metaData = new HashMap<>();
         metaData.put("size", "10");
         metaData.put("createdBy", USER_ID);
         metaData.put(CASE_ID, CASE_ID_VALUE);
-        metaData.put(CASE_TYPE_ID, CASE_TYPE_ID_VALUE);
+        metaData.put(CASE_TYPE_ID, caseTypeId);
         metaData.put(JURISDICTION_ID, JURISDICTION_ID_VALUE);
         metaData.put(CLASSIFICATION, CLASSIFICATION_VALUE);
         metaData.put("metadata", "");
