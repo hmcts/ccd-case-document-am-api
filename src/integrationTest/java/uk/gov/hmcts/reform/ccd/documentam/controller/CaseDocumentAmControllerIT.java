@@ -39,6 +39,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -82,6 +83,7 @@ public class CaseDocumentAmControllerIT extends BaseTest {
     public static final String SUCCESS = "Success";
     public static final int ERROR_403 = 403;
     public static final String PATCH_ERROR_DESCRIPTION_NOT_FOUND = "Meta data does not exist for documentId: ";
+    public static final String PATCH_ERROR_DESCRIPTION_FAILED_HASH_TOKEN_CHECK = "Hash token check failed for the document: ";
     public static final String PATCH_ERROR_DESCRIPTION_BAD_REQUEST = "Document metadata exists but the "
         + "case type is not a moving case type: ";
 
@@ -438,6 +440,47 @@ public class CaseDocumentAmControllerIT extends BaseTest {
             .andExpect(status().isNotFound())
             .andExpect(jsonPath(RESPONSE_ERROR_DESCRIPTION_KEY,
                                 is(PATCH_ERROR_DESCRIPTION_NOT_FOUND + DOCUMENT_ID_FROM_LINK)))
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
+                SERVICE_NAME_CCD_DATA,
+                documentIds,
+                body.getCaseId()
+            ));
+    }
+
+    @Test
+    void shouldNotSuccessfullyVerifyHashToken() throws Exception {
+        String hashToken = ApplicationUtils
+            .generateHashCode(salt.concat(DOCUMENT_ID.toString()
+                                              .concat(CASE_ID_VALUE)
+                                              .concat(JURISDICTION_ID_VALUE)
+                                              .concat("random")));
+
+        List<DocumentHashToken> documentHashTokens = new ArrayList<>();
+        documentHashTokens.add(new DocumentHashToken(DOCUMENT_ID.toString(), hashToken));
+        CaseDocumentsMetadata body = new CaseDocumentsMetadata();
+        body.setDocumentHashTokens(documentHashTokens);
+        body.setCaseId(CASE_ID_VALUE);
+        body.setCaseTypeId(CASE_TYPE_ID_MOVING_CASE_VALUE);
+        body.setJurisdictionId(JURISDICTION_ID_VALUE);
+
+        Date time = Date.from(Instant.now());
+
+        StoredDocumentHalResource storedDocumentResource =
+            getStoredDocumentResourceToUpdatePatch(time, CASE_TYPE_ID_MOVING_CASE_VALUE);
+
+        stubGetDocumentMetaData(storedDocumentResource);
+        stubPatchDocumentMetaData(storedDocumentResource);
+
+        List<String> documentIds = new ArrayList<>();
+        documentIds.add(DOCUMENT_ID.toString());
+
+        mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
+                            .headers(createHttpHeaders(SERVICE_NAME_CCD_DATA))
+                            .contentType(MediaType.APPLICATION_JSON_VALUE)
+                            .content(getJsonString(body)))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath(RESPONSE_ERROR_DESCRIPTION_KEY, containsString(PATCH_ERROR_DESCRIPTION_FAILED_HASH_TOKEN_CHECK + DOCUMENT_ID.toString())))
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
                 SERVICE_NAME_CCD_DATA,
