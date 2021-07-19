@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
@@ -17,7 +18,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
@@ -32,12 +32,8 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.BEARER;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_AUTHORIZATION;
 
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.ExcessiveImports"})
-public class WiremockFixtures {
-    public static final String MAIN_URL = "/cases/documents";
+public class WiremockFixtures implements TestFixture {
     public static final String DOCUMENTS_URL = "/documents/";
-
-    public static final UUID DOCUMENT_ID = UUID.randomUUID();
-    public static final String CASE_ID_VALUE = "1584722156538291";
 
     public static final String TOKEN = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJjY2RfZ3ciLCJleHAiOjE1ODM0NDUyOTd9"
         + ".WWRzROlKxLQCJw5h0h0dHb9hHfbBhF2Idwv1z4L4FnqSw3VZ38ZRLuDmwr3tj-8oOv6EfLAxV0dJAPtUT203Iw";
@@ -66,8 +62,7 @@ public class WiremockFixtures {
     }
 
     public static void stubDocumentUrlWithReadPermissions() {
-        ArrayList<Permission> permissionList = new ArrayList<>();
-        permissionList.add(Permission.READ);
+        final List<Permission> permissionList = List.of(Permission.READ);
 
         stubDocumentUrl(getCaseDocumentMetaData(permissionList));
     }
@@ -137,7 +132,7 @@ public class WiremockFixtures {
     private static CaseDocumentMetadata getCaseDocumentMetaData(final List<Permission> permissionList) {
         final DocumentPermissions documentPermissions = DocumentPermissions
             .builder()
-            .id(DOCUMENT_ID.toString())
+            .id(DOCUMENT_ID)
             .permissions(permissionList)
             .build();
 
@@ -146,6 +141,13 @@ public class WiremockFixtures {
             .caseId(CASE_ID_VALUE)
             .documentPermissions(documentPermissions)
             .build();
+    }
+
+    public static void stubGetGreeting() {
+        stubFor(WireMock.get(urlPathEqualTo("/greeting"))
+                    .willReturn(aResponse()
+                                    .withStatus(HTTP_OK)
+                                    .withBody("Hello World!")));
     }
 
     @SuppressWarnings({"PMD.AvoidThrowingRawExceptionTypes", "squid:S112"})

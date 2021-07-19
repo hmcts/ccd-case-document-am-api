@@ -17,5 +17,9 @@ azure:
     web:
       enabled: false
 
+hash:
+  check:
+    enabled: ${HASH_CHECK_ENABLED:false}
+
 documentStoreUrl: http://localhost:${wiremock.server.port}
 caseDataStoreUrl: http://localhost:${wiremock.server.port}

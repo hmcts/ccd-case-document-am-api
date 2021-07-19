@@ -34,7 +34,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "The Security Classification is not valid"
+      "errorDescription": "Classification is not valid"
     }
   }
 }

@@ -24,7 +24,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "Forbidden: Insufficient permissions: Could't find document for case  : ${[scenarioContext][childContexts][S-023_Case_Create][testData][actualResponse][body][id]}"
+      "errorDescription": "Forbidden: Insufficient permissions: Couldn't find document for case  : ${[scenarioContext][childContexts][S-023_Case_Create][testData][actualResponse][body][id]}"
     }
   }
 }

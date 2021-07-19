@@ -1,20 +1,15 @@
 package uk.gov.hmcts.reform.ccd.documentam.controller.endpoints;
 
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_DOCUMENT_HASH_TOKEN_INVALID;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_DOCUMENT_ID_INVALID;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_DOCUMENT_NOT_FOUND;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_ID_NOT_VALID;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID_INVALID;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CLASSIFICATION_ID_INVALID;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.JURISDICTION_ID_INVALID;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USER_PERMISSION_ERROR;
-import static uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils.SERVICE_AUTHORIZATION;
-
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -27,32 +22,37 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.validation.Valid;
-
-import java.util.UUID;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import lombok.extern.slf4j.Slf4j;
-
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.LogAudit;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
+import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.GeneratedHashCodeResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentMetaDataResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
-import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.documentam.model.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
+
+import javax.validation.Valid;
+import java.util.Optional;
+import java.util.UUID;
+
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_DOCUMENT_HASH_TOKEN_INVALID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_DOCUMENT_ID_INVALID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_DOCUMENT_NOT_FOUND;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_ID_NOT_VALID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID_INVALID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CLASSIFICATION_ID_INVALID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.JURISDICTION_ID_INVALID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USER_PERMISSION_ERROR;
+import static uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils.SERVICE_AUTHORIZATION;
 
 @Api(value = "cases")
 @RestController
@@ -99,22 +99,21 @@ public class CaseDocumentAmController {
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken
     ) {
-        final ResponseEntity<StoredDocumentHalResource> responseEntity =
-            documentManagementService.getDocumentMetadata(documentId);
+        StoredDocumentHalResource documentMetadata = getDocumentMetadata(documentId);
 
-        documentManagementService.checkServicePermission(responseEntity,
+        documentManagementService.checkServicePermission(documentMetadata,
                                                              getServiceNameFromS2SToken(s2sToken),
                                                              Permission.READ,
                                                              SERVICE_PERMISSION_ERROR,
                                                              documentId.toString());
 
-        documentManagementService.checkUserPermission(responseEntity,
+        documentManagementService.checkUserPermission(documentMetadata,
                                                       documentId,
                                                       Permission.READ,
                                                       USER_PERMISSION_ERROR,
                                                       documentId.toString());
 
-        return ResponseEntity.ok(responseEntity.getBody());
+        return ResponseEntity.status(HttpStatus.OK).body(documentMetadata);
     }
 
     @GetMapping(
@@ -148,8 +147,7 @@ public class CaseDocumentAmController {
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken
     ) {
-        final ResponseEntity<StoredDocumentHalResource> documentMetadata =
-            documentManagementService.getDocumentMetadata(documentId);
+        StoredDocumentHalResource documentMetadata = getDocumentMetadata(documentId);
 
         documentManagementService.checkServicePermission(documentMetadata,
                                                          getServiceNameFromS2SToken(s2sToken),
@@ -234,7 +232,7 @@ public class CaseDocumentAmController {
         @ApiResponse(
             code = 200,
             message = "Success",
-            response = StoredDocumentHalResource.class
+            response = PatchDocumentResponse.class
         ),
         @ApiResponse(
             code = 400,
@@ -251,22 +249,23 @@ public class CaseDocumentAmController {
         documentId = "#documentId"
     )
     public ResponseEntity<PatchDocumentResponse> patchDocumentByDocumentId(
-        @ApiParam(value = "", required = true)
-        @Valid @RequestBody final UpdateDocumentCommand body,
         @PathVariable("documentId") final UUID documentId,
+
+        @ApiParam(value = "", required = true)
+        @Valid @RequestBody final UpdateTtlRequest ttlRequest,
+
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken
     ) {
-        final ResponseEntity<StoredDocumentHalResource> responseEntity =
-            documentManagementService.getDocumentMetadata(documentId);
+        StoredDocumentHalResource documentMetadata = getDocumentMetadata(documentId);
 
-        documentManagementService.checkServicePermission(responseEntity,
+        documentManagementService.checkServicePermission(documentMetadata,
                                                              getServiceNameFromS2SToken(s2sToken),
                                                              Permission.UPDATE,
                                                              SERVICE_PERMISSION_ERROR,
                                                              documentId.toString());
 
-        return documentManagementService.patchDocument(documentId, body);
+        return documentManagementService.patchDocument(documentId, ttlRequest);
     }
 
     @PatchMapping(
@@ -279,7 +278,7 @@ public class CaseDocumentAmController {
         @ApiResponse(
             code = 200,
             message = "Success",
-            response = StoredDocumentHalResource.class
+            response = PatchDocumentMetaDataResponse.class
         ),
         @ApiResponse(
             code = 400,
@@ -316,14 +315,8 @@ public class CaseDocumentAmController {
         @ApiParam(value = "", required = true)
         @Valid @RequestBody final CaseDocumentsMetadata caseDocumentsMetadata,
 
-        final BindingResult bindingResult,
-
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken) {
-
-        handleErrors(bindingResult);
-
-        documentManagementService.validateHashTokens(caseDocumentsMetadata.getDocumentHashTokens());
 
         documentManagementService.checkServicePermission(
             caseDocumentsMetadata.getCaseTypeId(),
@@ -367,10 +360,9 @@ public class CaseDocumentAmController {
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken
     ) {
-        final ResponseEntity<StoredDocumentHalResource> responseEntity =
-            documentManagementService.getDocumentMetadata(documentId);
+        StoredDocumentHalResource documentMetadata = getDocumentMetadata(documentId);
 
-        documentManagementService.checkServicePermission(responseEntity,
+        documentManagementService.checkServicePermission(documentMetadata,
                                                          getServiceNameFromS2SToken(s2sToken),
                                                          Permission.UPDATE,
                                                          SERVICE_PERMISSION_ERROR,
@@ -390,7 +382,7 @@ public class CaseDocumentAmController {
         @ApiResponse(
             code = 200,
             message = "Success",
-            response = StoredDocumentHalResource.class
+            response = GeneratedHashCodeResponse.class
         ),
         @ApiResponse(
             code = 400,
@@ -410,18 +402,34 @@ public class CaseDocumentAmController {
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken
     ) {
-        final ResponseEntity<StoredDocumentHalResource> responseEntity =
-            documentManagementService.getDocumentMetadata(documentId);
+        StoredDocumentHalResource documentMetadata = getDocumentMetadata(documentId);
 
-        documentManagementService.checkServicePermission(responseEntity,
+        documentManagementService.checkServicePermission(documentMetadata,
                                                          getServiceNameFromS2SToken(s2sToken),
                                                          Permission.HASHTOKEN,
                                                          SERVICE_PERMISSION_ERROR,
                                                          documentId.toString());
 
-        return ResponseEntity.ok(GeneratedHashCodeResponse.builder()
-                              .hashToken(documentManagementService.generateHashToken(documentId))
-                              .build());
+        return new ResponseEntity<>(GeneratedHashCodeResponse.builder()
+                                        .hashToken(
+                                            documentManagementService.generateHashToken(documentId, documentMetadata))
+                                        .build(), HttpStatus.OK);
+    }
+
+    private StoredDocumentHalResource getDocumentMetadata(UUID documentId) {
+        Optional<StoredDocumentHalResource> documentMetadata =
+            documentManagementService.getDocumentMetadata(documentId);
+
+        checkMetadataExists(documentMetadata, documentId);
+
+        return documentMetadata.get();
+    }
+
+    private void checkMetadataExists(Optional<StoredDocumentHalResource> documentMetadata, UUID documentId) {
+        if (documentMetadata.isEmpty()) {
+            throw new ResourceNotFoundException(String.format("Meta data does not exist for documentId: %s",
+                                                              documentId.toString()));
+        }
     }
 
     private String getServiceNameFromS2SToken(String s2sToken) {

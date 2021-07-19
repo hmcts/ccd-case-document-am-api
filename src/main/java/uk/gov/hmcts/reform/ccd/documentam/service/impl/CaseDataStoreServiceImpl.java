@@ -33,19 +33,19 @@ import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
 @Service
 public class CaseDataStoreServiceImpl implements CaseDataStoreService {
 
-    private static final String ERROR_MESSAGE = "Could't find document for case  : {}, response code from CCD : {}";
-    private static final String CASE_ERROR_MESSAGE = "Could't find document for case  : ";
+    private static final String ERROR_MESSAGE = "Couldn't find document for case  : {}, response code from CCD : {}";
+    private static final String CASE_ERROR_MESSAGE = "Couldn't find document for case  : ";
 
-    @Value("${caseDataStoreUrl}")
-    protected String caseDataStoreUrl;
-
-    private RestTemplate restTemplate;
-    private SecurityUtils securityUtils;
-
+    private final RestTemplate restTemplate;
+    private final String caseDataStoreUrl;
+    private final SecurityUtils securityUtils;
 
     @Autowired
-    public CaseDataStoreServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils) {
+    public CaseDataStoreServiceImpl(final RestTemplate restTemplate,
+                                    @Value("${caseDataStoreUrl}") final String caseDataStoreUrl,
+                                    final SecurityUtils securityUtils) {
         this.restTemplate = restTemplate;
+        this.caseDataStoreUrl = caseDataStoreUrl;
         this.securityUtils = securityUtils;
     }
 

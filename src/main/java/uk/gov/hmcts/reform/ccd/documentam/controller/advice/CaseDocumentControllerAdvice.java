@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.ccd.documentam.controller.advice;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
@@ -49,10 +50,30 @@ public class CaseDocumentControllerAdvice {
         );
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    protected ResponseEntity<Object> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+        logger.error(LOG_STRING, exception);
+
+        final String message = exception.getBindingResult()
+            .getFieldErrors()
+            .stream()
+            .map(DefaultMessageSourceResolvable::getDefaultMessage)
+            .findFirst()
+            .orElse(null);
+
+        final ErrorResponse errorDetails = ErrorResponse.builder()
+            .errorCode(ErrorConstants.BAD_REQUEST.getErrorCode())
+            .errorMessage(ErrorConstants.BAD_REQUEST.getErrorMessage())
+            .errorDescription(message)
+            .timeStamp(getTimeStamp())
+            .build();
+
+        return new ResponseEntity<>(errorDetails, BAD_REQUEST);
+    }
+
     @ExceptionHandler({BadRequestException.class,
         RequiredFieldMissingException.class,
         InvalidRequest.class,
-        MethodArgumentNotValidException.class,
         MissingServletRequestParameterException.class,
         MethodArgumentTypeMismatchException.class,
         HttpMessageConversionException.class})

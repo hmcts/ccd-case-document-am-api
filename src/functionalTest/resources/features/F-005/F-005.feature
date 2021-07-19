@@ -15,7 +15,7 @@ Feature: F-005: Patch Document with ttl
     And   the response [contains the same ttl applied in request],
     And   the response has all other details as expected.
 #
-  @S-052
+  @S-052 @Ignore # Due to unexpected behaviour of @DateTimeFormat
   Scenario: must get an error response for a non-existing ttl
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
     And a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],

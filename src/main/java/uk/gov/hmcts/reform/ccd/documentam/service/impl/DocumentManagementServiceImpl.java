@@ -3,8 +3,11 @@ package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PATCH;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.BAD_REQUEST;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DM_DATE_TIME_FORMATTER;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,23 +24,19 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
@@ -48,20 +47,19 @@ import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedServices;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
+import uk.gov.hmcts.reform.ccd.documentam.model.DmTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentUpdate;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
-import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.documentam.model.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
-import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
-import uk.gov.hmcts.reform.ccd.documentam.service.ValidationUtils;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.documentam.util.ResponseHelper;
 
@@ -72,14 +70,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private static final Date NULL_TTL = null;
 
     private final RestTemplate restTemplate;
-    private final ValidationUtils validationUtils;
-    private final SecurityUtils securityUtils;
 
     @Value("${documentStoreUrl}")
     protected String documentURL;
 
-    @Value("${documentTTL}")
-    protected String documentTtl;
+    @Value("${documentTtlInDays}")
+    protected int documentTtlInDays;
 
     @Value("${idam.s2s-auth.totp_secret}")
     protected String salt;
@@ -89,7 +85,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Value("${hash.check.enabled}")
     private boolean hashCheckEnabled;
 
+    @Value("${bulkscan.exception.record.types}")
+    private List<String> bulkScanExceptionRecordTypes;
+
     private static AuthorisedServices authorisedServices;
+
+    private static final HttpEntity<Object> NULL_REQUEST_ENTITY = null;
 
     static {
         try (InputStream inputStream = DocumentManagementServiceImpl.class.getClassLoader()
@@ -102,25 +103,21 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Autowired
-    public DocumentManagementServiceImpl(RestTemplate restTemplate, SecurityUtils securityUtils,
-                                         CaseDataStoreService caseDataStoreService, ValidationUtils validationUtils) {
+    public DocumentManagementServiceImpl(RestTemplate restTemplate, CaseDataStoreService caseDataStoreService) {
         this.restTemplate = restTemplate;
-        this.securityUtils = securityUtils;
         this.caseDataStoreService = caseDataStoreService;
-        this.validationUtils = validationUtils;
     }
 
     @Override
-    public ResponseEntity<StoredDocumentHalResource> getDocumentMetadata(UUID documentId) {
+    public Optional<StoredDocumentHalResource> getDocumentMetadata(UUID documentId) {
         ResponseEntity<StoredDocumentHalResource> responseResult = new ResponseEntity<>(HttpStatus.OK);
 
         try {
-            final HttpEntity<String> requestEntity = new HttpEntity<>(getHttpHeaders());
             String documentMetadataUrl = String.format("%s/documents/%s", documentURL, documentId);
             ResponseEntity<StoredDocumentHalResource> response = restTemplate.exchange(
                 documentMetadataUrl,
                 GET,
-                requestEntity,
+                NULL_REQUEST_ENTITY,
                 StoredDocumentHalResource.class
             );
             ResponseEntity<StoredDocumentHalResource> responseEntity =
@@ -134,10 +131,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 throw new ResourceNotFoundException(formatNotFoundMessage(documentId.toString()));
             }
         } catch (HttpClientErrorException exception) {
+            if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
+                return Optional.empty();
+            }
             handleException(exception, documentId.toString());
         }
-        return responseResult;
-
+        return Optional.of(responseResult.getBody());
     }
 
     @Override
@@ -153,12 +152,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public ResponseEntity<ByteArrayResource> getDocumentBinaryContent(UUID documentId) {
         ResponseEntity<ByteArrayResource> responseResult = new ResponseEntity<>(HttpStatus.OK);
         try {
-            final HttpEntity<HttpHeaders> requestEntity = new HttpEntity<>(getHttpHeaders());
             String documentBinaryUrl = String.format("%s/documents/%s/binary", documentURL, documentId);
             ResponseEntity<ByteArrayResource> response = restTemplate.exchange(
                 documentBinaryUrl,
                 GET,
-                requestEntity,
+                NULL_REQUEST_ENTITY,
                 ByteArrayResource.class
             );
             if (HttpStatus.OK.equals(response.getStatusCode())) {
@@ -182,8 +180,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         try {
             UpdateDocumentsCommand updateDocumentsCommand
                 = prepareRequestForAttachingDocumentToCase(caseDocumentsMetadata);
-            HttpEntity<UpdateDocumentsCommand> requestEntity
-                = new HttpEntity<>(updateDocumentsCommand, getHttpHeaders());
+            HttpEntity<UpdateDocumentsCommand> requestEntity = new HttpEntity<>(updateDocumentsCommand);
             String documentUrl = String.format("%s/documents", documentURL);
             restTemplate.exchange(documentUrl, HttpMethod.PATCH, requestEntity, Void.class);
         } catch (HttpClientErrorException exception) {
@@ -196,32 +193,40 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         List<DocumentUpdate> documentsList = new ArrayList<>();
         for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashTokens()) {
 
+            Optional<StoredDocumentHalResource> documentMetadata =
+                getDocumentMetadata(documentHashToken.getId());
+
+
             if (documentHashToken.getHashToken() != null) {
-                String hashcodeFromStoredDocument = generateHashToken(UUID.fromString(documentHashToken.getId()));
-                if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
-                    throw new ForbiddenException(UUID.fromString(documentHashToken.getId()));
+                if (documentMetadata.isEmpty()) {
+                    throw new ResourceNotFoundException(String.format("Meta data does not exist for documentId: %s",
+                                                                      documentHashToken.getId()));
                 }
+                verifyHashTokenValidity(documentHashToken, documentMetadata.get());
             } else if (hashCheckEnabled) {
-                throw new ForbiddenException("Hash check is enabled but hashToken hasn't provided for the document:"
-                                                 + documentHashToken.getId());
+                throw new ForbiddenException(
+                    String.format(
+                        "Hash check is enabled but hashToken wasn't provided for the document:%s",
+                        documentHashToken.getId()
+                    ));
+            } else {
+                // document metadata does not exist and document is not a moving case
+                if (documentMetadata.isPresent()
+                    && !documentMetadata.get().getMetadata().isEmpty()
+                    && !isDocumentMovingCases(documentMetadata.get().getMetadata().get(CASE_TYPE_ID))) {
+                    throw new BadRequestException(String.format(
+                        "Document metadata exists but the case type is not a moving case type: %s",
+                        documentHashToken.getId()
+                    ));
+                }
             }
+
 
             Map<String, String> metadataMap = new HashMap<>();
             metadataMap.put(Constants.CASE_ID, caseDocumentsMetadata.getCaseId());
 
-            if (caseDocumentsMetadata.getCaseTypeId() != null) {
-                validationUtils.validateInputParams(Constants.INPUT_STRING_PATTERN,
-                    caseDocumentsMetadata.getCaseTypeId());
-                metadataMap.put(Constants.CASE_TYPE_ID, caseDocumentsMetadata.getCaseTypeId());
-            }
-
-            if (caseDocumentsMetadata.getJurisdictionId() != null) {
-                validationUtils.validateInputParams(Constants.INPUT_STRING_PATTERN,
-                    caseDocumentsMetadata.getJurisdictionId());
-                metadataMap.put(Constants.JURISDICTION_ID, caseDocumentsMetadata.getJurisdictionId());
-            }
             DocumentUpdate documentUpdate = new DocumentUpdate();
-            documentUpdate.setDocumentId(UUID.fromString(documentHashToken.getId()));
+            documentUpdate.setDocumentId(documentHashToken.getId());
             documentUpdate.setMetadata(metadataMap);
 
             documentsList.add(documentUpdate);
@@ -230,26 +235,37 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return new UpdateDocumentsCommand(NULL_TTL, documentsList);
     }
 
-    @Override
-    public String generateHashToken(UUID documentId) {
-        ResponseEntity<?> responseEntity = getDocumentMetadata(documentId);
-        String hashcodeFromStoredDocument = "";
-        if (responseEntity.getStatusCode().equals(HttpStatus.OK) && responseEntity.getBody() != null) {
-            StoredDocumentHalResource resource = (StoredDocumentHalResource) responseEntity.getBody();
-
-            if (resource.getMetadata().get(Constants.CASE_ID) == null) {
-                hashcodeFromStoredDocument = ApplicationUtils
-                    .generateHashCode(salt.concat(documentId.toString()
-                        .concat(resource.getMetadata().get(Constants.JURISDICTION_ID))
-                        .concat(resource.getMetadata().get(Constants.CASE_TYPE_ID))));
-            } else {
-                hashcodeFromStoredDocument = ApplicationUtils
-                    .generateHashCode(salt.concat(documentId.toString()
-                        .concat(resource.getMetadata().get(Constants.CASE_ID))
-                        .concat(resource.getMetadata().get(Constants.JURISDICTION_ID))
-                        .concat(resource.getMetadata().get(Constants.CASE_TYPE_ID))));
-            }
+    private void verifyHashTokenValidity(DocumentHashToken documentHashToken,
+                                         StoredDocumentHalResource documentMetadata) {
+        String hashcodeFromStoredDocument =
+            generateHashToken(documentHashToken.getId(), documentMetadata);
+        if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
+            throw new ForbiddenException(String.format("Hash token check failed for the document: %s",
+                                                       documentHashToken.getId()));
         }
+    }
+
+    private boolean isDocumentMovingCases(String documentCaseTypeId) {
+        return bulkScanExceptionRecordTypes.contains(documentCaseTypeId);
+    }
+
+    @Override
+    public String generateHashToken(UUID documentId, StoredDocumentHalResource documentMetaData) {
+        String hashcodeFromStoredDocument = "";
+
+        if (documentMetaData.getMetadata().get(Constants.CASE_ID) == null) {
+            hashcodeFromStoredDocument = ApplicationUtils
+                .generateHashCode(salt.concat(documentId.toString()
+                    .concat(documentMetaData.getMetadata().get(Constants.JURISDICTION_ID))
+                    .concat(documentMetaData.getMetadata().get(Constants.CASE_TYPE_ID))));
+        } else {
+            hashcodeFromStoredDocument = ApplicationUtils
+                .generateHashCode(salt.concat(documentId.toString()
+                    .concat(documentMetaData.getMetadata().get(Constants.CASE_ID))
+                    .concat(documentMetaData.getMetadata().get(Constants.JURISDICTION_ID))
+                    .concat(documentMetaData.getMetadata().get(Constants.CASE_TYPE_ID))));
+        }
+
         return hashcodeFromStoredDocument;
     }
 
@@ -277,15 +293,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public ResponseEntity<PatchDocumentResponse> patchDocument(UUID documentId, UpdateDocumentCommand ttl) {
+    public ResponseEntity<PatchDocumentResponse> patchDocument(UUID documentId, UpdateTtlRequest ttl) {
         ResponseEntity<PatchDocumentResponse> responseResult = new ResponseEntity<>(HttpStatus.OK);
-        if (!validationUtils.validateTTL(ttl.getTtl())) {
-            throw new BadRequestException(String.format(
-                "Incorrect date format %s",
-                ttl.getTtl()));
-        }
+
         try {
-            final HttpEntity<UpdateDocumentCommand> requestEntity = new HttpEntity<>(ttl, getHttpHeaders());
+            DmTtlRequest dmTtlRequest = new DmTtlRequest(ttl.getTtl().atZone(ZoneId.systemDefault()));
+            final HttpEntity<DmTtlRequest> requestEntity = new HttpEntity<>(dmTtlRequest);
             String patchTTLUrl = String.format("%s/documents/%s", documentURL, documentId);
             ResponseEntity<StoredDocumentHalResource> response = restTemplate.exchange(
                 patchTTLUrl,
@@ -309,10 +322,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Override
     public void deleteDocument(UUID documentId, Boolean permanent) {
-        final HttpEntity<HttpHeaders> requestEntity = new HttpEntity<>(getHttpHeaders());
-        String documentDeleteUrl = String.format("%s/documents/%s?permanent=%s", documentURL, documentId, permanent);
+        final String documentDeleteUrl = String.format(
+            "%s/documents/%s?permanent=%s",
+            documentURL,
+            documentId,
+            permanent
+        );
         try {
-            restTemplate.exchange(documentDeleteUrl, DELETE, requestEntity, Void.class);
+            restTemplate.exchange(documentDeleteUrl, DELETE, NULL_REQUEST_ENTITY, Void.class);
         } catch (HttpClientErrorException exception) {
             handleException(exception, documentId.toString());
         }
@@ -344,14 +361,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         bodyMap.set("metadata[caseTypeId]", caseTypeId);
         bodyMap.set("ttl", getEffectiveTTL());
 
-        HttpHeaders headers = getHttpHeaders();
+        HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         return headers;
     }
 
     private String getEffectiveTTL() {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ENGLISH);
-        return format.format(new Timestamp(new Date().getTime() + Long.parseLong(documentTtl)));
+        ZonedDateTime currentDateTime = ZonedDateTime.now();
+        return currentDateTime.plusDays(documentTtlInDays).format(DM_DATE_TIME_FORMATTER);
     }
 
     private HttpHeaders getHeaders(ResponseEntity<ByteArrayResource> response) {
@@ -365,17 +382,16 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public void checkUserPermission(ResponseEntity<StoredDocumentHalResource> responseEntity,
+    public void checkUserPermission(StoredDocumentHalResource documentMetadata,
                                        UUID documentId, Permission permissionToCheck,
                                        String logMessage, String exceptionMessage) {
-        String caseId = extractCaseIdFromMetadata(responseEntity.getBody());
-        validationUtils.validate(caseId);
+        final String caseId = extractCaseIdFromMetadata(documentMetadata);
 
-        DocumentPermissions documentPermissions = caseDataStoreService
+        final DocumentPermissions documentPermissions = caseDataStoreService
             .getCaseDocumentMetadata(caseId, documentId)
             .orElseThrow(() -> new CaseNotFoundException(caseId));
 
-        if (!documentPermissions.getId().equals(documentId.toString())
+        if (!documentPermissions.getId().equals(documentId)
             || !documentPermissions.getPermissions().contains(permissionToCheck)) {
             log.error(logMessage, HttpStatus.FORBIDDEN);
             throw new ForbiddenException(exceptionMessage);
@@ -383,12 +399,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public void checkServicePermission(ResponseEntity<StoredDocumentHalResource> responseEntity,
+    public void checkServicePermission(StoredDocumentHalResource documentMetadata,
                                        String serviceId, Permission permission,
                                        String logMessage, String exceptionMessage) {
         AuthorisedService serviceConfig = getServiceDetailsFromJson(serviceId);
-        String caseTypeId = extractCaseTypeIdFromMetadata(responseEntity.getBody());
-        String jurisdictionId = extractJurisdictionIdFromMetadata(responseEntity.getBody());
+        String caseTypeId = extractCaseTypeIdFromMetadata(documentMetadata);
+        String jurisdictionId = extractJurisdictionIdFromMetadata(documentMetadata);
         if (!validateCaseTypeId(serviceConfig, caseTypeId)
             || !validateJurisdictionId(serviceConfig, jurisdictionId)
             || !validatePermissions(serviceConfig, permission)
@@ -470,13 +486,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return null;
     }
 
-    private HttpHeaders getHttpHeaders() {
-        HttpHeaders headers = securityUtils.serviceAuthorizationHeaders();
-        headers.set(Constants.USERID, securityUtils.getUserInfo().getUid());
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return headers;
-    }
-
     private void handleException(HttpClientErrorException exception, String messageParam) {
         if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
             throw new ResourceNotFoundException(formatNotFoundMessage(messageParam), exception);
@@ -504,14 +513,5 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private String formatNotFoundMessage(String resourceId) {
         return Constants.RESOURCE_NOT_FOUND + " " + resourceId;
-    }
-
-    @Override
-    public void validateHashTokens(List<DocumentHashToken> documentList) {
-        if (documentList != null) {
-            documentList.forEach(document -> validationUtils.validateDocumentId(document.getId()));
-        } else {
-            throw new BadRequestException(BAD_REQUEST);
-        }
     }
 }

@@ -23,7 +23,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}"
+      "errorDescription": "Forbidden: Insufficient permissions: Hash token check failed for the document: ${[scenarioContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}"
     }
   }
 }
