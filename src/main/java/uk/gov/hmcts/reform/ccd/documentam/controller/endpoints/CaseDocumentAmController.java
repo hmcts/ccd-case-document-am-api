@@ -32,7 +32,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.GeneratedHashCodeResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentMetaDataResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
-import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentCommand;
+import uk.gov.hmcts.reform.ccd.documentam.model.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
@@ -232,7 +232,7 @@ public class CaseDocumentAmController {
         @ApiResponse(
             code = 200,
             message = "Success",
-            response = StoredDocumentHalResource.class
+            response = PatchDocumentResponse.class
         ),
         @ApiResponse(
             code = 400,
@@ -249,9 +249,11 @@ public class CaseDocumentAmController {
         documentId = "#documentId"
     )
     public ResponseEntity<PatchDocumentResponse> patchDocumentByDocumentId(
-        @ApiParam(value = "", required = true)
-        @Valid @RequestBody final UpdateDocumentCommand body,
         @PathVariable("documentId") final UUID documentId,
+
+        @ApiParam(value = "", required = true)
+        @Valid @RequestBody final UpdateTtlRequest ttlRequest,
+
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken
     ) {
@@ -263,7 +265,7 @@ public class CaseDocumentAmController {
                                                              SERVICE_PERMISSION_ERROR,
                                                              documentId.toString());
 
-        return documentManagementService.patchDocument(documentId, body);
+        return documentManagementService.patchDocument(documentId, ttlRequest);
     }
 
     @PatchMapping(
@@ -276,7 +278,7 @@ public class CaseDocumentAmController {
         @ApiResponse(
             code = 200,
             message = "Success",
-            response = StoredDocumentHalResource.class
+            response = PatchDocumentMetaDataResponse.class
         ),
         @ApiResponse(
             code = 400,
@@ -313,14 +315,8 @@ public class CaseDocumentAmController {
         @ApiParam(value = "", required = true)
         @Valid @RequestBody final CaseDocumentsMetadata caseDocumentsMetadata,
 
-        final BindingResult bindingResult,
-
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken) {
-
-        handleErrors(bindingResult);
-
-        documentManagementService.validateHashTokens(caseDocumentsMetadata.getDocumentHashTokens());
 
         documentManagementService.checkServicePermission(
             caseDocumentsMetadata.getCaseTypeId(),
@@ -386,7 +382,7 @@ public class CaseDocumentAmController {
         @ApiResponse(
             code = 200,
             message = "Success",
-            response = StoredDocumentHalResource.class
+            response = GeneratedHashCodeResponse.class
         ),
         @ApiResponse(
             code = 400,

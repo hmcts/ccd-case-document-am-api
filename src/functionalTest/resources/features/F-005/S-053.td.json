@@ -10,7 +10,7 @@
       "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
     },
     "body": {
-      "ttl": "2021-12-30T1@:10:10+0000"
+      "ttl": "2021-12-30T1@:10:10"
     }
   },
   "expectedResponse": {
@@ -20,7 +20,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "Incorrect date format 2021-12-30T1@:10:10+0000"
+      "errorDescription": "[[ANY_STRING_NOT_NULLABLE]]"
     }
   }
 }
