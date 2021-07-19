@@ -12,11 +12,12 @@ import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface DocumentManagementService {
 
-    ResponseEntity<StoredDocumentHalResource> getDocumentMetadata(final UUID documentId);
+    Optional<StoredDocumentHalResource> getDocumentMetadata(final UUID documentId);
 
     String extractCaseIdFromMetadata(StoredDocumentHalResource storedDocument);
 
@@ -24,7 +25,7 @@ public interface DocumentManagementService {
 
     void patchDocumentMetadata(CaseDocumentsMetadata caseDocumentsMetadata);
 
-    String generateHashToken(final UUID documentId);
+    String generateHashToken(final UUID documentId, StoredDocumentHalResource documentMetadata);
 
     UploadResponse uploadDocuments(List<MultipartFile> files, String classification,
                                    String caseTypeId,
@@ -36,11 +37,11 @@ public interface DocumentManagementService {
     void deleteDocument(final UUID documentId,  Boolean permanent);
 
 
-    void checkUserPermission(ResponseEntity<StoredDocumentHalResource> responseEntity,
+    void checkUserPermission(StoredDocumentHalResource documentMetadata,
                              UUID documentId, Permission permissionToCheck,
                              String logMessage, String exceptionMessage);
 
-    void checkServicePermission(ResponseEntity<StoredDocumentHalResource> responseEntity,
+    void checkServicePermission(StoredDocumentHalResource documentMetadata,
                                 String serviceId, Permission permission,
                                 String logMessage, String exceptionMessage);
 
