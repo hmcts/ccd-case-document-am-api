@@ -21,7 +21,7 @@ public class AuthorisedService {
     private String id;
 
     @JsonProperty("caseTypeId")
-    private String caseTypeId;
+    private List<String> caseTypeId;
 
     @JsonProperty("jurisdictionId")
     private String jurisdictionId;

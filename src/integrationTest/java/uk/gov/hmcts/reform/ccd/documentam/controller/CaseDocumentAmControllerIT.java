@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
 import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
+import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedServices;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
@@ -72,6 +73,9 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private AuthorisedServices authServices;
 
     public static final String RESPONSE_RESULT_KEY = "Result";
     public static final String RESPONSE_ERROR_KEY = "errorCode";
