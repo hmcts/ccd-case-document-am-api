@@ -27,8 +27,8 @@ public interface TestFixture {
     String JURISDICTION = "Test-Jurisdiction";
     String CASE_TYPE = "Test-Case-Type";
     String USER_ID = "d5566a63-f87c-4658-a4d6-213d949f8415";
-    String BEFTA_CASETYPE_2 = "BEFTA_CASETYPE_2";
-    String BEFTA_JURISDICTION_2 = "BEFTA_JURISDICTION_2";
+    String CASE_TYPE_ID_VALUE = "BEFTA_CASETYPE_2";
+    String JURISDICTION_ID_VALUE = "BEFTA_JURISDICTION_2";
     String CASE_ID_VALUE = "1582550122096256";
     String XUI_WEBAPP = "xui_webapp";
 
@@ -49,9 +49,15 @@ public interface TestFixture {
         return new UpdateTtlRequest(ttl);
     }
 
-    static String objectToJsonString(final Object object) throws IOException {
+    static ObjectMapper objectMapper() {
         final ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.findAndRegisterModules();
+
+        return objectMapper;
+    }
+
+    static String objectToJsonString(final Object object) throws IOException {
+        final ObjectMapper objectMapper = objectMapper();
 
         return objectMapper.writeValueAsString(object);
     }

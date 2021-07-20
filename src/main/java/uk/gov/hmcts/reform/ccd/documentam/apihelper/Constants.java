@@ -8,6 +8,7 @@ public final class Constants {
 
     public static final String BAD_REQUEST = "Bad Request";
     public static final String RESOURCE_NOT_FOUND = "Resource not found";
+    public static final String DOCUMENT_METADATA_NOT_FOUND = "Meta data does not exist for documentId: %s";
     public static final String FORBIDDEN = "Forbidden: Insufficient permissions";
     public static final String APPLICATION_JSON = "application/json";
     public static final String SERVICE_AUTHORIZATION = "serviceauthorization";

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -53,4 +54,11 @@ public class ApplicationConfiguration {
         return Clock.systemUTC();
     }
 
+    @Bean
+    public ObjectMapper provideObjectMapper() {
+        final ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
+
+        return objectMapper;
+    }
 }

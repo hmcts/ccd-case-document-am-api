@@ -136,8 +136,8 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
         final CaseDocumentsMetadata body = new CaseDocumentsMetadata(
             CASE_ID_VALUE,
-            BEFTA_CASETYPE_2,
-            BEFTA_JURISDICTION_2,
+            CASE_TYPE_ID_VALUE,
+                JURISDICTION_ID_VALUE,
             emptyList()
         );
 

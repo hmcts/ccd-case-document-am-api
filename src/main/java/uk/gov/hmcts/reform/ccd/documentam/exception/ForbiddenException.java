@@ -13,6 +13,10 @@ public class ForbiddenException  extends RuntimeException {
         super(String.format(Constants.FORBIDDEN + ": %s", message));
     }
 
+    public ForbiddenException(Throwable exception) {
+        super(Constants.FORBIDDEN, exception);
+    }
+
     public ForbiddenException(String message, Throwable exception) {
         super(String.format(Constants.FORBIDDEN + ": %s", message), exception);
     }

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UpdateTtlRequest {
     @ApiModelProperty
     @NotNull(message = "Provide the TTL")

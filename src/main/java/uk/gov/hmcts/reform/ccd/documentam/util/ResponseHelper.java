@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResponseFormatException;
+import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
@@ -47,15 +48,15 @@ public class ResponseHelper {
     }
 
     public static ResponseEntity<PatchDocumentResponse> updatePatchTTLResponse(
-        ResponseEntity<StoredDocumentHalResource> updateResponse) {
+        ResponseEntity<Document> updateResponse) {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            Optional<StoredDocumentHalResource> responseBody = Optional.of(updateResponse.getBody());
+            Optional<Document> responseBody = Optional.ofNullable(updateResponse.getBody());
             Map<String, Object> metaData = mapper.convertValue(responseBody.orElseThrow(), new TypeReference<>(){});
             PatchDocumentResponse updatedMetaData = updateResponseFields(responseBody.get().getTtl(),
                                                                          responseBody.get().getCreatedOn(),
-                                                                         responseBody.get().getModifiedOn(),
+                                                                         //responseBody.get().getModifiedOn(),
                                                                          metaData);
 
             return new ResponseEntity<>(updatedMetaData, convertHeaders(updateResponse.getHeaders()),
@@ -66,12 +67,14 @@ public class ResponseHelper {
         }
     }
 
-    private static PatchDocumentResponse updateResponseFields(Date ttl, Date createdOn,
-                                                              Date modifiedOn, Map<String, Object> metaData) {
+    private static PatchDocumentResponse updateResponseFields(Date ttl,
+                                                              Date createdOn,
+                                                              //Date modifiedOn,
+                                                              Map<String, Object> metaData) {
         return PatchDocumentResponse.builder()
             .ttl(ttl)
             .createdOn(createdOn)
-            .modifiedOn(modifiedOn)
+            //.modifiedOn(modifiedOn)
             .originalDocumentName(String.valueOf(metaData.get(Constants.ORIGINAL_DOCUMENT_NAME)))
             .mimeType(String.valueOf(metaData.get(Constants.MIME_TYPE)))
             .lastModifiedBy(String.valueOf(metaData.get(Constants.LAST_MODIFIED_BY)))

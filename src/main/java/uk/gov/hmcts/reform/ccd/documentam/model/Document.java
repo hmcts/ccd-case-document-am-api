@@ -8,8 +8,14 @@ import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
+
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.JURISDICTION_ID;
 
 @Builder(toBuilder = true)
 @Jacksonized
@@ -28,6 +34,32 @@ public class Document {
     private Map<String, String> metadata;
     @JsonProperty("_links")
     private Links links;
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public  Map<String, String> getMetadata() {
+        return Optional.ofNullable(metadata).orElse(Collections.emptyMap());
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public String getCaseId() {
+        return Optional.ofNullable(metadata)
+            .map(metadataMap -> metadataMap.get(CASE_ID))
+            .orElse(null);
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public String getCaseTypeId() {
+        return Optional.ofNullable(metadata)
+            .map(metadataMap -> metadataMap.get(CASE_TYPE_ID))
+            .orElse(null);
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public String getJurisdictionId() {
+        return Optional.ofNullable(metadata)
+            .map(metadataMap -> metadataMap.get(JURISDICTION_ID))
+            .orElse(null);
+    }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Links {
