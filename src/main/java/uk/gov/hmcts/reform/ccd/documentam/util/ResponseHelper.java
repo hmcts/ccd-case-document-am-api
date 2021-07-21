@@ -1,16 +1,12 @@
 package uk.gov.hmcts.reform.ccd.documentam.util;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import uk.gov.hmcts.reform.ccd.documentam.exception.ResponseFormatException;
-import uk.gov.hmcts.reform.ccd.documentam.model.Document;
+import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
-import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -45,26 +41,6 @@ public class ResponseHelper {
             });
 
         return responseEntityHeaders;
-    }
-
-    public static ResponseEntity<PatchDocumentResponse> updatePatchTTLResponse(
-        ResponseEntity<Document> updateResponse) {
-        ObjectMapper mapper = new ObjectMapper();
-
-        try {
-            Optional<Document> responseBody = Optional.ofNullable(updateResponse.getBody());
-            Map<String, Object> metaData = mapper.convertValue(responseBody.orElseThrow(), new TypeReference<>(){});
-            PatchDocumentResponse updatedMetaData = updateResponseFields(responseBody.get().getTtl(),
-                                                                         responseBody.get().getCreatedOn(),
-                                                                         //responseBody.get().getModifiedOn(),
-                                                                         metaData);
-
-            return new ResponseEntity<>(updatedMetaData, convertHeaders(updateResponse.getHeaders()),
-                updateResponse.getStatusCode());
-
-        } catch (Exception exception) {
-            throw new ResponseFormatException("Error while updating patch TTL response " + exception);
-        }
     }
 
     private static PatchDocumentResponse updateResponseFields(Date ttl,
