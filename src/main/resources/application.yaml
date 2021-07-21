@@ -88,3 +88,8 @@ bulkscan:
   exception:
     record:
       types: CMC_ExceptionRecord, FINREM_ExceptionRecord, SSCS_ExceptionRecord, PROBATE_ExceptionRecord, PUBLICLAW_ExceptionRecord, DIVORCE_ExceptionRecord
+case:
+  document:
+    am:
+      api:
+        enabled:${CASE_DOCUMENT_AM_API_ENABLED:true}

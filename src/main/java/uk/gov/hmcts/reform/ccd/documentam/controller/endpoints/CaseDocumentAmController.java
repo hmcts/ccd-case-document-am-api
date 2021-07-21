@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
@@ -57,6 +58,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils.SERVICE_
 @Api(value = "cases")
 @RestController
 @Slf4j
+@ConditionalOnProperty(value = "case.document.am.api.enabled", havingValue = "true")
 public class CaseDocumentAmController {
 
     private final DocumentManagementService documentManagementService;
