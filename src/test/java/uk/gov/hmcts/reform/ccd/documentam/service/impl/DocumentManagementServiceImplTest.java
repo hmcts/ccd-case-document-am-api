@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -370,6 +369,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @Test
     void patchDocumentMetadata_HappyPath() {
         // GIVEN
+        ReflectionTestUtils.setField(sut, "hashCheckEnabled", true);
+
         final DocumentHashToken doc = DocumentHashToken.builder()
             .id(DOCUMENT_ID)
             .hashToken(ApplicationUtils.generateHashCode(
@@ -379,12 +380,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .build();
         final List<DocumentHashToken> documentList = List.of(doc);
 
-        final Map<String, String> myMetadata = Map.of(
-            JURISDICTION_ID, JURISDICTION_ID_VALUE,
-            CASE_TYPE_ID, CASE_TYPE_ID_VALUE
-        );
         final Document document = Document.builder()
-            .metadata(myMetadata)
+            .metadata(Map.of(JURISDICTION_ID, JURISDICTION_ID_VALUE, CASE_TYPE_ID, CASE_TYPE_ID_VALUE))
             .build();
 
         stubDmStoreClient(document);
@@ -464,7 +461,6 @@ class DocumentManagementServiceImplTest implements TestFixture {
     }
 
     @Test
-    // (2) are these the same?
     void shouldNotPatchMetaDataWhenDocumentNotMovingCase_noExceptionRecordType() {
         ReflectionTestUtils.setField(sut, "hashCheckEnabled", false);
 
@@ -475,35 +471,6 @@ class DocumentManagementServiceImplTest implements TestFixture {
         stubDmStoreClient(document);
 
         final DocumentHashToken doc = DocumentHashToken.builder().id(DOCUMENT_ID).build();
-        final CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
-            .caseId(CASE_ID_VALUE)
-            .caseTypeId(CASE_TYPE_ID_VALUE)
-            .jurisdictionId(JURISDICTION_ID_VALUE)
-            .documentHashTokens(List.of(doc))
-            .build();
-
-        assertThrows(BadRequestException.class, () -> sut.patchDocumentMetadata(caseDocumentsMetadata));
-    }
-
-    @Test
-    // (2) are these the same? is this test still valid?
-    @Disabled
-    void patchDocumentMetadata_Throws_BadRequestException() {
-        final String token = ApplicationUtils.generateHashCode(
-            salt.concat(DOCUMENT_ID.toString())
-                .concat(JURISDICTION_ID_VALUE)
-                .concat(CASE_TYPE_ID_VALUE));
-        final DocumentHashToken doc = DocumentHashToken.builder()
-            .id(DOCUMENT_ID)
-            .hashToken(token)
-            .build();
-
-        final Document document = Document.builder()
-            .metadata(Map.of(JURISDICTION_ID, JURISDICTION_ID_VALUE, CASE_TYPE_ID, CASE_TYPE_ID_VALUE))
-            .build();
-
-        stubDmStoreClient(document);
-
         final CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
             .caseId(CASE_ID_VALUE)
             .caseTypeId(CASE_TYPE_ID_VALUE)
@@ -541,7 +508,6 @@ class DocumentManagementServiceImplTest implements TestFixture {
     }
 
     @Test
-    // (1) are these the same?
     void shouldThrowForbiddenWhenTokenIsNotMatched() {
         final String token = ApplicationUtils.generateHashCode(
             salt.concat(DOCUMENT_ID.toString())
@@ -572,7 +538,6 @@ class DocumentManagementServiceImplTest implements TestFixture {
     }
 
     @Test
-    // (1) are these the same?
     void patchDocumentMetadata_Throws_ForbiddenException_InvalidHashToken() {
         final String invalidToken = ApplicationUtils.generateHashCode(
             salt.concat(DOCUMENT_ID.toString())

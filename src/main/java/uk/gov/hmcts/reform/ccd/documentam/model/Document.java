@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -35,26 +36,25 @@ public class Document {
     @JsonProperty("_links")
     private Links links;
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
     public  Map<String, String> getMetadata() {
         return Optional.ofNullable(metadata).orElse(Collections.emptyMap());
     }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonIgnore
     public String getCaseId() {
         return Optional.ofNullable(metadata)
             .map(metadataMap -> metadataMap.get(CASE_ID))
             .orElse(null);
     }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonIgnore
     public String getCaseTypeId() {
         return Optional.ofNullable(metadata)
             .map(metadataMap -> metadataMap.get(CASE_TYPE_ID))
             .orElse(null);
     }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonIgnore
     public String getJurisdictionId() {
         return Optional.ofNullable(metadata)
             .map(metadataMap -> metadataMap.get(JURISDICTION_ID))
