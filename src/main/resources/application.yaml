@@ -92,4 +92,4 @@ case:
   document:
     am:
       api:
-        enabled:${CASE_DOCUMENT_AM_API_ENABLED:true}
+        enabled: ${CASE_DOCUMENT_AM_API_ENABLED:true}
