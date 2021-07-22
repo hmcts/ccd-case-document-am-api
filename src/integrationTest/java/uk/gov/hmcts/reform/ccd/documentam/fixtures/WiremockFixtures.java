@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
+import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 
 import java.util.ArrayList;
@@ -110,12 +111,12 @@ public class WiremockFixtures implements TestFixture {
                                     .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
     }
 
-    public static void stubPatchDocument(final Document document) {
+    public static void stubPatchDocument(final PatchDocumentResponse patchDocumentResponse) throws Exception {
         stubFor(WireMock.patch(urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID))
                     .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
                     .willReturn(aResponse()
                                     .withStatus(HTTP_OK)
-                                    .withBody(getJsonString(document))
+                                    .withBody(TestFixture.objectToJsonString(patchDocumentResponse))
                                     .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
     }
 

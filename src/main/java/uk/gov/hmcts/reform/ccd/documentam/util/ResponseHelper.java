@@ -4,13 +4,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
-import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -41,20 +37,6 @@ public class ResponseHelper {
             });
 
         return responseEntityHeaders;
-    }
-
-    private static PatchDocumentResponse updateResponseFields(Date ttl,
-                                                              Date createdOn,
-                                                              //Date modifiedOn,
-                                                              Map<String, Object> metaData) {
-        return PatchDocumentResponse.builder()
-            .ttl(ttl)
-            .createdOn(createdOn)
-            //.modifiedOn(modifiedOn)
-            .originalDocumentName(String.valueOf(metaData.get(Constants.ORIGINAL_DOCUMENT_NAME)))
-            .mimeType(String.valueOf(metaData.get(Constants.MIME_TYPE)))
-            .lastModifiedBy(String.valueOf(metaData.get(Constants.LAST_MODIFIED_BY)))
-            .build();
     }
 
     public static void addHateoasLinks(Optional<?> payload, UUID documentId) {

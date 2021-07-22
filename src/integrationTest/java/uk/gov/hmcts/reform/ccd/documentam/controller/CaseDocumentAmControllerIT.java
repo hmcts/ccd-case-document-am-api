@@ -23,11 +23,14 @@ import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
+import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -258,18 +261,25 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     @Test
     void shouldSuccessfullyPatchDocumentByDocumentId() throws Exception {
-        final Date time = Date.from(Instant.now());
+        final String ttlString = "2021-12-30T12:10:10";
+        final Instant instant = Instant.parse(String.format("%s.000Z", ttlString));
+        final Date date = Date.from(instant);
 
-        final Document document = buildDocument(time, CASE_TYPE_ID_MOVING_CASE_VALUE);
+        final Document document = buildDocument(date, CASE_TYPE_ID_MOVING_CASE_VALUE);
+
+        final PatchDocumentResponse patchDocumentResponse = PatchDocumentResponse.builder()
+            .ttl(LocalDateTime.ofInstant(instant, ZoneOffset.UTC))
+            .build();
 
         stubGetDocumentMetaData(document);
-        stubPatchDocument(document);
+        stubPatchDocument(patchDocumentResponse);
 
         mockMvc.perform(patch(MAIN_URL + "/" + DOCUMENT_ID)
                             .headers(createHttpHeaders(XUI_WEBAPP))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
-                            .content("{\"ttl\":\"2021-12-30T12:10:10\"}"))
+                            .content(String.format("{\"ttl\":\"%s\"}", ttlString)))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.ttl", is(ttlString)))
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
                 XUI_WEBAPP,
