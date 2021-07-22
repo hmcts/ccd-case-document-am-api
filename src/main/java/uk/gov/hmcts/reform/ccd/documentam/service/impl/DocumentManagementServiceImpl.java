@@ -42,7 +42,6 @@ import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.documentam.util.ResponseHelper;
 
-import javax.inject.Inject;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -85,15 +84,16 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Value("${bulkscan.exception.record.types}")
     private List<String> bulkScanExceptionRecordTypes;
 
-    @Inject
-    private AuthorisedServices authServices;
+    private final AuthorisedServices authorisedServices;
 
     private static final HttpEntity<Object> NULL_REQUEST_ENTITY = null;
 
     @Autowired
-    public DocumentManagementServiceImpl(RestTemplate restTemplate, CaseDataStoreService caseDataStoreService) {
+    public DocumentManagementServiceImpl(RestTemplate restTemplate, CaseDataStoreService caseDataStoreService,
+                                         AuthorisedServices authorisedServices) {
         this.restTemplate = restTemplate;
         this.caseDataStoreService = caseDataStoreService;
+        this.authorisedServices = authorisedServices;
     }
 
     @Override
@@ -448,7 +448,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private AuthorisedService getServiceDetailsFromJson(String serviceId) {
         Optional<AuthorisedService> service =
-            authServices.getAuthServices().stream().filter(s -> s.getId().equals(
+            authorisedServices.getAuthServices().stream().filter(s -> s.getId().equals(
                 serviceId)).findAny();
         if (service.isPresent()) {
             return service.get();

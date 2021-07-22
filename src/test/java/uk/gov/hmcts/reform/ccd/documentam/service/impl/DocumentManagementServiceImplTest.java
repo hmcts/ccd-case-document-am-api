@@ -27,6 +27,8 @@ import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
+import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
+import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedServices;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.DmTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
@@ -109,7 +111,9 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
     @InjectMocks
     private final DocumentManagementServiceImpl sut = new DocumentManagementServiceImpl(restTemplateMock,
-                                                                                        caseDataStoreServiceMock);
+                                                                                        caseDataStoreServiceMock,
+                                                                                        null
+    );
 
     private final String documentURL = "http://localhost:4506";
     private final String salt = "AAAOA7A2AA6AAAA5";
@@ -133,6 +137,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
         ReflectionTestUtils.setField(sut, "documentURL", "http://localhost:4506");
         ReflectionTestUtils.setField(sut, "salt", "AAAOA7A2AA6AAAA5");
         ReflectionTestUtils.setField(sut, "bulkScanExceptionRecordTypes", bulkScanExceptionRecordTypes);
+        ReflectionTestUtils.setField(sut, "authorisedServices", setupAuthorisedServices());
     }
 
     @Test
@@ -396,13 +401,16 @@ class DocumentManagementServiceImplTest implements TestFixture {
                                        "exception string"));
     }
 
-    private StoredDocumentHalResource initialiseMetaData(String caseTypeId, String jurisdictionID) {
-        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
-        Map<String, String> myMap = new HashMap<>();
-        myMap.put("caseTypeId", caseTypeId);
-        myMap.put("jurisdictionId", jurisdictionID);
-        storedDocumentHalResource.setMetadata(myMap);
-        return storedDocumentHalResource;
+    @Test
+    void checkServicePermission_Successful() {
+        mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("caseId", "caseTypeId",
+                                                               "jurisdiction"), HttpStatus.OK);
+        assertThrows(NullPointerException.class, () ->
+            sut.checkServicePermission(new StoredDocumentHalResource(),
+                                       XUI_WEBAPP,
+                                       Permission.READ,
+                                       "log string",
+                                       "exception string"));
     }
 
     @Test
@@ -1288,6 +1296,18 @@ class DocumentManagementServiceImplTest implements TestFixture {
                                                                              Permission.CREATE,
                                                                              USER_PERMISSION_ERROR,
                                                                              "exception string"));
+    }
+
+    private AuthorisedServices setupAuthorisedServices() {
+        AuthorisedServices authorisedServices = new AuthorisedServices();
+
+        AuthorisedService authorisedService = AuthorisedService.builder()
+            .id(XUI_WEBAPP).build();
+        List<AuthorisedService> authorisedServicesList = new ArrayList<>();
+        authorisedServicesList.add(authorisedService);
+        authorisedServices.setAuthServices(authorisedServicesList);
+
+        return authorisedServices;
     }
 
     private StoredDocumentHalResource initialiseMetaDataMap(String caseId, String caseTypeId, String jurisdictionId) {
