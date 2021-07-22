@@ -402,11 +402,10 @@ class DocumentManagementServiceImplTest implements TestFixture {
     }
 
     @Test
-    void checkServicePermission_Successful() {
-        mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("caseId", "caseTypeId",
-                                                               "jurisdiction"), HttpStatus.OK);
-        assertThrows(NullPointerException.class, () ->
-            sut.checkServicePermission(new StoredDocumentHalResource(),
+    void checkServicePermission_CaseTypeIdExistsButNotAuthorised() {
+        assertThrows(ForbiddenException.class, () ->
+            sut.checkServicePermission(initialiseMetaDataMap("caseId", "randomCaseTypeId",
+                                                             "jurisdiction"),
                                        XUI_WEBAPP,
                                        Permission.READ,
                                        "log string",
@@ -1299,12 +1298,18 @@ class DocumentManagementServiceImplTest implements TestFixture {
     }
 
     private AuthorisedServices setupAuthorisedServices() {
-        AuthorisedServices authorisedServices = new AuthorisedServices();
+        List<String> caseTypeIds = new ArrayList<>();
+        caseTypeIds.add("BEFTA_CASETYPE_1_1");
+        caseTypeIds.add("BEFTA_CASETYPE_2_1");
 
         AuthorisedService authorisedService = AuthorisedService.builder()
-            .id(XUI_WEBAPP).build();
+            .id(XUI_WEBAPP)
+            .caseTypeId(caseTypeIds)
+            .build();
         List<AuthorisedService> authorisedServicesList = new ArrayList<>();
         authorisedServicesList.add(authorisedService);
+
+        AuthorisedServices authorisedServices = new AuthorisedServices();
         authorisedServices.setAuthServices(authorisedServicesList);
 
         return authorisedServices;
