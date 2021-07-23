@@ -93,3 +93,11 @@ case:
     am:
       api:
         enabled: ${CASE_DOCUMENT_AM_API_ENABLED:true}
+
+
+http:
+  client:
+    connection:
+      timeout: ${HTTP_CLIENT_CONNECTION_TIMEOUT:10000}
+    read:
+      timeout: ${HTTP_CLIENT_READ_TIMEOUT:30000}
