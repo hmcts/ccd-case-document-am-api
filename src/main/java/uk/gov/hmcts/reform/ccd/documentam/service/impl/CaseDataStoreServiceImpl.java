@@ -39,14 +39,17 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
     private final RestTemplate restTemplate;
     private final String caseDataStoreUrl;
     private final SecurityUtils securityUtils;
+    private final ObjectMapper objectMapper;
 
     @Autowired
     public CaseDataStoreServiceImpl(final RestTemplate restTemplate,
                                     @Value("${caseDataStoreUrl}") final String caseDataStoreUrl,
-                                    final SecurityUtils securityUtils) {
+                                    final SecurityUtils securityUtils,
+                                    final ObjectMapper objectMapper) {
         this.restTemplate = restTemplate;
         this.caseDataStoreUrl = caseDataStoreUrl;
         this.securityUtils = securityUtils;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -64,7 +67,7 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
             if (responseEntity.getStatusCode() == HttpStatus.OK
                 && responseEntity.getBody() instanceof LinkedHashMap) {
                 LinkedHashMap<String, Object> responseObject = (LinkedHashMap<String, Object>) responseEntity.getBody();
-                CaseDocumentMetadata documentMetadata = new ObjectMapper().convertValue(responseObject.get(
+                CaseDocumentMetadata documentMetadata = objectMapper.convertValue(responseObject.get(
                     "documentMetadata"),
                     CaseDocumentMetadata.class);
 

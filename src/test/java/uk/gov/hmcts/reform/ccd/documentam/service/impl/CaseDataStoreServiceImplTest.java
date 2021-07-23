@@ -57,7 +57,7 @@ class CaseDataStoreServiceImplTest implements TestFixture {
     void prepare() {
         MockitoAnnotations.openMocks(this);
 
-        sut = new CaseDataStoreServiceImpl(restTemplate, caseDataStoreUrl, securityUtils);
+        sut = new CaseDataStoreServiceImpl(restTemplate, caseDataStoreUrl, securityUtils, TestFixture.objectMapper());
     }
 
     @Test
