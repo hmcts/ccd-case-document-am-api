@@ -74,9 +74,6 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private AuthorisedServices authServices;
-
     public static final String RESPONSE_RESULT_KEY = "Result";
     public static final String RESPONSE_ERROR_KEY = "errorCode";
     public static final String RESPONSE_ERROR_DESCRIPTION_KEY = "errorDescription";

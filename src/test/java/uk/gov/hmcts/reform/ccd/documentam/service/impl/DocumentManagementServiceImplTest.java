@@ -112,7 +112,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @InjectMocks
     private final DocumentManagementServiceImpl sut = new DocumentManagementServiceImpl(restTemplateMock,
                                                                                         caseDataStoreServiceMock,
-                                                                                        null
+                                                                                        setupAuthorisedServices()
     );
 
     private final String documentURL = "http://localhost:4506";
@@ -137,7 +137,6 @@ class DocumentManagementServiceImplTest implements TestFixture {
         ReflectionTestUtils.setField(sut, "documentURL", "http://localhost:4506");
         ReflectionTestUtils.setField(sut, "salt", "AAAOA7A2AA6AAAA5");
         ReflectionTestUtils.setField(sut, "bulkScanExceptionRecordTypes", bulkScanExceptionRecordTypes);
-        ReflectionTestUtils.setField(sut, "authorisedServices", setupAuthorisedServices());
     }
 
     @Test
@@ -405,7 +404,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     void checkServicePermission_CaseTypeIdExistsButNotAuthorised() {
         assertThrows(ForbiddenException.class, () ->
             sut.checkServicePermission(initialiseMetaDataMap("caseId", "randomCaseTypeId",
-                                                             "jurisdiction"),
+                                                             "juridiction"),
                                        XUI_WEBAPP,
                                        Permission.READ,
                                        "log string",
@@ -1312,7 +1311,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
         AuthorisedServices authorisedServices = new AuthorisedServices();
         authorisedServices.setAuthServices(authorisedServicesList);
 
-        return authorisedServices;
+        return mock(AuthorisedServices.class);
     }
 
     private StoredDocumentHalResource initialiseMetaDataMap(String caseId, String caseTypeId, String jurisdictionId) {
