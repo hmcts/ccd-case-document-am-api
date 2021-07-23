@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 
-import lombok.NonNull;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -13,14 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.util.LinkedHashMap;
-import java.util.Optional;
-import java.util.UUID;
-
-import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
@@ -29,6 +22,10 @@ import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
+
+import java.util.LinkedHashMap;
+import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -46,7 +43,7 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
     public CaseDataStoreServiceImpl(final RestTemplate restTemplate,
                                     @Value("${caseDataStoreUrl}") final String caseDataStoreUrl,
                                     final SecurityUtils securityUtils,
-                                    @NonNull final ObjectMapper objectMapper) {
+                                    final ObjectMapper objectMapper) {
         this.restTemplate = restTemplate;
         this.caseDataStoreUrl = caseDataStoreUrl;
         this.securityUtils = securityUtils;
@@ -67,17 +64,24 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
 
             if (responseEntity.getStatusCode() == HttpStatus.OK
                 && responseEntity.getBody() instanceof LinkedHashMap) {
-                LinkedHashMap<String, Object> responseObject = (LinkedHashMap<String, Object>) responseEntity.getBody();
-                CaseDocumentMetadata documentMetadata = objectMapper.convertValue(responseObject.get(
-                    "documentMetadata"),
-                    CaseDocumentMetadata.class);
 
-                if (documentMetadata != null && documentMetadata.getDocumentPermissions() != null) {
-                    result = Optional.of(documentMetadata.getDocumentPermissions());
-                } else {
-                    log.error(ERROR_MESSAGE, caseId, HttpStatus.FORBIDDEN);
-                    throw new ForbiddenException(CASE_ERROR_MESSAGE + caseId);
-                }
+                final Optional<CaseDocumentMetadata> documentMetadata = Optional.ofNullable(responseEntity.getBody())
+                    .map(body -> {
+                        final LinkedHashMap<String, Object> responseObject = (LinkedHashMap<String, Object>) body;
+                        return objectMapper.convertValue(
+                            responseObject.get("documentMetadata"),
+                            CaseDocumentMetadata.class
+                        );
+                    });
+
+                final DocumentPermissions documentPermissions = documentMetadata
+                    .map(CaseDocumentMetadata::getDocumentPermissions)
+                    .orElseThrow(() -> {
+                        log.error(ERROR_MESSAGE, caseId, HttpStatus.FORBIDDEN);
+                        throw new ForbiddenException(CASE_ERROR_MESSAGE + caseId);
+                    });
+
+                result = Optional.of(documentPermissions);
             }
         } catch (HttpClientErrorException exception) {
             if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
