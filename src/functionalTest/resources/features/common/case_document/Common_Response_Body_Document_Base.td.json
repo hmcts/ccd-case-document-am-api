@@ -5,6 +5,9 @@
   "originalDocumentName": "[[ANYTHING_PRESENT]]",
   "createdOn": "[[ANYTHING_PRESENT]]",
   "classification": "PUBLIC",
+  "createdBy": "[[ANYTHING_PRESENT]]",
+  "lastModifiedBy": "[[ANYTHING_PRESENT]]",
+  "modifiedOn": "[[ANYTHING_PRESENT]]",
   "metadata": {
     "caseTypeId": "BEFTA_CASETYPE_2_1",
     "jurisdictionId": "BEFTA_JURISDICTION_2"
