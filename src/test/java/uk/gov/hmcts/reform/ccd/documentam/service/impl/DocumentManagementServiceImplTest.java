@@ -1303,7 +1303,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
                                                                              "exception string"));
     }
 
-    private void mockAuthorisedServices(){
+    private void mockAuthorisedServices() {
         List<String> caseTypeIds = new ArrayList<>();
         caseTypeIds.add("BEFTA_CASETYPE_1_1");
         caseTypeIds.add("BEFTA_CASETYPE_2_1");
