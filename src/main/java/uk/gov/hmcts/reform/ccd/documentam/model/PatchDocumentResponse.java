@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
@@ -13,7 +12,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PatchDocumentResponse {
-    private LocalDateTime ttl;
+    private Date ttl;
     private Date createdOn;
     private Date modifiedOn;
     private String originalDocumentName;

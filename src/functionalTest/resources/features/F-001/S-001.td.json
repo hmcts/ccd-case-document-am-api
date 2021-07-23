@@ -20,10 +20,10 @@
     "body": {
       "_links" : {
         "self" : {
-          "href": "{{TEST_URL}}/cases/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+          "href": "{{DM_STORE_BASE_URL}}/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
         },
         "binary" : {
-          "href": "{{TEST_URL}}/cases/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}/binary"
+          "href": "{{DM_STORE_BASE_URL}}/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}/binary"
         }
       },
       "classification": "PUBLIC",

@@ -28,12 +28,12 @@ import uk.gov.hmcts.reform.ccd.documentam.model.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
+import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -261,14 +261,13 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     @Test
     void shouldSuccessfullyPatchDocumentByDocumentId() throws Exception {
-        final String ttlString = "2021-12-30T12:10:10";
-        final Instant instant = Instant.parse(String.format("%s.000Z", ttlString));
-        final Date date = Date.from(instant);
+        final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.ENGLISH);
+        final Date date = formatter.parse("2021-12-30T12:10:10.000");
 
         final Document document = buildDocument(date, CASE_TYPE_ID_MOVING_CASE_VALUE);
 
         final PatchDocumentResponse patchDocumentResponse = PatchDocumentResponse.builder()
-            .ttl(LocalDateTime.ofInstant(instant, ZoneOffset.UTC))
+            .ttl(date)
             .build();
 
         stubGetDocumentMetaData(document);
@@ -277,9 +276,9 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         mockMvc.perform(patch(MAIN_URL + "/" + DOCUMENT_ID)
                             .headers(createHttpHeaders(XUI_WEBAPP))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
-                            .content(String.format("{\"ttl\":\"%s\"}", ttlString)))
+                            .content("{\"ttl\":\"2021-12-30T12:10:10\"}"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.ttl", is(ttlString)))
+            .andExpect(jsonPath("$.ttl", is("2021-12-30T12:10:10.000+00:00")))
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
                 XUI_WEBAPP,

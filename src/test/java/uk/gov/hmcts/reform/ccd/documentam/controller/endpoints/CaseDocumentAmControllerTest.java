@@ -320,8 +320,9 @@ public class CaseDocumentAmControllerTest implements TestFixture {
                                  MATCHED_DOCUMENT_ID.toString());
 
         final UpdateTtlRequest body = new UpdateTtlRequest(null);
-        PatchDocumentResponse patchDocumentResponse = new PatchDocumentResponse();
-        patchDocumentResponse.setOriginalDocumentName("test.png");
+        final PatchDocumentResponse patchDocumentResponse = PatchDocumentResponse.builder()
+            .originalDocumentName("test.png")
+            .build();
         doReturn(new ResponseEntity<>(patchDocumentResponse, HttpStatus.OK))
             .when(documentManagementService).patchDocument(MATCHED_DOCUMENT_ID, body);
 
