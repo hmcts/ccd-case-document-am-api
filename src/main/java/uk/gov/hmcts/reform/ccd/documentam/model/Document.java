@@ -25,16 +25,19 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.JURISDICTIO
 @JsonInclude
 public class Document {
 
-    private Classification classification;
-    private Long size;
-    private String mimeType;
-    private String originalDocumentName;
-    private String hashToken;
-    private Date createdOn;
-    private Date ttl;
-    private Map<String, String> metadata;
+    Classification classification;
+    Long size;
+    String mimeType;
+    String originalDocumentName;
+    String hashToken;
+    Date createdOn;
+    String createdBy;
+    String lastModifiedBy;
+    Date modifiedOn;
+    Date ttl;
+    Map<String, String> metadata;
     @JsonProperty("_links")
-    private Links links;
+    Links links;
 
     public  Map<String, String> getMetadata() {
         return Optional.ofNullable(metadata).orElse(Collections.emptyMap());
