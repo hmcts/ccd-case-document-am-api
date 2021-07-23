@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -45,7 +46,7 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
     public CaseDataStoreServiceImpl(final RestTemplate restTemplate,
                                     @Value("${caseDataStoreUrl}") final String caseDataStoreUrl,
                                     final SecurityUtils securityUtils,
-                                    final ObjectMapper objectMapper) {
+                                    @NonNull final ObjectMapper objectMapper) {
         this.restTemplate = restTemplate;
         this.caseDataStoreUrl = caseDataStoreUrl;
         this.securityUtils = securityUtils;
