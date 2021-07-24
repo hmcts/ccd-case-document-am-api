@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface CaseDataStoreService {
+    String EXPERIMENTAL_HEADER = "experimental";
 
     /**
      * Root GET endpoint.

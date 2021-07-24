@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -37,7 +38,7 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
     private final SecurityUtils securityUtils;
 
     @Autowired
-    public CaseDataStoreServiceImpl(final RestTemplate restTemplate,
+    public CaseDataStoreServiceImpl(@Qualifier("dataStoreRestTemplate") final RestTemplate restTemplate,
                                     @Value("${caseDataStoreUrl}") final String caseDataStoreUrl,
                                     final SecurityUtils securityUtils) {
         this.restTemplate = restTemplate;
@@ -88,7 +89,7 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
         HttpHeaders headers = new HttpHeaders();
         headers.addAll(securityUtils.authorizationHeaders());
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("experimental", "true");
+        headers.set(EXPERIMENTAL_HEADER, "true");
         return headers;
     }
 }

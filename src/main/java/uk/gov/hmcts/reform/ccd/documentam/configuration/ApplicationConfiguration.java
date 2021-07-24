@@ -33,6 +33,13 @@ public class ApplicationConfiguration {
         return restTemplate;
     }
 
+    @Bean
+    public RestTemplate dataStoreRestTemplate() {
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(getHttpClient()));
+        return restTemplate;
+    }
+
     private CloseableHttpClient getHttpClient() {
         int timeout = 10000;
         RequestConfig config = RequestConfig.custom()
