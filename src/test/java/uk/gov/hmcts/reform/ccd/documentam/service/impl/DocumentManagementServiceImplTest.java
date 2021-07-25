@@ -14,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
@@ -25,6 +24,7 @@ import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DocumentStoreClient;
 import uk.gov.hmcts.reform.ccd.documentam.configuration.AuthorisedServicesConfiguration;
+import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
@@ -36,7 +36,6 @@ import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
-import uk.gov.hmcts.reform.ccd.documentam.model.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
@@ -46,7 +45,6 @@ import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -57,20 +55,20 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpMethod.DELETE;
-import static org.springframework.http.HttpMethod.PATCH;
+import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.buildPatchDocumentResponse;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.buildUpdateDocumentCommand;
@@ -101,8 +99,6 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
     @Mock
     private CaseDataStoreService caseDataStoreServiceMock;
-
-    private static final HttpEntity<Object> NULL_REQUEST_ENTITY = null;
 
     private DocumentManagementServiceImpl sut;
 
@@ -143,7 +139,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     void getDocumentMetadata_HappyPath() {
         // GIVEN
         final Document expectedDocument = Document.builder().build();
-        stubDmStoreClient(expectedDocument);
+        stubGetDocument(expectedDocument);
 
         // WHEN
         final Document actualDocument = sut.getDocumentMetadata(DOCUMENT_ID);
@@ -175,12 +171,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
         headers.add(DATA_SOURCE, "source");
         headers.add(CONTENT_TYPE, "type");
 
-        doReturn(new ResponseEntity<>(headers, HttpStatus.OK)).when(restTemplateMock).exchange(
-            documentURL + "/documents/" + DOCUMENT_ID + "/binary",
-            HttpMethod.GET,
-            NULL_REQUEST_ENTITY,
-            ByteArrayResource.class
-        );
+        doReturn(new ResponseEntity<>(headers, HttpStatus.OK))
+            .when(documentStoreClient).getDocumentAsBinary(any(UUID.class));
 
         final ResponseEntity<ByteArrayResource> responseEntity = sut.getDocumentBinaryContent(DOCUMENT_ID);
 
@@ -191,42 +183,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
                 assertThat(entity.getHeaders()).isEqualTo(headers);
             });
 
-        verifyRestExchangeByteArray();
-    }
-
-    @Test
-    void getDocumentBinaryContent_Try_ResponseNotOK() {
-        final ByteArrayResource byteArrayResource = mock(ByteArrayResource.class);
-        doReturn(new ResponseEntity<>(byteArrayResource, HttpStatus.BAD_REQUEST)).when(restTemplateMock).exchange(
-            documentURL + "/documents/" + DOCUMENT_ID + "/binary",
-            HttpMethod.GET,
-            NULL_REQUEST_ENTITY,
-            ByteArrayResource.class
-        );
-
-        final ResponseEntity<ByteArrayResource> responseEntity = sut.getDocumentBinaryContent(DOCUMENT_ID);
-
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-
-        verifyRestExchangeByteArray();
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideHttpErrorForDocumentParameters")
-    void getDocumentBinaryContent_Throws_Exception(final HttpStatus status,
-                                                   final Class<Throwable> clazz,
-                                                   final String msgPrefix) {
-        doThrow(new HttpClientErrorException(status)).when(restTemplateMock).exchange(
-            documentURL + "/documents/" + DOCUMENT_ID + "/binary",
-            HttpMethod.GET,
-            NULL_REQUEST_ENTITY,
-            ByteArrayResource.class);
-
-        assertThatExceptionOfType(clazz)
-            .isThrownBy(() -> sut.getDocumentBinaryContent(DOCUMENT_ID))
-            .withMessage(msgPrefix + DOCUMENT_ID);
-
-        verifyRestExchangeByteArray();
+        verify(documentStoreClient).getDocumentAsBinary(DOCUMENT_ID);
     }
 
     @Test
@@ -351,14 +308,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
         verifyCaseDataServiceGetDocMetadata();
     }
 
-    private void stubDmStoreClient(final Document document) {
+    private void stubGetDocument(final Document document) {
         doReturn(Optional.ofNullable(document)).when(documentStoreClient).getDocument(DOCUMENT_ID);
-    }
-
-    private void verifyRestExchangeByteArray() {
-        verify(restTemplateMock, times(1))
-            .exchange(documentURL + "/documents/" + DOCUMENT_ID + "/binary", HttpMethod.GET,
-                      NULL_REQUEST_ENTITY, ByteArrayResource.class);
     }
 
     private void verifyCaseDataServiceGetDocMetadata() {
@@ -378,47 +329,49 @@ class DocumentManagementServiceImplTest implements TestFixture {
                     .concat(JURISDICTION_ID_VALUE)
                     .concat(CASE_TYPE_ID_VALUE)))
             .build();
-        final List<DocumentHashToken> documentList = List.of(doc);
 
         final Document document = Document.builder()
             .metadata(Map.of(JURISDICTION_ID, JURISDICTION_ID_VALUE, CASE_TYPE_ID, CASE_TYPE_ID_VALUE))
             .build();
 
-        stubDmStoreClient(document);
+        final CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
+            .caseId(CASE_ID_VALUE)
+            .caseTypeId(CASE_TYPE_ID_VALUE)
+            .jurisdictionId(JURISDICTION_ID_VALUE)
+            .documentHashTokens(List.of(doc))
+            .build();
 
-        CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
-                                                                           .caseId(CASE_ID_VALUE)
-                                                                           .caseTypeId(CASE_TYPE_ID_VALUE)
-                                                                           .jurisdictionId(JURISDICTION_ID_VALUE)
-                                                                           .documentHashTokens(documentList)
-                                                                           .build();
+        final ArgumentCaptor<UpdateDocumentsCommand> updateDocumentsCommandCaptor =
+            ArgumentCaptor.forClass(UpdateDocumentsCommand.class);
 
-
-        ArgumentCaptor<HttpEntity> entityCaptor = ArgumentCaptor.forClass(HttpEntity.class);
+        stubGetDocument(document);
+        doNothing().when(documentStoreClient).patchDocumentMetadata(updateDocumentsCommandCaptor.capture());
 
         // WHEN
         sut.patchDocumentMetadata(caseDocumentsMetadata);
 
         // THEN
-        verify(restTemplateMock).exchange(eq(documentURL + "/documents"),
-                                          eq(PATCH),
-                                          entityCaptor.capture(),
-                                          eq(Void.class));
+        final UpdateDocumentsCommand documentsCommand = updateDocumentsCommandCaptor.getValue();
 
-        final UpdateDocumentsCommand documentsCommand = (UpdateDocumentsCommand)entityCaptor.getValue().getBody();
-        assertThat(documentsCommand.getTtl())
-            .isNull();
+        assertThat(documentsCommand).isNotNull().satisfies(command -> assertThat(command.getTtl()).isNull());
+
+        verify(documentStoreClient).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
     }
 
     @Test
     void shouldPatchMetaDataEvenIfTokenIsNotPassed_hashCheckDisabled() {
+        // GIVEN
         ReflectionTestUtils.setField(sut, "hashCheckEnabled", false);
 
         final Document document = Document.builder()
             .metadata(Map.of(JURISDICTION_ID, JURISDICTION_ID_VALUE, CASE_TYPE_ID, "CMC_ExceptionRecord"))
             .build();
 
-        stubDmStoreClient(document);
+        final ArgumentCaptor<UpdateDocumentsCommand> updateDocumentsCommandCaptor =
+            ArgumentCaptor.forClass(UpdateDocumentsCommand.class);
+
+        stubGetDocument(document);
+        doNothing().when(documentStoreClient).patchDocumentMetadata(updateDocumentsCommandCaptor.capture());
 
         final DocumentHashToken doc = DocumentHashToken.builder().id(DOCUMENT_ID).build();
         final CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
@@ -428,18 +381,20 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .documentHashTokens(List.of(doc))
             .build();
 
+        // WHEN
         sut.patchDocumentMetadata(caseDocumentsMetadata);
 
-        verify(restTemplateMock).exchange(
-            eq(documentURL + "/documents"),
-            eq(PATCH),
-            any(HttpEntity.class),
-            eq(Void.class)
-        );
+        // THEN
+        final UpdateDocumentsCommand documentsCommand = updateDocumentsCommandCaptor.getValue();
+
+        assertThat(documentsCommand).isNotNull().satisfies(command -> assertThat(command.getTtl()).isNull());
+
+        verify(documentStoreClient).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
     }
 
     @Test
     void patchDocumentMetadata_Throws_NotFoundException() {
+        // GIVEN
         final DocumentHashToken doc = DocumentHashToken.builder()
             .id(DOCUMENT_ID)
             .hashToken(ApplicationUtils.generateHashCode(
@@ -457,18 +412,22 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .documentHashTokens(List.of(doc))
             .build();
 
-        assertThrows(ResourceNotFoundException.class, () -> sut.patchDocumentMetadata(caseDocumentsMetadata));
+        // WHEN/THEN
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+            .isThrownBy(() -> sut.patchDocumentMetadata(caseDocumentsMetadata));
+        verify(documentStoreClient, never()).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
     }
 
     @Test
     void shouldNotPatchMetaDataWhenDocumentNotMovingCase_noExceptionRecordType() {
+        // GIVEN
         ReflectionTestUtils.setField(sut, "hashCheckEnabled", false);
 
         final Document document = Document.builder()
             .metadata(Map.of(JURISDICTION_ID, JURISDICTION_ID_VALUE, CASE_TYPE_ID, CASE_TYPE_ID_VALUE))
             .build();
 
-        stubDmStoreClient(document);
+        stubGetDocument(document);
 
         final DocumentHashToken doc = DocumentHashToken.builder().id(DOCUMENT_ID).build();
         final CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
@@ -478,7 +437,10 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .documentHashTokens(List.of(doc))
             .build();
 
-        assertThrows(BadRequestException.class, () -> sut.patchDocumentMetadata(caseDocumentsMetadata));
+        // WHEN/THEN
+        assertThatExceptionOfType(BadRequestException.class)
+            .isThrownBy(() -> sut.patchDocumentMetadata(caseDocumentsMetadata));
+        verify(documentStoreClient, never()).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
     }
 
     @Test
@@ -491,7 +453,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .metadata(Map.of(JURISDICTION_ID, JURISDICTION_ID_VALUE, CASE_TYPE_ID, CASE_TYPE_ID_VALUE))
             .build();
 
-        stubDmStoreClient(document);
+        stubGetDocument(document);
 
         final CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
             .caseId(CASE_ID_VALUE)
@@ -505,6 +467,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .withMessage("Forbidden: Insufficient permissions: "
                              + "Hash check is enabled but hashToken wasn't provided for the document: "
                              + DOCUMENT_ID);
+        verify(documentStoreClient, never()).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
     }
 
     @Test
@@ -522,7 +485,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .metadata(Map.of(JURISDICTION_ID, JURISDICTION_ID_VALUE, CASE_TYPE_ID, "DIFFERENT_CASETYPE"))
             .build();
 
-        stubDmStoreClient(document);
+        stubGetDocument(document);
 
         final CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
             .caseId(CASE_ID_VALUE)
@@ -535,6 +498,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .isThrownBy(() -> sut.patchDocumentMetadata(caseDocumentsMetadata))
             .withMessage("Forbidden: Insufficient permissions: Hash token check failed for the document: "
                              + DOCUMENT_ID);
+        verify(documentStoreClient, never()).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
     }
 
     @Test
@@ -557,7 +521,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .metadata(myMetadata)
             .build();
 
-        stubDmStoreClient(document);
+        stubGetDocument(document);
 
         final CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
             .caseId(CASE_ID_VALUE)
@@ -570,37 +534,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .isThrownBy(() -> sut.patchDocumentMetadata(caseDocumentsMetadata))
             .withMessage("Forbidden: Insufficient permissions: Hash token check failed for the document: "
                              + DOCUMENT_ID);
-    }
-
-    @Test
-    void patchDocumentMetadata_Throws_ServiceException() {
-        final DocumentHashToken doc = DocumentHashToken.builder()
-            .id(DOCUMENT_ID)
-            .hashToken(ApplicationUtils.generateHashCode(
-                salt.concat(DOCUMENT_ID.toString())
-                    .concat(JURISDICTION_ID_VALUE)
-                    .concat(CASE_TYPE_ID_VALUE)))
-            .build();
-
-        final Document document = Document.builder()
-            .metadata(Map.of(JURISDICTION_ID, JURISDICTION_ID_VALUE, CASE_TYPE_ID, CASE_TYPE_ID_VALUE))
-            .build();
-
-        stubDmStoreClient(document);
-
-        doThrow(new HttpClientErrorException(HttpStatus.BAD_GATEWAY))
-            .when(restTemplateMock).exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), eq(Void.class));
-
-        final CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
-                                                                           .caseId(CASE_ID_VALUE)
-                                                                           .caseTypeId(CASE_TYPE_ID_VALUE)
-                                                                           .jurisdictionId(JURISDICTION_ID_VALUE)
-                                                                           .documentHashTokens(List.of(doc))
-                                                                           .build();
-
-        assertThatExceptionOfType(ServiceException.class)
-            .isThrownBy(() -> sut.patchDocumentMetadata(caseDocumentsMetadata))
-            .withMessage("Exception occurred with operation");
+        verify(documentStoreClient, never()).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
     }
 
     @Test
@@ -679,93 +613,50 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
     @Test
     void patchDocument_HappyPath() {
+        // GIVEN
         final UpdateTtlRequest ttlRequest = buildUpdateDocumentCommand();
-        final HttpEntity<DmTtlRequest> requestEntity = getTtlRequestEntity(ttlRequest);
-        final String patchTTLUrl = String.format("%s/documents/%s", documentURL, DOCUMENT_ID);
+        final PatchDocumentResponse expectedResponse = buildPatchDocumentResponse();
 
-        final ResponseEntity<PatchDocumentResponse> expectedResponseEntity = new ResponseEntity<>(
-            PatchDocumentResponse.builder().build(),
-            HttpStatus.OK
-        );
-        doReturn(expectedResponseEntity)
-            .when(restTemplateMock).exchange(patchTTLUrl, PATCH, requestEntity, PatchDocumentResponse.class);
+        doReturn(Optional.of(expectedResponse))
+            .when(documentStoreClient).patchDocument(any(UUID.class), any(DmTtlRequest.class));
 
-        final ResponseEntity<PatchDocumentResponse> responseEntity = sut.patchDocument(DOCUMENT_ID, ttlRequest);
+        // WHEN
+        final PatchDocumentResponse actualResponse = sut.patchDocument(DOCUMENT_ID, ttlRequest);
 
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideHttpErrorForDocumentParameters")
-    void patchDocument_Throw_Exception(final HttpStatus status, final Class<Throwable> clazz, final String msgPrefix) {
-        final UpdateTtlRequest ttlRequest = buildUpdateDocumentCommand();
-        final HttpEntity<DmTtlRequest> requestEntity = getTtlRequestEntity(ttlRequest);
-
-        doThrow(new HttpClientErrorException(status)).when(restTemplateMock)
-            .exchange(String.format("%s/documents/%s", documentURL, DOCUMENT_ID),
-                      PATCH,
-                      requestEntity,
-                      PatchDocumentResponse.class);
-
-        assertThatExceptionOfType(clazz)
-            .isThrownBy(() -> sut.patchDocument(DOCUMENT_ID, ttlRequest))
-            .withMessage(msgPrefix + DOCUMENT_ID);
-    }
-
-    private HttpEntity<DmTtlRequest> getTtlRequestEntity(UpdateTtlRequest ttlRequest) {
-        return new HttpEntity<>(new DmTtlRequest(ttlRequest.getTtl().atZone(
-            ZoneId.systemDefault())));
+        // THEN
+        assertThat(actualResponse)
+            .isNotNull()
+            .isEqualTo(expectedResponse);
+        verify(documentStoreClient).patchDocument(eq(DOCUMENT_ID), any(DmTtlRequest.class));
     }
 
     @Test
-    @SuppressWarnings("ConstantConditions")
-    void deleteDocument_HappyPath() {
-        Boolean permanent = true;
+    void testShouldRaiseResourceNotFoundExceptionWhenPatchDocumentIsCalled() {
+        final UpdateTtlRequest ttlRequest = buildUpdateDocumentCommand();
+
+        doReturn(Optional.empty())
+            .when(documentStoreClient).patchDocument(any(UUID.class), any(DmTtlRequest.class));
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+            .isThrownBy(() -> sut.patchDocument(DOCUMENT_ID, ttlRequest))
+            .withMessage("Resource not found");
+    }
+
+    @Test
+    void testDeleteDocument() {
+        final boolean permanent = true;
+        doNothing().when(documentStoreClient).deleteDocument(any(UUID.class), anyBoolean());
 
         sut.deleteDocument(DOCUMENT_ID, permanent);
 
-        verify(restTemplateMock).exchange(
-            String.format("%s/documents/%s?permanent=%s", documentURL, DOCUMENT_ID, permanent),
-            DELETE,
-            NULL_REQUEST_ENTITY,
-            Void.class
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideHttpErrorForDocumentParameters")
-    @SuppressWarnings("ConstantConditions")
-    void deleteDocument_Throw_Exception(final HttpStatus status, final Class<Throwable> clazz, final String msgPrefix) {
-        final Boolean permanent = true;
-
-        doThrow(new HttpClientErrorException(status)).when(restTemplateMock)
-            .exchange(String.format("%s/documents/%s?permanent=" + permanent, documentURL, DOCUMENT_ID),
-                      DELETE,
-                      NULL_REQUEST_ENTITY,
-                      Void.class);
-
-        assertThatExceptionOfType(clazz)
-            .isThrownBy(() -> sut.deleteDocument(DOCUMENT_ID, permanent))
-            .withMessage(msgPrefix + DOCUMENT_ID);
-    }
-
-    @SuppressWarnings("unused")
-    private static Stream<Arguments> provideHttpErrorForDocumentParameters() {
-        final String serviceExceptionMessagePrefix = "Exception occurred with operation on document id: ";
-
-        return Stream.of(
-            Arguments.of(HttpStatus.BAD_GATEWAY, ServiceException.class, serviceExceptionMessagePrefix),
-            Arguments.of(HttpStatus.FORBIDDEN, ForbiddenException.class, "Forbidden: Insufficient permissions: "),
-            Arguments.of(HttpStatus.BAD_REQUEST, ServiceException.class, serviceExceptionMessagePrefix),
-            Arguments.of(HttpStatus.NOT_FOUND, ResourceNotFoundException.class, "Resource not found ")
-        );
+        verify(documentStoreClient).deleteDocument(DOCUMENT_ID, permanent);
     }
 
     @Test
     void shouldGenerateHashTokenWhenCaseIdIsPresent() {
         final Document document = buildDocument(CASE_ID_VALUE, "BEFTA_CASETYPE_2_2", JURISDICTION_ID_VALUE);
 
-        stubDmStoreClient(document);
+        stubGetDocument(document);
 
         final String result = sut.generateHashToken(DOCUMENT_ID);
 
@@ -778,7 +669,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .metadata(Map.of(CASE_TYPE_ID, "BEFTA_CASETYPE_2_2", JURISDICTION_ID, JURISDICTION_ID_VALUE))
             .build();
 
-        stubDmStoreClient(document);
+        stubGetDocument(document);
 
         final String result = sut.generateHashToken(DOCUMENT_ID);
 

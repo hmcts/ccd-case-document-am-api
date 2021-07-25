@@ -24,13 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.LogAudit;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
+import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.GeneratedHashCodeResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentMetaDataResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
-import uk.gov.hmcts.reform.ccd.documentam.model.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
@@ -271,7 +271,12 @@ public class CaseDocumentAmController {
             documentId.toString()
         );
 
-        return documentManagementService.patchDocument(documentId, ttlRequest);
+        final PatchDocumentResponse patchDocumentResponse = documentManagementService.patchDocument(
+            documentId,
+            ttlRequest
+        );
+
+        return ResponseEntity.ok(patchDocumentResponse);
     }
 
     @PatchMapping(

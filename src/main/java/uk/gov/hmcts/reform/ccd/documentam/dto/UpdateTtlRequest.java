@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.ccd.documentam.model;
+package uk.gov.hmcts.reform.ccd.documentam.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.annotations.ApiModelProperty;

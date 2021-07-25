@@ -1,18 +1,29 @@
 package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
+import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
+import uk.gov.hmcts.reform.ccd.documentam.model.DmTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
+import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
+import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.springframework.http.HttpMethod.GET;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.RESOURCE_NOT_FOUND;
 
 @Named
 public class DocumentStoreClient {
@@ -44,6 +55,101 @@ public class DocumentStoreClient {
                 exception
             );
         }
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    public ResponseEntity<ByteArrayResource> getDocumentAsBinary(final UUID documentId) {
+        final HttpEntity<Object> nullRequestEntity = null;
+
+        try {
+            final ResponseEntity<ByteArrayResource> response = restTemplate.exchange(
+                String.format("%s/documents/%s/binary", documentStoreBaseUrl, documentId),
+                GET,
+                nullRequestEntity,
+                ByteArrayResource.class
+            );
+            if (HttpStatus.OK.equals(response.getStatusCode())) {
+                return ResponseEntity
+                    .ok()
+                    .headers(getHeaders(response))
+                    .body(response.getBody());
+            }
+
+            return response;
+        } catch (HttpClientErrorException exception) {
+            if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
+                throw new ResourceNotFoundException(
+                    String.format("%s %s", RESOURCE_NOT_FOUND, documentId),
+                    exception
+                );
+            }
+
+            throw new ServiceException(
+                String.format(EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE, documentId),
+                exception
+            );
+        }
+    }
+
+    public void deleteDocument(final UUID documentId, final Boolean permanent) {
+        try {
+            restTemplate.delete(String.format(
+                "%s/documents/%s?permanent=%s",
+                documentStoreBaseUrl,
+                documentId,
+                permanent
+            ));
+        } catch (HttpClientErrorException exception) {
+            handleException(exception, documentId.toString());
+        }
+    }
+
+    public Optional<PatchDocumentResponse> patchDocument(final UUID documentId, final DmTtlRequest dmTtlRequest) {
+        try {
+            final PatchDocumentResponse patchDocumentResponse = restTemplate.patchForObject(
+                String.format("%s/documents/%s", documentStoreBaseUrl, documentId),
+                dmTtlRequest,
+                PatchDocumentResponse.class
+            );
+
+            return Optional.ofNullable(patchDocumentResponse);
+        } catch (HttpClientErrorException exception) {
+            if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
+                return Optional.empty();
+            }
+            throw new ServiceException(String.format(EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE, documentId), exception);
+        }
+    }
+
+    public void patchDocumentMetadata(final UpdateDocumentsCommand updateDocumentsCommand) {
+        try {
+            restTemplate.patchForObject(
+                String.format("%s/documents", documentStoreBaseUrl),
+                updateDocumentsCommand,
+                Void.class
+            );
+        } catch (HttpClientErrorException exception) {
+            throw new ServiceException(Constants.EXCEPTION_ERROR_MESSAGE, exception);
+        }
+    }
+
+    private HttpHeaders getHeaders(ResponseEntity<ByteArrayResource> response) {
+        final HttpHeaders responseHeaders = response.getHeaders();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(Constants.ORIGINAL_FILE_NAME, responseHeaders.get(Constants.ORIGINAL_FILE_NAME).get(0));
+        headers.add(Constants.CONTENT_DISPOSITION, responseHeaders.get(Constants.CONTENT_DISPOSITION).get(0));
+        headers.add(Constants.DATA_SOURCE, responseHeaders.get(Constants.DATA_SOURCE).get(0));
+        headers.add(Constants.CONTENT_TYPE, responseHeaders.get(Constants.CONTENT_TYPE).get(0));
+
+        return headers;
+    }
+
+    private void handleException(final HttpClientErrorException exception, final String parameter) {
+        if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
+            throw new ResourceNotFoundException(String.format("%s %s", RESOURCE_NOT_FOUND, parameter), exception);
+        }
+
+        throw new ServiceException(String.format(EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE, parameter), exception);
     }
 
 }

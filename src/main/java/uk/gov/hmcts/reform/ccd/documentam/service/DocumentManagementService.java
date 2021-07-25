@@ -3,10 +3,10 @@ package uk.gov.hmcts.reform.ccd.documentam.service;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
-import uk.gov.hmcts.reform.ccd.documentam.model.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 
@@ -29,8 +29,7 @@ public interface DocumentManagementService {
                                    String caseTypeId,
                                    String jurisdictionId);
 
-    ResponseEntity<PatchDocumentResponse> patchDocument(final UUID documentId,
-                                                        UpdateTtlRequest updateTtlRequest);
+    PatchDocumentResponse patchDocument(UUID documentId, UpdateTtlRequest updateTtlRequest);
 
     void deleteDocument(final UUID documentId,  Boolean permanent);
 

@@ -19,12 +19,12 @@ import uk.gov.hmcts.reform.ccd.documentam.BaseTest;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
 import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DmUploadResponse;
+import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
-import uk.gov.hmcts.reform.ccd.documentam.model.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 

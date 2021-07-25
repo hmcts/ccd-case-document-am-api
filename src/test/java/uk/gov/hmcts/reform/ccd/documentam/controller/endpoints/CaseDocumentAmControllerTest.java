@@ -14,6 +14,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
+import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
@@ -23,7 +24,6 @@ import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.model.GeneratedHashCodeResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentMetaDataResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
-import uk.gov.hmcts.reform.ccd.documentam.model.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
@@ -323,7 +323,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
         final PatchDocumentResponse patchDocumentResponse = PatchDocumentResponse.builder()
             .originalDocumentName("test.png")
             .build();
-        doReturn(new ResponseEntity<>(patchDocumentResponse, HttpStatus.OK))
+        doReturn(patchDocumentResponse)
             .when(documentManagementService).patchDocument(MATCHED_DOCUMENT_ID, body);
 
         final ResponseEntity<PatchDocumentResponse> response = testee.patchDocumentByDocumentId(
