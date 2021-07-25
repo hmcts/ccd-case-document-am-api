@@ -2,15 +2,14 @@ package uk.gov.hmcts.reform.ccd.documentam.service;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
+import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
-import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface DocumentManagementService {
@@ -25,9 +24,7 @@ public interface DocumentManagementService {
 
     String generateHashToken(final UUID documentId);
 
-    UploadResponse uploadDocuments(List<MultipartFile> files, String classification,
-                                   String caseTypeId,
-                                   String jurisdictionId);
+    UploadResponse uploadDocuments(DocumentUploadRequest documentUploadRequest);
 
     PatchDocumentResponse patchDocument(UUID documentId, UpdateTtlRequest updateTtlRequest);
 

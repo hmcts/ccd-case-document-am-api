@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.documentam.model.DmTtlRequest;
+import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -44,6 +45,11 @@ public interface TestFixture {
     String CASE_ID_VALUE = "1582550122096256";
     String XUI_WEBAPP = "xui_webapp";
     Date NULL_TTL = null;
+    String SALT = "AAAOA7A2AA6AAAA5";
+    String ORIGINAL_DOCUMENT_NAME = "filename.txt";
+    String SELF_LINK = "http://dm-store:8080/documents/" + DOCUMENT_ID;
+    String BINARY_LINK = "http://dm-store:8080/documents/" + DOCUMENT_ID + "/binary";
+    String MIME_TYPE = "application/octet-stream";
 
     static String generateRandomString() {
         final byte[] array = new byte[10];
@@ -96,4 +102,19 @@ public interface TestFixture {
             Arguments.of(HttpStatus.NOT_FOUND, ResourceNotFoundException.class, "Resource not found ")
         );
     }
+
+    static Document.Links getLinks() {
+        Document.Links links = new Document.Links();
+
+        Document.Link self = new Document.Link();
+        Document.Link binary = new Document.Link();
+        self.href = SELF_LINK;
+        binary.href = BINARY_LINK;
+
+        links.self = self;
+        links.binary = binary;
+
+        return links;
+    }
+
 }

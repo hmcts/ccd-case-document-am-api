@@ -13,15 +13,20 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
+import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.documentam.model.DmTtlRequest;
+import uk.gov.hmcts.reform.ccd.documentam.model.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
+import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Collections.emptyList;
@@ -58,7 +63,8 @@ class DocumentStoreClientTest implements TestFixture {
     void prepare() {
         MockitoAnnotations.openMocks(this);
 
-        underTest = new DocumentStoreClient(DM_STORE_URL, restTemplate);
+        final int documentTtlInDays = 1;
+        underTest = new DocumentStoreClient(restTemplate, DM_STORE_URL, documentTtlInDays);
     }
 
     @Test
@@ -355,7 +361,7 @@ class DocumentStoreClientTest implements TestFixture {
     }
 
     @Test
-    void patchDocumentMetadata_Throws_ServiceException() {
+    void testShouldRaiseExceptionWhenPatchDocumentMetadataFails() {
         // GIVEN
         final UpdateDocumentsCommand updateDocumentsCommand = new UpdateDocumentsCommand(NULL_TTL, emptyList());
 
@@ -374,4 +380,50 @@ class DocumentStoreClientTest implements TestFixture {
             Void.class
         );
     }
+
+    @Test
+    void testShouldSuccessfullyUploadDocuments() {
+        final Document document = Document.builder()
+            .size(1000L)
+            .mimeType(MIME_TYPE)
+            .originalDocumentName(ORIGINAL_DOCUMENT_NAME)
+            .classification(Classification.PUBLIC)
+            .links(TestFixture.getLinks())
+            .build();
+
+        final DmUploadResponse dmUploadResponse = DmUploadResponse.builder()
+            .embedded(DmUploadResponse.Embedded.builder().documents(List.of(document)).build())
+            .build();
+
+        doReturn(dmUploadResponse)
+            .when(restTemplate).postForObject(anyString(), any(HttpEntity.class), eq(DmUploadResponse.class));
+
+        final DocumentUploadRequest uploadRequest = new DocumentUploadRequest(
+            List.of(new MockMultipartFile("afile", "some".getBytes())),
+            Classification.PUBLIC.name(),
+            CASE_TYPE_ID_VALUE,
+            JURISDICTION_ID_VALUE
+        );
+
+        final DmUploadResponse response = underTest.uploadDocuments(uploadRequest);
+
+        assertThat(response)
+            .isNotNull();
+    }
+
+    @Test
+    void testShouldRaiseExceptionWhenUploadDocumentsFails() {
+        doThrow(new HttpClientErrorException(HttpStatus.FORBIDDEN)).when(restTemplate)
+            .postForObject(anyString(), any(HttpEntity.class), eq(DmUploadResponse.class));
+
+        assertThatExceptionOfType(ServiceException.class)
+            .isThrownBy(() -> underTest.uploadDocuments(new DocumentUploadRequest(
+                emptyList(),
+                "classification",
+                CASE_TYPE_ID_VALUE,
+                JURISDICTION_ID_VALUE
+            )))
+            .withMessage("Exception occurred with operation");
+    }
+
 }

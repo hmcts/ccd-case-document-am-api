@@ -18,10 +18,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import uk.gov.hmcts.reform.ccd.documentam.BaseTest;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
-import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
+import uk.gov.hmcts.reform.ccd.documentam.model.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
@@ -63,10 +63,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubP
 
 public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture {
 
-    private static final String FILENAME_TXT = "filename.txt";
     private static final String DOCUMENT_ID_FROM_LINK = "80e9471e-0f67-42ef-8739-170aa1942363";
-    private static final String SELF_LINK = "http://dm-store:8080/documents/" + DOCUMENT_ID;
-    private static final String BINARY_LINK = "http://dm-store:8080/documents/" + DOCUMENT_ID + "/binary";
 
     @Value("${idam.s2s-auth.totp_secret}")
     protected String salt;
@@ -97,13 +94,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     @Test
     void shouldSuccessfullyUploadDocument() throws Exception {
 
-        Document.Links links = getLinks();
-
         Document document = Document.builder()
-            .originalDocumentName(FILENAME_TXT)
+            .originalDocumentName(ORIGINAL_DOCUMENT_NAME)
             .size(1000L)
             .classification(Classification.PUBLIC)
-            .links(links)
+            .links(TestFixture.getLinks())
             .build();
 
         DmUploadResponse dmUploadResponse = DmUploadResponse.builder()
@@ -125,7 +120,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                             .headers(createHttpHeaders(XUI_WEBAPP))
                             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.documents[0].originalDocumentName", is(FILENAME_TXT)))
+            .andExpect(jsonPath("$.documents[0].originalDocumentName", is(ORIGINAL_DOCUMENT_NAME)))
             .andExpect(jsonPath("$.documents[0].classification", is(Classification.PUBLIC.name())))
             .andExpect(jsonPath("$.documents[0].size", is(1000)))
             .andExpect(jsonPath("$.documents[0].hashToken", is(expectedHash)))
@@ -639,13 +634,12 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
             CASE_ID, CASE_ID_VALUE,
             CASE_TYPE_ID, CASE_TYPE_ID_VALUE,
             JURISDICTION_ID, JURISDICTION_ID_VALUE);
-        final Document.Links links = getLinks();
 
         return Document.builder()
             .classification(Classification.PUBLIC)
             .createdOn(Date.from(Instant.now()))
             .metadata(metadata)
-            .links(links)
+            .links(TestFixture.getLinks())
             .build();
     }
 
@@ -655,30 +649,15 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
             CASE_TYPE_ID, caseTypeId,
             JURISDICTION_ID, JURISDICTION_ID_VALUE);
 
-        final Document.Links links = getLinks();
-
         return Document.builder()
-            .originalDocumentName(FILENAME_TXT)
+            .originalDocumentName(ORIGINAL_DOCUMENT_NAME)
             .size(1000L)
             .classification(Classification.PUBLIC)
             .metadata(metadata)
             .createdOn(time)
             .ttl(time)
-            .links(links)
+            .links(TestFixture.getLinks())
             .build();
-    }
-
-    private Document.Links getLinks() {
-        Document.Links links = new Document.Links();
-
-        Document.Link self = new Document.Link();
-        Document.Link binary = new Document.Link();
-        self.href = SELF_LINK;
-        binary.href = BINARY_LINK;
-
-        links.self = self;
-        links.binary = binary;
-        return links;
     }
 
     @SuppressWarnings("unused")

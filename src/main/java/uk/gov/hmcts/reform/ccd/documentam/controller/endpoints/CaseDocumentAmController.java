@@ -25,13 +25,13 @@ import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.LogAudit;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
+import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.GeneratedHashCodeResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentMetaDataResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
-import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
@@ -200,7 +200,7 @@ public class CaseDocumentAmController {
     )
     public UploadResponse uploadDocuments(
         @ApiParam(value = "List of documents to be uploaded and their metadata", required = true)
-        @Valid DocumentUploadRequest documentUploadRequest,
+        @Valid final DocumentUploadRequest documentUploadRequest,
 
         final BindingResult bindingResult,
 
@@ -219,10 +219,7 @@ public class CaseDocumentAmController {
                                                          SERVICE_PERMISSION_ERROR,
                                                          permissionFailureMessage);
 
-        return documentManagementService.uploadDocuments(documentUploadRequest.getFiles(),
-                                                         documentUploadRequest.getClassification(),
-                                                         documentUploadRequest.getCaseTypeId(),
-                                                         documentUploadRequest.getJurisdictionId());
+        return documentManagementService.uploadDocuments(documentUploadRequest);
     }
 
     @PatchMapping(

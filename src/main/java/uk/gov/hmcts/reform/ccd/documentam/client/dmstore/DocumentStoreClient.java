@@ -5,37 +5,46 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
+import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.documentam.model.DmTtlRequest;
+import uk.gov.hmcts.reform.ccd.documentam.model.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.http.HttpMethod.GET;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DM_DATE_TIME_FORMATTER;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.RESOURCE_NOT_FOUND;
 
 @Named
 public class DocumentStoreClient {
 
-    private final String documentStoreBaseUrl;
     private final RestTemplate restTemplate;
+    private final String documentStoreBaseUrl;
+    private final int documentTtlInDays;
 
     @Inject
-    public DocumentStoreClient(@Value("${documentStoreUrl}") final String documentStoreBaseUrl,
-                               final RestTemplate restTemplate) {
-        this.documentStoreBaseUrl = documentStoreBaseUrl;
+    public DocumentStoreClient(final RestTemplate restTemplate,
+                               @Value("${documentStoreUrl}") final String documentStoreBaseUrl,
+                               @Value("${documentTtlInDays}") final int documentTtlInDays) {
         this.restTemplate = restTemplate;
+        this.documentStoreBaseUrl = documentStoreBaseUrl;
+        this.documentTtlInDays = documentTtlInDays;
     }
 
     public Optional<Document> getDocument(final UUID documentId) {
@@ -62,20 +71,12 @@ public class DocumentStoreClient {
         final HttpEntity<Object> nullRequestEntity = null;
 
         try {
-            final ResponseEntity<ByteArrayResource> response = restTemplate.exchange(
+            return restTemplate.exchange(
                 String.format("%s/documents/%s/binary", documentStoreBaseUrl, documentId),
                 GET,
                 nullRequestEntity,
                 ByteArrayResource.class
             );
-            if (HttpStatus.OK.equals(response.getStatusCode())) {
-                return ResponseEntity
-                    .ok()
-                    .headers(getHeaders(response))
-                    .body(response.getBody());
-            }
-
-            return response;
         } catch (HttpClientErrorException exception) {
             if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
                 throw new ResourceNotFoundException(
@@ -133,15 +134,43 @@ public class DocumentStoreClient {
         }
     }
 
-    private HttpHeaders getHeaders(ResponseEntity<ByteArrayResource> response) {
-        final HttpHeaders responseHeaders = response.getHeaders();
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(Constants.ORIGINAL_FILE_NAME, responseHeaders.get(Constants.ORIGINAL_FILE_NAME).get(0));
-        headers.add(Constants.CONTENT_DISPOSITION, responseHeaders.get(Constants.CONTENT_DISPOSITION).get(0));
-        headers.add(Constants.DATA_SOURCE, responseHeaders.get(Constants.DATA_SOURCE).get(0));
-        headers.add(Constants.CONTENT_TYPE, responseHeaders.get(Constants.CONTENT_TYPE).get(0));
+    public DmUploadResponse uploadDocuments(final DocumentUploadRequest documentUploadRequest) {
+        try {
+            return restTemplate.postForObject(
+                String.format("%s/documents", documentStoreBaseUrl),
+                prepareRequestForUpload(documentUploadRequest),
+                DmUploadResponse.class
+            );
+        } catch (HttpClientErrorException exception) {
+            throw new ServiceException(Constants.EXCEPTION_ERROR_MESSAGE, exception);
+        }
+    }
 
-        return headers;
+    private HttpEntity<LinkedMultiValueMap<String, Object>> prepareRequestForUpload(final DocumentUploadRequest
+                                                                                        documentUploadRequest) {
+        LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
+
+        bodyMap.set(Constants.CLASSIFICATION, documentUploadRequest.getClassification());
+        bodyMap.set("metadata[jurisdictionId]", documentUploadRequest.getJurisdictionId());
+        bodyMap.set("metadata[caseTypeId]", documentUploadRequest.getCaseTypeId());
+        bodyMap.set("ttl", getEffectiveTTL());
+
+        documentUploadRequest.getFiles()
+            .forEach(file -> {
+                if (!file.isEmpty()) {
+                    bodyMap.add(Constants.FILES, file.getResource());
+                }
+            });
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        return new HttpEntity<>(bodyMap, headers);
+    }
+
+    private String getEffectiveTTL() {
+        final ZonedDateTime currentDateTime = ZonedDateTime.now();
+        return currentDateTime.plusDays(documentTtlInDays).format(DM_DATE_TIME_FORMATTER);
     }
 
     private void handleException(final HttpClientErrorException exception, final String parameter) {

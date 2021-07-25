@@ -3,41 +3,34 @@ package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
-import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DocumentStoreClient;
 import uk.gov.hmcts.reform.ccd.documentam.configuration.AuthorisedServicesConfiguration;
+import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
+import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
-import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedServices;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.DmTtlRequest;
+import uk.gov.hmcts.reform.ccd.documentam.model.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
-import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
@@ -50,10 +43,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.Collections.emptyList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -63,15 +55,14 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.buildPatchDocumentResponse;
+import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.buildUpdateDocumentCommand;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
-import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.buildUpdateDocumentCommand;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_TYPE;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DATA_SOURCE;
@@ -83,16 +74,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USER_PERMIS
 @ExtendWith(MockitoExtension.class)
 class DocumentManagementServiceImplTest implements TestFixture {
 
-    private static final String ORIGINAL_DOCUMENT_NAME = "filename.txt";
-    private static final String MIME_TYPE = "application/octet-stream";
-    private static final String DOCUMENT_ID_FROM_LINK = "80e9471e-0f67-42ef-8739-170aa1942363";
-    private static final String SELF_LINK = "http://dm-store:8080/documents/80e9471e-0f67-42ef-8739-170aa1942363";
-    private static final String BINARY_LINK = "http://dm-store:8080/documents/80e9471e-0f67-42ef-8739-170aa1942363/binary";
-
     private static final String BULK_SCAN_PROCESSOR = "bulk_scan_processor";
-
-    @Mock
-    private RestTemplate restTemplateMock;
 
     @Mock
     private DocumentStoreClient documentStoreClient;
@@ -102,8 +84,6 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
     private DocumentManagementServiceImpl sut;
 
-    private final String documentURL = "http://localhost:4506";
-    private final String salt = "AAAOA7A2AA6AAAA5";
     private final List<String> bulkScanExceptionRecordTypes = Arrays.asList(
         "CMC_ExceptionRecord",
         "FINREM_ExceptionRecord",
@@ -124,10 +104,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
         final AuthorisedServices authorisedServices = loadAuthorisedServices();
 
-        sut = new DocumentManagementServiceImpl(restTemplateMock,
-                                                documentStoreClient,
-                                                caseDataStoreServiceMock,
-                                                authorisedServices);
+        sut = new DocumentManagementServiceImpl(documentStoreClient, caseDataStoreServiceMock, authorisedServices);
 
         ReflectionTestUtils.setField(sut, "documentTtlInDays", 1);
         ReflectionTestUtils.setField(sut, "documentURL", "http://localhost:4506");
@@ -325,7 +302,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
         final DocumentHashToken doc = DocumentHashToken.builder()
             .id(DOCUMENT_ID)
             .hashToken(ApplicationUtils.generateHashCode(
-                salt.concat(DOCUMENT_ID.toString())
+                SALT.concat(DOCUMENT_ID.toString())
                     .concat(JURISDICTION_ID_VALUE)
                     .concat(CASE_TYPE_ID_VALUE)))
             .build();
@@ -398,7 +375,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
         final DocumentHashToken doc = DocumentHashToken.builder()
             .id(DOCUMENT_ID)
             .hashToken(ApplicationUtils.generateHashCode(
-                salt.concat(DOCUMENT_ID.toString())
+                SALT.concat(DOCUMENT_ID.toString())
                     .concat(JURISDICTION_ID_VALUE)
                     .concat(CASE_TYPE_ID_VALUE)))
             .build();
@@ -473,7 +450,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @Test
     void shouldThrowForbiddenWhenTokenIsNotMatched() {
         final String token = ApplicationUtils.generateHashCode(
-            salt.concat(DOCUMENT_ID.toString())
+            SALT.concat(DOCUMENT_ID.toString())
                 .concat(JURISDICTION_ID_VALUE)
                 .concat(CASE_TYPE_ID_VALUE));
         final DocumentHashToken doc = DocumentHashToken.builder()
@@ -504,7 +481,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @Test
     void patchDocumentMetadata_Throws_ForbiddenException_InvalidHashToken() {
         final String invalidToken = ApplicationUtils.generateHashCode(
-            salt.concat(DOCUMENT_ID.toString())
+            SALT.concat(DOCUMENT_ID.toString())
                 .concat(JURISDICTION_ID_VALUE)
                 .concat(CASE_TYPE_ID_VALUE));
         final DocumentHashToken doc = DocumentHashToken.builder()
@@ -539,35 +516,33 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
     @Test
     void uploadDocuments_HappyPath() {
-
-        Document.Links links = getLinks();
-
-        Document document = Document.builder()
+        final Document document = Document.builder()
             .size(1000L)
             .mimeType(MIME_TYPE)
             .originalDocumentName(ORIGINAL_DOCUMENT_NAME)
             .classification(Classification.PUBLIC)
-            .links(links)
+            .links(TestFixture.getLinks())
             .build();
 
-        DmUploadResponse dmUploadResponse = DmUploadResponse.builder()
+        final DmUploadResponse dmUploadResponse = DmUploadResponse.builder()
             .embedded(DmUploadResponse.Embedded.builder().documents(List.of(document)).build())
             .build();
 
-        Mockito.when(restTemplateMock.postForObject(anyString(), any(HttpEntity.class), eq(DmUploadResponse.class)))
-            .thenReturn(dmUploadResponse);
+        doReturn(dmUploadResponse).when(documentStoreClient).uploadDocuments(any(DocumentUploadRequest.class));
 
-        String expectedHash = ApplicationUtils
-            .generateHashCode(salt.concat(DOCUMENT_ID_FROM_LINK
+        final String expectedHash = ApplicationUtils
+            .generateHashCode(SALT.concat(DOCUMENT_ID.toString()
                                               .concat(JURISDICTION_ID_VALUE)
                                               .concat(CASE_TYPE_ID_VALUE)));
 
-        UploadResponse response = sut.uploadDocuments(
+        final DocumentUploadRequest uploadRequest = new DocumentUploadRequest(
             List.of(new MockMultipartFile("afile", "some".getBytes())),
             Classification.PUBLIC.name(),
             CASE_TYPE_ID_VALUE,
             JURISDICTION_ID_VALUE
         );
+
+        final UploadResponse response = sut.uploadDocuments(uploadRequest);
 
         assertThat(response.getDocuments())
             .hasSize(1)
@@ -580,35 +555,32 @@ class DocumentManagementServiceImplTest implements TestFixture {
                 assertThat(doc.getHashToken()).isEqualTo(expectedHash);
                 assertThat(doc.getLinks().binary.href).isEqualTo(BINARY_LINK);
                 assertThat(doc.getLinks().self.href).isEqualTo(SELF_LINK);
-            }
-            );
+            });
 
+        verify(documentStoreClient).uploadDocuments(uploadRequest);
     }
 
-    @ParameterizedTest
-    @MethodSource("provideDocumentUploadParameters")
-    void uploadDocuments_Throw_Exception(final HttpStatus status, final Class<Throwable> clazz, final String errorMsg) {
-        doThrow(new HttpClientErrorException(status)).when(restTemplateMock)
-            .postForObject(anyString(), any(HttpEntity.class), eq(DmUploadResponse.class));
+    @Test
+    @SuppressWarnings("ConstantConditions")
+    void testUploadDocumentsWhenDmUploadResponseIsNull() {
+        final DmUploadResponse dmUploadResponse = null;
 
-        assertThatExceptionOfType(clazz)
-            .isThrownBy(() -> sut.uploadDocuments(
-                emptyList(),
-                "classification",
-                CASE_TYPE_ID_VALUE,
-                JURISDICTION_ID_VALUE
-            ))
-            .withMessage(errorMsg);
-    }
+        doReturn(dmUploadResponse).when(documentStoreClient).uploadDocuments(any(DocumentUploadRequest.class));
 
-    @SuppressWarnings("unused")
-    private static Stream<Arguments> provideDocumentUploadParameters() {
-        return Stream.of(
-            Arguments.of(HttpStatus.BAD_GATEWAY, ServiceException.class, "Exception occurred with operation"),
-            Arguments.of(HttpStatus.FORBIDDEN, ForbiddenException.class, "Forbidden: Insufficient permissions"),
-            Arguments.of(HttpStatus.BAD_REQUEST, ServiceException.class, "Exception occurred with operation"),
-            Arguments.of(HttpStatus.NOT_FOUND, ResourceNotFoundException.class, "Resource not found")
+        final DocumentUploadRequest uploadRequest = new DocumentUploadRequest(
+            List.of(new MockMultipartFile("afile", "some".getBytes())),
+            Classification.PUBLIC.name(),
+            CASE_TYPE_ID_VALUE,
+            JURISDICTION_ID_VALUE
         );
+
+        final UploadResponse response = sut.uploadDocuments(uploadRequest);
+
+        assertThat(response)
+            .isNotNull()
+            .satisfies(x -> assertThat(x.getDocuments()).isEmpty());
+
+        verify(documentStoreClient).uploadDocuments(uploadRequest);
     }
 
     @Test
@@ -705,19 +677,6 @@ class DocumentManagementServiceImplTest implements TestFixture {
         return Document.builder()
             .metadata(myMap)
             .build();
-    }
-
-    private Document.Links getLinks() {
-        Document.Links links = new Document.Links();
-
-        Document.Link self = new Document.Link();
-        Document.Link binary = new Document.Link();
-        self.href = SELF_LINK;
-        binary.href = BINARY_LINK;
-
-        links.self = self;
-        links.binary = binary;
-        return links;
     }
 
     private AuthorisedServices loadAuthorisedServices() throws IOException {

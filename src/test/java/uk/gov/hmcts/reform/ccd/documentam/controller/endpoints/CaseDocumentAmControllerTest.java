@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
+import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
@@ -24,7 +25,6 @@ import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.model.GeneratedHashCodeResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentMetaDataResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
-import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
@@ -423,19 +423,16 @@ public class CaseDocumentAmControllerTest implements TestFixture {
             anyString()
         );
         List<MultipartFile> multipartFiles = generateMultipartList();
-        doReturn(mockResponse).when(documentManagementService).uploadDocuments(
-            multipartFiles,
-            Classification.PUBLIC.name(),
-            CASE_TYPE_ID_VALUE,
-                JURISDICTION_ID_VALUE
-        );
+
 
         final DocumentUploadRequest documentUploadRequest = new DocumentUploadRequest(
             multipartFiles,
             Classification.PUBLIC.name(),
             CASE_TYPE_ID_VALUE,
-                JURISDICTION_ID_VALUE
+            JURISDICTION_ID_VALUE
         );
+
+        doReturn(mockResponse).when(documentManagementService).uploadDocuments(documentUploadRequest);
 
         UploadResponse finalResponse = testee.uploadDocuments(
             documentUploadRequest,

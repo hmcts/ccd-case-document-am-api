@@ -5,43 +5,35 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
-import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DocumentStoreClient;
+import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
+import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.CaseNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
-import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedServices;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.DmTtlRequest;
+import uk.gov.hmcts.reform.ccd.documentam.model.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentUpdate;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
-import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -50,9 +42,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DM_DATE_TIME_FORMATTER;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DOCUMENT_METADATA_NOT_FOUND;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.RESOURCE_NOT_FOUND;
 
@@ -77,8 +69,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Value("${bulkscan.exception.record.types}")
     private List<String> bulkScanExceptionRecordTypes;
 
-    private final RestTemplate restTemplate;
-
     private final DocumentStoreClient documentStoreClient;
 
     private final CaseDataStoreService caseDataStoreService;
@@ -86,11 +76,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private final AuthorisedServices authorisedServices;
 
     @Autowired
-    public DocumentManagementServiceImpl(RestTemplate restTemplate,
-                                         final DocumentStoreClient documentStoreClient,
-                                         CaseDataStoreService caseDataStoreService,
+    public DocumentManagementServiceImpl(final DocumentStoreClient documentStoreClient,
+                                         final CaseDataStoreService caseDataStoreService,
                                          final AuthorisedServices authorisedServices) {
-        this.restTemplate = restTemplate;
         this.documentStoreClient = documentStoreClient;
         this.caseDataStoreService = caseDataStoreService;
         this.authorisedServices = authorisedServices;
@@ -195,26 +183,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public UploadResponse uploadDocuments(List<MultipartFile> files, String classification,
-                                          String caseTypeId, String jurisdictionId) {
-        DmUploadResponse dmResponse = null;
-        try {
-            LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
-            HttpHeaders headers = prepareRequestForUpload(classification, caseTypeId, jurisdictionId, bodyMap);
+    public UploadResponse uploadDocuments(final DocumentUploadRequest documentUploadRequest) {
+        final DmUploadResponse dmResponse = documentStoreClient.uploadDocuments(documentUploadRequest);
 
-            for (MultipartFile file : files) {
-                if (!file.isEmpty()) {
-                    bodyMap.add(Constants.FILES, file.getResource());
-                }
-            }
-            String docUrl = String.format("%s/documents", documentURL);
-
-            HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
-            dmResponse = restTemplate.postForObject(docUrl, requestEntity, DmUploadResponse.class);
-        } catch (HttpClientErrorException exception) {
-            handleException(exception);
-        }
-        return buildUploadResponse(caseTypeId, jurisdictionId, dmResponse);
+        return buildUploadResponse(documentUploadRequest.getCaseTypeId(),
+                                   documentUploadRequest.getJurisdictionId(),
+                                   dmResponse);
     }
 
     @Override
@@ -229,40 +203,30 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         documentStoreClient.deleteDocument(documentId, permanent);
     }
 
-    private UploadResponse buildUploadResponse(String caseTypeId, String jurisdictionId, DmUploadResponse dmResponse) {
-        List<Document> dmDocuments = dmResponse.getEmbedded().getDocuments();
+    private UploadResponse buildUploadResponse(final String caseTypeId,
+                                               final String jurisdictionId,
+                                               final DmUploadResponse dmResponse) {
+        final List<Document> dmDocuments = Optional.ofNullable(dmResponse)
+            .map(x -> x.getEmbedded().getDocuments())
+            .orElse(emptyList());
 
-        List<Document> documents = dmDocuments.stream()
+        final List<Document> documents = dmDocuments.stream()
             .map(doc -> documentWithHashToken(doc, caseTypeId, jurisdictionId))
             .collect(Collectors.toList());
+
         return new UploadResponse(documents);
     }
 
-    private Document documentWithHashToken(Document dmDocument, String caseTypeId, String jurisdictionId) {
-        String href = dmDocument.getLinks().self.href;
-        String hashToken = ApplicationUtils.generateHashCode(salt.concat(
+    private Document documentWithHashToken(final Document dmDocument,
+                                           final String caseTypeId,
+                                           final String jurisdictionId) {
+        final String href = dmDocument.getLinks().self.href;
+        final String hashToken = ApplicationUtils.generateHashCode(salt.concat(
             href.substring(href.length() - 36)
                 .concat(jurisdictionId)
                 .concat(caseTypeId)));
+
         return dmDocument.toBuilder().hashToken(hashToken).build();
-    }
-
-    private HttpHeaders prepareRequestForUpload(String classification,
-                                                String caseTypeId, String jurisdictionId,
-                                                LinkedMultiValueMap<String, Object> bodyMap) {
-        bodyMap.set(Constants.CLASSIFICATION, classification);
-        bodyMap.set("metadata[jurisdictionId]", jurisdictionId);
-        bodyMap.set("metadata[caseTypeId]", caseTypeId);
-        bodyMap.set("ttl", getEffectiveTTL());
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        return headers;
-    }
-
-    private String getEffectiveTTL() {
-        ZonedDateTime currentDateTime = ZonedDateTime.now();
-        return currentDateTime.plusDays(documentTtlInDays).format(DM_DATE_TIME_FORMATTER);
     }
 
     @Override
@@ -339,16 +303,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         } else {
             log.error("Service Id {} is not authorized to access API ", serviceId);
             throw new ForbiddenException(String.format(Constants.EXCEPTION_SERVICE_ID_NOT_AUTHORISED, serviceId));
-        }
-    }
-
-    private void handleException(HttpClientErrorException exception) {
-        if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-            throw new ResourceNotFoundException(RESOURCE_NOT_FOUND, exception);
-        } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
-            throw new ForbiddenException(exception);
-        } else {
-            throw new ServiceException(Constants.EXCEPTION_ERROR_MESSAGE, exception);
         }
     }
 
