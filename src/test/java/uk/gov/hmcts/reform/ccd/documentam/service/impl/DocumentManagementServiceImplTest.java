@@ -12,7 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DocumentStoreClient;
 import uk.gov.hmcts.reform.ccd.documentam.configuration.AuthorisedServicesConfiguration;
@@ -33,7 +33,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
-import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
+import uk.gov.hmcts.reform.ccd.documentam.client.datastore.CaseDataStoreClient;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
 import java.io.IOException;
@@ -80,7 +80,10 @@ class DocumentManagementServiceImplTest implements TestFixture {
     private DocumentStoreClient documentStoreClient;
 
     @Mock
-    private CaseDataStoreService caseDataStoreServiceMock;
+    private CaseDataStoreClient caseDataStoreServiceMock;
+
+    @Mock
+    private ApplicationParams applicationParams;
 
     private DocumentManagementServiceImpl sut;
 
@@ -104,12 +107,10 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
         final AuthorisedServices authorisedServices = loadAuthorisedServices();
 
-        sut = new DocumentManagementServiceImpl(documentStoreClient, caseDataStoreServiceMock, authorisedServices);
-
-        ReflectionTestUtils.setField(sut, "documentTtlInDays", 1);
-        ReflectionTestUtils.setField(sut, "documentURL", "http://localhost:4506");
-        ReflectionTestUtils.setField(sut, "salt", "AAAOA7A2AA6AAAA5");
-        ReflectionTestUtils.setField(sut, "bulkScanExceptionRecordTypes", bulkScanExceptionRecordTypes);
+        sut = new DocumentManagementServiceImpl(documentStoreClient,
+                                                caseDataStoreServiceMock,
+                                                authorisedServices,
+                                                applicationParams);
     }
 
     @Test
@@ -285,6 +286,10 @@ class DocumentManagementServiceImplTest implements TestFixture {
         verifyCaseDataServiceGetDocMetadata();
     }
 
+    private void stubGetSalt() {
+        doReturn("AAAOA7A2AA6AAAA5").when(applicationParams).getSalt();
+    }
+
     private void stubGetDocument(final Document document) {
         doReturn(Optional.ofNullable(document)).when(documentStoreClient).getDocument(DOCUMENT_ID);
     }
@@ -297,8 +302,6 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @Test
     void patchDocumentMetadata_HappyPath() {
         // GIVEN
-        ReflectionTestUtils.setField(sut, "hashCheckEnabled", true);
-
         final DocumentHashToken doc = DocumentHashToken.builder()
             .id(DOCUMENT_ID)
             .hashToken(ApplicationUtils.generateHashCode(
@@ -321,6 +324,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
         final ArgumentCaptor<UpdateDocumentsCommand> updateDocumentsCommandCaptor =
             ArgumentCaptor.forClass(UpdateDocumentsCommand.class);
 
+        stubGetSalt();
         stubGetDocument(document);
         doNothing().when(documentStoreClient).patchDocumentMetadata(updateDocumentsCommandCaptor.capture());
 
@@ -338,7 +342,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @Test
     void shouldPatchMetaDataEvenIfTokenIsNotPassed_hashCheckDisabled() {
         // GIVEN
-        ReflectionTestUtils.setField(sut, "hashCheckEnabled", false);
+        doReturn(false).when(applicationParams).isHashCheckEnabled();
 
         final Document document = Document.builder()
             .metadata(Map.of(JURISDICTION_ID, JURISDICTION_ID_VALUE, CASE_TYPE_ID, "CMC_ExceptionRecord"))
@@ -348,6 +352,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
             ArgumentCaptor.forClass(UpdateDocumentsCommand.class);
 
         stubGetDocument(document);
+        doReturn(bulkScanExceptionRecordTypes).when(applicationParams).getBulkScanExceptionRecordTypes();
         doNothing().when(documentStoreClient).patchDocumentMetadata(updateDocumentsCommandCaptor.capture());
 
         final DocumentHashToken doc = DocumentHashToken.builder().id(DOCUMENT_ID).build();
@@ -398,7 +403,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @Test
     void shouldNotPatchMetaDataWhenDocumentNotMovingCase_noExceptionRecordType() {
         // GIVEN
-        ReflectionTestUtils.setField(sut, "hashCheckEnabled", false);
+        doReturn(false).when(applicationParams).isHashCheckEnabled();
 
         final Document document = Document.builder()
             .metadata(Map.of(JURISDICTION_ID, JURISDICTION_ID_VALUE, CASE_TYPE_ID, CASE_TYPE_ID_VALUE))
@@ -422,7 +427,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
     @Test
     void shouldThrowForbiddenWhenTokenIsNotPassed_hashCheckEnabled() {
-        ReflectionTestUtils.setField(sut, "hashCheckEnabled", true);
+        doReturn(true).when(applicationParams).isHashCheckEnabled();
 
         final DocumentHashToken doc = DocumentHashToken.builder().id(DOCUMENT_ID).build();
 
@@ -462,6 +467,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .metadata(Map.of(JURISDICTION_ID, JURISDICTION_ID_VALUE, CASE_TYPE_ID, "DIFFERENT_CASETYPE"))
             .build();
 
+        stubGetSalt();
         stubGetDocument(document);
 
         final CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
@@ -498,6 +504,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .metadata(myMetadata)
             .build();
 
+        stubGetSalt();
         stubGetDocument(document);
 
         final CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
@@ -528,6 +535,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .embedded(DmUploadResponse.Embedded.builder().documents(List.of(document)).build())
             .build();
 
+        stubGetSalt();
         doReturn(dmUploadResponse).when(documentStoreClient).uploadDocuments(any(DocumentUploadRequest.class));
 
         final String expectedHash = ApplicationUtils
@@ -628,6 +636,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     void shouldGenerateHashTokenWhenCaseIdIsPresent() {
         final Document document = buildDocument(CASE_ID_VALUE, "BEFTA_CASETYPE_2_2", JURISDICTION_ID_VALUE);
 
+        stubGetSalt();
         stubGetDocument(document);
 
         final String result = sut.generateHashToken(DOCUMENT_ID);
@@ -641,6 +650,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .metadata(Map.of(CASE_TYPE_ID, "BEFTA_CASETYPE_2_2", JURISDICTION_ID, JURISDICTION_ID_VALUE))
             .build();
 
+        stubGetSalt();
         stubGetDocument(document);
 
         final String result = sut.generateHashToken(DOCUMENT_ID);

@@ -3,11 +3,11 @@ package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DocumentStoreClient;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
@@ -29,7 +29,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.DocumentUpdate;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
-import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
+import uk.gov.hmcts.reform.ccd.documentam.client.datastore.CaseDataStoreClient;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
@@ -54,34 +54,23 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private static final Date NULL_TTL = null;
 
-    @Value("${documentStoreUrl}")
-    protected String documentURL;
-
-    @Value("${documentTtlInDays}")
-    protected int documentTtlInDays;
-
-    @Value("${idam.s2s-auth.totp_secret}")
-    protected String salt;
-
-    @Value("${hash.check.enabled}")
-    private boolean hashCheckEnabled;
-
-    @Value("${bulkscan.exception.record.types}")
-    private List<String> bulkScanExceptionRecordTypes;
-
     private final DocumentStoreClient documentStoreClient;
 
-    private final CaseDataStoreService caseDataStoreService;
+    private final CaseDataStoreClient caseDataStoreClient;
 
     private final AuthorisedServices authorisedServices;
 
+    private final ApplicationParams applicationParams;
+
     @Autowired
     public DocumentManagementServiceImpl(final DocumentStoreClient documentStoreClient,
-                                         final CaseDataStoreService caseDataStoreService,
-                                         final AuthorisedServices authorisedServices) {
+                                         final CaseDataStoreClient caseDataStoreClient,
+                                         final AuthorisedServices authorisedServices,
+                                         final ApplicationParams applicationParams) {
         this.documentStoreClient = documentStoreClient;
-        this.caseDataStoreService = caseDataStoreService;
+        this.caseDataStoreClient = caseDataStoreClient;
         this.authorisedServices = authorisedServices;
+        this.applicationParams = applicationParams;
     }
 
     @Override
@@ -120,7 +109,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                     ));
                 }
                 verifyHashTokenValidity(documentHashToken, documentMetadata.get());
-            } else if (hashCheckEnabled) {
+            } else if (applicationParams.isHashCheckEnabled()) {
                 throw new ForbiddenException(
                     String.format(
                         "Hash check is enabled but hashToken wasn't provided for the document: %s",
@@ -160,11 +149,13 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     private boolean isDocumentMovingCases(String documentCaseTypeId) {
-        return bulkScanExceptionRecordTypes.contains(documentCaseTypeId);
+        return applicationParams.getBulkScanExceptionRecordTypes().contains(documentCaseTypeId);
     }
 
     @Override
     public String generateHashToken(UUID documentId, Document document) {
+        final String salt = applicationParams.getSalt();
+
         return (document.getCaseId() == null)
                 ? ApplicationUtils.generateHashCode(salt.concat(documentId.toString()
                                                                     .concat(document.getJurisdictionId())
@@ -221,7 +212,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                            final String caseTypeId,
                                            final String jurisdictionId) {
         final String href = dmDocument.getLinks().self.href;
-        final String hashToken = ApplicationUtils.generateHashCode(salt.concat(
+        final String hashToken = ApplicationUtils.generateHashCode(applicationParams.getSalt().concat(
             href.substring(href.length() - 36)
                 .concat(jurisdictionId)
                 .concat(caseTypeId)));
@@ -236,7 +227,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                     final String logMessage,
                                     final String exceptionMessage) {
 
-        final DocumentPermissions documentPermissions = caseDataStoreService
+        final DocumentPermissions documentPermissions = caseDataStoreClient
             .getCaseDocumentMetadata(caseId, documentId)
             .orElseThrow(() -> new CaseNotFoundException(caseId));
 

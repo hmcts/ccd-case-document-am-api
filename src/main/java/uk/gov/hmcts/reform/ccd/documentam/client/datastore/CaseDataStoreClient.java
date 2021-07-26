@@ -1,11 +1,11 @@
-package uk.gov.hmcts.reform.ccd.documentam.service;
+package uk.gov.hmcts.reform.ccd.documentam.client.datastore;
 
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public interface CaseDataStoreService {
+public interface CaseDataStoreClient {
     String EXPERIMENTAL_HEADER = "experimental";
 
     /**
@@ -15,5 +15,5 @@ public interface CaseDataStoreService {
      * @param documentId Document Id
      * @return Optional containing Case Metadata when found; empty optional otherwise
      */
-    Optional<DocumentPermissions> getCaseDocumentMetadata(final String caseReference, UUID documentId);
+    Optional<DocumentPermissions> getCaseDocumentMetadata(String caseReference, UUID documentId);
 }

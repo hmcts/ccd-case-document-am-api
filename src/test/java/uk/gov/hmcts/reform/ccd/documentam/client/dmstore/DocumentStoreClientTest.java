@@ -2,11 +2,13 @@ package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
@@ -48,6 +51,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_TYP
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DATA_SOURCE;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.ORIGINAL_FILE_NAME;
 
+@ExtendWith(MockitoExtension.class)
 class DocumentStoreClientTest implements TestFixture {
     private static final String DM_STORE_URL = "http://localhost:4506";
     private static final HttpEntity<Object> NULL_REQUEST_ENTITY = null;
@@ -55,16 +59,17 @@ class DocumentStoreClientTest implements TestFixture {
     @Mock
     private RestTemplate restTemplate;
 
+    @Mock
+    private ApplicationParams applicationParams;
+
+    @InjectMocks
     private DocumentStoreClient underTest;
 
     private final boolean permanent = true;
 
     @BeforeEach
     void prepare() {
-        MockitoAnnotations.openMocks(this);
-
-        final int documentTtlInDays = 1;
-        underTest = new DocumentStoreClient(restTemplate, DM_STORE_URL, documentTtlInDays);
+        doReturn(DM_STORE_URL).when(applicationParams).getDocumentURL();
     }
 
     @Test
@@ -395,6 +400,7 @@ class DocumentStoreClientTest implements TestFixture {
             .embedded(DmUploadResponse.Embedded.builder().documents(List.of(document)).build())
             .build();
 
+        doReturn(1).when(applicationParams).getDocumentTtlInDays();
         doReturn(dmUploadResponse)
             .when(restTemplate).postForObject(anyString(), any(HttpEntity.class), eq(DmUploadResponse.class));
 

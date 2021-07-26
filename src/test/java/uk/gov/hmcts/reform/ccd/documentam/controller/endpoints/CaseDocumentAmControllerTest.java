@@ -28,7 +28,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
-import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
+import uk.gov.hmcts.reform.ccd.documentam.client.datastore.CaseDataStoreClient;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 
 import java.util.Arrays;
@@ -70,7 +70,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
     @Mock
     private DocumentManagementService documentManagementService;
     @Mock
-    private CaseDataStoreService caseDataStoreService;
+    private CaseDataStoreClient caseDataStoreService;
     @Mock
     private SecurityUtils securityUtils;
     @Mock

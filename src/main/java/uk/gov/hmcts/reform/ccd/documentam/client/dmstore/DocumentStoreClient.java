@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -10,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
@@ -35,22 +35,19 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.RESOURCE_NO
 public class DocumentStoreClient {
 
     private final RestTemplate restTemplate;
-    private final String documentStoreBaseUrl;
-    private final int documentTtlInDays;
+    private final ApplicationParams applicationParams;
 
     @Inject
     public DocumentStoreClient(final RestTemplate restTemplate,
-                               @Value("${documentStoreUrl}") final String documentStoreBaseUrl,
-                               @Value("${documentTtlInDays}") final int documentTtlInDays) {
+                               final ApplicationParams applicationParams) {
         this.restTemplate = restTemplate;
-        this.documentStoreBaseUrl = documentStoreBaseUrl;
-        this.documentTtlInDays = documentTtlInDays;
+        this.applicationParams = applicationParams;
     }
 
     public Optional<Document> getDocument(final UUID documentId) {
         try {
             final Document document = restTemplate.getForObject(
-                String.format("%s/documents/%s", documentStoreBaseUrl, documentId),
+                String.format("%s/documents/%s", applicationParams.getDocumentURL(), documentId),
                 Document.class
             );
 
@@ -72,7 +69,7 @@ public class DocumentStoreClient {
 
         try {
             return restTemplate.exchange(
-                String.format("%s/documents/%s/binary", documentStoreBaseUrl, documentId),
+                String.format("%s/documents/%s/binary", applicationParams.getDocumentURL(), documentId),
                 GET,
                 nullRequestEntity,
                 ByteArrayResource.class
@@ -96,7 +93,7 @@ public class DocumentStoreClient {
         try {
             restTemplate.delete(String.format(
                 "%s/documents/%s?permanent=%s",
-                documentStoreBaseUrl,
+                applicationParams.getDocumentURL(),
                 documentId,
                 permanent
             ));
@@ -108,7 +105,7 @@ public class DocumentStoreClient {
     public Optional<PatchDocumentResponse> patchDocument(final UUID documentId, final DmTtlRequest dmTtlRequest) {
         try {
             final PatchDocumentResponse patchDocumentResponse = restTemplate.patchForObject(
-                String.format("%s/documents/%s", documentStoreBaseUrl, documentId),
+                String.format("%s/documents/%s", applicationParams.getDocumentURL(), documentId),
                 dmTtlRequest,
                 PatchDocumentResponse.class
             );
@@ -125,7 +122,7 @@ public class DocumentStoreClient {
     public void patchDocumentMetadata(final UpdateDocumentsCommand updateDocumentsCommand) {
         try {
             restTemplate.patchForObject(
-                String.format("%s/documents", documentStoreBaseUrl),
+                String.format("%s/documents", applicationParams.getDocumentURL()),
                 updateDocumentsCommand,
                 Void.class
             );
@@ -137,7 +134,7 @@ public class DocumentStoreClient {
     public DmUploadResponse uploadDocuments(final DocumentUploadRequest documentUploadRequest) {
         try {
             return restTemplate.postForObject(
-                String.format("%s/documents", documentStoreBaseUrl),
+                String.format("%s/documents", applicationParams.getDocumentURL()),
                 prepareRequestForUpload(documentUploadRequest),
                 DmUploadResponse.class
             );
@@ -170,7 +167,7 @@ public class DocumentStoreClient {
 
     private String getEffectiveTTL() {
         final ZonedDateTime currentDateTime = ZonedDateTime.now();
-        return currentDateTime.plusDays(documentTtlInDays).format(DM_DATE_TIME_FORMATTER);
+        return currentDateTime.plusDays(applicationParams.getDocumentTtlInDays()).format(DM_DATE_TIME_FORMATTER);
     }
 
     private void handleException(final HttpClientErrorException exception, final String parameter) {

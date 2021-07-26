@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.ccd.documentam.service.impl;
+package uk.gov.hmcts.reform.ccd.documentam.client.datastore;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +21,13 @@ import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentResource;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
-import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
 
 import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
 @Service
-public class CaseDataStoreServiceImpl implements CaseDataStoreService {
+public class CaseDataStoreClientImpl implements CaseDataStoreClient {
 
     private static final String ERROR_MESSAGE = "Couldn't find document for case  : {}, response code from CCD : {}";
     private static final String CASE_ERROR_MESSAGE = "Couldn't find document for case  : ";
@@ -38,9 +37,9 @@ public class CaseDataStoreServiceImpl implements CaseDataStoreService {
     private final SecurityUtils securityUtils;
 
     @Autowired
-    public CaseDataStoreServiceImpl(@Qualifier("dataStoreRestTemplate") final RestTemplate restTemplate,
-                                    @Value("${caseDataStoreUrl}") final String caseDataStoreUrl,
-                                    final SecurityUtils securityUtils) {
+    public CaseDataStoreClientImpl(@Qualifier("dataStoreRestTemplate") final RestTemplate restTemplate,
+                                   @Value("${caseDataStoreUrl}") final String caseDataStoreUrl,
+                                   final SecurityUtils securityUtils) {
         this.restTemplate = restTemplate;
         this.caseDataStoreUrl = caseDataStoreUrl;
         this.securityUtils = securityUtils;

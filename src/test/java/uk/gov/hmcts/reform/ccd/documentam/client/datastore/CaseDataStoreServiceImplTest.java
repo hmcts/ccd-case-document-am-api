@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.ccd.documentam.service.impl;
+package uk.gov.hmcts.reform.ccd.documentam.client.datastore;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +45,7 @@ class CaseDataStoreServiceImplTest implements TestFixture {
 
     private final String caseDataStoreUrl = "http://localhost";
 
-    private CaseDataStoreServiceImpl sut;
+    private CaseDataStoreClientImpl sut;
 
     private final String documentUrl = String.format(
         "%s/cases/%s/documents/%s",
@@ -58,7 +58,7 @@ class CaseDataStoreServiceImplTest implements TestFixture {
     void prepare() {
         MockitoAnnotations.openMocks(this);
 
-        sut = new CaseDataStoreServiceImpl(restTemplate, caseDataStoreUrl, securityUtils);
+        sut = new CaseDataStoreClientImpl(restTemplate, caseDataStoreUrl, securityUtils);
     }
 
     @Test
