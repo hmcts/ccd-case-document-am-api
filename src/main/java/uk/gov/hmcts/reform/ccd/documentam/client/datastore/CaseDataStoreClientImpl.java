@@ -29,7 +29,6 @@ import java.util.UUID;
 @Service
 public class CaseDataStoreClientImpl implements CaseDataStoreClient {
 
-    private static final String ERROR_MESSAGE = "Couldn't find document for case  : {}, response code from CCD : {}";
     private static final String CASE_ERROR_MESSAGE = "Couldn't find document for case  : ";
 
     private final RestTemplate restTemplate;
@@ -62,18 +61,15 @@ public class CaseDataStoreClientImpl implements CaseDataStoreClient {
                 .map(CaseDocumentResource::getDocumentMetadata)
                 .map(CaseDocumentMetadata::getDocumentPermissions);
         } catch (HttpClientErrorException exception) {
+            log.error("Exception occurred while getting document permissions from CCD Data store: {}",
+                      exception.getMessage());
             if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-                log.error(ERROR_MESSAGE, caseId, HttpStatus.NOT_FOUND);
                 return Optional.empty();
             } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
-                log.error(ERROR_MESSAGE, caseId, HttpStatus.FORBIDDEN);
                 throw new ForbiddenException(CASE_ERROR_MESSAGE + caseId);
             } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
-                log.error(ERROR_MESSAGE, caseId, HttpStatus.BAD_REQUEST);
                 throw new BadRequestException(Constants.INPUT_INVALID);
             } else {
-                log.error("Exception occurred while getting document permissions from CCD Data store: {}",
-                    exception.getMessage());
                 throw new ServiceException(String.format(
                     "Problem  fetching the document for document id: %s because of %s",
                     documentId,
@@ -84,7 +80,6 @@ public class CaseDataStoreClientImpl implements CaseDataStoreClient {
     }
 
     private HttpHeaders prepareRequestForUpload() {
-
         HttpHeaders headers = new HttpHeaders();
         headers.addAll(securityUtils.authorizationHeaders());
         headers.setContentType(MediaType.APPLICATION_JSON);

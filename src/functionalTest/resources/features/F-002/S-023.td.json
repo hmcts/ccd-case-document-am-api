@@ -18,13 +18,13 @@
     }
   },
   "expectedResponse": {
-    "_extends_": "AM_403_Response",
+    "_extends_": "AM_404_Response",
     "headers": {
       "Content-Type": "application/json",
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "Forbidden: Insufficient permissions: Couldn't find document for case  : ${[scenarioContext][childContexts][S-023_Case_Create][testData][actualResponse][body][id]}"
+      "errorDescription": "Case reference ${[scenarioContext][childContexts][S-023_Case_Create][testData][actualResponse][body][id]} not found for requested document."
     }
   }
 }
