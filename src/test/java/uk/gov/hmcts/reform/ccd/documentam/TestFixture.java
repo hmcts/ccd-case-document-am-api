@@ -43,7 +43,7 @@ public interface TestFixture {
     String CASE_TYPE_ID_VALUE = "BEFTA_CASETYPE_2";
     String JURISDICTION_ID_VALUE = "BEFTA_JURISDICTION_2";
     String CASE_ID_VALUE = "1582550122096256";
-    String XUI_WEBAPP = "xui_webapp";
+    String SERVICE_NAME_XUI_WEBAPP = "xui_webapp";
     Date NULL_TTL = null;
     String SALT = "AAAOA7A2AA6AAAA5";
     String ORIGINAL_DOCUMENT_NAME = "filename.txt";

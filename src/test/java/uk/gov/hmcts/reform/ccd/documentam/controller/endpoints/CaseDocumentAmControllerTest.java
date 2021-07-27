@@ -80,7 +80,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         testee = new CaseDocumentAmController(documentManagementService, securityUtils);
-        when(securityUtils.getServiceNameFromS2SToken(TEST_S2S_TOKEN)).thenReturn(XUI_WEBAPP);
+        when(securityUtils.getServiceNameFromS2SToken(TEST_S2S_TOKEN)).thenReturn(SERVICE_NAME_XUI_WEBAPP);
         doReturn(DOCUMENT).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
     }
 
@@ -97,7 +97,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
             .checkServicePermission(
                 DOCUMENT.getCaseTypeId(),
                 DOCUMENT.getJurisdictionId(),
-                XUI_WEBAPP,
+                SERVICE_NAME_XUI_WEBAPP,
                 Permission.READ,
                 SERVICE_PERMISSION_ERROR,
                 MATCHED_DOCUMENT_ID.toString());
@@ -123,7 +123,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
         doThrow(ForbiddenException.class).when(documentManagementService)
             .checkServicePermission(DOCUMENT.getCaseTypeId(),
                                     DOCUMENT.getJurisdictionId(),
-                                    XUI_WEBAPP,
+                                    SERVICE_NAME_XUI_WEBAPP,
                                     Permission.READ,
                                     SERVICE_PERMISSION_ERROR,
                                     MATCHED_DOCUMENT_ID.toString());
@@ -143,7 +143,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
         doNothing().when(documentManagementService)
             .checkServicePermission(DOCUMENT.getCaseTypeId(),
                                     DOCUMENT.getJurisdictionId(),
-                                    XUI_WEBAPP,
+                                    SERVICE_NAME_XUI_WEBAPP,
                                     Permission.READ,
                                     SERVICE_PERMISSION_ERROR,
                                     MATCHED_DOCUMENT_ID.toString());
@@ -164,7 +164,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
         doNothing().when(documentManagementService)
             .checkServicePermission(DOCUMENT.getCaseTypeId(),
                                     DOCUMENT.getJurisdictionId(),
-                                    XUI_WEBAPP,
+                                    SERVICE_NAME_XUI_WEBAPP,
                                     Permission.READ,
                                     SERVICE_PERMISSION_ERROR,
                                     MATCHED_DOCUMENT_ID.toString());
@@ -188,7 +188,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
         doNothing().when(documentManagementService)
             .checkServicePermission(DOCUMENT.getCaseTypeId(),
                                     DOCUMENT.getJurisdictionId(),
-                                    XUI_WEBAPP,
+                                    SERVICE_NAME_XUI_WEBAPP,
                                     Permission.READ,
                                     SERVICE_PERMISSION_ERROR,
                                     MATCHED_DOCUMENT_ID.toString());
@@ -217,7 +217,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
         doNothing().when(documentManagementService)
             .checkServicePermission(DOCUMENT.getCaseTypeId(),
                                     DOCUMENT.getJurisdictionId(),
-                                    XUI_WEBAPP,
+                                    SERVICE_NAME_XUI_WEBAPP,
                                     Permission.READ,
                                     SERVICE_PERMISSION_ERROR,
                                     MATCHED_DOCUMENT_ID.toString());
@@ -243,7 +243,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
         doThrow(ForbiddenException.class).when(documentManagementService)
             .checkServicePermission(DOCUMENT.getCaseTypeId(),
                                     DOCUMENT.getJurisdictionId(),
-                                    XUI_WEBAPP,
+                                    SERVICE_NAME_XUI_WEBAPP,
                                     Permission.READ,
                                     SERVICE_PERMISSION_ERROR,
                                     MATCHED_DOCUMENT_ID.toString());
@@ -258,7 +258,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
         doNothing().when(documentManagementService)
             .checkServicePermission(DOCUMENT.getCaseTypeId(),
                                     DOCUMENT.getJurisdictionId(),
-                                    XUI_WEBAPP,
+                                    SERVICE_NAME_XUI_WEBAPP,
                                     Permission.UPDATE,
                                     SERVICE_PERMISSION_ERROR,
                                     MATCHED_DOCUMENT_ID.toString());
@@ -286,7 +286,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
         doThrow(ForbiddenException.class).when(documentManagementService)
             .checkServicePermission(DOCUMENT.getCaseTypeId(),
                                     DOCUMENT.getJurisdictionId(),
-                                    XUI_WEBAPP,
+                                    SERVICE_NAME_XUI_WEBAPP,
                                     Permission.UPDATE,
                                     SERVICE_PERMISSION_ERROR,
                                     MATCHED_DOCUMENT_ID.toString());
@@ -308,7 +308,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
         doNothing().when(documentManagementService)
             .checkServicePermission(DOCUMENT.getCaseTypeId(),
                                     DOCUMENT.getJurisdictionId(),
-                                    XUI_WEBAPP,
+                                    SERVICE_NAME_XUI_WEBAPP,
                                     Permission.UPDATE,
                                     SERVICE_PERMISSION_ERROR,
                                     MATCHED_DOCUMENT_ID.toString());
@@ -343,7 +343,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
         doThrow(ForbiddenException.class).when(documentManagementService)
             .checkServicePermission(DOCUMENT.getCaseTypeId(),
                                     DOCUMENT.getJurisdictionId(),
-                                    XUI_WEBAPP,
+                                    SERVICE_NAME_XUI_WEBAPP,
                                     Permission.UPDATE,
                                     SERVICE_PERMISSION_ERROR,
                                     DOCUMENT_ID.toString());
@@ -377,7 +377,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
         doNothing().when(documentManagementService)
             .checkServicePermission(eq(DOCUMENT.getCaseTypeId()),
                                     eq(DOCUMENT.getJurisdictionId()),
-                                    eq(XUI_WEBAPP),
+                                    eq(SERVICE_NAME_XUI_WEBAPP),
                                     eq(Permission.ATTACH),
                                     eq(SERVICE_PERMISSION_ERROR),
                                     anyString());
@@ -401,7 +401,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
             () -> assertEquals(HttpStatus.OK, response.getStatusCode(), RESPONSE_CODE),
             () -> verify(documentManagementService).checkServicePermission(eq(CASE_TYPE_ID_VALUE),
                                                                            eq(JURISDICTION_ID_VALUE),
-                                                                           eq(XUI_WEBAPP),
+                                                                           eq(SERVICE_NAME_XUI_WEBAPP),
                                                                            eq(Permission.ATTACH),
                                                                            eq(SERVICE_PERMISSION_ERROR),
                                                                            anyString())
@@ -417,7 +417,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
         doNothing().when(documentManagementService).checkServicePermission(
             eq(CASE_TYPE_ID_VALUE),
             eq(JURISDICTION_ID_VALUE),
-            eq(XUI_WEBAPP),
+            eq(SERVICE_NAME_XUI_WEBAPP),
             eq(Permission.CREATE),
             eq(SERVICE_PERMISSION_ERROR),
             anyString()
@@ -509,7 +509,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
         doNothing().when(documentManagementService)
             .checkServicePermission(DOCUMENT.getCaseTypeId(),
                                     DOCUMENT.getJurisdictionId(),
-                                    XUI_WEBAPP,
+                                    SERVICE_NAME_XUI_WEBAPP,
                                     Permission.HASHTOKEN,
                                     SERVICE_PERMISSION_ERROR,
                                     MATCHED_DOCUMENT_ID.toString());
@@ -537,7 +537,7 @@ public class CaseDocumentAmControllerTest implements TestFixture {
         doThrow(ForbiddenException.class).when(documentManagementService)
             .checkServicePermission(DOCUMENT.getCaseTypeId(),
                                     DOCUMENT.getJurisdictionId(),
-                                    XUI_WEBAPP,
+                                    SERVICE_NAME_XUI_WEBAPP,
                                     Permission.HASHTOKEN,
                                     SERVICE_PERMISSION_ERROR,
                                     MATCHED_DOCUMENT_ID.toString());

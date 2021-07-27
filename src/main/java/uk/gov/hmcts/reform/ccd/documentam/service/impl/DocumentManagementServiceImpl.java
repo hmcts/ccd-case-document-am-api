@@ -121,8 +121,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                     && !documentMetadata.get().getMetadata().isEmpty()
                     && !isDocumentMovingCases(documentMetadata.get().getMetadata().get(CASE_TYPE_ID))) {
                     throw new BadRequestException(String.format(
-                        "Document metadata exists but the case type is not a moving case type: %s",
-                        documentHashToken.getId()
+                        "Document metadata exists for %s but the case type is not a moving case type: %s",
+                        documentHashToken.getId(), documentMetadata.get().getMetadata().get(CASE_TYPE_ID)
                     ));
                 }
             }

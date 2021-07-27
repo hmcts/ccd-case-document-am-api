@@ -78,12 +78,12 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     public static final String SUCCESS = "Success";
     public static final int ERROR_403 = 403;
     public static final String PATCH_ERROR_DESCRIPTION_NOT_FOUND = "Meta data does not exist for documentId: ";
-    public static final String PATCH_ERROR_DESCRIPTION_BAD_REQUEST = "Document metadata exists but the "
-        + "case type is not a moving case type: ";
-
+    public static final String PATCH_ERROR_DESCRIPTION_BAD_REQUEST = "Document metadata exists for %s but the "
+        + "case type is not a moving case type: %s";
     private static final String MAIN_URL = "/cases/documents";
     private static final String ATTACH_TO_CASE_URL = "/attachToCase";
     private static final String SERVICE_NAME_CCD_DATA = "ccd_data";
+    private static final String SERVICE_NAME_CCD_GW = "ccd_gw";
 
     private static final String CLASSIFICATION_VALUE = "PUBLIC";
     private static final String CASE_TYPE_ID_MOVING_CASE_VALUE = "CMC_ExceptionRecord";
@@ -117,7 +117,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                             .part(new MockPart(CLASSIFICATION, CLASSIFICATION_VALUE.getBytes()))
                             .part(new MockPart(CASE_TYPE_ID, CASE_TYPE_ID_VALUE.getBytes()))
                             .part(new MockPart(JURISDICTION_ID, JURISDICTION_ID_VALUE.getBytes()))
-                            .headers(createHttpHeaders(XUI_WEBAPP))
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
                             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.documents[0].originalDocumentName", is(ORIGINAL_DOCUMENT_NAME)))
@@ -128,7 +128,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
             .andExpect(jsonPath("$.documents[0]._links.binary.href", is(BINARY_LINK)))
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.UPLOAD_DOCUMENTS,
-                XUI_WEBAPP,
+                SERVICE_NAME_XUI_WEBAPP,
                 null,
                 null));
     }
@@ -157,7 +157,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         }
 
         mockMvc.perform(requestBuilder
-                            .headers(createHttpHeaders(XUI_WEBAPP))
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
                             .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
             .andExpect(status().isBadRequest())
             .andExpect(result -> assertThat(result.getResolvedException())
@@ -169,7 +169,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
             )
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.UPLOAD_DOCUMENTS,
-                XUI_WEBAPP,
+                SERVICE_NAME_XUI_WEBAPP,
                 null,
                 null));
     }
@@ -182,7 +182,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         stubGetDocumentMetaData(document);
 
         mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID)
-                            .headers(createHttpHeaders(XUI_WEBAPP)))
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isOk())
             .andExpect(jsonPath(META_DATA_JSON_EXPRESSION + CASE_ID, is(CASE_ID_VALUE)))
             .andExpect(jsonPath(META_DATA_JSON_EXPRESSION + CASE_TYPE_ID, is(CASE_TYPE_ID_VALUE)))
@@ -190,7 +190,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
             .andExpect(jsonPath("$._links.self.href", is(SELF_LINK)))
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
-                XUI_WEBAPP,
+                SERVICE_NAME_XUI_WEBAPP,
                 List.of(DOCUMENT_ID.toString()),
                 null));
     }
@@ -203,11 +203,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         stubDeleteDocumentByDocumentId();
 
         mockMvc.perform(delete(MAIN_URL + "/" + DOCUMENT_ID)
-                            .headers(createHttpHeaders(XUI_WEBAPP)))
+                            .headers(createHttpHeaders(SERVICE_NAME_CCD_GW)))
             .andExpect(status().isNoContent())
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
-                XUI_WEBAPP,
+                SERVICE_NAME_CCD_GW,
                 List.of(DOCUMENT_ID.toString()),
                 null));
     }
@@ -215,11 +215,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     @Test
     void testShouldRaiseBadRequestWhenDeleteDocumentByDocumentIdWithInvalidUUID() throws Exception {
         mockMvc.perform(delete(MAIN_URL + "/" + INVALID_DOCUMENT_ID)
-                            .headers(createHttpHeaders(XUI_WEBAPP)))
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isBadRequest())
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
-                XUI_WEBAPP,
+                SERVICE_NAME_XUI_WEBAPP,
                 List.of(INVALID_DOCUMENT_ID),
                 null));
     }
@@ -233,11 +233,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         stubDocumentBinaryContent();
 
         mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + "/binary")
-                            .headers(createHttpHeaders(XUI_WEBAPP)))
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isOk())
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
-                XUI_WEBAPP,
+                SERVICE_NAME_XUI_WEBAPP,
                 List.of(DOCUMENT_ID.toString()),
                 null));
     }
@@ -245,11 +245,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     @Test
     void testShouldRaiseBadRequestWhenGetDocumentBinaryWithInvalidUUID() throws Exception {
         mockMvc.perform(get(MAIN_URL + "/" + INVALID_DOCUMENT_ID + "/binary")
-                            .headers(createHttpHeaders(XUI_WEBAPP)))
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isBadRequest())
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
-                XUI_WEBAPP,
+                SERVICE_NAME_XUI_WEBAPP,
                 List.of(INVALID_DOCUMENT_ID),
                 null));
     }
@@ -259,7 +259,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.ENGLISH);
         final Date date = formatter.parse("2021-12-30T12:10:10.000");
 
-        final Document document = buildDocument(date, CASE_TYPE_ID_MOVING_CASE_VALUE);
+        final Document document = buildDocument(date, CASE_TYPE_ID_VALUE);
 
         final PatchDocumentResponse patchDocumentResponse = PatchDocumentResponse.builder()
             .ttl(date)
@@ -269,14 +269,14 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         stubPatchDocument(patchDocumentResponse);
 
         mockMvc.perform(patch(MAIN_URL + "/" + DOCUMENT_ID)
-                            .headers(createHttpHeaders(XUI_WEBAPP))
+                            .headers(createHttpHeaders(SERVICE_NAME_CCD_GW))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content("{\"ttl\":\"2021-12-30T12:10:10\"}"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.ttl", is("2021-12-30T12:10:10.000+00:00")))
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
-                XUI_WEBAPP,
+                SERVICE_NAME_CCD_GW,
                 List.of(DOCUMENT_ID.toString()),
                 null));
     }
@@ -286,13 +286,13 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         final UpdateTtlRequest body = buildUpdateDocumentCommand();
 
         mockMvc.perform(patch(MAIN_URL + "/" + INVALID_DOCUMENT_ID)
-                            .headers(createHttpHeaders(XUI_WEBAPP))
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(getJsonString(body)))
             .andExpect(status().isBadRequest())
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
-                XUI_WEBAPP,
+                SERVICE_NAME_XUI_WEBAPP,
                 List.of(INVALID_DOCUMENT_ID),
                 null));
     }
@@ -301,7 +301,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     @ValueSource(strings = {"", "    ", "{\"ttl\":\"6000\"}", "{\"ttl\":\"2021-13-14T12:14:39\"}"})
     void testShouldRaiseExceptionWhenPatchDocumentWithInvalidTtl(final String payload) throws Exception {
         mockMvc.perform(patch(MAIN_URL + "/" + DOCUMENT_ID)
-                            .headers(createHttpHeaders(XUI_WEBAPP))
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(payload))
             .andExpect(status().isBadRequest())
@@ -311,7 +311,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
             )
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
-                XUI_WEBAPP,
+                SERVICE_NAME_XUI_WEBAPP,
                 List.of(DOCUMENT_ID.toString()),
                 null));
     }
@@ -319,7 +319,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     @Test
     void testShouldRaiseExceptionWhenPatchDocumentWithNoTtl() throws Exception {
         mockMvc.perform(patch(MAIN_URL + "/" + DOCUMENT_ID)
-                            .headers(createHttpHeaders(XUI_WEBAPP))
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content("{\"ttl2\":\"\"}"))
             .andExpect(status().isBadRequest())
@@ -332,7 +332,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
             )
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
-                XUI_WEBAPP,
+                SERVICE_NAME_XUI_WEBAPP,
                 List.of(DOCUMENT_ID.toString()),
                 null));
     }
@@ -396,7 +396,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                             .content(getJsonString(body)))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath(RESPONSE_ERROR_DESCRIPTION_KEY,
-                                is(PATCH_ERROR_DESCRIPTION_BAD_REQUEST + DOCUMENT_ID)))
+                                is(String.format(PATCH_ERROR_DESCRIPTION_BAD_REQUEST,DOCUMENT_ID,CASE_TYPE_ID_VALUE))))
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
                 SERVICE_NAME_CCD_DATA,
@@ -522,7 +522,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
             .build();
 
         mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
-                            .headers(createHttpHeaders(XUI_WEBAPP))
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(getJsonString(metadata)))
             .andExpect(status().isForbidden())
@@ -539,7 +539,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
         mockMvc.perform(MockMvcRequestBuilders.multipart(MAIN_URL)
                             .file(jsonFile1)
-                            .headers(createHttpHeaders(XUI_WEBAPP))
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
                             .param(CLASSIFICATION, CLASSIFICATION_VALUE)
                             .param(CASE_TYPE_ID, CASE_TYPE_ID_VALUE)
                             .param(JURISDICTION_ID, JURISDICTION_ID_VALUE)
@@ -547,7 +547,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
             .andExpect(status().isBadRequest())
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.UPLOAD_DOCUMENTS,
-                XUI_WEBAPP,
+                SERVICE_NAME_XUI_WEBAPP,
                 null,
                 null));
     }
@@ -562,11 +562,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         ArrayList<String> documentIds = new ArrayList<>();
         documentIds.add(DOCUMENT_ID.toString());
         mockMvc.perform(get(MAIN_URL + "/" +  DOCUMENT_ID)
-                            .headers(createHttpHeaders(XUI_WEBAPP)))
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isForbidden())
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
-                XUI_WEBAPP,
+                SERVICE_NAME_XUI_WEBAPP,
                 documentIds,
                 null));
     }
@@ -574,11 +574,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     @Test
     void testShouldRaiseBadRequestWhenGetDocumentByDocumentIdWithInvalidUUID() throws Exception {
         mockMvc.perform(get(MAIN_URL + "/" + INVALID_DOCUMENT_ID)
-                            .headers(createHttpHeaders(XUI_WEBAPP)))
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isBadRequest())
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
-                XUI_WEBAPP,
+                SERVICE_NAME_XUI_WEBAPP,
                 List.of(INVALID_DOCUMENT_ID),
                 null));
     }
@@ -592,11 +592,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         stubDocumentBinaryContent();
 
         mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + "/binary")
-                            .headers(createHttpHeaders(XUI_WEBAPP)))
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isForbidden())
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
-                XUI_WEBAPP,
+                SERVICE_NAME_XUI_WEBAPP,
                 List.of(DOCUMENT_ID.toString()),
                 null));
     }
@@ -608,11 +608,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         stubDeleteDocumentByDocumentId();
 
         mockMvc.perform(delete(MAIN_URL + "/" + random)
-                            .headers(createHttpHeaders(XUI_WEBAPP)))
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isNotFound())
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
-                XUI_WEBAPP,
+                SERVICE_NAME_XUI_WEBAPP,
                 List.of(random.toString()),
                 null));
     }
@@ -620,11 +620,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     @Test
     void testShouldRaiseBadRequestWhenCallToGenerateHashCodeWithInvalidUUID() throws Exception {
         mockMvc.perform(get(MAIN_URL + "/" + INVALID_DOCUMENT_ID + "/token")
-                            .headers(createHttpHeaders(XUI_WEBAPP)))
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isBadRequest())
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.GENERATE_HASH_CODE,
-                XUI_WEBAPP,
+                SERVICE_NAME_XUI_WEBAPP,
                 List.of(INVALID_DOCUMENT_ID),
                 null));
     }

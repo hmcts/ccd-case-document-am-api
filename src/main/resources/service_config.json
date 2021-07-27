@@ -5,9 +5,7 @@
       "jurisdictionId": "*",
       "permissions": [
         "CREATE",
-        "READ",
-        "UPDATE",
-        "DELETE"
+        "READ"
       ]
     },
     {
@@ -37,8 +35,8 @@
     },
     {
       "id": "ccd_gw",
-      "caseTypeId": ["*"],
-      "jurisdictionId": "*",
+        "caseTypeId": ["BEFTA_CASETYPE_2_1","BEFTA_CASETYPE_2_2","BEFTA_CASETYPE_2"],
+        "jurisdictionId": "BEFTA_JURISDICTION_2",
       "permissions": [
         "CREATE",
         "READ",

@@ -164,7 +164,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
             sut.checkServicePermission(
                 "BEFTA_CASETYPE_1_1",
                 jurisdictionId,
-                XUI_WEBAPP,
+                SERVICE_NAME_XUI_WEBAPP,
                 Permission.READ,
                 "log string",
                 "exception string"));
@@ -176,7 +176,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
             sut.checkServicePermission(
                 "randomCaseTypeId",
                 "juridiction",
-                XUI_WEBAPP,
+                SERVICE_NAME_XUI_WEBAPP,
                 Permission.READ,
                 "log string",
                 "exception string"
@@ -700,7 +700,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
     private void mockAuthorisedServices() {
         final AuthorisedService authorisedService = AuthorisedService.builder()
-            .id(XUI_WEBAPP)
+            .id(SERVICE_NAME_XUI_WEBAPP)
             .caseTypeId(List.of("BEFTA_CASETYPE_1_1", "BEFTA_CASETYPE_2_1"))
             .build();
 
