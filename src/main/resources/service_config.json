@@ -30,8 +30,7 @@
       "caseTypeId": ["*"],
       "jurisdictionId": "*",
       "permissions": [
-        "ATTACH",
-        "READ"
+        "ATTACH"
       ]
     },
     {
