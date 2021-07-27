@@ -27,14 +27,16 @@ import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
+import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
+import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedServices;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.DmTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
-import uk.gov.hmcts.reform.ccd.documentam.model.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
+import uk.gov.hmcts.reform.ccd.documentam.model.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
@@ -54,8 +56,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.Collections.emptyList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -72,8 +74,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.PATCH;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.buildUpdateDocumentCommand;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_LENGTH;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_TYPE;
@@ -104,12 +106,15 @@ class DocumentManagementServiceImplTest implements TestFixture {
     private static final String BULK_SCAN_PROCESSOR = "bulk_scan_processor";
     private final RestTemplate restTemplateMock = Mockito.mock(RestTemplate.class);
     private final CaseDataStoreService caseDataStoreServiceMock = mock(CaseDataStoreService.class);
+    private AuthorisedServices authorisedServicesMock = mock(AuthorisedServices.class);
 
     private static final HttpEntity<Object> NULL_REQUEST_ENTITY = null;
 
     @InjectMocks
     private final DocumentManagementServiceImpl sut = new DocumentManagementServiceImpl(restTemplateMock,
-                                                                                        caseDataStoreServiceMock);
+                                                                                        caseDataStoreServiceMock,
+                                                                                        authorisedServicesMock
+    );
 
     private final String documentURL = "http://localhost:4506";
     private final String salt = "AAAOA7A2AA6AAAA5";
@@ -388,6 +393,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
     void checkServicePermission_WhenJurisdictionIdIsNull() {
         mockitoWhenRestExchangeThenThrow(initialiseMetaDataMap("", "caseTypeId",
                                                                ""), HttpStatus.OK);
+        mockAuthorisedServices();
+
         assertThrows(NullPointerException.class, () ->
             sut.checkServicePermission(new StoredDocumentHalResource(),
                                        XUI_WEBAPP,
@@ -396,13 +403,15 @@ class DocumentManagementServiceImplTest implements TestFixture {
                                        "exception string"));
     }
 
-    private StoredDocumentHalResource initialiseMetaData(String caseTypeId, String jurisdictionID) {
-        StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
-        Map<String, String> myMap = new HashMap<>();
-        myMap.put("caseTypeId", caseTypeId);
-        myMap.put("jurisdictionId", jurisdictionID);
-        storedDocumentHalResource.setMetadata(myMap);
-        return storedDocumentHalResource;
+    @Test
+    void checkServicePermission_CaseTypeIdExistsButNotAuthorised() {
+        assertThrows(ForbiddenException.class, () ->
+            sut.checkServicePermission(initialiseMetaDataMap("caseId", "randomCaseTypeId",
+                                                             "juridiction"),
+                                       XUI_WEBAPP,
+                                       Permission.READ,
+                                       "log string",
+                                       "exception string"));
     }
 
     @Test
@@ -419,6 +428,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
     @Test
     void checkServicePermissionForUpload_WhenCaseTypeIsNull() {
+        mockAuthorisedServices();
+
         assertThrows(ForbiddenException.class, () -> sut.checkServicePermission(
             "",
             "BEFTA_JURISDICTION_2",
@@ -431,6 +442,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
     @Test
     void checkServicePermissionForUpload_WhenJurisdictionIdIsNull() {
+        mockAuthorisedServices();
+
         assertThrows(ForbiddenException.class, () -> sut.checkServicePermission(
             "caseTypeId",
             "",
@@ -1288,6 +1301,23 @@ class DocumentManagementServiceImplTest implements TestFixture {
                                                                              Permission.CREATE,
                                                                              USER_PERMISSION_ERROR,
                                                                              "exception string"));
+    }
+
+    private void mockAuthorisedServices() {
+        List<String> caseTypeIds = new ArrayList<>();
+        caseTypeIds.add("BEFTA_CASETYPE_1_1");
+        caseTypeIds.add("BEFTA_CASETYPE_2_1");
+
+        AuthorisedService authorisedService = AuthorisedService.builder()
+            .id(XUI_WEBAPP)
+            .caseTypeId(caseTypeIds)
+            .build();
+
+        List<AuthorisedService> authorisedServicesList = new ArrayList<>();
+        authorisedServicesList.add(authorisedService);
+
+        when(authorisedServicesMock.getAuthServices())
+            .thenReturn(authorisedServicesList);
     }
 
     private StoredDocumentHalResource initialiseMetaDataMap(String caseId, String caseTypeId, String jurisdictionId) {

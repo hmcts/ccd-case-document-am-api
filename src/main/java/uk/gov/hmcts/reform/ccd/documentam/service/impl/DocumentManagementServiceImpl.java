@@ -1,12 +1,5 @@
 package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 
-import static org.springframework.http.HttpMethod.DELETE;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.PATCH;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DM_DATE_TIME_FORMATTER;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,20 +16,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
@@ -54,14 +33,31 @@ import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentUpdate;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.StoredDocumentHalResource;
-import uk.gov.hmcts.reform.ccd.documentam.model.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
+import uk.gov.hmcts.reform.ccd.documentam.model.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.service.CaseDataStoreService;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 import uk.gov.hmcts.reform.ccd.documentam.util.ResponseHelper;
+
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.PATCH;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DM_DATE_TIME_FORMATTER;
 
 @Slf4j
 @Service
@@ -88,24 +84,16 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Value("${bulkscan.exception.record.types}")
     private List<String> bulkScanExceptionRecordTypes;
 
-    private static AuthorisedServices authorisedServices;
+    private final AuthorisedServices authorisedServices;
 
     private static final HttpEntity<Object> NULL_REQUEST_ENTITY = null;
 
-    static {
-        try (InputStream inputStream = DocumentManagementServiceImpl.class.getClassLoader()
-            .getResourceAsStream("service_config.json")) {
-            authorisedServices = new ObjectMapper().readValue(inputStream, AuthorisedServices.class);
-            log.info("services config loaded {}", authorisedServices);
-        } catch (IOException e) {
-            log.error("IOException {}", e.getMessage());
-        }
-    }
-
     @Autowired
-    public DocumentManagementServiceImpl(RestTemplate restTemplate, CaseDataStoreService caseDataStoreService) {
+    public DocumentManagementServiceImpl(RestTemplate restTemplate, CaseDataStoreService caseDataStoreService,
+                                         AuthorisedServices authorisedServices) {
         this.restTemplate = restTemplate;
         this.caseDataStoreService = caseDataStoreService;
+        this.authorisedServices = authorisedServices;
     }
 
     @Override
@@ -429,9 +417,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     private boolean validateCaseTypeId(AuthorisedService serviceConfig, String caseTypeId) {
+        List<String> caseTypeIds = serviceConfig.getCaseTypeId();
         boolean result =
-            !StringUtils.isEmpty(caseTypeId) && (serviceConfig.getCaseTypeId().equals("*") || caseTypeId.equals(
-                serviceConfig.getCaseTypeId()));
+            !StringUtils.isEmpty(caseTypeId) && (caseTypeIds.contains("*") || caseTypeIds.contains(caseTypeId));
         caseTypeId = sanitiseData(caseTypeId);
         log.info("Case Type Id is {} and validation result is {}", caseTypeId, result);
         return result;
