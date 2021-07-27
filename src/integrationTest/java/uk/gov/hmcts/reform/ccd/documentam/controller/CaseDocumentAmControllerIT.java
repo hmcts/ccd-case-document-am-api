@@ -46,12 +46,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.buildUpdateDocumentCommand;
+import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.objectToJsonString;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CLASSIFICATION;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.FILES;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.JURISDICTION_ID;
-import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.getJsonString;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDeleteDocumentByDocumentId;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDocumentBinaryContent;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDocumentManagementUploadDocument;
@@ -288,7 +288,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         mockMvc.perform(patch(MAIN_URL + "/" + INVALID_DOCUMENT_ID)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
-                            .content(getJsonString(body)))
+                            .content(objectToJsonString(body)))
             .andExpect(status().isBadRequest())
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
@@ -363,7 +363,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
                                                           .headers(createHttpHeaders(SERVICE_NAME_CCD_DATA))
                                                           .contentType(MediaType.APPLICATION_JSON_VALUE)
-                                                          .content(getJsonString(body)))
+                                                          .content(objectToJsonString(body)))
             .andExpect(status().isOk())
             .andExpect(jsonPath(RESPONSE_RESULT_KEY, is(SUCCESS)))
             .andExpect(hasGeneratedLogAudit(
@@ -393,7 +393,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
                             .headers(createHttpHeaders(SERVICE_NAME_CCD_DATA))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
-                            .content(getJsonString(body)))
+                            .content(objectToJsonString(body)))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath(RESPONSE_ERROR_DESCRIPTION_KEY,
                                 is(String.format(PATCH_ERROR_DESCRIPTION_BAD_REQUEST,DOCUMENT_ID,CASE_TYPE_ID_VALUE))))
@@ -426,7 +426,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
                             .headers(createHttpHeaders(SERVICE_NAME_CCD_DATA))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
-                            .content(getJsonString(body)))
+                            .content(objectToJsonString(body)))
             .andExpect(status().isNotFound())
             .andExpect(jsonPath(RESPONSE_ERROR_DESCRIPTION_KEY,
                                 is(PATCH_ERROR_DESCRIPTION_NOT_FOUND + DOCUMENT_ID_FROM_LINK)))
@@ -461,7 +461,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
                             .headers(createHttpHeaders(SERVICE_NAME_CCD_DATA))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
-                            .content(getJsonString(body)))
+                            .content(objectToJsonString(body)))
             .andExpect(status().isBadRequest())
             .andExpect(result -> assertThat(result.getResolvedException())
                 .isNotNull()
@@ -501,7 +501,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
                             .headers(createHttpHeaders(SERVICE_NAME_CCD_DATA))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
-                            .content(getJsonString(body)))
+                            .content(objectToJsonString(body)))
             .andExpect(status().isForbidden())
             .andExpect(jsonPath(RESPONSE_ERROR_KEY, is(ERROR_403)))
             .andExpect(hasGeneratedLogAudit(
@@ -524,7 +524,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
-                            .content(getJsonString(metadata)))
+                            .content(objectToJsonString(metadata)))
             .andExpect(status().isForbidden())
             .andExpect(jsonPath(RESPONSE_ERROR_KEY, is(ERROR_403)));
 

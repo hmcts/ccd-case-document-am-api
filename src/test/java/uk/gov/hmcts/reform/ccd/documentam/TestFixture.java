@@ -88,10 +88,14 @@ public interface TestFixture {
         return objectMapper;
     }
 
-    static String objectToJsonString(final Object object) throws IOException {
-        final ObjectMapper objectMapper = objectMapper();
+    static String objectToJsonString(final Object object) {
+        try {
+            final ObjectMapper objectMapper = objectMapper();
 
-        return objectMapper.writeValueAsString(object);
+            return objectMapper.writeValueAsString(object);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     static Stream<Arguments> provideHttpErrorForDocumentParameters() {

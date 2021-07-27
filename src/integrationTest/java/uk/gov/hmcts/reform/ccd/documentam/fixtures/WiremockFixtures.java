@@ -1,12 +1,8 @@
 package uk.gov.hmcts.reform.ccd.documentam.fixtures;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.DmUploadResponse;
@@ -29,6 +25,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.objectToJsonString;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.BEARER;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_AUTHORIZATION;
 
@@ -39,10 +36,6 @@ public class WiremockFixtures implements TestFixture {
     public static final String TOKEN = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJjY2RfZ3ciLCJleHAiOjE1ODM0NDUyOTd9"
         + ".WWRzROlKxLQCJw5h0h0dHb9hHfbBhF2Idwv1z4L4FnqSw3VZ38ZRLuDmwr3tj-8oOv6EfLAxV0dJAPtUT203Iw";
     public static final String SERVICE_AUTHORISATION_VALUE = BEARER + TOKEN;
-
-    public static final ObjectMapper OBJECT_MAPPER = new Jackson2ObjectMapperBuilder()
-        .modules(new Jdk8Module())
-        .build();
 
     private WiremockFixtures() {
     }
@@ -57,7 +50,7 @@ public class WiremockFixtures implements TestFixture {
                     .willReturn(aResponse()
                                     .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                                     .withStatus(HttpStatus.OK.value())
-                                    .withBody(getJsonString(body))
+                                    .withBody(objectToJsonString(body))
                     )
         );
     }
@@ -80,7 +73,7 @@ public class WiremockFixtures implements TestFixture {
                     .willReturn(aResponse()
                                     .withStatus(HTTP_OK)
                                     .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                                    .withBody(getJsonString(dmUploadResponse))));
+                                    .withBody(objectToJsonString(dmUploadResponse))));
     }
 
     public static void stubGetDocumentMetaData(final Document document) {
@@ -88,7 +81,7 @@ public class WiremockFixtures implements TestFixture {
                     .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
                     .willReturn(aResponse()
                                     .withStatus(HTTP_OK)
-                                    .withBody(getJsonString(document))
+                                    .withBody(objectToJsonString(document))
                                     .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
     }
 
@@ -111,12 +104,12 @@ public class WiremockFixtures implements TestFixture {
                                     .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
     }
 
-    public static void stubPatchDocument(final PatchDocumentResponse patchDocumentResponse) throws Exception {
+    public static void stubPatchDocument(final PatchDocumentResponse patchDocumentResponse) {
         stubFor(WireMock.patch(urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID))
                     .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
                     .willReturn(aResponse()
                                     .withStatus(HTTP_OK)
-                                    .withBody(TestFixture.objectToJsonString(patchDocumentResponse))
+                                    .withBody(objectToJsonString(patchDocumentResponse))
                                     .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
     }
 
@@ -126,7 +119,7 @@ public class WiremockFixtures implements TestFixture {
                     .withRequestBody(containing("\"ttl\":null"))
                     .willReturn(aResponse()
                                     .withStatus(HTTP_OK)
-                                    .withBody(getJsonString(response))
+                                    .withBody(objectToJsonString(response))
                                     .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
     }
 
@@ -151,14 +144,4 @@ public class WiremockFixtures implements TestFixture {
                                     .withBody("Hello World!")));
     }
 
-    @SuppressWarnings({"PMD.AvoidThrowingRawExceptionTypes", "squid:S112"})
-    // Required as wiremock's Json.getObjectMapper().registerModule(..); not working
-    // see https://github.com/tomakehurst/wiremock/issues/1127
-    public static String getJsonString(Object object) {
-        try {
-            return OBJECT_MAPPER.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
