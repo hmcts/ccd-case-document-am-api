@@ -80,13 +80,13 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     public static final String SUCCESS = "Success";
     public static final int ERROR_403 = 403;
     public static final String PATCH_ERROR_DESCRIPTION_NOT_FOUND = "Meta data does not exist for documentId: ";
-    public static final String PATCH_ERROR_DESCRIPTION_BAD_REQUEST = "Document metadata exists but the "
-        + "case type is not a moving case type: ";
-
+    public static final String PATCH_ERROR_DESCRIPTION_BAD_REQUEST = "Document metadata exists for %s but the "
+        + "case type is not a moving case type: %s";
     private static final String MAIN_URL = "/cases/documents";
     private static final String ATTACH_TO_CASE_URL = "/attachToCase";
     private static final String SERVICE_NAME_XUI_WEBAPP = "xui_webapp";
     private static final String SERVICE_NAME_CCD_DATA = "ccd_data";
+    private static final String SERVICE_NAME_CCD_GW = "ccd_gw";
 
     private static final String CLASSIFICATION_VALUE = "PUBLIC";
     private static final String CASE_TYPE_ID_VALUE = "BEFTA_CASETYPE_2";
@@ -216,11 +216,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         documentIds.add(DOCUMENT_ID.toString());
 
         mockMvc.perform(delete(MAIN_URL + "/" + DOCUMENT_ID)
-                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+                            .headers(createHttpHeaders(SERVICE_NAME_CCD_GW)))
             .andExpect(status().isNoContent())
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
-                SERVICE_NAME_XUI_WEBAPP,
+                SERVICE_NAME_CCD_GW,
                 documentIds,
                 null));
     }
@@ -275,19 +275,19 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         final Date time = Date.from(Instant.now());
 
         StoredDocumentHalResource storedDocumentResource =
-            getStoredDocumentResourceToUpdatePatch(time, CASE_TYPE_ID_MOVING_CASE_VALUE);
+            getStoredDocumentResourceToUpdatePatch(time, CASE_TYPE_ID_VALUE);
 
         stubGetDocumentMetaData(storedDocumentResource);
         stubPatchDocument(storedDocumentResource);
 
         mockMvc.perform(patch(MAIN_URL + "/" + DOCUMENT_ID)
-                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
+                            .headers(createHttpHeaders(SERVICE_NAME_CCD_GW))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content("{\"ttl\":\"2021-12-30T12:10:10\"}"))
             .andExpect(status().isOk())
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
-                SERVICE_NAME_XUI_WEBAPP,
+                SERVICE_NAME_CCD_GW,
                 List.of(DOCUMENT_ID.toString()),
                 null));
     }
@@ -419,7 +419,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                             .content(getJsonString(body)))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath(RESPONSE_ERROR_DESCRIPTION_KEY,
-                                is(PATCH_ERROR_DESCRIPTION_BAD_REQUEST + DOCUMENT_ID)))
+                                is(String.format(PATCH_ERROR_DESCRIPTION_BAD_REQUEST,DOCUMENT_ID,CASE_TYPE_ID_VALUE))))
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
                 SERVICE_NAME_CCD_DATA,
@@ -701,9 +701,6 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         metaData.put(CASE_TYPE_ID, caseTypeId);
         metaData.put(JURISDICTION_ID, JURISDICTION_ID_VALUE);
         metaData.put(CLASSIFICATION, CLASSIFICATION_VALUE);
-        metaData.put("metadata", "");
-        metaData.put("roles", "");
-        metaData.put("links", "");
 
         StoredDocumentHalResource storedDocumentHalResource = new StoredDocumentHalResource();
         storedDocumentHalResource.setClassification(StoredDocumentHalResource.ClassificationEnum.PUBLIC);
