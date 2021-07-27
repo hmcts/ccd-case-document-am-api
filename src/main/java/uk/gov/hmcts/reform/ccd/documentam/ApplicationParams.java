@@ -1,16 +1,14 @@
 package uk.gov.hmcts.reform.ccd.documentam;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
 import java.util.List;
 import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 
-@Named
-@Singleton
+@Component
 public class ApplicationParams {
 
     @Value("${documentStoreUrl}")

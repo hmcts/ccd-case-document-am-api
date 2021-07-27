@@ -10,6 +10,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.TextCodec;
 import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -25,7 +26,6 @@ import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditRepository;
 import uk.gov.hmcts.reform.ccd.documentam.configuration.AuditConfiguration;
 import uk.gov.hmcts.reform.ccd.documentam.utils.KeyGenUtil;
 
-import javax.inject.Inject;
 import java.util.Date;
 import java.util.List;
 
@@ -54,7 +54,7 @@ public class BaseTest {
     private static final String EXAMPLE_REQUEST_ID = "TEST REQUEST ID";
 
     @SpyBean
-    @Inject
+    @Autowired
     protected AuditRepository auditRepository;
 
     public static HttpHeaders createHttpHeaders(String serviceName) throws JOSEException {

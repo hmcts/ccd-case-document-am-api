@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -20,8 +22,6 @@ import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,13 +31,13 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DM_DATE_TIM
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.RESOURCE_NOT_FOUND;
 
-@Named
+@Component
 public class DocumentStoreClient {
 
     private final RestTemplate restTemplate;
     private final ApplicationParams applicationParams;
 
-    @Inject
+    @Autowired
     public DocumentStoreClient(final RestTemplate restTemplate,
                                final ApplicationParams applicationParams) {
         this.restTemplate = restTemplate;
