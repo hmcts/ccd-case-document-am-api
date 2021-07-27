@@ -87,4 +87,17 @@ hash:
 bulkscan:
   exception:
     record:
-      types: CMC_ExceptionRecord, FINREM_ExceptionRecord, SSCS_ExceptionRecord, PROBATE_ExceptionRecord, PUBLICLAW_ExceptionRecord, DIVORCE_ExceptionRecord
+      types: CMC_ExceptionRecord,FINREM_ExceptionRecord,SSCS_ExceptionRecord,PROBATE_ExceptionRecord,PUBLICLAW_ExceptionRecord,DIVORCE_ExceptionRecord,DIVORCE,FinancialRemedyMVP2,FinancialRemedyContested
+case:
+  document:
+    am:
+      api:
+        enabled: ${CASE_DOCUMENT_AM_API_ENABLED:true}
+
+
+http:
+  client:
+    connection:
+      timeout: ${HTTP_CLIENT_CONNECTION_TIMEOUT:10000}
+    read:
+      timeout: ${HTTP_CLIENT_READ_TIMEOUT:30000}

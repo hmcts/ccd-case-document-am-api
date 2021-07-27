@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.ccd.documentam.configuration;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -17,6 +18,12 @@ import java.util.List;
 
 @Configuration
 public class ApplicationConfiguration {
+
+    @Value("${http.client.connection.timeout}")
+    private int connectionTimeout;
+
+    @Value("${http.client.read.timeout}")
+    private int readTimeout;
 
     @Bean
     public RestTemplate restTemplate(final RestTemplateHeaderModifierInterceptor headerModifierInterceptor) {
@@ -41,11 +48,9 @@ public class ApplicationConfiguration {
     }
 
     private CloseableHttpClient getHttpClient() {
-        int timeout = 10000;
         RequestConfig config = RequestConfig.custom()
-                                            .setConnectTimeout(timeout)
-                                            .setConnectionRequestTimeout(timeout)
-                                            .setSocketTimeout(timeout)
+                                            .setConnectTimeout(connectionTimeout)
+                                            .setSocketTimeout(readTimeout)
                                             .build();
 
         return HttpClientBuilder

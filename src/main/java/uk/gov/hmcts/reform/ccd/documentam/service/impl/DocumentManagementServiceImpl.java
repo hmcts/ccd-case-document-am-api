@@ -256,21 +256,22 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     private boolean validateCaseTypeId(AuthorisedService serviceConfig, String caseTypeId) {
+        List<String> caseTypeIds = serviceConfig.getCaseTypeId();
         boolean result =
-            !StringUtils.isEmpty(caseTypeId) && (serviceConfig.getCaseTypeId().equals("*") || caseTypeId.equals(
-                serviceConfig.getCaseTypeId()));
-        caseTypeId = sanitiseData(caseTypeId);
-        log.info("Case Type Id is {} and validation result is {}", caseTypeId, result);
+            !StringUtils.isEmpty(caseTypeId) && (caseTypeIds.contains("*") || caseTypeIds.contains(caseTypeId));
+
+        log.info("Case Type Id is {} and validation result is {}", sanitiseData(caseTypeId), result);
+
         return result;
     }
 
     private boolean validateJurisdictionId(AuthorisedService serviceConfig, String jurisdictionId) {
         boolean result =
             !StringUtils.isEmpty(jurisdictionId) && (serviceConfig.getJurisdictionId().equals("*")
-                || jurisdictionId.equals(
-                serviceConfig.getJurisdictionId()));
-        jurisdictionId = sanitiseData(jurisdictionId);
-        log.info("JurisdictionI Id is {} and validation result is {}", jurisdictionId, result);
+                || serviceConfig.getJurisdictionId().equals(jurisdictionId));
+
+        log.info("JurisdictionI Id is {} and validation result is {}", sanitiseData(jurisdictionId), result);
+
         return result;
     }
 
@@ -286,15 +287,13 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     private AuthorisedService getServiceDetailsFromJson(String serviceId) {
-        Optional<AuthorisedService> service =
-            authorisedServices.getAuthServices().stream().filter(s -> s.getId().equals(
-                serviceId)).findAny();
-        if (service.isPresent()) {
-            return service.get();
-        } else {
-            log.error("Service Id {} is not authorized to access API ", serviceId);
-            throw new ForbiddenException(String.format(Constants.EXCEPTION_SERVICE_ID_NOT_AUTHORISED, serviceId));
-        }
+        return authorisedServices.getAuthServices().stream()
+            .filter(service -> service.getId().equals(serviceId))
+            .findAny()
+            .orElseThrow(() -> {
+                log.error("Service Id {} is not authorized to access API ", serviceId);
+                throw new ForbiddenException(String.format(Constants.EXCEPTION_SERVICE_ID_NOT_AUTHORISED, serviceId));
+            });
     }
 
 }

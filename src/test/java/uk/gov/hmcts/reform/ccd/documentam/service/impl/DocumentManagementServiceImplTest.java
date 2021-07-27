@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -14,14 +13,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
+import uk.gov.hmcts.reform.ccd.documentam.client.datastore.CaseDataStoreClient;
 import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DocumentStoreClient;
-import uk.gov.hmcts.reform.ccd.documentam.configuration.AuthorisedServicesConfiguration;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
+import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedServices;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.DmTtlRequest;
@@ -33,11 +33,8 @@ import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
-import uk.gov.hmcts.reform.ccd.documentam.client.datastore.CaseDataStoreClient;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -83,8 +80,12 @@ class DocumentManagementServiceImplTest implements TestFixture {
     private CaseDataStoreClient caseDataStoreServiceMock;
 
     @Mock
+    private AuthorisedServices authorisedServicesMock;
+
+    @Mock
     private ApplicationParams applicationParams;
 
+    @InjectMocks
     private DocumentManagementServiceImpl sut;
 
     private final List<String> bulkScanExceptionRecordTypes = Arrays.asList(
@@ -99,18 +100,6 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @Test
     void documentMetadataInstantiation() {
         assertNotNull(sut);
-    }
-
-    @BeforeEach
-    void setUp() throws Exception {
-        MockitoAnnotations.openMocks(this);
-
-        final AuthorisedServices authorisedServices = loadAuthorisedServices();
-
-        sut = new DocumentManagementServiceImpl(documentStoreClient,
-                                                caseDataStoreServiceMock,
-                                                authorisedServices,
-                                                applicationParams);
     }
 
     @Test
@@ -165,17 +154,33 @@ class DocumentManagementServiceImplTest implements TestFixture {
     }
 
     @Test
+    @SuppressWarnings("ConstantConditions")
     void checkServicePermission_WhenJurisdictionIdIsNull() {
         final String jurisdictionId = null;
 
+        mockAuthorisedServices();
+
         assertThrows(NullPointerException.class, () ->
             sut.checkServicePermission(
-                CASE_TYPE_ID_VALUE,
+                "BEFTA_CASETYPE_1_1",
                 jurisdictionId,
                 XUI_WEBAPP,
                 Permission.READ,
                 "log string",
                 "exception string"));
+    }
+
+    @Test
+    void checkServicePermission_CaseTypeIdExistsButNotAuthorised() {
+        assertThrows(ForbiddenException.class, () ->
+            sut.checkServicePermission(
+                "randomCaseTypeId",
+                "juridiction",
+                XUI_WEBAPP,
+                Permission.READ,
+                "log string",
+                "exception string"
+            ));
     }
 
     @Test
@@ -192,6 +197,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
     @Test
     void checkServicePermissionForUpload_WhenCaseTypeIsNull() {
+        mockAuthorisedServices();
+
         assertThrows(ForbiddenException.class, () -> sut.checkServicePermission(
             "",
             JURISDICTION_ID_VALUE,
@@ -204,6 +211,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
     @Test
     void checkServicePermissionForUpload_WhenJurisdictionIdIsNull() {
+        mockAuthorisedServices();
+
         assertThrows(ForbiddenException.class, () -> sut.checkServicePermission(
             "caseTypeId",
             "",
@@ -689,12 +698,13 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .build();
     }
 
-    private AuthorisedServices loadAuthorisedServices() throws IOException {
-        try (final InputStream inputStream = AuthorisedServicesConfiguration.class.getClassLoader()
-            .getResourceAsStream("service_config.json")) {
+    private void mockAuthorisedServices() {
+        final AuthorisedService authorisedService = AuthorisedService.builder()
+            .id(XUI_WEBAPP)
+            .caseTypeId(List.of("BEFTA_CASETYPE_1_1", "BEFTA_CASETYPE_2_1"))
+            .build();
 
-            return TestFixture.objectMapper().readValue(inputStream, AuthorisedServices.class);
-        }
+        doReturn(List.of(authorisedService)).when(authorisedServicesMock).getAuthServices();
     }
 
 }
