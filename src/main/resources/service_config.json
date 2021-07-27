@@ -2,7 +2,7 @@
     "authorisedServices": [{
       "id": "xui_webapp",
       "caseTypeId": ["*"],
-      "jurisdictionId": "BEFTA_JURISDICTION_2",
+      "jurisdictionId": "*",
       "permissions": [
         "CREATE",
         "READ",
