@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.ccd.documentam.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Value;
@@ -22,7 +21,6 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.JURISDICTIO
 @Jacksonized
 @Value
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude
 public class Document {
 
     Classification classification;
