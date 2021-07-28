@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.ccd.documentam.configuration;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.documentam.BaseTest;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedServices;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
-
-import javax.inject.Inject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,7 +14,7 @@ class AuthServicesJsonPropertySourceFactoryTest extends BaseTest {
     private static final String CASE_TYPE_ID_ALL_WILDCARD = "*";
     private static final String JURISDICTION_ID = "*";
 
-    @Inject
+    @Autowired
     private AuthorisedServices authorisedServices;
 
     @Test

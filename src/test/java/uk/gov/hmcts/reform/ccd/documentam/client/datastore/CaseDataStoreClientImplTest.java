@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.ccd.documentam.service.impl;
+package uk.gov.hmcts.reform.ccd.documentam.client.datastore;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,23 +19,24 @@ import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentMetadata;
+import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentResource;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentPermissions;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 
 import java.nio.charset.Charset;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
-class CaseDataStoreServiceImplTest implements TestFixture {
+class CaseDataStoreClientImplTest implements TestFixture {
     @Mock
     private RestTemplate restTemplate;
 
@@ -44,7 +45,7 @@ class CaseDataStoreServiceImplTest implements TestFixture {
 
     private final String caseDataStoreUrl = "http://localhost";
 
-    private CaseDataStoreServiceImpl sut;
+    private CaseDataStoreClientImpl sut;
 
     private final String documentUrl = String.format(
         "%s/cases/%s/documents/%s",
@@ -57,7 +58,7 @@ class CaseDataStoreServiceImplTest implements TestFixture {
     void prepare() {
         MockitoAnnotations.openMocks(this);
 
-        sut = new CaseDataStoreServiceImpl(restTemplate, caseDataStoreUrl, securityUtils);
+        sut = new CaseDataStoreClientImpl(restTemplate, caseDataStoreUrl, securityUtils);
     }
 
     @Test
@@ -73,15 +74,15 @@ class CaseDataStoreServiceImplTest implements TestFixture {
             .documentPermissions(doc)
             .build();
 
-        final Map<String, Object> linkedHashMap = new LinkedHashMap<>(
-            Map.of("documentMetadata", caseDocumentMetadata)
-        );
         HttpHeaders headers = prepareRequestForUpload();
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
+        final CaseDocumentResource caseDocumentResource = CaseDocumentResource.builder()
+            .documentMetadata(caseDocumentMetadata)
+            .build();
 
-        doReturn(new ResponseEntity<>(linkedHashMap, HttpStatus.OK))
-            .when(restTemplate).exchange(documentUrl, HttpMethod.GET, requestEntity, Object.class);
+        doReturn(new ResponseEntity<>(caseDocumentResource, HttpStatus.OK))
+            .when(restTemplate).exchange(documentUrl, HttpMethod.GET, requestEntity, CaseDocumentResource.class);
 
         final Optional<DocumentPermissions> caseDocumentMetadataResponse =
             sut.getCaseDocumentMetadata(CASE_ID_VALUE, MATCHED_DOCUMENT_ID);
@@ -95,24 +96,26 @@ class CaseDataStoreServiceImplTest implements TestFixture {
     void getCaseDocumentMetadata_HttpClientErrorNotFound() {
 
         HttpHeaders headers = prepareRequestForUpload();
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
+        HttpEntity<LinkedMultiValueMap<String, CaseDocumentResource>> requestEntity = new HttpEntity<>(headers);
 
-        Mockito.when(restTemplate.exchange(documentUrl, HttpMethod.GET, requestEntity, Object.class))
-            .thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.NOT_FOUND,
-                                                                "404", new HttpHeaders(), new byte[1],
-                                                                Charset.defaultCharset()));
+        doThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND))
+            .when(restTemplate).exchange(documentUrl, HttpMethod.GET, requestEntity, CaseDocumentResource.class);
 
-        assertThatExceptionOfType(ForbiddenException.class)
-            .isThrownBy(() -> sut.getCaseDocumentMetadata(CASE_ID_VALUE, MATCHED_DOCUMENT_ID));
+        final Optional<DocumentPermissions> caseDocumentMetadata = sut.getCaseDocumentMetadata(
+            CASE_ID_VALUE,
+            MATCHED_DOCUMENT_ID
+        );
+
+        assertThat(caseDocumentMetadata).isNotPresent();
     }
 
     @Test
     void getCaseDocumentMetadata_HttpClientErrorForbiddenException() {
 
         HttpHeaders headers = prepareRequestForUpload();
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
+        HttpEntity<LinkedMultiValueMap<String, CaseDocumentResource>> requestEntity = new HttpEntity<>(headers);
 
-        Mockito.when(restTemplate.exchange(documentUrl, HttpMethod.GET, requestEntity, Object.class))
+        Mockito.when(restTemplate.exchange(documentUrl, HttpMethod.GET, requestEntity, CaseDocumentResource.class))
             .thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.FORBIDDEN,
                                                                 "404", new HttpHeaders(), new byte[1],
                                                                 Charset.defaultCharset()));
@@ -125,9 +128,9 @@ class CaseDataStoreServiceImplTest implements TestFixture {
     void getCaseDocumentMetadata_HttpClientErrorBadRequestException() {
 
         HttpHeaders headers = prepareRequestForUpload();
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
+        HttpEntity<LinkedMultiValueMap<String, CaseDocumentResource>> requestEntity = new HttpEntity<>(headers);
 
-        Mockito.when(restTemplate.exchange(documentUrl, HttpMethod.GET, requestEntity, Object.class))
+        Mockito.when(restTemplate.exchange(documentUrl, HttpMethod.GET, requestEntity, CaseDocumentResource.class))
             .thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.BAD_REQUEST,
                                                                 "404", new HttpHeaders(), new byte[1],
                                                                 Charset.defaultCharset()));
@@ -139,9 +142,9 @@ class CaseDataStoreServiceImplTest implements TestFixture {
     void getCaseDocumentMetadata_ServiceException() {
 
         HttpHeaders headers = prepareRequestForUpload();
-        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
+        HttpEntity<LinkedMultiValueMap<String, CaseDocumentResource>> requestEntity = new HttpEntity<>(headers);
 
-        Mockito.when(restTemplate.exchange(documentUrl, HttpMethod.GET, requestEntity, Object.class))
+        Mockito.when(restTemplate.exchange(documentUrl, HttpMethod.GET, requestEntity, CaseDocumentResource.class))
             .thenThrow(HttpClientErrorException.NotFound.create("woopsie", HttpStatus.UNAUTHORIZED,
                                                                 "404", new HttpHeaders(), new byte[1],
                                                                 Charset.defaultCharset()));
@@ -156,7 +159,7 @@ class CaseDataStoreServiceImplTest implements TestFixture {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("experimental", "true");
+
         return headers;
     }
 }
