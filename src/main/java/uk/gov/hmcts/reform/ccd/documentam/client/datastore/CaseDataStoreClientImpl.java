@@ -83,7 +83,7 @@ public class CaseDataStoreClientImpl implements CaseDataStoreClient {
         HttpHeaders headers = new HttpHeaders();
         headers.addAll(securityUtils.authorizationHeaders());
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set(EXPERIMENTAL_HEADER, "true");
+
         return headers;
     }
 }

@@ -36,7 +36,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
-class CaseDataStoreServiceImplTest implements TestFixture {
+class CaseDataStoreClientImplTest implements TestFixture {
     @Mock
     private RestTemplate restTemplate;
 
@@ -159,7 +159,7 @@ class CaseDataStoreServiceImplTest implements TestFixture {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("experimental", "true");
+
         return headers;
     }
 }
