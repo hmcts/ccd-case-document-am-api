@@ -9,8 +9,8 @@
   "lastModifiedBy": "[[ANYTHING_PRESENT]]",
   "modifiedOn": "[[ANYTHING_PRESENT]]",
   "metadata": {
-    "caseTypeId": "BEFTA_CASETYPE_2_1",
-    "jurisdictionId": "BEFTA_JURISDICTION_2"
+    "case_type_id": "BEFTA_CASETYPE_2_1",
+    "jurisdiction": "BEFTA_JURISDICTION_2"
   },
   "hashToken": "[[ANYTHING_PRESENT]]",
   "ttl": "[[ANY_NULLABLE]]",

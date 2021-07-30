@@ -58,12 +58,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.buildPatchDocumentResponse;
 import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.buildUpdateDocumentCommand;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_ID;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CASE_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_TYPE;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DATA_SOURCE;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.JURISDICTION_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_JURISDICTION_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.ORIGINAL_FILE_NAME;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USER_PERMISSION_ERROR;
@@ -320,7 +320,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .build();
 
         final Document document = Document.builder()
-            .metadata(Map.of(JURISDICTION_ID, JURISDICTION_ID_VALUE, CASE_TYPE_ID, CASE_TYPE_ID_VALUE))
+            .metadata(Map.of(METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE,
+                             METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE))
             .build();
 
         final CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
@@ -354,7 +355,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
         doReturn(false).when(applicationParams).isHashCheckEnabled();
 
         final Document document = Document.builder()
-            .metadata(Map.of(JURISDICTION_ID, JURISDICTION_ID_VALUE, CASE_TYPE_ID, "CMC_ExceptionRecord"))
+            .metadata(Map.of(METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE,
+                             METADATA_CASE_TYPE_ID, "CMC_ExceptionRecord"))
             .build();
 
         final ArgumentCaptor<UpdateDocumentsCommand> updateDocumentsCommandCaptor =
@@ -415,7 +417,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
         doReturn(false).when(applicationParams).isHashCheckEnabled();
 
         final Document document = Document.builder()
-            .metadata(Map.of(JURISDICTION_ID, JURISDICTION_ID_VALUE, CASE_TYPE_ID, CASE_TYPE_ID_VALUE))
+            .metadata(Map.of(METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE,
+                             METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE))
             .build();
 
         stubGetDocument(document);
@@ -441,7 +444,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
         final DocumentHashToken doc = DocumentHashToken.builder().id(DOCUMENT_ID).build();
 
         final Document document = Document.builder()
-            .metadata(Map.of(JURISDICTION_ID, JURISDICTION_ID_VALUE, CASE_TYPE_ID, CASE_TYPE_ID_VALUE))
+            .metadata(Map.of(METADATA_JURISDICTION_ID,
+                             JURISDICTION_ID_VALUE, METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE))
             .build();
 
         stubGetDocument(document);
@@ -473,7 +477,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .build();
 
         final Document document = Document.builder()
-            .metadata(Map.of(JURISDICTION_ID, JURISDICTION_ID_VALUE, CASE_TYPE_ID, "DIFFERENT_CASETYPE"))
+            .metadata(Map.of(METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE,
+                             METADATA_CASE_TYPE_ID, "DIFFERENT_CASETYPE"))
             .build();
 
         stubGetSalt();
@@ -505,9 +510,9 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .build();
 
         final Map<String, String> myMetadata = Map.of(
-            CASE_ID, CASE_ID_VALUE,
-            JURISDICTION_ID, JURISDICTION_ID_VALUE,
-            CASE_TYPE_ID, CASE_TYPE_ID_VALUE
+            METADATA_CASE_ID, CASE_ID_VALUE,
+            METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE,
+            METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE
         );
         final Document document = Document.builder()
             .metadata(myMetadata)
@@ -656,7 +661,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
     @Test
     void shouldGenerateHashTokenWhenCaseIdIsNotPresent() {
         final Document document = Document.builder()
-            .metadata(Map.of(CASE_TYPE_ID, "BEFTA_CASETYPE_2_2", JURISDICTION_ID, JURISDICTION_ID_VALUE))
+            .metadata(Map.of(METADATA_CASE_TYPE_ID, "BEFTA_CASETYPE_2_2",
+                             METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE))
             .build();
 
         stubGetSalt();
@@ -688,9 +694,9 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
     private Document buildDocument(final String caseId, final String caseTypeId, final String jurisdictionId) {
         final Map<String, String> myMap = Map.of(
-            CASE_ID, caseId,
-            CASE_TYPE_ID, caseTypeId,
-            JURISDICTION_ID, jurisdictionId
+            METADATA_CASE_ID, caseId,
+            METADATA_CASE_TYPE_ID, caseTypeId,
+            METADATA_JURISDICTION_ID, jurisdictionId
         );
 
         return Document.builder()

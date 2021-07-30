@@ -43,9 +43,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_ID;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DOCUMENT_METADATA_NOT_FOUND;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CASE_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CASE_TYPE_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_JURISDICTION_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.RESOURCE_NOT_FOUND;
 
 @Slf4j
@@ -119,17 +120,21 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 // document metadata exists and document is not a moving case
                 if (documentMetadata.isPresent()
                     && !documentMetadata.get().getMetadata().isEmpty()
-                    && !isDocumentMovingCases(documentMetadata.get().getMetadata().get(CASE_TYPE_ID))) {
+                    && !isDocumentMovingCases(documentMetadata.get().getCaseTypeId())) {
                     throw new BadRequestException(String.format(
                         "Document metadata exists for %s but the case type is not a moving case type: %s",
-                        documentHashToken.getId(), documentMetadata.get().getMetadata().get(CASE_TYPE_ID)
+                        documentHashToken.getId(), documentMetadata.get().getCaseTypeId()
                     ));
                 }
             }
 
             final DocumentUpdate documentUpdate = new DocumentUpdate(
                 documentHashToken.getId(),
-                Map.of(CASE_ID, caseDocumentsMetadata.getCaseId())
+                Map.of(
+                    METADATA_CASE_ID, caseDocumentsMetadata.getCaseId(),
+                    METADATA_CASE_TYPE_ID, caseDocumentsMetadata.getCaseTypeId(),
+                    METADATA_JURISDICTION_ID, caseDocumentsMetadata.getJurisdictionId()
+                )
             );
 
             documentsList.add(documentUpdate);

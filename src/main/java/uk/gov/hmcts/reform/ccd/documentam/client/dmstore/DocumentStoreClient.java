@@ -148,8 +148,8 @@ public class DocumentStoreClient {
         LinkedMultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
 
         bodyMap.set(Constants.CLASSIFICATION, documentUploadRequest.getClassification());
-        bodyMap.set("metadata[jurisdictionId]", documentUploadRequest.getJurisdictionId());
-        bodyMap.set("metadata[caseTypeId]", documentUploadRequest.getCaseTypeId());
+        bodyMap.set("metadata[jurisdiction]", documentUploadRequest.getJurisdictionId());
+        bodyMap.set("metadata[case_type_id]", documentUploadRequest.getCaseTypeId());
         bodyMap.set("ttl", getEffectiveTTL());
 
         documentUploadRequest.getFiles()

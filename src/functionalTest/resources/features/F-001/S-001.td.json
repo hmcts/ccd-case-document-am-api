@@ -31,9 +31,9 @@
       "createdOn": "[[ANYTHING_PRESENT]]",
       "lastModifiedBy": "[[ANYTHING_PRESENT]]",
       "metadata": {
-        "caseId": "${[scenarioContext][childContexts][S-001_Case_Create][testData][actualResponse][body][id]}",
-        "caseTypeId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][documents][0][metadata][caseTypeId]}",
-        "jurisdictionId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][documents][0][metadata][jurisdictionId]}"
+        "case_id": "${[scenarioContext][childContexts][S-001_Case_Create][testData][actualResponse][body][id]}",
+        "case_type_id": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][documents][0][metadata][case_type_id]}",
+        "jurisdiction": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][documents][0][metadata][jurisdiction]}"
       },
       "mimeType": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][documents][0][mimeType]}",
       "modifiedOn": "[[ANYTHING_PRESENT]]",
