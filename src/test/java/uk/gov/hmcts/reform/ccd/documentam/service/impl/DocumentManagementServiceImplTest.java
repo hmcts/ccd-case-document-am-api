@@ -444,8 +444,12 @@ class DocumentManagementServiceImplTest implements TestFixture {
         final DocumentHashToken doc = DocumentHashToken.builder().id(DOCUMENT_ID).build();
 
         final Document document = Document.builder()
-            .metadata(Map.of(METADATA_JURISDICTION_ID,
-                             JURISDICTION_ID_VALUE, METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE))
+            .metadata(
+                Map.of(
+                    METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE,
+                    METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE
+                )
+            )
             .build();
 
         stubGetDocument(document);
