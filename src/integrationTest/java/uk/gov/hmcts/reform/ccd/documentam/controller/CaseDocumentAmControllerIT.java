@@ -47,11 +47,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.buildUpdateDocumentCommand;
 import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.objectToJsonString;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CLASSIFICATION;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.FILES;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.JURISDICTION_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CASE_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CASE_TYPE_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_JURISDICTION_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDeleteDocumentByDocumentId;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDocumentBinaryContent;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDocumentManagementUploadDocument;
@@ -184,9 +186,9 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath(META_DATA_JSON_EXPRESSION + CASE_ID, is(CASE_ID_VALUE)))
-            .andExpect(jsonPath(META_DATA_JSON_EXPRESSION + CASE_TYPE_ID, is(CASE_TYPE_ID_VALUE)))
-            .andExpect(jsonPath(META_DATA_JSON_EXPRESSION + JURISDICTION_ID, is(JURISDICTION_ID_VALUE)))
+            .andExpect(jsonPath(META_DATA_JSON_EXPRESSION + METADATA_CASE_ID, is(CASE_ID_VALUE)))
+            .andExpect(jsonPath(META_DATA_JSON_EXPRESSION + METADATA_CASE_TYPE_ID, is(CASE_TYPE_ID_VALUE)))
+            .andExpect(jsonPath(META_DATA_JSON_EXPRESSION + METADATA_JURISDICTION_ID, is(JURISDICTION_ID_VALUE)))
             .andExpect(jsonPath("$._links.self.href", is(SELF_LINK)))
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
@@ -631,9 +633,9 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     private Document buildDocument() {
         final Map<String, String> metadata = Map.of(
-            CASE_ID, CASE_ID_VALUE,
-            CASE_TYPE_ID, CASE_TYPE_ID_VALUE,
-            JURISDICTION_ID, JURISDICTION_ID_VALUE);
+            METADATA_CASE_ID, CASE_ID_VALUE,
+            METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE,
+            METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE);
 
         return Document.builder()
             .classification(Classification.PUBLIC)
@@ -645,9 +647,9 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     private Document buildDocument(final Date time, final String caseTypeId) {
         final Map<String, String> metadata = Map.of(
-            CASE_ID, CASE_ID_VALUE,
-            CASE_TYPE_ID, caseTypeId,
-            JURISDICTION_ID, JURISDICTION_ID_VALUE);
+            METADATA_CASE_ID, CASE_ID_VALUE,
+            METADATA_CASE_TYPE_ID, caseTypeId,
+            METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE);
 
         return Document.builder()
             .originalDocumentName(ORIGINAL_DOCUMENT_NAME)

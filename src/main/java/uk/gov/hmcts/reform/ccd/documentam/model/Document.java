@@ -13,9 +13,9 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_ID;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CASE_TYPE_ID;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.JURISDICTION_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CASE_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CASE_TYPE_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_JURISDICTION_ID;
 
 @Builder(toBuilder = true)
 @Jacksonized
@@ -44,21 +44,21 @@ public class Document {
     @JsonIgnore
     public String getCaseId() {
         return Optional.ofNullable(metadata)
-            .map(metadataMap -> metadataMap.get(CASE_ID))
+            .map(metadataMap -> metadataMap.get(METADATA_CASE_ID))
             .orElse(null);
     }
 
     @JsonIgnore
     public String getCaseTypeId() {
         return Optional.ofNullable(metadata)
-            .map(metadataMap -> metadataMap.get(CASE_TYPE_ID))
+            .map(metadataMap -> metadataMap.get(METADATA_CASE_TYPE_ID))
             .orElse(null);
     }
 
     @JsonIgnore
     public String getJurisdictionId() {
         return Optional.ofNullable(metadata)
-            .map(metadataMap -> metadataMap.get(JURISDICTION_ID))
+            .map(metadataMap -> metadataMap.get(METADATA_JURISDICTION_ID))
             .orElse(null);
     }
 
