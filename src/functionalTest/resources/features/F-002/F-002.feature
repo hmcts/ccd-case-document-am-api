@@ -1,4 +1,4 @@
-@F-002
+@F-002 @Ignore
 Feature: F-002: Get Document Binary Content by Document ID
 
   Background: Load test data for the scenario
