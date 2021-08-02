@@ -1,15 +1,11 @@
 package uk.gov.hmcts.reform.ccd.documentam;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.params.provider.Arguments;
-import org.springframework.http.HttpStatus;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
-import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
-import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.documentam.model.DmTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -22,7 +18,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 public interface TestFixture {
     UUID MATCHED_DOCUMENT_ID = UUID.fromString("41334a2b-79ce-44eb-9168-2d49a744be9c");
@@ -96,15 +91,6 @@ public interface TestFixture {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    static Stream<Arguments> provideHttpErrorForDocumentParameters() {
-        final String serviceExceptionMessagePrefix = "Exception occurred with operation on document id: ";
-
-        return Stream.of(
-            Arguments.of(HttpStatus.BAD_GATEWAY, ServiceException.class, serviceExceptionMessagePrefix),
-            Arguments.of(HttpStatus.NOT_FOUND, ResourceNotFoundException.class, "Resource not found ")
-        );
     }
 
     static Document.Links getLinks() {

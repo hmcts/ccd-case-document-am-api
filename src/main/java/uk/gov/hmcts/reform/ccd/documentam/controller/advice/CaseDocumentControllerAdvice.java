@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
@@ -90,6 +91,11 @@ public class CaseDocumentControllerAdvice {
     protected ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException exception) {
         return errorDetailsResponseEntity(exception, HttpStatus.NOT_FOUND,
             ErrorConstants.NOT_FOUND.getErrorCode(), ErrorConstants.NOT_FOUND.getErrorMessage());
+    }
+
+    @ExceptionHandler(HttpClientErrorException.class)
+    protected ResponseEntity<Object> handleHttpClientErrorException(final HttpClientErrorException exception) {
+        return new ResponseEntity<>(exception.getResponseBodyAsString(), exception.getStatusCode());
     }
 
     @ExceptionHandler(Exception.class)

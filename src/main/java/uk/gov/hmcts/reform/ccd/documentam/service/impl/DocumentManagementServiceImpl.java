@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 
+import io.vavr.control.Either;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,8 +8,10 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
+import uk.gov.hmcts.reform.ccd.documentam.client.datastore.CaseDataStoreClient;
 import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DocumentStoreClient;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
@@ -16,7 +19,6 @@ import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.CaseNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
-import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedServices;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
@@ -29,7 +31,6 @@ import uk.gov.hmcts.reform.ccd.documentam.model.DocumentUpdate;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
-import uk.gov.hmcts.reform.ccd.documentam.client.datastore.CaseDataStoreClient;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
@@ -43,11 +44,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DOCUMENT_METADATA_NOT_FOUND;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CASE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_JURISDICTION_ID;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.RESOURCE_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -77,10 +76,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Override
     public Document getDocumentMetadata(UUID documentId) {
         return documentStoreClient.getDocument(documentId)
-            .orElseThrow(() -> new ResourceNotFoundException(String.format(
-                DOCUMENT_METADATA_NOT_FOUND,
-                documentId.toString()
-            )));
+            .fold(
+                this::throwLeft,
+                right -> right
+            );
     }
 
     @Override
@@ -100,16 +99,14 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                                                                 caseDocumentsMetadata) {
         List<DocumentUpdate> documentsList = new ArrayList<>();
         for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashTokens()) {
-            final Optional<Document> documentMetadata = documentStoreClient.getDocument(documentHashToken.getId());
+            final Either<HttpClientErrorException, Document> either =
+                documentStoreClient.getDocument(documentHashToken.getId());
 
             if (documentHashToken.getHashToken() != null) {
-                if (documentMetadata.isEmpty()) {
-                    throw new ResourceNotFoundException(String.format(
-                        "Meta data does not exist for documentId: %s",
-                        documentHashToken.getId()
-                    ));
+                if (either.isLeft()) {
+                    throw either.getLeft();
                 }
-                verifyHashTokenValidity(documentHashToken, documentMetadata.get());
+                verifyHashTokenValidity(documentHashToken, either.get());
             } else if (applicationParams.isHashCheckEnabled()) {
                 throw new ForbiddenException(
                     String.format(
@@ -118,12 +115,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                     ));
             } else {
                 // document metadata exists and document is not a moving case
-                if (documentMetadata.isPresent()
-                    && !documentMetadata.get().getMetadata().isEmpty()
-                    && !isDocumentMovingCases(documentMetadata.get().getCaseTypeId())) {
+                if (either.isRight()
+                    && !either.get().getMetadata().isEmpty()
+                    && !isDocumentMovingCases(either.get().getCaseTypeId())) {
                     throw new BadRequestException(String.format(
                         "Document metadata exists for %s but the case type is not a moving case type: %s",
-                        documentHashToken.getId(), documentMetadata.get().getCaseTypeId()
+                        documentHashToken.getId(), either.get().getCaseTypeId()
                     ));
                 }
             }
@@ -174,8 +171,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Override
     public String generateHashToken(UUID documentId) {
         return documentStoreClient.getDocument(documentId)
-            .map(document -> generateHashToken(documentId, document))
-            .orElse("");
+            .fold(
+                left -> "",
+                right -> generateHashToken(documentId, right)
+            );
     }
 
     @Override
@@ -191,7 +190,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public PatchDocumentResponse patchDocument(final UUID documentId, final UpdateTtlRequest ttl) {
         final DmTtlRequest dmTtlRequest = new DmTtlRequest(ttl.getTtl().atZone(ZoneId.systemDefault()));
         return documentStoreClient.patchDocument(documentId, dmTtlRequest)
-            .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NOT_FOUND));
+            .fold(
+                this::throwLeft,
+                right -> right
+            );
     }
 
     @Override
@@ -258,6 +260,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             log.error(logMessage, HttpStatus.FORBIDDEN);
             throw new ForbiddenException(exceptionMessage);
         }
+    }
+
+    private <U> U throwLeft(HttpClientErrorException exception) {
+        throw exception;
     }
 
     private boolean validateCaseTypeId(AuthorisedService serviceConfig, String caseTypeId) {

@@ -54,6 +54,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.JURISDICTIO
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CASE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_JURISDICTION_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubNotFoundDeleteDocumentByDocumentId;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDeleteDocumentByDocumentId;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDocumentBinaryContent;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDocumentManagementUploadDocument;
@@ -430,8 +431,6 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(objectToJsonString(body)))
             .andExpect(status().isNotFound())
-            .andExpect(jsonPath(RESPONSE_ERROR_DESCRIPTION_KEY,
-                                is(PATCH_ERROR_DESCRIPTION_NOT_FOUND + DOCUMENT_ID_FROM_LINK)))
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
                 SERVICE_NAME_CCD_DATA,
@@ -604,17 +603,35 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     }
 
     @Test
-    void shouldNotFindDocumentToDeleteWhenTryingToDeleteDocumentByDocumentId() throws Exception {
-        UUID random = UUID.randomUUID();
+    void testShouldHaveDmStoreErrorFormatWhenDmStoreOperationReturnsFailure() throws Exception {
+        final UUID random = UUID.randomUUID();
 
-        stubDeleteDocumentByDocumentId();
+        final Map<String, String> metadata = Map.of(
+            METADATA_CASE_ID, CASE_ID_VALUE,
+            METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE,
+            METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE);
+
+        final Document document = Document.builder()
+            .classification(Classification.PUBLIC)
+            .createdOn(Date.from(Instant.now()))
+            .metadata(metadata)
+            .links(TestFixture.getLinks())
+            .build();
+
+        stubGetDocumentMetaData(document, random);
+        stubNotFoundDeleteDocumentByDocumentId(random);
 
         mockMvc.perform(delete(MAIN_URL + "/" + random)
-                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+                            .headers(createHttpHeaders(SERVICE_NAME_CCD_GW)))
             .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.status", is(404)))
+            .andExpect(jsonPath("$.path", is("/documents/" + random)))
+            .andExpect(jsonPath("$.error", is("Delete error")))
+            .andExpect(jsonPath("$.exception", is("not.found.Exception")))
+            .andExpect(jsonPath("$.timestamp", is("2021-07-30T08:23:34+0000")))
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
-                SERVICE_NAME_XUI_WEBAPP,
+                SERVICE_NAME_CCD_GW,
                 List.of(random.toString()),
                 null));
     }

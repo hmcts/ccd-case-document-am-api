@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 
+import io.vavr.control.Either;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.client.datastore.CaseDataStoreClient;
@@ -20,7 +22,6 @@ import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
-import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedServices;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
@@ -120,12 +121,12 @@ class DocumentManagementServiceImplTest implements TestFixture {
     }
 
     @Test
-    void getDocumentMetadata_OptionalEmpty() {
-        doReturn(Optional.empty()).when(documentStoreClient).getDocument(DOCUMENT_ID);
+    void getDocumentMetadata_failure() {
+        doReturn(Either.left(new HttpClientErrorException(HttpStatus.NOT_FOUND)))
+            .when(documentStoreClient).getDocument(DOCUMENT_ID);
 
-        assertThatExceptionOfType(ResourceNotFoundException.class)
-            .isThrownBy(() -> sut.getDocumentMetadata(DOCUMENT_ID))
-            .withMessage("Meta data does not exist for documentId: " + DOCUMENT_ID);
+        assertThatExceptionOfType(HttpClientErrorException.class)
+            .isThrownBy(() -> sut.getDocumentMetadata(DOCUMENT_ID));
 
         verify(documentStoreClient).getDocument(DOCUMENT_ID);
     }
@@ -300,7 +301,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     }
 
     private void stubGetDocument(final Document document) {
-        doReturn(Optional.ofNullable(document)).when(documentStoreClient).getDocument(DOCUMENT_ID);
+        doReturn(Either.right(document)).when(documentStoreClient).getDocument(DOCUMENT_ID);
     }
 
     private void verifyCaseDataServiceGetDocMetadata() {
@@ -396,7 +397,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
                     .concat(CASE_TYPE_ID_VALUE)))
             .build();
 
-        doReturn(Optional.empty()).when(documentStoreClient).getDocument(DOCUMENT_ID);
+        doReturn(Either.left(new HttpClientErrorException(HttpStatus.NOT_FOUND)))
+            .when(documentStoreClient).getDocument(DOCUMENT_ID);
 
         final CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
             .caseId(CASE_ID_VALUE)
@@ -406,7 +408,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .build();
 
         // WHEN/THEN
-        assertThatExceptionOfType(ResourceNotFoundException.class)
+        assertThatExceptionOfType(HttpClientErrorException.class)
             .isThrownBy(() -> sut.patchDocumentMetadata(caseDocumentsMetadata));
         verify(documentStoreClient, never()).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
     }
@@ -615,7 +617,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
         final UpdateTtlRequest ttlRequest = buildUpdateDocumentCommand();
         final PatchDocumentResponse expectedResponse = buildPatchDocumentResponse();
 
-        doReturn(Optional.of(expectedResponse))
+        doReturn(Either.right(expectedResponse))
             .when(documentStoreClient).patchDocument(any(UUID.class), any(DmTtlRequest.class));
 
         // WHEN
@@ -629,15 +631,16 @@ class DocumentManagementServiceImplTest implements TestFixture {
     }
 
     @Test
-    void testShouldRaiseResourceNotFoundExceptionWhenPatchDocumentIsCalled() {
+    void testShouldRaiseExceptionWhenPatchDocumentFails() {
+        // GIVEN
         final UpdateTtlRequest ttlRequest = buildUpdateDocumentCommand();
-
-        doReturn(Optional.empty())
+        final HttpClientErrorException expectedException = new HttpClientErrorException(HttpStatus.BAD_REQUEST);
+        doReturn(Either.left(expectedException))
             .when(documentStoreClient).patchDocument(any(UUID.class), any(DmTtlRequest.class));
 
-        assertThatExceptionOfType(ResourceNotFoundException.class)
-            .isThrownBy(() -> sut.patchDocument(DOCUMENT_ID, ttlRequest))
-            .withMessage("Resource not found");
+        // WHEN
+        assertThatExceptionOfType(HttpClientErrorException.class)
+            .isThrownBy(() -> sut.patchDocument(DOCUMENT_ID, ttlRequest));
     }
 
     @Test
@@ -675,6 +678,21 @@ class DocumentManagementServiceImplTest implements TestFixture {
         final String result = sut.generateHashToken(DOCUMENT_ID);
 
         assertNotNull(result);
+    }
+
+    @Test
+    void testGenerateHashTokenShouldReturnEmptyStringWhenGetDocumentFails() {
+        // GIVEN
+        doReturn(Either.left(new HttpClientErrorException(HttpStatus.NOT_FOUND)))
+            .when(documentStoreClient).getDocument(DOCUMENT_ID);
+
+        // WHEN
+        final String result = sut.generateHashToken(DOCUMENT_ID);
+
+        // THEN
+        assertThat(result)
+            .isNotNull()
+            .isEqualTo("");
     }
 
     @Test

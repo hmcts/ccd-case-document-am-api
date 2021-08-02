@@ -9,6 +9,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.controller.endpoints.CaseDocumentAmController;
@@ -22,7 +23,10 @@ import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 
+import java.nio.charset.StandardCharsets;
+
 import static java.util.Collections.emptyList;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -149,5 +153,21 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
             .andExpect(result -> assertThat(result.getResolvedException())
                 .isNotNull()
                 .satisfies(throwable -> assertThat(throwable).isInstanceOf(MethodArgumentNotValidException.class)));
+    }
+
+    @Test
+    void testHandleHttpClientErrorException() {
+        final HttpClientErrorException exception = new HttpClientErrorException(HttpStatus.BAD_REQUEST,
+                                                                                "Bad Request",
+                                                                                "{\"key\":\"value\"}".getBytes(),
+                                                                                StandardCharsets.UTF_8);
+
+        final ResponseEntity<Object> responseEntity = underTest.handleHttpClientErrorException(exception);
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
+
+        assertThatJson(responseEntity.getBody())
+            .and(a -> a.node("key").isEqualTo("value"));
     }
 }

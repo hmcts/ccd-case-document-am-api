@@ -277,7 +277,6 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-resource-server'
 
-  implementation group: 'net.minidev', name: 'json-smart', version: '2.3'
   implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
   implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '11.0'
   implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
@@ -288,9 +287,13 @@ dependencies {
 
   implementation group: 'net.minidev', name: 'json-smart', version: '2.4.7'
 
+  implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
+
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: versions.junit
   testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: versions.junit
+
+  testImplementation group: 'net.javacrumbs.json-unit', name: 'json-unit-assertj', version: '2.27.0'
 
   testImplementation (group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot) {
     exclude group: 'junit', module: 'junit'
@@ -298,6 +301,8 @@ dependencies {
   testImplementation (group: 'com.github.hmcts', name: 'ccd-test-definitions', version: '7.0.0') {
     exclude group: 'io.rest-assured', module : 'rest-assured'
   }
+
+  testImplementation group: 'org.assertj', name: 'assertj-vavr', version: '0.4.2'
 
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '2.2.2.RELEASE'
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
