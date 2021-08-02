@@ -30,7 +30,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "Provide the Case Type ID"
+      "error": "Provide the Case Type ID"
     }
   }
 }

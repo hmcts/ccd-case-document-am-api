@@ -23,7 +23,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "Meta data does not exist for documentId: ${[scenarioContext][testData][request][body][documentHashTokens][0][id]}"
+      "error": "Meta data does not exist for documentId: ${[scenarioContext][testData][request][body][documentHashTokens][0][id]}"
     }
   }
 }

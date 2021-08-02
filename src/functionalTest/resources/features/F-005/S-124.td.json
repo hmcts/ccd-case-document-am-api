@@ -22,7 +22,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "Forbidden: Insufficient permissions: ${[scenarioContext][testData][request][pathVariables][documentId]}"
+      "error": "Forbidden: Insufficient permissions: ${[scenarioContext][testData][request][pathVariables][documentId]}"
     }
   }
 }

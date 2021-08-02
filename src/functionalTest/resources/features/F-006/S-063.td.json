@@ -17,7 +17,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "Meta data does not exist for documentId: ${[scenarioContext][testData][request][pathVariables][documentId]}"
+      "error": "Meta data does not exist for documentId: ${[scenarioContext][testData][request][pathVariables][documentId]}"
     }
   }
 }

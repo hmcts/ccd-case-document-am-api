@@ -20,7 +20,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "[[ANYTHING_PRESENT]]"
+      "error": "[[ANYTHING_PRESENT]]"
     }
   }
 }
