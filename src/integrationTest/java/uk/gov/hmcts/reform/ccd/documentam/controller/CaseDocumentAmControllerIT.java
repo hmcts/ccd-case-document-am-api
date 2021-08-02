@@ -624,11 +624,6 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         mockMvc.perform(delete(MAIN_URL + "/" + random)
                             .headers(createHttpHeaders(SERVICE_NAME_CCD_GW)))
             .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.status", is(404)))
-            .andExpect(jsonPath("$.path", is("/documents/" + random)))
-            .andExpect(jsonPath("$.error", is("Delete error")))
-            .andExpect(jsonPath("$.exception", is("not.found.Exception")))
-            .andExpect(jsonPath("$.timestamp", is("2021-07-30T08:23:34+0000")))
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
                 SERVICE_NAME_CCD_GW,
