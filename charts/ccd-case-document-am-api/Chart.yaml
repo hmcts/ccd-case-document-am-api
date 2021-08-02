@@ -8,5 +8,5 @@ maintainers:
   - name: CCD Team
 dependencies:
   - name: java
-    version: 3.4.7
+    version: 3.6.0
     repository: '@hmctspublic'
