@@ -8,7 +8,6 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.client.datastore.CaseDataStoreClient;
@@ -99,7 +98,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                                                                 caseDocumentsMetadata) {
         List<DocumentUpdate> documentsList = new ArrayList<>();
         for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashTokens()) {
-            final Either<HttpClientErrorException, Document> either =
+            final Either<RuntimeException, Document> either =
                 documentStoreClient.getDocument(documentHashToken.getId());
 
             if (documentHashToken.getHashToken() != null) {
@@ -262,7 +261,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
     }
 
-    private <U> U throwLeft(HttpClientErrorException exception) {
+    private <U> U throwLeft(final RuntimeException exception) {
         throw exception;
     }
 

@@ -20,6 +20,7 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
+import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.model.DmTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
@@ -31,6 +32,7 @@ import java.util.List;
 
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.vavr.api.VavrAssertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -76,7 +78,7 @@ class DocumentStoreClientTest implements TestFixture {
             .when(restTemplate).getForObject(anyString(), ArgumentMatchers.<Class<Document>>any());
 
         // WHEN
-        final Either<HttpClientErrorException, Document> actualResult = underTest.getDocument(DOCUMENT_ID);
+        final Either<RuntimeException, Document> actualResult = underTest.getDocument(DOCUMENT_ID);
 
         // THEN
         assertThat(actualResult)
@@ -92,17 +94,21 @@ class DocumentStoreClientTest implements TestFixture {
     @Test
     void testShouldReturnExceptionWhenGetDocumentReturnsNotFound() {
         // GIVEN
-        final HttpClientErrorException expectedException = new HttpClientErrorException(HttpStatus.NOT_FOUND);
-        doThrow(expectedException)
+        final HttpClientErrorException httpClientErrorException = new HttpClientErrorException(HttpStatus.NOT_FOUND);
+        doThrow(httpClientErrorException)
             .when(restTemplate).getForObject(anyString(), ArgumentMatchers.<Class<Document>>any());
 
         // WHEN
-        final Either<HttpClientErrorException, Document> actualResult = underTest.getDocument(DOCUMENT_ID);
+        final Either<RuntimeException, Document> actualResult = underTest.getDocument(DOCUMENT_ID);
 
         // THEN
         assertThat(actualResult)
             .isLeft()
-            .hasLeftValueSatisfying(actualException -> assertThat(actualException).isEqualTo(expectedException));
+            .hasLeftValueSatisfying(actualException -> {
+                final String message = String.format("Meta data does not exist for documentId: %s", DOCUMENT_ID);
+                assertThat(actualException.getMessage()).isEqualTo(message);
+                assertThat(actualException.getCause()).isInstanceOf(HttpClientErrorException.class);
+            });
 
         verify(restTemplate).getForObject(
             DM_STORE_URL + "/documents/" + DOCUMENT_ID,
@@ -118,7 +124,7 @@ class DocumentStoreClientTest implements TestFixture {
             .when(restTemplate).getForObject(anyString(), ArgumentMatchers.<Class<Document>>any());
 
         // WHEN
-        final Either<HttpClientErrorException, Document> result = underTest.getDocument(DOCUMENT_ID);
+        final Either<RuntimeException, Document> result = underTest.getDocument(DOCUMENT_ID);
 
         // THEN
         assertThat(result)
@@ -176,6 +182,18 @@ class DocumentStoreClientTest implements TestFixture {
         verifyRestExchangeByteArray();
     }
 
+    @Test
+    void getDocumentBinaryContent_Throws_NotFoundException() {
+        doThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND)).when(restTemplate)
+            .exchange(anyString(), eq(HttpMethod.GET), any(), ArgumentMatchers.<Class<ByteArrayResource>>any());
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+            .isThrownBy(() -> underTest.getDocumentAsBinary(DOCUMENT_ID))
+            .withMessage("Resource not found " + DOCUMENT_ID);
+
+        verifyRestExchangeByteArray();
+    }
+
     private void verifyRestExchangeByteArray() {
         verify(restTemplate)
             .exchange(DM_STORE_URL + "/documents/" + DOCUMENT_ID + "/binary",
@@ -199,6 +217,22 @@ class DocumentStoreClientTest implements TestFixture {
     }
 
     @Test
+    void testShouldRaiseExceptionWhenDocumentToDeleteIsNotFound() {
+        // GIVEN
+        final boolean permanent = true;
+        doThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND)).when(restTemplate)
+            .delete(String.format("%s/documents/%s?permanent=%s", DM_STORE_URL, DOCUMENT_ID, permanent));
+
+        // WHEN/THEN
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+            .isThrownBy(() -> underTest.deleteDocument(DOCUMENT_ID, permanent))
+            .withMessage("Resource not found " + DOCUMENT_ID);
+
+        verify(restTemplate)
+            .delete(String.format("%s/documents/%s?permanent=%s", DM_STORE_URL, DOCUMENT_ID, permanent));
+    }
+
+    @Test
     void testShouldSuccessfullyPatchDocument() {
         // GIVEN
         final DmTtlRequest dmTtlRequest = buildTtlRequest();
@@ -210,7 +244,7 @@ class DocumentStoreClientTest implements TestFixture {
                             ArgumentMatchers.<Class<PatchDocumentResponse>>any());
 
         // WHEN
-        final Either<HttpClientErrorException, PatchDocumentResponse> result =
+        final Either<RuntimeException, PatchDocumentResponse> result =
             underTest.patchDocument(DOCUMENT_ID, dmTtlRequest);
 
         // THEN
@@ -226,7 +260,35 @@ class DocumentStoreClientTest implements TestFixture {
     }
 
     @Test
-    void testShouldRaiseExceptionWhenPatchDocumentFails() {
+    void testShouldReturnLeftWhenPatchDocumentReturnsNotFound() {
+        // GIVEN
+        final DmTtlRequest dmTtlRequest = buildTtlRequest();
+        doThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND)).when(restTemplate)
+            .patchForObject(anyString(),
+                            ArgumentMatchers.<Class<DmTtlRequest>>any(),
+                            ArgumentMatchers.<Class<PatchDocumentResponse>>any());
+
+        // WHEN
+        final Either<RuntimeException, PatchDocumentResponse> result =
+            underTest.patchDocument(DOCUMENT_ID, dmTtlRequest);
+
+        // THEN
+        assertThat(result)
+            .isLeft()
+            .hasLeftValueSatisfying(actualException -> {
+                assertThat(actualException.getMessage()).isEqualTo("Resource not found " + DOCUMENT_ID);
+                assertThat(actualException.getCause()).isInstanceOf(HttpClientErrorException.class);
+            });
+
+        verify(restTemplate).patchForObject(
+            String.format("%s/documents/%s", DM_STORE_URL, DOCUMENT_ID),
+            dmTtlRequest,
+            PatchDocumentResponse.class
+        );
+    }
+
+    @Test
+    void testShouldReturnLeftWhenPatchDocumentFails() {
         // GIVEN
         final DmTtlRequest dmTtlRequest = buildTtlRequest();
         final HttpClientErrorException expectedException = new HttpClientErrorException(HttpStatus.BAD_GATEWAY);
@@ -237,7 +299,7 @@ class DocumentStoreClientTest implements TestFixture {
                             ArgumentMatchers.<Class<PatchDocumentResponse>>any());
 
         // WHEN
-        final Either<HttpClientErrorException, PatchDocumentResponse> result =
+        final Either<RuntimeException, PatchDocumentResponse> result =
             underTest.patchDocument(DOCUMENT_ID, dmTtlRequest);
 
         // THEN
