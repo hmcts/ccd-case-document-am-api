@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
+import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedServices;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
@@ -634,12 +635,13 @@ class DocumentManagementServiceImplTest implements TestFixture {
     void testShouldRaiseExceptionWhenPatchDocumentFails() {
         // GIVEN
         final UpdateTtlRequest ttlRequest = buildUpdateDocumentCommand();
-        final HttpClientErrorException expectedException = new HttpClientErrorException(HttpStatus.BAD_REQUEST);
+        final ResourceNotFoundException expectedException =
+            new ResourceNotFoundException(RANDOM_STRING, new HttpClientErrorException(HttpStatus.NOT_FOUND));
         doReturn(Either.left(expectedException))
             .when(documentStoreClient).patchDocument(any(UUID.class), any(DmTtlRequest.class));
 
         // WHEN
-        assertThatExceptionOfType(HttpClientErrorException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
             .isThrownBy(() -> sut.patchDocument(DOCUMENT_ID, ttlRequest));
     }
 

@@ -244,7 +244,7 @@ class DocumentStoreClientTest implements TestFixture {
                             ArgumentMatchers.<Class<PatchDocumentResponse>>any());
 
         // WHEN
-        final Either<RuntimeException, PatchDocumentResponse> result =
+        final Either<ResourceNotFoundException, PatchDocumentResponse> result =
             underTest.patchDocument(DOCUMENT_ID, dmTtlRequest);
 
         // THEN
@@ -269,7 +269,7 @@ class DocumentStoreClientTest implements TestFixture {
                             ArgumentMatchers.<Class<PatchDocumentResponse>>any());
 
         // WHEN
-        final Either<RuntimeException, PatchDocumentResponse> result =
+        final Either<ResourceNotFoundException, PatchDocumentResponse> result =
             underTest.patchDocument(DOCUMENT_ID, dmTtlRequest);
 
         // THEN
@@ -279,33 +279,6 @@ class DocumentStoreClientTest implements TestFixture {
                 assertThat(actualException.getMessage()).isEqualTo("Resource not found " + DOCUMENT_ID);
                 assertThat(actualException.getCause()).isInstanceOf(HttpClientErrorException.class);
             });
-
-        verify(restTemplate).patchForObject(
-            String.format("%s/documents/%s", DM_STORE_URL, DOCUMENT_ID),
-            dmTtlRequest,
-            PatchDocumentResponse.class
-        );
-    }
-
-    @Test
-    void testShouldReturnLeftWhenPatchDocumentFails() {
-        // GIVEN
-        final DmTtlRequest dmTtlRequest = buildTtlRequest();
-        final HttpClientErrorException expectedException = new HttpClientErrorException(HttpStatus.BAD_GATEWAY);
-
-        doThrow(expectedException).when(restTemplate)
-            .patchForObject(anyString(),
-                            ArgumentMatchers.<Class<DmTtlRequest>>any(),
-                            ArgumentMatchers.<Class<PatchDocumentResponse>>any());
-
-        // WHEN
-        final Either<RuntimeException, PatchDocumentResponse> result =
-            underTest.patchDocument(DOCUMENT_ID, dmTtlRequest);
-
-        // THEN
-        assertThat(result)
-            .isLeft()
-            .hasLeftValueSatisfying(left -> assertThat(left).isEqualTo(expectedException));
 
         verify(restTemplate).patchForObject(
             String.format("%s/documents/%s", DM_STORE_URL, DOCUMENT_ID),

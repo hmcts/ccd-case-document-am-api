@@ -75,12 +75,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     private MockMvc mockMvc;
 
     public static final String RESPONSE_RESULT_KEY = "Result";
-    public static final String RESPONSE_ERROR_KEY = "errorCode";
-    public static final String RESPONSE_ERROR_DESCRIPTION_KEY = "errorDescription";
+    public static final String RESPONSE_STATUS_KEY = "status";
+    public static final String RESPONSE_ERROR_KEY = "error";
 
     public static final String SUCCESS = "Success";
     public static final int ERROR_403 = 403;
-    public static final String PATCH_ERROR_DESCRIPTION_NOT_FOUND = "Meta data does not exist for documentId: ";
     public static final String PATCH_ERROR_DESCRIPTION_BAD_REQUEST = "Document metadata exists for %s but the "
         + "case type is not a moving case type: %s";
     private static final String MAIN_URL = "/cases/documents";
@@ -398,8 +397,9 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(objectToJsonString(body)))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath(RESPONSE_ERROR_DESCRIPTION_KEY,
-                                is(String.format(PATCH_ERROR_DESCRIPTION_BAD_REQUEST,DOCUMENT_ID,CASE_TYPE_ID_VALUE))))
+            .andExpect(jsonPath(
+                RESPONSE_ERROR_KEY,
+                is(String.format(PATCH_ERROR_DESCRIPTION_BAD_REQUEST,DOCUMENT_ID,CASE_TYPE_ID_VALUE))))
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
                 SERVICE_NAME_CCD_DATA,
@@ -504,7 +504,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(objectToJsonString(body)))
             .andExpect(status().isForbidden())
-            .andExpect(jsonPath(RESPONSE_ERROR_KEY, is(ERROR_403)))
+            .andExpect(jsonPath(RESPONSE_STATUS_KEY, is(ERROR_403)))
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
                 SERVICE_NAME_CCD_DATA,
@@ -527,7 +527,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(objectToJsonString(metadata)))
             .andExpect(status().isForbidden())
-            .andExpect(jsonPath(RESPONSE_ERROR_KEY, is(ERROR_403)));
+            .andExpect(jsonPath(RESPONSE_STATUS_KEY, is(ERROR_403)));
 
     }
 

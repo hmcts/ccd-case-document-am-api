@@ -97,7 +97,7 @@ public class DocumentStoreClient {
         }
     }
 
-    public Either<RuntimeException, PatchDocumentResponse> patchDocument(final UUID documentId,
+    public Either<ResourceNotFoundException, PatchDocumentResponse> patchDocument(final UUID documentId,
                                                                          final DmTtlRequest dmTtlRequest) {
         try {
             final PatchDocumentResponse patchDocumentResponse = restTemplate.patchForObject(
@@ -113,7 +113,8 @@ public class DocumentStoreClient {
                     String.format("%s %s", RESOURCE_NOT_FOUND, documentId),
                     exception));
             }
-            return Either.left(exception);
+
+            throw exception;
         }
     }
 
