@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.CaseNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
+import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedServices;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
@@ -98,7 +99,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                                                                 caseDocumentsMetadata) {
         List<DocumentUpdate> documentsList = new ArrayList<>();
         for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashTokens()) {
-            final Either<RuntimeException, Document> either =
+            final Either<ResourceNotFoundException, Document> either =
                 documentStoreClient.getDocument(documentHashToken.getId());
 
             if (documentHashToken.getHashToken() != null) {
@@ -171,8 +172,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public String generateHashToken(UUID documentId) {
         return documentStoreClient.getDocument(documentId)
             .fold(
-                left -> "",
-                right -> generateHashToken(documentId, right)
+                resourceNotFound -> "",
+                document -> generateHashToken(documentId, document)
             );
     }
 

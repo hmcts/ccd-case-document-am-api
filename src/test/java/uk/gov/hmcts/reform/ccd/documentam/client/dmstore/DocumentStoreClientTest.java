@@ -78,7 +78,7 @@ class DocumentStoreClientTest implements TestFixture {
             .when(restTemplate).getForObject(anyString(), ArgumentMatchers.<Class<Document>>any());
 
         // WHEN
-        final Either<RuntimeException, Document> actualResult = underTest.getDocument(DOCUMENT_ID);
+        final Either<ResourceNotFoundException, Document> actualResult = underTest.getDocument(DOCUMENT_ID);
 
         // THEN
         assertThat(actualResult)
@@ -99,7 +99,7 @@ class DocumentStoreClientTest implements TestFixture {
             .when(restTemplate).getForObject(anyString(), ArgumentMatchers.<Class<Document>>any());
 
         // WHEN
-        final Either<RuntimeException, Document> actualResult = underTest.getDocument(DOCUMENT_ID);
+        final Either<ResourceNotFoundException, Document> actualResult = underTest.getDocument(DOCUMENT_ID);
 
         // THEN
         assertThat(actualResult)
@@ -109,27 +109,6 @@ class DocumentStoreClientTest implements TestFixture {
                 assertThat(actualException.getMessage()).isEqualTo(message);
                 assertThat(actualException.getCause()).isInstanceOf(HttpClientErrorException.class);
             });
-
-        verify(restTemplate).getForObject(
-            DM_STORE_URL + "/documents/" + DOCUMENT_ID,
-            Document.class
-        );
-    }
-
-    @Test
-    void testShouldRaiseExceptionWhenGetDocumentFails() {
-        // GIVEN
-        final HttpClientErrorException expectedException = new HttpClientErrorException(HttpStatus.BAD_REQUEST);
-        doThrow(expectedException)
-            .when(restTemplate).getForObject(anyString(), ArgumentMatchers.<Class<Document>>any());
-
-        // WHEN
-        final Either<RuntimeException, Document> result = underTest.getDocument(DOCUMENT_ID);
-
-        // THEN
-        assertThat(result)
-            .isLeft()
-            .hasLeftValueSatisfying(left -> assertThat(left).isEqualTo(expectedException));
 
         verify(restTemplate).getForObject(
             DM_STORE_URL + "/documents/" + DOCUMENT_ID,

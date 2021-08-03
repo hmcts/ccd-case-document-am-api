@@ -43,7 +43,7 @@ public class DocumentStoreClient {
         this.applicationParams = applicationParams;
     }
 
-    public Either<RuntimeException, Document> getDocument(final UUID documentId) {
+    public Either<ResourceNotFoundException, Document> getDocument(final UUID documentId) {
         try {
             final Document document = restTemplate.getForObject(
                 String.format("%s/documents/%s", applicationParams.getDocumentURL(), documentId),
@@ -57,7 +57,7 @@ public class DocumentStoreClient {
                         String.format(DOCUMENT_METADATA_NOT_FOUND, documentId.toString()),
                         exception));
             }
-            return Either.left(exception);
+            throw exception;
         }
     }
 
