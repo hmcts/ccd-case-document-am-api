@@ -24,7 +24,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "Case reference ${[scenarioContext][childContexts][S-023_Case_Create][testData][actualResponse][body][id]} not found for requested document."
+      "error": "Case reference ${[scenarioContext][childContexts][S-023_Case_Create][testData][actualResponse][body][id]} not found for requested document."
     }
   }
 }

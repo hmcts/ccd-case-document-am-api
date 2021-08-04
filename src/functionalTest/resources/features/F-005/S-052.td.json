@@ -20,7 +20,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "Incorrect date format 2021-13-30T12:10:10+0000"
+      "error": "Incorrect date format 2021-13-30T12:10:10+0000"
     }
   }
 }

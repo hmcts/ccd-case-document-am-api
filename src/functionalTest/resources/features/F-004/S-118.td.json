@@ -35,7 +35,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "Forbidden: Insufficient permissions: ${[scenarioContext][testData][request][body][arrayInMap][1][value]} ${[scenarioContext][testData][request][body][arrayInMap][2][value]}"
+      "error": "Forbidden: Insufficient permissions: ${[scenarioContext][testData][request][body][arrayInMap][1][value]} ${[scenarioContext][testData][request][body][arrayInMap][2][value]}"
     }
   }
 }

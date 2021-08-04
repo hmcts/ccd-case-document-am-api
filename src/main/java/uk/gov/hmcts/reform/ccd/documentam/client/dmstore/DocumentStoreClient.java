@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
+import io.vavr.control.Either;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
@@ -15,7 +16,6 @@ import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
-import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
 import uk.gov.hmcts.reform.ccd.documentam.model.DmTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
@@ -23,12 +23,11 @@ import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 
 import java.time.ZonedDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.http.HttpMethod.GET;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DM_DATE_TIME_FORMATTER;
-import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DOCUMENT_METADATA_NOT_FOUND;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.RESOURCE_NOT_FOUND;
 
 @Component
@@ -44,22 +43,21 @@ public class DocumentStoreClient {
         this.applicationParams = applicationParams;
     }
 
-    public Optional<Document> getDocument(final UUID documentId) {
+    public Either<ResourceNotFoundException, Document> getDocument(final UUID documentId) {
         try {
             final Document document = restTemplate.getForObject(
                 String.format("%s/documents/%s", applicationParams.getDocumentURL(), documentId),
                 Document.class
             );
 
-            return Optional.ofNullable(document);
+            return Either.right(document);
         } catch (HttpClientErrorException exception) {
             if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-                return Optional.empty();
+                return Either.left(new ResourceNotFoundException(
+                        String.format(DOCUMENT_METADATA_NOT_FOUND, documentId.toString()),
+                        exception));
             }
-            throw new ServiceException(
-                String.format(EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE, documentId),
-                exception
-            );
+            throw exception;
         }
     }
 
@@ -76,16 +74,10 @@ public class DocumentStoreClient {
             );
         } catch (HttpClientErrorException exception) {
             if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-                throw new ResourceNotFoundException(
-                    String.format("%s %s", RESOURCE_NOT_FOUND, documentId),
-                    exception
-                );
+                throw new ResourceNotFoundException(String.format("%s %s", RESOURCE_NOT_FOUND, documentId), exception);
             }
 
-            throw new ServiceException(
-                String.format(EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE, documentId),
-                exception
-            );
+            throw exception;
         }
     }
 
@@ -98,11 +90,15 @@ public class DocumentStoreClient {
                 permanent
             ));
         } catch (HttpClientErrorException exception) {
-            handleException(exception, documentId.toString());
+            if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
+                throw new ResourceNotFoundException(String.format("%s %s", RESOURCE_NOT_FOUND, documentId), exception);
+            }
+            throw exception;
         }
     }
 
-    public Optional<PatchDocumentResponse> patchDocument(final UUID documentId, final DmTtlRequest dmTtlRequest) {
+    public Either<ResourceNotFoundException, PatchDocumentResponse> patchDocument(final UUID documentId,
+                                                                         final DmTtlRequest dmTtlRequest) {
         try {
             final PatchDocumentResponse patchDocumentResponse = restTemplate.patchForObject(
                 String.format("%s/documents/%s", applicationParams.getDocumentURL(), documentId),
@@ -110,37 +106,32 @@ public class DocumentStoreClient {
                 PatchDocumentResponse.class
             );
 
-            return Optional.ofNullable(patchDocumentResponse);
+            return Either.right(patchDocumentResponse);
         } catch (HttpClientErrorException exception) {
             if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-                return Optional.empty();
+                return Either.left(new ResourceNotFoundException(
+                    String.format("%s %s", RESOURCE_NOT_FOUND, documentId),
+                    exception));
             }
-            throw new ServiceException(String.format(EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE, documentId), exception);
+
+            throw exception;
         }
     }
 
     public void patchDocumentMetadata(final UpdateDocumentsCommand updateDocumentsCommand) {
-        try {
-            restTemplate.patchForObject(
-                String.format("%s/documents", applicationParams.getDocumentURL()),
-                updateDocumentsCommand,
-                Void.class
-            );
-        } catch (HttpClientErrorException exception) {
-            throw new ServiceException(Constants.EXCEPTION_ERROR_MESSAGE, exception);
-        }
+        restTemplate.patchForObject(
+            String.format("%s/documents", applicationParams.getDocumentURL()),
+            updateDocumentsCommand,
+            Void.class
+        );
     }
 
     public DmUploadResponse uploadDocuments(final DocumentUploadRequest documentUploadRequest) {
-        try {
-            return restTemplate.postForObject(
-                String.format("%s/documents", applicationParams.getDocumentURL()),
-                prepareRequestForUpload(documentUploadRequest),
-                DmUploadResponse.class
-            );
-        } catch (HttpClientErrorException exception) {
-            throw new ServiceException(Constants.EXCEPTION_ERROR_MESSAGE, exception);
-        }
+        return restTemplate.postForObject(
+            String.format("%s/documents", applicationParams.getDocumentURL()),
+            prepareRequestForUpload(documentUploadRequest),
+            DmUploadResponse.class
+        );
     }
 
     private HttpEntity<LinkedMultiValueMap<String, Object>> prepareRequestForUpload(final DocumentUploadRequest
@@ -168,14 +159,6 @@ public class DocumentStoreClient {
     private String getEffectiveTTL() {
         final ZonedDateTime currentDateTime = ZonedDateTime.now();
         return currentDateTime.plusDays(applicationParams.getDocumentTtlInDays()).format(DM_DATE_TIME_FORMATTER);
-    }
-
-    private void handleException(final HttpClientErrorException exception, final String parameter) {
-        if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-            throw new ResourceNotFoundException(String.format("%s %s", RESOURCE_NOT_FOUND, parameter), exception);
-        }
-
-        throw new ServiceException(String.format(EXCEPTION_ERROR_ON_DOCUMENT_MESSAGE, parameter), exception);
     }
 
 }

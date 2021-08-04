@@ -24,7 +24,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "Forbidden: Insufficient permissions: ${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][metadata][case_type_id]} ${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][metadata][jurisdiction]}"
+      "error": "Forbidden: Insufficient permissions: ${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][metadata][case_type_id]} ${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][metadata][jurisdiction]}"
     }
   }
 }

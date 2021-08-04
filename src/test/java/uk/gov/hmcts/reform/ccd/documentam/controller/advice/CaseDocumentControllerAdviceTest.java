@@ -9,6 +9,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.controller.endpoints.CaseDocumentAmController;
@@ -22,7 +23,11 @@ import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 
+import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
+
 import static java.util.Collections.emptyList;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,11 +40,14 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
     private final CaseDocumentControllerAdvice underTest = new CaseDocumentControllerAdvice();
 
+    private final HttpServletRequest request = mock(HttpServletRequest.class);
+
     @Test
     void handleUnauthorizedExceptionException() {
         UnauthorizedException unauthorizedException = mock(UnauthorizedException.class);
-        ResponseEntity<Object> responseEntity = underTest
-            .handleUnauthorizedException(unauthorizedException);
+
+        ResponseEntity<Object> responseEntity = underTest.handleUnauthorizedException(unauthorizedException, request);
+
         assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
         assertEquals(HttpStatus.UNAUTHORIZED.value(), responseEntity.getStatusCodeValue());
     }
@@ -48,7 +56,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
     void handleForbiddenExceptionException() {
         final ForbiddenException forbiddenException = mock(ForbiddenException.class);
 
-        final ResponseEntity<Object> responseEntity = underTest.handleForbiddenException(forbiddenException);
+        final ResponseEntity<Object> responseEntity = underTest.handleForbiddenException(forbiddenException, request);
 
         assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
         assertEquals(HttpStatus.FORBIDDEN.value(), responseEntity.getStatusCodeValue());
@@ -102,8 +110,10 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
     @Test
     void handleResourceNotFoundException() {
         ResourceNotFoundException resourceNotFoundException = mock(ResourceNotFoundException.class);
+
         ResponseEntity<Object> responseEntity = underTest
-            .handleResourceNotFoundException(resourceNotFoundException);
+            .handleResourceNotFoundException(resourceNotFoundException, request);
+
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
         assertEquals(HttpStatus.NOT_FOUND.value(), responseEntity.getStatusCodeValue());
     }
@@ -111,13 +121,15 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
     @Test
     void handleUnknownException() {
         Exception exception = mock(Exception.class);
-        ResponseEntity<Object> responseEntity = underTest.handleUnknownException(exception);
+
+        ResponseEntity<Object> responseEntity = underTest.handleUnknownException(exception, request);
+
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
     }
 
     private void testBadRequest(final Exception exceptionClazz) {
-        final ResponseEntity<Object> responseEntity = underTest.handleBadRequestException(exceptionClazz);
+        final ResponseEntity<Object> responseEntity = underTest.handleBadRequestException(exceptionClazz, request);
 
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
         assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
@@ -137,7 +149,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         final CaseDocumentsMetadata body = new CaseDocumentsMetadata(
             CASE_ID_VALUE,
             CASE_TYPE_ID_VALUE,
-                JURISDICTION_ID_VALUE,
+            JURISDICTION_ID_VALUE,
             emptyList()
         );
 
@@ -145,9 +157,25 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
                                                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                                                         .content(TestFixture.objectToJsonString(body)))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.errorDescription", is("At least one document should be provided")))
+            .andExpect(jsonPath("$.error", is("At least one document should be provided")))
             .andExpect(result -> assertThat(result.getResolvedException())
                 .isNotNull()
                 .satisfies(throwable -> assertThat(throwable).isInstanceOf(MethodArgumentNotValidException.class)));
+    }
+
+    @Test
+    void testHandleHttpClientErrorException() {
+        final HttpClientErrorException exception = new HttpClientErrorException(HttpStatus.BAD_REQUEST,
+                                                                                "Bad Request",
+                                                                                "{\"key\":\"value\"}".getBytes(),
+                                                                                StandardCharsets.UTF_8);
+
+        final ResponseEntity<Object> responseEntity = underTest.handleHttpClientErrorException(exception);
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
+
+        assertThatJson(responseEntity.getBody())
+            .and(a -> a.node("key").isEqualTo("value"));
     }
 }
