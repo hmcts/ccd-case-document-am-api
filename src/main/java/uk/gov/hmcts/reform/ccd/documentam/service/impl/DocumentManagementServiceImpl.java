@@ -117,7 +117,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 // document metadata exists and document is not a moving case
                 if (either.isRight()
                     && !either.get().getMetadata().isEmpty()
-                    && !isDocumentMovingCases(either.get().getCaseTypeId())) {
+                    && !isDocumentMovingCases(either.get(), caseDocumentsMetadata, documentHashToken)) {
                     throw new BadRequestException(String.format(
                         "Document metadata exists for %s but the case type is not a moving case type: %s",
                         documentHashToken.getId(), either.get().getCaseTypeId()
@@ -150,8 +150,15 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
     }
 
-    private boolean isDocumentMovingCases(String documentCaseTypeId) {
-        return applicationParams.getBulkScanExceptionRecordTypes().contains(documentCaseTypeId);
+    private boolean isDocumentMovingCases(Document document, CaseDocumentsMetadata caseDocumentsMetadata,
+                                          DocumentHashToken documentHashToken) {
+        boolean isMovingType = applicationParams.getMovingCaseTypes().contains(document.getCaseTypeId());
+        if (isMovingType) {
+            log.info("Document {} is trying to move From caseType:{}, caseId:{} To caseType:{}, caseId:{}",
+                     documentHashToken.getId(), document.getCaseTypeId(), document.getCaseId(),
+                     caseDocumentsMetadata.getCaseTypeId(), caseDocumentsMetadata.getCaseId());
+        }
+        return isMovingType;
     }
 
     @Override

@@ -369,7 +369,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
             ArgumentCaptor.forClass(UpdateDocumentsCommand.class);
 
         stubGetDocument(document);
-        doReturn(bulkScanExceptionRecordTypes).when(applicationParams).getBulkScanExceptionRecordTypes();
+        doReturn(bulkScanExceptionRecordTypes).when(applicationParams).getMovingCaseTypes();
         doNothing().when(documentStoreClient).patchDocumentMetadata(updateDocumentsCommandCaptor.capture());
 
         final DocumentHashToken doc = DocumentHashToken.builder().id(DOCUMENT_ID).build();

@@ -23,8 +23,8 @@ public class ApplicationParams {
     @Value("${hash.check.enabled}")
     private boolean hashCheckEnabled;
 
-    @Value("${bulkscan.exception.record.types}")
-    private List<String> bulkScanExceptionRecordTypes;
+    @Value("${moving.case.types}")
+    private List<String> movingCaseTypes;
 
     public String getDocumentURL() {
         return documentURL;
@@ -42,8 +42,8 @@ public class ApplicationParams {
         return hashCheckEnabled;
     }
 
-    public List<String> getBulkScanExceptionRecordTypes() {
-        return Optional.ofNullable(bulkScanExceptionRecordTypes).orElse(emptyList());
+    public List<String> getMovingCaseTypes() {
+        return Optional.ofNullable(movingCaseTypes).orElse(emptyList());
     }
 
 }
