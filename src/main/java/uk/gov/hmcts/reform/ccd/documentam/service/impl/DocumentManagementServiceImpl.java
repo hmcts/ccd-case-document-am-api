@@ -118,6 +118,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 if (either.isRight()
                     && !either.get().getMetadata().isEmpty()
                     && !isDocumentMovingCases(either.get(), caseDocumentsMetadata, documentHashToken)) {
+                    log.warn("Document metadata already exists for docId:{} with caseType:{} and caseId:{}. "
+                                 + "Cannot override with caseType:{}, caseId:{}",
+                             documentHashToken.getId(), either.get().getCaseTypeId(), either.get().getCaseId(),
+                             caseDocumentsMetadata.getCaseTypeId(), caseDocumentsMetadata.getCaseId());
                     throw new BadRequestException(String.format(
                         "Document metadata exists for %s but the case type is not a moving case type: %s",
                         documentHashToken.getId(), either.get().getCaseTypeId()
