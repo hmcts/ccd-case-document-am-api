@@ -45,7 +45,7 @@
         "READ",        
         "DELETE"
       ]
-    }                       
+    },                     
     {
       "id": "ccd_data",
       "caseTypeId": ["*"],
