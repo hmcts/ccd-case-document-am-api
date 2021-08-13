@@ -377,7 +377,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     }
 
     @Test
-    void shouldNotSuccessfullyPatchMetaDataWhenDocumentIsNotMovingCases() throws Exception {
+    void shouldSuccessfullyPatchMetaDataWhenMetadataExistsForSameCaseId() throws Exception {
         final CaseDocumentsMetadata body = CaseDocumentsMetadata.builder()
             .documentHashTokens(List.of(new DocumentHashToken(DOCUMENT_ID, null)))
             .caseId(CASE_ID_VALUE)
@@ -396,16 +396,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                             .headers(createHttpHeaders(SERVICE_NAME_CCD_DATA))
                             .contentType(MediaType.APPLICATION_JSON_VALUE)
                             .content(objectToJsonString(body)))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath(
-                RESPONSE_ERROR_KEY,
-                is(String.format(PATCH_ERROR_DESCRIPTION_BAD_REQUEST,DOCUMENT_ID,CASE_TYPE_ID_VALUE))))
-            .andExpect(hasGeneratedLogAudit(
-                AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
-                SERVICE_NAME_CCD_DATA,
-                List.of(DOCUMENT_ID.toString()),
-                body.getCaseId()
-            ));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath(RESPONSE_RESULT_KEY, is(SUCCESS)));
     }
 
     @Test

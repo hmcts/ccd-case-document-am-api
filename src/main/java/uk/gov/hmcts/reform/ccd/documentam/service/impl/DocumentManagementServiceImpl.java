@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DocumentStoreClient;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
-import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.CaseNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
@@ -117,15 +116,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 // document metadata exists and document is not a moving case
                 if (either.isRight()
                     && !either.get().getMetadata().isEmpty()
-                    && !isDocumentMovingCases(either.get(), caseDocumentsMetadata, documentHashToken)) {
+                    && !allowMetadataOverride(either.get(), caseDocumentsMetadata, documentHashToken)) {
+                    // graceful failure with warning.
                     log.warn("Document metadata already exists for docId:{} with caseType:{} and caseId:{}. "
                                  + "Cannot override with caseType:{}, caseId:{}",
                              documentHashToken.getId(), either.get().getCaseTypeId(), either.get().getCaseId(),
                              caseDocumentsMetadata.getCaseTypeId(), caseDocumentsMetadata.getCaseId());
-                    throw new BadRequestException(String.format(
-                        "Document metadata exists for %s but the case type is not a moving case type: %s",
-                        documentHashToken.getId(), either.get().getCaseTypeId()
-                    ));
                 }
             }
 
@@ -154,15 +150,22 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
     }
 
-    private boolean isDocumentMovingCases(Document document, CaseDocumentsMetadata caseDocumentsMetadata,
+    private boolean allowMetadataOverride(Document document, CaseDocumentsMetadata caseDocumentsMetadata,
                                           DocumentHashToken documentHashToken) {
-        boolean isMovingType = applicationParams.getMovingCaseTypes().contains(document.getCaseTypeId());
-        if (isMovingType) {
+        boolean isMetadataExistsForSameCase = caseDocumentsMetadata.getCaseId().equalsIgnoreCase(document.getCaseId());
+        if (isMetadataExistsForSameCase) {
+            log.info("Document {} metadata already attached to same caseId:{} - possibly due to concurrent ccd events",
+                     documentHashToken.getId(), document.getCaseId());
+            return true;
+        }
+
+        boolean isOfMovingCaseType = applicationParams.getMovingCaseTypes().contains(document.getCaseTypeId());
+        if (isOfMovingCaseType) {
             log.info("Document {} is trying to move From caseType:{}, caseId:{} To caseType:{}, caseId:{}",
                      documentHashToken.getId(), document.getCaseTypeId(), document.getCaseId(),
                      caseDocumentsMetadata.getCaseTypeId(), caseDocumentsMetadata.getCaseId());
         }
-        return isMovingType;
+        return isOfMovingCaseType;
     }
 
     @Override
