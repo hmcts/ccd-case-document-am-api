@@ -26,6 +26,27 @@
       ]
     },
     {
+      "id": "iac",
+      "caseTypeId": ["Asylum"],
+      "jurisdictionId": "IA",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
+      "id": "probate_backend",
+        "caseTypeId": ["*"],
+        "jurisdictionId": "PROBATE",
+      "permissions": [
+        "CREATE",
+        "READ",        
+        "DELETE"
+      ]
+    },                     
+    {
       "id": "ccd_data",
       "caseTypeId": ["*"],
       "jurisdictionId": "*",
