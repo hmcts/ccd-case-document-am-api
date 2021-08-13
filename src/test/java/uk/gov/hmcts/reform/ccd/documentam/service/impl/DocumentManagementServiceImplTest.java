@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DocumentStoreClient;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
-import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
@@ -422,16 +421,20 @@ class DocumentManagementServiceImplTest implements TestFixture {
     }
 
     @Test
-    void shouldNotPatchMetaDataWhenDocumentNotMovingCase_noExceptionRecordType() {
+    void shouldPatchMetaDataWhenMetadataExistsForASameCase() {
         // GIVEN
         doReturn(false).when(applicationParams).isHashCheckEnabled();
 
         final Document document = Document.builder()
             .metadata(Map.of(METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE,
-                             METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE))
+                             METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE, METADATA_CASE_ID, CASE_ID_VALUE))
             .build();
 
         stubGetDocument(document);
+
+        final ArgumentCaptor<UpdateDocumentsCommand> updateDocumentsCommandCaptor =
+            ArgumentCaptor.forClass(UpdateDocumentsCommand.class);
+        doNothing().when(documentStoreClient).patchDocumentMetadata(updateDocumentsCommandCaptor.capture());
 
         final DocumentHashToken doc = DocumentHashToken.builder().id(DOCUMENT_ID).build();
         final CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
@@ -441,10 +444,15 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .documentHashTokens(List.of(doc))
             .build();
 
-        // WHEN/THEN
-        assertThatExceptionOfType(BadRequestException.class)
-            .isThrownBy(() -> sut.patchDocumentMetadata(caseDocumentsMetadata));
-        verify(documentStoreClient, never()).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
+        // WHEN
+        sut.patchDocumentMetadata(caseDocumentsMetadata);
+
+        // THEN
+        final UpdateDocumentsCommand documentsCommand = updateDocumentsCommandCaptor.getValue();
+
+        assertThat(documentsCommand).isNotNull().satisfies(command -> assertThat(command.getTtl()).isNull());
+
+        verify(documentStoreClient).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
     }
 
     @Test
