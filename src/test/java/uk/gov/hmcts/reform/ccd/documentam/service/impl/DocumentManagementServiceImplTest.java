@@ -521,6 +521,45 @@ class DocumentManagementServiceImplTest implements TestFixture {
     }
 
     @Test
+    void shouldPatchMetaData_handleDuplicates() {
+        final String token = ApplicationUtils.generateHashCode(
+            SALT.concat(DOCUMENT_ID.toString())
+                .concat(JURISDICTION_ID_VALUE)
+                .concat(CASE_TYPE_ID_VALUE));
+
+        final DocumentHashToken doc1 = DocumentHashToken.builder()
+            .id(DOCUMENT_ID)
+            .build();
+
+        final DocumentHashToken doc2 = DocumentHashToken.builder()
+            .id(DOCUMENT_ID)
+            .hashToken(token)
+            .build();
+
+        final Document document = Document.builder()
+            .metadata(Map.of(METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE,
+                             METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE))
+            .build();
+
+        stubGetSalt();
+
+        stubGetDocument(document);
+
+        final CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
+            .caseId(CASE_ID_VALUE)
+            .caseTypeId(CASE_TYPE_ID_VALUE)
+            .jurisdictionId(JURISDICTION_ID_VALUE)
+            .documentHashTokens(List.of(doc1, doc2))
+            .build();
+
+        // WHEN
+        sut.patchDocumentMetadata(caseDocumentsMetadata);
+
+        // THEN
+        verify(documentStoreClient, times(1)).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
+    }
+
+    @Test
     void patchDocumentMetadata_Throws_ForbiddenException_InvalidHashToken() {
         final String invalidToken = ApplicationUtils.generateHashCode(
             SALT.concat(DOCUMENT_ID.toString())

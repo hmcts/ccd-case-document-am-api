@@ -35,11 +35,13 @@ import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
@@ -97,7 +99,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private UpdateDocumentsCommand prepareRequestForAttachingDocumentToCase(CaseDocumentsMetadata
                                                                                 caseDocumentsMetadata) {
         List<DocumentUpdate> documentsList = new ArrayList<>();
-        for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashTokens()) {
+
+        Collection<DocumentHashToken> documentHashTokens = caseDocumentsMetadata.getDocumentHashTokens().stream()
+            .collect(Collectors.toMap(DocumentHashToken::getId, Function.identity(), (a, b) -> b))
+            .values();
+
+        for (DocumentHashToken documentHashToken : documentHashTokens) {
             final Either<ResourceNotFoundException, Document> either =
                 documentStoreClient.getDocument(documentHashToken.getId());
 
