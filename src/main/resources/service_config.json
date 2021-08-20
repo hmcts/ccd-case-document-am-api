@@ -64,6 +64,14 @@
         "UPDATE",
         "DELETE"
       ]
+    },
+    {
+      "id": "em_npa_app",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "READ"
+      ]
     }
   ]
 }
