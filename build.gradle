@@ -46,7 +46,7 @@ pmd {
   sourceSets = []
 }
 ext['spring-framework.version'] = '5.3.7'
-ext['spring-security.version'] = '5.4.5'
+ext['spring-security.version'] = '5.4.7'
 
 
 group = 'uk.gov.hmcts.reform.ccd.documentam'
