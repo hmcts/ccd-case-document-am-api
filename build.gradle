@@ -246,8 +246,12 @@ dependencies {
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
   implementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
 
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
+  implementation (group: 'org.springframework.boot', name: 'spring-boot-starter-web'){
+    exclude group: 'org.glassfish', module: 'jakarta.el'
+  }
+  implementation (group: 'org.springframework.boot', name: 'spring-boot-starter-validation'){
+    exclude group: 'org.glassfish', module: 'jakarta.el'
+  }
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
