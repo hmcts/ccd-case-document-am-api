@@ -39,11 +39,13 @@ public class AuditAspect {
             String documentId = getValue(joinPoint, logAudit.documentId(), result, String.class);
             List<String> documentIds = getValueAsList(joinPoint, logAudit.documentIds(), result);
             String caseId = getValue(joinPoint, logAudit.caseId(), result, String.class);
+            String jurisdiction = getValue(joinPoint, logAudit.jurisdiction(), result, String.class);
+            String caseType = getValue(joinPoint, logAudit.caseType(), result, String.class);
 
             AuditContextHolder.setAuditContext(AuditContext.auditContextWith()
                                                    .auditOperationType(logAudit.operationType())
-                                                   .jurisdiction(logAudit.jurisdiction())
-                                                   .caseType(logAudit.caseType())
+                                                   .jurisdiction(jurisdiction)
+                                                   .caseType(caseType)
                                                    .documentIds(combineStringAndList(documentIds, documentId))
                                                    .caseId(caseId)
                                                    .build());
