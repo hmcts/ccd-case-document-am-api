@@ -132,7 +132,9 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.UPLOAD_DOCUMENTS,
                 SERVICE_NAME_XUI_WEBAPP,
                 null,
-                null));
+                null,
+                JURISDICTION_ID_VALUE,
+                CASE_TYPE_ID_VALUE));
     }
 
     @Test
@@ -214,6 +216,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.UPLOAD_DOCUMENTS,
                 SERVICE_NAME_XUI_WEBAPP,
                 null,
+                null,
+                null,
                 null));
     }
 
@@ -235,6 +239,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
                 SERVICE_NAME_XUI_WEBAPP,
                 List.of(DOCUMENT_ID.toString()),
+                null,
+                null,
                 null));
     }
 
@@ -252,6 +258,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
                 SERVICE_NAME_CCD_GW,
                 List.of(DOCUMENT_ID.toString()),
+                null,
+                null,
                 null));
     }
 
@@ -264,6 +272,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
                 SERVICE_NAME_XUI_WEBAPP,
                 List.of(INVALID_DOCUMENT_ID),
+                null,
+                null,
                 null));
     }
 
@@ -282,6 +292,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
                 SERVICE_NAME_XUI_WEBAPP,
                 List.of(DOCUMENT_ID.toString()),
+                null,
+                null,
                 null));
     }
 
@@ -294,6 +306,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
                 SERVICE_NAME_XUI_WEBAPP,
                 List.of(INVALID_DOCUMENT_ID),
+                null,
+                null,
                 null));
     }
 
@@ -321,6 +335,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
                 SERVICE_NAME_CCD_GW,
                 List.of(DOCUMENT_ID.toString()),
+                null,
+                null,
                 null));
     }
 
@@ -337,6 +353,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
                 SERVICE_NAME_XUI_WEBAPP,
                 List.of(INVALID_DOCUMENT_ID),
+                null,
+                null,
                 null));
     }
 
@@ -356,6 +374,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
                 SERVICE_NAME_XUI_WEBAPP,
                 List.of(DOCUMENT_ID.toString()),
+                null,
+                null,
                 null));
     }
 
@@ -377,6 +397,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
                 SERVICE_NAME_XUI_WEBAPP,
                 List.of(DOCUMENT_ID.toString()),
+                null,
+                null,
                 null));
     }
 
@@ -413,7 +435,9 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
                 SERVICE_NAME_CCD_DATA,
                 List.of(DOCUMENT_ID.toString()),
-                body.getCaseId()
+                body.getCaseId(),
+                null,
+                null
             ));
     }
 
@@ -468,7 +492,9 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
                 SERVICE_NAME_CCD_DATA,
                 List.of(DOCUMENT_ID_FROM_LINK),
-                body.getCaseId()
+                body.getCaseId(),
+                null,
+                null
             ));
     }
 
@@ -508,7 +534,9 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
                 SERVICE_NAME_CCD_DATA,
                 List.of(DOCUMENT_ID.toString()),
-                body.getCaseId()
+                body.getCaseId(),
+                null,
+                null
             ));
     }
 
@@ -542,7 +570,9 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
                 SERVICE_NAME_CCD_DATA,
                 documentIds,
-                body.getCaseId()));
+                body.getCaseId(),
+                null,
+                null));
     }
 
     @Test
@@ -583,6 +613,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.UPLOAD_DOCUMENTS,
                 SERVICE_NAME_XUI_WEBAPP,
                 null,
+                null,
+                null,
                 null));
     }
 
@@ -602,6 +634,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
                 SERVICE_NAME_XUI_WEBAPP,
                 documentIds,
+                null,
+                null,
                 null));
     }
 
@@ -614,6 +648,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
                 SERVICE_NAME_XUI_WEBAPP,
                 List.of(INVALID_DOCUMENT_ID),
+                null,
+                null,
                 null));
     }
 
@@ -632,6 +668,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
                 SERVICE_NAME_XUI_WEBAPP,
                 List.of(DOCUMENT_ID.toString()),
+                null,
+                null,
                 null));
     }
 
@@ -661,6 +699,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
                 SERVICE_NAME_CCD_GW,
                 List.of(random.toString()),
+                null,
+                null,
                 null));
     }
 
@@ -673,6 +713,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.GENERATE_HASH_CODE,
                 SERVICE_NAME_XUI_WEBAPP,
                 List.of(INVALID_DOCUMENT_ID),
+                null,
+                null,
                 null));
     }
 
