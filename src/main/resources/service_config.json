@@ -42,10 +42,10 @@
         "jurisdictionId": "PROBATE",
       "permissions": [
         "CREATE",
-        "READ",        
+        "READ",
         "DELETE"
       ]
-    },                     
+    },
     {
       "id": "ccd_data",
       "caseTypeId": ["*"],
@@ -70,6 +70,24 @@
       "caseTypeId": ["*"],
       "jurisdictionId": "*",
       "permissions": [
+        "READ"
+      ]
+    },
+    {
+      "id": "fprl-dgs-api",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "PRIVATELAW",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
+    },
+    {
+      "id": "dg_docassembly_api",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE",
         "READ"
       ]
     }
