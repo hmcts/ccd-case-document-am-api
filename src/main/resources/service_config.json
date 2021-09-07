@@ -90,6 +90,17 @@
         "CREATE",
         "READ"
       ]
+    },
+    {
+      "id": "claim-store-api",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
     }
   ]
 }

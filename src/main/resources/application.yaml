@@ -67,7 +67,7 @@ idam:
     totp_secret: ${CASE_DOCUMENT_AM_API_S2S_SECRET:CNTOE7D2NX6XHBKT}
     url: ${S2S_URL:http://localhost:4502}
   s2s-authorised:
-    services: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor,em_npa_app,fprl-dgs-api,dg_docassembly_api}
+    services: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor,em_npa_app,fprl-dgs-api,dg_docassembly_api,claim-store-api}
 oidc:
   issuer: ${OIDC_ISSUER:http://fr-am:8080/openam/oauth2/hmcts}
 
