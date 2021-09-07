@@ -25,12 +25,14 @@
     <cve>CVE-2021-33037</cve>
   </suppress>
 
-  <suppress until="2021-09-25">
-		<notes>A vulnerability in all versions of Nim-lang allows unauthenticated attackers to write files to 
-		arbitrary directories via a crafted zip file with dot-slash characters included in the name of the 
-		crafted file
-		</notes>
-		<cve>CVE-2020-23171</cve>
+	<suppress until="2021-09-25">
+    <notes>
+			Declared as False positive on library com.nimbusds:lang-tag #3594 
+			https://github.com/jeremylong/DependencyCheck/issues/3594
+			CVE-2020-23171 Reference https://tools.hmcts.net/jira/browse/CCD-1872
+    </notes>
+    <packageUrl regex="true">^pkg:maven/com\.nimbusds/lang\-tag@.*$</packageUrl>
+    <cpe>cpe:/a:nim-lang:nim-lang</cpe>
 	</suppress>
 
 </suppressions>
