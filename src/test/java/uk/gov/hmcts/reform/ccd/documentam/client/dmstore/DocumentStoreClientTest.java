@@ -318,4 +318,39 @@ class DocumentStoreClientTest implements TestFixture {
             .isNotNull();
     }
 
+    @Test
+    void testShouldSuccessfullyUploadEmptyDocument() {
+        final Document document = Document.builder()
+            .size(0L)
+            .mimeType(MIME_TYPE)
+            .originalDocumentName(ORIGINAL_DOCUMENT_NAME)
+            .classification(Classification.PUBLIC)
+            .links(TestFixture.getLinks())
+            .build();
+
+        final DmUploadResponse dmUploadResponse = DmUploadResponse.builder()
+            .embedded(DmUploadResponse.Embedded.builder().documents(List.of(document)).build())
+            .build();
+
+        doReturn(1).when(applicationParams).getDocumentTtlInDays();
+        doReturn(dmUploadResponse)
+            .when(restTemplate).postForObject(anyString(), any(HttpEntity.class), eq(DmUploadResponse.class));
+
+        final DocumentUploadRequest uploadRequest = new DocumentUploadRequest(
+            List.of(new MockMultipartFile("afile", "".getBytes())),
+            Classification.PUBLIC.name(),
+            CASE_TYPE_ID_VALUE,
+            JURISDICTION_ID_VALUE
+        );
+
+        final DmUploadResponse response = underTest.uploadDocuments(uploadRequest);
+
+        assertThat(response)
+            .isNotNull()
+            .satisfies(entity -> {
+                assertThat(entity.getEmbedded().getDocuments().size()).isEqualTo(1);
+                assertThat(entity.getEmbedded().getDocuments().get(0)).isEqualTo(document);
+            });;
+    }
+
 }
