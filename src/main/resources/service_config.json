@@ -94,12 +94,10 @@
     {
       "id": "claim-store-api",
       "caseTypeId": ["*"],
-      "jurisdictionId": "*",
+      "jurisdictionId": "CMC",
       "permissions": [
         "CREATE",
-        "READ",
-        "UPDATE",
-        "DELETE"
+        "READ"
       ]
     }
   ]
