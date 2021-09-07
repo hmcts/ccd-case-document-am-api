@@ -175,7 +175,9 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 AuditOperationType.UPLOAD_DOCUMENTS,
                 SERVICE_NAME_XUI_WEBAPP,
                 null,
-                null));
+                null,
+                JURISDICTION_ID_VALUE,
+                CASE_TYPE_ID_VALUE));
     }
 
     @ParameterizedTest
