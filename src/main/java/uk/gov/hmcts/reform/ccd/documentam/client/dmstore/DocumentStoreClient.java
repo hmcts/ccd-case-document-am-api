@@ -145,9 +145,7 @@ public class DocumentStoreClient {
 
         documentUploadRequest.getFiles()
             .forEach(file -> {
-                if (!file.isEmpty()) {
-                    bodyMap.add(Constants.FILES, file.getResource());
-                }
+                bodyMap.add(Constants.FILES, file.getResource());
             });
 
         HttpHeaders headers = new HttpHeaders();
