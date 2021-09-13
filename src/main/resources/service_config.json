@@ -92,7 +92,7 @@
       ]
     },
     {
-      "id": "claim-store-api",
+      "id": "cmc_claim_store",
       "caseTypeId": ["*"],
       "jurisdictionId": "CMC",
       "permissions": [
