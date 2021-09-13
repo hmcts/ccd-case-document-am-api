@@ -81,6 +81,15 @@
         "CREATE",
         "READ"
       ]
+    },
+    {
+      "id": "dg_docassembly_api",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
     }
   ]
 }
