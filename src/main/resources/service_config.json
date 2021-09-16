@@ -90,6 +90,15 @@
         "CREATE",
         "READ"
       ]
+    },
+    {
+      "id": "cmc_claim_store",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "CMC",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
     }
   ]
 }
