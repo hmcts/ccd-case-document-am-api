@@ -38,6 +38,7 @@ def versions = [
   springfoxSwagger   : '3.0.0',
   restAssured        : '4.3.1',
   cucumber           : '5.5.0',
+  tomcatEmbedded     : '9.0.50',
 ]
 
 pmd {
@@ -45,7 +46,7 @@ pmd {
   sourceSets = []
 }
 ext['spring-framework.version'] = '5.3.7'
-ext['spring-security.version'] = '5.4.5'
+ext['spring-security.version'] = '5.4.7'
 
 
 group = 'uk.gov.hmcts.reform.ccd.documentam'
@@ -289,6 +290,14 @@ dependencies {
 
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
 
+  // CVE-2021-25122
+  implementation "org.apache.tomcat.embed:tomcat-embed-core:${versions.tomcatEmbedded}"
+  implementation "org.apache.tomcat.embed:tomcat-embed-el:${versions.tomcatEmbedded}"
+  implementation "org.apache.tomcat.embed:tomcat-embed-websocket:${versions.tomcatEmbedded}"
+
+  // CVE-2021-28170
+  implementation group: 'org.glassfish', name: 'jakarta.el', version: '4.0.1'
+
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: versions.junit
   testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: versions.junit
@@ -330,13 +339,6 @@ dependencyManagement {
 
     // Versions prior to 30.0 vulnerable to CVE-2020-8908
     dependency 'com.google.guava:guava:30.1-jre'
-
-    // CVE-2021-25122
-    dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.50') {
-      entry 'tomcat-embed-core'
-      entry 'tomcat-embed-el'
-      entry 'tomcat-embed-websocket'
-    }
 
     dependencySet(group: 'org.codehaus.groovy', version: '3.0.7') {
       entry 'groovy'
