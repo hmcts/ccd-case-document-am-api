@@ -93,7 +93,7 @@
     },
     {
       "id": "cmc_claim_store",
-      "caseTypeId": ["*"],
+      "caseTypeId": ["MoneyClaimCase"],
       "jurisdictionId": "CMC",
       "permissions": [
         "CREATE",
