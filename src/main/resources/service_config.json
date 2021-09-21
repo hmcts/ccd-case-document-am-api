@@ -97,8 +97,7 @@
       "jurisdictionId": "*",
       "permissions": [
         "CREATE",
-        "READ",
-        "UPDATE"
+        "READ"
       ]
     },
     {
@@ -107,8 +106,7 @@
       "jurisdictionId": "*",
       "permissions": [
         "CREATE",
-        "READ",
-        "UPDATE"
+        "READ"
       ]
     }
   ]
