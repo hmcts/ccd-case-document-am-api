@@ -90,6 +90,24 @@
         "CREATE",
         "READ"
       ]
+    },
+    {
+      "id": "em_stitching_api",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
+    },
+    {
+      "id": "em_ccd_orchestrator",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
     }
   ]
 }
