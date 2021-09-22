@@ -74,8 +74,8 @@
       ]
     },
     {
-      "id": "fprl-dgs-api",
-      "caseTypeId": ["*"],
+      "id": "fprl_dgs_api",
+      "caseTypeId": ["C100"],
       "jurisdictionId": "PRIVATELAW",
       "permissions": [
         "CREATE",
