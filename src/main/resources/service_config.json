@@ -112,7 +112,7 @@
     {
       "id": "cmc_claim_store",
       "caseTypeId": ["*"],
-      "jurisdictionId": "CMC",
+      "jurisdictionId": "*",
       "permissions": [
         "CREATE",
         "READ"
