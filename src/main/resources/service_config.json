@@ -120,7 +120,7 @@
     },
     {
       "id": "civil",
-      "caseTypeId": ["*"],
+      "caseTypeId": ["CIVIL"],
       "jurisdictionId": "CIVIL",
       "permissions": [
         "CREATE",
