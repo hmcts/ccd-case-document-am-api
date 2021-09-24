@@ -119,7 +119,7 @@
       ]
     },
     {
-      "id": "civil",
+      "id": "civil_service",
       "caseTypeId": ["CIVIL"],
       "jurisdictionId": "CIVIL",
       "permissions": [
