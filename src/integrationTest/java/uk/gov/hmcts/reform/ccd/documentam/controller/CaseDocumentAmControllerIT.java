@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -67,6 +68,8 @@ import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubP
 public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture {
 
     private static final String DOCUMENT_ID_FROM_LINK = "80e9471e-0f67-42ef-8739-170aa1942363";
+    private static final String BINARY = "/binary";
+    private static final String CASE_ID_IS_NOT_VALID_ERROR_MESSAGE = "Case ID is not valid";
 
     @Value("${idam.s2s-auth.totp_secret}")
     protected String salt;
@@ -74,12 +77,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     @Autowired
     private MockMvc mockMvc;
 
-    public static final String RESPONSE_RESULT_KEY = "Result";
-    public static final String RESPONSE_STATUS_KEY = "status";
-    public static final String RESPONSE_ERROR_KEY = "error";
+    private static final String RESPONSE_RESULT_KEY = "Result";
+    private static final String RESPONSE_STATUS_KEY = "status";
 
-    public static final String SUCCESS = "Success";
-    public static final int ERROR_403 = 403;
+    private static final String SUCCESS = "Success";
+    private static final int ERROR_403 = 403;
     public static final String PATCH_ERROR_DESCRIPTION_BAD_REQUEST = "Document metadata exists for %s but the "
         + "case type is not a moving case type: %s";
     private static final String MAIN_URL = "/cases/documents";
@@ -182,7 +184,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     @ParameterizedTest
     @MethodSource("provideDocumentUploadParameters")
-    public void testShouldRaiseExceptionWhenUploadingDocumentsWithInvalidValues(
+    void testShouldRaiseExceptionWhenUploadingDocumentsWithInvalidValues(
         final String fileContent,
         final String classification,
         final String caseTypeId,
@@ -247,6 +249,66 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     }
 
     @Test
+    void shouldSuccessfullyGetDocumentByDocumentIdNoCaseIdTTLInFuture() throws Exception {
+        final Document document = buildDocument(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)));
+
+        stubDocumentUrlWithReadPermissions();
+        stubGetDocumentMetaData(document);
+
+        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID)
+                .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath(META_DATA_JSON_EXPRESSION + METADATA_CASE_TYPE_ID, is(CASE_TYPE_ID_VALUE)))
+                .andExpect(jsonPath(META_DATA_JSON_EXPRESSION + METADATA_JURISDICTION_ID, is(JURISDICTION_ID_VALUE)))
+                .andExpect(jsonPath("$._links.self.href", is(SELF_LINK)))
+                .andExpect(hasGeneratedLogAudit(
+                        AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
+                        SERVICE_NAME_XUI_WEBAPP,
+                        List.of(DOCUMENT_ID.toString()),
+                        null,
+                        null,
+                        null));
+    }
+
+    @Test
+    void shouldReturnBadRequestGetDocumentByDocumentIdNoCaseIdTTLIsNull() throws Exception {
+        final Document document = buildDocument(null);
+
+        stubDocumentUrlWithReadPermissions();
+        stubGetDocumentMetaData(document);
+
+        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID)
+                .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+                .andExpect(status().isBadRequest())
+                .andExpect(hasGeneratedLogAudit(
+                        AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
+                        SERVICE_NAME_XUI_WEBAPP,
+                        List.of(DOCUMENT_ID.toString()),
+                        null,
+                        null,
+                        null));
+    }
+
+    @Test
+    void shouldReturnBadRequestGetDocumentByDocumentIdNoCaseIdTTLInPast() throws Exception {
+        final Document document = buildDocument(Date.from(Instant.now().minus(1, ChronoUnit.HOURS)));
+
+        stubDocumentUrlWithReadPermissions();
+        stubGetDocumentMetaData(document);
+
+        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID)
+                .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+                .andExpect(status().isBadRequest())
+                .andExpect(hasGeneratedLogAudit(
+                        AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
+                        SERVICE_NAME_XUI_WEBAPP,
+                        List.of(DOCUMENT_ID.toString()),
+                        null,
+                        null,
+                        null));
+    }
+
+    @Test
     void shouldSuccessfullyDeleteDocumentByDocumentId() throws Exception {
         final Document document = buildDocument();
 
@@ -287,7 +349,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         stubGetDocumentMetaData(document);
         stubDocumentBinaryContent();
 
-        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + "/binary")
+        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + BINARY)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isOk())
             .andExpect(hasGeneratedLogAudit(
@@ -300,8 +362,68 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     }
 
     @Test
+    void shouldSuccessfullyGetDocumentBinaryContentNoCaseIdTTLInFuture() throws Exception {
+        final Document document = buildDocument(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)));
+
+        stubDocumentUrlWithReadPermissions();
+        stubGetDocumentMetaData(document);
+        stubDocumentBinaryContent();
+
+        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + BINARY)
+                .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+                .andExpect(status().isOk())
+                .andExpect(hasGeneratedLogAudit(
+                        AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
+                        SERVICE_NAME_XUI_WEBAPP,
+                        List.of(DOCUMENT_ID.toString()),
+                        null,
+                        null,
+                        null));
+    }
+
+    @Test
+    void shouldSuccessfullyGetDocumentBinaryContentNoCaseIdTTLInPast() throws Exception {
+        final Document document = buildDocument(Date.from(Instant.now().minus(1, ChronoUnit.HOURS)));
+
+        stubDocumentUrlWithReadPermissions();
+        stubGetDocumentMetaData(document);
+        stubDocumentBinaryContent();
+
+        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + BINARY)
+                .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+                .andExpect(status().isBadRequest())
+                .andExpect(hasGeneratedLogAudit(
+                        AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
+                        SERVICE_NAME_XUI_WEBAPP,
+                        List.of(DOCUMENT_ID.toString()),
+                        null,
+                        null,
+                        null));
+    }
+
+    @Test
+    void shouldSuccessfullyGetDocumentBinaryContentNoCaseIdTTLIsNull() throws Exception {
+        final Document document = buildDocument(null);
+
+        stubDocumentUrlWithReadPermissions();
+        stubGetDocumentMetaData(document);
+        stubDocumentBinaryContent();
+
+        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + BINARY)
+                .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+                .andExpect(status().isBadRequest())
+                .andExpect(hasGeneratedLogAudit(
+                        AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
+                        SERVICE_NAME_XUI_WEBAPP,
+                        List.of(DOCUMENT_ID.toString()),
+                        null,
+                        null,
+                        null));
+    }
+
+    @Test
     void testShouldRaiseBadRequestWhenGetDocumentBinaryWithInvalidUUID() throws Exception {
-        mockMvc.perform(get(MAIN_URL + "/" + INVALID_DOCUMENT_ID + "/binary")
+        mockMvc.perform(get(MAIN_URL + "/" + INVALID_DOCUMENT_ID + BINARY)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isBadRequest())
             .andExpect(hasGeneratedLogAudit(
@@ -663,7 +785,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         stubGetDocumentMetaData(document);
         stubDocumentBinaryContent();
 
-        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + "/binary")
+        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + BINARY)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isForbidden())
             .andExpect(hasGeneratedLogAudit(
@@ -751,6 +873,22 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
             .build();
     }
 
+    private Document buildDocument(final Date time) {
+        final Map<String, String> metadata = Map.of(
+                METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE,
+                METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE);
+
+        return Document.builder()
+                .originalDocumentName(ORIGINAL_DOCUMENT_NAME)
+                .size(1000L)
+                .classification(Classification.PUBLIC)
+                .metadata(metadata)
+                .createdOn(time)
+                .ttl(time)
+                .links(TestFixture.getLinks())
+                .build();
+    }
+
     @SuppressWarnings("unused")
     private static Stream<Arguments> provideDocumentUploadParameters() {
         final String fileContent = "Some content";
@@ -828,37 +966,37 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 "",
                 CASE_TYPE_ID_VALUE,
                 JURISDICTION_ID_VALUE,
-                "Case ID is not valid"
+                    CASE_ID_IS_NOT_VALID_ERROR_MESSAGE
             ),
             Arguments.of(
                 "    ",
                 CASE_TYPE_ID_VALUE,
                 JURISDICTION_ID_VALUE,
-                "Case ID is not valid"
+                    CASE_ID_IS_NOT_VALID_ERROR_MESSAGE
             ),
             Arguments.of(
                 "111112222233333",
                 CASE_TYPE_ID_VALUE,
                 JURISDICTION_ID_VALUE,
-                "Case ID is not valid"
+                    CASE_ID_IS_NOT_VALID_ERROR_MESSAGE
             ),
             Arguments.of(
                 "11111222223333344",
                 CASE_TYPE_ID_VALUE,
                 JURISDICTION_ID_VALUE,
-                "Case ID is not valid"
+                    CASE_ID_IS_NOT_VALID_ERROR_MESSAGE
             ),
             Arguments.of(
                 "A111112222233333",
                 CASE_TYPE_ID_VALUE,
                 JURISDICTION_ID_VALUE,
-                "Case ID is not valid"
+                    CASE_ID_IS_NOT_VALID_ERROR_MESSAGE
             ),
             Arguments.of(
                 "1111$%2222333334",
                 CASE_TYPE_ID_VALUE,
                 JURISDICTION_ID_VALUE,
-                "Case ID is not valid"
+                    CASE_ID_IS_NOT_VALID_ERROR_MESSAGE
             ),
             Arguments.of(
                 CASE_ID_VALUE,

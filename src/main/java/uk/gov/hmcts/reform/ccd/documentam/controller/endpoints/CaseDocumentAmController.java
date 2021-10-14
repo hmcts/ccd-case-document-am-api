@@ -38,6 +38,8 @@ import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 
 import javax.validation.Valid;
+import java.time.Instant;
+import java.util.Date;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.APPLICATION_JSON;
@@ -109,15 +111,22 @@ public class CaseDocumentAmController {
             documentId.toString()
         );
 
-        documentManagementService.checkUserPermission(
-            document.getCaseId(),
-            documentId,
-            Permission.READ,
-            USER_PERMISSION_ERROR,
-            documentId.toString()
-        );
+        if (document.getCaseId() != null) {
+            documentManagementService.checkUserPermission(
+                    document.getCaseId(),
+                    documentId,
+                    Permission.READ,
+                    USER_PERMISSION_ERROR,
+                    documentId.toString());
 
-        return ResponseEntity.ok(document);
+            return ResponseEntity.ok(document);
+        }
+
+        return ttlIsFutureDate(document.getTtl()) ? ResponseEntity.ok(document) :  ResponseEntity.badRequest().build();
+    }
+
+    private boolean ttlIsFutureDate(Date ttl) {
+        return ttl != null && ttl.after(Date.from(Instant.now()));
     }
 
     @GetMapping(
@@ -160,13 +169,19 @@ public class CaseDocumentAmController {
                                                          SERVICE_PERMISSION_ERROR,
                                                          documentId.toString());
 
-        documentManagementService.checkUserPermission(document.getCaseId(),
-                                                      documentId,
-                                                      Permission.READ,
-                                                      USER_PERMISSION_ERROR,
-                                                      documentId.toString());
+        if (document.getCaseId() != null) {
+            documentManagementService.checkUserPermission(document.getCaseId(),
+                    documentId,
+                    Permission.READ,
+                    USER_PERMISSION_ERROR,
+                    documentId.toString());
 
-        return documentManagementService.getDocumentBinaryContent(documentId);
+            return documentManagementService.getDocumentBinaryContent(documentId);
+        }
+
+        return ttlIsFutureDate(document.getTtl())
+                ? documentManagementService.getDocumentBinaryContent(documentId)
+                : ResponseEntity.badRequest().build();
     }
 
     @PostMapping(

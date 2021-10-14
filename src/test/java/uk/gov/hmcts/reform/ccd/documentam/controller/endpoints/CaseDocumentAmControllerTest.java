@@ -13,6 +13,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
+import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
+import uk.gov.hmcts.reform.ccd.documentam.client.datastore.CaseDataStoreClient;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
@@ -28,12 +30,17 @@ import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
-import uk.gov.hmcts.reform.ccd.documentam.client.datastore.CaseDataStoreClient;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 
+import java.sql.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -48,13 +55,14 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.USER_PERMISSION_ERROR;
 
-public class CaseDocumentAmControllerTest implements TestFixture {
+class CaseDocumentAmControllerTest implements TestFixture {
     private static final String VALID_RESPONSE = "Valid Response from API";
     private static final String RESPONSE_CODE = "Status code is OK";
     private static final String NO_CONTENT_RESPONSE_CODE = "Status code is No Content";
@@ -64,6 +72,21 @@ public class CaseDocumentAmControllerTest implements TestFixture {
     private static final Document DOCUMENT = Document.builder()
         .originalDocumentName("test.png")
         .build();
+
+    private static final Document DOCUMENT_WITH_FUTURE_TTL = Document.builder()
+            .originalDocumentName("test.png")
+            .ttl(Date.from(LocalDateTime.now().plus(6, ChronoUnit.HOURS).toInstant(ZoneOffset.UTC)))
+            .build();
+
+    private static final Document DOCUMENT_WITH_PAST_TTL = Document.builder()
+            .originalDocumentName("test.png")
+            .ttl(Date.from(LocalDateTime.now().minus(6, ChronoUnit.HOURS).toInstant(ZoneOffset.UTC)))
+            .build();
+
+    private static final Document DOCUMENT_WITH_CASE_ID = Document.builder()
+            .originalDocumentName("test.png")
+            .metadata(Map.of(Constants.METADATA_CASE_ID, CASE_ID_VALUE))
+            .build();
 
     private CaseDocumentAmController testee;
 
@@ -81,22 +104,22 @@ public class CaseDocumentAmControllerTest implements TestFixture {
         MockitoAnnotations.openMocks(this);
         testee = new CaseDocumentAmController(documentManagementService, securityUtils);
         when(securityUtils.getServiceNameFromS2SToken(TEST_S2S_TOKEN)).thenReturn(SERVICE_NAME_XUI_WEBAPP);
-        doReturn(DOCUMENT).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
+        doReturn(DOCUMENT_WITH_FUTURE_TTL).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
     }
 
     @Test
     void shouldGetValidMetaDataResponse() {
         doNothing().when(documentManagementService)
             .checkUserPermission(
-                DOCUMENT.getCaseId(),
+                DOCUMENT_WITH_FUTURE_TTL.getCaseId(),
                 MATCHED_DOCUMENT_ID,
                 Permission.READ,
                 USER_PERMISSION_ERROR,
                 MATCHED_DOCUMENT_ID.toString());
         doNothing().when(documentManagementService)
             .checkServicePermission(
-                DOCUMENT.getCaseTypeId(),
-                DOCUMENT.getJurisdictionId(),
+                DOCUMENT_WITH_FUTURE_TTL.getCaseTypeId(),
+                DOCUMENT_WITH_FUTURE_TTL.getJurisdictionId(),
                 SERVICE_NAME_XUI_WEBAPP,
                 Permission.READ,
                 SERVICE_PERMISSION_ERROR,
@@ -108,6 +131,118 @@ public class CaseDocumentAmControllerTest implements TestFixture {
             () -> assertNotNull(response, "Valid Response from API"),
             () -> assertNotNull(response.getBody(), "Valid response body"),
             () -> assertEquals(HttpStatus.OK, response.getStatusCode(), "Status code is OK")
+        );
+    }
+
+    @Test
+    void shouldGetValidMetaDataResponseWithValidCaseId() {
+
+        doReturn(DOCUMENT_WITH_CASE_ID).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
+        doNothing().when(documentManagementService)
+                .checkUserPermission(
+                        DOCUMENT_WITH_CASE_ID.getCaseId(),
+                        MATCHED_DOCUMENT_ID,
+                        Permission.READ,
+                        USER_PERMISSION_ERROR,
+                        MATCHED_DOCUMENT_ID.toString());
+        doNothing().when(documentManagementService)
+                .checkServicePermission(
+                        DOCUMENT_WITH_CASE_ID.getCaseTypeId(),
+                        DOCUMENT_WITH_CASE_ID.getJurisdictionId(),
+                        SERVICE_NAME_XUI_WEBAPP,
+                        Permission.READ,
+                        SERVICE_PERMISSION_ERROR,
+                        MATCHED_DOCUMENT_ID.toString());
+
+        final ResponseEntity<Document> response = testee.getDocumentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN);
+
+        assertAll(
+            () -> assertNotNull(response, "Valid Response from API"),
+            () -> assertNotNull(response.getBody(), "Valid response body"),
+            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), "Status code is OK")
+        );
+    }
+
+    @Test
+    void shouldGetValidMetaDataResponseWithoutCallingDatastoreWhenDocumentMetadataHasTTLInFutureButNoCaseId() {
+        doNothing().when(documentManagementService)
+                .checkServicePermission(
+                        DOCUMENT_WITH_FUTURE_TTL.getCaseTypeId(),
+                        DOCUMENT_WITH_FUTURE_TTL.getJurisdictionId(),
+                        SERVICE_NAME_XUI_WEBAPP,
+                        Permission.READ,
+                        SERVICE_PERMISSION_ERROR,
+                        MATCHED_DOCUMENT_ID.toString());
+
+
+        final ResponseEntity<Document> response = testee.getDocumentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN);
+
+        assertAll(
+            () -> assertNotNull(response, "Valid Response from API"),
+            () -> assertNotNull(response.getBody(), "Valid response body"),
+            () -> assertEquals(HttpStatus.OK, response.getStatusCode(), "Status code is OK"),
+            () -> verify(documentManagementService, never())
+                    .checkUserPermission(
+                        DOCUMENT_WITH_FUTURE_TTL.getCaseId(),
+                        MATCHED_DOCUMENT_ID,
+                        Permission.READ,
+                        USER_PERMISSION_ERROR,
+                        MATCHED_DOCUMENT_ID.toString())
+
+        );
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenDocumentMetadataHasTTLInPastButNoCaseId() {
+        doNothing().when(documentManagementService)
+                .checkServicePermission(
+                        DOCUMENT_WITH_FUTURE_TTL.getCaseTypeId(),
+                        DOCUMENT_WITH_FUTURE_TTL.getJurisdictionId(),
+                        SERVICE_NAME_XUI_WEBAPP,
+                        Permission.READ,
+                        SERVICE_PERMISSION_ERROR,
+                        MATCHED_DOCUMENT_ID.toString());
+
+
+        doReturn(DOCUMENT_WITH_PAST_TTL).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
+        final ResponseEntity<Document> response = testee.getDocumentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN);
+
+        assertAll(
+            () -> assertNotNull(response, "Valid Response from API"),
+            () -> assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode(), "Status code is 400"),
+            () -> verify(documentManagementService, never()).checkUserPermission(
+                    DOCUMENT_WITH_FUTURE_TTL.getCaseId(),
+                    MATCHED_DOCUMENT_ID,
+                    Permission.READ,
+                    USER_PERMISSION_ERROR,
+                    MATCHED_DOCUMENT_ID.toString())
+        );
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenDocumentMetadataHasNullTTL() {
+        doNothing().when(documentManagementService)
+                .checkServicePermission(
+                        DOCUMENT_WITH_FUTURE_TTL.getCaseTypeId(),
+                        DOCUMENT_WITH_FUTURE_TTL.getJurisdictionId(),
+                        SERVICE_NAME_XUI_WEBAPP,
+                        Permission.READ,
+                        SERVICE_PERMISSION_ERROR,
+                        MATCHED_DOCUMENT_ID.toString());
+
+
+        doReturn(DOCUMENT).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
+        final ResponseEntity<Document> response = testee.getDocumentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN);
+
+        assertAll(
+            () -> assertNotNull(response, "Valid Response from API"),
+            () -> assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode(), "Status code is 400"),
+            () -> verify(documentManagementService, never()).checkUserPermission(
+                    DOCUMENT_WITH_FUTURE_TTL.getCaseId(),
+                    MATCHED_DOCUMENT_ID,
+                    Permission.READ,
+                    USER_PERMISSION_ERROR,
+                    MATCHED_DOCUMENT_ID.toString())
         );
     }
 
@@ -134,15 +269,26 @@ public class CaseDocumentAmControllerTest implements TestFixture {
 
     @Test
     void shouldNotGetValidMetaDataResponseWhenUserNotAuthorised() {
+
+        Map<String, String> metaData = new HashMap<>();
+        metaData.put(Constants.METADATA_CASE_ID, CASE_ID_VALUE);
+
+        final Document documentWithCaseId = Document.builder()
+                .originalDocumentName("test.png")
+                .metadata(metaData)
+                .build();
+
+        doReturn(documentWithCaseId).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
+
         doThrow(ForbiddenException.class).when(documentManagementService)
-            .checkUserPermission(DOCUMENT.getCaseId(),
+            .checkUserPermission(documentWithCaseId.getCaseId(),
                                  MATCHED_DOCUMENT_ID,
                                  Permission.READ,
                                  USER_PERMISSION_ERROR,
                                  MATCHED_DOCUMENT_ID.toString());
         doNothing().when(documentManagementService)
-            .checkServicePermission(DOCUMENT.getCaseTypeId(),
-                                    DOCUMENT.getJurisdictionId(),
+            .checkServicePermission(documentWithCaseId.getCaseTypeId(),
+                                    documentWithCaseId.getJurisdictionId(),
                                     SERVICE_NAME_XUI_WEBAPP,
                                     Permission.READ,
                                     SERVICE_PERMISSION_ERROR,
@@ -183,6 +329,125 @@ public class CaseDocumentAmControllerTest implements TestFixture {
     }
 
     @Test
+    void shouldGetDocumentBinaryContentWithValidCaseId() {
+
+        doReturn(DOCUMENT_WITH_CASE_ID).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
+        doNothing().when(documentManagementService)
+                .checkUserPermission(
+                        DOCUMENT_WITH_CASE_ID.getCaseId(),
+                        MATCHED_DOCUMENT_ID,
+                        Permission.READ,
+                        USER_PERMISSION_ERROR,
+                        MATCHED_DOCUMENT_ID.toString());
+        doNothing().when(documentManagementService)
+                .checkServicePermission(
+                        DOCUMENT_WITH_CASE_ID.getCaseTypeId(),
+                        DOCUMENT_WITH_CASE_ID.getJurisdictionId(),
+                        SERVICE_NAME_XUI_WEBAPP,
+                        Permission.READ,
+                        SERVICE_PERMISSION_ERROR,
+                        MATCHED_DOCUMENT_ID.toString());
+        doReturn(setDocumentBinaryContent("OK"))
+                .when(documentManagementService).getDocumentBinaryContent(MATCHED_DOCUMENT_ID);
+
+        final ResponseEntity<ByteArrayResource> response =
+                testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN);
+
+        assertAll(
+            () -> verify(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID),
+            () -> verify(documentManagementService, times(1)).getDocumentBinaryContent(MATCHED_DOCUMENT_ID),
+            () -> assertThat(response.getStatusCode(), is(HttpStatus.OK)),
+            () -> assertNotNull(response.getBody())
+        );
+    }
+
+    @Test
+    void shouldGetValidDocumentBinaryContentWithoutCallingDatastoreWhenDocumentMetadataHasTTLInFutureButNoCaseId() {
+        doNothing().when(documentManagementService)
+                .checkServicePermission(
+                        DOCUMENT_WITH_FUTURE_TTL.getCaseTypeId(),
+                        DOCUMENT_WITH_FUTURE_TTL.getJurisdictionId(),
+                        SERVICE_NAME_XUI_WEBAPP,
+                        Permission.READ,
+                        SERVICE_PERMISSION_ERROR,
+                        MATCHED_DOCUMENT_ID.toString());
+
+        doReturn(setDocumentBinaryContent("OK"))
+                .when(documentManagementService).getDocumentBinaryContent(MATCHED_DOCUMENT_ID);
+        final ResponseEntity<ByteArrayResource> response =
+                testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN);
+
+        assertAll(
+            () -> verify(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID),
+            () -> verify(documentManagementService, times(1)).getDocumentBinaryContent(MATCHED_DOCUMENT_ID),
+            () -> assertThat(response.getStatusCode(), is(HttpStatus.OK)),
+            () -> assertNotNull(response.getBody()),
+            () -> verify(documentManagementService, never()).checkUserPermission(
+                    DOCUMENT_WITH_FUTURE_TTL.getCaseId(),
+                    MATCHED_DOCUMENT_ID,
+                    Permission.READ,
+                    USER_PERMISSION_ERROR,
+                    MATCHED_DOCUMENT_ID.toString())
+        );
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenRetrievingDocumentBinaryContentWhenDocumentMetadataHasTTLInPastButNoCaseId() {
+        doNothing().when(documentManagementService)
+                .checkServicePermission(
+                        DOCUMENT_WITH_FUTURE_TTL.getCaseTypeId(),
+                        DOCUMENT_WITH_FUTURE_TTL.getJurisdictionId(),
+                        SERVICE_NAME_XUI_WEBAPP,
+                        Permission.READ,
+                        SERVICE_PERMISSION_ERROR,
+                        MATCHED_DOCUMENT_ID.toString());
+
+
+        doReturn(DOCUMENT_WITH_PAST_TTL).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
+        final ResponseEntity<ByteArrayResource> response =
+                testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN);
+
+        assertAll(
+            () -> assertNotNull(response, "Valid Response from API"),
+            () -> assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode(), "Status code is 400"),
+            () -> verify(documentManagementService, never()).checkUserPermission(
+                    DOCUMENT_WITH_FUTURE_TTL.getCaseId(),
+                    MATCHED_DOCUMENT_ID,
+                    Permission.READ,
+                    USER_PERMISSION_ERROR,
+                    MATCHED_DOCUMENT_ID.toString())
+
+        );
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenRetrievingDocumentBinaryContentWhenDocumentMetadataHasNullTTL() {
+        doNothing().when(documentManagementService)
+                .checkServicePermission(
+                        DOCUMENT_WITH_FUTURE_TTL.getCaseTypeId(),
+                        DOCUMENT_WITH_FUTURE_TTL.getJurisdictionId(),
+                        SERVICE_NAME_XUI_WEBAPP,
+                        Permission.READ,
+                        SERVICE_PERMISSION_ERROR,
+                        MATCHED_DOCUMENT_ID.toString());
+
+
+        doReturn(DOCUMENT).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
+        final ResponseEntity<Document> response = testee.getDocumentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN);
+
+        assertAll(
+            () -> assertNotNull(response, "Valid Response from API"),
+            () -> assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode(), "Status code is 400"),
+            () -> verify(documentManagementService, never()).checkUserPermission(
+                    DOCUMENT_WITH_FUTURE_TTL.getCaseId(),
+                    MATCHED_DOCUMENT_ID,
+                    Permission.READ,
+                    USER_PERMISSION_ERROR,
+                    MATCHED_DOCUMENT_ID.toString())
+        );
+    }
+
+    @Test
     @DisplayName("should throw 403 forbidden  when the requested document does not have read permission")
     void shouldThrowForbiddenWhenDocumentDoesNotHaveReadPermission() {
         doNothing().when(documentManagementService)
@@ -209,14 +474,14 @@ public class CaseDocumentAmControllerTest implements TestFixture {
                 Permission.READ
             )
         ));
-        doReturn(DOCUMENT).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
+        doReturn(DOCUMENT_WITH_CASE_ID).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
         doReturn(documentPermissions).when(caseDataStoreService)
             .getCaseDocumentMetadata(CASE_ID_VALUE, MATCHED_DOCUMENT_ID);
         doThrow(ForbiddenException.class).when(documentManagementService)
             .getDocumentBinaryContent(MATCHED_DOCUMENT_ID);
         doNothing().when(documentManagementService)
-            .checkServicePermission(DOCUMENT.getCaseTypeId(),
-                                    DOCUMENT.getJurisdictionId(),
+            .checkServicePermission(DOCUMENT_WITH_CASE_ID.getCaseTypeId(),
+                                    DOCUMENT_WITH_CASE_ID.getJurisdictionId(),
                                     SERVICE_NAME_XUI_WEBAPP,
                                     Permission.READ,
                                     SERVICE_PERMISSION_ERROR,
