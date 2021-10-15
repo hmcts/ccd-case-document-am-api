@@ -1,0 +1,22 @@
+{
+  "title": "must return error when no caseID exists and TTL is a past date",
+  "_extends_": "F-001_Test_Base_data",
+  "_guid_": "S-001.14",
+  "s2sClientId": "ccd_gw",
+  "specs": [
+    "contains the metadata for the document uploaded above"
+  ],
+  "request": {
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "AM_400_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body": null
+  }
+}
