@@ -42,10 +42,10 @@
         "jurisdictionId": "PROBATE",
       "permissions": [
         "CREATE",
-        "READ",        
+        "READ",
         "DELETE"
       ]
-    },                     
+    },
     {
       "id": "ccd_data",
       "caseTypeId": ["*"],
@@ -63,6 +63,68 @@
         "READ",
         "UPDATE",
         "DELETE"
+      ]
+    },
+    {
+      "id": "em_npa_app",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "READ"
+      ]
+    },
+    {
+      "id": "fprl_dgs_api",
+      "caseTypeId": ["C100"],
+      "jurisdictionId": "PRIVATELAW",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
+    },
+    {
+      "id": "dg_docassembly_api",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
+    },
+    {
+      "id": "em_stitching_api",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
+    },
+    {
+      "id": "em_ccd_orchestrator",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
+    },
+    {
+      "id": "cmc_claim_store",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "CMC",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
+    },
+    {
+      "id": "civil_service",
+      "caseTypeId": ["CIVIL"],
+      "jurisdictionId": "CIVIL",
+      "permissions": [
+        "CREATE",
+        "READ"
       ]
     }
   ]
