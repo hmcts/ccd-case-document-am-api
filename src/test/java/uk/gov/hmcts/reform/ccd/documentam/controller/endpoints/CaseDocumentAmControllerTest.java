@@ -50,6 +50,8 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -193,7 +195,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
     }
 
     @Test
-    void shouldReturnBadRequestWhenDocumentMetadataHasTTLInPastButNoCaseId() {
+    void shouldThrowForbiddenExceptionWhenGetDocumentByDocumentIdDocumentMetadataHasTTLInPastButNoCaseId() {
         doNothing().when(documentManagementService)
                 .checkServicePermission(
                         DOCUMENT_WITH_FUTURE_TTL.getCaseTypeId(),
@@ -205,11 +207,16 @@ class CaseDocumentAmControllerTest implements TestFixture {
 
 
         doReturn(DOCUMENT_WITH_PAST_TTL).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
-        final ResponseEntity<Document> response = testee.getDocumentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN);
+
+        ForbiddenException thrown = assertThrows(
+            ForbiddenException.class,
+            () -> testee.getDocumentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN),
+            "Failed to throw ForbiddenException"
+        );
 
         assertAll(
-            () -> assertNotNull(response, "Valid Response from API"),
-            () -> assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode(), "Status code is 400"),
+            () -> assertTrue(thrown.getMessage()
+                    .contains("Document " + MATCHED_DOCUMENT_ID + " can not be downloaded as TTL has expired")),
             () -> verify(documentManagementService, never()).checkUserPermission(
                     DOCUMENT_WITH_FUTURE_TTL.getCaseId(),
                     MATCHED_DOCUMENT_ID,
@@ -220,7 +227,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
     }
 
     @Test
-    void shouldReturnBadRequestWhenDocumentMetadataHasNullTTL() {
+    void shouldThrowForbiddenExceptionWhenGetDocumentByDocumentIdDocumentMetadataHasNullTTL() {
         doNothing().when(documentManagementService)
                 .checkServicePermission(
                         DOCUMENT_WITH_FUTURE_TTL.getCaseTypeId(),
@@ -232,17 +239,22 @@ class CaseDocumentAmControllerTest implements TestFixture {
 
 
         doReturn(DOCUMENT).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
-        final ResponseEntity<Document> response = testee.getDocumentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN);
+
+        ForbiddenException thrown = assertThrows(
+            ForbiddenException.class,
+            () -> testee.getDocumentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN),
+            "Failed to throw ForbiddenException"
+        );
 
         assertAll(
-            () -> assertNotNull(response, "Valid Response from API"),
-            () -> assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode(), "Status code is 400"),
+            () -> assertTrue(thrown.getMessage()
+                        .contains("Document " + MATCHED_DOCUMENT_ID + " can not be downloaded as TTL has expired")),
             () -> verify(documentManagementService, never()).checkUserPermission(
-                    DOCUMENT_WITH_FUTURE_TTL.getCaseId(),
-                    MATCHED_DOCUMENT_ID,
-                    Permission.READ,
-                    USER_PERMISSION_ERROR,
-                    MATCHED_DOCUMENT_ID.toString())
+                DOCUMENT_WITH_FUTURE_TTL.getCaseId(),
+                MATCHED_DOCUMENT_ID,
+                Permission.READ,
+                USER_PERMISSION_ERROR,
+                MATCHED_DOCUMENT_ID.toString())
         );
     }
 
@@ -392,7 +404,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
     }
 
     @Test
-    void shouldReturnBadRequestWhenRetrievingDocumentBinaryContentWhenDocumentMetadataHasTTLInPastButNoCaseId() {
+    void shouldThrowForbiddenExceptionWhenRetrievingDocumentBinaryContentWhenDocumentMetadataHasTTLInPastButNoCaseId() {
         doNothing().when(documentManagementService)
                 .checkServicePermission(
                         DOCUMENT_WITH_FUTURE_TTL.getCaseTypeId(),
@@ -404,24 +416,27 @@ class CaseDocumentAmControllerTest implements TestFixture {
 
 
         doReturn(DOCUMENT_WITH_PAST_TTL).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
-        final ResponseEntity<ByteArrayResource> response =
-                testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN);
+
+        ForbiddenException thrown = assertThrows(
+            ForbiddenException.class,
+            () -> testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN),
+            "Failed to throw ForbiddenException"
+        );
 
         assertAll(
-            () -> assertNotNull(response, "Valid Response from API"),
-            () -> assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode(), "Status code is 400"),
+            () -> assertTrue(thrown.getMessage()
+                    .contains("Document " + MATCHED_DOCUMENT_ID + " can not be downloaded as TTL has expired")),
             () -> verify(documentManagementService, never()).checkUserPermission(
                     DOCUMENT_WITH_FUTURE_TTL.getCaseId(),
                     MATCHED_DOCUMENT_ID,
                     Permission.READ,
                     USER_PERMISSION_ERROR,
                     MATCHED_DOCUMENT_ID.toString())
-
         );
     }
 
     @Test
-    void shouldReturnBadRequestWhenRetrievingDocumentBinaryContentWhenDocumentMetadataHasNullTTL() {
+    void shouldThrowForbiddenExceptionWhenRetrievingDocumentBinaryContentWhenDocumentMetadataHasNullTTL() {
         doNothing().when(documentManagementService)
                 .checkServicePermission(
                         DOCUMENT_WITH_FUTURE_TTL.getCaseTypeId(),
@@ -433,11 +448,16 @@ class CaseDocumentAmControllerTest implements TestFixture {
 
 
         doReturn(DOCUMENT).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
-        final ResponseEntity<Document> response = testee.getDocumentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN);
+
+        ForbiddenException thrown = assertThrows(
+            ForbiddenException.class,
+            () -> testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN),
+            "Failed to throw ForbiddenException"
+        );
 
         assertAll(
-            () -> assertNotNull(response, "Valid Response from API"),
-            () -> assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode(), "Status code is 400"),
+            () -> assertTrue(thrown.getMessage()
+                    .contains("Document " + MATCHED_DOCUMENT_ID + " can not be downloaded as TTL has expired")),
             () -> verify(documentManagementService, never()).checkUserPermission(
                     DOCUMENT_WITH_FUTURE_TTL.getCaseId(),
                     MATCHED_DOCUMENT_ID,

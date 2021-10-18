@@ -55,13 +55,13 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.JURISDICTIO
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CASE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_JURISDICTION_ID;
-import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubNotFoundDeleteDocumentByDocumentId;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDeleteDocumentByDocumentId;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDocumentBinaryContent;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDocumentManagementUploadDocument;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDocumentUrlNoPermissions;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDocumentUrlWithReadPermissions;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubGetDocumentMetaData;
+import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubNotFoundDeleteDocumentByDocumentId;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubPatchDocument;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubPatchDocumentMetaData;
 
@@ -227,7 +227,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     @Test
     void shouldSuccessfullyGetDocumentByDocumentId() throws Exception {
-        final Document document = buildDocument();
+        final Document document = buildDocumentWithoutCaseId();
 
         stubDocumentUrlWithReadPermissions();
         stubGetDocumentMetaData(document);
@@ -250,7 +250,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     @Test
     void shouldSuccessfullyGetDocumentByDocumentIdNoCaseIdTTLInFuture() throws Exception {
-        final Document document = buildDocument(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)));
+        final Document document = buildDocumentWithoutCaseId(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)));
 
         stubDocumentUrlWithReadPermissions();
         stubGetDocumentMetaData(document);
@@ -271,15 +271,19 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     }
 
     @Test
-    void shouldReturnBadRequestGetDocumentByDocumentIdNoCaseIdTTLIsNull() throws Exception {
-        final Document document = buildDocument(null);
+    void shouldErrorForbiddenGetDocumentByDocumentIdNoCaseIdTTLIsNull() throws Exception {
+        final Document document = buildDocumentWithoutCaseId(null);
 
         stubDocumentUrlWithReadPermissions();
         stubGetDocumentMetaData(document);
 
         mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID)
                 .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error",
+                        is("Forbidden: Insufficient permissions: Document "
+                                + DOCUMENT_ID
+                                + " can not be downloaded as TTL has expired")))
                 .andExpect(hasGeneratedLogAudit(
                         AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
                         SERVICE_NAME_XUI_WEBAPP,
@@ -290,15 +294,19 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     }
 
     @Test
-    void shouldReturnBadRequestGetDocumentByDocumentIdNoCaseIdTTLInPast() throws Exception {
-        final Document document = buildDocument(Date.from(Instant.now().minus(1, ChronoUnit.HOURS)));
+    void shouldErrorForbiddenGetDocumentByDocumentIdNoCaseIdTTLInPast() throws Exception {
+        final Document document = buildDocumentWithoutCaseId(Date.from(Instant.now().minus(1, ChronoUnit.HOURS)));
 
         stubDocumentUrlWithReadPermissions();
         stubGetDocumentMetaData(document);
 
         mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID)
                 .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error",
+                        is("Forbidden: Insufficient permissions: Document "
+                                + DOCUMENT_ID
+                                + " can not be downloaded as TTL has expired")))
                 .andExpect(hasGeneratedLogAudit(
                         AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
                         SERVICE_NAME_XUI_WEBAPP,
@@ -310,7 +318,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     @Test
     void shouldSuccessfullyDeleteDocumentByDocumentId() throws Exception {
-        final Document document = buildDocument();
+        final Document document = buildDocumentWithoutCaseId();
 
         stubGetDocumentMetaData(document);
         stubDeleteDocumentByDocumentId();
@@ -343,7 +351,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     @Test
     void shouldSuccessfullyGetDocumentBinaryContent() throws Exception {
-        final Document document = buildDocument();
+        final Document document = buildDocumentWithoutCaseId();
 
         stubDocumentUrlWithReadPermissions();
         stubGetDocumentMetaData(document);
@@ -363,7 +371,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     @Test
     void shouldSuccessfullyGetDocumentBinaryContentNoCaseIdTTLInFuture() throws Exception {
-        final Document document = buildDocument(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)));
+        final Document document = buildDocumentWithoutCaseId(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)));
 
         stubDocumentUrlWithReadPermissions();
         stubGetDocumentMetaData(document);
@@ -382,8 +390,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     }
 
     @Test
-    void shouldSuccessfullyGetDocumentBinaryContentNoCaseIdTTLInPast() throws Exception {
-        final Document document = buildDocument(Date.from(Instant.now().minus(1, ChronoUnit.HOURS)));
+    void shouldErrorForbiddenGetDocumentBinaryContentNoCaseIdTTLInPast() throws Exception {
+        final Document document = buildDocumentWithoutCaseId(Date.from(Instant.now().minus(1, ChronoUnit.HOURS)));
 
         stubDocumentUrlWithReadPermissions();
         stubGetDocumentMetaData(document);
@@ -391,7 +399,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
         mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + BINARY)
                 .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error",
+                        is("Forbidden: Insufficient permissions: Document "
+                                + DOCUMENT_ID
+                                + " can not be downloaded as TTL has expired")))
                 .andExpect(hasGeneratedLogAudit(
                         AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
                         SERVICE_NAME_XUI_WEBAPP,
@@ -402,8 +414,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     }
 
     @Test
-    void shouldSuccessfullyGetDocumentBinaryContentNoCaseIdTTLIsNull() throws Exception {
-        final Document document = buildDocument(null);
+    void shouldErrorForbiddenGetDocumentBinaryContentNoCaseIdTTLIsNull() throws Exception {
+        final Document document = buildDocumentWithoutCaseId(null);
 
         stubDocumentUrlWithReadPermissions();
         stubGetDocumentMetaData(document);
@@ -411,7 +423,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
         mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + BINARY)
                 .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error",
+                        is("Forbidden: Insufficient permissions: Document "
+                                + DOCUMENT_ID
+                                + " can not be downloaded as TTL has expired")))
                 .andExpect(hasGeneratedLogAudit(
                         AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
                         SERVICE_NAME_XUI_WEBAPP,
@@ -440,7 +456,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.ENGLISH);
         final Date date = formatter.parse("2021-12-30T12:10:10.000");
 
-        final Document document = buildDocument(date, CASE_TYPE_ID_VALUE);
+        final Document document = buildDocumentWithoutCaseId(date, CASE_TYPE_ID_VALUE);
 
         final PatchDocumentResponse patchDocumentResponse = PatchDocumentResponse.builder()
             .ttl(date)
@@ -544,7 +560,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
         Date time = Date.from(Instant.now());
 
-        final Document document = buildDocument(time, CASE_TYPE_ID_MOVING_CASE_VALUE);
+        final Document document = buildDocumentWithoutCaseId(time, CASE_TYPE_ID_MOVING_CASE_VALUE);
 
         stubGetDocumentMetaData(document);
         stubPatchDocumentMetaData(document);
@@ -576,7 +592,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
         Date time = Date.from(Instant.now());
 
-        final Document document = buildDocument(time, CASE_TYPE_ID_VALUE);
+        final Document document = buildDocumentWithoutCaseId(time, CASE_TYPE_ID_VALUE);
 
         stubGetDocumentMetaData(document);
         stubPatchDocumentMetaData(document);
@@ -676,7 +692,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
         Date time = Date.from(Instant.now());
 
-        final Document document = buildDocument(time, CASE_TYPE_ID_MOVING_CASE_VALUE);
+        final Document document = buildDocumentWithoutCaseId(time, CASE_TYPE_ID_MOVING_CASE_VALUE);
 
         stubGetDocumentMetaData(document);
         stubPatchDocumentMetaData(document);
@@ -744,7 +760,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     @Test
     void shouldBeForbiddenGetDocumentByDocumentIdWithNoPermissions() throws Exception {
-        final Document document = buildDocument();
+        final Document document = buildDocumentWithoutCaseId();
 
         stubDocumentUrlNoPermissions();
         stubGetDocumentMetaData(document);
@@ -779,7 +795,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     @Test
     void shouldBeForbiddenWhenGettingDocumentBinaryContentWithNoPermissions() throws Exception {
-        final Document document = buildDocument();
+        final Document document = buildDocumentWithoutCaseId();
 
         stubDocumentUrlNoPermissions();
         stubGetDocumentMetaData(document);
@@ -842,7 +858,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 null));
     }
 
-    private Document buildDocument() {
+    private Document buildDocumentWithoutCaseId() {
         final Map<String, String> metadata = Map.of(
             METADATA_CASE_ID, CASE_ID_VALUE,
             METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE,
@@ -856,7 +872,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
             .build();
     }
 
-    private Document buildDocument(final Date time, final String caseTypeId) {
+    private Document buildDocumentWithoutCaseId(final Date time, final String caseTypeId) {
         final Map<String, String> metadata = Map.of(
             METADATA_CASE_ID, CASE_ID_VALUE,
             METADATA_CASE_TYPE_ID, caseTypeId,
@@ -873,7 +889,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
             .build();
     }
 
-    private Document buildDocument(final Date time) {
+    private Document buildDocumentWithoutCaseId(final Date time) {
         final Map<String, String> metadata = Map.of(
                 METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE,
                 METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE);

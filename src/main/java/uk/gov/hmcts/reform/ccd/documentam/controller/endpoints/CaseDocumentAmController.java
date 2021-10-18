@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
+import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.GeneratedHashCodeResponse;
@@ -62,6 +63,7 @@ public class CaseDocumentAmController {
 
     private final DocumentManagementService documentManagementService;
     private final SecurityUtils securityUtils;
+    private static final String TTL_FORBIDDEN_MESSAGE = "Document %s can not be downloaded as TTL has expired";
 
     @Autowired
     public CaseDocumentAmController(final DocumentManagementService documentManagementService,
@@ -122,7 +124,13 @@ public class CaseDocumentAmController {
             return ResponseEntity.ok(document);
         }
 
-        return ttlIsFutureDate(document.getTtl()) ? ResponseEntity.ok(document) :  ResponseEntity.badRequest().build();
+        if (ttlIsFutureDate(document.getTtl())) {
+            return ResponseEntity.ok(document);
+        } else {
+            String errorMessage = String.format(TTL_FORBIDDEN_MESSAGE, documentId);
+            log.error(errorMessage);
+            throw new ForbiddenException(errorMessage);
+        }
     }
 
     private boolean ttlIsFutureDate(Date ttl) {
@@ -179,9 +187,13 @@ public class CaseDocumentAmController {
             return documentManagementService.getDocumentBinaryContent(documentId);
         }
 
-        return ttlIsFutureDate(document.getTtl())
-                ? documentManagementService.getDocumentBinaryContent(documentId)
-                : ResponseEntity.badRequest().build();
+        if (ttlIsFutureDate(document.getTtl())) {
+            return documentManagementService.getDocumentBinaryContent(documentId);
+        } else {
+            String errorMessage = String.format(TTL_FORBIDDEN_MESSAGE, documentId);
+            log.error(errorMessage);
+            throw new ForbiddenException(errorMessage);
+        }
     }
 
     @PostMapping(
