@@ -75,7 +75,7 @@ azure:
   application-insights:
     instrumentation-key: ${ccd.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
 
-documentTtlInDays: ${DOCUMENT_TTL_IN_DAYS:7}
+documentTtlInDays: ${DOCUMENT_TTL_IN_DAYS:1}
 
 documentStoreUrl: ${DM_STORE_BASE_URL:http://localhost:4506}
 caseDataStoreUrl: ${CCD_DATA_STORE_API_BASE_URL:http://localhost:4452}
