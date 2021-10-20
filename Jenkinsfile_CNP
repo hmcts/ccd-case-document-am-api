@@ -5,6 +5,7 @@ import uk.gov.hmcts.contino.GradleBuilder
 
 def product = "ccd"
 def component = "case-document-am-api"
+def branchesToSync = ['demo', 'ithc', 'perftest']
 
 GradleBuilder builder = new GradleBuilder(this, product)
 
@@ -83,6 +84,7 @@ withPipeline("java", product, component) {
       env.DEFINITION_STORE_HOST = "http://ccd-definition-store-api-${environmentOfDependencies}.service.core-compute-${environmentOfDependencies}.internal"
       env.CCD_DATA_STORE_API_BASE_URL = "http://ccd-data-store-api-${environmentOfDependencies}.service.core-compute-${environmentOfDependencies}.internal"
   }
+  syncBranchesWithMaster(branchesToSync)
   enableSlackNotifications('#ccd-case-document-am-api-builds')
 
   loadVaultSecrets(secrets)
