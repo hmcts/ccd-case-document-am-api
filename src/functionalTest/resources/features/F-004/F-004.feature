@@ -118,15 +118,6 @@ Feature: F-004: Upload Document With Binary Content
     Then  a negative response is received,
     And   the response has all the details as expected.
 
-  @S-119
-  Scenario: must get an error response when Bulk Scan Processor tries to access Upload Document With Binary Content API
-    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
-    When  a request is prepared with appropriate values,
-    And   the request [is to be made on behalf of Bulk Scan Processor API],
-    And   it is submitted to call the [Upload Document With Binary Content] operation of [CCD Case Document AM API],
-    Then  a negative response is received,
-    And   the response has all the details as expected.
-
   @S-120 #This can be enabled once ccd_gw level permissions are removed.
   Scenario: must get an error response when API-Gateway tries to access Upload Document With Binary Content API
 #    Given a user with [an active caseworker profile in CCD with full permissions on a document field],

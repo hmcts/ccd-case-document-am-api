@@ -13,6 +13,7 @@
       "caseTypeId": ["*"],
       "jurisdictionId": "*",
       "permissions": [
+        "CREATE",
         "HASHTOKEN"
       ]
     },
