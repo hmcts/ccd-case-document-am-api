@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
+import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.GeneratedHashCodeResponse;
@@ -38,6 +39,8 @@ import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 
 import javax.validation.Valid;
+import java.time.Instant;
+import java.util.Date;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.APPLICATION_JSON;
@@ -60,6 +63,7 @@ public class CaseDocumentAmController {
 
     private final DocumentManagementService documentManagementService;
     private final SecurityUtils securityUtils;
+    private static final String TTL_FORBIDDEN_MESSAGE = "Document %s can not be downloaded as TTL has expired";
 
     @Autowired
     public CaseDocumentAmController(final DocumentManagementService documentManagementService,
@@ -109,15 +113,28 @@ public class CaseDocumentAmController {
             documentId.toString()
         );
 
-        documentManagementService.checkUserPermission(
-            document.getCaseId(),
-            documentId,
-            Permission.READ,
-            USER_PERMISSION_ERROR,
-            documentId.toString()
-        );
+        if (document.getCaseId() != null) {
+            documentManagementService.checkUserPermission(
+                    document.getCaseId(),
+                    documentId,
+                    Permission.READ,
+                    USER_PERMISSION_ERROR,
+                    documentId.toString());
 
-        return ResponseEntity.ok(document);
+            return ResponseEntity.ok(document);
+        }
+
+        if (ttlIsFutureDate(document.getTtl())) {
+            return ResponseEntity.ok(document);
+        } else {
+            String errorMessage = String.format(TTL_FORBIDDEN_MESSAGE, documentId);
+            log.error(errorMessage);
+            throw new ForbiddenException(errorMessage);
+        }
+    }
+
+    private boolean ttlIsFutureDate(Date ttl) {
+        return ttl != null && ttl.after(Date.from(Instant.now()));
     }
 
     @GetMapping(
@@ -160,13 +177,23 @@ public class CaseDocumentAmController {
                                                          SERVICE_PERMISSION_ERROR,
                                                          documentId.toString());
 
-        documentManagementService.checkUserPermission(document.getCaseId(),
-                                                      documentId,
-                                                      Permission.READ,
-                                                      USER_PERMISSION_ERROR,
-                                                      documentId.toString());
+        if (document.getCaseId() != null) {
+            documentManagementService.checkUserPermission(document.getCaseId(),
+                    documentId,
+                    Permission.READ,
+                    USER_PERMISSION_ERROR,
+                    documentId.toString());
 
-        return documentManagementService.getDocumentBinaryContent(documentId);
+            return documentManagementService.getDocumentBinaryContent(documentId);
+        }
+
+        if (ttlIsFutureDate(document.getTtl())) {
+            return documentManagementService.getDocumentBinaryContent(documentId);
+        } else {
+            String errorMessage = String.format(TTL_FORBIDDEN_MESSAGE, documentId);
+            log.error(errorMessage);
+            throw new ForbiddenException(errorMessage);
+        }
     }
 
     @PostMapping(

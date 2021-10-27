@@ -1,0 +1,22 @@
+{
+  "title": "must successfully Patch Document with ttl with a value set in the future",
+  "_guid_": "Patch_Document_Ttl_Future_Date",
+  "_extends_": "Patch_Document_Ttl_Root",
+  "s2sClientId": "ccd_gw",
+  "specs": [
+    "to set the TTL of the metadata for the uploaded document to a future date"
+  ],
+  "request": {
+    "pathVariables": {
+      "documentId": "${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    },
+    "body": {
+      "ttl": "2031-12-30T12:10:10"
+    }
+  },
+  "expectedResponse": {
+    "body": {
+      "ttl": "2031-12-30T12:10:10.000+00:00"
+    }
+  }
+}
