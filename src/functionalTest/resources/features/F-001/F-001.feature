@@ -86,3 +86,25 @@ Feature: F-001: Get Document Metadata by Document ID
 #    Then  a negative response is received,
 #    And   the response has all the details as expected.
 
+  @S-001.13
+  Scenario: Document meta-data exists in Doc-store without Case Id; with a valid TTL (in future), Jurisdiction and
+            case type matching the service identifier supplied in the Get request- Happy Path 1
+    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
+    And   a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
+    And   another successful call [to set the TTL of the metadata for the uploaded document to a future date] as in [Patch_Document_Ttl_Future_Date],
+    When  a request is prepared with appropriate values,
+    And   it is submitted to call the [Get Document Metadata by Document ID] operation of [CCD Case Document AM API],
+    Then  a positive response is received,
+    And   the response [contains the metadata for the document uploaded above],
+    And   the response has all other details as expected.
+
+  @S-001.14
+  Scenario:  Document meta-data exists in Doc-store without case id; with a invalid TTL (in the past)- Error Path 1
+    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
+    And   a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
+    And   another successful call [to set the TTL of the metadata for the uploaded document to a past date] as in [Patch_Document_Ttl_Past_Date],
+    When  a request is prepared with appropriate values,
+    And   it is submitted to call the [Get Document Metadata by Document ID] operation of [CCD Case Document AM API],
+    Then  a negative response is received
+    And   the response has all other details as expected.
+
