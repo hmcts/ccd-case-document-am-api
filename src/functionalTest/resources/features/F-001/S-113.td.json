@@ -1,0 +1,46 @@
+{
+  "title": "must successfully get document metadata by document ID when no caseID exists and TTL is a future date",
+  "_extends_": "F-001_Test_Base_data",
+  "_guid_": "S-001.13",
+  "s2sClientId": "ccd_gw",
+  "specs": [
+    "contains the metadata for the document uploaded above"
+  ],
+  "request": {
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_200_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]",
+      "Content-Encoding": "gzip"
+    },
+    "body": {
+      "_links" : {
+        "self" : {
+          "href": "{{DM_STORE_BASE_URL}}/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+        },
+        "binary" : {
+          "href": "{{DM_STORE_BASE_URL}}/documents/${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}/binary"
+        }
+      },
+      "classification": "PUBLIC",
+      "createdBy": "[[ANYTHING_PRESENT]]",
+      "createdOn": "[[ANYTHING_PRESENT]]",
+      "lastModifiedBy": "[[ANYTHING_PRESENT]]",
+      "metadata": {
+        "case_type_id": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][documents][0][metadata][case_type_id]}",
+        "jurisdiction": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][documents][0][metadata][jurisdiction]}"
+      },
+      "mimeType": "${[scenarioContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][documents][0][mimeType]}",
+      "modifiedOn": "[[ANYTHING_PRESENT]]",
+      "originalDocumentName": "[[ANYTHING_PRESENT]]",
+      "size": "[[ANYTHING_PRESENT]]",
+      "ttl" : "${[scenarioContext][childContexts][Patch_Document_Ttl_Future_Date][testData][actualResponse][body][ttl]}"
+
+    }
+  }
+}
