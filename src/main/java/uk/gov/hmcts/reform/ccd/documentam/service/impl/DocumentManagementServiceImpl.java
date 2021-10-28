@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 
 import io.vavr.control.Either;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -91,7 +92,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         final UpdateDocumentsCommand updateDocumentsCommand
             = prepareRequestForAttachingDocumentToCase(caseDocumentsMetadata);
 
-        documentStoreClient.patchDocumentMetadata(updateDocumentsCommand);
+        if (CollectionUtils.isNotEmpty(updateDocumentsCommand.getDocuments())) {
+            documentStoreClient.patchDocumentMetadata(updateDocumentsCommand);
+        }
     }
 
     private UpdateDocumentsCommand prepareRequestForAttachingDocumentToCase(CaseDocumentsMetadata
@@ -104,6 +107,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             if (documentHashToken.getHashToken() != null) {
                 if (either.isLeft()) {
                     throw either.getLeft();
+                }
+                if (shouldSkip(caseDocumentsMetadata, either.get(), documentHashToken.getId())) {
+                    continue;
                 }
                 verifyHashTokenValidity(documentHashToken, either.get());
             } else if (applicationParams.isHashCheckEnabled()) {
@@ -138,6 +144,17 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
 
         return new UpdateDocumentsCommand(NULL_TTL, documentsList);
+    }
+
+    private boolean shouldSkip(CaseDocumentsMetadata caseDocumentsMetadata, Document document, UUID documentId) {
+        if (document.getCaseId() != null) {
+            if (caseDocumentsMetadata.getCaseId().equalsIgnoreCase(document.getCaseId())) {
+                log.info("Document {} metadata is already attached to same caseId:{} - possibly due to concurrent"
+                             + " ccd events", documentId, document.getCaseId());
+                return true;
+            }
+        }
+        return false;
     }
 
     private void verifyHashTokenValidity(DocumentHashToken documentHashToken,
