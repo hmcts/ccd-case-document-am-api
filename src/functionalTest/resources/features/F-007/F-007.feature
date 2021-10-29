@@ -94,6 +94,18 @@ Feature: F-007: Attach Document to Case
     Then a positive response is received,
     And the response has all other details as expected.
 
+  @S-078
+  Scenario: must skip attach a document to a case with hash token if document is already attached
+    Given a user with [an active caseworker profile in CCD with full permissions on a document field]
+    And a successful call [by same user to upload a document with mandatory metadata] as in [F-007-Upload_Document1],
+    And another successful call [Attach Documents To Case] as in [F-007-Attach_Document1],
+    When a request is prepared with appropriate values,
+    And the request [contains a Case Id],
+    And the request [is to be made on behalf of CCD Data Store API],
+    And it is submitted to call the [Attach Documents To Case] operation of [CCD Case Document AM API],
+    Then a positive response is received,
+    And the response has all other details as expected.
+
   @S-080 @Ignore
   Scenario: generic scenario for Unauthorised
 

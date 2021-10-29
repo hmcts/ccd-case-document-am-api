@@ -108,7 +108,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 if (either.isLeft()) {
                     throw either.getLeft();
                 }
-                if (shouldSkip(caseDocumentsMetadata, either.get(), documentHashToken.getId())) {
+                if (shouldSkip(caseDocumentsMetadata.getCaseId(), documentHashToken.getId(), either.get())) {
                     continue;
                 }
                 verifyHashTokenValidity(documentHashToken, either.get());
@@ -146,9 +146,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return new UpdateDocumentsCommand(NULL_TTL, documentsList);
     }
 
-    private boolean shouldSkip(CaseDocumentsMetadata caseDocumentsMetadata, Document document, UUID documentId) {
+    private boolean shouldSkip(final String caseId, final UUID documentId, final Document document) {
         if (document.getCaseId() != null) {
-            if (caseDocumentsMetadata.getCaseId().equalsIgnoreCase(document.getCaseId())) {
+            if (caseId.equalsIgnoreCase(document.getCaseId())) {
                 log.info("Document {} metadata is already attached to same caseId:{} - possibly due to concurrent"
                              + " ccd events", documentId, document.getCaseId());
                 return true;

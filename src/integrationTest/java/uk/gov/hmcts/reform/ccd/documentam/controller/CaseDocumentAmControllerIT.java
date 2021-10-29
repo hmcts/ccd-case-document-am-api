@@ -456,7 +456,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.ENGLISH);
         final Date date = formatter.parse("2021-12-30T12:10:10.000");
 
-        final Document document = buildDocumentWithoutCaseId(date, CASE_TYPE_ID_VALUE);
+        final Document document = buildDocumentWithCaseId(date, CASE_TYPE_ID_VALUE);
 
         final PatchDocumentResponse patchDocumentResponse = PatchDocumentResponse.builder()
             .ttl(date)
@@ -560,7 +560,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
         Date time = Date.from(Instant.now());
 
-        final Document document = buildDocumentWithoutCaseId(time, CASE_TYPE_ID_MOVING_CASE_VALUE);
+        final Document document = buildDocumentWithCaseId(time, CASE_TYPE_ID_MOVING_CASE_VALUE);
 
         stubGetDocumentMetaData(document);
         stubPatchDocumentMetaData(document);
@@ -592,7 +592,36 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
         Date time = Date.from(Instant.now());
 
-        final Document document = buildDocumentWithoutCaseId(time, CASE_TYPE_ID_VALUE);
+        final Document document = buildDocumentWithCaseId(time, CASE_TYPE_ID_VALUE);
+
+        stubGetDocumentMetaData(document);
+        stubPatchDocumentMetaData(document);
+
+        mockMvc.perform(patch(MAIN_URL + ATTACH_TO_CASE_URL)
+                            .headers(createHttpHeaders(SERVICE_NAME_CCD_DATA))
+                            .contentType(MediaType.APPLICATION_JSON_VALUE)
+                            .content(objectToJsonString(body)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath(RESPONSE_RESULT_KEY, is(SUCCESS)));
+    }
+
+    @Test
+    void shouldSuccessfullyPatchMetaDataWhenMetadataExistsForSameCaseId_2() throws Exception {
+        final String hashToken = ApplicationUtils.generateHashCode(salt.concat(DOCUMENT_ID.toString()
+                                              .concat(CASE_ID_VALUE)
+                                              .concat(JURISDICTION_ID_VALUE)
+                                              .concat(CASE_TYPE_ID_MOVING_CASE_VALUE)));
+
+        final CaseDocumentsMetadata body = CaseDocumentsMetadata.builder()
+            .documentHashTokens(List.of(new DocumentHashToken(DOCUMENT_ID, hashToken)))
+            .caseId(CASE_ID_VALUE)
+            .caseTypeId(CASE_TYPE_ID_VALUE)
+            .jurisdictionId(JURISDICTION_ID_VALUE)
+            .build();
+
+        Date time = Date.from(Instant.now());
+
+        final Document document = buildDocumentWithCaseId(time, CASE_TYPE_ID_VALUE);
 
         stubGetDocumentMetaData(document);
         stubPatchDocumentMetaData(document);
@@ -682,8 +711,9 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     @Test
     void shouldBeForbiddenWhenPatchingMetaDataOnDocumentWithIncorrectDocumentHashToken() throws Exception {
+        final String badHash = "567890976546789";
         List<DocumentHashToken> documentHashTokens = new ArrayList<>();
-        documentHashTokens.add(new DocumentHashToken(DOCUMENT_ID, "567890976546789"));
+        documentHashTokens.add(new DocumentHashToken(DOCUMENT_ID, badHash));
         CaseDocumentsMetadata body = new CaseDocumentsMetadata();
         body.setDocumentHashTokens(documentHashTokens);
         body.setCaseId(CASE_ID_VALUE);
@@ -692,7 +722,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
         Date time = Date.from(Instant.now());
 
-        final Document document = buildDocumentWithoutCaseId(time, CASE_TYPE_ID_MOVING_CASE_VALUE);
+        final Document document = buildDocumentWithoutCaseId(time);
 
         stubGetDocumentMetaData(document);
         stubPatchDocumentMetaData(document);
@@ -872,7 +902,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
             .build();
     }
 
-    private Document buildDocumentWithoutCaseId(final Date time, final String caseTypeId) {
+    private Document buildDocumentWithCaseId(final Date time, final String caseTypeId) {
         final Map<String, String> metadata = Map.of(
             METADATA_CASE_ID, CASE_ID_VALUE,
             METADATA_CASE_TYPE_ID, caseTypeId,
