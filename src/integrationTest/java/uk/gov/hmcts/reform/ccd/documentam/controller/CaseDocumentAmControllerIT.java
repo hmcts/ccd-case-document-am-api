@@ -227,7 +227,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     @Test
     void shouldSuccessfullyGetDocumentByDocumentId() throws Exception {
-        final Document document = buildDocumentWithoutCaseId();
+        final Document document = buildDocument();
 
         stubDocumentUrlWithReadPermissions();
         stubGetDocumentMetaData(document);
@@ -318,7 +318,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     @Test
     void shouldSuccessfullyDeleteDocumentByDocumentId() throws Exception {
-        final Document document = buildDocumentWithoutCaseId();
+        final Document document = buildDocument();
 
         stubGetDocumentMetaData(document);
         stubDeleteDocumentByDocumentId();
@@ -351,7 +351,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     @Test
     void shouldSuccessfullyGetDocumentBinaryContent() throws Exception {
-        final Document document = buildDocumentWithoutCaseId();
+        final Document document = buildDocument();
 
         stubDocumentUrlWithReadPermissions();
         stubGetDocumentMetaData(document);
@@ -790,7 +790,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     @Test
     void shouldBeForbiddenGetDocumentByDocumentIdWithNoPermissions() throws Exception {
-        final Document document = buildDocumentWithoutCaseId();
+        final Document document = buildDocument();
 
         stubDocumentUrlNoPermissions();
         stubGetDocumentMetaData(document);
@@ -825,7 +825,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     @Test
     void shouldBeForbiddenWhenGettingDocumentBinaryContentWithNoPermissions() throws Exception {
-        final Document document = buildDocumentWithoutCaseId();
+        final Document document = buildDocument();
 
         stubDocumentUrlNoPermissions();
         stubGetDocumentMetaData(document);
@@ -888,7 +888,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 null));
     }
 
-    private Document buildDocumentWithoutCaseId() {
+    private Document buildDocument() {
         final Map<String, String> metadata = Map.of(
             METADATA_CASE_ID, CASE_ID_VALUE,
             METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE,
