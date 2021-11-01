@@ -165,7 +165,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
         mockAuthorisedServices();
 
-        assertThrows(NullPointerException.class, () ->
+        assertThrows(ForbiddenException.class, () ->
             sut.checkServicePermission(
                 "BEFTA_CASETYPE_1_1",
                 jurisdictionId,

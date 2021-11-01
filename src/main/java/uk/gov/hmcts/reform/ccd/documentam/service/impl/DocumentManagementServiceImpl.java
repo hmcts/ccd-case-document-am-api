@@ -302,7 +302,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         boolean result =
             !StringUtils.isEmpty(caseTypeId) && (caseTypeIds.contains("*") || caseTypeIds.contains(caseTypeId));
 
-        log.info("Case Type Id is {} and validation result is {}", sanitiseData(caseTypeId), result);
+        log.info("Case Type Id is {} and validation result is {}", caseTypeId, result);
 
         return result;
     }
@@ -312,13 +312,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             !StringUtils.isEmpty(jurisdictionId) && (serviceConfig.getJurisdictionId().equals("*")
                 || serviceConfig.getJurisdictionId().equals(jurisdictionId));
 
-        log.info("JurisdictionI Id is {} and validation result is {}", sanitiseData(jurisdictionId), result);
+        log.info("JurisdictionI Id is {} and validation result is {}", jurisdictionId, result);
 
         return result;
-    }
-
-    private String sanitiseData(String value) {
-        return value.replaceAll("[\n|\r|\t]", "_");
     }
 
     private boolean validatePermissions(AuthorisedService serviceConfig, Permission permission) {
