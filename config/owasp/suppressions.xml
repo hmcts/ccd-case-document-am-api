@@ -36,9 +36,4 @@
     <cve>CVE-2021-33037</cve>
   </suppress>
 
-  <suppress until="2021-11-25">
-    <notes>Suppress CVE affecting spring-core temporarily until it can be addressed</notes>
-    <cve>CVE-2021-22096</cve>
-  </suppress>
-
 </suppressions>

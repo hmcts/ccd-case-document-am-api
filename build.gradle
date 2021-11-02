@@ -45,7 +45,7 @@ pmd {
   toolVersion = '6.21.0'
   sourceSets = []
 }
-ext['spring-framework.version'] = '5.3.7'
+ext['spring-framework.version'] = '5.3.12'
 ext['spring-security.version'] = '5.4.7'
 
 
