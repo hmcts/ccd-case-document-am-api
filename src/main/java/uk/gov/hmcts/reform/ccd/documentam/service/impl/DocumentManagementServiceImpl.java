@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 
 import io.vavr.control.Either;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -91,7 +92,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         final UpdateDocumentsCommand updateDocumentsCommand
             = prepareRequestForAttachingDocumentToCase(caseDocumentsMetadata);
 
-        documentStoreClient.patchDocumentMetadata(updateDocumentsCommand);
+        if (CollectionUtils.isNotEmpty(updateDocumentsCommand.getDocuments())) {
+            documentStoreClient.patchDocumentMetadata(updateDocumentsCommand);
+        }
     }
 
     private UpdateDocumentsCommand prepareRequestForAttachingDocumentToCase(CaseDocumentsMetadata
@@ -104,6 +107,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             if (documentHashToken.getHashToken() != null) {
                 if (either.isLeft()) {
                     throw either.getLeft();
+                }
+                if (shouldSkip(caseDocumentsMetadata.getCaseId(), documentHashToken.getId(), either.get())) {
+                    continue;
                 }
                 verifyHashTokenValidity(documentHashToken, either.get());
             } else if (applicationParams.isHashCheckEnabled()) {
@@ -138,6 +144,17 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
 
         return new UpdateDocumentsCommand(NULL_TTL, documentsList);
+    }
+
+    private boolean shouldSkip(final String caseId, final UUID documentId, final Document document) {
+        if (document.getCaseId() != null) {
+            if (caseId.equalsIgnoreCase(document.getCaseId())) {
+                log.info("Document {} metadata is already attached to same caseId:{} - possibly due to concurrent"
+                             + " ccd events", documentId, document.getCaseId());
+                return true;
+            }
+        }
+        return false;
     }
 
     private void verifyHashTokenValidity(DocumentHashToken documentHashToken,
@@ -285,7 +302,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         boolean result =
             !StringUtils.isEmpty(caseTypeId) && (caseTypeIds.contains("*") || caseTypeIds.contains(caseTypeId));
 
-        log.info("Case Type Id is {} and validation result is {}", sanitiseData(caseTypeId), result);
+        log.info("Case Type Id is {} and validation result is {}", caseTypeId, result);
 
         return result;
     }
@@ -295,13 +312,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             !StringUtils.isEmpty(jurisdictionId) && (serviceConfig.getJurisdictionId().equals("*")
                 || serviceConfig.getJurisdictionId().equals(jurisdictionId));
 
-        log.info("JurisdictionI Id is {} and validation result is {}", sanitiseData(jurisdictionId), result);
+        log.info("JurisdictionI Id is {} and validation result is {}", jurisdictionId, result);
 
         return result;
-    }
-
-    private String sanitiseData(String value) {
-        return value.replaceAll("[\n|\r|\t]", "_");
     }
 
     private boolean validatePermissions(AuthorisedService serviceConfig, Permission permission) {
