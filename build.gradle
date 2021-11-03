@@ -38,7 +38,7 @@ def versions = [
   springfoxSwagger   : '3.0.0',
   restAssured        : '4.3.1',
   cucumber           : '5.5.0',
-  tomcatEmbedded     : '9.0.50',
+  tomcatEmbedded     : '9.0.54',
 ]
 
 pmd {
