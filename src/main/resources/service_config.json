@@ -13,8 +13,7 @@
       "caseTypeId": ["*"],
       "jurisdictionId": "*",
       "permissions": [
-        "CREATE",
-        "HASHTOKEN"
+        "CREATE"
       ]
     },
     {
@@ -126,6 +125,14 @@
       "permissions": [
         "CREATE",
         "READ"
+      ]
+    },
+    {
+      "id": "bulk_scan_orchestrator",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "HASHTOKEN"
       ]
     }
   ]
