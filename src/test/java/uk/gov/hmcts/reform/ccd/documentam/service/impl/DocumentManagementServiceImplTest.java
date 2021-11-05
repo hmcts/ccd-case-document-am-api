@@ -165,7 +165,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
         mockAuthorisedServices();
 
-        assertThrows(NullPointerException.class, () ->
+        assertThrows(ForbiddenException.class, () ->
             sut.checkServicePermission(
                 "BEFTA_CASETYPE_1_1",
                 jurisdictionId,
@@ -349,7 +349,9 @@ class DocumentManagementServiceImplTest implements TestFixture {
         // THEN
         final UpdateDocumentsCommand documentsCommand = updateDocumentsCommandCaptor.getValue();
 
-        assertThat(documentsCommand).isNotNull().satisfies(command -> assertThat(command.getTtl()).isNull());
+        assertThat(documentsCommand)
+            .isNotNull()
+            .satisfies(command -> assertThat(command.getTtl()).isNull());
 
         verify(documentStoreClient).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
     }
@@ -524,6 +526,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
     void patchDocumentMetadata_Throws_ForbiddenException_InvalidHashToken() {
         final String invalidToken = ApplicationUtils.generateHashCode(
             SALT.concat(DOCUMENT_ID.toString())
+                .concat(CASE_ID_VALUE)
                 .concat(JURISDICTION_ID_VALUE)
                 .concat(CASE_TYPE_ID_VALUE));
         final DocumentHashToken doc = DocumentHashToken.builder()
@@ -532,7 +535,6 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .build();
 
         final Map<String, String> myMetadata = Map.of(
-            METADATA_CASE_ID, CASE_ID_VALUE,
             METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE,
             METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE
         );
@@ -554,6 +556,40 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .isThrownBy(() -> sut.patchDocumentMetadata(caseDocumentsMetadata))
             .withMessage("Forbidden: Insufficient permissions: Hash token check failed for the document: "
                              + DOCUMENT_ID);
+        verify(documentStoreClient, never()).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
+    }
+
+    @Test
+    void patchDocumentMetadata_Should_Skip_When_Document_Is_Already_Attached() {
+        // GIVEN
+        final DocumentHashToken doc = DocumentHashToken.builder()
+            .id(DOCUMENT_ID)
+            .hashToken(ApplicationUtils.generateHashCode(
+                SALT.concat(DOCUMENT_ID.toString())
+                    .concat(CASE_ID_VALUE)
+                    .concat(JURISDICTION_ID_VALUE)
+                    .concat(CASE_TYPE_ID_VALUE)))
+            .build();
+
+        final Document document = Document.builder()
+            .metadata(Map.of(METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE,
+                             METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE,
+                             METADATA_CASE_ID, CASE_ID_VALUE))
+            .build();
+
+        final CaseDocumentsMetadata caseDocumentsMetadata = CaseDocumentsMetadata.builder()
+            .caseId(CASE_ID_VALUE)
+            .caseTypeId(CASE_TYPE_ID_VALUE)
+            .jurisdictionId(JURISDICTION_ID_VALUE)
+            .documentHashTokens(List.of(doc))
+            .build();
+
+        stubGetDocument(document);
+
+        // WHEN
+        sut.patchDocumentMetadata(caseDocumentsMetadata);
+
+        // THEN
         verify(documentStoreClient, never()).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
     }
 
