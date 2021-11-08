@@ -134,6 +134,15 @@
       "permissions": [
         "HASHTOKEN"
       ]
+    },
+    {
+      "id": "ethos_repl_docmosis_service",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "EMPLOYMENT",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
     }
   ]
 }
