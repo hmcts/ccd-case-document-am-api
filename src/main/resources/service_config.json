@@ -143,6 +143,25 @@
         "CREATE",
         "READ"
       ]
-    }
-  ]
+    },
+    {
+      "id": "divorce_document_generator",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "DIVORCE",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "DELETE"
+      ]
+    },
+    {
+      "id": "finrem_document_generator",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "DIVORCE",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "DELETE"
+      ]
+    }]
 }
