@@ -3,7 +3,7 @@ appVersion: "1.0"
 description: A Helm chart for CCD Case Document AM API
 name: ccd-case-document-am-api
 home: https://github.com/hmcts/ccd-case-document-am-api
-version: 1.6.26
+version: 1.6.27
 maintainers:
   - name: CCD Team
 dependencies:
