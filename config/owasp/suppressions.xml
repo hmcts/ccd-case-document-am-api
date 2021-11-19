@@ -30,10 +30,4 @@
     <cve>CVE-2020-29245</cve>
   </suppress>
 
-  <suppress until="2021-11-25">
-    <notes>Inconsistent Interpretation of HTTP Requests
-    </notes>
-    <cve>CVE-2021-33037</cve>
-  </suppress>
-
 </suppressions>
