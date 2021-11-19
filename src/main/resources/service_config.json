@@ -143,6 +143,25 @@
         "CREATE",
         "READ"
       ]
-    }
-  ]
+    },
+    {
+      "id": "divorce_document_generator",
+      "caseTypeId": ["DIVORCE","DIVORCE_BulkAction","DIVORCE_NOTICE_OF_ACTING"],
+      "jurisdictionId": "DIVORCE",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "DELETE"
+      ]
+    },
+    {
+      "id": "finrem_document_generator",
+      "caseTypeId": ["FinancialRemedyContested","FinancialRemedyMVP2"],
+      "jurisdictionId": "DIVORCE",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "DELETE"
+      ]
+    }]
 }
