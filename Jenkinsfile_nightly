@@ -13,8 +13,9 @@ def component = "case-document-am-api"
 
 withNightlyPipeline(type, product, component) {
   enableSlackNotifications('#ccd-case-document-am-api-builds')
-  enableFortifyScan()
-  after('fortify-scan') {
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
-  }
+  // Temporarily disable fortify scan stage until fortify access re-enabled
+  //enableFortifyScan()
+  //after('fortify-scan') {
+  //  steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
+  //}
 }

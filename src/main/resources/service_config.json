@@ -164,5 +164,14 @@
         "DELETE",
         "UPDATE"
       ]
+    },
+    {
+      "id": "fpl_case_service",
+      "caseTypeId": ["CARE_SUPERVISION_EPO"],
+      "jurisdictionId": "PUBLICLAW",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
     }]
 }
