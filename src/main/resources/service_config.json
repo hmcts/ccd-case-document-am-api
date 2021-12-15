@@ -161,7 +161,8 @@
       "permissions": [
         "CREATE",
         "READ",
-        "DELETE"
+        "DELETE",
+        "UPDATE"
       ]
     },
     {
