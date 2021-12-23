@@ -173,5 +173,25 @@
         "CREATE",
         "READ"
       ]
+    },
+    {
+      "id": "prl_dgs_api",
+      "caseTypeId": ["C100"],
+      "jurisdictionId": "PRIVATELAW",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE"
+      ]
+    },
+    {
+      "id": "prl_cos_api",
+      "caseTypeId": ["C100"],
+      "jurisdictionId": "PRIVATELAW",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE"
+      ]
     }]
 }
