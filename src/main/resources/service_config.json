@@ -193,5 +193,14 @@
         "READ",
         "UPDATE"
       ]
+    },
+    {
+      "id": "et_cos",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "EMPLOYMENT",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
     }]
 }
