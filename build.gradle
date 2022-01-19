@@ -1,6 +1,5 @@
 buildscript {
   repositories {
-    jcenter()
   }
   configurations.maybeCreate("pitest")
   dependencies {
@@ -233,7 +232,6 @@ dependencyUpdates.resolutionStrategy = {
 
 repositories {
   mavenLocal()
-  jcenter()
   mavenCentral()
   maven {
     url "https://jitpack.io"
