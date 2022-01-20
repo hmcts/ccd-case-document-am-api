@@ -141,7 +141,9 @@
       "jurisdictionId": "EMPLOYMENT",
       "permissions": [
         "CREATE",
-        "READ"
+        "READ",
+        "UPDATE",
+        "DELETE"
       ]
     },
     {
