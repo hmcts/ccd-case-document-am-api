@@ -30,7 +30,7 @@ apply plugin: 'io.spring.dependency-management'
 def versions = [
   junit              : '5.6.2',
   lombok             : '1.18.20',
-  reformLogging      : '5.1.7',
+  reformLogging      : '5.1.9',
   serenity           : '2.1.0',
   springBoot         : springBoot.class.package.implementationVersion,
   springCloud        : '3.0.1',
@@ -38,6 +38,7 @@ def versions = [
   restAssured        : '4.3.1',
   cucumber           : '5.5.0',
   tomcatEmbedded     : '9.0.54',
+  serviceAuthVersion : '3.1.4',
 ]
 
 pmd {
@@ -236,7 +237,6 @@ repositories {
   maven {
     url "https://jitpack.io"
   }
-  maven { url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
 }
 
 
@@ -267,11 +267,10 @@ dependencies {
   testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   integrationTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 
-  implementation group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformLogging
-  implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
-
-  implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '3.1.2'
-  implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '1.5.5'
+  implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformLogging
+  implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: versions.reformLogging
+  implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceAuthVersion
+  implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '1.5.5'
 
   implementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.4.4'
   implementation group: 'org.springframework.security', name: 'spring-security-config', version: '5.4.4'
@@ -307,9 +306,11 @@ dependencies {
   testImplementation (group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot) {
     exclude group: 'junit', module: 'junit'
   }
-  testImplementation (group: 'com.github.hmcts', name: 'ccd-test-definitions', version: '7.0.0') {
+  testImplementation (group: 'com.github.hmcts', name: 'ccd-test-definitions', version: '7.9.1') {
     exclude group: 'io.rest-assured', module : 'rest-assured'
+    exclude group: 'com.github.hmcts.befta-fw', module: 'befta-fw'
   }
+  testImplementation group: 'com.github.hmcts', name: 'befta-fw', version: '8.7.1'
 
   testImplementation group: 'org.assertj', name: 'assertj-vavr', version: '0.4.2'
 

@@ -3,11 +3,10 @@ package uk.gov.hmcts.ccd.documentam.befta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.hmcts.befta.BeftaMain;
 import uk.gov.hmcts.befta.BeftaTestDataLoader;
 import uk.gov.hmcts.befta.DefaultBeftaTestDataLoader;
 import uk.gov.hmcts.befta.DefaultTestAutomationAdapter;
-import uk.gov.hmcts.befta.dse.ccd.TestDataLoaderToDefinitionStore;
+import uk.gov.hmcts.befta.dse.ccd.DataLoaderToDefinitionStore;
 import uk.gov.hmcts.befta.exception.FunctionalTestException;
 import uk.gov.hmcts.befta.player.BackEndFunctionalTestScenarioContext;
 import uk.gov.hmcts.befta.util.BeftaUtils;
@@ -18,8 +17,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
 
     private static final Logger logger = LoggerFactory.getLogger(CaseDocumentAmTestAutomationAdapter.class);
 
-    private TestDataLoaderToDefinitionStore loader = new TestDataLoaderToDefinitionStore(this,
-            "uk/gov/hmcts/ccd/test_definitions/valid", BeftaMain.getConfig().getDefinitionStoreUrl());
+    private DataLoaderToDefinitionStore loader = new DataLoaderToDefinitionStore(this);
 
     @Override
     protected BeftaTestDataLoader buildTestDataLoader() {
@@ -33,7 +31,7 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
     }
 
     @Override
-    public Object calculateCustomValue(BackEndFunctionalTestScenarioContext scenarioContext, Object key) {
+    public synchronized Object calculateCustomValue(BackEndFunctionalTestScenarioContext scenarioContext, Object key) {
         //the docAMUrl is is referring the self link in PR
         String docAmUrl = EnvironmentVariableUtils.getRequiredVariable("TEST_URL");
         switch (key.toString()) {
