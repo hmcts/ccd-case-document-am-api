@@ -141,7 +141,9 @@
       "jurisdictionId": "EMPLOYMENT",
       "permissions": [
         "CREATE",
-        "READ"
+        "READ",
+        "UPDATE",
+        "DELETE"
       ]
     },
     {
@@ -192,6 +194,15 @@
         "CREATE",
         "READ",
         "UPDATE"
+      ]
+    },
+    {
+      "id": "et_cos",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "EMPLOYMENT",
+      "permissions": [
+        "CREATE",
+        "READ"
       ]
     }]
 }
