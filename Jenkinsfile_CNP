@@ -54,7 +54,7 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 
 // Assume a feature build branched off 'develop', with dependencies develop-to-develop.
 env.CCD_DATA_STORE_API_BASE_URL = "http://ccd-data-store-api-${dataStoreApiDevelopPr}.service.core-compute-preview.internal".toLowerCase()
-
+env.DEFINITION_STORE_URL_BASE   = "http://ccd-definition-store-api-${definitionStoreDevelopPr}.service.core-compute-preview.internal".toLowerCase()
 env.IDAM_URL = "https://idam-api.aat.platform.hmcts.net"
 env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
 env.OAUTH2_CLIENT_ID = "ccd_gateway"
