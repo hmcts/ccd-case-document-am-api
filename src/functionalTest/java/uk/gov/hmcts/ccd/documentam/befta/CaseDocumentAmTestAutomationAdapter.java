@@ -2,11 +2,10 @@ package uk.gov.hmcts.ccd.documentam.befta;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import uk.gov.hmcts.befta.BeftaTestDataLoader;
 import uk.gov.hmcts.befta.DefaultBeftaTestDataLoader;
 import uk.gov.hmcts.befta.DefaultTestAutomationAdapter;
-import uk.gov.hmcts.befta.dse.ccd.DataLoaderToDefinitionStore;
+import uk.gov.hmcts.befta.dse.ccd.CcdEnvironment;
 import uk.gov.hmcts.befta.exception.FunctionalTestException;
 import uk.gov.hmcts.befta.player.BackEndFunctionalTestScenarioContext;
 import uk.gov.hmcts.befta.util.BeftaUtils;
@@ -17,17 +16,9 @@ public class CaseDocumentAmTestAutomationAdapter extends DefaultTestAutomationAd
 
     private static final Logger logger = LoggerFactory.getLogger(CaseDocumentAmTestAutomationAdapter.class);
 
-    private DataLoaderToDefinitionStore loader = new DataLoaderToDefinitionStore(this);
-
     @Override
     protected BeftaTestDataLoader buildTestDataLoader() {
-        return new DefaultBeftaTestDataLoader() {
-            @Override
-            public void doLoadTestData() {
-                CaseDocumentAmTestAutomationAdapter.this.loader.addCcdRoles();
-                CaseDocumentAmTestAutomationAdapter.this.loader.importDefinitions();
-            }
-        };
+        return new DefaultBeftaTestDataLoader(CcdEnvironment.AAT);
     }
 
     @Override
