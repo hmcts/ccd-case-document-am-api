@@ -73,6 +73,8 @@ env.BEFTA_RESPONSE_HEADER_CHECK_POLICY = "JUST_WARN"
 
 env.CCD_API_GATEWAY_S2S_ID = "ccd_gw"
 
+env.CCD_API_GATEWAY_S2S_KEY = "AAAAAAAAAAAAAAAC"
+
 withPipeline("java", product, component) {
 
   after('test') {
