@@ -133,6 +133,9 @@
       "jurisdictionId": "*",
       "permissions": [
         "HASHTOKEN"
+      ],
+      "caseTypeIdOptionalFor" : [
+        "HASHTOKEN"
       ]
     },
     {

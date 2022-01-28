@@ -284,7 +284,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                        final String logMessage,
                                        final String exceptionMessage) {
         AuthorisedService serviceConfig = getServiceDetailsFromJson(serviceId);
-        if (!validateCaseTypeId(serviceConfig, caseTypeId)
+        if (!validateCaseTypeId(serviceConfig, caseTypeId, permission)
             || !validateJurisdictionId(serviceConfig, jurisdictionId)
             || !validatePermissions(serviceConfig, permission)
         ) {
@@ -297,10 +297,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         throw exception;
     }
 
-    private boolean validateCaseTypeId(AuthorisedService serviceConfig, String caseTypeId) {
+    private boolean validateCaseTypeId(AuthorisedService serviceConfig, String caseTypeId, Permission permission) {
         List<String> caseTypeIds = serviceConfig.getCaseTypeId();
         boolean result =
-            !StringUtils.isEmpty(caseTypeId) && (caseTypeIds.contains("*") || caseTypeIds.contains(caseTypeId));
+            (StringUtils.isEmpty(caseTypeId) && serviceConfig.getCaseTypeIdOptionalFor().contains(permission))
+                || (!StringUtils.isEmpty(caseTypeId)
+                    && (caseTypeIds.contains("*") || caseTypeIds.contains(caseTypeId)));
 
         log.info("Case Type Id is {} and validation result is {}", caseTypeId, result);
 
