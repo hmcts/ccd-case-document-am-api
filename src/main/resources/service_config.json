@@ -139,7 +139,7 @@
       ]
     },
     {
-      "id": "ethos_repl_docmosis_service",
+      "id": "ethos_repl_service",
       "caseTypeId": ["*"],
       "jurisdictionId": "EMPLOYMENT",
       "permissions": [
