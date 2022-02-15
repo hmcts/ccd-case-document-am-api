@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Validated
@@ -29,4 +30,7 @@ public class AuthorisedService {
     @JsonProperty("permissions")
     private List<Permission> permissions;
 
+    @Builder.Default
+    @JsonProperty("caseTypeIdOptionalFor")
+    private List<Permission> caseTypeIdOptionalFor = new ArrayList<>();
 }

@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
+import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
+import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedServices;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
@@ -31,6 +33,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
+import uk.gov.hmcts.reform.ccd.documentam.service.impl.DocumentManagementServiceImpl;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
@@ -48,6 +51,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -90,6 +94,18 @@ class CaseDocumentAmControllerTest implements TestFixture {
             .metadata(Map.of(Constants.METADATA_CASE_ID, CASE_ID_VALUE))
             .build();
 
+    private static final Document DOCUMENT_WITH_CASE_TYPE_ID = Document.builder()
+        .originalDocumentName("test.png")
+        .metadata(Map.of(Constants.METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE,
+                         Constants.METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE
+        ))
+        .build();
+
+    private static final Document DOCUMENT_WITH_JURISDICTION_ID = Document.builder()
+        .originalDocumentName("test.png")
+        .metadata(Map.of(Constants.METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE))
+        .build();
+
     private CaseDocumentAmController testee;
 
     @Mock
@@ -100,6 +116,8 @@ class CaseDocumentAmControllerTest implements TestFixture {
     private SecurityUtils securityUtils;
     @Mock
     private BindingResult bindingResult;
+    @Mock
+    AuthorisedServices serviceConfig;
 
     @BeforeEach
     void setUp() {
@@ -833,4 +851,148 @@ class CaseDocumentAmControllerTest implements TestFixture {
             .isThrownBy(() -> testee.generateHashCode(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN));
     }
 
+    @Test
+    void shouldPassCheckServicePermissionWithEmptyCaseTypeIdWithCaseTypeIdOptionalFor() {
+
+        List<AuthorisedService> authServices =
+            List.of(AuthorisedService.builder()
+                        .id("xui_webapp")
+                        .caseTypeId(List.of("*"))
+                        .jurisdictionId("*")
+                        .permissions(List.of(Permission.HASHTOKEN, Permission.READ))
+                        .caseTypeIdOptionalFor(List.of(Permission.HASHTOKEN))
+                        .build());
+        doReturn(authServices).when(serviceConfig).getAuthServices();
+        DocumentManagementService documentManagementService =
+            new DocumentManagementServiceImpl(null, null,
+                                              serviceConfig, null
+            );
+
+        assertDoesNotThrow(() -> documentManagementService
+            .checkServicePermission(
+                DOCUMENT_WITH_JURISDICTION_ID.getCaseTypeId(),
+                DOCUMENT_WITH_JURISDICTION_ID.getJurisdictionId(),
+                SERVICE_NAME_XUI_WEBAPP,
+                Permission.HASHTOKEN,
+                SERVICE_PERMISSION_ERROR,
+                MATCHED_DOCUMENT_ID.toString()
+            ));
+        verify(serviceConfig, times(1)).getAuthServices();
+    }
+
+    @Test
+    void shouldPassCheckServicePermissionWithNonEmptyCaseTypeIdWithoutCaseTypeIdOptionalFor() {
+
+        List<AuthorisedService> authServices =
+            List.of(AuthorisedService.builder()
+                        .id("xui_webapp")
+                        .caseTypeId(List.of("*"))
+                        .jurisdictionId("*")
+                        .permissions(List.of(Permission.CREATE, Permission.READ))
+                        .build());
+        doReturn(authServices).when(serviceConfig).getAuthServices();
+        DocumentManagementService documentManagementService =
+            new DocumentManagementServiceImpl(null, null,
+                                              serviceConfig, null
+            );
+
+        assertDoesNotThrow(() -> documentManagementService
+            .checkServicePermission(
+                DOCUMENT_WITH_CASE_TYPE_ID.getCaseTypeId(),
+                DOCUMENT_WITH_CASE_TYPE_ID.getJurisdictionId(),
+                SERVICE_NAME_XUI_WEBAPP,
+                Permission.READ,
+                SERVICE_PERMISSION_ERROR,
+                MATCHED_DOCUMENT_ID.toString()
+            ));
+        verify(serviceConfig, times(1)).getAuthServices();
+    }
+
+    @Test
+    void shouldPassCheckServicePermissionWithNonEmptyCaseTypeIdWithCaseTypeIdOptionalFor() {
+
+        List<AuthorisedService> authServices =
+            List.of(AuthorisedService.builder()
+                        .id("xui_webapp")
+                        .caseTypeId(List.of("*"))
+                        .jurisdictionId("*")
+                        .permissions(List.of(Permission.CREATE, Permission.HASHTOKEN))
+                        .caseTypeIdOptionalFor(List.of(Permission.HASHTOKEN))
+                        .build());
+        doReturn(authServices).when(serviceConfig).getAuthServices();
+        DocumentManagementService documentManagementService =
+            new DocumentManagementServiceImpl(null, null,
+                                              serviceConfig, null
+            );
+
+        assertDoesNotThrow(() -> documentManagementService
+            .checkServicePermission(
+                DOCUMENT_WITH_CASE_TYPE_ID.getCaseTypeId(),
+                DOCUMENT_WITH_CASE_TYPE_ID.getJurisdictionId(),
+                SERVICE_NAME_XUI_WEBAPP,
+                Permission.HASHTOKEN,
+                SERVICE_PERMISSION_ERROR,
+                MATCHED_DOCUMENT_ID.toString()
+            ));
+        verify(serviceConfig, times(1)).getAuthServices();
+    }
+
+    @Test
+    void shouldFailCheckServicePermissionWithEmptyCaseTypeIdAndWithoutCaseTypeIdOptionalFor() {
+        List<AuthorisedService> authServices =
+            List.of(AuthorisedService.builder()
+                        .id("xui_webapp")
+                        .caseTypeId(List.of("*"))
+                        .jurisdictionId("*")
+                        .permissions(List.of(Permission.HASHTOKEN, Permission.READ))
+                        .build());
+        doReturn(authServices).when(serviceConfig).getAuthServices();
+        DocumentManagementService documentManagementService =
+            new DocumentManagementServiceImpl(null, null,
+                                              serviceConfig, null
+            );
+
+        assertThatExceptionOfType(ForbiddenException.class)
+            .isThrownBy(() ->
+                            documentManagementService
+                                .checkServicePermission(
+                                    DOCUMENT.getCaseTypeId(),
+                                    DOCUMENT.getJurisdictionId(),
+                                    SERVICE_NAME_XUI_WEBAPP,
+                                    Permission.READ,
+                                    SERVICE_PERMISSION_ERROR,
+                                    MATCHED_DOCUMENT_ID.toString()
+                                ));
+        verify(serviceConfig, times(1)).getAuthServices();
+    }
+
+    @Test
+    void shouldFailCheckServicePermissionWithEmptyCaseTypeIdAndWithInsufficientCaseTypeIdOptionalFor() {
+        List<AuthorisedService> authServices =
+            List.of(AuthorisedService.builder()
+                        .id("xui_webapp")
+                        .caseTypeId(List.of("*"))
+                        .jurisdictionId("*")
+                        .permissions(List.of(Permission.HASHTOKEN, Permission.READ))
+                        .caseTypeIdOptionalFor(List.of(Permission.HASHTOKEN))
+                        .build());
+        doReturn(authServices).when(serviceConfig).getAuthServices();
+        DocumentManagementService documentManagementService =
+            new DocumentManagementServiceImpl(null, null,
+                                              serviceConfig, null
+            );
+
+        assertThatExceptionOfType(ForbiddenException.class)
+            .isThrownBy(() ->
+                            documentManagementService
+                                .checkServicePermission(
+                                    DOCUMENT.getCaseTypeId(),
+                                    DOCUMENT.getJurisdictionId(),
+                                    SERVICE_NAME_XUI_WEBAPP,
+                                    Permission.READ,
+                                    SERVICE_PERMISSION_ERROR,
+                                    MATCHED_DOCUMENT_ID.toString()
+                                ));
+        verify(serviceConfig, times(1)).getAuthServices();
+    }
 }
