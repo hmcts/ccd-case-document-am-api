@@ -1,0 +1,41 @@
+{
+  "_guid_": "Patch_Document_Ttl_Root",
+
+  "productName": "CCD Case Document AM API",
+  "operationName": "Patch Document with ttl",
+  "s2sClientId": "ccd_gw",
+  "specs": [
+    "an active caseworker profile in CCD with full permissions on a document field"
+  ],
+  "method": "PATCH",
+  "uri": "/cases/documents/{documentId}",
+
+  "users": {
+    "invokingUser": {
+      "username": "befta.caseworker.2.solicitor.2@gmail.com",
+      "password": "[[$CCD_BEFTA_CASEWORKER_2_SOLICITOR_2_PWD]]"
+    }
+  },
+  "request": {
+    "headers": {
+      "Authorization": "[[DEFAULT_AUTO_VALUE]]",
+      "ServiceAuthorization": "[[DEFAULT_AUTO_VALUE]]",
+      "Content-Type": "application/json"
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_200_Response",
+    "headers": {
+      "Content-Length": "[[ANYTHING_PRESENT]]",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "originalDocumentName": "[[ANYTHING_PRESENT]]",
+      "mimeType": "[[ANYTHING_PRESENT]]",
+      "createdOn": "[[ANYTHING_PRESENT]]",
+      "modifiedOn": "[[ANYTHING_PRESENT]]",
+      "lastModifiedBy": "[[ANYTHING_PRESENT]]",
+      "ttl": "OVERRIDE"
+    }
+  }
+}

@@ -1,19 +1,19 @@
 package uk.gov.hmcts.reform.ccd.documentam.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.ccd.documentam.configuration.AuthServicesJsonPropertySourceFactory;
 
 import java.util.List;
 
-@Validated
+@Component
 @Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@PropertySource(value = "classpath:service_config.json",
+    factory  = AuthServicesJsonPropertySourceFactory.class)
+@ConfigurationProperties
 public class AuthorisedServices {
 
     @JsonProperty("authorisedServices")

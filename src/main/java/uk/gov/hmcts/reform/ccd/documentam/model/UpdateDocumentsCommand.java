@@ -8,7 +8,6 @@ import java.util.List;
 
 @Data
 public class UpdateDocumentsCommand {
-
     private final Date ttl;
     private final @NotEmpty List<DocumentUpdate> documents;
 }

@@ -1,0 +1,31 @@
+{
+  "title": "must skip attach a document to a case with hash token if document is already attached",
+  "_guid_": "F-007-Attach_Document1",
+  "_extends_": "F-007_Test_Data_Base",
+  "specs": [
+    "Attach Documents To Case"
+  ],
+  "request": {
+    "body": {
+      "caseId": "1234567890099900",
+      "caseTypeId": "${[scenarioContext][parentContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][metadata][case_type_id]}",
+      "jurisdictionId": "${[scenarioContext][parentContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][metadata][jurisdiction]}",
+      "documentHashTokens": [
+        {
+          "id": "${[scenarioContext][parentContext][childContexts][F-007-Upload_Document1][customValues][documentIdInTheResponse]}",
+          "hashToken": "${[scenarioContext][parentContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][hashToken]}"
+        }
+      ]
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_200_Response",
+    "headers": {
+      "Content-Length": "[[ANYTHING_PRESENT]]",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "Result": "Success"
+    }
+  }
+}

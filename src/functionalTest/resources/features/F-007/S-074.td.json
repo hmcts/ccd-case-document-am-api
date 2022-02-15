@@ -24,7 +24,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "The input parameter: \"${[scenarioContext][testData][request][body][caseTypeId]}\", does not comply with the required pattern"
+      "error": "[[ANY_STRING_NOT_NULLABLE]]"
     }
   }
 }

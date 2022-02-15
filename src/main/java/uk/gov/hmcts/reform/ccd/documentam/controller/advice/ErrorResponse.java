@@ -7,12 +7,14 @@ import lombok.Getter;
 @Builder
 public class ErrorResponse {
 
-    private final int errorCode;
+    private final int status;
 
-    private final String errorMessage;
+    private final String error;
 
-    private final String errorDescription;
+    private final String exception;
 
-    private final String timeStamp;
+    private final String timestamp;
+
+    private final String path;
 
 }

@@ -8,8 +8,8 @@
   "request": {
     "body": {
       "caseId": "1234567890099900",
-      "caseTypeId": "${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][documents][0][metadata][caseTypeId]}",
-      "jurisdictionId": "${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][documents][0][metadata][jurisdictionId]}",
+      "caseTypeId": "${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][documents][0][metadata][case_type_id]}",
+      "jurisdictionId": "${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][testData][actualResponse][body][documents][0][metadata][jurisdiction]}",
       "documentHashTokens": [
         {
           "id": "${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}",

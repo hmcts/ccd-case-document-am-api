@@ -67,7 +67,7 @@ idam:
     totp_secret: ${CASE_DOCUMENT_AM_API_S2S_SECRET:CNTOE7D2NX6XHBKT}
     url: ${S2S_URL:http://localhost:4502}
   s2s-authorised:
-    services: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor}
+    services: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor,em_npa_app,fprl_dgs_api,dg_docassembly_api,cmc_claim_store,civil_service,bulk_scan_orchestrator,ethos_repl_service,et_cos}
 oidc:
   issuer: ${OIDC_ISSUER:http://fr-am:8080/openam/oauth2/hmcts}
 
@@ -75,7 +75,7 @@ azure:
   application-insights:
     instrumentation-key: ${ccd.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
 
-documentTtlInDays: ${DOCUMENT_TTL_IN_DAYS:7}
+documentTtlInDays: ${DOCUMENT_TTL_IN_DAYS:1}
 
 documentStoreUrl: ${DM_STORE_BASE_URL:http://localhost:4506}
 caseDataStoreUrl: ${CCD_DATA_STORE_API_BASE_URL:http://localhost:4452}
@@ -84,7 +84,19 @@ hash:
   check:
       enabled: ${HASH_CHECK_ENABLED:false}
 
-bulkscan:
-  exception:
-    record:
-      types: CMC_ExceptionRecord, FINREM_ExceptionRecord, SSCS_ExceptionRecord, PROBATE_ExceptionRecord, PUBLICLAW_ExceptionRecord, DIVORCE_ExceptionRecord
+moving:
+  case:
+    types: CMC_ExceptionRecord,FINREM_ExceptionRecord,SSCS_ExceptionRecord,PROBATE_ExceptionRecord,PUBLICLAW_ExceptionRecord,DIVORCE_ExceptionRecord,DIVORCE,FinancialRemedyMVP2,FinancialRemedyContested,Bristol,Bristol_Multiple,Leeds,Leeds_Multiple,LondonCentral,LondonCentral_Multiple,LondonEast,LondonEast_Multiple,LondonSouth,LondonSouth_Multiple,Manchester,Manchester_Multiple,MidlandsEast,MidlandsEast_Multiple,MidlandsWest,MidlandsWest_Multiple,Newcastle,Newcastle_Multiple,Scotland,Scotland_Multiple,Wales,Wales_Multiple,Watford,Watford_Multiple
+case:
+  document:
+    am:
+      api:
+        enabled: ${CASE_DOCUMENT_AM_API_ENABLED:true}
+
+
+http:
+  client:
+    connection:
+      timeout: ${HTTP_CLIENT_CONNECTION_TIMEOUT:10000}
+    read:
+      timeout: ${HTTP_CLIENT_READ_TIMEOUT:30000}

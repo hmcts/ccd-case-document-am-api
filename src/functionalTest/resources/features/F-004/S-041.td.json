@@ -34,7 +34,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "The Case Type ID is not valid"
+      "error": "Case Type ID is not valid"
     }
   }
 }

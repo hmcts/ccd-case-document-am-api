@@ -10,6 +10,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.TextCodec;
 import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -25,7 +26,6 @@ import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditRepository;
 import uk.gov.hmcts.reform.ccd.documentam.configuration.AuditConfiguration;
 import uk.gov.hmcts.reform.ccd.documentam.utils.KeyGenUtil;
 
-import javax.inject.Inject;
 import java.util.Date;
 import java.util.List;
 
@@ -54,7 +54,7 @@ public class BaseTest {
     private static final String EXAMPLE_REQUEST_ID = "TEST REQUEST ID";
 
     @SpyBean
-    @Inject
+    @Autowired
     protected AuditRepository auditRepository;
 
     public static HttpHeaders createHttpHeaders(String serviceName) throws JOSEException {
@@ -76,19 +76,25 @@ public class BaseTest {
     protected ResultMatcher hasGeneratedLogAudit(AuditOperationType operationType,
                                                  String invokingService,
                                                  List<String> documentIds,
-                                                 String caseId) {
+                                                 String caseId,
+                                                 String jurisdiction,
+                                                 String caseType) {
         return result -> verifyLogAuditValues(result,
                                               operationType,
                                               invokingService,
                                               documentIds,
-                                              caseId);
+                                              caseId,
+                                              jurisdiction,
+                                              caseType);
     }
 
     protected void verifyLogAuditValues(MvcResult result,
                                         AuditOperationType operationType,
                                         String invokingService,
                                         List<String> documentIds,
-                                        String caseId) {
+                                        String caseId,
+                                        String jurisdiction,
+                                        String caseType) {
         ArgumentCaptor<AuditEntry> captor = ArgumentCaptor.forClass(AuditEntry.class);
         verify(auditRepository).save(captor.capture());
 
@@ -122,6 +128,20 @@ public class BaseTest {
                     .isNotNull();
             } else {
                 assertThat(auditEntry.getCaseId()).isNullOrEmpty();
+            }
+
+            if (jurisdiction != null && !jurisdiction.equals("")) {
+                assertThat(auditEntry.getJurisdiction())
+                    .isNotNull();
+            } else {
+                assertThat(auditEntry.getJurisdiction()).isNullOrEmpty();
+            }
+
+            if (caseType != null && !caseType.equals("")) {
+                assertThat(auditEntry.getCaseType())
+                    .isNotNull();
+            } else {
+                assertThat(auditEntry.getCaseType()).isNullOrEmpty();
             }
         }
     }
