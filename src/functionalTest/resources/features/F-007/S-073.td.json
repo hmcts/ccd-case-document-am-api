@@ -23,7 +23,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "errorDescription": "[[ANY_STRING_NOT_NULLABLE]]"
+      "error": "[[ANY_STRING_NOT_NULLABLE]]"
     }
   }
 }

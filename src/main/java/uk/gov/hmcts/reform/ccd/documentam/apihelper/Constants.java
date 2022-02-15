@@ -8,6 +8,7 @@ public final class Constants {
 
     public static final String BAD_REQUEST = "Bad Request";
     public static final String RESOURCE_NOT_FOUND = "Resource not found";
+    public static final String DOCUMENT_METADATA_NOT_FOUND = "Meta data does not exist for documentId: %s";
     public static final String FORBIDDEN = "Forbidden: Insufficient permissions";
     public static final String APPLICATION_JSON = "application/json";
     public static final String SERVICE_AUTHORIZATION = "serviceauthorization";
@@ -51,6 +52,11 @@ public final class Constants {
     public static final String CASE_ID = "caseId";
     public static final String CASE_TYPE_ID = "caseTypeId";
     public static final String JURISDICTION_ID = "jurisdictionId";
+
+    public static final String METADATA_CASE_ID = "case_id";
+    public static final String METADATA_CASE_TYPE_ID = "case_type_id";
+    public static final String METADATA_JURISDICTION_ID = "jurisdiction";
+
     public static final String USER_PERMISSION_ERROR = "User doesn't have read permission on requested document {}";
     public static final String SERVICE_PERMISSION_ERROR = "Service doesn't have sufficient permission on requested "
         + "API {}";

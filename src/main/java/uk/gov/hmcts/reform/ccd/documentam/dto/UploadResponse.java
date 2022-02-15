@@ -1,4 +1,6 @@
-package uk.gov.hmcts.reform.ccd.documentam.model;
+package uk.gov.hmcts.reform.ccd.documentam.dto;
+
+import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 
 import java.util.List;
 

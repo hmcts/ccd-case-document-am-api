@@ -1,8 +1,34 @@
 {
     "authorisedServices": [{
       "id": "xui_webapp",
-      "caseTypeId": "*",
-      "jurisdictionId": "BEFTA_JURISDICTION_2",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
+    },
+    {
+      "id": "bulk_scan_processor",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE"
+      ]
+    },
+    {
+      "id": "sscs",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "SSCS",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
+    },
+    {
+      "id": "iac",
+      "caseTypeId": ["Asylum"],
+      "jurisdictionId": "IA",
       "permissions": [
         "CREATE",
         "READ",
@@ -10,41 +36,173 @@
         "DELETE"
       ]
     },
-      {
-        "id": "bulk_scan_processor",
-        "caseTypeId": "*",
-        "jurisdictionId": "*",
-        "permissions": [
-          "HASHTOKEN"
-        ]
-      },
-       {
-        "id": "sscs",
-        "caseTypeId": "*",
-        "jurisdictionId": "SSCS",
-        "permissions": [
-          "CREATE",
-          "READ"
-        ]
-      },                     
-      {
-        "id": "ccd_data",
-        "caseTypeId": "*",
-        "jurisdictionId": "*",
-        "permissions": [
-          "ATTACH"
-        ]
-      },
-      {
-        "id": "ccd_gw",
-        "caseTypeId": "*",
-        "jurisdictionId": "*",
-        "permissions": [
-          "CREATE",
-          "READ",
-          "UPDATE",
-          "DELETE"
-        ]
-      }
-    ]
+    {
+      "id": "probate_backend",
+        "caseTypeId": ["*"],
+        "jurisdictionId": "PROBATE",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "DELETE"
+      ]
+    },
+    {
+      "id": "ccd_data",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "ATTACH"
+      ]
+    },
+    {
+      "id": "ccd_gw",
+        "caseTypeId": ["BEFTA_CASETYPE_2_1","BEFTA_CASETYPE_2_2","BEFTA_CASETYPE_2"],
+        "jurisdictionId": "BEFTA_JURISDICTION_2",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
+      "id": "em_npa_app",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "READ"
+      ]
+    },
+    {
+      "id": "fprl_dgs_api",
+      "caseTypeId": ["C100"],
+      "jurisdictionId": "PRIVATELAW",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
+    },
+    {
+      "id": "dg_docassembly_api",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
+    },
+    {
+      "id": "em_stitching_api",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
+    },
+    {
+      "id": "em_ccd_orchestrator",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
+    },
+    {
+      "id": "cmc_claim_store",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "CMC",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
+    },
+    {
+      "id": "civil_service",
+      "caseTypeId": ["CIVIL"],
+      "jurisdictionId": "CIVIL",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
+    },
+    {
+      "id": "bulk_scan_orchestrator",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "HASHTOKEN"
+      ]
+    },
+    {
+      "id": "ethos_repl_service",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "EMPLOYMENT",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
+      "id": "divorce_document_generator",
+      "caseTypeId": ["DIVORCE","DIVORCE_BulkAction","DIVORCE_NOTICE_OF_ACTING"],
+      "jurisdictionId": "DIVORCE",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "DELETE"
+      ]
+    },
+    {
+      "id": "finrem_document_generator",
+      "caseTypeId": ["FinancialRemedyContested","FinancialRemedyMVP2"],
+      "jurisdictionId": "DIVORCE",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "DELETE",
+        "UPDATE"
+      ]
+    },
+    {
+      "id": "fpl_case_service",
+      "caseTypeId": ["CARE_SUPERVISION_EPO"],
+      "jurisdictionId": "PUBLICLAW",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
+    },
+    {
+      "id": "prl_dgs_api",
+      "caseTypeId": ["C100"],
+      "jurisdictionId": "PRIVATELAW",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE"
+      ]
+    },
+    {
+      "id": "prl_cos_api",
+      "caseTypeId": ["C100"],
+      "jurisdictionId": "PRIVATELAW",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE"
+      ]
+    },
+    {
+      "id": "et_cos",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "EMPLOYMENT",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
+    }]
 }

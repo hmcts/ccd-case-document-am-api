@@ -11,7 +11,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.util.UriUtils;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.InvalidRequest;
@@ -19,39 +21,38 @@ import uk.gov.hmcts.reform.ccd.documentam.exception.RequiredFieldMissingExceptio
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.UnauthorizedException;
 
+import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-
 @Slf4j
 @ControllerAdvice
-// FIXME : https://tools.hmcts.net/jira/browse/RDM-11324
 public class CaseDocumentControllerAdvice {
 
     private static final String LOG_STRING = "handling exception: ";
     private static final Logger logger = LoggerFactory.getLogger(CaseDocumentControllerAdvice.class);
 
     @ExceptionHandler(UnauthorizedException.class)
-    protected ResponseEntity<Object> handleUnauthorizedException(UnauthorizedException exception) {
-        return errorDetailsResponseEntity(exception,
-                                          HttpStatus.UNAUTHORIZED,
-                                          ErrorConstants.UNAUTHORIZED.getErrorCode(),
-                                          ErrorConstants.UNAUTHORIZED.getErrorMessage()
-        );
+    protected ResponseEntity<Object> handleUnauthorizedException(final UnauthorizedException exception,
+                                                                 final HttpServletRequest request) {
+
+        return errorDetailsResponseEntity(exception, HttpStatus.UNAUTHORIZED, getPath(request));
     }
 
     @ExceptionHandler(ForbiddenException.class)
-    protected ResponseEntity<Object> handleForbiddenException(ForbiddenException exception) {
-        return errorDetailsResponseEntity(exception, HttpStatus.FORBIDDEN,
-                                          ErrorConstants.ACCESS_DENIED.getErrorCode(),
-                                          ErrorConstants.ACCESS_DENIED.getErrorMessage()
-        );
+    protected ResponseEntity<Object> handleForbiddenException(final ForbiddenException exception,
+                                                              final HttpServletRequest request) {
+
+        return errorDetailsResponseEntity(exception, HttpStatus.FORBIDDEN, getPath(request));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    protected ResponseEntity<Object> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValidException(
+        final MethodArgumentNotValidException exception,
+        final HttpServletRequest request
+    ) {
         logger.error(LOG_STRING, exception);
 
         final String message = exception.getBindingResult()
@@ -62,13 +63,14 @@ public class CaseDocumentControllerAdvice {
             .orElse(null);
 
         final ErrorResponse errorDetails = ErrorResponse.builder()
-            .errorCode(ErrorConstants.BAD_REQUEST.getErrorCode())
-            .errorMessage(ErrorConstants.BAD_REQUEST.getErrorMessage())
-            .errorDescription(message)
-            .timeStamp(getTimeStamp())
+            .status(HttpStatus.BAD_REQUEST.value())
+            .path(getPath(request))
+            .exception(exception.getClass().getName())
+            .error(message)
+            .timestamp(getTimeStamp())
             .build();
 
-        return new ResponseEntity<>(errorDetails, BAD_REQUEST);
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({BadRequestException.class,
@@ -77,26 +79,26 @@ public class CaseDocumentControllerAdvice {
         MissingServletRequestParameterException.class,
         MethodArgumentTypeMismatchException.class,
         HttpMessageConversionException.class})
-    protected ResponseEntity<Object> handleBadRequestException(final Exception exception) {
-        return errorDetailsResponseEntity(
-            exception,
-            BAD_REQUEST,
-            ErrorConstants.BAD_REQUEST.getErrorCode(),
-            ErrorConstants.BAD_REQUEST.getErrorMessage()
-        );
+    protected ResponseEntity<Object> handleBadRequestException(final Exception exception,
+                                                               final HttpServletRequest request) {
+        return errorDetailsResponseEntity(exception, HttpStatus.BAD_REQUEST, getPath(request));
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    protected ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException exception) {
-        return errorDetailsResponseEntity(exception, HttpStatus.NOT_FOUND,
-            ErrorConstants.NOT_FOUND.getErrorCode(), ErrorConstants.NOT_FOUND.getErrorMessage());
+    protected ResponseEntity<Object> handleResourceNotFoundException(final ResourceNotFoundException exception,
+                                                                     final HttpServletRequest request) {
+        return errorDetailsResponseEntity(exception, HttpStatus.NOT_FOUND, getPath(request));
+    }
+
+    @ExceptionHandler(HttpClientErrorException.class)
+    protected ResponseEntity<Object> handleHttpClientErrorException(final HttpClientErrorException exception) {
+        return new ResponseEntity<>(exception.getResponseBodyAsString(), exception.getStatusCode());
     }
 
     @ExceptionHandler(Exception.class)
-    protected ResponseEntity<Object> handleUnknownException(Exception exception) {
-        return errorDetailsResponseEntity(exception,
-            HttpStatus.INTERNAL_SERVER_ERROR, ErrorConstants.UNKNOWN_EXCEPTION.getErrorCode(),
-            ErrorConstants.UNKNOWN_EXCEPTION.getErrorMessage());
+    protected ResponseEntity<Object> handleUnknownException(final Exception exception,
+                                                            final HttpServletRequest request) {
+        return errorDetailsResponseEntity(exception, HttpStatus.INTERNAL_SERVER_ERROR, getPath(request));
     }
 
     private String getTimeStamp() {
@@ -105,16 +107,21 @@ public class CaseDocumentControllerAdvice {
 
     private ResponseEntity<Object> errorDetailsResponseEntity(final Exception ex,
                                                               final HttpStatus httpStatus,
-                                                              final int errorCode,
-                                                              final String errorMsg) {
+                                                              final String requestPath) {
         logger.error(LOG_STRING, ex);
         final ErrorResponse errorDetails = ErrorResponse.builder()
-            .errorCode(errorCode)
-            .errorMessage(errorMsg)
-            .errorDescription(ex.getLocalizedMessage())
-            .timeStamp(getTimeStamp())
+            .status(httpStatus.value())
+            .path(requestPath)
+            .error(ex.getLocalizedMessage())
+            .exception(ex.getClass().getName())
+            .timestamp(getTimeStamp())
             .build();
 
         return new ResponseEntity<>(errorDetails, httpStatus);
     }
+
+    private String getPath(final HttpServletRequest request) {
+        return UriUtils.encodePath(request.getRequestURI(), StandardCharsets.UTF_8);
+    }
+
 }

@@ -1,0 +1,23 @@
+{
+  "title": "must successfully Patch Document with ttl with a value set in the past",
+  "_guid_": "Patch_Document_Ttl_Past_Date",
+  "_extends_": "Patch_Document_Ttl_Root",
+  "s2sClientId": "ccd_gw",
+  "specs": [
+    "to set the TTL of the metadata for the uploaded document to a past date",
+    "is to be made on behalf of API-Gateway API"
+  ],
+  "request": {
+    "pathVariables": {
+      "documentId": "${[scenarioContext][parentContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    },
+    "body": {
+      "ttl": "2020-12-30T12:10:10"
+    }
+  },
+  "expectedResponse": {
+    "body": {
+      "ttl": "2020-12-30T12:10:10.000+00:00"
+    }
+  }
+}

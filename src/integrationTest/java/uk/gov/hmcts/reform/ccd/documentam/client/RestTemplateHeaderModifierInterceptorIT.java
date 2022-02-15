@@ -2,14 +2,13 @@ package uk.gov.hmcts.reform.ccd.documentam.client;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.documentam.BaseTest;
 import uk.gov.hmcts.reform.ccd.documentam.TestSecurityUtilsConfiguration;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
-
-import javax.inject.Inject;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
@@ -22,7 +21,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubG
 
 @ContextConfiguration(classes = {TestSecurityUtilsConfiguration.class})
 public class RestTemplateHeaderModifierInterceptorIT extends BaseTest {
-    @Inject
+    @Autowired
     private RestTemplate restTemplate;
 
     @Value("${wiremock.server.port}")

@@ -3,7 +3,7 @@
   "_extends_": "F-003-Base-Root",
   "productName": "CCD Case Document AM API",
   "operationName": "Delete Document by Document ID",
-  "s2sClientId": "xui_webapp",
+  "s2sClientId": "ccd_gw",
   "specs": [
     "an active caseworker profile in CCD with full permissions on a document field"
   ],
