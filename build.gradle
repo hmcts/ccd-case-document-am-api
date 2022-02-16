@@ -37,7 +37,7 @@ def versions = [
   springfoxSwagger   : '3.0.0',
   restAssured        : '4.3.1',
   cucumber           : '5.5.0',
-  tomcatEmbedded     : '9.0.54',
+  tomcatEmbedded     : '10.1.0-M10',
   serviceAuthVersion : '3.1.4',
 ]
 
@@ -290,8 +290,8 @@ dependencies {
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
 
   // CVE-2022-23181
-  compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '9.0.58'
-  compile group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: '10.1.0-M10'
+  implementation "org.apache.tomcat.embed:tomcat-embed-core:${versions.tomcatEmbedded}"
+  implementation "org.apache.tomcat.embed:tomcat-embed-websocket:${versions.tomcatEmbedded}"
   implementation "org.apache.tomcat.embed:tomcat-embed-el:${versions.tomcatEmbedded}"
 
   //CVE-2021-42500
