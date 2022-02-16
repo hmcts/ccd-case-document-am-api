@@ -37,7 +37,7 @@ def versions = [
   springfoxSwagger   : '3.0.0',
   restAssured        : '4.3.1',
   cucumber           : '5.5.0',
-  tomcatEmbedded     : '10.1.0-M10',
+  tomcatEmbedded     : '9.0.58',
   serviceAuthVersion : '3.1.4',
 ]
 
@@ -291,8 +291,8 @@ dependencies {
 
   // CVE-2022-23181
   implementation "org.apache.tomcat.embed:tomcat-embed-core:${versions.tomcatEmbedded}"
-  implementation "org.apache.tomcat.embed:tomcat-embed-websocket:${versions.tomcatEmbedded}"
   implementation "org.apache.tomcat.embed:tomcat-embed-el:${versions.tomcatEmbedded}"
+  implementation "org.apache.tomcat.embed:tomcat-embed-websocket:${versions.tomcatEmbedded}"
 
   //CVE-2021-42500
   implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.10'
