@@ -178,7 +178,7 @@
     },
     {
       "id": "prl_dgs_api",
-      "caseTypeId": ["PRLAPPS"],
+      "caseTypeId": ["*"],
       "jurisdictionId": "PRIVATELAW",
       "permissions": [
         "CREATE",
@@ -188,7 +188,7 @@
     },
     {
       "id": "prl_cos_api",
-      "caseTypeId": ["PRLAPPS"],
+      "caseTypeId": ["*"],
       "jurisdictionId": "PRIVATELAW",
       "permissions": [
         "CREATE",
