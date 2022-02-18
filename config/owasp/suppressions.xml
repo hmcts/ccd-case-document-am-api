@@ -29,12 +29,5 @@
     <cve>CVE-2020-29244</cve>
     <cve>CVE-2020-29245</cve>
   </suppress>
-  
-  <suppress until="2022-02-25">
-    <cve>CVE-2021-22060</cve>
-    <cve>CVE-2022-23181</cve>
-    <cve>CVE-2021-42550</cve>
-    <cve>CVE-2021-44832</cve>
-  </suppress>
 
 </suppressions>
