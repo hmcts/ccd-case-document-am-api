@@ -160,7 +160,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private void verifyHashTokenValidity(DocumentHashToken documentHashToken,
                                          Document documentMetadata) {
         String hashcodeFromStoredDocument =
-            generateHashToken(documentHashToken.getId(), documentMetadata);
+            generateHashToken(documentHashToken.getId(), documentMetadata, null);
         if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
             throw new ForbiddenException(String.format("Hash token check failed for the document: %s",
                                                        documentHashToken.getId()));
@@ -186,25 +186,39 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public String generateHashToken(UUID documentId, Document document) {
+    public String generateHashToken(UUID documentId, Document document, String caseTypeId) {
+        final String finalCaseTypeId = StringUtils.isNotEmpty(document.getCaseTypeId())
+            ? document.getCaseTypeId() : caseTypeId;
+
+        if (finalCaseTypeId == null) {
+            throw new ForbiddenException("Service doesn't have sufficient "
+                                             + "permission to override null document caseTypeId");
+        }
+
         final String salt = applicationParams.getSalt();
 
         return (document.getCaseId() == null)
-                ? ApplicationUtils.generateHashCode(salt.concat(documentId.toString()
-                                                                    .concat(document.getJurisdictionId())
-                                                                    .concat(document.getCaseTypeId())))
-                : ApplicationUtils.generateHashCode(salt.concat(documentId.toString()
-                                                                    .concat(document.getCaseId())
-                                                                    .concat(document.getJurisdictionId())
-                                                                    .concat(document.getCaseTypeId())));
+            ? ApplicationUtils.generateHashCode(salt.concat(documentId.toString()
+                                                                .concat(document.getJurisdictionId())
+                                                                .concat(finalCaseTypeId)))
+            : ApplicationUtils.generateHashCode(salt.concat(documentId.toString()
+                                                                .concat(document.getCaseId())
+                                                                .concat(document.getJurisdictionId())
+                                                                .concat(finalCaseTypeId)));
     }
 
     @Override
-    public String generateHashToken(UUID documentId) {
+    public String generateHashToken(UUID documentId, AuthorisedService authorisedService, Permission permission) {
+        String caseTypeId = null;
+        if (authorisedService.getCaseTypeIdOptionalFor().contains(permission)) {
+            caseTypeId = authorisedService.getDefaultCaseTypeForTokenGeneration();
+        }
+
+        final String finalCaseTypeId = caseTypeId;
         return documentStoreClient.getDocument(documentId)
             .fold(
                 resourceNotFound -> "",
-                document -> generateHashToken(documentId, document)
+                document -> generateHashToken(documentId, document, finalCaseTypeId)
             );
     }
 
@@ -277,12 +291,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public void checkServicePermission(final String caseTypeId,
-                                       final String jurisdictionId,
-                                       final String serviceId,
-                                       final Permission permission,
-                                       final String logMessage,
-                                       final String exceptionMessage) {
+    public AuthorisedService checkServicePermission(final String caseTypeId,
+                                                    final String jurisdictionId,
+                                                    final String serviceId,
+                                                    final Permission permission,
+                                                    final String logMessage,
+                                                    final String exceptionMessage) {
         AuthorisedService serviceConfig = getServiceDetailsFromJson(serviceId);
         if (!validateCaseTypeId(serviceConfig, caseTypeId, permission)
             || !validateJurisdictionId(serviceConfig, jurisdictionId)
@@ -291,6 +305,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             log.error(logMessage, HttpStatus.FORBIDDEN);
             throw new ForbiddenException(exceptionMessage);
         }
+
+        return serviceConfig;
     }
 
     private <U> U throwLeft(final RuntimeException exception) {

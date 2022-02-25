@@ -27,6 +27,12 @@ public class AuthorisedService {
     @JsonProperty("jurisdictionId")
     private String jurisdictionId;
 
+    @JsonProperty("defaultJurisdictionForTokenGeneration")
+    private String defaultJurisdictionForTokenGeneration;
+
+    @JsonProperty("defaultCaseTypeForTokenGeneration")
+    private String defaultCaseTypeForTokenGeneration;
+
     @JsonProperty("permissions")
     private List<Permission> permissions;
 
