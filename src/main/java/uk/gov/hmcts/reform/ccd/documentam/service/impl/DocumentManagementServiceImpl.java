@@ -191,8 +191,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             ? document.getCaseTypeId() : caseTypeId;
 
         if (finalCaseTypeId == null) {
-            throw new ForbiddenException("Service doesn't have sufficient "
-                                             + "permission to override null document caseTypeId");
+            throw new ForbiddenException("No case type id available to generate hash token for document "
+                                         + documentId);
         }
 
         final String salt = applicationParams.getSalt();
