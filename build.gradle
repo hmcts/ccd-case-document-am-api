@@ -37,7 +37,7 @@ def versions = [
   springfoxSwagger   : '3.0.0',
   restAssured        : '4.3.1',
   cucumber           : '5.5.0',
-  tomcatEmbedded     : '9.0.54',
+  tomcatEmbedded     : '9.0.58',
   serviceAuthVersion : '3.1.4',
 ]
 
@@ -45,9 +45,9 @@ pmd {
   toolVersion = '6.21.0'
   sourceSets = []
 }
-ext['spring-framework.version'] = '5.3.12'
+ext['spring-framework.version'] = '5.3.15'
 ext['spring-security.version'] = '5.4.7'
-ext['log4j2.version'] = '2.17.0'
+ext['log4j2.version'] = '2.17.1'
 
 group = 'uk.gov.hmcts.reform.ccd.documentam'
 version = '0.0.1'
@@ -242,7 +242,7 @@ repositories {
 
 dependencies {
   implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.10.3'
-  implementation "com.fasterxml.jackson.core:jackson-databind:2.12.4"
+  implementation "com.fasterxml.jackson.core:jackson-databind:2.11.1"
 
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
   implementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
@@ -289,10 +289,14 @@ dependencies {
 
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
 
-  // CVE-2021-25122
+  // CVE-2022-23181
   implementation "org.apache.tomcat.embed:tomcat-embed-core:${versions.tomcatEmbedded}"
   implementation "org.apache.tomcat.embed:tomcat-embed-el:${versions.tomcatEmbedded}"
   implementation "org.apache.tomcat.embed:tomcat-embed-websocket:${versions.tomcatEmbedded}"
+
+  //CVE-2021-42500
+  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.10'
+  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.2.10'
 
   // CVE-2021-28170
   implementation group: 'org.glassfish', name: 'jakarta.el', version: '4.0.1'
@@ -306,7 +310,7 @@ dependencies {
   testImplementation (group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot) {
     exclude group: 'junit', module: 'junit'
   }
-  testImplementation (group: 'com.github.hmcts', name: 'ccd-test-definitions', version: '7.9.1') {
+  testImplementation (group: 'com.github.hmcts', name: 'ccd-test-definitions', version: '7.13.0') {
     exclude group: 'io.rest-assured', module : 'rest-assured'
     exclude group: 'com.github.hmcts.befta-fw', module: 'befta-fw'
   }
