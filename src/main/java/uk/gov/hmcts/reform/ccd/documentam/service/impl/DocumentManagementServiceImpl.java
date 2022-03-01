@@ -195,15 +195,23 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                          + documentId);
         }
 
+        final String finalJurisdictionId = StringUtils.isNotEmpty(document.getJurisdictionId())
+            ? document.getJurisdictionId() : jurisdictionId;
+
+        if (finalJurisdictionId == null) {
+            throw new ForbiddenException("No jurisdiction id available to generate hash token for document "
+                                         + documentId);
+        }
+
         final String salt = applicationParams.getSalt();
 
         return (document.getCaseId() == null)
             ? ApplicationUtils.generateHashCode(salt.concat(documentId.toString()
-                                                                .concat(document.getJurisdictionId())
+                                                                .concat(finalJurisdictionId)
                                                                 .concat(finalCaseTypeId)))
             : ApplicationUtils.generateHashCode(salt.concat(documentId.toString()
                                                                 .concat(document.getCaseId())
-                                                                .concat(document.getJurisdictionId())
+                                                                .concat(finalJurisdictionId)
                                                                 .concat(finalCaseTypeId)));
     }
 
