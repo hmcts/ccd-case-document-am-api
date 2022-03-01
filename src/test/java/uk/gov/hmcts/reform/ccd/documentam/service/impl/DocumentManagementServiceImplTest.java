@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -720,8 +721,8 @@ class DocumentManagementServiceImplTest implements TestFixture {
     }
 
     @Test
-    void shouldGenerateHashTokenWithDefaultJurisdictionForTokenGenerationWhenCaseTypeIdIsNotPresent() {
-        final Document document = buildDocument();
+    void shouldGenerateHashTokenWithDefaultCaseTypeForTokenGenerationWhenCaseTypeIdIsNotPresent() {
+        final Document document = buildDocument(true, false);
 
         stubGetSalt();
         stubGetDocument(document);
@@ -735,8 +736,23 @@ class DocumentManagementServiceImplTest implements TestFixture {
     }
 
     @Test
+    void shouldGenerateHashTokenWithDefaultJurisdictionForTokenGenerationWhenJurisdictionIdIsNotPresent() {
+        final Document document = buildDocument(false, true);
+
+        stubGetSalt();
+        stubGetDocument(document);
+
+        final String result = sut.generateHashToken(DOCUMENT_ID, AuthorisedService.builder()
+            .defaultJurisdictionForTokenGeneration("BULKSCAN")
+            .jurisdictionIdOptionalFor(List.of(Permission.HASHTOKEN))
+            .build(), Permission.HASHTOKEN);
+
+        assertNotNull(result);
+    }
+
+    @Test
     void shouldFailGenerateHashTokenWhenCaseTypeIdIsNotPresentAndNoSufficientPermission() {
-        final Document document = buildDocument();
+        final Document document = buildDocument(true, false);
 
         stubGetDocument(document);
 
@@ -744,6 +760,19 @@ class DocumentManagementServiceImplTest implements TestFixture {
             sut.generateHashToken(DOCUMENT_ID, AuthorisedService.builder()
                 .defaultCaseTypeForTokenGeneration("BULKSCAN")
                 .caseTypeIdOptionalFor(List.of(Permission.HASHTOKEN))
+                .build(), Permission.READ));
+    }
+
+    @Test
+    void shouldFailGenerateHashTokenWhenJurisdictionIdIsNotPresentAndNoSufficientPermission() {
+        final Document document = buildDocument(false, true);
+
+        stubGetDocument(document);
+
+        assertThrows(ForbiddenException.class, () ->
+            sut.generateHashToken(DOCUMENT_ID, AuthorisedService.builder()
+                .defaultJurisdictionForTokenGeneration("BULKSCAN")
+                .jurisdictionIdOptionalFor(List.of(Permission.HASHTOKEN))
                 .build(), Permission.READ));
     }
 
@@ -820,11 +849,12 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .build();
     }
 
-    private Document buildDocument() {
-        final Map<String, String> myMap = Map.of(
-            METADATA_CASE_ID, TestFixture.CASE_ID_VALUE,
-            METADATA_JURISDICTION_ID, TestFixture.JURISDICTION_ID_VALUE
-        );
+    private Document buildDocument(boolean withJurisdiction, boolean withCaseTypeId) {
+        final Map<String, String> myMap = new HashMap<>() {{
+                put(METADATA_CASE_ID, TestFixture.CASE_ID_VALUE);
+                put(METADATA_JURISDICTION_ID, withJurisdiction ? TestFixture.JURISDICTION_ID_VALUE : null);
+                put(METADATA_CASE_TYPE_ID, withCaseTypeId ? TestFixture.CASE_TYPE_ID_VALUE : null);
+            }};
 
         return Document.builder()
             .metadata(myMap)

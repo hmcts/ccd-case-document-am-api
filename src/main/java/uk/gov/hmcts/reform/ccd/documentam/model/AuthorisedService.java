@@ -39,4 +39,8 @@ public class AuthorisedService {
     @Builder.Default
     @JsonProperty("caseTypeIdOptionalFor")
     private List<Permission> caseTypeIdOptionalFor = new ArrayList<>();
+
+    @Builder.Default
+    @JsonProperty("jurisdictionIdOptionalFor")
+    private List<Permission> jurisdictionIdOptionalFor = new ArrayList<>();
 }

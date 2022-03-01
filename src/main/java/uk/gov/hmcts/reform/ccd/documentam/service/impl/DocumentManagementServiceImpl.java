@@ -160,7 +160,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private void verifyHashTokenValidity(DocumentHashToken documentHashToken,
                                          Document documentMetadata) {
         String hashcodeFromStoredDocument =
-            generateHashToken(documentHashToken.getId(), documentMetadata, null);
+            generateHashToken(documentHashToken.getId(), documentMetadata, null, null);
         if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
             throw new ForbiddenException(String.format("Hash token check failed for the document: %s",
                                                        documentHashToken.getId()));
@@ -186,21 +186,22 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public String generateHashToken(UUID documentId, Document document, String caseTypeId) {
+    public String generateHashToken(UUID documentId, Document document, String defaultCaseTypeId,
+                                    String defaultJurisdictionId) {
         final String finalCaseTypeId = StringUtils.isNotEmpty(document.getCaseTypeId())
-            ? document.getCaseTypeId() : caseTypeId;
+            ? document.getCaseTypeId() : defaultCaseTypeId;
 
         if (finalCaseTypeId == null) {
             throw new ForbiddenException("No case type id available to generate hash token for document "
-                                         + documentId);
+                                             + documentId);
         }
 
         final String finalJurisdictionId = StringUtils.isNotEmpty(document.getJurisdictionId())
-            ? document.getJurisdictionId() : jurisdictionId;
+            ? document.getJurisdictionId() : defaultJurisdictionId;
 
         if (finalJurisdictionId == null) {
             throw new ForbiddenException("No jurisdiction id available to generate hash token for document "
-                                         + documentId);
+                                             + documentId);
         }
 
         final String salt = applicationParams.getSalt();
@@ -221,12 +222,19 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         if (authorisedService.getCaseTypeIdOptionalFor().contains(permission)) {
             caseTypeId = authorisedService.getDefaultCaseTypeForTokenGeneration();
         }
-
         final String finalCaseTypeId = caseTypeId;
+
+        String jurisdictionId = null;
+        if (authorisedService.getJurisdictionIdOptionalFor().contains(permission)) {
+            jurisdictionId = authorisedService.getDefaultJurisdictionForTokenGeneration();
+        }
+
+        final String finalJurisdictionId = jurisdictionId;
+
         return documentStoreClient.getDocument(documentId)
             .fold(
                 resourceNotFound -> "",
-                document -> generateHashToken(documentId, document, finalCaseTypeId)
+                document -> generateHashToken(documentId, document, finalCaseTypeId, finalJurisdictionId)
             );
     }
 
@@ -307,7 +315,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                                     final String exceptionMessage) {
         AuthorisedService serviceConfig = getServiceDetailsFromJson(serviceId);
         if (!validateCaseTypeId(serviceConfig, caseTypeId, permission)
-            || !validateJurisdictionId(serviceConfig, jurisdictionId)
+            || !validateJurisdictionId(serviceConfig, jurisdictionId, permission)
             || !validatePermissions(serviceConfig, permission)
         ) {
             log.error(logMessage, HttpStatus.FORBIDDEN);
@@ -333,10 +341,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return result;
     }
 
-    private boolean validateJurisdictionId(AuthorisedService serviceConfig, String jurisdictionId) {
+    private boolean validateJurisdictionId(AuthorisedService serviceConfig, String jurisdictionId,
+                                           Permission permission) {
         boolean result =
-            !StringUtils.isEmpty(jurisdictionId) && (serviceConfig.getJurisdictionId().equals("*")
-                || serviceConfig.getJurisdictionId().equals(jurisdictionId));
+            (StringUtils.isEmpty(jurisdictionId) && serviceConfig.getJurisdictionIdOptionalFor().contains(permission))
+            || (!StringUtils.isEmpty(jurisdictionId) && (serviceConfig.getJurisdictionId().equals("*")
+                || serviceConfig.getJurisdictionId().equals(jurisdictionId)));
 
         log.info("JurisdictionI Id is {} and validation result is {}", jurisdictionId, result);
 
