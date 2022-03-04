@@ -131,7 +131,12 @@
       "id": "bulk_scan_orchestrator",
       "caseTypeId": ["*"],
       "jurisdictionId": "*",
+      "defaultJurisdictionForTokenGeneration": "BULKSCAN",
+      "defaultCaseTypeForTokenGeneration": "BULKSCAN_Exception",
       "permissions": [
+        "HASHTOKEN"
+      ],
+      "caseTypeIdOptionalFor" : [
         "HASHTOKEN"
       ]
     },

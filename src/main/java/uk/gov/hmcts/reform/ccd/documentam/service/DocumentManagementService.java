@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
+import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
@@ -20,9 +21,11 @@ public interface DocumentManagementService {
 
     void patchDocumentMetadata(CaseDocumentsMetadata caseDocumentsMetadata);
 
-    String generateHashToken(UUID documentId, Document document);
+    String generateHashToken(final UUID documentId, final Document document, final String defaultCaseTypeId,
+                             final String defaultJurisdictionId);
 
-    String generateHashToken(final UUID documentId);
+    String generateHashToken(final UUID documentId, final AuthorisedService authorisedService,
+                             final Permission permission);
 
     UploadResponse uploadDocuments(DocumentUploadRequest documentUploadRequest);
 
@@ -37,11 +40,11 @@ public interface DocumentManagementService {
                              String logMessage,
                              String exceptionMessage);
 
-    void checkServicePermission(String caseTypeId,
-                                String jurisdictionId,
-                                String serviceId,
-                                Permission permission,
-                                String logMessage,
-                                String exceptionMessage);
+    AuthorisedService checkServicePermission(String caseTypeId,
+                                             String jurisdictionId,
+                                             String serviceId,
+                                             Permission permission,
+                                             String logMessage,
+                                             String exceptionMessage);
 
 }
