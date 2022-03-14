@@ -272,6 +272,7 @@ dependencies {
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceAuthVersion
   implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '1.5.5'
 
+  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '5.6.1'
   implementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.4.4'
   implementation group: 'org.springframework.security', name: 'spring-security-config', version: '5.4.4'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client'
