@@ -21,8 +21,8 @@ public interface DocumentManagementService {
 
     void patchDocumentMetadata(CaseDocumentsMetadata caseDocumentsMetadata);
 
-    String generateHashToken(final UUID documentId, final Document document, final String defaultCaseTypeId,
-                             final String defaultJurisdictionId);
+    String generateHashToken(final UUID documentId, final String caseId, final String caseTypeId,
+                             final String jurisdictionId);
 
     String generateHashToken(final UUID documentId, final AuthorisedService authorisedService,
                              final Permission permission);
