@@ -97,6 +97,21 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
     }
 
+    @Override
+    public void patchDocumentMetadata(UUID documentId, String caseTypeId, String jurisdictionId) {
+        List<DocumentUpdate> documentsList = new ArrayList<>();
+        final DocumentUpdate documentUpdate = new DocumentUpdate(
+            documentId,
+            Map.of(METADATA_CASE_TYPE_ID, caseTypeId,
+                   METADATA_JURISDICTION_ID, jurisdictionId
+            )
+        );
+
+        documentsList.add(documentUpdate);
+        UpdateDocumentsCommand updateDocumentsCommand = new UpdateDocumentsCommand(NULL_TTL, documentsList);
+        documentStoreClient.patchDocumentMetadata(updateDocumentsCommand);
+    }
+
     private UpdateDocumentsCommand prepareRequestForAttachingDocumentToCase(CaseDocumentsMetadata
                                                                                 caseDocumentsMetadata) {
         List<DocumentUpdate> documentsList = new ArrayList<>();
@@ -127,7 +142,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                     log.warn("Document metadata already exists for docId:{} with caseType:{} and caseId:{}. "
                                  + "Cannot override with caseType:{}, caseId:{}",
                              documentHashToken.getId(), either.get().getCaseTypeId(), either.get().getCaseId(),
-                             caseDocumentsMetadata.getCaseTypeId(), caseDocumentsMetadata.getCaseId());
+                             caseDocumentsMetadata.getCaseTypeId(), caseDocumentsMetadata.getCaseId()
+                    );
                 }
             }
 
@@ -159,11 +175,16 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private void verifyHashTokenValidity(DocumentHashToken documentHashToken,
                                          Document documentMetadata) {
-        String hashcodeFromStoredDocument = generateHashToken(documentHashToken.getId(), documentMetadata.getCaseId(),
-                              documentMetadata.getJurisdictionId(), documentMetadata.getCaseTypeId());
+        String hashcodeFromStoredDocument = generateHashToken(documentHashToken.getId(),
+                                                              documentMetadata.getCaseId(),
+                                                              documentMetadata.getJurisdictionId(),
+                                                              documentMetadata.getCaseTypeId()
+        );
         if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
-            throw new ForbiddenException(String.format("Hash token check failed for the document: %s",
-                                                       documentHashToken.getId()));
+            throw new ForbiddenException(String.format(
+                "Hash token check failed for the document: %s",
+                documentHashToken.getId()
+            ));
         }
     }
 
@@ -172,7 +193,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         boolean isMetadataExistsForSameCase = caseDocumentsMetadata.getCaseId().equalsIgnoreCase(document.getCaseId());
         if (isMetadataExistsForSameCase) {
             log.info("Document {} metadata already attached to same caseId:{} - possibly due to concurrent ccd events",
-                     documentHashToken.getId(), document.getCaseId());
+                     documentHashToken.getId(), document.getCaseId()
+            );
             return true;
         }
 
@@ -180,7 +202,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         if (isOfMovingCaseType) {
             log.info("Document {} is trying to move From caseType:{}, caseId:{} To caseType:{}, caseId:{}",
                      documentHashToken.getId(), document.getCaseTypeId(), document.getCaseId(),
-                     caseDocumentsMetadata.getCaseTypeId(), caseDocumentsMetadata.getCaseId());
+                     caseDocumentsMetadata.getCaseTypeId(), caseDocumentsMetadata.getCaseId()
+            );
         }
         return isOfMovingCaseType;
     }
@@ -238,17 +261,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
         String hashToken = generateHashToken(documentId, documentMetaData.getCaseId(), jurisdictionId, caseTypeId);
 
+        // if jurisdictionId or caseTypeId for a document is null, default values are retrieved from service_config
+        // for the client, and if the client has sufficient permission to generate a hashToken
+        // the document's metadata is patched with these values to allow management of the file to the client.
         if (metadataPatchRequired) {
-            List<DocumentUpdate> documentsList = new ArrayList<>();
-            final DocumentUpdate documentUpdate = new DocumentUpdate(
-                documentId,
-                Map.of(METADATA_CASE_TYPE_ID, caseTypeId,
-                    METADATA_JURISDICTION_ID, jurisdictionId)
-            );
-
-            documentsList.add(documentUpdate);
-            UpdateDocumentsCommand updateDocumentsCommand = new UpdateDocumentsCommand(NULL_TTL, documentsList);
-            documentStoreClient.patchDocumentMetadata(updateDocumentsCommand);
+            patchDocumentMetadata(documentId, caseTypeId, jurisdictionId);
         }
 
         return hashToken;
@@ -258,9 +275,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public UploadResponse uploadDocuments(final DocumentUploadRequest documentUploadRequest) {
         final DmUploadResponse dmResponse = documentStoreClient.uploadDocuments(documentUploadRequest);
 
-        return buildUploadResponse(documentUploadRequest.getCaseTypeId(),
-                                   documentUploadRequest.getJurisdictionId(),
-                                   dmResponse);
+        return buildUploadResponse(
+            documentUploadRequest.getCaseTypeId(),
+            documentUploadRequest.getJurisdictionId(),
+            dmResponse
+        );
     }
 
     @Override
@@ -350,7 +369,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         boolean result =
             (StringUtils.isEmpty(caseTypeId) && serviceConfig.getCaseTypeIdOptionalFor().contains(permission))
                 || (!StringUtils.isEmpty(caseTypeId)
-                    && (caseTypeIds.contains("*") || caseTypeIds.contains(caseTypeId)));
+                && (caseTypeIds.contains("*") || caseTypeIds.contains(caseTypeId)));
 
         log.info("Case Type Id is {} and validation result is {}", caseTypeId, result);
 
@@ -361,7 +380,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                            Permission permission) {
         boolean result =
             (StringUtils.isEmpty(jurisdictionId) && serviceConfig.getJurisdictionIdOptionalFor().contains(permission))
-            || (!StringUtils.isEmpty(jurisdictionId) && (serviceConfig.getJurisdictionId().equals("*")
+                || (!StringUtils.isEmpty(jurisdictionId) && (serviceConfig.getJurisdictionId().equals("*")
                 || serviceConfig.getJurisdictionId().equals(jurisdictionId)));
 
         log.info("JurisdictionI Id is {} and validation result is {}", jurisdictionId, result);
