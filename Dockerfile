@@ -4,7 +4,9 @@ COPY ${JAR_FILE} application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
 
 ARG APP_INSIGHTS_AGENT_VERSION=2.5.1
-FROM hmctspublic.azurecr.io/base/java:11-distroless
+ARG PLATFORM=""
+
+FROM hmctspublic.azurecr.io/base/java${PLATFORM}:11-distroless
 
 COPY lib/AI-Agent.xml /opt/app/
 
