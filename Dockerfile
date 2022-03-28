@@ -1,6 +1,5 @@
 
-ARG PLATFORM=""
-FROM --platform=${PLATFORM} adoptopenjdk:11-jre-hotspot as builder
+FROM adoptopenjdk:11-jre-hotspot as builder
 
 ARG JAR_FILE=build/libs/*.jar
 COPY ${JAR_FILE} application.jar
@@ -8,6 +7,7 @@ RUN java -Djarmode=layertools -jar application.jar extract
 
 ARG APP_INSIGHTS_AGENT_VERSION=2.5.1
 
+ARG PLATFORM=""
 FROM hmctspublic.azurecr.io/base/java${PLATFORM}:11-distroless
 
 COPY lib/AI-Agent.xml /opt/app/
