@@ -18,7 +18,7 @@ steps:
   - id: pull-base-image-arm64
     cmd: docker pull --platform linux/arm64 hmctspublic.azurecr.io/base/java:11-distroless && docker tag hmctspublic.azurecr.io/base/java:11-distroless hmctspublic.azurecr.io/base/java/linux/arm64:11-distroless
     when:
-      - pull-base-image-amd64
+      - runtime-amd64
     keep: true
 
   - id: runtime-arm64
