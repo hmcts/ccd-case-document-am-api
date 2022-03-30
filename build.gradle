@@ -46,7 +46,7 @@ pmd {
   sourceSets = []
 }
 ext['spring-framework.version'] = '5.3.15'
-ext['spring-security.version'] = '5.4.7'
+ext['spring-security.version'] = '5.6.1'
 ext['log4j2.version'] = '2.17.1'
 
 group = 'uk.gov.hmcts.reform.ccd.documentam'
@@ -272,8 +272,8 @@ dependencies {
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceAuthVersion
   implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '1.5.5'
 
-  implementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.4.4'
-  implementation group: 'org.springframework.security', name: 'spring-security-config', version: '5.4.4'
+  implementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.6.1'
+  implementation group: 'org.springframework.security', name: 'spring-security-config', version: '5.6.1'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-resource-server'
 
@@ -288,6 +288,8 @@ dependencies {
   implementation group: 'net.minidev', name: 'json-smart', version: '2.4.7'
 
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
+
+  implementation group: 'com.nimbusds', name: 'nimbus-jose-jwt', version: '9.21'
 
   // CVE-2022-23181
   implementation "org.apache.tomcat.embed:tomcat-embed-core:${versions.tomcatEmbedded}"
