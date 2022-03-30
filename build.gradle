@@ -289,6 +289,8 @@ dependencies {
 
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
 
+  implementation group: 'com.nimbusds', name: 'nimbus-jose-jwt', version: '9.21'
+
   // CVE-2022-23181
   implementation "org.apache.tomcat.embed:tomcat-embed-core:${versions.tomcatEmbedded}"
   implementation "org.apache.tomcat.embed:tomcat-embed-el:${versions.tomcatEmbedded}"
