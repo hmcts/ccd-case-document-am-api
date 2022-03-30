@@ -209,5 +209,15 @@
         "CREATE",
         "READ"
       ]
-    }]
+    },
+    {
+      "id": "et_sya_api",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "EMPLOYMENT",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"]
+      }]
 }
