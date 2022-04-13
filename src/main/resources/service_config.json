@@ -242,5 +242,14 @@
         "UPDATE",
         "DELETE"
       ]
+    },
+    {
+      "id": "ds_ui",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE"]
     }]
 }

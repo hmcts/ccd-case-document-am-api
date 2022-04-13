@@ -38,4 +38,9 @@
     <cve>CVE-2020-36518</cve>
   </suppress>
 
+  <!-- Suppress before it's fixed. -->
+  <suppress until="2022-04-25">
+    <cve>CVE-2022-22950</cve>
+  </suppress>  
+
 </suppressions>
