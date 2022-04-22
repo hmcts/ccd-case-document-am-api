@@ -218,6 +218,38 @@
         "CREATE",
         "READ",
         "UPDATE",
-        "DELETE"]
-      }]
+        "DELETE"
+      ]
+    },
+    {
+      "id": "adoption_cos_api",
+      "caseTypeId": ["A58"],
+      "jurisdictionId": "ADOPTION",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
+      "id": "adoption_web",
+      "caseTypeId": ["A58"],
+      "jurisdictionId": "ADOPTION",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
+      "id": "ds_ui",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE"]
+    }]
 }

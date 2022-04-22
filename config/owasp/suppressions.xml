@@ -30,20 +30,9 @@
     <cve>CVE-2020-29245</cve>
   </suppress>
 
-	<suppress until="2022-04-25">
-    		<notes><![CDATA[
-   			file name: spring-security-core-5.4.7.jar
-   		]]></notes>
-    		<packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-core@.*$</packageUrl>
-    		<vulnerabilityName>CWE-862: Missing Authorization</vulnerabilityName>
-  </suppress>
-
+  <!-- Suppress before it's fixed. -->
   <suppress until="2022-04-25">
-    <notes><![CDATA[
-   file name: jackson-databind-2.11.4.jar
-   ]]></notes>
-    <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>
-    <cve>CVE-2020-36518</cve>
+    <cve>CVE-2022-22950</cve>
   </suppress>
 
 </suppressions>
