@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
 import io.vavr.control.Either;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
@@ -31,6 +32,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DOCUMENT_ME
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.RESOURCE_NOT_FOUND;
 
 @Component
+@Slf4j
 public class DocumentStoreClient {
 
     private final RestTemplate restTemplate;
@@ -49,6 +51,8 @@ public class DocumentStoreClient {
                 String.format("%s/documents/%s", applicationParams.getDocumentURL(), documentId),
                 Document.class
             );
+
+            log.debug("Result of {} metadata call: {}", documentId, document);
 
             return Either.right(document);
         } catch (HttpClientErrorException exception) {

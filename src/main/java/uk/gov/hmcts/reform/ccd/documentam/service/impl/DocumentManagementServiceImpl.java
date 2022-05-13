@@ -313,6 +313,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                                     final Permission permission,
                                                     final String logMessage,
                                                     final String exceptionMessage) {
+        log.debug("checkServicePermission parameters: caseTypeId: {}, jurisdictionId: {}, serviceId: {}",
+                  caseTypeId, jurisdictionId, serviceId);
+
         AuthorisedService serviceConfig = getServiceDetailsFromJson(serviceId);
         if (!validateCaseTypeId(serviceConfig, caseTypeId, permission)
             || !validateJurisdictionId(serviceConfig, jurisdictionId, permission)
