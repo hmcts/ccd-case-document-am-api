@@ -51,7 +51,8 @@
       "caseTypeId": ["*"],
       "jurisdictionId": "*",
       "permissions": [
-        "ATTACH"
+        "ATTACH",
+        "READ"
       ]
     },
     {
