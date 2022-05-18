@@ -97,6 +97,21 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
     }
 
+    @Override
+    public void patchDocumentMetadata(UUID documentId, String caseTypeId, String jurisdictionId) {
+        List<DocumentUpdate> documentsList = new ArrayList<>();
+        final DocumentUpdate documentUpdate = new DocumentUpdate(
+            documentId,
+            Map.of(METADATA_CASE_TYPE_ID, caseTypeId,
+                   METADATA_JURISDICTION_ID, jurisdictionId
+            )
+        );
+
+        documentsList.add(documentUpdate);
+        UpdateDocumentsCommand updateDocumentsCommand = new UpdateDocumentsCommand(NULL_TTL, documentsList);
+        documentStoreClient.patchDocumentMetadata(updateDocumentsCommand);
+    }
+
     private UpdateDocumentsCommand prepareRequestForAttachingDocumentToCase(CaseDocumentsMetadata
                                                                                 caseDocumentsMetadata) {
         List<DocumentUpdate> documentsList = new ArrayList<>();
@@ -159,8 +174,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private void verifyHashTokenValidity(DocumentHashToken documentHashToken,
                                          Document documentMetadata) {
-        String hashcodeFromStoredDocument =
-            generateHashToken(documentHashToken.getId(), documentMetadata, null, null);
+        String hashcodeFromStoredDocument = generateHashToken(documentHashToken.getId(), documentMetadata.getCaseId(),
+                              documentMetadata.getJurisdictionId(), documentMetadata.getCaseTypeId());
         if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
             throw new ForbiddenException(String.format("Hash token check failed for the document: %s",
                                                        documentHashToken.getId()));
@@ -186,56 +201,66 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public String generateHashToken(UUID documentId, Document document, String defaultCaseTypeId,
-                                    String defaultJurisdictionId) {
-        final String finalCaseTypeId = StringUtils.isNotEmpty(document.getCaseTypeId())
-            ? document.getCaseTypeId() : defaultCaseTypeId;
-
-        if (finalCaseTypeId == null) {
-            throw new ForbiddenException("No case type id available to generate hash token for document "
-                                             + documentId);
-        }
-
-        final String finalJurisdictionId = StringUtils.isNotEmpty(document.getJurisdictionId())
-            ? document.getJurisdictionId() : defaultJurisdictionId;
-
-        if (finalJurisdictionId == null) {
-            throw new ForbiddenException("No jurisdiction id available to generate hash token for document "
-                                             + documentId);
-        }
-
+    public String generateHashToken(UUID documentId, String caseId, String jurisdictionId,
+                                    String caseTypeId) {
         final String salt = applicationParams.getSalt();
 
-        return (document.getCaseId() == null)
+        return (caseId == null)
             ? ApplicationUtils.generateHashCode(salt.concat(documentId.toString()
-                                                                .concat(finalJurisdictionId)
-                                                                .concat(finalCaseTypeId)))
+                                                                .concat(jurisdictionId)
+                                                                .concat(caseTypeId)))
             : ApplicationUtils.generateHashCode(salt.concat(documentId.toString()
-                                                                .concat(document.getCaseId())
-                                                                .concat(finalJurisdictionId)
-                                                                .concat(finalCaseTypeId)));
+                                                                .concat(caseId)
+                                                                .concat(jurisdictionId)
+                                                                .concat(caseTypeId)));
     }
 
     @Override
     public String generateHashToken(UUID documentId, AuthorisedService authorisedService, Permission permission) {
-        String caseTypeId = null;
-        if (authorisedService.getCaseTypeIdOptionalFor().contains(permission)) {
-            caseTypeId = authorisedService.getDefaultCaseTypeForTokenGeneration();
+        Either<ResourceNotFoundException, Document> either = documentStoreClient.getDocument(documentId);
+        if (either.isLeft()) {
+            return "";
         }
-        final String finalCaseTypeId = caseTypeId;
+        Document documentMetaData = either.get();
 
-        String jurisdictionId = null;
-        if (authorisedService.getJurisdictionIdOptionalFor().contains(permission)) {
-            jurisdictionId = authorisedService.getDefaultJurisdictionForTokenGeneration();
+        boolean metadataPatchRequired = false;
+
+        String caseTypeId;
+        if (StringUtils.isNotEmpty(documentMetaData.getCaseTypeId())) {
+            caseTypeId = documentMetaData.getCaseTypeId();
+        } else {
+            if (authorisedService.getCaseTypeIdOptionalFor().contains(permission)) {
+                caseTypeId = authorisedService.getDefaultCaseTypeForTokenGeneration();
+                metadataPatchRequired = true;
+            } else {
+                throw new ForbiddenException("No case type id available to generate hash token for document "
+                                                 + documentId);
+            }
         }
 
-        final String finalJurisdictionId = jurisdictionId;
+        String jurisdictionId;
+        if (StringUtils.isNotEmpty(documentMetaData.getJurisdictionId())) {
+            jurisdictionId = documentMetaData.getJurisdictionId();
+        } else {
+            if (authorisedService.getJurisdictionIdOptionalFor().contains(permission)) {
+                jurisdictionId = authorisedService.getDefaultJurisdictionForTokenGeneration();
+                metadataPatchRequired = true;
+            } else {
+                throw new ForbiddenException("No jurisdiction id available to generate hash token for document "
+                                                 + documentId);
+            }
+        }
 
-        return documentStoreClient.getDocument(documentId)
-            .fold(
-                resourceNotFound -> "",
-                document -> generateHashToken(documentId, document, finalCaseTypeId, finalJurisdictionId)
-            );
+        String hashToken = generateHashToken(documentId, documentMetaData.getCaseId(), jurisdictionId, caseTypeId);
+
+        // if jurisdictionId or caseTypeId for a document is null, default values are retrieved from service_config
+        // for the client, and if the client has sufficient permission to generate a hashToken
+        // the document's metadata is patched with these values to allow management of the file to the client.
+        if (metadataPatchRequired) {
+            patchDocumentMetadata(documentId, caseTypeId, jurisdictionId);
+        }
+
+        return hashToken;
     }
 
     @Override
@@ -313,6 +338,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                                     final Permission permission,
                                                     final String logMessage,
                                                     final String exceptionMessage) {
+        log.debug("checkServicePermission parameters: caseTypeId: {}, jurisdictionId: {}, serviceId: {}",
+                  caseTypeId, jurisdictionId, serviceId);
+
         AuthorisedService serviceConfig = getServiceDetailsFromJson(serviceId);
         if (!validateCaseTypeId(serviceConfig, caseTypeId, permission)
             || !validateJurisdictionId(serviceConfig, jurisdictionId, permission)

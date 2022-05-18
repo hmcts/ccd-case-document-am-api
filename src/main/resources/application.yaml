@@ -100,3 +100,12 @@ http:
       timeout: ${HTTP_CLIENT_CONNECTION_TIMEOUT:10000}
     read:
       timeout: ${HTTP_CLIENT_READ_TIMEOUT:30000}
+
+logging:
+  level:
+    uk:
+      gov:
+        hmcts:
+          reform:
+            ccd:
+              documentam: ${CCD_DOCUMENTAM_LOG_LEVEL:INFO}
