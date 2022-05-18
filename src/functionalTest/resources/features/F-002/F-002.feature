@@ -56,7 +56,7 @@ Feature: F-002: Get Document Binary Content by Document ID
     @S-026 @Ignore
     Scenario: generic scenario for Unsupported Media Type
 
-  @S-114
+  @S-114 @Ignore #this scenario is not valid anymore after CCD-3138.
   Scenario: must receive an error response when CCD Data Store tries to access Get Document Binary Content API
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
     And a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
