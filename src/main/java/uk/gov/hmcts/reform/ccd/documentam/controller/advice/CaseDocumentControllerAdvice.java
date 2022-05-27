@@ -45,6 +45,7 @@ public class CaseDocumentControllerAdvice {
     protected ResponseEntity<Object> handleForbiddenException(final ForbiddenException exception,
                                                               final HttpServletRequest request) {
 
+        logger.error("I AM IN handleForbiddenException", exception);
         return errorDetailsResponseEntity(exception, HttpStatus.FORBIDDEN, getPath(request));
     }
 
@@ -92,6 +93,7 @@ public class CaseDocumentControllerAdvice {
 
     @ExceptionHandler(HttpClientErrorException.class)
     protected ResponseEntity<Object> handleHttpClientErrorException(final HttpClientErrorException exception) {
+        logger.error("I AM IN handleForbiddenException", exception);
         return new ResponseEntity<>(exception.getResponseBodyAsString(), exception.getStatusCode());
     }
 
