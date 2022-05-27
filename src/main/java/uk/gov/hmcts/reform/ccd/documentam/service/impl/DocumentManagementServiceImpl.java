@@ -89,10 +89,15 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Override
     public void patchDocumentMetadata(final CaseDocumentsMetadata caseDocumentsMetadata) {
+        log.info("I am in patchDocumentMetadata");
+
         final UpdateDocumentsCommand updateDocumentsCommand
             = prepareRequestForAttachingDocumentToCase(caseDocumentsMetadata);
 
+        log.info("updateDocumentsCommand is ready: {}", updateDocumentsCommand);
+
         if (CollectionUtils.isNotEmpty(updateDocumentsCommand.getDocuments())) {
+            log.info("Calling patchDocumentMetadata");
             documentStoreClient.patchDocumentMetadata(updateDocumentsCommand);
         }
     }
@@ -116,24 +121,32 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                                                                 caseDocumentsMetadata) {
         List<DocumentUpdate> documentsList = new ArrayList<>();
         for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashTokens()) {
+            log.info("processing documentHashToken: {}", documentHashToken);
+
             final Either<ResourceNotFoundException, Document> either =
                 documentStoreClient.getDocument(documentHashToken.getId());
 
             if (documentHashToken.getHashToken() != null) {
+                log.info("documentHashToken is not null");
                 if (either.isLeft()) {
+                    log.info("either is left {}", either);
+                    log.error(String.valueOf(either.getLeft()));
                     throw either.getLeft();
                 }
                 if (shouldSkip(caseDocumentsMetadata.getCaseId(), documentHashToken.getId(), either.get())) {
+                    log.info("I am in should skip ");
                     continue;
                 }
                 verifyHashTokenValidity(documentHashToken, either.get());
             } else if (applicationParams.isHashCheckEnabled()) {
+                log.info("I am in applicationParams.isHashCheckEnabled()");
                 throw new ForbiddenException(
                     String.format(
                         "Hash check is enabled but hashToken wasn't provided for the document: %s",
                         documentHashToken.getId()
                     ));
             } else {
+                log.info("I am in document metadata exists and document is not a moving case");
                 // document metadata exists and document is not a moving case
                 if (either.isRight()
                     && !either.get().getMetadata().isEmpty()
@@ -155,9 +168,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 )
             );
 
+            log.info("documentUpdate is ready: {}", documentUpdate);
             documentsList.add(documentUpdate);
         }
 
+        log.info("documentsList is ready: {}", documentsList);
         return new UpdateDocumentsCommand(NULL_TTL, documentsList);
     }
 
@@ -174,12 +189,18 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private void verifyHashTokenValidity(DocumentHashToken documentHashToken,
                                          Document documentMetadata) {
+        log.info("I am in verifyHashTokenValidity. documentHashToken: {}. documentMetadata: {}",
+                 documentHashToken, documentMetadata);
         String hashcodeFromStoredDocument = generateHashToken(documentHashToken.getId(), documentMetadata.getCaseId(),
                               documentMetadata.getJurisdictionId(), documentMetadata.getCaseTypeId());
+        log.info("hashcodeFromStoredDocument :{}", hashcodeFromStoredDocument);
         if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
+            log.info("Hash token check failed for the document:{}", documentHashToken.getId());
             throw new ForbiddenException(String.format("Hash token check failed for the document: %s",
                                                        documentHashToken.getId()));
         }
+
+        log.info("hashtoken validation is successfully");
     }
 
     private boolean allowMetadataOverride(Document document, CaseDocumentsMetadata caseDocumentsMetadata,
@@ -204,7 +225,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     public String generateHashToken(UUID documentId, String caseId, String jurisdictionId,
                                     String caseTypeId) {
         final String salt = applicationParams.getSalt();
-
+        log.info("I am in generateHashToken. documentId: {}. caseId: {}. jurisdictionId:{}. caseTypeId: {}",
+                 documentId, caseId, jurisdictionId, caseTypeId);
         return (caseId == null)
             ? ApplicationUtils.generateHashCode(salt.concat(documentId.toString()
                                                                 .concat(jurisdictionId)

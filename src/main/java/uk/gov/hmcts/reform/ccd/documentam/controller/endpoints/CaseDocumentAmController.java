@@ -356,6 +356,7 @@ public class CaseDocumentAmController {
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken) {
 
+        log.info("attachToCase is called. Request details: {}", caseDocumentsMetadata);
         documentManagementService.checkServicePermission(
             caseDocumentsMetadata.getCaseTypeId(),
             caseDocumentsMetadata.getJurisdictionId(),
@@ -364,6 +365,7 @@ public class CaseDocumentAmController {
             SERVICE_PERMISSION_ERROR,
             caseDocumentsMetadata.getCaseTypeId() + " " + caseDocumentsMetadata.getJurisdictionId());
 
+        log.info("Ready to call patchDocumentMetadata");
         documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
 
         return ResponseEntity.ok(new PatchDocumentMetaDataResponse("Success"));

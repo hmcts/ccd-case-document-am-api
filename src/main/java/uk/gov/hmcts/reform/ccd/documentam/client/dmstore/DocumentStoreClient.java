@@ -123,11 +123,15 @@ public class DocumentStoreClient {
     }
 
     public void patchDocumentMetadata(final UpdateDocumentsCommand updateDocumentsCommand) {
+        log.info("I am in patchDocumentMetadata");
         restTemplate.patchForObject(
             String.format("%s/documents", applicationParams.getDocumentURL()),
             updateDocumentsCommand,
             Void.class
         );
+
+        log.info("patchDocumentMetadata has been called");
+
     }
 
     public DmUploadResponse uploadDocuments(final DocumentUploadRequest documentUploadRequest) {
