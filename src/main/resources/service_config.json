@@ -245,6 +245,17 @@
       ]
     },
     {
+      "id": "fis_cos_api",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
       "id": "ds_ui",
       "caseTypeId": ["*"],
       "jurisdictionId": "*",
