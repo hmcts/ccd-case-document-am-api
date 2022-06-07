@@ -12,6 +12,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.util.UriUtils;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
@@ -91,8 +92,17 @@ public class CaseDocumentControllerAdvice {
     }
 
     @ExceptionHandler(HttpClientErrorException.class)
-    protected ResponseEntity<Object> handleHttpClientErrorException(final HttpClientErrorException exception) {
-        return new ResponseEntity<>(exception.getResponseBodyAsString(), exception.getStatusCode());
+    protected ResponseEntity<Object> handleHttpClientErrorException(final HttpClientErrorException exception,
+                                                                    final HttpServletRequest request) {
+        return errorDetailsResponseEntity(exception, exception.getStatusCode(), getPath(request));
+    }
+
+    @ExceptionHandler(HttpServerErrorException.class)
+    protected ResponseEntity<Object> handleHttpServerErrorException(final HttpServerErrorException exception,
+                                                                    final HttpServletRequest request) {
+        HttpStatus httpStatus = (exception.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR)
+            ? HttpStatus.BAD_GATEWAY : exception.getStatusCode();
+        return errorDetailsResponseEntity(exception, httpStatus, getPath(request));
     }
 
     @ExceptionHandler(Exception.class)
