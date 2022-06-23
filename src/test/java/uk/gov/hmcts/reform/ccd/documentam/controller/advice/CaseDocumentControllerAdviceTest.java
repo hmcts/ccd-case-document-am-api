@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.ccd.documentam.controller.advice;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.controller.endpoints.CaseDocumentAmController;
@@ -24,13 +26,13 @@ import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 
 import javax.servlet.http.HttpServletRequest;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 
 import static java.util.Collections.emptyList;
-import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -165,17 +167,49 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
     @Test
     void testHandleHttpClientErrorException() {
-        final HttpClientErrorException exception = new HttpClientErrorException(HttpStatus.BAD_REQUEST,
-                                                                                "Bad Request",
-                                                                                "{\"key\":\"value\"}".getBytes(),
-                                                                                StandardCharsets.UTF_8);
+        final HttpClientErrorException exception = HttpClientErrorException
+            .create(HttpStatus.BAD_REQUEST, "myUniqueExceptionMessage", HttpHeaders.EMPTY,
+                    new byte[0], Charset.defaultCharset());
 
-        final ResponseEntity<Object> responseEntity = underTest.handleHttpClientErrorException(exception);
+        final ResponseEntity<Object> responseEntity = underTest.handleHttpClientErrorException(exception, request);
 
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
         assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
 
-        assertThatJson(responseEntity.getBody())
-            .and(a -> a.node("key").isEqualTo("value"));
+        ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
+        assert errorResponse != null;
+        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
+    }
+
+    @Test
+    void testHandleHttpServerErrorExceptionWhenReceivedInternalServerError() {
+        final HttpServerErrorException exception = HttpServerErrorException
+                .create(HttpStatus.INTERNAL_SERVER_ERROR, "myUniqueExceptionMessage", HttpHeaders.EMPTY,
+                        new byte[0], Charset.defaultCharset());
+
+        final ResponseEntity<Object> responseEntity = underTest.handleHttpServerErrorException(exception, request);
+
+        assertEquals(HttpStatus.BAD_GATEWAY, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.BAD_GATEWAY.value(), responseEntity.getStatusCodeValue());
+
+        ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
+        assert errorResponse != null;
+        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
+    }
+
+    @Test
+    void testHandleHttpServerErrorExceptionWhenReceivedServiceUnavailable() {
+        final HttpServerErrorException exception = HttpServerErrorException
+                .create(HttpStatus.SERVICE_UNAVAILABLE, "myUniqueExceptionMessage", HttpHeaders.EMPTY,
+                        new byte[0], Charset.defaultCharset());
+
+        final ResponseEntity<Object> responseEntity = underTest.handleHttpServerErrorException(exception, request);
+
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE.value(), responseEntity.getStatusCodeValue());
+
+        ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
+        assert errorResponse != null;
+        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
     }
 }
