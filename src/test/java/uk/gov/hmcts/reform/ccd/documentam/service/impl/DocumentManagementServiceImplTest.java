@@ -358,6 +358,27 @@ class DocumentManagementServiceImplTest implements TestFixture {
     }
 
     @Test
+    void patchDocumentMetadata_ParametricMethod() {
+        // GIVEN
+        final ArgumentCaptor<UpdateDocumentsCommand> updateDocumentsCommandCaptor =
+            ArgumentCaptor.forClass(UpdateDocumentsCommand.class);
+
+        doNothing().when(documentStoreClient).patchDocumentMetadata(updateDocumentsCommandCaptor.capture());
+
+        // WHEN
+        sut.patchDocumentMetadata(DOCUMENT_ID, CASE_TYPE_ID_VALUE, JURISDICTION_ID_VALUE);
+
+        // THEN
+        final UpdateDocumentsCommand documentsCommand = updateDocumentsCommandCaptor.getValue();
+
+        assertThat(documentsCommand)
+            .isNotNull()
+            .satisfies(command -> assertThat(command.getTtl()).isNull());
+
+        verify(documentStoreClient).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
+    }
+
+    @Test
     void shouldPatchMetaDataEvenIfTokenIsNotPassed_hashCheckDisabled() {
         // GIVEN
         doReturn(false).when(applicationParams).isHashCheckEnabled();
@@ -727,12 +748,15 @@ class DocumentManagementServiceImplTest implements TestFixture {
         stubGetSalt();
         stubGetDocument(document);
 
+        doNothing().when(documentStoreClient).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
+
         final String result = sut.generateHashToken(DOCUMENT_ID, AuthorisedService.builder()
             .defaultCaseTypeForTokenGeneration("BULKSCAN")
             .caseTypeIdOptionalFor(List.of(Permission.HASHTOKEN))
             .build(), Permission.HASHTOKEN);
 
         assertNotNull(result);
+        verify(documentStoreClient, times(1)).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
     }
 
     @Test
@@ -742,12 +766,16 @@ class DocumentManagementServiceImplTest implements TestFixture {
         stubGetSalt();
         stubGetDocument(document);
 
+        doNothing().when(documentStoreClient).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
+
+        final String defaultJurisdiction = "BULKSCAN";
         final String result = sut.generateHashToken(DOCUMENT_ID, AuthorisedService.builder()
-            .defaultJurisdictionForTokenGeneration("BULKSCAN")
+            .defaultJurisdictionForTokenGeneration(defaultJurisdiction)
             .jurisdictionIdOptionalFor(List.of(Permission.HASHTOKEN))
             .build(), Permission.HASHTOKEN);
 
         assertNotNull(result);
+        verify(documentStoreClient, times(1)).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
     }
 
     @Test
