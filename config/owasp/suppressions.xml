@@ -26,7 +26,7 @@
   <suppress>
     <notes>Temporary Suppression
       CVE-2022-34305 refer https://tools.hmcts.net/jira/browse/CCD-3427
-      cve>CVE-2022-33915 refer https://tools.hmcts.net/jira/browse/CCD-3447
+      CVE-2022-33915 refer https://tools.hmcts.net/jira/browse/CCD-3447
     </notes>
     <cve>CVE-2022-34305</cve>
     <cve>CVE-2022-33915</cve>
