@@ -106,10 +106,10 @@ Feature: F-007: Attach Document to Case
     Then a positive response is received,
     And the response has all other details as expected.
 
-  @S-080 @Ignore
+  @S-080 @Ignore @Reenable
   Scenario: generic scenario for Unauthorised
 
-  @S-081 @Ignore
+  @S-081 @Ignore @Reenable
   Scenario: generic scenario for Forbidden
 
   @S-102

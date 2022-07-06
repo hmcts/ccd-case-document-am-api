@@ -47,13 +47,13 @@ Feature: F-002: Get Document Binary Content by Document ID
     And the response has all other details as expected.
 
     #Generic Scenarios for Security
-    @S-024 @Ignore
+    @S-024 @Ignore @Reenable
     Scenario: generic scenario for Unauthorized
 
-    @S-025 @Ignore
+    @S-025 @Ignore @Reenable
     Scenario: generic scenario for Forbidden
 
-    @S-026 @Ignore
+    @S-026 @Ignore @Reenable
     Scenario: generic scenario for Unsupported Media Type
 
   @S-114 @Ignore #this scenario is not valid anymore after CCD-3138.

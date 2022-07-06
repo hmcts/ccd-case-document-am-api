@@ -111,7 +111,8 @@ task functional(type: Test, description: 'Runs the functional tests.', group: 'V
       classpath += configurations.cucumberRuntime + sourceSets.functionalTest.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
       args = ['--plugin', "json:${rootDir}/target/cucumber.json",
               '--plugin', "junit:${buildDir}/test-results/functional/cucumber.xml",
-              '--tags', 'not @Ignore',
+//              '--tags', 'not @Ignore',
+              '--tags', '@Reenable',
               '--glue', 'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features/']
     }
   }
