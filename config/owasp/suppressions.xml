@@ -11,6 +11,7 @@
       CVE-2020-29245 refer https://tools.hmcts.net/jira/browse/CCD-21
       CVE-2018-1258  refer https://tools.hmcts.net/jira/browse/CCD-460
       CVE-2020-23171 refer https://tools.hmcts.net/jira/browse/CCD-1870
+      CVE-2022-33915 refer https://tools.hmcts.net/jira/browse/CCD-3447
     </notes>
     <cve>CVE-2016-1000027</cve>
     <cve>CVE-2020-29242</cve>
@@ -19,13 +20,14 @@
     <cve>CVE-2020-29245</cve>
     <cve>CVE-2018-1258</cve>
     <cve>CVE-2020-23171</cve>
+    <cve>CVE-2022-33915</cve>
   </suppress>
   <!--End of false positives section -->
-  
+
   <!--Please add all the temporary suppression under the below section -->
   <suppress>
     <notes>Temporary Suppression
-      CVE-2022-34305  refer https://tools.hmcts.net/jira/browse/CCD-3427
+      CVE-2022-34305 refer https://tools.hmcts.net/jira/browse/CCD-3427
     </notes>
     <cve>CVE-2022-34305</cve>
   </suppress>
