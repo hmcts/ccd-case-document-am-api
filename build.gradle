@@ -204,9 +204,6 @@ sonarqube {
     property "sonar.coverage.jacoco.xmlReportPaths", "${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml"
     property "sonar.pitest.mode", "reuseReport"
     property "sonar.pitest.reportsDirectory", "build/reports/pitest"
-    // FIXME : RDM-11309
-    property "sonar.exclusions",  "**/service/impl/DocumentManagementServiceImpl.java,"
-    property "sonar.coverage.exclusions", "**/configuration/*.java,**/advice/exception/*.java,**/apihelper/*.java,**/ErrorConstants.java,**/ClassificationValueValidator.java,**/UpdateDocumentCommand.java,**/UpdateDocumentsCommand.java,**/AuthorisedService.java"
     property "sonar.junit.reportPaths", "${project.buildDir}/test-results/junit-platform"
   }
 }
