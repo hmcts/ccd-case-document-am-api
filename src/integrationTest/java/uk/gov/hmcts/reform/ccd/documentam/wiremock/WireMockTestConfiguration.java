@@ -57,7 +57,7 @@ public class WireMockTestConfiguration {
                                                                              basePath);
         return new WebMvcEndpointHandlerMapping(endpointMapping, webEndpoints, endpointMediaTypes,
                                                 corsProperties.toCorsConfiguration(),
-                                                new EndpointLinksResolver(allEndpoints, basePath),
+                                                new EndpointLinksResolver((Collection<? extends ExposableEndpoint<?>>) allEndpoints, basePath),
                                                 shouldRegisterLinksMapping, null);
     }
 
