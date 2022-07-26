@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.documentam.wiremock.extension.DynamicS2sDetailsRe
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Configuration
 public class WireMockTestConfiguration {
@@ -46,7 +47,7 @@ public class WireMockTestConfiguration {
         EndpointMediaTypes endpointMediaTypes, CorsEndpointProperties corsProperties,
         WebEndpointProperties webEndpointProperties, Environment environment) {
 
-        ArrayList<ExposableEndpoint> allEndpoints = new ArrayList<>();
+        List<ExposableEndpoint<?>> allEndpoints = new ArrayList();
         Collection<ExposableWebEndpoint> webEndpoints = webEndpointsSupplier.getEndpoints();
         allEndpoints.addAll(webEndpoints);
         allEndpoints.addAll(servletEndpointsSupplier.getEndpoints());
@@ -57,7 +58,7 @@ public class WireMockTestConfiguration {
                                                                              basePath);
         return new WebMvcEndpointHandlerMapping(endpointMapping, webEndpoints, endpointMediaTypes,
                                                 corsProperties.toCorsConfiguration(),
-                                                new EndpointLinksResolver((Collection<? extends ExposableEndpoint<?>>) allEndpoints, basePath),
+                                                new EndpointLinksResolver(allEndpoints, basePath),
                                                 shouldRegisterLinksMapping, null);
     }
 
