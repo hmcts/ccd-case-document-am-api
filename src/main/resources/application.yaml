@@ -26,6 +26,11 @@ management:
 
 #If you use a database then uncomment below lines and update db properties accordingly
 spring:
+#CCD-3509 CVE-2021-22044 spring.mvc.pathmatch.matching-strategy = ant_path_matcher
+#required to fix null pointers in integration tests, conflict in Springfox after Springboot 2.6.10 upgrade
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
   application:
     name: CCD Case Document AM API
   servlet:
