@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.ccd.documentam.wiremock;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.CorsEndpointProperties;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.actuate.autoconfigure.web.server.ManagementPortType;
-import org.springframework.boot.actuate.endpoint.ExposableEndpoint;
 import org.springframework.boot.actuate.endpoint.web.EndpointMediaTypes;
 import org.springframework.boot.actuate.endpoint.web.ExposableWebEndpoint;
 import org.springframework.boot.actuate.endpoint.web.WebEndpointsSupplier;
@@ -23,7 +22,6 @@ import uk.gov.hmcts.reform.ccd.documentam.wiremock.extension.DynamicS2sDetailsRe
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 @Configuration
 public class WireMockTestConfiguration {
