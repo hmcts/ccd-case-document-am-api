@@ -205,6 +205,7 @@ sonarqube {
     property "sonar.pitest.mode", "reuseReport"
     property "sonar.pitest.reportsDirectory", "build/reports/pitest"
     property "sonar.junit.reportPaths", "${project.buildDir}/test-results/junit-platform"
+    property "sonar.exclusions", "src/main/java/uk/gov/hmcts/reform/ccd/documentam/configuration/SwaggerConfiguration.java"
   }
 }
 
