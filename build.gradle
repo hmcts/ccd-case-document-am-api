@@ -170,7 +170,7 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
 }
 
 jacocoTestReport {
-  executionData(test)
+  executionData(test, integration)
   reports {
     xml.enabled = true
     csv.enabled = false
