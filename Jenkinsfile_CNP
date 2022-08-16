@@ -90,7 +90,7 @@ withPipeline("java", product, component) {
       }
       env.CCD_DATA_STORE_API_BASE_URL = "http://ccd-data-store-api-${environmentOfDependencies}.service.core-compute-${environmentOfDependencies}.internal"
   } else {
-      env.DEFINITION_STORE_URL_BASE   = "https://ccd-definition-store-api-${definitionStoreDevelopPr}.service.core-compute-preview.internal".toLowerCase()
+      env.DEFINITION_STORE_URL_BASE  = "https://ccd-definition-store-api-${definitionStoreDevelopPr}.service.core-compute-preview.internal".toLowerCase()
   }
 
   syncBranchesWithMaster(branchesToSync)
