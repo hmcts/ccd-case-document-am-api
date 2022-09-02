@@ -15,6 +15,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SwaggerConfigurationTest extends BaseTest {
 
+    private static final int EXPECTED_TOTAL_ENDPOINTS = 2;
+    private static final String EXPECTED_APPLICATION_CONTEXT_NAME = "CCD Case Document AM API";
+
     @Autowired
     private WebEndpointsSupplier webEndpointsSupplier;
 
@@ -53,8 +56,8 @@ class SwaggerConfigurationTest extends BaseTest {
         assertThat(swaggerConfiguration.webEndpointServletHandlerMapping(webEndpointsSupplier, servletEndpointsSupplier,
             controllerEndpointsSupplier, endpointMediaTypes,corsProperties, webEndpointProperties, environment))
             .satisfies(mapping -> {
-                assertThat(mapping.getEndpoints().size()).isEqualTo(2);
-                assertThat(mapping.getApplicationContext().getId()).isEqualTo("CCD Case Document AM API");
+                assertThat(mapping.getEndpoints().size()).isEqualTo(EXPECTED_TOTAL_ENDPOINTS);
+                assertThat(mapping.getApplicationContext().getId()).isEqualTo(EXPECTED_APPLICATION_CONTEXT_NAME);
             });
     }
 
