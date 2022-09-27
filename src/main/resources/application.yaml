@@ -26,12 +26,17 @@ management:
 
 #If you use a database then uncomment below lines and update db properties accordingly
 spring:
+#CCD-3509 CVE-2021-22044 spring.mvc.pathmatch.matching-strategy = ant_path_matcher
+#required to fix null pointers in integration tests, conflict in Springfox after Springboot 2.6.10 upgrade
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
   application:
     name: CCD Case Document AM API
   servlet:
     multipart:
-      maxFileSize: 4GB
-      maxRequestSize: 4GB
+      maxFileSize: 1024MB
+      maxRequestSize: 1024MB
       enabled: true
   jackson:
     default-property-inclusion: NON_NULL
@@ -64,7 +69,7 @@ idam:
     url: ${IDAM_API_URL:http://localhost:5000}
   s2s-auth:
     microservice: ccd_case_document_am_api
-    totp_secret: ${CASE_DOCUMENT_AM_API_S2S_SECRET:CNTOE7D2NX6XHBKT}
+    totp_secret: ${CASE_DOCUMENT_AM_API_S2S_SECRET:AABBCCDDEEFFGGHH}
     url: ${S2S_URL:http://localhost:4502}
   s2s-authorised:
     services: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor,em_npa_app,fprl_dgs_api,dg_docassembly_api,cmc_claim_store,civil_service,bulk_scan_orchestrator,ethos_repl_service,et_cos}
