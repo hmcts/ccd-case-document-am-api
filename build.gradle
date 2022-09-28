@@ -51,7 +51,6 @@ ext['log4j2.version'] = '2.17.1'
 ext['jackson.version'] = '2.13.2'
 
 group = 'uk.gov.hmcts.reform.ccd.documentam'
-version = '0.0.1'
 
 allprojects {
   sourceCompatibility = '11'
