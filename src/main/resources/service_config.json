@@ -27,7 +27,7 @@
     },
     {
       "id": "iac",
-      "caseTypeId": ["Asylum"],
+      "caseTypeId": ["Asylum", "Bail"],
       "jurisdictionId": "IA",
       "permissions": [
         "CREATE",
