@@ -2,6 +2,7 @@
 @Library("Infrastructure")
 
 import uk.gov.hmcts.contino.GradleBuilder
+import uk.gov.hmcts.contino.GithubAPI
 
 def product = "ccd"
 def component = "case-document-am-api"
@@ -76,6 +77,12 @@ env.CCD_API_GATEWAY_S2S_ID = "ccd_gw"
 env.CCD_API_GATEWAY_S2S_KEY = "AAAAAAAAAAAAAAAC"
 
 withPipeline("java", product, component) {
+  onPR {
+    def githubApi = new GithubAPI(this)
+    if (!githubApi.getLabelsbyPattern(env.BRANCH_NAME, "keep-helm")) {
+      enableCleanupOfHelmReleaseOnSuccess()
+    }
+  }
 
   after('test') {
       builder.gradle('integration')
