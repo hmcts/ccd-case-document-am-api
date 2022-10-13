@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.controller.advice;
 
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.UnauthorizedException;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -94,14 +96,20 @@ public class CaseDocumentControllerAdvice {
     @ExceptionHandler(HttpClientErrorException.class)
     protected ResponseEntity<Object> handleHttpClientErrorException(final HttpClientErrorException exception,
                                                                     final HttpServletRequest request) {
-        return errorDetailsResponseEntity(exception, exception.getStatusCode(), getPath(request));
+        log.error(exception.getMessage(), exception);
+
+        HttpStatus httpStatus = getClientStatusCode(exception.getStatusCode());
+
+        return errorDetailsResponseEntity(exception, httpStatus, getPath(request));
     }
 
     @ExceptionHandler(HttpServerErrorException.class)
     protected ResponseEntity<Object> handleHttpServerErrorException(final HttpServerErrorException exception,
                                                                     final HttpServletRequest request) {
-        HttpStatus httpStatus = (exception.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR)
-            ? HttpStatus.BAD_GATEWAY : exception.getStatusCode();
+        log.error(exception.getMessage(), exception);
+
+        HttpStatus httpStatus = getServerStatusCode(exception.getStatusCode());
+
         return errorDetailsResponseEntity(exception, httpStatus, getPath(request));
     }
 
@@ -110,6 +118,36 @@ public class CaseDocumentControllerAdvice {
                                                             final HttpServletRequest request) {
         return errorDetailsResponseEntity(exception, HttpStatus.INTERNAL_SERVER_ERROR, getPath(request));
     }
+
+    @ExceptionHandler(FeignException.FeignClientException.class)
+    public ResponseEntity<Object> handleFeignClientException(final FeignException.FeignClientException exception,
+                                                             final HttpServletRequest request) {
+        log.error(exception.getMessage(), exception);
+
+        HttpStatus httpStatus = getClientStatusCode(HttpStatus.valueOf(exception.status()));
+
+        return errorDetailsResponseEntity(exception, httpStatus, getPath(request));
+    }
+
+    @ExceptionHandler(FeignException.FeignServerException.class)
+    public ResponseEntity<Object> handleFeignServerException(final FeignException.FeignServerException exception,
+                                                             final HttpServletRequest request) {
+        log.error(exception.getMessage(), exception);
+
+        HttpStatus httpStatus = getServerStatusCode(HttpStatus.valueOf(exception.status()));
+
+        return errorDetailsResponseEntity(exception, httpStatus, getPath(request));
+    }
+
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<Object> handleIOException(IOException exception, HttpServletRequest request) {
+        log.error(exception.getMessage(), exception);
+        int status = isReadTimeoutException(exception) ? HttpStatus.GATEWAY_TIMEOUT.value()
+            : HttpStatus.INTERNAL_SERVER_ERROR.value();
+
+        return errorDetailsResponseEntity(exception, HttpStatus.valueOf(status), getPath(request));
+    }
+
 
     private String getTimeStamp() {
         return new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS", Locale.ENGLISH).format(new Date());
@@ -134,4 +172,19 @@ public class CaseDocumentControllerAdvice {
         return UriUtils.encodePath(request.getRequestURI(), StandardCharsets.UTF_8);
     }
 
+    private boolean isReadTimeoutException(Throwable causeOfException) {
+        //getCause() returns null if it is the same as parent Exception
+        causeOfException = causeOfException.getCause() == null ? causeOfException : causeOfException.getCause();
+
+        return causeOfException instanceof java.net.SocketTimeoutException
+            && causeOfException.getMessage().contains("Read timed out");
+    }
+
+    private HttpStatus getClientStatusCode(HttpStatus httpStatus) {
+        return httpStatus != HttpStatus.UNAUTHORIZED ? HttpStatus.INTERNAL_SERVER_ERROR : httpStatus;
+    }
+
+    private HttpStatus getServerStatusCode(HttpStatus httpStatus) {
+        return httpStatus == HttpStatus.INTERNAL_SERVER_ERROR ? HttpStatus.BAD_GATEWAY : httpStatus;
+    }
 }
