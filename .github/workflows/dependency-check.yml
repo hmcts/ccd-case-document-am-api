@@ -30,9 +30,10 @@ jobs:
         with:
           java-version: 11
       - name: Run dependencyCheck and Suppress CVE
-        run: ./gradlew --continue dependencyCheckAnalyze suppressCves
-      - name: Clean suppressions
-        run: ./gradlew cleanSuppressions
+        run: ./gradlew dependencyCheckAnalyze
+        continue-on-error: true
+      - name: Run Suppress CVE
+        run: ./gradlew suppressCves
       - name: Commit
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
