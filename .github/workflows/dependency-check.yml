@@ -1,10 +1,10 @@
 name: Suppressions
 
-on: [ pull_request, workflow_dispatch ]
-#  schedule:
-    # // H allow predefined but random minute see https://en.wikipedia.org/wiki/Cron#Non-standard_characters
+on:
+  schedule:
     # every 3rd hour from 10 through 12
-    #    - cron: "H 10-12/3 * * *"
+    - cron: "H 10-12/3 * * *"
+  workflow_dispatch:
 
 jobs:
   build:
@@ -30,11 +30,11 @@ jobs:
         with:
           java-version: 11
       - name: Run dependencyCheck
-        run: ./gradlew dependencyCheckAnalyze
+        run: ./gradlew dependencyCheckAggregate
         continue-on-error: true
-      - name: Run Suppress CVE
+      - name: Run suppressCves
         run: ./gradlew suppressCves
-      - name: Run Suppress CVE
+      - name: Run cleanSuppressions
         run: ./gradlew cleanSuppressions
       - name: Commit
         uses: stefanzweifel/git-auto-commit-action@v4
