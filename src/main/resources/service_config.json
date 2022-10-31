@@ -274,26 +274,26 @@
         "UPDATE"
       ]
     },
-      {
-        "id": "nfdiv_case_api",
-        "caseTypeId": ["NFD", "NO_FAULT_DIVORCE_BulkAction"],
-        "jurisdictionId": "DIVORCE",
-        "permissions": [
-          "CREATE",
-          "READ",
-          "UPDATE",
-          "DELETE"
-        ]
-      },
-      {
-        "id": "divorce_frontend",
-        "caseTypeId": ["NFD"],
-        "jurisdictionId": "DIVORCE",
-        "permissions": [
-          "CREATE",
-          "READ",
-          "UPDATE",
-          "DELETE"
-        ]
-      }]
+    {
+      "id": "nfdiv_case_api",
+      "caseTypeId": ["NFD", "NO_FAULT_DIVORCE_BulkAction"],
+      "jurisdictionId": "DIVORCE",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
+      "id": "divorce_frontend",
+      "caseTypeId": ["NFD"],
+      "jurisdictionId": "DIVORCE",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
+    }]
 }
