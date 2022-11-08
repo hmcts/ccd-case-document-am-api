@@ -12,12 +12,4 @@
 <cve>CVE-2021-22112</cve>
 <cve>CVE-2022-22976</cve>
 </suppress>
-<suppress>
-<notes>Temporary Suppression
-      CVE-2022-31690 refer https://tools.hmcts.net/jira/browse/CCD-3917
-      CVE-2022-31692 refer https://tools.hmcts.net/jira/browse/CCD-3917
-    </notes>
-<cve>CVE-2022-31690</cve>
-<cve>CVE-2022-31692</cve>
-</suppress>
 </suppressions>
