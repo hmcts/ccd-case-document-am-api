@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.UnauthorizedException;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -116,7 +115,12 @@ public class CaseDocumentControllerAdvice {
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<Object> handleUnknownException(final Exception exception,
                                                             final HttpServletRequest request) {
-        return errorDetailsResponseEntity(exception, HttpStatus.INTERNAL_SERVER_ERROR, getPath(request));
+        log.error(exception.getMessage(), exception);
+
+        int status = isReadTimeoutException(exception) ? HttpStatus.GATEWAY_TIMEOUT.value()
+            : HttpStatus.INTERNAL_SERVER_ERROR.value();
+
+        return errorDetailsResponseEntity(exception, HttpStatus.valueOf(status), getPath(request));
     }
 
     @ExceptionHandler(FeignException.FeignClientException.class)
@@ -138,16 +142,6 @@ public class CaseDocumentControllerAdvice {
 
         return errorDetailsResponseEntity(exception, httpStatus, getPath(request));
     }
-
-    @ExceptionHandler(IOException.class)
-    public ResponseEntity<Object> handleIOException(IOException exception, HttpServletRequest request) {
-        log.error(exception.getMessage(), exception);
-        int status = isReadTimeoutException(exception) ? HttpStatus.GATEWAY_TIMEOUT.value()
-            : HttpStatus.INTERNAL_SERVER_ERROR.value();
-
-        return errorDetailsResponseEntity(exception, HttpStatus.valueOf(status), getPath(request));
-    }
-
 
     private String getTimeStamp() {
         return new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS", Locale.ENGLISH).format(new Date());

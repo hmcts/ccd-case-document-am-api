@@ -318,13 +318,13 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
     @Test
     @SuppressWarnings("checkstyle:LineLength") // don't want to break long method name
-    public void handleIOException_shouldReturnInternalServerErrorIfIOExceptionTypeNotReadTimedOut() {
+    public void handleUnknownExceptionException_shouldReturnInternalServerErrorIfIOExceptionTypeNotReadTimedOut() {
         String myUniqueExceptionMessage = "My unique generic runtime exception message";
 
         SocketTimeoutException socketTimeoutException = new SocketTimeoutException("some timeout error");
         IOException ioException = new IOException(myUniqueExceptionMessage, socketTimeoutException);
 
-        final ResponseEntity<Object> responseEntity = underTest.handleIOException(ioException, request);
+        final ResponseEntity<Object> responseEntity = underTest.handleUnknownException(ioException, request);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
@@ -332,13 +332,13 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
     @Test
     @SuppressWarnings("checkstyle:LineLength") // don't want to break long method name
-    public void handleIOException_shouldReturnBadGatewayIfIOExceptionTypeReadTimedOut() {
+    public void handleUnknownException_shouldReturnBadGatewayIfIOExceptionTypeReadTimedOut() {
         String myUniqueExceptionMessage = "My unique generic runtime exception message";
 
         SocketTimeoutException socketTimeoutException = new SocketTimeoutException("Read timed out");
         IOException ioException = new IOException(myUniqueExceptionMessage, socketTimeoutException);
 
-        final ResponseEntity<Object> responseEntity = underTest.handleIOException(ioException, request);
+        final ResponseEntity<Object> responseEntity = underTest.handleUnknownException(ioException, request);
 
         assertEquals(HttpStatus.GATEWAY_TIMEOUT, responseEntity.getStatusCode());
         assertEquals(HttpStatus.GATEWAY_TIMEOUT.value(), responseEntity.getStatusCodeValue());
@@ -346,12 +346,10 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
     @Test
     @SuppressWarnings("checkstyle:LineLength") // don't want to break long method name
-    public void handleIOException_shouldReturnInternalServerErrorIfSocketTimeoutExceptionTypeNotReadTimedOut() {
-        String myUniqueExceptionMessage = "My unique generic runtime exception message";
-
+    public void handleUnknownException_shouldReturnInternalServerErrorIfSocketTimeoutExceptionTypeNotReadTimedOut() {
         SocketTimeoutException socketTimeoutException = new SocketTimeoutException("some timeout error");
 
-        final ResponseEntity<Object> responseEntity = underTest.handleIOException(socketTimeoutException, request);
+        final ResponseEntity<Object> responseEntity = underTest.handleUnknownException(socketTimeoutException, request);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
@@ -359,12 +357,9 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
     @Test
     @SuppressWarnings("checkstyle:LineLength") // don't want to break long method name
-    public void handleIOException_shouldReturnBadGatewayIfSocketTimeoutExceptionTypeReadTimedOut() {
-        String myUniqueExceptionMessage = "My unique generic runtime exception message";
-
+    public void handleUnknownException_shouldReturnBadGatewayIfSocketTimeoutExceptionTypeReadTimedOut() {
         SocketTimeoutException socketTimeoutException = new SocketTimeoutException("Read timed out");
-
-        final ResponseEntity<Object> responseEntity = underTest.handleIOException(socketTimeoutException, request);
+        final ResponseEntity<Object> responseEntity = underTest.handleUnknownException(socketTimeoutException, request);
 
         assertEquals(HttpStatus.GATEWAY_TIMEOUT, responseEntity.getStatusCode());
         assertEquals(HttpStatus.GATEWAY_TIMEOUT.value(), responseEntity.getStatusCodeValue());
