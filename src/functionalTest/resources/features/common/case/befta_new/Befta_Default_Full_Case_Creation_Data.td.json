@@ -32,14 +32,6 @@
         "YesOrNoField": "PUBLIC",
         "EmailField": "PUBLIC",
         "TextField": "PUBLIC"
-      },
-      "security_classifications": {
-        "MoneyGBPField": "PUBLIC",
-        "PhoneUKField": "PUBLIC",
-        "NumberField": "PUBLIC",
-        "YesOrNoField": "PUBLIC",
-        "EmailField": "PUBLIC",
-        "TextField": "PUBLIC"
       }
     }
   }
