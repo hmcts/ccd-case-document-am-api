@@ -1,10 +1,14 @@
 name: Suppressions
 
+#on:
+#  schedule:
+#    # H allow predefined but random minute see https://en.wikipedia.org/wiki/Cron#Non-standard_characters
+#    # At 12 midnight and every 3rd hour from 10am through 11pm
+#    - cron: "0 0,10-23/3 * * *"
 on:
-  schedule:
-    # H allow predefined but random minute see https://en.wikipedia.org/wiki/Cron#Non-standard_characters
-    # At 12 midnight and every 3rd hour from 10am through 11pm
-    - cron: "0 0,10-23/3 * * *"
+  push:
+    branches:
+      - CCD-3916_Github_Actions
   workflow_dispatch:
 
 jobs:
