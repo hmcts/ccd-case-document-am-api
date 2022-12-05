@@ -21,7 +21,7 @@ public class DynamicOAuthJwkSetResponseTransformer extends AbstractDynamicRespon
         try {
 
             return "{"
-                + "   \"keys\": [" +  KeyGenUtil.getRsaJWK().toJSONObject() + "]"
+                + "\"keys\": [" +  KeyGenUtil.getRsaJWK().toPublicJWK().toJSONString() + "]"
                 + "}";
 
         } catch (JOSEException ex) {

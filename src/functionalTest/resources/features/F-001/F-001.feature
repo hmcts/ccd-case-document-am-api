@@ -56,7 +56,7 @@ Feature: F-001: Get Document Metadata by Document ID
   @S-007
   Scenario: generic scenario for Unsupported Media Type
 
-  @S-110
+  @S-110 @Ignore #this scenario is not valid anymore after CCD-3138.
   Scenario: must get an error response when CCD Data Store tries to access Get Document Metadata API
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
     And   a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],

@@ -10,7 +10,7 @@
   "users": {
     "invokingUser": {
       "username": "befta.citizen.3@gmail.com",
-      "password": "Pa55word11"
+      "password": "[[$CCD_BEFTA_CITIZEN_3_PWD]]"
     }
   },
   "request": {
@@ -48,8 +48,7 @@
         "callback_response_status_code": null,
         "callback_response_status": null,
         "delete_draft_response_status_code": null,
-        "delete_draft_response_status": null,
-        "security_classifications": {}
+        "delete_draft_response_status": null
       },
       "event_id": "CREATE"
     }

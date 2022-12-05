@@ -2,6 +2,7 @@
 @Library("Infrastructure")
 
 import uk.gov.hmcts.contino.GradleBuilder
+import uk.gov.hmcts.contino.GithubAPI
 
 def product = "ccd"
 def component = "case-document-am-api"
@@ -53,8 +54,8 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 // Vars needed for functional and smoke tests run against AKS
 
 // Assume a feature build branched off 'develop', with dependencies develop-to-develop.
-env.CCD_DATA_STORE_API_BASE_URL = "http://ccd-data-store-api-${dataStoreApiDevelopPr}.service.core-compute-preview.internal".toLowerCase()
-env.DEFINITION_STORE_URL_BASE   = "http://ccd-definition-store-api-${definitionStoreDevelopPr}.service.core-compute-preview.internal".toLowerCase()
+env.CCD_DATA_STORE_API_BASE_URL = "https://ccd-data-store-api-${dataStoreApiDevelopPr}.service.core-compute-preview.internal".toLowerCase()
+env.DEFINITION_STORE_URL_BASE   = "https://ccd-definition-store-api-${definitionStoreDevelopPr}.service.core-compute-preview.internal".toLowerCase()
 env.IDAM_URL = "https://idam-api.aat.platform.hmcts.net"
 env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
 env.OAUTH2_CLIENT_ID = "ccd_gateway"
@@ -76,6 +77,12 @@ env.CCD_API_GATEWAY_S2S_ID = "ccd_gw"
 env.CCD_API_GATEWAY_S2S_KEY = "AAAAAAAAAAAAAAAC"
 
 withPipeline("java", product, component) {
+  onPR {
+    def githubApi = new GithubAPI(this)
+    if (!githubApi.getLabelsbyPattern(env.BRANCH_NAME, "keep-helm")) {
+      enableCleanupOfHelmReleaseOnSuccess()
+    }
+  }
 
   after('test') {
       builder.gradle('integration')
@@ -90,7 +97,7 @@ withPipeline("java", product, component) {
       }
       env.CCD_DATA_STORE_API_BASE_URL = "http://ccd-data-store-api-${environmentOfDependencies}.service.core-compute-${environmentOfDependencies}.internal"
   } else {
-      env.DEFINITION_STORE_URL_BASE = "http://ccd-definition-store-api-pr-575.service.core-compute-preview.internal"
+      env.DEFINITION_STORE_URL_BASE = "https://ccd-definition-store-api-${definitionStoreDevelopPr}.service.core-compute-preview.internal".toLowerCase()
   }
 
   syncBranchesWithMaster(branchesToSync)

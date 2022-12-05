@@ -4,7 +4,7 @@
   "users": {
     "invokingUser": {
       "username": "befta.caseworker.1@gmail.com",
-      "password": "Pa55word11"
+      "password": "[[$CCD_BEFTA_CASEWORKER_1_PWD]]"
     }
   },
   "request": {
@@ -26,14 +26,6 @@
         "_extends_": "Befta_Default_Full_Case_Data"
       },
       "data_classification": {
-        "MoneyGBPField": "PUBLIC",
-        "PhoneUKField": "PUBLIC",
-        "NumberField": "PUBLIC",
-        "YesOrNoField": "PUBLIC",
-        "EmailField": "PUBLIC",
-        "TextField": "PUBLIC"
-      },
-      "security_classifications": {
         "MoneyGBPField": "PUBLIC",
         "PhoneUKField": "PUBLIC",
         "NumberField": "PUBLIC",

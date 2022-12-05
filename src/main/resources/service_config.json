@@ -27,7 +27,7 @@
     },
     {
       "id": "iac",
-      "caseTypeId": ["Asylum"],
+      "caseTypeId": ["Asylum", "Bail"],
       "jurisdictionId": "IA",
       "permissions": [
         "CREATE",
@@ -51,7 +51,8 @@
       "caseTypeId": ["*"],
       "jurisdictionId": "*",
       "permissions": [
-        "ATTACH"
+        "ATTACH",
+        "READ"
       ]
     },
     {
@@ -131,7 +132,12 @@
       "id": "bulk_scan_orchestrator",
       "caseTypeId": ["*"],
       "jurisdictionId": "*",
+      "defaultJurisdictionForTokenGeneration": "BULKSCAN",
+      "defaultCaseTypeForTokenGeneration": "BULKSCAN_Exception",
       "permissions": [
+        "HASHTOKEN"
+      ],
+      "caseTypeIdOptionalFor" : [
         "HASHTOKEN"
       ]
     },
@@ -203,6 +209,91 @@
       "permissions": [
         "CREATE",
         "READ"
+      ]
+    },
+    {
+      "id": "et_sya_api",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "EMPLOYMENT",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
+      "id": "adoption_cos_api",
+      "caseTypeId": ["A58"],
+      "jurisdictionId": "ADOPTION",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
+      "id": "adoption_web",
+      "caseTypeId": ["A58"],
+      "jurisdictionId": "ADOPTION",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
+      "id": "fis_cos_api",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
+      "id": "ds_ui",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE"]
+    },
+    {
+      "id": "prl_citizen_frontend",
+      "caseTypeId": ["PRLAPPS"],
+      "jurisdictionId": "PRIVATELAW",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE"
+      ]
+    },
+    {
+      "id": "nfdiv_case_api",
+      "caseTypeId": ["NFD", "NO_FAULT_DIVORCE_BulkAction"],
+      "jurisdictionId": "DIVORCE",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
+      "id": "divorce_frontend",
+      "caseTypeId": ["NFD"],
+      "jurisdictionId": "DIVORCE",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
       ]
     }]
 }

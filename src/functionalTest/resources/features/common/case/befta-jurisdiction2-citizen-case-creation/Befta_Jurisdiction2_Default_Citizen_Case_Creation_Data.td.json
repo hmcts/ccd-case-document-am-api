@@ -4,7 +4,7 @@
   "users": {
     "invokingUser": {
       "username": "befta.citizen.2@gmail.com",
-      "password": "Pa55word11"
+      "password": "[[$CCD_BEFTA_CITIZEN_2_PWD]]"
     }
   },
   "request": {
@@ -49,9 +49,6 @@
         }
       },
       "data_classification": {
-        "_extends_": "Befta_Citizen_Data_Securities_Classification"
-      },
-      "security_classifications": {
         "_extends_": "Befta_Citizen_Data_Securities_Classification"
       },
       "after_submit_callback_response": null,

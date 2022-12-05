@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -345,6 +346,27 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
         // WHEN
         sut.patchDocumentMetadata(caseDocumentsMetadata);
+
+        // THEN
+        final UpdateDocumentsCommand documentsCommand = updateDocumentsCommandCaptor.getValue();
+
+        assertThat(documentsCommand)
+            .isNotNull()
+            .satisfies(command -> assertThat(command.getTtl()).isNull());
+
+        verify(documentStoreClient).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
+    }
+
+    @Test
+    void patchDocumentMetadata_ParametricMethod() {
+        // GIVEN
+        final ArgumentCaptor<UpdateDocumentsCommand> updateDocumentsCommandCaptor =
+            ArgumentCaptor.forClass(UpdateDocumentsCommand.class);
+
+        doNothing().when(documentStoreClient).patchDocumentMetadata(updateDocumentsCommandCaptor.capture());
+
+        // WHEN
+        sut.patchDocumentMetadata(DOCUMENT_ID, CASE_TYPE_ID_VALUE, JURISDICTION_ID_VALUE);
 
         // THEN
         final UpdateDocumentsCommand documentsCommand = updateDocumentsCommandCaptor.getValue();
@@ -713,22 +735,89 @@ class DocumentManagementServiceImplTest implements TestFixture {
         stubGetSalt();
         stubGetDocument(document);
 
-        final String result = sut.generateHashToken(DOCUMENT_ID);
+        final String result = sut.generateHashToken(DOCUMENT_ID, AuthorisedService.builder().build(),
+                                                    Permission.HASHTOKEN);
 
         assertNotNull(result);
+    }
+
+    @Test
+    void shouldGenerateHashTokenWithDefaultCaseTypeForTokenGenerationWhenCaseTypeIdIsNotPresent() {
+        final Document document = buildDocument(true, false);
+
+        stubGetSalt();
+        stubGetDocument(document);
+
+        doNothing().when(documentStoreClient).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
+
+        final String result = sut.generateHashToken(DOCUMENT_ID, AuthorisedService.builder()
+            .defaultCaseTypeForTokenGeneration("BULKSCAN")
+            .caseTypeIdOptionalFor(List.of(Permission.HASHTOKEN))
+            .build(), Permission.HASHTOKEN);
+
+        assertNotNull(result);
+        verify(documentStoreClient, times(1)).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
+    }
+
+    @Test
+    void shouldGenerateHashTokenWithDefaultJurisdictionForTokenGenerationWhenJurisdictionIdIsNotPresent() {
+        final Document document = buildDocument(false, true);
+
+        stubGetSalt();
+        stubGetDocument(document);
+
+        doNothing().when(documentStoreClient).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
+
+        final String defaultJurisdiction = "BULKSCAN";
+        final String result = sut.generateHashToken(DOCUMENT_ID, AuthorisedService.builder()
+            .defaultJurisdictionForTokenGeneration(defaultJurisdiction)
+            .jurisdictionIdOptionalFor(List.of(Permission.HASHTOKEN))
+            .build(), Permission.HASHTOKEN);
+
+        assertNotNull(result);
+        verify(documentStoreClient, times(1)).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
+    }
+
+    @Test
+    void shouldFailGenerateHashTokenWhenCaseTypeIdIsNotPresentAndNoSufficientPermission() {
+        final Document document = buildDocument(true, false);
+
+        stubGetDocument(document);
+
+        assertThrows(ForbiddenException.class, () ->
+            sut.generateHashToken(DOCUMENT_ID, AuthorisedService.builder()
+                .defaultCaseTypeForTokenGeneration("BULKSCAN")
+                .caseTypeIdOptionalFor(List.of(Permission.HASHTOKEN))
+                .build(), Permission.READ));
+    }
+
+    @Test
+    void shouldFailGenerateHashTokenWhenJurisdictionIdIsNotPresentAndNoSufficientPermission() {
+        final Document document = buildDocument(false, true);
+
+        stubGetDocument(document);
+
+        assertThrows(ForbiddenException.class, () ->
+            sut.generateHashToken(DOCUMENT_ID, AuthorisedService.builder()
+                .defaultJurisdictionForTokenGeneration("BULKSCAN")
+                .jurisdictionIdOptionalFor(List.of(Permission.HASHTOKEN))
+                .build(), Permission.READ));
     }
 
     @Test
     void shouldGenerateHashTokenWhenCaseIdIsNotPresent() {
         final Document document = Document.builder()
             .metadata(Map.of(METADATA_CASE_TYPE_ID, "BEFTA_CASETYPE_2_2",
-                             METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE))
+                             METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE
+            ))
             .build();
 
         stubGetSalt();
         stubGetDocument(document);
 
-        final String result = sut.generateHashToken(DOCUMENT_ID);
+        final String result = sut.generateHashToken(DOCUMENT_ID, AuthorisedService.builder().build(),
+                                                    Permission.HASHTOKEN
+        );
 
         assertNotNull(result);
     }
@@ -737,13 +826,19 @@ class DocumentManagementServiceImplTest implements TestFixture {
     void testGenerateHashTokenShouldReturnEmptyStringWhenDocumentIsNotFound() {
         // GIVEN
         final ResourceNotFoundException resourceNotFoundException =
-            new ResourceNotFoundException(RANDOM_STRING,
-                                          new HttpClientErrorException(HttpStatus.NOT_FOUND));
+            new ResourceNotFoundException(
+                RANDOM_STRING,
+                new HttpClientErrorException(HttpStatus.NOT_FOUND)
+            );
         doReturn(Either.left(resourceNotFoundException))
             .when(documentStoreClient).getDocument(DOCUMENT_ID);
 
         // WHEN
-        final String result = sut.generateHashToken(DOCUMENT_ID);
+        final String result = sut.generateHashToken(
+            DOCUMENT_ID,
+            AuthorisedService.builder().build(),
+            Permission.HASHTOKEN
+        );
 
         // THEN
         assertThat(result)
@@ -776,6 +871,18 @@ class DocumentManagementServiceImplTest implements TestFixture {
             METADATA_CASE_TYPE_ID, caseTypeId,
             METADATA_JURISDICTION_ID, jurisdictionId
         );
+
+        return Document.builder()
+            .metadata(myMap)
+            .build();
+    }
+
+    private Document buildDocument(boolean withJurisdiction, boolean withCaseTypeId) {
+        final Map<String, String> myMap = new HashMap<>() {{
+                put(METADATA_CASE_ID, TestFixture.CASE_ID_VALUE);
+                put(METADATA_JURISDICTION_ID, withJurisdiction ? TestFixture.JURISDICTION_ID_VALUE : null);
+                put(METADATA_CASE_TYPE_ID, withCaseTypeId ? TestFixture.CASE_TYPE_ID_VALUE : null);
+            }};
 
         return Document.builder()
             .metadata(myMap)

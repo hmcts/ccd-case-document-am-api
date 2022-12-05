@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
+import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.GeneratedHashCodeResponse;
@@ -442,16 +443,23 @@ public class CaseDocumentAmController {
     ) {
         final Document document = documentManagementService.getDocumentMetadata(documentId);
 
-        documentManagementService.checkServicePermission(document.getCaseTypeId(),
-                                                         document.getJurisdictionId(),
-                                                         getServiceNameFromS2SToken(s2sToken),
-                                                         Permission.HASHTOKEN,
-                                                         SERVICE_PERMISSION_ERROR,
-                                                         documentId.toString());
+        AuthorisedService authorisedService = documentManagementService
+            .checkServicePermission(
+                document.getCaseTypeId(),
+                document.getJurisdictionId(),
+                getServiceNameFromS2SToken(s2sToken),
+                Permission.HASHTOKEN,
+                SERVICE_PERMISSION_ERROR,
+                documentId.toString()
+            );
 
         return ResponseEntity.ok(GeneratedHashCodeResponse.builder()
-                              .hashToken(documentManagementService.generateHashToken(documentId))
-                              .build());
+                                     .hashToken(documentManagementService.generateHashToken(
+                                         documentId,
+                                         authorisedService,
+                                         Permission.HASHTOKEN
+                                     ))
+                                     .build());
     }
 
     private String getServiceNameFromS2SToken(String s2sToken) {

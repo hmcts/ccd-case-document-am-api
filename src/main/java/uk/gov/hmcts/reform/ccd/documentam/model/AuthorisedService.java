@@ -27,10 +27,20 @@ public class AuthorisedService {
     @JsonProperty("jurisdictionId")
     private String jurisdictionId;
 
+    @JsonProperty("defaultJurisdictionForTokenGeneration")
+    private String defaultJurisdictionForTokenGeneration;
+
+    @JsonProperty("defaultCaseTypeForTokenGeneration")
+    private String defaultCaseTypeForTokenGeneration;
+
     @JsonProperty("permissions")
     private List<Permission> permissions;
 
     @Builder.Default
     @JsonProperty("caseTypeIdOptionalFor")
     private List<Permission> caseTypeIdOptionalFor = new ArrayList<>();
+
+    @Builder.Default
+    @JsonProperty("jurisdictionIdOptionalFor")
+    private List<Permission> jurisdictionIdOptionalFor = new ArrayList<>();
 }

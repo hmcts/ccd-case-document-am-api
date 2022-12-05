@@ -1,6 +1,10 @@
 package uk.gov.hmcts.reform.ccd.documentam.controller.advice;
 
+import feign.FeignException;
+import feign.Request;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +14,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.controller.endpoints.CaseDocumentAmController;
@@ -24,13 +30,17 @@ import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 
 import javax.servlet.http.HttpServletRequest;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.util.Collections.emptyList;
-import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -43,7 +53,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
     private final HttpServletRequest request = mock(HttpServletRequest.class);
 
     @Test
-    void handleUnauthorizedExceptionException() {
+    void handleUnauthorizedException() {
         UnauthorizedException unauthorizedException = mock(UnauthorizedException.class);
 
         ResponseEntity<Object> responseEntity = underTest.handleUnauthorizedException(unauthorizedException, request);
@@ -164,18 +174,215 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
     }
 
     @Test
-    void testHandleHttpClientErrorException() {
-        final HttpClientErrorException exception = new HttpClientErrorException(HttpStatus.BAD_REQUEST,
-                                                                                "Bad Request",
-                                                                                "{\"key\":\"value\"}".getBytes(),
-                                                                                StandardCharsets.UTF_8);
+    void testHandleHttpServerErrorExceptionWhenReceivedInternalServerError() {
+        final HttpServerErrorException exception = HttpServerErrorException
+                .create(HttpStatus.INTERNAL_SERVER_ERROR, "myUniqueExceptionMessage", HttpHeaders.EMPTY,
+                        new byte[0], Charset.defaultCharset());
 
-        final ResponseEntity<Object> responseEntity = underTest.handleHttpClientErrorException(exception);
+        final ResponseEntity<Object> responseEntity = underTest.handleHttpServerErrorException(exception, request);
 
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.BAD_GATEWAY, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.BAD_GATEWAY.value(), responseEntity.getStatusCodeValue());
 
-        assertThatJson(responseEntity.getBody())
-            .and(a -> a.node("key").isEqualTo("value"));
+        ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
+        assert errorResponse != null;
+        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
+    }
+
+    @Test
+    void testHandleHttpServerErrorExceptionWhenReceivedServiceUnavailable() {
+        final HttpServerErrorException exception = HttpServerErrorException
+                .create(HttpStatus.SERVICE_UNAVAILABLE, "myUniqueExceptionMessage", HttpHeaders.EMPTY,
+                        new byte[0], Charset.defaultCharset());
+
+        final ResponseEntity<Object> responseEntity = underTest.handleHttpServerErrorException(exception, request);
+
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE.value(), responseEntity.getStatusCodeValue());
+
+        ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
+        assert errorResponse != null;
+        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
+    }
+
+    @Test
+    void testHandleHttpClientErrorExceptionWhenReceivedInternalServerError() {
+        final HttpClientErrorException exception = HttpClientErrorException
+            .create(HttpStatus.INTERNAL_SERVER_ERROR, "myUniqueExceptionMessage", HttpHeaders.EMPTY,
+                    new byte[0], Charset.defaultCharset());
+
+        final ResponseEntity<Object> responseEntity = underTest.handleHttpClientErrorException(exception, request);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
+
+        ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
+        assert errorResponse != null;
+        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
+    }
+
+    @Test
+    void testHandleHttpClientErrorExceptionWhenReceivedUnauthorized() {
+        final HttpClientErrorException exception = HttpClientErrorException
+            .create(HttpStatus.UNAUTHORIZED, "myUniqueExceptionMessage", HttpHeaders.EMPTY,
+                    new byte[0], Charset.defaultCharset());
+
+        final ResponseEntity<Object> responseEntity = underTest.handleHttpClientErrorException(exception, request);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), responseEntity.getStatusCodeValue());
+
+        ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
+        assert errorResponse != null;
+        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
+    }
+
+    @Test
+    void testHandleHttpClientErrorExceptionWhenReceivedMovedPermanently() {
+        final HttpClientErrorException exception = HttpClientErrorException
+            .create(HttpStatus.MOVED_PERMANENTLY, "myUniqueExceptionMessage", HttpHeaders.EMPTY,
+                    new byte[0], Charset.defaultCharset());
+
+        final ResponseEntity<Object> responseEntity = underTest.handleHttpClientErrorException(exception, request);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
+
+        ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
+        assert errorResponse != null;
+        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
+    }
+
+
+    @Test
+    public void handleFeignServerException_shouldSwitch500_502() throws IOException {
+        FeignException.FeignServerException ex = new FeignException.FeignServerException(
+            HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error",
+            Request.create(Request.HttpMethod.GET, "Internal Server Error", Map.of(), new byte[0],
+                           Charset.defaultCharset(), null), new byte[0], Map.of());
+        final ResponseEntity<Object> responseEntity = underTest.handleFeignServerException(ex, request);
+
+        Assert.assertEquals(HttpStatus.BAD_GATEWAY.value(), responseEntity.getStatusCodeValue());
+    }
+
+    @Test
+    public void handleFeignServerException_shouldReturn5xx() throws IOException {
+        FeignException.FeignServerException ex = new FeignException.FeignServerException(
+            HttpStatus.GATEWAY_TIMEOUT.value(), "Gateway Timeout",
+            Request.create(Request.HttpMethod.GET, "Gateway Timeout", Map.of(), new byte[0],
+                           Charset.defaultCharset(), null), new byte[0], Map.of());
+        final ResponseEntity<Object> response = underTest.handleFeignServerException(ex, request);
+
+        Assert.assertEquals(HttpStatus.GATEWAY_TIMEOUT.value(), response.getStatusCodeValue());
+    }
+
+    @Test
+    public void handleFeignClientException_shouldReturn401() {
+        FeignException.FeignClientException ex = new FeignException.FeignClientException(
+            HttpStatus.UNAUTHORIZED.value(), "UNAUTHORIZED",
+            Request.create(Request.HttpMethod.GET, "UNAUTHORIZED", Map.of(), new byte[0],
+                           Charset.defaultCharset(), null), new byte[0], Map.of());
+
+        final ResponseEntity<Object> response = underTest.handleFeignClientException(ex, request);
+
+        Assert.assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCodeValue());
+    }
+
+    @Test
+    public void handleFeignClientException_shouldReturn500IfReceived400() {
+        FeignException.FeignClientException ex = new FeignException.FeignClientException(
+            HttpStatus.BAD_REQUEST.value(), "Bad Request",
+            Request.create(Request.HttpMethod.GET, "Bad Request", Map.of(), new byte[0],
+                           Charset.defaultCharset(), null), new byte[0], Map.of());
+
+        final ResponseEntity<Object> response = underTest
+            .handleFeignClientException(ex, request);
+
+        Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatusCodeValue());
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:LineLength") // don't want to break long method name
+    public void handleSocketTimeoutException_shouldReturnInternalServerErrorIfTypeNotReadTimedOut() {
+        String myUniqueExceptionMessage = "My unique generic runtime exception message";
+
+        SocketTimeoutException socketTimeoutException = new SocketTimeoutException("some timeout error");
+        ResourceAccessException exception = new ResourceAccessException(myUniqueExceptionMessage,
+                                                                                      socketTimeoutException);
+
+        final ResponseEntity<Object> responseEntity = underTest.handleUnknownException(exception, request);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:LineLength") // don't want to break long method name
+    public void handleUnknownExceptionException_shouldReturnInternalServerErrorIfIOExceptionTypeNotReadTimedOut() {
+        String myUniqueExceptionMessage = "My unique generic runtime exception message";
+
+        SocketTimeoutException socketTimeoutException = new SocketTimeoutException("some timeout error");
+        IOException ioException = new IOException(myUniqueExceptionMessage, socketTimeoutException);
+
+        final ResponseEntity<Object> responseEntity = underTest.handleUnknownException(ioException, request);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:LineLength") // don't want to break long method name
+    public void handleUnknownException_shouldReturnBadGatewayIfIOExceptionTypeReadTimedOut() {
+        String myUniqueExceptionMessage = "My unique generic runtime exception message";
+
+        SocketTimeoutException socketTimeoutException = new SocketTimeoutException("Read timed out");
+        IOException ioException = new IOException(myUniqueExceptionMessage, socketTimeoutException);
+
+        final ResponseEntity<Object> responseEntity = underTest.handleUnknownException(ioException, request);
+
+        assertEquals(HttpStatus.GATEWAY_TIMEOUT, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.GATEWAY_TIMEOUT.value(), responseEntity.getStatusCodeValue());
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:LineLength") // don't want to break long method name
+    public void handleUnknownException_shouldReturnInternalServerErrorIfSocketTimeoutExceptionTypeNotReadTimedOut() {
+        SocketTimeoutException socketTimeoutException = new SocketTimeoutException("some timeout error");
+
+        final ResponseEntity<Object> responseEntity = underTest.handleUnknownException(socketTimeoutException, request);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:LineLength") // don't want to break long method name
+    public void handleUnknownException_shouldReturnBadGatewayIfSocketTimeoutExceptionTypeReadTimedOut() {
+        SocketTimeoutException socketTimeoutException = new SocketTimeoutException("Read timed out");
+        final ResponseEntity<Object> responseEntity = underTest.handleUnknownException(socketTimeoutException, request);
+
+        assertEquals(HttpStatus.GATEWAY_TIMEOUT, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.GATEWAY_TIMEOUT.value(), responseEntity.getStatusCodeValue());
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:LineLength") // don't want to break long method name
+    public void handleFeignServerException_shouldReturnInternalServerErrorWhenReceivedFeignServerExceptionForbidden() {
+        String myUniqueExceptionMessage = "My unique generic runtime exception message 1";
+        final FeignException.FeignServerException exception =
+            createFeignServerException(HttpStatus.FORBIDDEN, myUniqueExceptionMessage);
+
+        final ResponseEntity<Object> responseEntity = underTest.handleUnknownException(exception, request);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
+    }
+
+    private FeignException.FeignServerException createFeignServerException(final HttpStatus httpStatus,
+                                                                           final String message) {
+        return new FeignException.FeignServerException(httpStatus.value(), message,
+                                                       Request.create(Request.HttpMethod.GET, message, Map.of(),
+                                                                      new byte[0], Charset.defaultCharset(), null),
+                                                       new byte[0], new HashMap<>());
     }
 }

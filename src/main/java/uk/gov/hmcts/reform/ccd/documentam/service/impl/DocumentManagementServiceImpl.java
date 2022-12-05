@@ -97,6 +97,21 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         }
     }
 
+    @Override
+    public void patchDocumentMetadata(UUID documentId, String caseTypeId, String jurisdictionId) {
+        List<DocumentUpdate> documentsList = new ArrayList<>();
+        final DocumentUpdate documentUpdate = new DocumentUpdate(
+            documentId,
+            Map.of(METADATA_CASE_TYPE_ID, caseTypeId,
+                   METADATA_JURISDICTION_ID, jurisdictionId
+            )
+        );
+
+        documentsList.add(documentUpdate);
+        UpdateDocumentsCommand updateDocumentsCommand = new UpdateDocumentsCommand(NULL_TTL, documentsList);
+        documentStoreClient.patchDocumentMetadata(updateDocumentsCommand);
+    }
+
     private UpdateDocumentsCommand prepareRequestForAttachingDocumentToCase(CaseDocumentsMetadata
                                                                                 caseDocumentsMetadata) {
         List<DocumentUpdate> documentsList = new ArrayList<>();
@@ -159,8 +174,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private void verifyHashTokenValidity(DocumentHashToken documentHashToken,
                                          Document documentMetadata) {
-        String hashcodeFromStoredDocument =
-            generateHashToken(documentHashToken.getId(), documentMetadata);
+        String hashcodeFromStoredDocument = generateHashToken(documentHashToken.getId(), documentMetadata.getCaseId(),
+                              documentMetadata.getJurisdictionId(), documentMetadata.getCaseTypeId());
         if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
             throw new ForbiddenException(String.format("Hash token check failed for the document: %s",
                                                        documentHashToken.getId()));
@@ -186,26 +201,66 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public String generateHashToken(UUID documentId, Document document) {
+    public String generateHashToken(UUID documentId, String caseId, String jurisdictionId,
+                                    String caseTypeId) {
         final String salt = applicationParams.getSalt();
 
-        return (document.getCaseId() == null)
-                ? ApplicationUtils.generateHashCode(salt.concat(documentId.toString()
-                                                                    .concat(document.getJurisdictionId())
-                                                                    .concat(document.getCaseTypeId())))
-                : ApplicationUtils.generateHashCode(salt.concat(documentId.toString()
-                                                                    .concat(document.getCaseId())
-                                                                    .concat(document.getJurisdictionId())
-                                                                    .concat(document.getCaseTypeId())));
+        return (caseId == null)
+            ? ApplicationUtils.generateHashCode(salt.concat(documentId.toString()
+                                                                .concat(jurisdictionId)
+                                                                .concat(caseTypeId)))
+            : ApplicationUtils.generateHashCode(salt.concat(documentId.toString()
+                                                                .concat(caseId)
+                                                                .concat(jurisdictionId)
+                                                                .concat(caseTypeId)));
     }
 
     @Override
-    public String generateHashToken(UUID documentId) {
-        return documentStoreClient.getDocument(documentId)
-            .fold(
-                resourceNotFound -> "",
-                document -> generateHashToken(documentId, document)
-            );
+    public String generateHashToken(UUID documentId, AuthorisedService authorisedService, Permission permission) {
+        Either<ResourceNotFoundException, Document> either = documentStoreClient.getDocument(documentId);
+        if (either.isLeft()) {
+            return "";
+        }
+        Document documentMetaData = either.get();
+
+        boolean metadataPatchRequired = false;
+
+        String caseTypeId;
+        if (StringUtils.isNotEmpty(documentMetaData.getCaseTypeId())) {
+            caseTypeId = documentMetaData.getCaseTypeId();
+        } else {
+            if (authorisedService.getCaseTypeIdOptionalFor().contains(permission)) {
+                caseTypeId = authorisedService.getDefaultCaseTypeForTokenGeneration();
+                metadataPatchRequired = true;
+            } else {
+                throw new ForbiddenException("No case type id available to generate hash token for document "
+                                                 + documentId);
+            }
+        }
+
+        String jurisdictionId;
+        if (StringUtils.isNotEmpty(documentMetaData.getJurisdictionId())) {
+            jurisdictionId = documentMetaData.getJurisdictionId();
+        } else {
+            if (authorisedService.getJurisdictionIdOptionalFor().contains(permission)) {
+                jurisdictionId = authorisedService.getDefaultJurisdictionForTokenGeneration();
+                metadataPatchRequired = true;
+            } else {
+                throw new ForbiddenException("No jurisdiction id available to generate hash token for document "
+                                                 + documentId);
+            }
+        }
+
+        String hashToken = generateHashToken(documentId, documentMetaData.getCaseId(), jurisdictionId, caseTypeId);
+
+        // if jurisdictionId or caseTypeId for a document is null, default values are retrieved from service_config
+        // for the client, and if the client has sufficient permission to generate a hashToken
+        // the document's metadata is patched with these values to allow management of the file to the client.
+        if (metadataPatchRequired) {
+            patchDocumentMetadata(documentId, caseTypeId, jurisdictionId);
+        }
+
+        return hashToken;
     }
 
     @Override
@@ -277,20 +332,25 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public void checkServicePermission(final String caseTypeId,
-                                       final String jurisdictionId,
-                                       final String serviceId,
-                                       final Permission permission,
-                                       final String logMessage,
-                                       final String exceptionMessage) {
+    public AuthorisedService checkServicePermission(final String caseTypeId,
+                                                    final String jurisdictionId,
+                                                    final String serviceId,
+                                                    final Permission permission,
+                                                    final String logMessage,
+                                                    final String exceptionMessage) {
+        log.debug("checkServicePermission parameters: caseTypeId: {}, jurisdictionId: {}, serviceId: {}",
+                  caseTypeId, jurisdictionId, serviceId);
+
         AuthorisedService serviceConfig = getServiceDetailsFromJson(serviceId);
         if (!validateCaseTypeId(serviceConfig, caseTypeId, permission)
-            || !validateJurisdictionId(serviceConfig, jurisdictionId)
+            || !validateJurisdictionId(serviceConfig, jurisdictionId, permission)
             || !validatePermissions(serviceConfig, permission)
         ) {
             log.error(logMessage, HttpStatus.FORBIDDEN);
             throw new ForbiddenException(exceptionMessage);
         }
+
+        return serviceConfig;
     }
 
     private <U> U throwLeft(final RuntimeException exception) {
@@ -309,10 +369,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return result;
     }
 
-    private boolean validateJurisdictionId(AuthorisedService serviceConfig, String jurisdictionId) {
+    private boolean validateJurisdictionId(AuthorisedService serviceConfig, String jurisdictionId,
+                                           Permission permission) {
         boolean result =
-            !StringUtils.isEmpty(jurisdictionId) && (serviceConfig.getJurisdictionId().equals("*")
-                || serviceConfig.getJurisdictionId().equals(jurisdictionId));
+            (StringUtils.isEmpty(jurisdictionId) && serviceConfig.getJurisdictionIdOptionalFor().contains(permission))
+            || (!StringUtils.isEmpty(jurisdictionId) && (serviceConfig.getJurisdictionId().equals("*")
+                || serviceConfig.getJurisdictionId().equals(jurisdictionId)));
 
         log.info("JurisdictionI Id is {} and validation result is {}", jurisdictionId, result);
 
