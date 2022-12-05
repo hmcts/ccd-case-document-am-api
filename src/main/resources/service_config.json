@@ -286,6 +286,17 @@
       ]
     },
     {
+      "id": "sptribs_dss_backend",
+      "caseTypeId": ["CriminalInjuriesCompensation"],
+      "jurisdictionId": "ST_CIC",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
       "id": "divorce_frontend",
       "caseTypeId": ["NFD"],
       "jurisdictionId": "DIVORCE",
