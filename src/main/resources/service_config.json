@@ -287,8 +287,33 @@
     },
     {
       "id": "sptribs_dss_backend",
-      "caseTypeId": ["CriminalInjuriesCompensation"],
-      "jurisdictionId": "ST_CIC",
+      "caseTypeId": [
+        "CriminalInjuriesCompensation",
+        "SpecialEducationalNeeds",
+        "DisabilityDiscrimination",
+        "CareStandards",
+        "PrimaryHealthLists",
+        "MentalHeath"
+      ],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
+      "id": "sptribs_case_api",
+      "caseTypeId": [
+        "CriminalInjuriesCompensation",
+        "SpecialEducationalNeeds",
+        "DisabilityDiscrimination",
+        "CareStandards",
+        "PrimaryHealthLists",
+        "MentalHeath"
+      ],
+      "jurisdictionId": "*",
       "permissions": [
         "CREATE",
         "READ",
