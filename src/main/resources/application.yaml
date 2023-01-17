@@ -114,3 +114,7 @@ logging:
           reform:
             ccd:
               documentam: ${CCD_DOCUMENTAM_LOG_LEVEL:INFO}
+
+retry:
+  maxAttempts: ${RETRY_MAX_ATTEMPTS:3}
+  maxDelay: ${RETRY_MAX_DELAY:1000}

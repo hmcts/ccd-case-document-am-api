@@ -9,9 +9,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
@@ -23,6 +26,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 
+import java.net.SocketTimeoutException;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -45,6 +49,8 @@ public class DocumentStoreClient {
         this.applicationParams = applicationParams;
     }
 
+    @Retryable(value = {HttpServerErrorException.class, SocketTimeoutException.class},
+        maxAttemptsExpression = "${retry.maxAttempts}", backoff = @Backoff(delayExpression = "${retry.maxDelay}"))
     public Either<ResourceNotFoundException, Document> getDocument(final UUID documentId) {
         try {
             final Document document = restTemplate.getForObject(
@@ -65,6 +71,8 @@ public class DocumentStoreClient {
         }
     }
 
+    @Retryable(value = {HttpServerErrorException.class, SocketTimeoutException.class},
+        maxAttemptsExpression = "${retry.maxAttempts}", backoff = @Backoff(delayExpression = "${retry.maxDelay}"))
     @SuppressWarnings("ConstantConditions")
     public ResponseEntity<ByteArrayResource> getDocumentAsBinary(final UUID documentId) {
         final HttpEntity<Object> nullRequestEntity = null;
