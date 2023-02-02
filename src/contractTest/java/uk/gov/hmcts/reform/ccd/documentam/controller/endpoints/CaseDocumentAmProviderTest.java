@@ -20,7 +20,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
-import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 
@@ -63,7 +62,7 @@ public class CaseDocumentAmProviderTest {
     @BeforeEach
     void before(PactVerificationContext context) {
         MockMvcTestTarget testTarget = new MockMvcTestTarget();
-//        System.getProperties().setProperty("pact.verifier.publishResults", "true");
+        //System.getProperties().setProperty("pact.verifier.publishResults", "true");
         testTarget.setControllers(caseDocumentAmController);
         if (context != null) {
             context.setTarget(testTarget);
@@ -89,6 +88,6 @@ public class CaseDocumentAmProviderTest {
                                                                    AuthorisedService.builder().build());
 
         ResponseEntity response = new ResponseEntity(HttpStatus.OK);
-        given(documentManagementService.getDocumentBinaryContent(DOCUMENT_ID_UUID)).willReturn(response);
+        given(documentManagementService.getDocumentBinaryContent(DOCUMENT_ID_UUID)).willAnswer(x -> response);
     }
 }
