@@ -62,7 +62,7 @@ public class CaseDocumentAmProviderTest {
     @BeforeEach
     void before(PactVerificationContext context) {
         MockMvcTestTarget testTarget = new MockMvcTestTarget();
-        System.getProperties().setProperty("pact.verifier.publishResults", "true");
+        //System.getProperties().setProperty("pact.verifier.publishResults", "true");
         testTarget.setControllers(caseDocumentAmController);
         if (context != null) {
             context.setTarget(testTarget);
