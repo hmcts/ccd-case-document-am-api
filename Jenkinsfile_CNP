@@ -76,9 +76,23 @@ env.CCD_API_GATEWAY_S2S_ID = "ccd_gw"
 
 env.CCD_API_GATEWAY_S2S_KEY = "AAAAAAAAAAAAAAAC"
 
+env.PACT_BROKER_FULL_URL = "https://pact-broker.platform.hmcts.net"
+env.PACT_BROKER_URL = "pact-broker.platform.hmcts.net"
+env.PACT_BROKER_PORT = "443"
+env.PACT_BROKER_SCHEME = "https"
+
 withPipeline("java", product, component) {
+  onMaster {
+    enablePactAs([
+      AppPipelineDsl.PactRoles.PROVIDER
+    ])
+  }
+
   onPR {
     def githubApi = new GithubAPI(this)
+    enablePactAs([
+      AppPipelineDsl.PactRoles.PROVIDER
+    ])
     if (!githubApi.getLabelsbyPattern(env.BRANCH_NAME, "keep-helm")) {
       enableCleanupOfHelmReleaseOnSuccess()
     }
