@@ -19,4 +19,3 @@ java:
     DM_STORE_BASE_URL: http://dm-store-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     CCD_DATA_STORE_API_BASE_URL: http://ccd-data-store-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     HASH_CHECK_ENABLED: false
-    PACT_BRANCH_NAME: master
