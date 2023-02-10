@@ -35,7 +35,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PER
 @PactBroker(scheme = "${PACT_BROKER_SCHEME:http}",
     host = "${PACT_BROKER_URL:localhost}",
     port = "${PACT_BROKER_PORT:80}",
-    consumerVersionSelectors = {@VersionSelector(tag = "${PACT_BRANCH_NAME:master}")})
+    consumerVersionSelectors = {@VersionSelector(tag = "master")})
 @ContextConfiguration(classes = {ContractConfig.class})
 @IgnoreNoPactsToVerify
 public class CaseDocumentAmProviderTest {
@@ -62,7 +62,7 @@ public class CaseDocumentAmProviderTest {
     @BeforeEach
     void before(PactVerificationContext context) {
         MockMvcTestTarget testTarget = new MockMvcTestTarget();
-        System.getProperties().setProperty("pact.verifier.publishResults", "true");
+        //System.getProperties().setProperty("pact.verifier.publishResults", "true");
         testTarget.setControllers(caseDocumentAmController);
         if (context != null) {
             context.setTarget(testTarget);
