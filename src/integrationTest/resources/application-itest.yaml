@@ -23,3 +23,7 @@ hash:
 
 documentStoreUrl: http://localhost:${wiremock.server.port}
 caseDataStoreUrl: http://localhost:${wiremock.server.port}
+
+retry:
+  maxAttempts: 3
+  maxDelay: 500
