@@ -95,7 +95,7 @@ withPipeline("java", product, component) {
       AppPipelineDsl.PactRoles.PROVIDER
     ])
     if (!githubApi.getLabelsbyPattern(env.BRANCH_NAME, "keep-helm")) {
-      enableCleanupOfHelmReleaseOnSuccess()
+      enableCleanupOfHelmReleaseAlways()
     }
   }
 
