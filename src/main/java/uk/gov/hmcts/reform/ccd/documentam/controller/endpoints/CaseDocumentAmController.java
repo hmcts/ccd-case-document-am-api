@@ -106,16 +106,17 @@ public class CaseDocumentAmController {
         final Document document = documentManagementService.getDocumentMetadata(documentId);
 
         log.info("JCDEBUG: getDocumentByDocumentId: serviceName: {}", getServiceNameFromS2SToken(s2sToken));
-        log.info("JCDEBUG: getDocumentByDocumentId: document: {}", (document == null ? "NULL" : document.toString()));
-
-        documentManagementService.checkServicePermission(
-            document.getCaseTypeId(),
-            document.getJurisdictionId(),
-            getServiceNameFromS2SToken(s2sToken),
-            Permission.READ,
-            SERVICE_PERMISSION_ERROR,
-            documentId.toString()
-        );
+        if (document != null) {
+            log.info("JCDEBUG: getDocumentByDocumentId: document: {}", document);
+            documentManagementService.checkServicePermission(
+                document.getCaseTypeId(),
+                document.getJurisdictionId(),
+                getServiceNameFromS2SToken(s2sToken),
+                Permission.READ,
+                SERVICE_PERMISSION_ERROR,
+                documentId.toString()
+            );
+        }
 
         if (document.getCaseId() != null) {
             documentManagementService.checkUserPermission(
@@ -176,15 +177,17 @@ public class CaseDocumentAmController {
 
         log.info("JCDEBUG: getDocumentBinaryContentByDocumentId: serviceName: {}",
                  getServiceNameFromS2SToken(s2sToken));
-        log.info("JCDEBUG: getDocumentBinaryContentByDocumentId: document: {}",
-                 (document == null ? "NULL" : document.toString()));
-
-        documentManagementService.checkServicePermission(document.getCaseTypeId(),
-                                                         document.getJurisdictionId(),
-                                                         getServiceNameFromS2SToken(s2sToken),
-                                                         Permission.READ,
-                                                         SERVICE_PERMISSION_ERROR,
-                                                         documentId.toString());
+        if (document != null) {
+            log.info("JCDEBUG: getDocumentBinaryContentByDocumentId: document: {}", document);
+            documentManagementService.checkServicePermission(
+                document.getCaseTypeId(),
+                document.getJurisdictionId(),
+                getServiceNameFromS2SToken(s2sToken),
+                Permission.READ,
+                SERVICE_PERMISSION_ERROR,
+                documentId.toString()
+            );
+        }
 
         if (document.getCaseId() != null) {
             documentManagementService.checkUserPermission(document.getCaseId(),

@@ -39,9 +39,7 @@ public class CaseDataStoreClientImpl implements CaseDataStoreClient {
     public CaseDataStoreClientImpl(@Qualifier("dataStoreRestTemplate") final RestTemplate restTemplate,
                                    @Value("${caseDataStoreUrl}") final String caseDataStoreUrl,
                                    final SecurityUtils securityUtils) {
-
         log.info("JCDEBUG: CaseDataStoreClientImpl: caseDataStoreUrl: {}", caseDataStoreUrl);
-
         this.restTemplate = restTemplate;
         this.caseDataStoreUrl = caseDataStoreUrl;
         this.securityUtils = securityUtils;

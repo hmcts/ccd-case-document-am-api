@@ -177,12 +177,13 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         String hashcodeFromStoredDocument = generateHashToken(documentHashToken.getId(), documentMetadata.getCaseId(),
                               documentMetadata.getJurisdictionId(), documentMetadata.getCaseTypeId());
 
+        if (hashcodeFromStoredDocument == null) {
+            throw new NullPointerException("hashcodeFromStoredDocument == null");
+        }
         log.info("JCDEBUG: verifyHashTokenValidity: documentHashToken: {} , {}",
                  (documentHashToken.getId() == null ? "NULL" : documentHashToken.getId()),
                  (documentHashToken.getHashToken() == null ? "NULL" : documentHashToken.getHashToken()));
-        log.info("JCDEBUG: verifyHashTokenValidity: hashcodeFromStoredDocument: {}",
-                 (hashcodeFromStoredDocument == null ? "NULL" : hashcodeFromStoredDocument));
-
+        log.info("JCDEBUG: verifyHashTokenValidity: hashcodeFromStoredDocument: {}", hashcodeFromStoredDocument));
         if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
             throw new ForbiddenException(String.format("Hash token check failed for the document: %s",
                                                        documentHashToken.getId()));
