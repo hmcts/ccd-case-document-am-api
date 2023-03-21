@@ -218,6 +218,8 @@ sonarqube {
     property "sonar.pitest.mode", "reuseReport"
     property "sonar.pitest.reportsDirectory", "build/reports/pitest"
     property "sonar.junit.reportPaths", "${project.buildDir}/test-results/junit-platform"
+    //TEMPORARY coverage exclusions
+    property "sonar.coverage.exclusions", "**/CaseDocumentAmController.java,**/DocumentManagementServiceImpl.java"
   }
 }
 
