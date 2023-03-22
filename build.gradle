@@ -326,7 +326,7 @@ dependencies {
     exclude group: 'io.rest-assured', module : 'rest-assured'
     exclude group: 'com.github.hmcts.befta-fw', module: 'befta-fw'
   }
-  testImplementation group: 'com.github.hmcts', name: 'befta-fw', version: '8.7.1'
+  testImplementation group: 'com.github.hmcts', name: 'befta-fw', version: '8.7.11'
   testImplementation group: 'commons-lang', name: 'commons-lang', version: '2.6'
   testImplementation group: 'org.assertj', name: 'assertj-vavr', version: '0.4.2'
 

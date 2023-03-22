@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.ccd.documentam.security;
 
-import com.google.common.collect.Lists;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.TextCodec;
@@ -21,6 +20,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.util.Date;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -59,7 +59,7 @@ class SecurityUtilsTest {
     void setUp() {
         jwt = Jwt.withTokenValue(USER_JWT)
             .claim("aClaim", "aClaim")
-            .claim("aud", Lists.newArrayList("ccd_gateway"))
+            .claim("aud", List.of("ccd_gateway"))
             .header("aHeader", "aHeader")
             .build();
 
