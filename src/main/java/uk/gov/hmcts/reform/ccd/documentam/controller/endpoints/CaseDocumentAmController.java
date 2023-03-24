@@ -171,14 +171,12 @@ public class CaseDocumentAmController {
     ) {
         final Document document = documentManagementService.getDocumentMetadata(documentId);
 
-        documentManagementService.checkServicePermission(
-            document.getCaseTypeId(),
-            document.getJurisdictionId(),
-            getServiceNameFromS2SToken(s2sToken),
-            Permission.READ,
-            SERVICE_PERMISSION_ERROR,
-            documentId.toString()
-        );
+        documentManagementService.checkServicePermission(document.getCaseTypeId(),
+                                                         document.getJurisdictionId(),
+                                                         getServiceNameFromS2SToken(s2sToken),
+                                                         Permission.READ,
+                                                         SERVICE_PERMISSION_ERROR,
+                                                         documentId.toString());
 
         if (document.getCaseId() != null) {
             documentManagementService.checkUserPermission(document.getCaseId(),
