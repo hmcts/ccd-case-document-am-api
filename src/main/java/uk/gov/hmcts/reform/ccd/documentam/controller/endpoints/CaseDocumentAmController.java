@@ -105,11 +105,6 @@ public class CaseDocumentAmController {
     ) {
         final Document document = documentManagementService.getDocumentMetadata(documentId);
 
-        log.info("JCDEBUG: getDocumentByDocumentId: serviceName: {}", getServiceNameFromS2SToken(s2sToken));
-        if (document == null) {
-            throw new NullPointerException("document == null");
-        }
-        log.info("JCDEBUG: getDocumentByDocumentId: document: {}", document);
         documentManagementService.checkServicePermission(
             document.getCaseTypeId(),
             document.getJurisdictionId(),
@@ -176,12 +171,6 @@ public class CaseDocumentAmController {
     ) {
         final Document document = documentManagementService.getDocumentMetadata(documentId);
 
-        log.info("JCDEBUG: getDocumentBinaryContentByDocumentId: serviceName: {}",
-                 getServiceNameFromS2SToken(s2sToken));
-        if (document == null) {
-            throw new NullPointerException("document == null");
-        }
-        log.info("JCDEBUG: getDocumentBinaryContentByDocumentId: document: {}", document);
         documentManagementService.checkServicePermission(
             document.getCaseTypeId(),
             document.getJurisdictionId(),
