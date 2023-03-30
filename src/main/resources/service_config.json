@@ -175,6 +175,17 @@
       ]
     },
     {
+      "id": "finrem_case_orchestration",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
       "id": "fpl_case_service",
       "caseTypeId": ["CARE_SUPERVISION_EPO"],
       "jurisdictionId": "PUBLICLAW",

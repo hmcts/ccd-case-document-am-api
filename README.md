@@ -1,6 +1,6 @@
 # ccd-case-document-am-api
 
-[![API v1](https://img.shields.io/badge/API%20Docs-v1-e140ad.svg)](https://hmcts.github.io/reform-api-docs/swagger.html?url=https://hmcts.github.io/reform-api-docs/specs/document-management-store-app.json)
+[![API v1](https://img.shields.io/badge/API%20Docs-v1-e140ad.svg)](https://hmcts.github.io/cnp-api-docs/swagger.html?url=https://hmcts.github.io/cnp-api-docs/specs/document-management-store-app.json)
 [![Build Status](https://travis-ci.org/hmcts/ccd-case-document-am-api.svg?branch=master)](https://travis-ci.org/github/hmcts/ccd-case-document-am-api)
 [![Docker Build Status](https://img.shields.io/docker/build/hmcts/ccd-case-document-am-api.svg)](https://hub.docker.com/r/hmcts/ccd-case-document-am-api)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
