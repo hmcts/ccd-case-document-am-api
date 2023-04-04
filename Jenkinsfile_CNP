@@ -55,17 +55,17 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 // Vars needed for functional and smoke tests run against AKS
 
 // Assume a feature build branched off 'develop', with dependencies develop-to-develop.
-env.CCD_DATA_STORE_API_BASE_URL = "https://ccd-data-store-api-${dataStoreApiDevelopPr}.service.core-compute-preview.internal".toLowerCase()
-env.DEFINITION_STORE_URL_BASE   = "https://ccd-definition-store-api-${definitionStoreDevelopPr}.service.core-compute-preview.internal".toLowerCase()
+env.CCD_DATA_STORE_API_BASE_URL = "https://ccd-data-store-api-${dataStoreApiDevelopPr}.preview.platform.hmcts.net".toLowerCase()
+env.DEFINITION_STORE_URL_BASE   = "https://ccd-definition-store-api-${definitionStoreDevelopPr}.preview.platform.hmcts.net".toLowerCase()
 env.IDAM_URL = "https://idam-api.aat.platform.hmcts.net"
-env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
+env.S2S_URL = "http://rpe-service-auth-provider-aat.aat.platform.hmcts.net"
 env.OAUTH2_CLIENT_ID = "ccd_gateway"
 env.OAUTH2_REDIRECT_URI = "https://www-ccd.aat.platform.hmcts.net/oauth2redirect"
-env.DM_STORE_BASE_URL = "http://dm-store-aat.service.core-compute-aat.internal"
+env.DM_STORE_BASE_URL = "http://dm-store-aat.service.aat.platform.hmcts.net"
 
 env.CCD_API_GATEWAY_OAUTH2_CLIENT_ID = "ccd_gateway"
 env.IDAM_API_URL_BASE = "https://idam-api.aat.platform.hmcts.net"
-env.S2S_URL_BASE = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
+env.S2S_URL_BASE = "http://rpe-service-auth-provider-aat.aat.platform.hmcts.net"
 env.BEFTA_S2S_CLIENT_ID = "ccd_gw"
 env.BEFTA_S2S_CLIENT_ID_OF_CCD_DATA = "ccd_data"
 env.BEFTA_S2S_CLIENT_ID_OF_XUI_WEBAPP = "xui_webapp"
@@ -110,9 +110,9 @@ withPipeline("java", product, component) {
       if (env.BRANCH_NAME.startsWith("PR") || env.BRANCH_NAME == 'master') {
           environmentOfDependencies = "aat"
       }
-      env.CCD_DATA_STORE_API_BASE_URL = "http://ccd-data-store-api-${environmentOfDependencies}.service.core-compute-${environmentOfDependencies}.internal"
+      env.CCD_DATA_STORE_API_BASE_URL = "http://ccd-data-store-api-${environmentOfDependencies}.${environmentOfDependencies}.platform.hmcts.net"
   } else {
-      env.DEFINITION_STORE_URL_BASE = "https://ccd-definition-store-api-${definitionStoreDevelopPr}.service.core-compute-preview.internal".toLowerCase()
+      env.DEFINITION_STORE_URL_BASE = "https://ccd-definition-store-api-${definitionStoreDevelopPr}.preview.platform.hmcts.net".toLowerCase()
   }
 
   syncBranchesWithMaster(branchesToSync)
