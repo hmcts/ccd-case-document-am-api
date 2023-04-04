@@ -43,6 +43,7 @@
       "permissions": [
         "CREATE",
         "READ",
+        "UPDATE",
         "DELETE"
       ]
     },
@@ -171,6 +172,17 @@
         "READ",
         "DELETE",
         "UPDATE"
+      ]
+    },
+    {
+      "id": "finrem_case_orchestration",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "*",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
       ]
     },
     {
