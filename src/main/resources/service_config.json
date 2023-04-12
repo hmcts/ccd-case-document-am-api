@@ -131,7 +131,7 @@
     },
     {
       "id": "civil_general_applications",
-      "caseTypeId": ["CIVIL,GENERALAPPLICATIONS"],
+      "caseTypeId": ["CIVIL"],
       "jurisdictionId": "CIVIL",
       "permissions": [
         "CREATE",
