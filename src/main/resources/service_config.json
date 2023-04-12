@@ -129,15 +129,24 @@
         "READ"
       ]
     },
-      {
-        "id": "civil_general_applications",
-        "caseTypeId": ["GENERALAPPLICATIONS"],
-        "jurisdictionId": "CIVIL",
-        "permissions": [
-          "CREATE",
-          "READ"
-        ]
-      },
+    {
+      "id": "civil_general_applications",
+      "caseTypeId": ["GENERALAPPLICATIONS"],
+      "jurisdictionId": "CIVIL",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
+    },
+    {
+      "id": "civil_general_applications",
+      "caseTypeId": ["CIVIL"],
+      "jurisdictionId": "CIVIL",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
+    },
     {
       "id": "bulk_scan_orchestrator",
       "caseTypeId": ["*"],
