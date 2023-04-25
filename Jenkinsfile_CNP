@@ -55,8 +55,8 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 // Vars needed for functional and smoke tests run against AKS
 
 // Assume a feature build branched off 'develop', with dependencies develop-to-develop.
-env.CCD_DATA_STORE_API_BASE_URL = "https://ccd-data-store-api-${dataStoreApiDevelopPr}.service.core-compute-preview.internal".toLowerCase()
-env.DEFINITION_STORE_URL_BASE   = "https://ccd-definition-store-api-${definitionStoreDevelopPr}.service.core-compute-preview.internal".toLowerCase()
+env.CCD_DATA_STORE_API_BASE_URL = "https://ccd-data-store-api-${dataStoreApiDevelopPr}.preview.platform.hmcts.net".toLowerCase()
+env.DEFINITION_STORE_URL_BASE   = "https://ccd-definition-store-api-${definitionStoreDevelopPr}.preview.platform.hmcts.net".toLowerCase()
 env.IDAM_URL = "https://idam-api.aat.platform.hmcts.net"
 env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
 env.OAUTH2_CLIENT_ID = "ccd_gateway"
