@@ -130,6 +130,15 @@
       ]
     },
     {
+      "id": "civil_general_applications",
+      "caseTypeId": ["CIVIL","GENERALAPPLICATIONS"],
+      "jurisdictionId": "CIVIL",
+      "permissions": [
+        "CREATE",
+        "READ"
+      ]
+    },
+    {
       "id": "bulk_scan_orchestrator",
       "caseTypeId": ["*"],
       "jurisdictionId": "*",
