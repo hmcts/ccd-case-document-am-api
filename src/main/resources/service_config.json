@@ -308,24 +308,6 @@
       ]
     },
     {
-      "id": "sptribs_dss_backend",
-      "caseTypeId": [
-        "CriminalInjuriesCompensation",
-        "SpecialEducationalNeeds",
-        "DisabilityDiscrimination",
-        "CareStandards",
-        "PrimaryHealthLists",
-        "MentalHeath"
-      ],
-      "jurisdictionId": "*",
-      "permissions": [
-        "CREATE",
-        "READ",
-        "UPDATE",
-        "DELETE"
-      ]
-    },
-    {
       "id": "sptribs_case_api",
       "caseTypeId": [
         "CriminalInjuriesCompensation",
