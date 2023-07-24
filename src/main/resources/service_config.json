@@ -126,7 +126,8 @@
       "jurisdictionId": "CIVIL",
       "permissions": [
         "CREATE",
-        "READ"
+        "READ",
+        "UPDATE"
       ]
     },
     {
