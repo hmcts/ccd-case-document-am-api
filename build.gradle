@@ -73,6 +73,16 @@ configurations {
   cucumberRuntime.extendsFrom(functionalRuntime)
 }
 
+tasks.withType(Test).configureEach{
+  // Added to handle Powermockito issues
+  jvmArgs = jvmArgs + [
+    '--add-opens=java.base/java.lang=ALL-UNNAMED',
+    '--add-opens=java.base/java.util=ALL-UNNAMED',
+    '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED',
+    '--add-opens=java.base/sun.security.action=ALL-UNNAMED'
+  ]
+}
+
 sourceSets {
   functionalTest {
     java {
@@ -111,7 +121,6 @@ task functional(type: Test, description: 'Runs the functional tests.', group: 'V
   classpath = sourceSets.functionalTest.runtimeClasspath
 
   doFirst {
-    generateCucumberReports.enabled = true
     javaexec {
       main = "uk.gov.hmcts.ccd.documentam.befta.CaseDocumentAmBeftaMain"
       classpath += configurations.cucumberRuntime + sourceSets.functionalTest.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
@@ -152,7 +161,6 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
   }
 
   doLast {
-    generateCucumberReports.enabled = true
     javaexec {
       mainClass = "uk.gov.hmcts.ccd.documentam.befta.CaseDocumentAmBeftaMain"
       classpath += configurations.cucumberRuntime + sourceSets.functionalTest.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
