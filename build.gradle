@@ -118,6 +118,7 @@ task functional(type: Test, description: 'Runs the functional tests.', group: 'V
               '--plugin', "junit:${buildDir}/test-results/functional/cucumber.xml",
               '--tags', 'not @Ignore',
               '--glue', 'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features/']
+      jvmArgs = [ '--add-opens=java.base/java.lang.reflect=ALL-UNNAMED' ]
     }
   }
 
@@ -142,14 +143,6 @@ task integration(type: Test, description: 'Runs the integration tests.', group: 
   finalizedBy aggregate
 }
 
-tasks.withType(Test).configureEach{
-  jvmArgs = jvmArgs + [
-    '--add-opens=java.base/java.lang=ALL-UNNAMED',
-    '--add-opens=java.base/java.util=ALL-UNNAMED',
-    '--add-opens=java.base/java.lang.reflect=ALL-UNNAMED'
-  ]
-}
-
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
   setTestClassesDirs(sourceSets.functionalTest.output.classesDirs)
   setClasspath(sourceSets.functionalTest.runtimeClasspath)
@@ -166,6 +159,7 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
               '--plugin', "junit:${buildDir}/test-results/smoke/cucumber.xml",
               '--tags', '@Smoke',
               '--glue', 'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features']
+      jvmArgs = [ '--add-opens=java.base/java.lang.reflect=ALL-UNNAMED' ]
     }
   }
 
