@@ -1,6 +1,4 @@
-ARG PLATFORM=""
-
-FROM eclipse-temurin${PLATFORM}:17 as builder
+FROM eclipse-temurin:17 as builder
 
 ARG JAR_FILE=build/libs/ccd-case-document-am-api.jar
 COPY ${JAR_FILE} application.jar
@@ -9,7 +7,7 @@ RUN java -Djarmode=layertools -jar application.jar extract
 # renovate: datasource=github-releases depName=microsoft/ApplicationInsights-Java
 ARG APP_INSIGHTS_AGENT_VERSION=3.4.13
 
-FROM hmctspublic.azurecr.io/base/java${PLATFORM}:17-distroless
+FROM hmctspublic.azurecr.io/base/java:17-distroless
 USER hmcts
 
 COPY lib/applicationinsights.json /opt/app
