@@ -73,17 +73,6 @@ configurations {
   cucumberRuntime.extendsFrom(functionalRuntime)
 }
 
-tasks.withType(Test).configureEach{
-  // Added to handle Powermockito issues
-  jvmArgs = jvmArgs + [
-    '--add-opens=java.base/java.lang=ALL-UNNAMED',
-    '--add-opens=java.base/java.util=ALL-UNNAMED',
-    '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED',
-    '--add-opens=java.base/sun.security.action=ALL-UNNAMED',
-    '--add-opens=java.base/java.lang.reflect=ALL-UNNAMED'
-  ]
-}
-
 sourceSets {
   functionalTest {
     java {
@@ -160,6 +149,7 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
   useJUnitPlatform {
     includeTags 'smoke'
   }
+  jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
 
   doLast {
     javaexec {
@@ -394,7 +384,7 @@ tasks.withType(Test) {
 }
 
 task fortifyScan(type: JavaExec)  {
-  main = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
+  mainClass = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
   classpath += sourceSets.test.runtimeClasspath
   jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
   // The line below prevents the build from failing if the Fortify scan detects issues
