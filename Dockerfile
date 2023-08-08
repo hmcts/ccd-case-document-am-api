@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17 as builder
+FROM openjdk:17-jdk-slim as builder
 
 ARG JAR_FILE=build/libs/ccd-case-document-am-api.jar
 COPY ${JAR_FILE} application.jar
