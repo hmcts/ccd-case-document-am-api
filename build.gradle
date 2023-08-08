@@ -142,8 +142,11 @@ task integration(type: Test, description: 'Runs the integration tests.', group: 
   finalizedBy aggregate
 }
 
-test.jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
-
+tasks.withType(Test).jvmArgs = [
+    '--add-opens=java.base/java.lang=ALL-UNNAMED',
+    '--add-opens=java.base/java.util=ALL-UNNAMED',
+    '--add-opens=java.base/java.lang.reflect=ALL-UNNAMED'
+]
 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
   setTestClassesDirs(sourceSets.functionalTest.output.classesDirs)
