@@ -6,8 +6,8 @@ java:
   keyVaults:
     ccd:
       secrets:
-        - name: AppInsightsInstrumentationKey
-          alias: azure.application-insights.instrumentation-key
+        - name: app-insights-connection-string
+          alias: app-insights-connection-string
         - name: ccd-case-document-am-api-s2s-secret
           alias: CASE_DOCUMENT_AM_API_S2S_SECRET
   environment:

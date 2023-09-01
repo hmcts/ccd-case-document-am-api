@@ -40,7 +40,7 @@ The following environment variables are required:
       |USER_PROFILE_HOST|
       |DM_STORE_BASE_URL| http://dm-store:8080|
       |CCD_DATA_STORE_API_BASE_URL| http://ccd-data-store-api:4452|
-      |AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY|
+      |app-insights-connection-string|
       |IDAM_USER_URL| http://idam-api:5000 |
       |IDAM_S2S_URL| http://service-auth-provider-api:8080|
       |JAVA_TOOL_OPTIONS| -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket, server=y,suspend=n,address=5005
