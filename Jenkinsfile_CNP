@@ -94,9 +94,6 @@ withPipeline("java", product, component) {
     enablePactAs([
       AppPipelineDsl.PactRoles.PROVIDER
     ])
-    if (!githubApi.getLabelsbyPattern(env.BRANCH_NAME, "keep-helm")) {
-      enableCleanupOfHelmReleaseAlways()
-    }
   }
 
   afterAlways('test') {
