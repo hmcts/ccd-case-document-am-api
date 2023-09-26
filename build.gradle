@@ -310,8 +310,8 @@ dependencies {
   //implementation group: 'com.microsoft.azure', name: 'applicationinsights-logging-logback', version: versions.appInsightsVersion
   //implementation group: 'com.microsoft.azure', name: 'applicationinsights-spring-boot-starter', version: '2.6.1'
 
-  implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: reformLogging
-  implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: reformLogging
+  //implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformLogging
+  implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: versions.reformLogging
 
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: versions.junit
