@@ -24,7 +24,7 @@ def versions = [
   junit              : '5.6.2',
   lombok             : '1.18.20',
   reformLogging      : '6.0.1',
-  appInsightsVersion : '2.4.1',
+  appInsightsVersion : '2.6.1',
   serenity           : '3.7.0',
   springFramework    : '5.3.27',
   springBoot         : springBoot.class.package.implementationVersion,
@@ -271,6 +271,10 @@ dependencies {
 
   testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   integrationTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+
+  // CVE-2021-42550
+  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.10'
+  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.2.10'
 
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformLogging
   implementation group: 'com.microsoft.azure', name: 'applicationinsights-logging-logback', version: versions.appInsightsVersion
