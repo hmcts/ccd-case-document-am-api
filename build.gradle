@@ -299,8 +299,8 @@ dependencies {
   implementation "org.apache.tomcat.embed:tomcat-embed-websocket:${versions.tomcatEmbedded}"
 
   //CVE-2021-42500
-  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.10'
-  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.2.10'
+  //implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.10'
+  //implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.2.10'
 
   // CVE-2021-28170
   implementation group: 'org.glassfish', name: 'jakarta.el', version: '4.0.1'
