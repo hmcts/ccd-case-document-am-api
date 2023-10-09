@@ -38,6 +38,11 @@ def versions = [
   pact_version       : '4.1.7',
 ]
 
+ext {
+  reformLogging = '6.0.1'
+  sl4jVersion = '2.0.7'
+}
+
 pmd {
   toolVersion = '6.21.0'
   sourceSets = []
@@ -72,6 +77,12 @@ configurations {
   functionalTestCompile.extendsFrom testCompile
   functionalTestRuntime.extendsFrom testRuntime
   cucumberRuntime.extendsFrom(functionalRuntime)
+
+  all {
+    //exclude group: 'ch.qos.logback'
+    //exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
+    //exclude group: 'commons-logging', module: 'commons-logging'
+  }
 }
 
 sourceSets {
@@ -272,7 +283,7 @@ dependencies {
   testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   integrationTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 
-  implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformLogging
+  //implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformLogging
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceAuthVersion
   implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '1.5.5'
 
@@ -310,8 +321,15 @@ dependencies {
   //implementation group: 'com.microsoft.azure', name: 'applicationinsights-spring-boot-starter', version: '2.6.4'
   //implementation group: 'com.microsoft.azure', name: 'applicationinsights-logging-logback', version: '2.6.4'
 
-  implementation group: 'com.microsoft.azure', name: 'applicationinsights-logging-logback', version: '2.4.1'
-  implementation group: 'com.microsoft.azure', name: 'applicationinsights-spring-boot-starter', version: '2.4.1'
+  //implementation group: 'com.microsoft.azure', name: 'applicationinsights-logging-logback', version: '2.4.1'
+  //implementation group: 'com.microsoft.azure', name: 'applicationinsights-spring-boot-starter', version: '2.4.1'
+
+  implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: reformLogging
+  implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: reformLogging
+
+  //implementation group: 'org.slf4j', name: 'slf4j-simple', version: sl4jVersion
+  //implementation group: 'org.slf4j', name: 'slf4j-api', version: sl4jVersion
+  //implementation group: 'org.slf4j', name: 'jcl-over-slf4j', version: sl4jVersion
 
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: versions.junit
