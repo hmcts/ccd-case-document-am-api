@@ -19,5 +19,10 @@
         }
       ]
     }
+  },
+  "instrumentation": {
+    "logging": {
+      "level": "INFO"
+    }
   }
 }
