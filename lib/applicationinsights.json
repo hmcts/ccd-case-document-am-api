@@ -1,7 +1,7 @@
 {
   "connectionString": "${file:/mnt/secrets/ccd/app-insights-connection-string}",
   "role": {
-    "name": "ccd-case-document-am-api"
+    "name": "CCD Case Document AM API"
   },
   "preview": {
     "sampling": {
