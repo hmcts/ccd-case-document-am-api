@@ -28,3 +28,6 @@ bin/main/
 
 ### Remote run configs
 .*-remote-env
+
+applicationinsights-agent-*.jar
+*.log
