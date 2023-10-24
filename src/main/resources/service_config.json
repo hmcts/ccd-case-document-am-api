@@ -126,6 +126,16 @@
       "jurisdictionId": "CIVIL",
       "permissions": [
         "CREATE",
+        "READ",
+        "UPDATE"
+      ]
+    },
+    {
+      "id": "civil_general_applications",
+      "caseTypeId": ["CIVIL","GENERALAPPLICATIONS"],
+      "jurisdictionId": "CIVIL",
+      "permissions": [
+        "CREATE",
         "READ"
       ]
     },
@@ -288,7 +298,7 @@
     },
     {
       "id": "nfdiv_case_api",
-      "caseTypeId": ["NFD", "NO_FAULT_DIVORCE_BulkAction"],
+      "caseTypeId": ["*"],
       "jurisdictionId": "DIVORCE",
       "permissions": [
         "CREATE",

@@ -83,15 +83,15 @@ public class CaseDocumentAmController {
             code = 200,
             message = "Success",
             response = Document.class
-        ),
+            ),
         @ApiResponse(
             code = 400,
             message = CASE_DOCUMENT_ID_INVALID
-        ),
+            ),
         @ApiResponse(
             code = 404,
             message = CASE_DOCUMENT_NOT_FOUND
-        )
+            )
     })
 
     @LogAudit(
@@ -149,15 +149,15 @@ public class CaseDocumentAmController {
             code = 200,
             message = "OK",
             response = Object.class
-        ),
+            ),
         @ApiResponse(
             code = 400,
             message = CASE_DOCUMENT_ID_INVALID
-        ),
+            ),
         @ApiResponse(
             code = 404,
             message = CASE_DOCUMENT_NOT_FOUND
-        )
+            )
     })
 
     @LogAudit(
@@ -208,19 +208,19 @@ public class CaseDocumentAmController {
             code = 200,
             message = "Created",
             response = UploadResponse.class
-        ),
+            ),
         @ApiResponse(
             code = 400,
             message = CASE_TYPE_ID_INVALID
-        ),
+            ),
         @ApiResponse(
             code = 400,
             message = JURISDICTION_ID_INVALID
-        ),
+            ),
         @ApiResponse(
             code = 400,
             message = CLASSIFICATION_ID_INVALID
-        )
+            )
     })
 
     @LogAudit(
@@ -263,15 +263,15 @@ public class CaseDocumentAmController {
             code = 200,
             message = "Success",
             response = PatchDocumentResponse.class
-        ),
+            ),
         @ApiResponse(
             code = 400,
             message = CASE_DOCUMENT_ID_INVALID
-        ),
+            ),
         @ApiResponse(
             code = 404,
             message = CASE_DOCUMENT_NOT_FOUND
-        )
+            )
     })
 
     @LogAudit(
@@ -317,31 +317,31 @@ public class CaseDocumentAmController {
             code = 200,
             message = "Success",
             response = PatchDocumentMetaDataResponse.class
-        ),
+            ),
         @ApiResponse(
             code = 400,
             message = CASE_DOCUMENT_ID_INVALID
-        ),
+            ),
         @ApiResponse(
             code = 400,
             message = CASE_ID_NOT_VALID
-        ),
+            ),
         @ApiResponse(
             code = 400,
             message = CASE_TYPE_ID_INVALID
-        ),
+            ),
         @ApiResponse(
             code = 400,
             message = JURISDICTION_ID_INVALID
-        ),
+            ),
         @ApiResponse(
             code = 400,
             message = CASE_DOCUMENT_HASH_TOKEN_INVALID
-        ),
+            ),
         @ApiResponse(
             code = 404,
             message = CASE_DOCUMENT_NOT_FOUND
-        )
+            )
     })
     @LogAudit(
         operationType = AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
@@ -378,15 +378,15 @@ public class CaseDocumentAmController {
         @ApiResponse(
             code = 200,
             message = "OK"
-        ),
+            ),
         @ApiResponse(
             code = 400,
             message = CASE_DOCUMENT_ID_INVALID
-        ),
+            ),
         @ApiResponse(
             code = 404,
             message = CASE_DOCUMENT_NOT_FOUND
-        )
+            )
     })
     @LogAudit(
         operationType = AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
@@ -422,15 +422,15 @@ public class CaseDocumentAmController {
             code = 200,
             message = "Success",
             response = GeneratedHashCodeResponse.class
-        ),
+            ),
         @ApiResponse(
             code = 400,
             message = CASE_DOCUMENT_ID_INVALID
-        ),
+            ),
         @ApiResponse(
             code = 404,
             message = CASE_DOCUMENT_NOT_FOUND
-        )
+            )
     })
     @LogAudit(
         operationType = AuditOperationType.GENERATE_HASH_CODE,
