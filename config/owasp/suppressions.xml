@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?><suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+<!--Please add all the false positives under the below section-->
+  <suppress>
+    <notes>False Positives
+      CVE-2023-5072 - So for versions 20231013 and later of json-java, CVE-2023-5072 is apparently a False Positive.
+    </notes>
+    <cve>CVE-2023-5072</cve>
+  </suppress>
+  <!--End of false positives section -->
 <suppress>
 <notes>Temporary Suppression
       CVE-2022-45688 refer https://tools.hmcts.net/jira/browse/CCD-4373
@@ -13,7 +21,6 @@
       CVE-2023-42795 refer [Ticket]
       CVE-2023-45648 refer [Ticket]
       CVE-2023-44487 refer [Ticket]
-      CVE-2023-5072 refer [Ticket]
   </notes>
 <cve>CVE-2022-45688</cve>
 <cve>CVE-2022-1471</cve>
@@ -27,6 +34,5 @@
 <cve>CVE-2023-42795</cve>
 <cve>CVE-2023-45648</cve>
 <cve>CVE-2023-44487</cve>
-<cve>CVE-2023-5072</cve>
 </suppress>
 </suppressions>
