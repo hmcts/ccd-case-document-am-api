@@ -6,6 +6,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -85,6 +86,11 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Override
     public ResponseEntity<ByteArrayResource> getDocumentBinaryContent(UUID documentId) {
         return documentStoreClient.getDocumentAsBinary(documentId);
+    }
+
+    @Override
+    public ResponseEntity<InputStreamResource> streamDocumentBinaryContent(UUID documentId) {
+        return documentStoreClient.streamDocumentAsBinary(documentId);
     }
 
     @Override

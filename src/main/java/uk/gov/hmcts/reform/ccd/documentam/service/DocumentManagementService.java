@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.ccd.documentam.service;
 
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
@@ -18,6 +19,8 @@ public interface DocumentManagementService {
     Document getDocumentMetadata(final UUID documentId);
 
     ResponseEntity<ByteArrayResource> getDocumentBinaryContent(final UUID documentId);
+
+    ResponseEntity<InputStreamResource> streamDocumentBinaryContent(final UUID documentId);
 
     void patchDocumentMetadata(CaseDocumentsMetadata caseDocumentsMetadata);
 
