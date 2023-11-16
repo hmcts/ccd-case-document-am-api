@@ -4,6 +4,8 @@ steps:
     cmd: docker pull --platform linux/amd64 hmctspublic.azurecr.io/base/java:17-distroless && docker tag hmctspublic.azurecr.io/base/java:17-distroless hmctspublic.azurecr.io/base/java/linux/amd64:17-distroless && docker pull --platform linux/amd64 openjdk:17-jdk-slim && docker tag openjdk:17-jdk-slim adoptopenjdk/linux/amd64:17-jre-hotspot
     when: ["-"]
     keep: true
+    retries: 3
+    retryDelay: 5
 
   - id: runtime-amd64
     build: >
@@ -14,12 +16,16 @@ steps:
     when:
       - pull-base-image-amd64
     keep: true
+    retries: 3
+    retryDelay: 5
 
   - id: pull-base-image-arm64
     cmd: docker pull --platform linux/arm64 hmctspublic.azurecr.io/base/java:17-distroless && docker tag hmctspublic.azurecr.io/base/java:17-distroless hmctspublic.azurecr.io/base/java/linux/arm64:17-distroless && docker pull --platform linux/arm64 openjdk:17-jdk-slim && docker tag openjdk:17-jdk-slim adoptopenjdk/linux/arm64:17-jre-hotspot
     when:
       - pull-base-image-amd64
     keep: true
+    retries: 3
+    retryDelay: 5
 
   - id: runtime-arm64
     build: >
@@ -30,6 +36,8 @@ steps:
     when:
       - pull-base-image-arm64
     keep: true
+    retries: 3
+    retryDelay: 5
 
   - id: push-images
     push:
@@ -38,6 +46,8 @@ steps:
     when:
       - runtime-amd64
       - runtime-arm64
+    retries: 3
+    retryDelay: 5
 
   - id: manifest-create
     cmd: docker manifest create {{.Run.Registry}}/{{CI_IMAGE_TAG}} {{.Run.Registry}}/{{CI_IMAGE_TAG}}-amd64 {{.Run.Registry}}/{{CI_IMAGE_TAG}}-arm64
@@ -52,3 +62,5 @@ steps:
     when:
       - manifest-create
     keep: true
+    retries: 3
+    retryDelay: 5
