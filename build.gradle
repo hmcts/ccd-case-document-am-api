@@ -43,7 +43,7 @@ pmd {
 }
 
 ext['spring-framework.version'] = '5.3.26'
-ext['spring-security.version'] = '5.7.8'
+ext['spring-security.version'] = '5.7.10'
 ext['log4j2.version'] = '2.17.1'
 ext['jackson.version'] = '2.15.3'
 ext['snakeyaml.version'] = '2.0'
