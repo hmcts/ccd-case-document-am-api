@@ -206,7 +206,6 @@ pitest {
 project.tasks['pitest'].group="verification"
 
 sonarqube {
-  isSkipProject = true
   properties {
     property "sonar.projectName", "ccd-case-document-am-api"
     property "sonar.projectKey", "ccd-case-document-am-api"
@@ -214,6 +213,8 @@ sonarqube {
     property "sonar.pitest.mode", "reuseReport"
     property "sonar.pitest.reportsDirectory", "build/reports/pitest"
     property "sonar.junit.reportPaths", "${project.buildDir}/test-results/junit-platform"
+    property "sonar.exclusions","**/CaseDocumentAmController.java, **/CaseDocumentControllerAdvice.java, " +
+      "**/DocumentManagementServiceImpl.java, **/DocumentStoreClient.java, **/ApplicationConfiguration.java"
   }
 }
 
