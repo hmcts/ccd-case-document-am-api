@@ -8,7 +8,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -31,10 +30,16 @@ import uk.gov.hmcts.reform.ccd.documentam.model.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
+import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 
-import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.SocketTimeoutException;
 import java.time.ZonedDateTime;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.springframework.http.HttpMethod.GET;
@@ -46,14 +51,16 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.RESOURCE_NO
 @Slf4j
 public class DocumentStoreClient {
 
+    private final SecurityUtils securityUtils;
     private final RestTemplate restTemplate;
     public final CloseableHttpClient httpClient;
     private final ApplicationParams applicationParams;
 
     @Autowired
-    public DocumentStoreClient(final RestTemplate restTemplate,
+    public DocumentStoreClient(SecurityUtils securityUtils, final RestTemplate restTemplate,
                                final CloseableHttpClient httpClient,
                                final ApplicationParams applicationParams) {
+        this.securityUtils = securityUtils;
         this.restTemplate = restTemplate;
         this.httpClient = httpClient;
         this.applicationParams = applicationParams;
@@ -106,15 +113,15 @@ public class DocumentStoreClient {
 
     @Retryable(value = {HttpServerErrorException.class, SocketTimeoutException.class},
         maxAttemptsExpression = "${retry.maxAttempts}", backoff = @Backoff(delayExpression = "${retry.maxDelay}"))
-    public ResponseEntity<InputStreamResource> streamDocumentAsBinary(final UUID documentId) {
+    public void streamDocumentAsBinary(final UUID documentId, HttpServletResponse httpResponseOut,
+                                       Map<String, String> requestHeaders) {
         try {
-            HttpGet httpGet = new HttpGet(
-                String.format("%s/documents/%s/binary", applicationParams.getDocumentURL(), documentId));
-            CloseableHttpResponse response = httpClient.execute(httpGet);
-            HttpStatus statusCode = HttpStatus.valueOf(response.getStatusLine().getStatusCode());
+            HttpGet httpRequest = prepareHttpRequest(documentId, requestHeaders);
+            CloseableHttpResponse httpClientResponse = httpClient.execute(httpRequest);
+            HttpStatus statusCode = HttpStatus.valueOf(httpClientResponse.getStatusLine().getStatusCode());
 
-            return handleResponse(statusCode, response, documentId);
-        } catch (IOException exception) {
+            handleStreamResponse(statusCode, httpClientResponse, httpResponseOut, documentId);
+        } catch (Exception exception) {
             log.error("Error occurred", exception);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                                               "Error occurred while processing the request", exception
@@ -122,23 +129,63 @@ public class DocumentStoreClient {
         }
     }
 
-    private ResponseEntity<InputStreamResource> handleResponse(HttpStatus statusCode,
-                                                               CloseableHttpResponse response,
-                                                               UUID documentId) throws IOException {
+    private HttpGet prepareHttpRequest(UUID documentId, final Map<String, String> requestHeaders) {
+        HttpGet httpGet = new HttpGet(
+            String.format("%s/documents/%s/binary", applicationParams.getDocumentURL(), documentId));
+
+        setRequestHeaders(httpGet, requestHeaders);
+
+        return httpGet;
+    }
+
+    private void setRequestHeaders(final HttpGet httpGet, Map<String, String> requestHeaders) {
+        Set<String> filteredHeaders = new HashSet<>(applicationParams.getFilteredRequestHeaders());
+
+        // map client request headers
+        if (!filteredHeaders.isEmpty()) {
+            requestHeaders.forEach((name, value) -> {
+                if (filteredHeaders.stream().anyMatch(name::equalsIgnoreCase)) {
+                    httpGet.addHeader(name.toLowerCase(), value);
+                }
+            });
+        }
+
+        HttpHeaders headers = securityUtils.serviceAuthorizationHeaders();
+        headers.forEach((headerName, headerValues) ->
+            headerValues.forEach(headerValue -> httpGet.addHeader(headerName, headerValue))
+        );
+        httpGet.addHeader(Constants.USERID, securityUtils.getUserInfo().getUid());
+        httpGet.addHeader(HttpHeaders.CONTENT_TYPE, String.valueOf(MediaType.APPLICATION_JSON));
+    }
+
+
+    private void handleStreamResponse(HttpStatus statusCode,
+                                      CloseableHttpResponse httpClientResponse,
+                                      HttpServletResponse httpResponseOut,
+                                      UUID documentId) {
         switch (statusCode) {
             case OK -> {
-                HttpHeaders headers = mapResponseHeaders(response.getAllHeaders());
-                InputStreamResource responseBody = new InputStreamResource(response.getEntity().getContent());
+                httpResponseOut.setStatus(statusCode.value());
+                mapResponseHeaders(httpClientResponse, httpResponseOut);
+                try {
+                    try (InputStream input = httpClientResponse.getEntity().getContent()) {
+                        OutputStream output = httpResponseOut.getOutputStream();
+                        byte[] buffer = new byte[1024 * 1024]; // 1 MB buffer
+                        int bytesRead;
+                        while ((bytesRead = input.read(buffer)) >= 0) {
+                            output.write(buffer, 0, bytesRead);
+                        }
+                    }
+                } catch (Throwable t) {
+                    log.error("Error transferring document {} : {}", documentId, t.getMessage());
+                }
 
-                return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(responseBody);
             }
             case NOT_FOUND ->
                 throw new ResourceNotFoundException(String.format("%s %s", RESOURCE_NOT_FOUND, documentId), null);
             case INTERNAL_SERVER_ERROR, BAD_GATEWAY, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT ->
-                throw new HttpServerErrorException(statusCode, String.format("Failed to retrieve document with ID: " +
-                                                                                 "%s", documentId));
+                throw new HttpServerErrorException(statusCode, String.format("Failed to retrieve document with ID: "
+                                                                                 + "%s", documentId));
             default ->
                 throw new ResponseStatusException(
                     statusCode,
@@ -147,13 +194,10 @@ public class DocumentStoreClient {
         }
     }
 
-    private HttpHeaders mapResponseHeaders(final Header[] responseHeaders) {
-        HttpHeaders mappedHeaders = new HttpHeaders();
-
-        for (Header header : responseHeaders) {
-            mappedHeaders.set(header.getName(), header.getValue());
+    private void mapResponseHeaders(CloseableHttpResponse httpClientResponse, HttpServletResponse httpResponseOut) {
+        for (Header header : httpClientResponse.getAllHeaders()) {
+            httpResponseOut.setHeader(header.getName(), header.getValue());
         }
-        return mappedHeaders;
     }
 
     public void deleteDocument(final UUID documentId, final Boolean permanent) {
@@ -234,5 +278,4 @@ public class DocumentStoreClient {
         final ZonedDateTime currentDateTime = ZonedDateTime.now();
         return currentDateTime.plusDays(applicationParams.getDocumentTtlInDays()).format(DM_DATE_TIME_FORMATTER);
     }
-
 }

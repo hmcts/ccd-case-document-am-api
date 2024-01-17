@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -8,6 +9,7 @@ import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 
+@Getter
 @Component
 public class ApplicationParams {
 
@@ -26,24 +28,10 @@ public class ApplicationParams {
     @Value("${moving.case.types}")
     private List<String> movingCaseTypes;
 
-    public String getDocumentURL() {
-        return documentURL;
-    }
-
-    public int getDocumentTtlInDays() {
-        return documentTtlInDays;
-    }
-
-    public String getSalt() {
-        return salt;
-    }
-
-    public boolean isHashCheckEnabled() {
-        return hashCheckEnabled;
-    }
+    @Value("${filtered.request.headers}")
+    private List<String> filteredRequestHeaders;
 
     public List<String> getMovingCaseTypes() {
         return Optional.ofNullable(movingCaseTypes).orElse(emptyList());
     }
-
 }
