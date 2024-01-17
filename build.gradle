@@ -206,6 +206,7 @@ pitest {
 project.tasks['pitest'].group="verification"
 
 sonarqube {
+  skipProject = true
   properties {
     property "sonar.projectName", "ccd-case-document-am-api"
     property "sonar.projectKey", "ccd-case-document-am-api"

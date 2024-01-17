@@ -140,7 +140,7 @@ public class CaseDocumentAmController {
     }
 
     @GetMapping(
-        path = "/cases/documents/{documentId}/binary",
+        path = "/_cases/documents/{documentId}/binary",
         produces = {APPLICATION_JSON
         })
     @ApiOperation(value = "Returns contents of the most recent Document associated with the Case Document.", tags =
@@ -199,7 +199,7 @@ public class CaseDocumentAmController {
     }
 
     @GetMapping(
-        path = "/cases/documents/{documentId}/v2/binary",
+        path = "/cases/documents/{documentId}/binary",
         produces = {APPLICATION_JSON})
     @ApiOperation(value = "Streams contents of the most recent Document associated with the Case Document.", tags =
         "get")
@@ -208,15 +208,15 @@ public class CaseDocumentAmController {
             code = 200,
             message = "OK",
             response = Object.class
-        ),
+            ),
         @ApiResponse(
             code = 400,
             message = CASE_DOCUMENT_ID_INVALID
-        ),
+            ),
         @ApiResponse(
             code = 404,
             message = CASE_DOCUMENT_NOT_FOUND
-        )
+            )
     })
 
     @LogAudit(
@@ -227,32 +227,34 @@ public class CaseDocumentAmController {
         @PathVariable("documentId") final UUID documentId,
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken) {
-            final Document document = documentManagementService.getDocumentMetadata(documentId);
+        final Document document = documentManagementService.getDocumentMetadata(documentId);
 
-            documentManagementService.checkServicePermission(document.getCaseTypeId(),
-                                                             document.getJurisdictionId(),
-                                                             getServiceNameFromS2SToken(s2sToken),
-                                                             Permission.READ,
-                                                             SERVICE_PERMISSION_ERROR,
-                                                             documentId.toString());
+        documentManagementService.checkServicePermission(
+                        document.getCaseTypeId(),
+                        document.getJurisdictionId(),
+                        getServiceNameFromS2SToken(s2sToken),
+                        Permission.READ,
+                        SERVICE_PERMISSION_ERROR,
+                        documentId.toString());
 
-            if (document.getCaseId() != null) {
-                documentManagementService.checkUserPermission(document.getCaseId(),
-                                                              documentId,
-                                                              Permission.READ,
-                                                              USER_PERMISSION_ERROR,
-                                                              documentId.toString());
+        if (document.getCaseId() != null) {
+            documentManagementService.checkUserPermission(
+                        document.getCaseId(),
+                        documentId,
+                        Permission.READ,
+                        USER_PERMISSION_ERROR,
+                        documentId.toString());
 
-                return documentManagementService.streamDocumentBinaryContent(documentId);
-            }
+            return documentManagementService.streamDocumentBinaryContent(documentId);
+        }
 
-            if (ttlIsFutureDate(document.getTtl())) {
-                return documentManagementService.streamDocumentBinaryContent(documentId);
-            } else {
-                String errorMessage = String.format(TTL_FORBIDDEN_MESSAGE, documentId);
-                log.error(errorMessage);
-                throw new ForbiddenException(errorMessage);
-            }
+        if (ttlIsFutureDate(document.getTtl())) {
+            return documentManagementService.streamDocumentBinaryContent(documentId);
+        } else {
+            String errorMessage = String.format(TTL_FORBIDDEN_MESSAGE, documentId);
+            log.error(errorMessage);
+            throw new ForbiddenException(errorMessage);
+        }
     }
 
     @PostMapping(

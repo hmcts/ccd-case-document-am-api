@@ -105,6 +105,15 @@ http:
       timeout: ${HTTP_CLIENT_CONNECTION_TIMEOUT:10000}
     read:
       timeout: ${HTTP_CLIENT_READ_TIMEOUT:30000}
+    max:
+      total: ${HTTP_CLIENT_MAX_TOTAL:100}
+      client_per_route: ${HTTP_CLIENT_MAX_CLIENT_PER_ROUTE:20}
+    seconds:
+      idle:
+        connection: ${HTTP_CLIENT_SECONDS_IDLE_CONNECTION:120}
+    validate:
+      after:
+        inactivity: ${HTTP_CLIENT_VALIDATE_AFTER_INACTIVITY:2000}
 
 logging:
   level:

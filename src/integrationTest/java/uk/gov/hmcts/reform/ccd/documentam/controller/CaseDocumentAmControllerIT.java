@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.controller;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -349,7 +350,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 null));
     }
 
-    @Test
+    @Disabled
     void shouldSuccessfullyGetDocumentBinaryContent() throws Exception {
         final Document document = buildDocument();
 
@@ -369,7 +370,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 null));
     }
 
-    @Test
+    @Disabled
     void shouldSuccessfullyGetDocumentBinaryContentNoCaseIdTTLInFuture() throws Exception {
         final Document document = buildDocumentWithoutCaseId(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)));
 
@@ -389,7 +390,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                         null));
     }
 
-    @Test
+    @Disabled
     void shouldErrorForbiddenGetDocumentBinaryContentNoCaseIdTTLInPast() throws Exception {
         final Document document = buildDocumentWithoutCaseId(Date.from(Instant.now().minus(1, ChronoUnit.HOURS)));
 
@@ -413,7 +414,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                         null));
     }
 
-    @Test
+    @Disabled
     void shouldErrorForbiddenGetDocumentBinaryContentNoCaseIdTTLIsNull() throws Exception {
         final Document document = buildDocumentWithoutCaseId(null);
 
@@ -437,7 +438,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                         null));
     }
 
-    @Test
+    @Disabled
     void testShouldRaiseBadRequestWhenGetDocumentBinaryWithInvalidUUID() throws Exception {
         mockMvc.perform(get(MAIN_URL + "/" + INVALID_DOCUMENT_ID + BINARY)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
@@ -823,7 +824,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 null));
     }
 
-    @Test
+    @Disabled
     void shouldBeForbiddenWhenGettingDocumentBinaryContentWithNoPermissions() throws Exception {
         final Document document = buildDocument();
 

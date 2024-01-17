@@ -103,8 +103,6 @@ public class CaseDocumentControllerAdvice {
     @ExceptionHandler(HttpClientErrorException.class)
     protected ResponseEntity<Object> handleHttpClientErrorException(final HttpClientErrorException exception,
                                                                     final HttpServletRequest request) {
-        log.error(exception.getMessage(), exception);
-
         HttpStatus httpStatus = getClientStatusCode(exception.getStatusCode());
 
         return errorDetailsResponseEntity(exception, httpStatus, getPath(request));
@@ -113,8 +111,6 @@ public class CaseDocumentControllerAdvice {
     @ExceptionHandler(HttpServerErrorException.class)
     protected ResponseEntity<Object> handleHttpServerErrorException(final HttpServerErrorException exception,
                                                                     final HttpServletRequest request) {
-        log.error(exception.getMessage(), exception);
-
         HttpStatus httpStatus = getServerStatusCode(exception.getStatusCode());
 
         return errorDetailsResponseEntity(exception, httpStatus, getPath(request));

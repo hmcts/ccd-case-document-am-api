@@ -137,8 +137,8 @@ public class DocumentStoreClient {
             case NOT_FOUND ->
                 throw new ResourceNotFoundException(String.format("%s %s", RESOURCE_NOT_FOUND, documentId), null);
             case INTERNAL_SERVER_ERROR, BAD_GATEWAY, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT ->
-                throw new HttpServerErrorException(statusCode, String.format("Failed to retrieve document with ID: " +
-                                                                                 "%s", documentId));
+                throw new HttpServerErrorException(statusCode, String.format("Failed to retrieve document with ID: "
+                                                                                 + "%s", documentId));
             default ->
                 throw new ResponseStatusException(
                     statusCode,
