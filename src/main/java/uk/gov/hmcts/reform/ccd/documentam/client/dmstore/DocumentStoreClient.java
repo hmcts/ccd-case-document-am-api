@@ -31,10 +31,13 @@ import uk.gov.hmcts.reform.ccd.documentam.model.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
+import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.springframework.http.HttpMethod.GET;
@@ -46,14 +49,16 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.RESOURCE_NO
 @Slf4j
 public class DocumentStoreClient {
 
+    private final SecurityUtils securityUtils;
     private final RestTemplate restTemplate;
     public final CloseableHttpClient httpClient;
     private final ApplicationParams applicationParams;
 
     @Autowired
-    public DocumentStoreClient(final RestTemplate restTemplate,
+    public DocumentStoreClient(SecurityUtils securityUtils, final RestTemplate restTemplate,
                                final CloseableHttpClient httpClient,
                                final ApplicationParams applicationParams) {
+        this.securityUtils = securityUtils;
         this.restTemplate = restTemplate;
         this.httpClient = httpClient;
         this.applicationParams = applicationParams;
@@ -108,8 +113,7 @@ public class DocumentStoreClient {
         maxAttemptsExpression = "${retry.maxAttempts}", backoff = @Backoff(delayExpression = "${retry.maxDelay}"))
     public ResponseEntity<InputStreamResource> streamDocumentAsBinary(final UUID documentId) {
         try {
-            HttpGet httpGet = new HttpGet(
-                String.format("%s/documents/%s/binary", applicationParams.getDocumentURL(), documentId));
+            HttpGet httpGet = getHttpGet(documentId);
             CloseableHttpResponse response = httpClient.execute(httpGet);
             HttpStatus statusCode = HttpStatus.valueOf(response.getStatusLine().getStatusCode());
 
@@ -120,6 +124,20 @@ public class DocumentStoreClient {
                                               "Error occurred while processing the request", exception
             );
         }
+    }
+
+    private HttpGet getHttpGet(UUID documentId) {
+        HttpGet httpGet = new HttpGet(
+            String.format("%s/documents/%s/binary", applicationParams.getDocumentURL(), documentId));
+        HttpHeaders requestHeaders = getRequestHeaders();
+        for (Map.Entry<String, List<String>> entry : requestHeaders.entrySet()) {
+            String headerName = entry.getKey();
+            List<String> headerValues = entry.getValue();
+            for (String headerValue : headerValues) {
+                httpGet.addHeader(headerName, headerValue);
+            }
+        }
+        return httpGet;
     }
 
     private ResponseEntity<InputStreamResource> handleResponse(HttpStatus statusCode,
@@ -145,6 +163,13 @@ public class DocumentStoreClient {
                     String.format("Failed to retrieve document with ID: %s", documentId)
                 );
         }
+    }
+
+    private HttpHeaders getRequestHeaders() {
+        HttpHeaders headers = securityUtils.serviceAuthorizationHeaders();
+        headers.set(Constants.USERID, securityUtils.getUserInfo().getUid());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return headers;
     }
 
     private HttpHeaders mapResponseHeaders(final Header[] responseHeaders) {
