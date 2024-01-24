@@ -2,13 +2,14 @@ package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
 import io.vavr.control.Either;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.input.CountingInputStream;
+import org.apache.commons.io.output.CountingOutputStream;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -33,12 +34,15 @@ import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static org.springframework.http.HttpMethod.GET;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DM_DATE_TIME_FORMATTER;
@@ -111,14 +115,15 @@ public class DocumentStoreClient {
 
     @Retryable(value = {HttpServerErrorException.class, SocketTimeoutException.class},
         maxAttemptsExpression = "${retry.maxAttempts}", backoff = @Backoff(delayExpression = "${retry.maxDelay}"))
-    public ResponseEntity<InputStreamResource> streamDocumentAsBinary(final UUID documentId) {
+    public void streamDocumentAsBinary(final UUID documentId, HttpServletResponse httpResponseOut,
+                                       Map<String, String> requestHeaders) {
         try {
-            HttpGet httpGet = getHttpGet(documentId);
-            CloseableHttpResponse response = httpClient.execute(httpGet);
-            HttpStatus statusCode = HttpStatus.valueOf(response.getStatusLine().getStatusCode());
+            HttpGet httpRequest = prepareHttpRequest(documentId, requestHeaders);
+            CloseableHttpResponse httpClientResponse = httpClient.execute(httpRequest);
+            HttpStatus statusCode = HttpStatus.valueOf(httpClientResponse.getStatusLine().getStatusCode());
 
-            return handleResponse(statusCode, response, documentId);
-        } catch (IOException exception) {
+            handleResponse(statusCode, httpClientResponse, httpResponseOut, documentId);
+        } catch (Exception exception) {
             log.error("Error occurred", exception);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                                               "Error occurred while processing the request", exception
@@ -126,31 +131,70 @@ public class DocumentStoreClient {
         }
     }
 
-    private HttpGet getHttpGet(UUID documentId) {
+    private HttpGet prepareHttpRequest(UUID documentId, final Map<String, String> requestHeaders) {
         HttpGet httpGet = new HttpGet(
             String.format("%s/documents/%s/binary", applicationParams.getDocumentURL(), documentId));
-        HttpHeaders requestHeaders = getRequestHeaders();
-        for (Map.Entry<String, List<String>> entry : requestHeaders.entrySet()) {
-            String headerName = entry.getKey();
-            List<String> headerValues = entry.getValue();
-            for (String headerValue : headerValues) {
-                httpGet.addHeader(headerName, headerValue);
-            }
-        }
+
+        getRequestHeaders().forEach((headerName, headerValues) ->
+            headerValues.forEach(headerValue -> httpGet.addHeader(headerName, headerValue))
+        );
+
         return httpGet;
     }
 
-    private ResponseEntity<InputStreamResource> handleResponse(HttpStatus statusCode,
-                                                               CloseableHttpResponse response,
-                                                               UUID documentId) throws IOException {
+    private HttpHeaders getRequestHeaders() {
+        HttpHeaders headers = securityUtils.serviceAuthorizationHeaders();
+        headers.set(Constants.USERID, securityUtils.getUserInfo().getUid());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        return headers;
+    }
+
+    private void setRequestHeaders(final HttpGet httpGet, Map<String, String> requestHeaders) {
+        // map client request headers
+        requestHeaders.forEach(httpGet::addHeader);
+
+        HttpHeaders headers = securityUtils.serviceAuthorizationHeaders();
+        headers.forEach((headerName, headerValues) ->
+            headerValues.forEach(headerValue -> httpGet.addHeader(headerName, headerValue))
+        );
+        httpGet.addHeader(Constants.USERID, securityUtils.getUserInfo().getUid());
+        httpGet.addHeader(HttpHeaders.CONTENT_TYPE, String.valueOf(MediaType.APPLICATION_JSON));
+    }
+
+
+    private void handleResponse(HttpStatus statusCode,
+                                CloseableHttpResponse httpClientResponse,
+                                HttpServletResponse httpResponseOut,
+                                UUID documentId) throws IOException {
         switch (statusCode) {
             case OK -> {
-                HttpHeaders headers = mapResponseHeaders(response.getAllHeaders());
-                InputStreamResource responseBody = new InputStreamResource(response.getEntity().getContent());
+                mapResponseHeaders(httpClientResponse, httpResponseOut);
+                CountingInputStream countingInputStream =
+                    new CountingInputStream(httpClientResponse.getEntity().getContent());
+                CountingOutputStream countingOutputStream = new CountingOutputStream(httpResponseOut.getOutputStream());
 
-                return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(responseBody);
+                Thread transferThread = callDmStore(countingInputStream, countingOutputStream);
+
+                ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+                executorService.scheduleAtFixedRate(() -> {
+                    long bytesTransferredFromInput = countingInputStream.getByteCount();
+                    long bytesWrittenToOutput = countingOutputStream.getByteCount();
+                    log.info("Bytes transferred from input: {}; Bytes written to output: {} for document: {}",
+                             bytesTransferredFromInput, bytesWrittenToOutput, documentId);
+
+                }, 0, 1, TimeUnit.SECONDS);
+
+                try {
+                    transferThread.join();
+                } catch (InterruptedException e) {
+                    log.error("Thread interrupted", e);
+                } finally {
+                    executorService.shutdown();
+                }
+
+                log.info("Total bytes written to output: {} for document: {}", countingOutputStream.getByteCount(),
+                         documentId);
             }
             case NOT_FOUND ->
                 throw new ResourceNotFoundException(String.format("%s %s", RESOURCE_NOT_FOUND, documentId), null);
@@ -165,20 +209,23 @@ public class DocumentStoreClient {
         }
     }
 
-    private HttpHeaders getRequestHeaders() {
-        HttpHeaders headers = securityUtils.serviceAuthorizationHeaders();
-        headers.set(Constants.USERID, securityUtils.getUserInfo().getUid());
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return headers;
+    private Thread callDmStore(CountingInputStream countingInputStream, CountingOutputStream countingOutputStream) {
+        Thread transferThread = new Thread(() -> {
+            try (countingInputStream) {
+                countingInputStream.transferTo(countingOutputStream);
+            } catch (IOException e) {
+                log.error("Exception in Thread", e);
+            }
+        });
+
+        transferThread.start();
+        return transferThread;
     }
 
-    private HttpHeaders mapResponseHeaders(final Header[] responseHeaders) {
-        HttpHeaders mappedHeaders = new HttpHeaders();
-
-        for (Header header : responseHeaders) {
-            mappedHeaders.set(header.getName(), header.getValue());
+    private void mapResponseHeaders(CloseableHttpResponse httpClientResponse, HttpServletResponse httpResponseOut) {
+        for (Header header : httpClientResponse.getAllHeaders()) {
+            httpResponseOut.setHeader(header.getName(), header.getValue());
         }
-        return mappedHeaders;
     }
 
     public void deleteDocument(final UUID documentId, final Boolean permanent) {

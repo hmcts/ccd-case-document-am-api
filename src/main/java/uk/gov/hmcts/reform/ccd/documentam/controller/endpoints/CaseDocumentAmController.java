@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.LogAudit;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
@@ -40,9 +41,11 @@ import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.APPLICATION_JSON;
@@ -223,10 +226,12 @@ public class CaseDocumentAmController {
         operationType = AuditOperationType.DOWNLOAD_STREAMED_DOCUMENT_BINARY_CONTENT_BY_ID,
         documentId = "#documentId"
     )
-    public ResponseEntity<InputStreamResource> streamDocumentBinaryContentByDocumentId(
-        @PathVariable("documentId") final UUID documentId,
+    public ResponseEntity<Void> streamDocumentBinaryContentByDocumentId(
+        @PathVariable("documentId") final UUID documentId, final HttpServletResponse httpResponse,
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
-        @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken) {
+        @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken,
+        @ApiIgnore
+        @RequestHeader final Map<String, String> requestHeaders) {
         final Document document = documentManagementService.getDocumentMetadata(documentId);
 
         documentManagementService.checkServicePermission(
@@ -245,16 +250,29 @@ public class CaseDocumentAmController {
                         USER_PERMISSION_ERROR,
                         documentId.toString());
 
-            return documentManagementService.streamDocumentBinaryContent(documentId);
+            return streamDocumentContent(documentId, httpResponse, requestHeaders);
         }
 
         if (ttlIsFutureDate(document.getTtl())) {
-            return documentManagementService.streamDocumentBinaryContent(documentId);
+            return streamDocumentContent(documentId, httpResponse, requestHeaders);
         } else {
             String errorMessage = String.format(TTL_FORBIDDEN_MESSAGE, documentId);
             log.error(errorMessage);
             throw new ForbiddenException(errorMessage);
         }
+    }
+
+    private ResponseEntity<Void> streamDocumentContent(UUID documentId, HttpServletResponse httpResponse,
+                                                       Map<String, String> requestHeaders) {
+        removeAuthorizationHeaders(requestHeaders);
+
+        documentManagementService.streamDocumentBinaryContent(documentId, httpResponse, requestHeaders);
+        return ResponseEntity.ok().build();
+    }
+
+    private void removeAuthorizationHeaders(Map<String, String> requestHeaders) {
+        requestHeaders.remove(HttpHeaders.AUTHORIZATION.toLowerCase());
+        requestHeaders.remove(SERVICE_AUTHORIZATION.toLowerCase());
     }
 
     @PostMapping(

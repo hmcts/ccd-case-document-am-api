@@ -6,7 +6,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -35,6 +34,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
+import javax.servlet.http.HttpServletResponse;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
@@ -89,8 +89,9 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public ResponseEntity<InputStreamResource> streamDocumentBinaryContent(UUID documentId) {
-        return documentStoreClient.streamDocumentAsBinary(documentId);
+    public void streamDocumentBinaryContent(UUID documentId, HttpServletResponse httpResponse,
+                                            Map<String, String> requestHeaders) {
+        documentStoreClient.streamDocumentAsBinary(documentId, httpResponse, requestHeaders);
     }
 
     @Override

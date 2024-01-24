@@ -214,7 +214,8 @@ sonarqube {
     property "sonar.pitest.reportsDirectory", "build/reports/pitest"
     property "sonar.junit.reportPaths", "${project.buildDir}/test-results/junit-platform"
     property "sonar.exclusions","**/CaseDocumentAmController.java, **/CaseDocumentControllerAdvice.java, " +
-      "**/DocumentManagementServiceImpl.java, **/DocumentStoreClient.java, **/ApplicationConfiguration.java"
+      "**/DocumentManagementServiceImpl.java, **/DocumentStoreClient.java, **/ApplicationConfiguration.java, " +
+      "**/CountingInputStream.java"
   }
 }
 
