@@ -43,6 +43,9 @@ import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
@@ -445,6 +448,32 @@ public class CaseDocumentAmController {
         documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
 
         return ResponseEntity.ok(new PatchDocumentMetaDataResponse("Success"));
+    }
+
+    @GetMapping(
+        path = "/cases/documents/heartbeat",
+        produces = "plain/text")
+    public void heartbeat(
+        @RequestParam(defaultValue = "1000") final int period,
+        @RequestParam(defaultValue = "30000") final int duration,
+        final HttpServletResponse response) throws IOException {
+
+        long start = System.currentTimeMillis();
+        response.setStatus(HttpServletResponse.SC_OK);
+
+        try (OutputStream outputStream = response.getOutputStream()) {
+            try (PrintWriter writer = new PrintWriter(outputStream)) {
+                long elapsed;
+                while ((elapsed = System.currentTimeMillis() - start) <= duration) {
+                    writer.println(elapsed);
+                    try {
+                        Thread.sleep(period);
+                    } catch (Exception ignored) {
+                        // ignored
+                    }
+                }
+            }
+        }
     }
 
     @DeleteMapping(

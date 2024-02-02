@@ -36,13 +36,12 @@ import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.SocketTimeoutException;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import static org.springframework.http.HttpMethod.GET;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DM_DATE_TIME_FORMATTER;
@@ -166,35 +165,34 @@ public class DocumentStoreClient {
     private void handleResponse(HttpStatus statusCode,
                                 CloseableHttpResponse httpClientResponse,
                                 HttpServletResponse httpResponseOut,
-                                UUID documentId) throws IOException {
+                                UUID documentId) {
         switch (statusCode) {
             case OK -> {
+                httpResponseOut.setStatus(statusCode.value());
                 mapResponseHeaders(httpClientResponse, httpResponseOut);
-                CountingInputStream countingInputStream =
-                    new CountingInputStream(httpClientResponse.getEntity().getContent());
-                CountingOutputStream countingOutputStream = new CountingOutputStream(httpResponseOut.getOutputStream());
-
-                Thread transferThread = callDmStore(countingInputStream, countingOutputStream);
-
-                ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-                executorService.scheduleAtFixedRate(() -> {
-                    long bytesTransferredFromInput = countingInputStream.getByteCount();
-                    long bytesWrittenToOutput = countingOutputStream.getByteCount();
-                    log.info("Bytes transferred from input: {}; Bytes written to output: {} for document: {}",
-                             bytesTransferredFromInput, bytesWrittenToOutput, documentId);
-
-                }, 0, 1, TimeUnit.SECONDS);
-
+                long logNextAt = System.currentTimeMillis();
+                int byteCount = 0;
                 try {
-                    transferThread.join();
-                } catch (InterruptedException e) {
-                    log.error("Thread interrupted", e);
-                } finally {
-                    executorService.shutdown();
+                    try (InputStream input = httpClientResponse.getEntity().getContent()) {
+                        try (OutputStream output = httpResponseOut.getOutputStream()) {
+                            byte[] buffer = new byte[1024 * 1024]; // 1 MB buffer
+                            int bytesRead;
+                            while ((bytesRead = input.read(buffer)) >= 0) {
+                                output.write(buffer, 0, bytesRead);
+                                byteCount += bytesRead;
+                                if (System.currentTimeMillis() >= logNextAt) {
+                                    log.info("Transferred {} bytes for document {}", byteCount, documentId);
+                                    logNextAt += 1000;
+                                }
+                            }
+                            log.info("Total bytes transferred: {} for document {} (complete)", byteCount, documentId);
+                        }
+                    }
+                } catch (Throwable t) {
+                    log.error("Error transferring document {} : {}", documentId, t.getMessage());
+                    log.info("Total bytes transferred: {} for document {} (error)", byteCount, documentId);
                 }
 
-                log.info("Total bytes written to output: {} for document: {}", countingOutputStream.getByteCount(),
-                         documentId);
             }
             case NOT_FOUND ->
                 throw new ResourceNotFoundException(String.format("%s %s", RESOURCE_NOT_FOUND, documentId), null);
