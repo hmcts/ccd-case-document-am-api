@@ -2,6 +2,12 @@ package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
 import io.vavr.control.Either;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.input.CountingInputStream;
+import org.apache.commons.io.output.CountingOutputStream;
+import org.apache.http.Header;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
@@ -16,6 +22,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
@@ -25,9 +32,15 @@ import uk.gov.hmcts.reform.ccd.documentam.model.DmUploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
+import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.SocketTimeoutException;
 import java.time.ZonedDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.springframework.http.HttpMethod.GET;
@@ -39,13 +52,18 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.RESOURCE_NO
 @Slf4j
 public class DocumentStoreClient {
 
+    private final SecurityUtils securityUtils;
     private final RestTemplate restTemplate;
+    public final CloseableHttpClient httpClient;
     private final ApplicationParams applicationParams;
 
     @Autowired
-    public DocumentStoreClient(final RestTemplate restTemplate,
+    public DocumentStoreClient(SecurityUtils securityUtils, final RestTemplate restTemplate,
+                               final CloseableHttpClient httpClient,
                                final ApplicationParams applicationParams) {
+        this.securityUtils = securityUtils;
         this.restTemplate = restTemplate;
+        this.httpClient = httpClient;
         this.applicationParams = applicationParams;
     }
 
@@ -64,8 +82,9 @@ public class DocumentStoreClient {
         } catch (HttpClientErrorException exception) {
             if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
                 return Either.left(new ResourceNotFoundException(
-                        String.format(DOCUMENT_METADATA_NOT_FOUND, documentId.toString()),
-                        exception));
+                    String.format(DOCUMENT_METADATA_NOT_FOUND, documentId.toString()),
+                    exception
+                ));
             }
             throw exception;
         }
@@ -93,6 +112,120 @@ public class DocumentStoreClient {
         }
     }
 
+    @Retryable(value = {HttpServerErrorException.class, SocketTimeoutException.class},
+        maxAttemptsExpression = "${retry.maxAttempts}", backoff = @Backoff(delayExpression = "${retry.maxDelay}"))
+    public void streamDocumentAsBinary(final UUID documentId, HttpServletResponse httpResponseOut,
+                                       Map<String, String> requestHeaders) {
+        try {
+            HttpGet httpRequest = prepareHttpRequest(documentId, requestHeaders);
+            CloseableHttpResponse httpClientResponse = httpClient.execute(httpRequest);
+            HttpStatus statusCode = HttpStatus.valueOf(httpClientResponse.getStatusLine().getStatusCode());
+
+            handleResponse(statusCode, httpClientResponse, httpResponseOut, documentId);
+        } catch (Exception exception) {
+            log.error("Error occurred", exception);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                                              "Error occurred while processing the request", exception
+            );
+        }
+    }
+
+    private HttpGet prepareHttpRequest(UUID documentId, final Map<String, String> requestHeaders) {
+        HttpGet httpGet = new HttpGet(
+            String.format("%s/documents/%s/binary", applicationParams.getDocumentURL(), documentId));
+
+        getRequestHeaders().forEach((headerName, headerValues) ->
+            headerValues.forEach(headerValue -> httpGet.addHeader(headerName, headerValue))
+        );
+
+        return httpGet;
+    }
+
+    private HttpHeaders getRequestHeaders() {
+        HttpHeaders headers = securityUtils.serviceAuthorizationHeaders();
+        headers.set(Constants.USERID, securityUtils.getUserInfo().getUid());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        return headers;
+    }
+
+    private void setRequestHeaders(final HttpGet httpGet, Map<String, String> requestHeaders) {
+        // map client request headers
+        requestHeaders.forEach(httpGet::addHeader);
+
+        HttpHeaders headers = securityUtils.serviceAuthorizationHeaders();
+        headers.forEach((headerName, headerValues) ->
+            headerValues.forEach(headerValue -> httpGet.addHeader(headerName, headerValue))
+        );
+        httpGet.addHeader(Constants.USERID, securityUtils.getUserInfo().getUid());
+        httpGet.addHeader(HttpHeaders.CONTENT_TYPE, String.valueOf(MediaType.APPLICATION_JSON));
+    }
+
+
+    private void handleResponse(HttpStatus statusCode,
+                                CloseableHttpResponse httpClientResponse,
+                                HttpServletResponse httpResponseOut,
+                                UUID documentId) {
+        switch (statusCode) {
+            case OK -> {
+                httpResponseOut.setStatus(statusCode.value());
+                mapResponseHeaders(httpClientResponse, httpResponseOut);
+                long logNextAt = System.currentTimeMillis();
+                int byteCount = 0;
+                try {
+                    try (InputStream input = httpClientResponse.getEntity().getContent()) {
+                        try (OutputStream output = httpResponseOut.getOutputStream()) {
+                            byte[] buffer = new byte[1024 * 1024]; // 1 MB buffer
+                            int bytesRead;
+                            while ((bytesRead = input.read(buffer)) >= 0) {
+                                output.write(buffer, 0, bytesRead);
+                                byteCount += bytesRead;
+                                if (System.currentTimeMillis() >= logNextAt) {
+                                    log.info("Transferred {} bytes for document {}", byteCount, documentId);
+                                    logNextAt += 1000;
+                                }
+                            }
+                            log.info("Total bytes transferred: {} for document {} (complete)", byteCount, documentId);
+                        }
+                    }
+                } catch (Throwable t) {
+                    log.error("Error transferring document {} : {}", documentId, t.getMessage());
+                    log.info("Total bytes transferred: {} for document {} (error)", byteCount, documentId);
+                }
+
+            }
+            case NOT_FOUND ->
+                throw new ResourceNotFoundException(String.format("%s %s", RESOURCE_NOT_FOUND, documentId), null);
+            case INTERNAL_SERVER_ERROR, BAD_GATEWAY, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT ->
+                throw new HttpServerErrorException(statusCode, String.format("Failed to retrieve document with ID: "
+                                                                                 + "%s", documentId));
+            default ->
+                throw new ResponseStatusException(
+                    statusCode,
+                    String.format("Failed to retrieve document with ID: %s", documentId)
+                );
+        }
+    }
+
+    private Thread callDmStore(CountingInputStream countingInputStream, CountingOutputStream countingOutputStream) {
+        Thread transferThread = new Thread(() -> {
+            try (countingInputStream) {
+                countingInputStream.transferTo(countingOutputStream);
+            } catch (IOException e) {
+                log.error("Exception in Thread", e);
+            }
+        });
+
+        transferThread.start();
+        return transferThread;
+    }
+
+    private void mapResponseHeaders(CloseableHttpResponse httpClientResponse, HttpServletResponse httpResponseOut) {
+        for (Header header : httpClientResponse.getAllHeaders()) {
+            httpResponseOut.setHeader(header.getName(), header.getValue());
+        }
+    }
+
     public void deleteDocument(final UUID documentId, final Boolean permanent) {
         try {
             restTemplate.delete(String.format(
@@ -110,7 +243,7 @@ public class DocumentStoreClient {
     }
 
     public Either<ResourceNotFoundException, PatchDocumentResponse> patchDocument(final UUID documentId,
-                                                                         final DmTtlRequest dmTtlRequest) {
+                                                                                  final DmTtlRequest dmTtlRequest) {
         try {
             final PatchDocumentResponse patchDocumentResponse = restTemplate.patchForObject(
                 String.format("%s/documents/%s", applicationParams.getDocumentURL(), documentId),
@@ -123,7 +256,8 @@ public class DocumentStoreClient {
             if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
                 return Either.left(new ResourceNotFoundException(
                     String.format("%s %s", RESOURCE_NOT_FOUND, documentId),
-                    exception));
+                    exception
+                ));
             }
 
             throw exception;

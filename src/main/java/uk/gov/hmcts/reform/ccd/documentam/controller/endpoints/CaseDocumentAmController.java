@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.LogAudit;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
@@ -39,9 +41,14 @@ import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.APPLICATION_JSON;
@@ -139,10 +146,10 @@ public class CaseDocumentAmController {
     }
 
     @GetMapping(
-        path = "/cases/documents/{documentId}/binary",
+        path = "/_cases/documents/{documentId}/binary",
         produces = {APPLICATION_JSON
         })
-    @ApiOperation(value = "Streams contents of the most recent Document associated with the Case Document.", tags =
+    @ApiOperation(value = "Returns contents of the most recent Document associated with the Case Document.", tags =
         "get")
     @ApiResponses({
         @ApiResponse(
@@ -195,6 +202,80 @@ public class CaseDocumentAmController {
             log.error(errorMessage);
             throw new ForbiddenException(errorMessage);
         }
+    }
+
+    @GetMapping(
+        path = "/cases/documents/{documentId}/binary",
+        produces = {APPLICATION_JSON})
+    @ApiOperation(value = "Streams contents of the most recent Document associated with the Case Document.", tags =
+        "get")
+    @ApiResponses({
+        @ApiResponse(
+            code = 200,
+            message = "OK",
+            response = Object.class
+            ),
+        @ApiResponse(
+            code = 400,
+            message = CASE_DOCUMENT_ID_INVALID
+            ),
+        @ApiResponse(
+            code = 404,
+            message = CASE_DOCUMENT_NOT_FOUND
+            )
+    })
+
+    @LogAudit(
+        operationType = AuditOperationType.DOWNLOAD_STREAMED_DOCUMENT_BINARY_CONTENT_BY_ID,
+        documentId = "#documentId"
+    )
+    public ResponseEntity<Void> streamDocumentBinaryContentByDocumentId(
+        @PathVariable("documentId") final UUID documentId, final HttpServletResponse httpResponse,
+        @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
+        @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken,
+        @ApiIgnore
+        @RequestHeader final Map<String, String> requestHeaders) {
+        final Document document = documentManagementService.getDocumentMetadata(documentId);
+
+        documentManagementService.checkServicePermission(
+                        document.getCaseTypeId(),
+                        document.getJurisdictionId(),
+                        getServiceNameFromS2SToken(s2sToken),
+                        Permission.READ,
+                        SERVICE_PERMISSION_ERROR,
+                        documentId.toString());
+
+        if (document.getCaseId() != null) {
+            documentManagementService.checkUserPermission(
+                        document.getCaseId(),
+                        documentId,
+                        Permission.READ,
+                        USER_PERMISSION_ERROR,
+                        documentId.toString());
+
+            return streamDocumentContent(documentId, httpResponse, requestHeaders);
+        }
+
+        if (ttlIsFutureDate(document.getTtl())) {
+            return streamDocumentContent(documentId, httpResponse, requestHeaders);
+        } else {
+            String errorMessage = String.format(TTL_FORBIDDEN_MESSAGE, documentId);
+            log.error(errorMessage);
+            throw new ForbiddenException(errorMessage);
+        }
+    }
+
+    private ResponseEntity<Void> streamDocumentContent(UUID documentId, HttpServletResponse httpResponse,
+                                                       Map<String, String> requestHeaders) {
+        removeAuthorizationHeaders(requestHeaders);
+
+        documentManagementService.streamDocumentBinaryContent(documentId, httpResponse, requestHeaders);
+        return ResponseEntity.ok().build();
+    }
+
+    private void removeAuthorizationHeaders(Map<String, String> requestHeaders) {
+        requestHeaders.remove(HttpHeaders.AUTHORIZATION.toLowerCase());
+        requestHeaders.remove(SERVICE_AUTHORIZATION.toLowerCase());
     }
 
     @PostMapping(
@@ -367,6 +448,32 @@ public class CaseDocumentAmController {
         documentManagementService.patchDocumentMetadata(caseDocumentsMetadata);
 
         return ResponseEntity.ok(new PatchDocumentMetaDataResponse("Success"));
+    }
+
+    @GetMapping(
+        path = "/cases/documents/heartbeat",
+        produces = "plain/text")
+    public void heartbeat(
+        @RequestParam(defaultValue = "1000") final int period,
+        @RequestParam(defaultValue = "30000") final int duration,
+        final HttpServletResponse response) throws IOException {
+
+        long start = System.currentTimeMillis();
+        response.setStatus(HttpServletResponse.SC_OK);
+
+        try (OutputStream outputStream = response.getOutputStream()) {
+            try (PrintWriter writer = new PrintWriter(outputStream)) {
+                long elapsed;
+                while ((elapsed = System.currentTimeMillis() - start) <= duration) {
+                    writer.println(elapsed);
+                    try {
+                        Thread.sleep(period);
+                    } catch (Exception ignored) {
+                        // ignored
+                    }
+                }
+            }
+        }
     }
 
     @DeleteMapping(

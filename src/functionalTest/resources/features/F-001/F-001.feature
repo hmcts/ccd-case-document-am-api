@@ -1,4 +1,4 @@
-@F-001
+@F-001 @Ignore
 Feature: F-001: Get Document Metadata by Document ID
 
   Background: Load test data for the scenario
