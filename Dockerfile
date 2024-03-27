@@ -1,7 +1,7 @@
 # renovate: datasource=github-releases depName=microsoft/ApplicationInsights-Java
-ARG APP_INSIGHTS_AGENT_VERSION=3.4.13
+ARG APP_INSIGHTS_AGENT_VERSION=3.5.1
 
-FROM openjdk:17-jdk-slim as builder
+FROM openjdk:17.0.2-jdk-slim as builder
 
 ARG JAR_FILE=build/libs/ccd-case-document-am-api.jar
 COPY ${JAR_FILE} application.jar
