@@ -139,7 +139,7 @@ public class DocumentStoreClient {
     }
 
     private void setRequestHeaders(final HttpGet httpGet, Map<String, String> requestHeaders) {
-        Set<String> filteredHeaders = new HashSet<>(applicationParams.getFilteredRequestHeaders());
+        Set<String> filteredHeaders = new HashSet<>(applicationParams.getClientRequestHeadersToForward());
 
         // map client request headers
         if (!filteredHeaders.isEmpty()) {
@@ -164,7 +164,7 @@ public class DocumentStoreClient {
                                       HttpServletResponse httpResponseOut,
                                       UUID documentId) {
         switch (statusCode) {
-            case OK -> {
+            case OK, PARTIAL_CONTENT -> {
                 httpResponseOut.setStatus(statusCode.value());
                 mapResponseHeaders(httpClientResponse, httpResponseOut);
                 try {

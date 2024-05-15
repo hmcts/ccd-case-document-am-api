@@ -28,8 +28,8 @@ public class ApplicationParams {
     @Value("${moving.case.types}")
     private List<String> movingCaseTypes;
 
-    @Value("${filtered.request.headers}")
-    private List<String> filteredRequestHeaders;
+    @Value("#{'${request.forwarded_headers.from_client}'.split(',')}")
+    private List<String> clientRequestHeadersToForward;
 
     public List<String> getMovingCaseTypes() {
         return Optional.ofNullable(movingCaseTypes).orElse(emptyList());

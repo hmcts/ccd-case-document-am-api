@@ -211,15 +211,15 @@ public class CaseDocumentAmController {
             code = 200,
             message = "OK",
             response = Object.class
-        ),
+            ),
         @ApiResponse(
             code = 400,
             message = CASE_DOCUMENT_ID_INVALID
-        ),
+            ),
         @ApiResponse(
             code = 404,
             message = CASE_DOCUMENT_NOT_FOUND
-        )
+            )
     })
 
     @LogAudit(
