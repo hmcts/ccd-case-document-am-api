@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.SocketTimeoutException;
@@ -121,7 +122,7 @@ public class DocumentStoreClient {
             HttpStatus statusCode = HttpStatus.valueOf(httpClientResponse.getStatusLine().getStatusCode());
 
             handleStreamResponse(statusCode, httpClientResponse, httpResponseOut, documentId);
-        } catch (Exception exception) {
+        } catch (IOException exception) {
             log.error("Error occurred", exception);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                                               "Error occurred while processing the request", exception
@@ -162,24 +163,20 @@ public class DocumentStoreClient {
     private void handleStreamResponse(HttpStatus statusCode,
                                       CloseableHttpResponse httpClientResponse,
                                       HttpServletResponse httpResponseOut,
-                                      UUID documentId) {
+                                      UUID documentId) throws IOException {
         switch (statusCode) {
             case OK, PARTIAL_CONTENT -> {
                 httpResponseOut.setStatus(statusCode.value());
                 mapResponseHeaders(httpClientResponse, httpResponseOut);
-                try {
-                    try (InputStream input = httpClientResponse.getEntity().getContent()) {
-                        OutputStream output = httpResponseOut.getOutputStream();
-                        byte[] buffer = new byte[1024 * 1024]; // 1 MB buffer
-                        int bytesRead;
-                        while ((bytesRead = input.read(buffer)) >= 0) {
-                            output.write(buffer, 0, bytesRead);
-                        }
-                    }
-                } catch (Throwable t) {
-                    log.error("Error transferring document {} : {}", documentId, t.getMessage());
-                }
 
+                try (InputStream input = httpClientResponse.getEntity().getContent()) {
+                    OutputStream output = httpResponseOut.getOutputStream();
+                    byte[] buffer = new byte[1024 * 1024]; // 1 MB buffer
+                    int bytesRead;
+                    while ((bytesRead = input.read(buffer)) >= 0) {
+                        output.write(buffer, 0, bytesRead);
+                    }
+                }
             }
             case NOT_FOUND ->
                 throw new ResourceNotFoundException(String.format("%s %s", RESOURCE_NOT_FOUND, documentId), null);
