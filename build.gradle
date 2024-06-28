@@ -334,7 +334,7 @@ dependencies {
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
   testImplementation group: 'io.rest-assured', name: 'json-path', version: versions.restAssured
   testImplementation group: 'io.rest-assured', name: 'xml-path', version: versions.restAssured
-  testCompile 'com.github.hmcts:fortify-client:1.3.0:all'
+  testImplementation 'com.github.hmcts:fortify-client:1.3.0:all'
 
   integrationTestImplementation sourceSets.main.runtimeClasspath
   integrationTestImplementation sourceSets.test.runtimeClasspath
@@ -390,7 +390,7 @@ tasks.withType(Test) {
 }
 
 task fortifyScan(type: JavaExec)  {
-  mainClass = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
+  main = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
   classpath += sourceSets.test.runtimeClasspath
   jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
   // The line below prevents the build from failing if the Fortify scan detects issues
