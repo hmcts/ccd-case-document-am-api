@@ -82,9 +82,8 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     private static final String SUCCESS = "Success";
     private static final int ERROR_403 = 403;
-    public static final String PATCH_ERROR_DESCRIPTION_BAD_REQUEST = "Document metadata exists for %s but the "
-        + "case type is not a moving case type: %s";
     private static final String MAIN_URL = "/cases/documents";
+    private static final String MAIN_URL_V2 = "/v2/cases/documents";
     private static final String ATTACH_TO_CASE_URL = "/attachToCase";
     private static final String SERVICE_NAME_CCD_DATA = "ccd_data";
     private static final String SERVICE_NAME_CCD_GW = "ccd_gw";
@@ -370,6 +369,26 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     }
 
     @Test
+    void shouldSuccessfullyStreamDocumentBinaryContent() throws Exception {
+        final Document document = buildDocument();
+
+        stubDocumentUrlWithReadPermissions();
+        stubGetDocumentMetaData(document);
+        stubDocumentBinaryContent();
+
+        mockMvc.perform(get(MAIN_URL_V2 + "/" + DOCUMENT_ID + BINARY)
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+            .andExpect(status().isOk())
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.DOWNLOAD_STREAMED_DOCUMENT_BINARY_CONTENT_BY_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                List.of(DOCUMENT_ID.toString()),
+                null,
+                null,
+                null));
+    }
+
+    @Test
     void shouldSuccessfullyGetDocumentBinaryContentNoCaseIdTTLInFuture() throws Exception {
         final Document document = buildDocumentWithoutCaseId(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)));
 
@@ -387,6 +406,26 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                         null,
                         null,
                         null));
+    }
+
+    @Test
+    void shouldSuccessfullyStreamDocumentBinaryContentNoCaseIdTTLInFuture() throws Exception {
+        final Document document = buildDocumentWithoutCaseId(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)));
+
+        stubDocumentUrlWithReadPermissions();
+        stubGetDocumentMetaData(document);
+        stubDocumentBinaryContent();
+
+        mockMvc.perform(get(MAIN_URL_V2 + "/" + DOCUMENT_ID + BINARY)
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+            .andExpect(status().isOk())
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.DOWNLOAD_STREAMED_DOCUMENT_BINARY_CONTENT_BY_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                List.of(DOCUMENT_ID.toString()),
+                null,
+                null,
+                null));
     }
 
     @Test
@@ -414,6 +453,30 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     }
 
     @Test
+    void shouldErrorForbiddenStreamDocumentBinaryContentNoCaseIdTTLInPast() throws Exception {
+        final Document document = buildDocumentWithoutCaseId(Date.from(Instant.now().minus(1, ChronoUnit.HOURS)));
+
+        stubDocumentUrlWithReadPermissions();
+        stubGetDocumentMetaData(document);
+        stubDocumentBinaryContent();
+
+        mockMvc.perform(get(MAIN_URL_V2 + "/" + DOCUMENT_ID + BINARY)
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.error",
+                                is("Forbidden: Insufficient permissions: Document "
+                                       + DOCUMENT_ID
+                                       + " can not be downloaded as TTL has expired")))
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.DOWNLOAD_STREAMED_DOCUMENT_BINARY_CONTENT_BY_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                List.of(DOCUMENT_ID.toString()),
+                null,
+                null,
+                null));
+    }
+
+    @Test
     void shouldErrorForbiddenGetDocumentBinaryContentNoCaseIdTTLIsNull() throws Exception {
         final Document document = buildDocumentWithoutCaseId(null);
 
@@ -435,6 +498,30 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                         null,
                         null,
                         null));
+    }
+
+    @Test
+    void shouldErrorForbiddenStreamDocumentBinaryContentNoCaseIdTTLIsNull() throws Exception {
+        final Document document = buildDocumentWithoutCaseId(null);
+
+        stubDocumentUrlWithReadPermissions();
+        stubGetDocumentMetaData(document);
+        stubDocumentBinaryContent();
+
+        mockMvc.perform(get(MAIN_URL_V2 + "/" + DOCUMENT_ID + BINARY)
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.error",
+                                is("Forbidden: Insufficient permissions: Document "
+                                       + DOCUMENT_ID
+                                       + " can not be downloaded as TTL has expired")))
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.DOWNLOAD_STREAMED_DOCUMENT_BINARY_CONTENT_BY_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                List.of(DOCUMENT_ID.toString()),
+                null,
+                null,
+                null));
     }
 
     @Test

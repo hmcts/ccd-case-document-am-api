@@ -1,0 +1,32 @@
+{
+  "title": "must successfully stream a document's binary content",
+  "_guid_": "S-024",
+  "_extends_": "F-002_Test_Stream_Base",
+  "specs": [
+    "contains the binary content for the uploaded document"
+  ],
+  "request": {
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "Common_200_Response",
+    "headers": {
+      "Accept-Ranges": "bytes",
+      "Content-Disposition": "[[ANYTHING_PRESENT]]",
+      "Content-Type": "[[ANYTHING_PRESENT]]",
+      "data-source": "contentURI",
+      "OriginalFileName": "[[ANYTHING_PRESENT]]",
+      "Content-Encoding": "gzip",
+      "Transfer-Encoding": "chunked"
+    },
+    "body": {
+      "__fileInBody__": {
+        "fullPath": "file",
+        "size": "[[ANYTHING_PRESENT]]",
+        "contentHash": "hash"
+      }
+    }
+  }
+}

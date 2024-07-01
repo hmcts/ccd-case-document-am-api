@@ -4,6 +4,7 @@ public enum AuditOperationType {
     DOWNLOAD_DOCUMENT_BY_ID("DownloadDocumentById"),
     PATCH_METADATA_ON_DOCUMENTS("PatchMetaDataOnDocuments"),
     DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID("DownloadDocumentBinaryContentById"),
+    DOWNLOAD_STREAMED_DOCUMENT_BINARY_CONTENT_BY_ID("DownloadStreamedDocumentBinaryContentById"),
     UPLOAD_DOCUMENTS("UploadDocuments"),
     PATCH_DOCUMENT_BY_DOCUMENT_ID("PatchDocumentByDocumentId"),
     DELETE_DOCUMENT_BY_DOCUMENT_ID("DeleteDocumentByDocumentId"),

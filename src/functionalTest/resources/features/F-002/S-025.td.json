@@ -1,0 +1,23 @@
+{
+  "title": "must receive an error response from streaming endpoint for a non existing document id",
+  "_guid_": "S-025",
+  "_extends_": "F-002_Test_Stream_Base",
+  "specs": [
+    "contains a non existing document id"
+  ],
+  "request": {
+    "pathVariables": {
+      "documentId": "00000000-0000-0000-0000-000000000000"
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "AM_404_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body": {
+      "error": "Meta data does not exist for documentId: 00000000-0000-0000-0000-000000000000"
+    }
+  }
+}
