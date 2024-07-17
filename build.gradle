@@ -57,6 +57,10 @@ java {
   }
 }
 
+application {
+  mainClass = 'uk.gov.hmcts.reform.ccd.documentam.Application'
+}
+
 jacocoTestCoverageVerification {
   violationRules {
     rule {
@@ -183,7 +187,7 @@ jacocoTestReport {
   reports {
     xml.required = true
     csv.required = false
-    xml.destination file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+    xml.outputLocation = file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")
   }
 }
 
@@ -390,7 +394,7 @@ tasks.withType(Test) {
 }
 
 task fortifyScan(type: JavaExec)  {
-  main = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
+  mainClass = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
   classpath += sourceSets.test.runtimeClasspath
   jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
   // The line below prevents the build from failing if the Fortify scan detects issues
@@ -400,8 +404,6 @@ task fortifyScan(type: JavaExec)  {
 test {
   generateCucumberReports.enabled = false
 }
-
-mainClassName = 'uk.gov.hmcts.reform.ccd.documentam.Application'
 
 bootJar {
   archiveFileName = 'ccd-case-document-am-api.jar'
@@ -429,7 +431,6 @@ task reloadEnvSecrets {
 }
 
 task runRemoteDemo(type: JavaExec) {
-  main = mainClassName
   classpath = sourceSets.main.runtimeClasspath
   doFirst() {
     configRemoteRunTask(it, 'demo')
