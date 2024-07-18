@@ -4,7 +4,9 @@ Feature: F-001: Get Document Metadata by Document ID
   Background: Load test data for the scenario
     Given an appropriate test context as detailed in the test data source
 
-  @S-001 @Retryable(statusCodes={400,409,502},maxAttempts=2,delay=1000)
+  @S-001 @Retryable(statusCodes={400,409,502},maxAttempts=2,delay=1000,match={
+  @value(url="requestURI1",regex="testValue1"),
+  @value(url="requestURI2",regex="testValue2")})
   Scenario: must successfully get document metadata by document ID
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
     And   a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
