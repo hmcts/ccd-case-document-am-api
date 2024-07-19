@@ -30,7 +30,7 @@ Feature: F-001: Get Document Metadata by Document ID
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
     When  a request is prepared with appropriate values,
     And   the request [for a malformed document ID],
-    And   it is submitted to call the [Get Document Metadata by Document ID] operation of [CCD Case Document AM API] [after] delaying [5] seconds,
+    And   it is submitted to call the [Get Document Metadata by Document ID] operation of [CCD Case Document AM API] [before] delaying [20] seconds,
     Then  a negative response is received,
     And   the response has all the details as expected.
 
