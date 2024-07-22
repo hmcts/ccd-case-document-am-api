@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.ccd.documentam.model;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 import java.util.Date;
 import java.util.List;
 
