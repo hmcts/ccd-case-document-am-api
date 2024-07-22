@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,24 +79,15 @@ public class CaseDocumentAmController {
         produces = {APPLICATION_JSON
         })
     @Operation(summary = "Retrieves JSON representation of a Stored Document.", tags = "get")
-    @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "Success",
-            content = @Content(
-                schema = @Schema(implementation = Document.class)
-            )
-            ),
-        @ApiResponse(
-            responseCode = "400",
-            description = CASE_DOCUMENT_ID_INVALID
-            ),
-        @ApiResponse(
-            responseCode = "404",
-            description = CASE_DOCUMENT_NOT_FOUND
-            )
-    })
-
+    @ApiResponse(
+        responseCode = "200",
+        description = "Success",
+        content = @Content(
+            schema = @Schema(implementation = Document.class)
+        )
+    )
+    @ApiResponse(responseCode = "400", description = CASE_DOCUMENT_ID_INVALID)
+    @ApiResponse(responseCode = "404", description = CASE_DOCUMENT_NOT_FOUND)
     @LogAudit(
         operationType = AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
         documentId = "#documentId"
@@ -146,23 +136,13 @@ public class CaseDocumentAmController {
         path = "/cases/documents/{documentId}/binary",
         produces = {APPLICATION_JSON
         })
-    @Operation(summary = "Streams contents of the most recent Document associated with the Case Document.", tags =
-        "get")
-    @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "OK"
-            ),
-        @ApiResponse(
-            responseCode = "400",
-            description = CASE_DOCUMENT_ID_INVALID
-            ),
-        @ApiResponse(
-            responseCode = "404",
-            description = CASE_DOCUMENT_NOT_FOUND
-            )
-    })
-
+    @Operation(
+        summary = "Streams contents of the most recent Document associated with the Case Document.", 
+        tags = "get"
+    )
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "400", description = CASE_DOCUMENT_ID_INVALID)
+    @ApiResponse(responseCode = "404", description = CASE_DOCUMENT_NOT_FOUND)
     @LogAudit(
         operationType = AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
         documentId = "#documentId"
@@ -206,28 +186,16 @@ public class CaseDocumentAmController {
         consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
     @Operation(summary = "creates a list of stored document by uploading a list of binary/text file", tags = "upload")
-    @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "Created",
-            content = @Content(
-                schema = @Schema(implementation = UploadResponse.class)
-            )
-            ),
-        @ApiResponse(
-            responseCode = "400",
-            description = CASE_TYPE_ID_INVALID
-            ),
-        @ApiResponse(
-            responseCode = "400",
-            description = JURISDICTION_ID_INVALID
-            ),
-        @ApiResponse(
-            responseCode = "400",
-            description = CLASSIFICATION_ID_INVALID
-            )
-    })
-
+    @ApiResponse(
+        responseCode = "200",
+        description = "Created",
+        content = @Content(
+            schema = @Schema(implementation = UploadResponse.class)
+        )
+    )
+    @ApiResponse(responseCode = "400", description = CASE_TYPE_ID_INVALID)
+    @ApiResponse(responseCode = "400", description = JURISDICTION_ID_INVALID)
+    @ApiResponse(responseCode = "400", description = CLASSIFICATION_ID_INVALID)
     @LogAudit(
         operationType = AuditOperationType.UPLOAD_DOCUMENTS,
         caseType = "#documentUploadRequest.caseTypeId",
@@ -263,24 +231,15 @@ public class CaseDocumentAmController {
         consumes = {APPLICATION_JSON}
     )
     @Operation(summary = "Updates ttl on document ", tags = "patch")
-    @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "Success",
-            content = @Content(
-                schema = @Schema(implementation = PatchDocumentResponse.class)
-            )
-            ),
-        @ApiResponse(
-            responseCode = "400",
-            description = CASE_DOCUMENT_ID_INVALID
-            ),
-        @ApiResponse(
-            responseCode = "404",
-            description = CASE_DOCUMENT_NOT_FOUND
-            )
-    })
-
+    @ApiResponse(
+        responseCode = "200",
+        description = "Success",
+        content = @Content(
+            schema = @Schema(implementation = PatchDocumentResponse.class)
+        )
+    )
+    @ApiResponse(responseCode = "400", description = CASE_DOCUMENT_ID_INVALID)
+    @ApiResponse(responseCode = "404", description = CASE_DOCUMENT_NOT_FOUND)
     @LogAudit(
         operationType = AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
         documentId = "#documentId"
@@ -319,39 +278,19 @@ public class CaseDocumentAmController {
         consumes = {APPLICATION_JSON}
     )
     @Operation(summary = "Updates a list of case document with provided metadata", tags = "patch")
-    @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "Success",
-            content = @Content(
-                schema = @Schema(implementation = PatchDocumentMetaDataResponse.class)
-            )
-            ),
-        @ApiResponse(
-            responseCode = "400",
-            description = CASE_DOCUMENT_ID_INVALID
-            ),
-        @ApiResponse(
-            responseCode = "400",
-            description = CASE_ID_NOT_VALID
-            ),
-        @ApiResponse(
-            responseCode = "400",
-            description = CASE_TYPE_ID_INVALID
-            ),
-        @ApiResponse(
-            responseCode = "400",
-            description = JURISDICTION_ID_INVALID
-            ),
-        @ApiResponse(
-            responseCode = "400",
-            description = CASE_DOCUMENT_HASH_TOKEN_INVALID
-            ),
-        @ApiResponse(
-            responseCode = "404",
-            description = CASE_DOCUMENT_NOT_FOUND
-            )
-    })
+    @ApiResponse(
+        responseCode = "200",
+        description = "Success",
+        content = @Content(
+            schema = @Schema(implementation = PatchDocumentMetaDataResponse.class)
+        )
+    )
+    @ApiResponse(responseCode = "400", description = CASE_DOCUMENT_ID_INVALID)
+    @ApiResponse(responseCode = "400", description = CASE_ID_NOT_VALID)
+    @ApiResponse(responseCode = "400", description = CASE_TYPE_ID_INVALID)
+    @ApiResponse(responseCode = "400", description = JURISDICTION_ID_INVALID)
+    @ApiResponse(responseCode = "400", description = CASE_DOCUMENT_HASH_TOKEN_INVALID)
+    @ApiResponse(responseCode = "404", description = CASE_DOCUMENT_NOT_FOUND)
     @LogAudit(
         operationType = AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
         documentIds = "T(uk.gov.hmcts.reform.ccd.documentam.util.DocumentIdsExtractor)"
@@ -383,20 +322,9 @@ public class CaseDocumentAmController {
         produces = {APPLICATION_JSON}
     )
     @Operation(summary = "Deletes a case document with service authorization.", tags = "delete")
-    @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "OK"
-            ),
-        @ApiResponse(
-            responseCode = "400",
-            description = CASE_DOCUMENT_ID_INVALID
-            ),
-        @ApiResponse(
-            responseCode = "404",
-            description = CASE_DOCUMENT_NOT_FOUND
-            )
-    })
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "400", description = CASE_DOCUMENT_ID_INVALID)
+    @ApiResponse(responseCode = "404", description = CASE_DOCUMENT_NOT_FOUND)
     @LogAudit(
         operationType = AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
         documentId = "#documentId"
@@ -426,23 +354,15 @@ public class CaseDocumentAmController {
         produces = {APPLICATION_JSON}
     )
     @Operation(summary = "Retrieves the hashcode for document Id", tags = "get")
-    @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "Success",
-            content = @Content(
-                schema = @Schema(implementation = GeneratedHashCodeResponse.class)
-            )
-            ),
-        @ApiResponse(
-            responseCode = "400",
-            description = CASE_DOCUMENT_ID_INVALID
-            ),
-        @ApiResponse(
-            responseCode = "404",
-            description = CASE_DOCUMENT_NOT_FOUND
-            )
-    })
+    @ApiResponse(
+        responseCode = "200",
+        description = "Success",
+        content = @Content(
+            schema = @Schema(implementation = GeneratedHashCodeResponse.class)
+        )
+    )
+    @ApiResponse(responseCode = "400", description = CASE_DOCUMENT_ID_INVALID)
+    @ApiResponse(responseCode = "404", description = CASE_DOCUMENT_NOT_FOUND)
     @LogAudit(
         operationType = AuditOperationType.GENERATE_HASH_CODE,
         documentId = "#documentId"
