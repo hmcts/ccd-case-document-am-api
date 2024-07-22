@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.ccd.documentam.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
 import org.springframework.validation.annotation.Validated;
 
@@ -16,7 +17,7 @@ public class ErrorMap {
     @JsonProperty("message")
     private String message = null;
 
-    @Schema(required = true, description = "The error code")
+    @Schema(requiredMode = RequiredMode.REQUIRED, description = "The error code")
     @NotNull
     public String getCode() {
         return code;
@@ -26,7 +27,7 @@ public class ErrorMap {
         this.code = code;
     }
 
-    @Schema(required = true, description = "The error message")
+    @Schema(requiredMode = RequiredMode.REQUIRED, description = "The error message")
     @NotNull
 
     public String getMessage() {
