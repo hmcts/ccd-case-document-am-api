@@ -118,7 +118,7 @@ task functional(type: Test, description: 'Runs the functional tests.', group: 'V
 
   doFirst {
     javaexec {
-      main = "uk.gov.hmcts.ccd.documentam.befta.CaseDocumentAmBeftaMain"
+      mainClass = "uk.gov.hmcts.ccd.documentam.befta.CaseDocumentAmBeftaMain"
       classpath += configurations.cucumberRuntime + sourceSets.functionalTest.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
       args = ['--plugin', "json:${rootDir}/target/cucumber.json",
               '--plugin', "junit:${buildDir}/test-results/functional/cucumber.xml",
@@ -191,8 +191,6 @@ jacocoTestReport {
   }
 }
 
-project.tasks['sonarqube'].dependsOn jacocoTestReport
-
 jacoco {
   toolVersion = "0.8.8"
 }
@@ -208,7 +206,9 @@ pitest {
   mutationThreshold = 40
 }
 
-project.tasks['pitest'].group="verification"
+configure(pitest) {
+  group = "verification"
+}
 
 sonarqube {
   properties {
@@ -222,7 +222,9 @@ sonarqube {
 }
 
 project.tasks['sonarqube'].dependsOn test, integration, jacocoTestReport
-project.tasks['sonarqube'].group = "Verification"
+configure(sonarqube) {
+  group = "Verification"
+}
 
 //https://jeremylong.github.io/DependencyCheck/dependency-check-gradle/configuration.html
 apply from: './gradle/suppress.gradle'
@@ -255,7 +257,7 @@ repositories {
 dependencies {
   implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.5'
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
-  implementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
+  implementation group: 'commons-io', name: 'commons-io', version: '2.14.0'
 
   implementation group: 'org.springframework', name: 'spring-context-support'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
@@ -333,11 +335,8 @@ dependencies {
   testImplementation group: 'net.javacrumbs.json-unit', name: 'json-unit-assertj', version: '2.27.0'
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-  testImplementation (group: 'com.github.hmcts', name: 'ccd-test-definitions', version: '7.13.0') {
-    exclude group: 'io.rest-assured', module : 'rest-assured'
-    exclude group: 'com.github.hmcts.befta-fw', module: 'befta-fw'
-  }
-  testImplementation group: 'com.github.hmcts', name: 'befta-fw', version: '8.7.11'
+  testImplementation group: 'com.github.hmcts', name: 'ccd-test-definitions', version: '7.22.0'
+  testImplementation group: 'com.github.hmcts', name: 'befta-fw', version: '9.0.2'
   testImplementation group: 'commons-lang', name: 'commons-lang', version: '2.6'
   testImplementation group: 'org.assertj', name: 'assertj-vavr', version: '0.4.2'
 
@@ -345,7 +344,7 @@ dependencies {
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
   testImplementation group: 'io.rest-assured', name: 'json-path', version: versions.restAssured
   testImplementation group: 'io.rest-assured', name: 'xml-path', version: versions.restAssured
-  testImplementation group: 'com.github.hmcts', name: 'fortify-client', version: '1.4.0'
+  testImplementation group: 'com.github.hmcts', name: 'fortify-client', version: '1.4.2'
 
   integrationTestImplementation sourceSets.main.runtimeClasspath
   integrationTestImplementation sourceSets.test.runtimeClasspath

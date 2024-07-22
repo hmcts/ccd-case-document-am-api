@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.ccd.documentam.controller.advice;
 
 import feign.FeignException;
 import feign.Request;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -261,7 +260,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
                            Charset.defaultCharset(), null), new byte[0], null);
         final ResponseEntity<Object> responseEntity = underTest.handleFeignServerException(ex, request);
 
-        Assert.assertEquals(HttpStatus.BAD_GATEWAY.value(), responseEntity.getStatusCode().value());
+        assertEquals(HttpStatus.BAD_GATEWAY.value(), responseEntity.getStatusCode().value());
     }
 
     @Test
@@ -272,7 +271,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
                            Charset.defaultCharset(), null), new byte[0], null);
         final ResponseEntity<Object> response = underTest.handleFeignServerException(ex, request);
 
-        Assert.assertEquals(HttpStatus.GATEWAY_TIMEOUT.value(), response.getStatusCode().value());
+        assertEquals(HttpStatus.GATEWAY_TIMEOUT.value(), response.getStatusCode().value());
     }
 
     @Test
@@ -284,7 +283,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
         final ResponseEntity<Object> response = underTest.handleFeignClientException(ex, request);
 
-        Assert.assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCode().value());
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCode().value());
     }
 
     @Test
@@ -297,7 +296,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         final ResponseEntity<Object> response = underTest
             .handleFeignClientException(ex, request);
 
-        Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatusCode().value());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatusCode().value());
     }
 
     @Test
