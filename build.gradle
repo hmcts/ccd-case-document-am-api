@@ -260,8 +260,9 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-hateoas'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-cache'
+
+  implementation group: 'org.springframework.hateoas', name: 'spring-hateoas', version: '1.5.5'
 
   implementation group: 'org.springframework', name: 'spring-context-support', version: versions.springFramework
   implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.7.0'
