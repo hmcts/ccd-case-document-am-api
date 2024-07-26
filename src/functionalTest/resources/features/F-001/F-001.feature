@@ -4,7 +4,7 @@ Feature: F-001: Get Document Metadata by Document ID
   Background: Load test data for the scenario
     Given an appropriate test context as detailed in the test data source
 
-  @Smoke @S-001 @Retryable(statusCodes={400,409,502},match={"\"case_type_id\"\s*:\s*\"BEFTA_CASETYPE_2_1\""})
+  @Smoke @S-001 @Retryable(statusCodes={400,409,502},match={"\"BEFTA_CA1SETYPE_246465_1\"","\"case_type_id\"\s*:\s*\"BEFTA_CASETYPE_2_1\""})
   Scenario: must successfully get document metadata by document ID
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
     And   a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
