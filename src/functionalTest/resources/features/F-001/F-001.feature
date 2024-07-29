@@ -4,14 +4,14 @@ Feature: F-001: Get Document Metadata by Document ID
   Background: Load test data for the scenario
     Given an appropriate test context as detailed in the test data source
 
-  @S-001
+  @Smoke @S-001 @Retryable(statusCodes={400,409,502},match={"\"BEFTA_CA1SETYPE_246465_1\"","\"case_type_id\"\s*:\s*\"BEFTA_CASETYPE_2_1\""})
   Scenario: must successfully get document metadata by document ID
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
     And   a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
     And   another successful call [to create a token for case creation] as in [Befta_Jurisdiction2_Default_Token_Creation_Data_For_Case_Creation]
     And   another successful call [to create a case of this case type] as in [S-001_Case_Create]
     When  a request is prepared with appropriate values,
-    And   it is submitted to call the [Get Document Metadata by Document ID] operation of [CCD Case Document AM API],
+    And   it is submitted to call the [Get Document Metadata by Document ID] operation of [CCD Case Document AM API] with a delay of [30] seconds [before] the call,
     Then  a positive response is received,
     And   the response [contains the metadata for the document uploaded above],
     And   the response has all other details as expected.
@@ -25,12 +25,12 @@ Feature: F-001: Get Document Metadata by Document ID
     Then  a negative response is received,
     And   the response has all the details as expected.
 
-  @S-003
+  @S-003 @Smoke
   Scenario: must get an error response for a malformed document ID
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
     When  a request is prepared with appropriate values,
     And   the request [for a malformed document ID],
-    And   it is submitted to call the [Get Document Metadata by Document ID] operation of [CCD Case Document AM API],
+    And   it is submitted to call the [Get Document Metadata by Document ID] operation of [CCD Case Document AM API] with a delay of [25] seconds [after] the call,
     Then  a negative response is received,
     And   the response has all the details as expected.
 
