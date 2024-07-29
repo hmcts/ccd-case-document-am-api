@@ -25,7 +25,7 @@ Feature: F-001: Get Document Metadata by Document ID
     Then  a negative response is received,
     And   the response has all the details as expected.
 
-  @S-003
+  @Smoke @S-003
   Scenario: must get an error response for a malformed document ID
     Given a user with [an active caseworker profile in CCD with full permissions on a document field],
     When  a request is prepared with appropriate values,
