@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.ccd.documentam.controller.advice;
 
 import feign.FeignException;
 import feign.Request;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -277,7 +276,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
                            Charset.defaultCharset(), null), new byte[0], Map.of());
         final ResponseEntity<Object> responseEntity = underTest.handleFeignServerException(ex, request);
 
-        Assert.assertEquals(HttpStatus.BAD_GATEWAY.value(), responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.BAD_GATEWAY.value(), responseEntity.getStatusCodeValue());
     }
 
     @Test
@@ -288,7 +287,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
                            Charset.defaultCharset(), null), new byte[0], Map.of());
         final ResponseEntity<Object> response = underTest.handleFeignServerException(ex, request);
 
-        Assert.assertEquals(HttpStatus.GATEWAY_TIMEOUT.value(), response.getStatusCodeValue());
+        assertEquals(HttpStatus.GATEWAY_TIMEOUT.value(), response.getStatusCodeValue());
     }
 
     @Test
@@ -300,7 +299,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
         final ResponseEntity<Object> response = underTest.handleFeignClientException(ex, request);
 
-        Assert.assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCodeValue());
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCodeValue());
     }
 
     @Test
@@ -313,7 +312,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         final ResponseEntity<Object> response = underTest
             .handleFeignClientException(ex, request);
 
-        Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatusCodeValue());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatusCodeValue());
     }
 
     @Test
