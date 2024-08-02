@@ -17,6 +17,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
+import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.controller.endpoints.CaseDocumentAmController;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
@@ -163,7 +164,8 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
     void testHandleMethodArgumentNotValidException() throws Exception {
         final CaseDocumentAmController controller = new CaseDocumentAmController(
             mock(DocumentManagementService.class),
-            mock(SecurityUtils.class)
+            mock(SecurityUtils.class),
+            mock(ApplicationParams.class)
         );
 
         final MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller)

@@ -131,3 +131,7 @@ retry:
 request:
   forwarded_headers:
     from_client: ${CLIENT_REQUEST_HEADERS_TO_FORWARD:RANGE}
+
+download:
+  streaming:
+    enabled: ${DOWNLOAD_STREAMING_ENABLED:false}

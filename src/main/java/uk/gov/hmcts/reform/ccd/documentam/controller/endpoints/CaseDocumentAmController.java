@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
+import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.LogAudit;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
@@ -69,12 +71,14 @@ public class CaseDocumentAmController {
     private final DocumentManagementService documentManagementService;
     private final SecurityUtils securityUtils;
     private static final String TTL_FORBIDDEN_MESSAGE = "Document %s can not be downloaded as TTL has expired";
+    private final ApplicationParams applicationParams;
 
     @Autowired
     public CaseDocumentAmController(final DocumentManagementService documentManagementService,
-                                    final SecurityUtils securityUtils) {
+                                    final SecurityUtils securityUtils, ApplicationParams applicationParams) {
         this.documentManagementService = documentManagementService;
         this.securityUtils = securityUtils;
+        this.applicationParams = applicationParams;
     }
 
     @GetMapping(
@@ -146,7 +150,7 @@ public class CaseDocumentAmController {
         path = "/cases/documents/{documentId}/binary",
         produces = {APPLICATION_JSON
         })
-    @ApiOperation(value = "Returns contents of the most recent Document associated with the Case Document.", tags =
+    @ApiOperation(value = "Streams contents of the most recent Document associated with the Case Document.", tags =
         "get")
     @ApiResponses({
         @ApiResponse(
@@ -169,9 +173,11 @@ public class CaseDocumentAmController {
         documentId = "#documentId"
     )
     public ResponseEntity<ByteArrayResource> getDocumentBinaryContentByDocumentId(
-        @PathVariable("documentId") final UUID documentId,
+        @PathVariable("documentId") final UUID documentId,  final HttpServletResponse httpResponse,
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
-        @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken
+        @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken,
+        @ApiIgnore
+        @RequestHeader final Map<String, String> requestHeaders
     ) {
         final Document document = documentManagementService.getDocumentMetadata(documentId);
 
@@ -189,11 +195,11 @@ public class CaseDocumentAmController {
                     USER_PERMISSION_ERROR,
                     documentId.toString());
 
-            return documentManagementService.getDocumentBinaryContent(documentId);
+            return handleDocumentContent(documentId, httpResponse, requestHeaders);
         }
 
         if (ttlIsFutureDate(document.getTtl())) {
-            return documentManagementService.getDocumentBinaryContent(documentId);
+            return handleDocumentContent(documentId, httpResponse, requestHeaders);
         } else {
             String errorMessage = String.format(TTL_FORBIDDEN_MESSAGE, documentId);
             log.error(errorMessage);
@@ -201,73 +207,20 @@ public class CaseDocumentAmController {
         }
     }
 
-    @GetMapping(
-        path = "/v2/cases/documents/{documentId}/binary",
-        produces = {APPLICATION_JSON})
-    @ApiOperation(value = "Streams contents of the most recent Document associated with the Case Document.", tags =
-        "get")
-    @ApiResponses({
-        @ApiResponse(
-            code = 200,
-            message = "OK",
-            response = Object.class
-            ),
-        @ApiResponse(
-            code = 400,
-            message = CASE_DOCUMENT_ID_INVALID
-            ),
-        @ApiResponse(
-            code = 404,
-            message = CASE_DOCUMENT_NOT_FOUND
-            )
-    })
-
-    @LogAudit(
-        operationType = AuditOperationType.DOWNLOAD_STREAMED_DOCUMENT_BINARY_CONTENT_BY_ID,
-        documentId = "#documentId"
-    )
-    public ResponseEntity<Void> streamDocumentBinaryContentByDocumentId(
-        @PathVariable("documentId") final UUID documentId, final HttpServletResponse httpResponse,
-        @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
-        @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken,
-        @ApiIgnore
-        @RequestHeader final Map<String, String> requestHeaders) {
-        final Document document = documentManagementService.getDocumentMetadata(documentId);
-
-        documentManagementService.checkServicePermission(
-            document.getCaseTypeId(),
-            document.getJurisdictionId(),
-            getServiceNameFromS2SToken(s2sToken),
-            Permission.READ,
-            SERVICE_PERMISSION_ERROR,
-            documentId.toString());
-
-        if (document.getCaseId() != null) {
-            documentManagementService.checkUserPermission(
-                document.getCaseId(),
-                documentId,
-                Permission.READ,
-                USER_PERMISSION_ERROR,
-                documentId.toString());
-
-            return streamDocumentContent(documentId, httpResponse, requestHeaders);
-        }
-
-        if (ttlIsFutureDate(document.getTtl())) {
-            return streamDocumentContent(documentId, httpResponse, requestHeaders);
+    private ResponseEntity<ByteArrayResource> handleDocumentContent(UUID documentId, HttpServletResponse httpResponse,
+        Map<String, String> requestHeaders) {
+        if (applicationParams.isDownloadStreamingEnabled()) {
+            streamDocumentContent(documentId, httpResponse, requestHeaders);
+            return new ResponseEntity<>(HttpStatus.OK);
         } else {
-            String errorMessage = String.format(TTL_FORBIDDEN_MESSAGE, documentId);
-            log.error(errorMessage);
-            throw new ForbiddenException(errorMessage);
+            return documentManagementService.getDocumentBinaryContent(documentId);
         }
     }
 
-    private ResponseEntity<Void> streamDocumentContent(UUID documentId, HttpServletResponse httpResponse,
-                                                       Map<String, String> requestHeaders) {
+    private void streamDocumentContent(UUID documentId, HttpServletResponse httpResponse,
+                                       Map<String, String> requestHeaders) {
         removeAuthorizationHeaders(requestHeaders);
-
         documentManagementService.streamDocumentBinaryContent(documentId, httpResponse, requestHeaders);
-        return ResponseEntity.ok().build();
     }
 
     private void removeAuthorizationHeaders(Map<String, String> requestHeaders) {

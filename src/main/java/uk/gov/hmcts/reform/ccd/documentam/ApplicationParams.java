@@ -31,6 +31,9 @@ public class ApplicationParams {
     @Value("#{'${request.forwarded_headers.from_client}'.split(',')}")
     private List<String> clientRequestHeadersToForward;
 
+    @Value("${download.streaming.enabled}")
+    private boolean isDownloadStreamingEnabled;
+
     public List<String> getMovingCaseTypes() {
         return Optional.ofNullable(movingCaseTypes).orElse(emptyList());
     }

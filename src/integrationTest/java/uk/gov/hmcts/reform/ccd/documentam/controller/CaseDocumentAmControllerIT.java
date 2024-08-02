@@ -14,7 +14,9 @@ import org.springframework.mock.web.MockPart;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.BaseTest;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
@@ -28,6 +30,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -77,13 +80,15 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private ApplicationParams applicationParams;
+
     private static final String RESPONSE_RESULT_KEY = "Result";
     private static final String RESPONSE_STATUS_KEY = "status";
 
     private static final String SUCCESS = "Success";
     private static final int ERROR_403 = 403;
     private static final String MAIN_URL = "/cases/documents";
-    private static final String MAIN_URL_V2 = "/v2/cases/documents";
     private static final String ATTACH_TO_CASE_URL = "/attachToCase";
     private static final String SERVICE_NAME_CCD_DATA = "ccd_data";
     private static final String SERVICE_NAME_CCD_GW = "ccd_gw";
@@ -376,11 +381,13 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         stubGetDocumentMetaData(document);
         stubDocumentBinaryContent();
 
-        mockMvc.perform(get(MAIN_URL_V2 + "/" + DOCUMENT_ID + BINARY)
+        enableDownloadStreaming();
+
+        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + BINARY)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isOk())
             .andExpect(hasGeneratedLogAudit(
-                AuditOperationType.DOWNLOAD_STREAMED_DOCUMENT_BINARY_CONTENT_BY_ID,
+                AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
                 SERVICE_NAME_XUI_WEBAPP,
                 List.of(DOCUMENT_ID.toString()),
                 null,
@@ -416,11 +423,13 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         stubGetDocumentMetaData(document);
         stubDocumentBinaryContent();
 
-        mockMvc.perform(get(MAIN_URL_V2 + "/" + DOCUMENT_ID + BINARY)
+        enableDownloadStreaming();
+
+        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + BINARY)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isOk())
             .andExpect(hasGeneratedLogAudit(
-                AuditOperationType.DOWNLOAD_STREAMED_DOCUMENT_BINARY_CONTENT_BY_ID,
+                AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
                 SERVICE_NAME_XUI_WEBAPP,
                 List.of(DOCUMENT_ID.toString()),
                 null,
@@ -460,7 +469,9 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         stubGetDocumentMetaData(document);
         stubDocumentBinaryContent();
 
-        mockMvc.perform(get(MAIN_URL_V2 + "/" + DOCUMENT_ID + BINARY)
+        enableDownloadStreaming();
+
+        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + BINARY)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isForbidden())
             .andExpect(jsonPath("$.error",
@@ -468,7 +479,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                                        + DOCUMENT_ID
                                        + " can not be downloaded as TTL has expired")))
             .andExpect(hasGeneratedLogAudit(
-                AuditOperationType.DOWNLOAD_STREAMED_DOCUMENT_BINARY_CONTENT_BY_ID,
+                AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
                 SERVICE_NAME_XUI_WEBAPP,
                 List.of(DOCUMENT_ID.toString()),
                 null,
@@ -508,7 +519,9 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         stubGetDocumentMetaData(document);
         stubDocumentBinaryContent();
 
-        mockMvc.perform(get(MAIN_URL_V2 + "/" + DOCUMENT_ID + BINARY)
+        enableDownloadStreaming();
+
+        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + BINARY)
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isForbidden())
             .andExpect(jsonPath("$.error",
@@ -516,7 +529,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                                        + DOCUMENT_ID
                                        + " can not be downloaded as TTL has expired")))
             .andExpect(hasGeneratedLogAudit(
-                AuditOperationType.DOWNLOAD_STREAMED_DOCUMENT_BINARY_CONTENT_BY_ID,
+                AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
                 SERVICE_NAME_XUI_WEBAPP,
                 List.of(DOCUMENT_ID.toString()),
                 null,
@@ -973,6 +986,13 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 null,
                 null,
                 null));
+    }
+
+    private void enableDownloadStreaming() {
+        Field field = ReflectionUtils.findField(ApplicationParams.class, "isDownloadStreamingEnabled");
+        assert field != null;
+        ReflectionUtils.makeAccessible(field);
+        ReflectionUtils.setField(field, applicationParams, true);
     }
 
     private Document buildDocument() {
