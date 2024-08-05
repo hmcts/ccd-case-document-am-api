@@ -32,7 +32,7 @@ def versions = [
   springfoxSwagger   : '3.0.0',
   restAssured        : '4.3.1',
   cucumber           : '5.5.0',
-  tomcatEmbedded     : '9.0.82',
+  tomcatEmbedded     : '9.0.91',
   serviceAuthVersion : '3.1.4',
   pact_version       : '4.1.7',
 ]
