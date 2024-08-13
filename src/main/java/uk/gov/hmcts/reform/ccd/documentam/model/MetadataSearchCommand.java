@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.ccd.documentam.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModelProperty;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Objects;
@@ -14,7 +16,7 @@ public class MetadataSearchCommand {
     @JsonProperty("value")
     private String value = null;
 
-    @ApiModelProperty
+    @Schema
     public String getName() {
         return name;
     }
@@ -23,7 +25,7 @@ public class MetadataSearchCommand {
         this.name = name;
     }
 
-    @ApiModelProperty
+    @Schema
     public String getValue() {
         return value;
     }

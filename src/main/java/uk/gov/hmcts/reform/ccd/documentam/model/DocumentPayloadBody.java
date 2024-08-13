@@ -5,10 +5,11 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import org.springframework.validation.annotation.Validated;
 
 @Validated
@@ -27,7 +28,7 @@ public class DocumentPayloadBody {
     @Valid
     private List<File> files;
 
-    @ApiModelProperty
+    @Schema
     public String getClassification() {
         return classification;
     }
@@ -36,7 +37,7 @@ public class DocumentPayloadBody {
         this.classification = classification;
     }
 
-    @ApiModelProperty
+    @Schema
     @Valid
     public OffsetDateTime getTtl() {
         return ttl;
@@ -54,7 +55,7 @@ public class DocumentPayloadBody {
         return this;
     }
 
-    @ApiModelProperty
+    @Schema
     public List<String> getRoles() {
         return roles;
     }
@@ -71,7 +72,7 @@ public class DocumentPayloadBody {
         return this;
     }
 
-    @ApiModelProperty
+    @Schema
     @Valid
     public List<File> getFiles() {
         return files;
