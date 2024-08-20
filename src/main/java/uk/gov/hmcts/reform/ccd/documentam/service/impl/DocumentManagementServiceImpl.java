@@ -280,6 +280,15 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
+    public UploadResponse uploadStreamDocuments(final DocumentUploadRequest documentUploadRequest) {
+        final DmUploadResponse dmResponse = documentStoreClient.uploadDocumentsAsStream(documentUploadRequest);
+
+        return buildUploadResponse(documentUploadRequest.getCaseTypeId(),
+                                   documentUploadRequest.getJurisdictionId(),
+                                   dmResponse);
+    }
+
+    @Override
     public PatchDocumentResponse patchDocument(final UUID documentId, final UpdateTtlRequest ttl) {
         final DmTtlRequest dmTtlRequest = new DmTtlRequest(ttl.getTtl().atZone(ZoneId.systemDefault()));
         return documentStoreClient.patchDocument(documentId, dmTtlRequest)

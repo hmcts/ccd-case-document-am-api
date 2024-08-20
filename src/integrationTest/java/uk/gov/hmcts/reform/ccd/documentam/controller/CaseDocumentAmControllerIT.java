@@ -101,7 +101,16 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     @Test
     void shouldSuccessfullyUploadDocument() throws Exception {
+        uploadDocumentByIsStreamUploadEnabled(false);
+    }
 
+    @Test
+    void shouldSuccessfullyUploadStreamDocument() throws Exception {
+        uploadDocumentByIsStreamUploadEnabled(true);
+    }
+
+
+    private void uploadDocumentByIsStreamUploadEnabled(boolean isStreamUploadEnabled) throws Exception {
         Document document = Document.builder()
             .originalDocumentName(ORIGINAL_DOCUMENT_NAME)
             .size(1000L)
@@ -112,6 +121,10 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         DmUploadResponse dmUploadResponse = DmUploadResponse.builder()
             .embedded(DmUploadResponse.Embedded.builder().documents(List.of(document)).build())
             .build();
+
+        if (isStreamUploadEnabled) {
+            enableUploadStreaming();
+        }
 
         stubDocumentManagementUploadDocument(dmUploadResponse);
 
@@ -146,6 +159,16 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     @Test
     void shouldSuccessfullyUploadEmptyDocument() throws Exception {
 
+        uploadEmptyDocumentByIsStreamUploadEnabled(false);
+    }
+
+    @Test
+    void shouldSuccessfullyUploadStreamEmptyDocument() throws Exception {
+
+        uploadEmptyDocumentByIsStreamUploadEnabled(true);
+    }
+
+    private void uploadEmptyDocumentByIsStreamUploadEnabled(boolean isStreamUploadEnabled) throws Exception {
         Document document = Document.builder()
             .originalDocumentName(ORIGINAL_DOCUMENT_NAME)
             .size(0L)
@@ -156,6 +179,10 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         DmUploadResponse dmUploadResponse = DmUploadResponse.builder()
             .embedded(DmUploadResponse.Embedded.builder().documents(List.of(document)).build())
             .build();
+
+        if (isStreamUploadEnabled) {
+            enableUploadStreaming();
+        }
 
         stubDocumentManagementUploadDocument(dmUploadResponse);
 
@@ -889,6 +916,32 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     }
 
     @Test
+    void shouldFailToUploadStreamDocumentEmptyFile() throws Exception {
+
+        MockMultipartFile jsonFile1 =
+            new MockMultipartFile("name", null,
+                                  null, new byte[0]);
+
+        enableUploadStreaming();
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart(MAIN_URL)
+                            .file(jsonFile1)
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
+                            .param(CLASSIFICATION, CLASSIFICATION_VALUE)
+                            .param(CASE_TYPE_ID, CASE_TYPE_ID_VALUE)
+                            .param(JURISDICTION_ID, JURISDICTION_ID_VALUE)
+                            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+            .andExpect(status().isBadRequest())
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.UPLOAD_DOCUMENTS,
+                SERVICE_NAME_XUI_WEBAPP,
+                null,
+                null,
+                null,
+                null));
+    }
+
+    @Test
     void shouldBeForbiddenGetDocumentByDocumentIdWithNoPermissions() throws Exception {
         final Document document = buildDocument();
 
@@ -989,7 +1042,14 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     }
 
     private void enableDownloadStreaming() {
-        Field field = ReflectionUtils.findField(ApplicationParams.class, "isDownloadStreamingEnabled");
+        Field field = ReflectionUtils.findField(ApplicationParams.class, "isStreamDownloadEnabled");
+        assert field != null;
+        ReflectionUtils.makeAccessible(field);
+        ReflectionUtils.setField(field, applicationParams, true);
+    }
+
+    private void enableUploadStreaming() {
+        Field field = ReflectionUtils.findField(ApplicationParams.class, "isStreamUploadEnabled");
         assert field != null;
         ReflectionUtils.makeAccessible(field);
         ReflectionUtils.setField(field, applicationParams, true);

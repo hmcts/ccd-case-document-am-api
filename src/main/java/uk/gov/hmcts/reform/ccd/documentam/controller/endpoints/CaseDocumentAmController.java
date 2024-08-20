@@ -209,7 +209,7 @@ public class CaseDocumentAmController {
 
     private ResponseEntity<ByteArrayResource> handleDocumentContent(UUID documentId, HttpServletResponse httpResponse,
         Map<String, String> requestHeaders) {
-        if (applicationParams.isDownloadStreamingEnabled()) {
+        if (applicationParams.isStreamDownloadEnabled()) {
             streamDocumentContent(documentId, httpResponse, requestHeaders);
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
@@ -262,9 +262,7 @@ public class CaseDocumentAmController {
     public UploadResponse uploadDocuments(
         @ApiParam(value = "List of documents to be uploaded and their metadata", required = true)
         @Valid final DocumentUploadRequest documentUploadRequest,
-
         final BindingResult bindingResult,
-
         @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken) {
 
@@ -279,6 +277,10 @@ public class CaseDocumentAmController {
                                                          Permission.CREATE,
                                                          SERVICE_PERMISSION_ERROR,
                                                          permissionFailureMessage);
+
+        if (applicationParams.isStreamUploadEnabled()) {
+            return documentManagementService.uploadStreamDocuments(documentUploadRequest);
+        }
 
         return documentManagementService.uploadDocuments(documentUploadRequest);
     }
