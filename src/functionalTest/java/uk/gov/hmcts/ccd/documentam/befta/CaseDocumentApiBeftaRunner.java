@@ -11,7 +11,7 @@ import uk.gov.hmcts.befta.BeftaMain;
 @RunWith(Cucumber.class)
 @CucumberOptions(plugin = "json:target/cucumber.json",
                  glue = "uk.gov.hmcts.befta.player",
-                 tags = { "not @Ignore" },
+                 tags = "not @Ignore",
                  features = {"classpath:features"})
 public class CaseDocumentApiBeftaRunner {
 
