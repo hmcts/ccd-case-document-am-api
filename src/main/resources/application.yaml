@@ -35,8 +35,8 @@ spring:
     name: CCD Case Document AM API
   servlet:
     multipart:
-      max-file-size: -1
-      max-request-size: -1
+      maxFileSize: 1024MB
+      maxRequestSize: 1024MB
       enabled: true
   jackson:
     default-property-inclusion: NON_NULL
