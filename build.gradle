@@ -297,11 +297,11 @@ dependencies {
   implementation group: 'io.springfox', name: 'springfox-boot-starter', version: versions.springfoxSwagger
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: versions.springCloud
 
-  implementation group: 'net.minidev', name: 'json-smart', version: '2.4.7'
+  implementation group: 'net.minidev', name: 'json-smart', version: '2.4.9'
 
   implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
 
-  implementation group: 'com.nimbusds', name: 'nimbus-jose-jwt', version: '9.21'
+  implementation group: 'com.nimbusds', name: 'nimbus-jose-jwt', version: '9.37.2'
 
   implementation "org.apache.tomcat.embed:tomcat-embed-core:${versions.tomcatEmbedded}"
   implementation "org.apache.tomcat.embed:tomcat-embed-el:${versions.tomcatEmbedded}"
@@ -335,7 +335,7 @@ dependencies {
   testImplementation group: 'io.rest-assured', name: 'json-path', version: versions.restAssured
   testImplementation group: 'io.rest-assured', name: 'xml-path', version: versions.restAssured
 
-  testCompile 'com.github.hmcts:fortify-client:1.4.2'
+  testImplementation 'com.github.hmcts:fortify-client:1.4.3:all'
 
   integrationTestImplementation sourceSets.main.runtimeClasspath
   integrationTestImplementation sourceSets.test.runtimeClasspath
@@ -394,8 +394,6 @@ task fortifyScan(type: JavaExec)  {
   main = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
   classpath += sourceSets.test.runtimeClasspath
   jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
-  // The line below prevents the build from failing if the Fortify scan detects issues
-  ignoreExitValue = true
 }
 
 test {
