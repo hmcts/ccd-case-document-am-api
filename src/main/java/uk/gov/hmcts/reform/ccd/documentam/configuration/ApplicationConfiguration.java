@@ -34,7 +34,7 @@ public class ApplicationConfiguration {
         if (CollectionUtils.isEmpty(interceptors)) {
             interceptors = new ArrayList<>();
         }
-        interceptors.add(headerModifierInterceptor);
+
         restTemplate.setInterceptors(interceptors);
 
         return restTemplate;
