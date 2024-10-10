@@ -19,8 +19,12 @@ public class StartupConfigPrinter implements ApplicationListener<ApplicationRead
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        log.info("Stream configurations:\nDOWNLOAD_ENABLED: {}\nUPLOAD_ENABLED: {}", 
-         applicationParams.isStreamDownloadEnabled(), 
-         applicationParams.isStreamUploadEnabled());
+        log.info("""
+                Stream configurations:
+                DOWNLOAD_ENABLED: {}
+                UPLOAD_ENABLED: {}
+                """, 
+                applicationParams.isStreamDownloadEnabled(), 
+                applicationParams.isStreamUploadEnabled());
     }
 }
