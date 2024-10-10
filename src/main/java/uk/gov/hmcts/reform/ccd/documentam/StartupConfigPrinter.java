@@ -22,9 +22,8 @@ public class StartupConfigPrinter implements ApplicationListener<ApplicationRead
         log.info("""
                 Stream configurations:
                 DOWNLOAD_ENABLED: {}
-                UPLOAD_ENABLED: {}
-                """, 
-                applicationParams.isStreamDownloadEnabled(), 
+                UPLOAD_ENABLED: {}""",
+                applicationParams.isStreamDownloadEnabled(),
                 applicationParams.isStreamUploadEnabled());
     }
 }
