@@ -36,6 +36,8 @@ public interface DocumentManagementService {
 
     UploadResponse uploadDocuments(DocumentUploadRequest documentUploadRequest);
 
+    UploadResponse uploadStreamDocuments(DocumentUploadRequest documentUploadRequest);
+
     PatchDocumentResponse patchDocument(UUID documentId, UpdateTtlRequest updateTtlRequest);
 
     void deleteDocument(final UUID documentId,  Boolean permanent);

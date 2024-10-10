@@ -337,7 +337,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
     @Test
     @DisplayName("should get 200 document binary content")
     void shouldGetDocumentBinaryContent() {
-        doReturn(false).when(applicationParams).isDownloadStreamingEnabled();
+        doReturn(false).when(applicationParams).isStreamDownloadEnabled();
         doNothing().when(documentManagementService)
             .checkUserPermission(DOCUMENT.getCaseId(),
                                  MATCHED_DOCUMENT_ID,
@@ -369,7 +369,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
     @Test
     @DisplayName("should stream 200 document binary content")
     void shouldStreamDocumentBinaryContent() {
-        doReturn(true).when(applicationParams).isDownloadStreamingEnabled();
+        doReturn(true).when(applicationParams).isStreamDownloadEnabled();
         doNothing().when(documentManagementService)
             .checkUserPermission(DOCUMENT.getCaseId(),
                                  MATCHED_DOCUMENT_ID,
@@ -403,7 +403,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
 
     @Test
     void shouldGetDocumentBinaryContentWithValidCaseId() {
-        doReturn(false).when(applicationParams).isDownloadStreamingEnabled();
+        doReturn(false).when(applicationParams).isStreamDownloadEnabled();
         doReturn(DOCUMENT_WITH_CASE_ID).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
         doNothing().when(documentManagementService)
                 .checkUserPermission(
@@ -437,7 +437,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
 
     @Test
     void shouldGetValidDocumentBinaryContentWithoutCallingDatastoreWhenDocumentMetadataHasTTLInFutureButNoCaseId() {
-        doReturn(false).when(applicationParams).isDownloadStreamingEnabled();
+        doReturn(false).when(applicationParams).isStreamDownloadEnabled();
         doReturn(AuthorisedService.builder().build()).when(documentManagementService)
                 .checkServicePermission(
                         DOCUMENT_WITH_FUTURE_TTL.getCaseTypeId(),
@@ -469,7 +469,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
 
     @Test
     void shouldThrowForbiddenExceptionWhenRetrievingDocumentBinaryContentWhenDocumentMetadataHasTTLInPastButNoCaseId() {
-        doReturn(false).when(applicationParams).isDownloadStreamingEnabled();
+        doReturn(false).when(applicationParams).isStreamDownloadEnabled();
         doReturn(AuthorisedService.builder().build()).when(documentManagementService)
                 .checkServicePermission(
                         DOCUMENT_WITH_FUTURE_TTL.getCaseTypeId(),
@@ -503,7 +503,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
 
     @Test
     void shouldThrowForbiddenExceptionWhenRetrievingDocumentBinaryContentWhenDocumentMetadataHasNullTTL() {
-        doReturn(false).when(applicationParams).isDownloadStreamingEnabled();
+        doReturn(false).when(applicationParams).isStreamDownloadEnabled();
         doReturn(AuthorisedService.builder().build()).when(documentManagementService)
                 .checkServicePermission(
                         DOCUMENT_WITH_FUTURE_TTL.getCaseTypeId(),
@@ -538,7 +538,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
     @Test
     @DisplayName("should throw 403 forbidden  when the requested document does not have read permission")
     void shouldThrowForbiddenWhenDocumentDoesNotHaveReadPermission() {
-        doReturn(false).when(applicationParams).isDownloadStreamingEnabled();
+        doReturn(false).when(applicationParams).isStreamDownloadEnabled();
         doReturn(AuthorisedService.builder().build()).when(documentManagementService)
             .checkServicePermission(DOCUMENT.getCaseTypeId(),
                                     DOCUMENT.getJurisdictionId(),
@@ -558,7 +558,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
     @Test
     @DisplayName("should throw 403 forbidden when the requested document does not match with available doc")
     void shouldThrowForbiddenWhenDocumentDoesNotMatch() {
-        doReturn(false).when(applicationParams).isDownloadStreamingEnabled();
+        doReturn(false).when(applicationParams).isStreamDownloadEnabled();
         Optional<DocumentPermissions> documentPermissions = Optional.of(getDocumentPermissions(
             Arrays.asList(
                 Permission.CREATE,
@@ -586,7 +586,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
     @Test
     @DisplayName("should throw 403 forbidden when the service is not authorised to access")
     void shouldThrowForbiddenWhenServiceIsNotAuthorised() {
-        doReturn(false).when(applicationParams).isDownloadStreamingEnabled();
+        doReturn(false).when(applicationParams).isStreamDownloadEnabled();
         Optional<DocumentPermissions> documentPermissions = Optional.of(getDocumentPermissions(
             Arrays.asList(
                 Permission.CREATE,
@@ -770,6 +770,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
     @Test
     @DisplayName("Should go through happy path")
     void uploadDocuments_HappyPath() {
+        doReturn(false).when(applicationParams).isStreamUploadEnabled();
 
         UploadResponse mockResponse = new UploadResponse(List.of(Document.builder().build()));
 
@@ -803,7 +804,46 @@ class CaseDocumentAmControllerTest implements TestFixture {
     }
 
     @Test
+    @DisplayName("Should go through happy path streaming")
+    void uploadDocumentsAsStreaming_HappyPath() {
+        doReturn(true).when(applicationParams).isStreamUploadEnabled();
+
+        UploadResponse mockResponse = new UploadResponse(List.of(Document.builder().build()));
+
+        doReturn(AuthorisedService.builder().build()).when(documentManagementService).checkServicePermission(
+            eq(CASE_TYPE_ID_VALUE),
+            eq(JURISDICTION_ID_VALUE),
+            eq(SERVICE_NAME_XUI_WEBAPP),
+            eq(Permission.CREATE),
+            eq(SERVICE_PERMISSION_ERROR),
+            anyString()
+        );
+        List<MultipartFile> multipartFiles = generateMultipartList();
+
+
+        final DocumentUploadRequest documentUploadRequest = new DocumentUploadRequest(
+            multipartFiles,
+            Classification.PUBLIC.name(),
+            CASE_TYPE_ID_VALUE,
+            JURISDICTION_ID_VALUE
+        );
+
+        doReturn(mockResponse).when(documentManagementService).uploadStreamDocuments(documentUploadRequest);
+
+        UploadResponse finalResponse = testee.uploadDocuments(
+            documentUploadRequest,
+            bindingResult,
+            TEST_S2S_TOKEN
+        );
+
+        assertEquals(finalResponse, mockResponse);
+        verify(documentManagementService, times(1)).uploadStreamDocuments(documentUploadRequest);
+    }
+
+    @Test
     void testShouldRaiseExceptionWhenBindingResultHasErrorsDuringUploadDocuments() {
+        doReturn(false).when(applicationParams).isStreamUploadEnabled();
+
         doReturn(true).when(bindingResult).hasErrors();
 
         final DocumentUploadRequest documentUploadRequest = new DocumentUploadRequest(

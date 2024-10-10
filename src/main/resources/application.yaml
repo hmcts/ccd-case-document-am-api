@@ -132,6 +132,8 @@ request:
   forwarded_headers:
     from_client: ${CLIENT_REQUEST_HEADERS_TO_FORWARD:RANGE}
 
-download:
-  streaming:
-    enabled: ${DOWNLOAD_STREAMING_ENABLED:false}
+stream:
+  upload:
+    enabled: ${STREAM_UPLOAD_ENABLED:false}
+  download:
+    enabled: ${STREAM_DOWNLOAD_ENABLED:false}
