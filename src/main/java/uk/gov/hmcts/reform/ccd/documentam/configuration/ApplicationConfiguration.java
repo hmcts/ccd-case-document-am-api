@@ -10,7 +10,6 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.hmcts.reform.ccd.documentam.client.RestTemplateHeaderModifierInterceptor;
 
 import java.time.Clock;
 import java.util.ArrayList;
@@ -26,7 +25,7 @@ public class ApplicationConfiguration {
     private int readTimeout;
 
     @Bean
-    public RestTemplate restTemplate(final RestTemplateHeaderModifierInterceptor headerModifierInterceptor) {
+    public RestTemplate restTemplate() {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(getHttpClient()));
 
