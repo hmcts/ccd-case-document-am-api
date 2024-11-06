@@ -306,7 +306,7 @@ dependencies {
   runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.12.6'
 
   implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '11.0'
-  implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.1.4'
+  implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.3.1'
 
   implementation group: 'net.minidev', name: 'json-smart', version: '2.5.1'
 
@@ -342,7 +342,7 @@ dependencies {
   testImplementation group: 'commons-lang', name: 'commons-lang', version: '2.6'
   testImplementation group: 'org.assertj', name: 'assertj-vavr', version: '0.4.2'
 
-  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.0.5'
+  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.1.4'
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: restAssured
   testImplementation group: 'io.rest-assured', name: 'json-path', version: restAssured
   testImplementation group: 'io.rest-assured', name: 'xml-path', version: restAssured
