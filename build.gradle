@@ -29,7 +29,7 @@ ext {
   restAssured      = '5.2.1'
   cucumber         = '5.5.0'
   tomcatEmbedded   = '10.1.25'
-  pact_version     = '4.1.7'
+  pact_version     = '4.6.15'
 }
 
 ext.libraries = [
@@ -262,10 +262,6 @@ repositories {
   }
 }
 
-configurations.all {
-  exclude group: 'org.codehaus.groovy', module: 'groovy'
-}
-
 dependencies {
 
   implementation group: 'org.springframework', name: 'spring-context-support'
@@ -359,10 +355,9 @@ dependencies {
   functionalTestImplementation sourceSets.main.runtimeClasspath
   functionalTestImplementation sourceSets.test.runtimeClasspath
 
+  contractTestImplementation sourceSets.main.runtimeClasspath
+  contractTestImplementation sourceSets.test.runtimeClasspath
   contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'junit5', version: pact_version
-  contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'java8', version: pact_version
-  contractTestRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'junit5', version: pact_version
-  contractTestRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'java8', version: pact_version
   contractTestImplementation group: 'au.com.dius.pact.provider', name: 'junit5', version: pact_version
   contractTestImplementation group: 'au.com.dius.pact.provider', name: 'spring', version: pact_version
   contractTestImplementation group: 'au.com.dius.pact.provider', name: 'junit5spring', version: pact_version
@@ -370,8 +365,6 @@ dependencies {
   contractTestRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junit
   contractTestImplementation group: 'org.projectlombok', name: 'lombok', version: lombok
   contractTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok
-  contractTestImplementation sourceSets.main.runtimeClasspath
-  contractTestImplementation sourceSets.test.runtimeClasspath
 
 }
 
