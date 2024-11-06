@@ -3,7 +3,7 @@ plugins {
   id 'checkstyle'
   id 'pmd'
   id 'jacoco'
-  id 'io.spring.dependency-management' version '1.1.5'
+  id 'io.spring.dependency-management' version '1.1.6'
   id 'info.solidsoft.pitest' version '1.5.0'
   id 'org.springframework.boot' version '2.7.18'
   id 'uk.gov.hmcts.java' version '0.12.62'
@@ -14,7 +14,6 @@ plugins {
   id 'net.serenity-bdd.serenity-gradle-plugin' version '3.0.0'
 }
 
-apply plugin: 'java'
 apply plugin: 'net.serenity-bdd.aggregator'
 apply plugin: 'project-report'
 apply plugin: 'idea'
@@ -22,7 +21,7 @@ apply plugin: 'io.spring.dependency-management'
 
 def versions = [
   junit              : '5.6.2',
-  lombok             : '1.18.20',
+  lombok             : '1.18.30',
   reformLogging      : '6.0.1',
   serenity           : '3.7.0',
   springFramework    : '5.3.27',
@@ -53,7 +52,7 @@ group = 'uk.gov.hmcts.reform.ccd.documentam'
 
 java {
   toolchain {
-    languageVersion = JavaLanguageVersion.of(17)
+    languageVersion = JavaLanguageVersion.of(21)
   }
 }
 
@@ -188,10 +187,6 @@ jacocoTestReport {
   }
 }
 
-jacoco {
-  toolVersion = "0.8.8"
-}
-
 pitest {
   pitestVersion = "1.4.9"
   testPlugin = "junit5"
@@ -308,6 +303,8 @@ dependencies {
   implementation "org.apache.tomcat.embed:tomcat-embed-el:${versions.tomcatEmbedded}"
   implementation "org.apache.tomcat.embed:tomcat-embed-websocket:${versions.tomcatEmbedded}"
 
+  implementation group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: '4.8.6'
+
   //CVE-2021-42500
   implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.10'
   implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.2.10'
@@ -392,7 +389,7 @@ tasks.withType(Test) {
 }
 
 task fortifyScan(type: JavaExec)  {
-  main = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
+  mainClass = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
   classpath += sourceSets.test.runtimeClasspath
   jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
 }
