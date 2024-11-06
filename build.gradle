@@ -56,7 +56,7 @@ configurations {
   cucumberRuntime.extendsFrom(functionalRuntime)
 
   all {
-    exclude group: 'org.apache.httpcomponents', module: 'httpclient'
+    // Excluded from all dependenciess
   }
 }
 
@@ -312,6 +312,7 @@ dependencies {
 
   implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '11.0'
   implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.3.1'
+  implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.14'
 
   implementation group: 'net.minidev', name: 'json-smart', version: '2.5.1'
 
