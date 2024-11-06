@@ -13,6 +13,7 @@ plugins {
   id 'com.github.spacialcircumstances.gradle-cucumber-reporting' version '0.1.23'
   id 'au.com.dius.pact' version '4.1.7'
   id 'net.serenity-bdd.serenity-gradle-plugin' version '3.0.0'
+  id 'org.owasp.dependencycheck' version '11.1.0'
 }
 
 ext {
@@ -49,6 +50,16 @@ dependencyManagement {
   }
 }
 
+configurations {
+  functionalTestCompile.extendsFrom testCompile
+  functionalTestRuntime.extendsFrom testRuntime
+  cucumberRuntime.extendsFrom(functionalRuntime)
+
+  all {
+    exclude group: 'org.apache.httpcomponents', module: 'httpclient'
+  }
+}
+
 pmd {
   toolVersion = '6.21.0'
   sourceSets = []
@@ -76,12 +87,6 @@ jacocoTestCoverageVerification {
       }
     }
   }
-}
-
-configurations {
-  functionalTestCompile.extendsFrom testCompile
-  functionalTestRuntime.extendsFrom testRuntime
-  cucumberRuntime.extendsFrom(functionalRuntime)
 }
 
 sourceSets {
