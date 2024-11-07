@@ -1,13 +1,13 @@
 # renovate: datasource=github-releases depName=microsoft/ApplicationInsights-Java
-ARG APP_INSIGHTS_AGENT_VERSION=3.4.13
+ARG APP_INSIGHTS_AGENT_VERSION=3.5.4
 
-FROM openjdk:17-jdk-slim as builder
+FROM openjdk:21-jdk-slim as builder
 
 ARG JAR_FILE=build/libs/ccd-case-document-am-api.jar
 COPY ${JAR_FILE} application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
 
-FROM hmctspublic.azurecr.io/base/java:17-distroless
+FROM hmctspublic.azurecr.io/base/java:21-distroless
 USER hmcts
 
 COPY lib/applicationinsights.json /opt/app
