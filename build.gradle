@@ -247,11 +247,6 @@ repositories {
 
 
 dependencies {
-  implementation('org.json:json') {
-    version {
-      strictly '20240303'
-    }
-  }
   implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.5'
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
   implementation group: 'commons-io', name: 'commons-io', version: '2.14.0'
@@ -269,7 +264,7 @@ dependencies {
   implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.7.0'
 
   implementation group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
-  implementation group: 'org.json', name: 'json', version: '20200518'
+  implementation group: 'org.json', name: 'json', version: '20240303'
 
   implementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
