@@ -19,7 +19,7 @@ Users & services with sufficient permissions only will be able to upload, modify
 
 ### Prerequisites
 
-- [Open JDK 8](https://openjdk.java.net/)
+- [Open JDK 21](https://openjdk.java.net/)
 - [Docker](https://www.docker.com)
 
 This service works with the DocStore Api and CaseData Api alongside their databases CCD Data Store and Document Management Store.
