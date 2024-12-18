@@ -3,15 +3,15 @@ plugins {
   id 'checkstyle'
   id 'pmd'
   id 'jacoco'
-  id 'io.spring.dependency-management' version '1.1.6'
-  id 'info.solidsoft.pitest' version '1.5.0'
+  id 'io.spring.dependency-management' version '1.1.7'
+  id 'info.solidsoft.pitest' version '1.15.0'
   id 'org.springframework.boot' version '2.7.18'
-  id 'uk.gov.hmcts.java' version '0.12.62'
+  id 'uk.gov.hmcts.java' version '0.12.63'
   id 'com.github.ben-manes.versions' version '0.51.0'
-  id 'org.sonarqube' version '4.2.0.3129'
-  id 'com.github.spacialcircumstances.gradle-cucumber-reporting' version '0.1.23'
-  id 'au.com.dius.pact' version '4.1.7'
-  id 'net.serenity-bdd.serenity-gradle-plugin' version '3.0.0'
+  id 'org.sonarqube' version '4.4.1.3373'
+  id 'com.github.spacialcircumstances.gradle-cucumber-reporting' version '0.1.25'
+  id 'au.com.dius.pact' version '4.6.16'
+  id 'net.serenity-bdd.serenity-gradle-plugin' version '3.9.8'
 }
 
 apply plugin: 'net.serenity-bdd.aggregator'
@@ -20,24 +20,24 @@ apply plugin: 'idea'
 apply plugin: 'io.spring.dependency-management'
 
 def versions = [
-  junit              : '5.6.2',
-  lombok             : '1.18.30',
-  reformLogging      : '6.0.1',
+  junit              : '5.11.4',
+  lombok             : '1.18.36',
+  reformLogging      : '6.1.7',
   serenity           : '3.7.0',
-  springFramework    : '5.3.27',
+  springFramework    : '5.3.39',
   springBoot         : springBoot.class.package.implementationVersion,
-  springCloud        : '3.1.3',
+  springCloud        : '3.1.9',
   springRetry        : '1.3.4',
   springfoxSwagger   : '3.0.0',
-  restAssured        : '4.3.1',
+  restAssured        : '4.5.1',
   cucumber           : '5.5.0',
-  tomcatEmbedded     : '9.0.91',
+  tomcatEmbedded     : '9.0.98',
   serviceAuthVersion : '3.1.4',
-  pact_version       : '4.1.7',
+  pact_version       : '4.6.16',
 ]
 
 pmd {
-  toolVersion = '6.21.0'
+  toolVersion = '6.55.0'
   sourceSets = []
 }
 
@@ -248,8 +248,8 @@ repositories {
 
 dependencies {
   implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.5'
-  implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
-  implementation group: 'commons-io', name: 'commons-io', version: '2.14.0'
+  implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0'
+  implementation group: 'commons-io', name: 'commons-io', version: '2.18.0'
 
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
@@ -258,10 +258,10 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-cache'
 
-  implementation group: 'org.springframework.hateoas', name: 'spring-hateoas', version: '1.5.5'
+  implementation group: 'org.springframework.hateoas', name: 'spring-hateoas', version: '1.5.6'
 
   implementation group: 'org.springframework', name: 'spring-context-support', version: versions.springFramework
-  implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.7.0'
+  implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.9.3'
 
   implementation group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
   implementation group: 'org.json', name: 'json', version: '20200518'
@@ -280,24 +280,24 @@ dependencies {
   implementation group: 'org.springframework.retry', name: 'spring-retry', version: versions.springRetry
   implementation group: 'org.springframework.security', name: 'spring-security-web'
   implementation group: 'org.springframework.security', name: 'spring-security-config'
-  implementation group: 'org.springframework.security', name: 'spring-security-rsa', version: '1.1.1'
-  implementation group: 'org.eclipse.jgit', name:  'org.eclipse.jgit', version: '6.6.1.202309021850-r';
+  implementation group: 'org.springframework.security', name: 'spring-security-rsa', version: '1.1.5'
+  implementation group: 'org.eclipse.jgit', name:  'org.eclipse.jgit', version: '6.10.0.202406032230-r';
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client', version: '2.7.18'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-resource-server', version: '2.7.18'
 
-  implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
-  implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '11.0'
-  implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
+  implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.12.6'
+  implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '11.10'
+  implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.14'
 
   implementation group: 'javax.inject', name: 'javax.inject', version: '1'
   implementation group: 'io.springfox', name: 'springfox-boot-starter', version: versions.springfoxSwagger
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: versions.springCloud
 
-  implementation group: 'net.minidev', name: 'json-smart', version: '2.4.9'
+  implementation group: 'net.minidev', name: 'json-smart', version: '2.5.1'
 
-  implementation group: 'io.vavr', name: 'vavr', version: '0.10.4'
+  implementation group: 'io.vavr', name: 'vavr', version: '0.10.5'
 
-  implementation group: 'com.nimbusds', name: 'nimbus-jose-jwt', version: '9.37.2'
+  implementation group: 'com.nimbusds', name: 'nimbus-jose-jwt', version: '9.47'
 
   implementation "org.apache.tomcat.embed:tomcat-embed-core:${versions.tomcatEmbedded}"
   implementation "org.apache.tomcat.embed:tomcat-embed-el:${versions.tomcatEmbedded}"
@@ -306,11 +306,11 @@ dependencies {
   implementation group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: '4.8.6'
 
   //CVE-2021-42500
-  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.10'
-  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.2.10'
+  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.13'
+  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.13'
 
   // CVE-2021-28170
-  implementation group: 'org.glassfish', name: 'jakarta.el', version: '4.0.1'
+  implementation group: 'org.glassfish', name: 'jakarta.el', version: '4.0.2'
 
   implementation group: 'com.microsoft.azure', name: 'applicationinsights-spring-boot-starter', version: '2.6.4'
 
@@ -318,22 +318,22 @@ dependencies {
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: versions.junit
   testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: versions.junit
 
-  testImplementation group: 'net.javacrumbs.json-unit', name: 'json-unit-assertj', version: '2.27.0'
+  testImplementation group: 'net.javacrumbs.json-unit', name: 'json-unit-assertj', version: '2.40.1'
 
   testImplementation (group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: versions.springBoot) {
     exclude group: 'junit', module: 'junit'
   }
-  testImplementation group: 'com.github.hmcts', name: 'ccd-test-definitions', version: '7.22.2'
-  testImplementation group: 'com.github.hmcts', name: 'befta-fw', version: '9.0.2'
+  testImplementation group: 'com.github.hmcts', name: 'ccd-test-definitions', version: '7.24.2-prerelease-CME-110-6'
+  testImplementation group: 'com.github.hmcts', name: 'befta-fw', version: '9.2.0'
   testImplementation group: 'commons-lang', name: 'commons-lang', version: '2.6'
-  testImplementation group: 'org.assertj', name: 'assertj-vavr', version: '0.4.2'
+  testImplementation group: 'org.assertj', name: 'assertj-vavr', version: '0.4.3'
 
-  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '2.2.2.RELEASE'
+  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '2.2.6.RELEASE'
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
   testImplementation group: 'io.rest-assured', name: 'json-path', version: versions.restAssured
   testImplementation group: 'io.rest-assured', name: 'xml-path', version: versions.restAssured
 
-  testImplementation 'com.github.hmcts:fortify-client:1.4.3:all'
+  testImplementation 'com.github.hmcts:fortify-client:1.4.6:all'
 
   integrationTestImplementation sourceSets.main.runtimeClasspath
   integrationTestImplementation sourceSets.test.runtimeClasspath
@@ -362,20 +362,20 @@ dependencyManagement {
   dependencies {
     dependency group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.70'
     // Remove once BEFTA rest-assured is updated
-    dependencySet(group: 'io.rest-assured', version: '4.3.1') {
+    dependencySet(group: 'io.rest-assured', version: '4.5.1') {
       entry 'json-path'
       entry 'xml-path'
     }
 
     // Versions prior to 30.0 vulnerable to CVE-2020-8908
-    dependency 'com.google.guava:guava:30.1-jre'
+    dependency 'com.google.guava:guava:30.1.1-jre'
 
-    dependencySet(group: 'org.codehaus.groovy', version: '3.0.7') {
+    dependencySet(group: 'org.codehaus.groovy', version: '3.0.23') {
       entry 'groovy'
       entry 'groovy-xml'
       entry 'groovy-json'
     }
-    dependency "org.apache.httpcomponents:httpclient:4.5.13"
+    dependency "org.apache.httpcomponents:httpclient:4.5.14"
 
   }
 }
