@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.ccd.documentam.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
+
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.Objects;
 
 @Validated
@@ -15,7 +17,7 @@ public class ErrorMap {
     @JsonProperty("message")
     private String message = null;
 
-    @ApiModelProperty(required = true, value = "The error code")
+    @Schema(requiredMode = RequiredMode.REQUIRED, description = "The error code")
     @NotNull
     public String getCode() {
         return code;
@@ -25,7 +27,7 @@ public class ErrorMap {
         this.code = code;
     }
 
-    @ApiModelProperty(required = true, value = "The error message")
+    @Schema(requiredMode = RequiredMode.REQUIRED, description = "The error message")
     @NotNull
 
     public String getMessage() {
