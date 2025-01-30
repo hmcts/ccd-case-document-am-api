@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriUtils;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
@@ -48,6 +49,13 @@ public class CaseDocumentControllerAdvice {
                                                               final HttpServletRequest request) {
 
         return errorDetailsResponseEntity(exception, HttpStatus.FORBIDDEN, getPath(request));
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    protected ResponseEntity<Object> handleResponseStatusException(final ResponseStatusException exception,
+                                                              final HttpServletRequest request) {
+
+        return errorDetailsResponseEntity(exception, exception.getStatus(), getPath(request));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -95,8 +103,6 @@ public class CaseDocumentControllerAdvice {
     @ExceptionHandler(HttpClientErrorException.class)
     protected ResponseEntity<Object> handleHttpClientErrorException(final HttpClientErrorException exception,
                                                                     final HttpServletRequest request) {
-        log.error(exception.getMessage(), exception);
-
         HttpStatus httpStatus = getClientStatusCode(exception.getStatusCode());
 
         return errorDetailsResponseEntity(exception, httpStatus, getPath(request));
@@ -105,8 +111,6 @@ public class CaseDocumentControllerAdvice {
     @ExceptionHandler(HttpServerErrorException.class)
     protected ResponseEntity<Object> handleHttpServerErrorException(final HttpServerErrorException exception,
                                                                     final HttpServletRequest request) {
-        log.error(exception.getMessage(), exception);
-
         HttpStatus httpStatus = getServerStatusCode(exception.getStatusCode());
 
         return errorDetailsResponseEntity(exception, httpStatus, getPath(request));

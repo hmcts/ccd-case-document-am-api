@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.ccd.documentam.configuration;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,10 +14,13 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.documentam.client.RestTemplateHeaderModifierInterceptor;
 
+import javax.annotation.PreDestroy;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Configuration
 public class ApplicationConfiguration {
 
@@ -24,6 +29,34 @@ public class ApplicationConfiguration {
 
     @Value("${http.client.read.timeout}")
     private int readTimeout;
+
+    @Value("${http.client.max.total}")
+    private int maxTotalHttpClient;
+
+    @Value("${http.client.seconds.idle.connection}")
+    private int maxSecondsIdleConnection;
+
+    @Value("${http.client.max.client_per_route}")
+    private int maxClientPerRoute;
+
+    @Value("${http.client.validate.after.inactivity}")
+    private int validateAfterInactivity;
+
+    private PoolingHttpClientConnectionManager cm;
+
+    @PreDestroy
+    void close() {
+        log.info("PreDestroy called");
+        if (null != cm) {
+            log.info("closing connection manager");
+            cm.close();
+        }
+    }
+
+    @Bean
+    public CloseableHttpClient httpClient() {
+        return getPoolingHttpClient();
+    }
 
     @Bean
     public RestTemplate restTemplate(final RestTemplateHeaderModifierInterceptor headerModifierInterceptor) {
@@ -49,14 +82,46 @@ public class ApplicationConfiguration {
 
     private CloseableHttpClient getHttpClient() {
         RequestConfig config = RequestConfig.custom()
-                                            .setConnectTimeout(connectionTimeout)
-                                            .setSocketTimeout(readTimeout)
-                                            .build();
+            .setConnectTimeout(connectionTimeout)
+            .setSocketTimeout(readTimeout)
+            .build();
 
         return HttpClientBuilder
             .create()
             .useSystemProperties()
             .setDefaultRequestConfig(config)
+            .build();
+    }
+
+    private CloseableHttpClient getPoolingHttpClient() {
+        cm = new PoolingHttpClientConnectionManager();
+
+        log.info("""
+                HttpClient Configuration:
+                maxTotalHttpClient: {},
+                maxSecondsIdleConnection: {},
+                maxClientPerRoute: {},
+                validateAfterInactivity: {},
+                connectionReadTimeout: {}
+                connectionTimeout: {}""", maxTotalHttpClient, maxSecondsIdleConnection, maxClientPerRoute,
+                 validateAfterInactivity, readTimeout, connectionTimeout);
+
+        cm.setMaxTotal(maxTotalHttpClient);
+        cm.closeIdleConnections(maxSecondsIdleConnection, TimeUnit.SECONDS);
+        cm.setDefaultMaxPerRoute(maxClientPerRoute);
+        cm.setValidateAfterInactivity(validateAfterInactivity);
+        final RequestConfig
+            config =
+            RequestConfig.custom()
+                .setConnectTimeout(connectionTimeout)
+                .setConnectionRequestTimeout(connectionTimeout)
+                .setSocketTimeout(readTimeout)
+                .build();
+
+        return HttpClientBuilder.create()
+            .useSystemProperties()
+            .setDefaultRequestConfig(config)
+            .setConnectionManager(cm)
             .build();
     }
 
