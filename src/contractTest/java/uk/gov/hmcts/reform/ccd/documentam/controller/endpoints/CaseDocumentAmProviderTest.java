@@ -32,9 +32,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PER
 
 @ExtendWith(SpringExtension.class)
 @Provider("case-document-am-api")
-@PactBroker(scheme = "${PACT_BROKER_SCHEME:http}",
-    host = "${PACT_BROKER_URL:localhost}",
-    port = "${PACT_BROKER_PORT:80}",
+@PactBroker(url = "${PACT_BROKER_FULL_URL:http://localhost}",
     consumerVersionSelectors = {@VersionSelector(tag = "master")})
 @ContextConfiguration(classes = {ContractConfig.class})
 @IgnoreNoPactsToVerify
