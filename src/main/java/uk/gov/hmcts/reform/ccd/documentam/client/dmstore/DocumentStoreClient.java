@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -60,11 +61,12 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.RESOURCE_NO
 @Slf4j
 public class DocumentStoreClient {
 
-    private final SecurityUtils securityUtils;
     private final RestTemplate restTemplate;
     public final CloseableHttpClient httpClient;
     private final ApplicationParams applicationParams;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final SecurityUtils securityUtils;
+
 
     @Autowired
     public DocumentStoreClient(SecurityUtils securityUtils, final RestTemplate restTemplate,
@@ -80,11 +82,14 @@ public class DocumentStoreClient {
         maxAttemptsExpression = "${retry.maxAttempts}", backoff = @Backoff(delayExpression = "${retry.maxDelay}"))
     public Either<ResourceNotFoundException, Document> getDocument(final UUID documentId) {
         try {
-            final Document document = restTemplate.getForObject(
+            ResponseEntity<Document> response = restTemplate.exchange(
                 String.format("%s/documents/%s", applicationParams.getDocumentURL(), documentId),
+                HttpMethod.GET,
+                getRequestHttpEntity(),
                 Document.class
             );
 
+            Document document = response.getBody();
             log.debug("Result of {} metadata call: {}", documentId, document);
 
             return Either.right(document);
@@ -103,13 +108,11 @@ public class DocumentStoreClient {
         maxAttemptsExpression = "${retry.maxAttempts}", backoff = @Backoff(delayExpression = "${retry.maxDelay}"))
     @SuppressWarnings("ConstantConditions")
     public ResponseEntity<ByteArrayResource> getDocumentAsBinary(final UUID documentId) {
-        final HttpEntity<Object> nullRequestEntity = null;
-
         try {
             return restTemplate.exchange(
                 String.format("%s/documents/%s/binary", applicationParams.getDocumentURL(), documentId),
                 GET,
-                nullRequestEntity,
+                getRequestHttpEntity(),
                 ByteArrayResource.class
             );
         } catch (HttpClientErrorException exception) {
@@ -210,12 +213,17 @@ public class DocumentStoreClient {
 
     public void deleteDocument(final UUID documentId, final Boolean permanent) {
         try {
-            restTemplate.delete(String.format(
-                "%s/documents/%s?permanent=%s",
-                applicationParams.getDocumentURL(),
-                documentId,
-                permanent
-            ));
+            HttpEntity<Void> entity = getRequestHttpEntity();
+
+            ResponseEntity<Void> response = restTemplate.exchange(
+                String.format("%s/documents/%s?permanent=%s", applicationParams.getDocumentURL(), documentId,
+                              permanent),
+                HttpMethod.DELETE,
+                entity,
+                Void.class
+            );
+
+            log.debug("Delete document {} completed with status: {}", documentId, response.getStatusCode());
         } catch (HttpClientErrorException exception) {
             if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
                 throw new ResourceNotFoundException(String.format("%s %s", RESOURCE_NOT_FOUND, documentId), exception);
@@ -229,7 +237,7 @@ public class DocumentStoreClient {
         try {
             final PatchDocumentResponse patchDocumentResponse = restTemplate.patchForObject(
                 String.format("%s/documents/%s", applicationParams.getDocumentURL(), documentId),
-                dmTtlRequest,
+                getRequestHttpEntity(dmTtlRequest),
                 PatchDocumentResponse.class
             );
 
@@ -249,7 +257,7 @@ public class DocumentStoreClient {
     public void patchDocumentMetadata(final UpdateDocumentsCommand updateDocumentsCommand) {
         restTemplate.patchForObject(
             String.format("%s/documents", applicationParams.getDocumentURL()),
-            updateDocumentsCommand,
+            getRequestHttpEntity(updateDocumentsCommand),
             Void.class
         );
     }
@@ -276,7 +284,7 @@ public class DocumentStoreClient {
                 bodyMap.add(Constants.FILES, file.getResource());
             });
 
-        HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = prepareRequestHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         return new HttpEntity<>(bodyMap, headers);
@@ -285,6 +293,23 @@ public class DocumentStoreClient {
     private String getEffectiveTTL() {
         final ZonedDateTime currentDateTime = ZonedDateTime.now();
         return currentDateTime.plusDays(applicationParams.getDocumentTtlInDays()).format(DM_DATE_TIME_FORMATTER);
+    }
+
+
+    private <T> HttpEntity<T> getRequestHttpEntity() {
+        return getRequestHttpEntity(null);
+    }
+
+    private <T> HttpEntity<T> getRequestHttpEntity(T body) {
+        return new HttpEntity<>(body, prepareRequestHeaders());
+    }
+
+    private HttpHeaders prepareRequestHeaders() {
+        HttpHeaders headers = securityUtils.serviceAuthorizationHeaders();
+        headers.set(Constants.USERID, securityUtils.getUserInfo().getUid());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        return headers;
     }
 
     @Retryable(value = {HttpServerErrorException.class, SocketTimeoutException.class},

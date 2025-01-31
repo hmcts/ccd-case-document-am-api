@@ -12,7 +12,6 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.hmcts.reform.ccd.documentam.client.RestTemplateHeaderModifierInterceptor;
 
 import javax.annotation.PreDestroy;
 import java.time.Clock;
@@ -59,7 +58,7 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    public RestTemplate restTemplate(final RestTemplateHeaderModifierInterceptor headerModifierInterceptor) {
+    public RestTemplate restTemplate() {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(getHttpClient()));
 
@@ -67,7 +66,7 @@ public class ApplicationConfiguration {
         if (CollectionUtils.isEmpty(interceptors)) {
             interceptors = new ArrayList<>();
         }
-        interceptors.add(headerModifierInterceptor);
+
         restTemplate.setInterceptors(interceptors);
 
         return restTemplate;
