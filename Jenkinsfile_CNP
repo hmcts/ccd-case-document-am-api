@@ -138,8 +138,7 @@ withPipeline("java", product, component) {
             keepAll              : true,
             reportDir            : "reports",
             reportFiles          : "index.html",
-            reportName           : "Functional Test Report",
-            reportTitles: "Functional Test Report"
+            reportName           : "Functional Test Report"
         ]
   }
 
@@ -151,8 +150,7 @@ withPipeline("java", product, component) {
             keepAll              : true,
             reportDir            : "reports",
             reportFiles          : "index.html",
-            reportName           : "Functional Test Report",
-            reportTitles: "Functional Test Report"
+            reportName           : "Functional Test Report"
         ]
   }
 
