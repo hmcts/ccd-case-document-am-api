@@ -136,7 +136,7 @@ withPipeline("java", product, component) {
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
             keepAll              : true,
-            reportDir            : "target/BEFTA Report for Functional Tests/",
+            reportDir            : "target/site/serenity",
             reportFiles          : "index.html",
             reportName           : "Functional Tests Report"
         ]
@@ -148,7 +148,7 @@ withPipeline("java", product, component) {
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
             keepAll              : true,
-            reportDir            : "target/BEFTA Report for Functional Tests/",
+            reportDir            : "target/site/serenity",
             reportFiles          : "index.html",
             reportName           : "Functional Tests Report"
         ]
@@ -160,7 +160,7 @@ withPipeline("java", product, component) {
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
             keepAll              : true,
-            reportDir            : "target/BEFTA Report for Smoke Tests/",
+            reportDir            : "build/reports/tests/smoke/",
             reportFiles          : "index.html",
             reportName           : "Smoke Test Report"
         ]
@@ -172,7 +172,7 @@ withPipeline("java", product, component) {
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
             keepAll              : true,
-            reportDir            : "target/BEFTA Report for Smoke Tests",
+            reportDir            : "build/reports/tests/smoke",
             reportFiles          : "index.html",
             reportName           : "Smoke Test Report"
         ]
