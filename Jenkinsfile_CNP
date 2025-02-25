@@ -137,7 +137,7 @@ withPipeline("java", product, component) {
             alwaysLinkToLastBuild: true,
             keepAll              : true,
             reportDir            : "build/reports/tests/functional",
-            reportFiles          : "index.html",
+            reportFiles          : "overview-features.html",
             reportName           : "Functional Test Report"
         ]
   }
@@ -149,7 +149,7 @@ withPipeline("java", product, component) {
             alwaysLinkToLastBuild: true,
             keepAll              : true,
             reportDir            : "build/reports/tests/functional",
-            reportFiles          : "index.html",
+            reportFiles          : "overview-features.html",
             reportName           : "Functional Test Report"
         ]
   }
