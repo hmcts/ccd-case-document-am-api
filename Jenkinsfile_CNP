@@ -136,9 +136,9 @@ withPipeline("java", product, component) {
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
             keepAll              : true,
-            reportDir            : "target/BEFTA Report for Functional Tests",
+            reportDir            : "build/reports/tests/functional",
             reportFiles          : "index.html",
-            reportName           : "Functional Tests Report"
+            reportName           : "Functional Test Report"
         ]
   }
 
@@ -148,9 +148,9 @@ withPipeline("java", product, component) {
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
             keepAll              : true,
-            reportDir            : "target/BEFTA Report for Functional Tests",
+            reportDir            : "build/reports/tests/functional",
             reportFiles          : "index.html",
-            reportName           : "Functional Tests Report"
+            reportName           : "Functional Test Report"
         ]
   }
 
@@ -160,7 +160,7 @@ withPipeline("java", product, component) {
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
             keepAll              : true,
-            reportDir            : "build/BEFTA Report for Smoke Tests",
+            reportDir            : "build/reports/tests/smoke",
             reportFiles          : "index.html",
             reportName           : "Smoke Test Report"
         ]
@@ -172,7 +172,7 @@ withPipeline("java", product, component) {
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
             keepAll              : true,
-            reportDir            : "build/BEFTA Report for Smoke Tests",
+            reportDir            : "build/reports/tests/smoke",
             reportFiles          : "index.html",
             reportName           : "Smoke Test Report"
         ]
