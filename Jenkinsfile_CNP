@@ -131,7 +131,6 @@ withPipeline("java", product, component) {
   disableLegacyDeployment()
 
   afterAlways('functionalTest:preview') {
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Functional Tests/**/*'
     publishHTML target: [
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
@@ -140,10 +139,10 @@ withPipeline("java", product, component) {
             reportFiles          : "index.html",
             reportName           : "Functional Tests Report"
         ]
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Functional Tests/**/*'
   }
 
   afterAlways('functionalTest:aat') {
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Functional Tests/**/*'
     publishHTML target: [
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
@@ -152,10 +151,10 @@ withPipeline("java", product, component) {
             reportFiles          : "index.html",
             reportName           : "Functional Tests Report"
         ]
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Functional Tests/**/*'
   }
 
-  afterAlways('smoketest:preview') {
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Smoke Tests/**/*'
+  afterAlways('smoketest:preview') 
     publishHTML target: [
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
@@ -164,10 +163,10 @@ withPipeline("java", product, component) {
             reportFiles          : "index.html",
             reportName           : "Smoke Test Report"
         ]
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Smoke Tests/**/*'
   }
 
   afterAlways('smoketest:aat') {
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Smoke Tests/**/*'
     publishHTML target: [
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
@@ -176,5 +175,6 @@ withPipeline("java", product, component) {
             reportFiles          : "index.html",
             reportName           : "Smoke Test Report"
         ]
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Smoke Tests/**/*'
   }
 }
