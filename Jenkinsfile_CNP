@@ -136,9 +136,10 @@ withPipeline("java", product, component) {
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
             keepAll              : true,
-            reportDir            : "build/reports/tests/functional",
-            reportFiles          : "overview-features.html",
-            reportName           : "Functional Test Report"
+            reportDir            : "reports",
+            reportFiles          : "index.html",
+            reportName           : "Functional Test Report",
+            reportTitles: "Functional Test Report"
         ]
   }
 
@@ -148,9 +149,10 @@ withPipeline("java", product, component) {
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
             keepAll              : true,
-            reportDir            : "build/reports/tests/functional",
-            reportFiles          : "overview-features.html",
-            reportName           : "Functional Test Report"
+            reportDir            : "reports",
+            reportFiles          : "index.html",
+            reportName           : "Functional Test Report",
+            reportTitles: "Functional Test Report"
         ]
   }
 
