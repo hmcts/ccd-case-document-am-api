@@ -154,7 +154,7 @@ withPipeline("java", product, component) {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Functional Tests/**/*'
   }
 
-  afterAlways('smoketest:preview') 
+  afterAlways('smoketest:preview') {
     publishHTML target: [
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
