@@ -135,11 +135,11 @@ withPipeline("java", product, component) {
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
             keepAll              : true,
-            reportDir            : "target/site/serenity/",
+            reportDir            : "build/reports/tests/functional",
             reportFiles          : "index.html",
             reportName           : "Functional Test Report"
     ]
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Functional Tests/**/*'
+    //steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Functional Tests/**/*'
   }
 
   afterAlways('functionalTest:aat') {
