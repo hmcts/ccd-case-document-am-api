@@ -131,15 +131,16 @@ withPipeline("java", product, component) {
   disableLegacyDeployment()
 
   afterAlways('functionalTest:preview') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Functional Tests/**/*'
     publishHTML target: [
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
             keepAll              : true,
-            reportDir            : "build/reports/tests/functional",
-            reportFiles          : "index.html",
+            reportDir            : "target/BEFTA Report for Functional Tests",
+            //reportFiles          : "index.html",
+            reportFiles: "${dir('reports') { findFiles(glob: '**/*.html').join(',') ?: 'Not found' }}",
             reportName           : "Functional Test Report"
     ]
-    //steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Functional Tests/**/*'
   }
 
   afterAlways('functionalTest:aat') {
