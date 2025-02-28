@@ -135,8 +135,8 @@ withPipeline("java", product, component) {
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
             keepAll              : true,
-            reportDir            : "target/BEFTA Report for Functional Tests/",
-            reportFiles          : "overview-features.html",
+            reportDir            : "target/site/serenity/",
+            reportFiles          : "index.html",
             reportName           : "Functional Test Report"
     ]
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Functional Tests/**/*'
@@ -147,8 +147,8 @@ withPipeline("java", product, component) {
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
             keepAll              : true,
-            reportDir            : "target/BEFTA Report for Functional Tests/",
-            reportFiles          : "overview-features.html",
+            reportDir            : "target/site/serenity/",
+            reportFiles          : "index.html",
             reportName           : "Functional Test Report"
     ]
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Functional Tests/**/*'
