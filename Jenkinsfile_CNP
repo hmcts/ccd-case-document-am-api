@@ -136,8 +136,8 @@ withPipeline("java", product, component) {
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
             keepAll              : true,
-            reportDir            : "BEFTA Report for Functional Tests",
-            reportFiles          : "BEFTA%20Report%20for%20Functional%20Tests/overview-features.html",
+            reportDir            : "BEFTA%20Report%20for%20Functional%20Tests/",
+            reportFiles          : "overview-features.html",
             reportName           : "Functional Test Report"
     ]
   }
