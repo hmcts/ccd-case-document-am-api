@@ -136,8 +136,8 @@ withPipeline("java", product, component) {
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
             keepAll              : true,
-            reportDir            : "'**/BEFTA Report for Functional Tests",
-            reportFiles          : "overview-features.html",
+            reportDir            : "BEFTA Report for Functional Tests",
+            reportFiles          : "BEFTA%20Report%20for%20Functional%20Tests/overview-features.html",
             reportName           : "Functional Test Report"
     ]
   }
@@ -163,7 +163,7 @@ withPipeline("java", product, component) {
                 reportDir : "BEFTA Report for Smoke Tests/reports/",
                 reportFiles : "BEFTA-Report-for-Smoke-Tests.html",
                 reportName : "Smoke Test Report"
-        ]    
+        ]
   }
 
   afterAlways('smoketest:aat') {
