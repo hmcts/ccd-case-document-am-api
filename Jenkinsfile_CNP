@@ -157,13 +157,13 @@ withPipeline("java", product, component) {
   afterAlways('smoketest:preview') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Smoke Tests/**/*'
     publishHTML target: [
-            allowMissing         : true,
-            alwaysLinkToLastBuild: true,
-            keepAll              : true,
-            reportDir            : "target/BEFTA Report for Smoke Tests/",
-            reportFiles          : "index.html",
-            reportName           : "Smoke Test Report"
-    ]
+                allowMissing : true,
+                alwaysLinkToLastBuild: true,
+                keepAll : true,
+                reportDir : "BEFTA Report for Smoke Tests/reports/",
+                reportFiles : "BEFTA-Report-for-Smoke-Tests.html",
+                reportName : "Smoke Test Report"
+        ]    
   }
 
   afterAlways('smoketest:aat') {
