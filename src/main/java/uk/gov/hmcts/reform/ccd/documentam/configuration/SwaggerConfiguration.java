@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.configuration;
 
+import org.springdoc.core.customizers.OperationCustomizer;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.CorsEndpointProperties;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.actuate.autoconfigure.web.server.ManagementPortType;
@@ -9,91 +10,78 @@ import org.springframework.boot.actuate.endpoint.web.ExposableWebEndpoint;
 import org.springframework.boot.actuate.endpoint.web.WebEndpointsSupplier;
 import org.springframework.boot.actuate.endpoint.web.EndpointMapping;
 import org.springframework.boot.actuate.endpoint.web.EndpointLinksResolver;
-import org.springframework.boot.actuate.endpoint.web.annotation.ControllerEndpointsSupplier;
-import org.springframework.boot.actuate.endpoint.web.annotation.ServletEndpointsSupplier;
 import org.springframework.boot.actuate.endpoint.web.servlet.WebMvcEndpointHandlerMapping;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.builders.RequestParameterBuilder;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.ParameterType;
-import springfox.documentation.service.RequestParameter;
-import springfox.documentation.service.Tag;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
-import uk.gov.hmcts.reform.ccd.documentam.controller.endpoints.CaseDocumentAmController;
+import org.springframework.web.method.HandlerMethod;
 
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 @Configuration
-@EnableSwagger2
 public class SwaggerConfiguration {
 
     @Bean
-    public Docket apiV2() {
-        return new Docket(DocumentationType.SWAGGER_2)
-            .tags(new Tag("get", "Get data endpoints"),
-                  new Tag("patch", "Patch data related endpoints"),
-                  new Tag("delete", "Delete endpoints"),
-                  new Tag("upload", "Upload documents"))
-            .select()
-            .apis(RequestHandlerSelectors.basePackage(CaseDocumentAmController.class.getPackage().getName()))
-            .build()
-            .useDefaultResponseMessages(false)
-            .apiInfo(apiV2Info())
-            .globalRequestParameters(Arrays.asList(
-                headerServiceAuthorization(),
-                headerAuthorization()
-            ));
+    public OpenAPI springShopOpenAPI() {
+        return new OpenAPI()
+                .info(apiV2Info())
+
+                ;
     }
 
-    private ApiInfo apiV2Info() {
-        return new ApiInfoBuilder()
+    @Bean
+    public OperationCustomizer customGlobalHeaders() {
+        return (Operation customOperation, HandlerMethod handlerMethod) -> {
+            customOperation.addParametersItem(headerServiceAuthorization());
+            customOperation.addParametersItem(headerAuthorization());
+            return customOperation;
+        };
+    }
+
+    private Info apiV2Info() {
+        return new Info()
             .title("CCD Case Document AM API")
             .description("download, upload")
-            .version("2-beta")
-            .build();
+            .version("2-beta");
     }
 
-    private RequestParameter headerServiceAuthorization() {
-        return new RequestParameterBuilder()
-            .name("ServiceAuthorization")
-            .description("Valid Service-to-Service JWT token for a whitelisted micro-service")
-            .in(ParameterType.HEADER)
-            .required(true)
-            .build();
+    private Parameter headerServiceAuthorization() {
+        return new Parameter()
+                .in(ParameterIn.HEADER.toString())
+                .schema(new StringSchema())
+                .name("ServiceAuthorization")
+                .description("Valid Service-to-Service JWT token for a whitelisted micro-service")
+                .required(true);
     }
 
-    private RequestParameter headerAuthorization() {
-        return new RequestParameterBuilder()
-            .name("Authorization")
-            .description("Keyword `Bearer` followed by a valid IDAM user token")
-            .in(ParameterType.HEADER)
-            .required(true)
-            .build();
+    private Parameter headerAuthorization() {
+        return new Parameter()
+                .in(ParameterIn.HEADER.toString())
+                .schema(new StringSchema())
+                .name("Authorization")
+                .description("Keyword `Bearer` followed by a valid IDAM user token")
+                .required(true);
     }
 
     //CCD-3509 CVE-2021-22044 required to fix null pointers in integration tests,
     //conflict in Springfox after Springboot 2.6.10
     @Bean
     public WebMvcEndpointHandlerMapping webEndpointServletHandlerMapping(WebEndpointsSupplier webEndpointsSupplier,
-        ServletEndpointsSupplier servletEndpointsSupplier, ControllerEndpointsSupplier controllerEndpointsSupplier,
         EndpointMediaTypes endpointMediaTypes, CorsEndpointProperties corsProperties,
         WebEndpointProperties webEndpointProperties, Environment environment) {
 
         List<ExposableEndpoint<?>> allEndpoints = new ArrayList<>();
         Collection<ExposableWebEndpoint> webEndpoints = webEndpointsSupplier.getEndpoints();
         allEndpoints.addAll(webEndpoints);
-        allEndpoints.addAll(servletEndpointsSupplier.getEndpoints());
-        allEndpoints.addAll(controllerEndpointsSupplier.getEndpoints());
         String basePath = webEndpointProperties.getBasePath();
         EndpointMapping endpointMapping = new EndpointMapping(basePath);
         boolean shouldRegisterLinksMapping = this.shouldRegisterLinksMapping(webEndpointProperties, environment,
@@ -101,7 +89,7 @@ public class SwaggerConfiguration {
         return new WebMvcEndpointHandlerMapping(endpointMapping, webEndpoints, endpointMediaTypes,
                                                 corsProperties.toCorsConfiguration(),
                                                 new EndpointLinksResolver(allEndpoints, basePath),
-                                                shouldRegisterLinksMapping, null);
+                                                shouldRegisterLinksMapping);
     }
 
     private boolean shouldRegisterLinksMapping(WebEndpointProperties webEndpointProperties, Environment environment,

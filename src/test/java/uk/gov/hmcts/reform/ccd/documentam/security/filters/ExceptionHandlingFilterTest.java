@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
@@ -69,7 +69,7 @@ public class ExceptionHandlingFilterTest {
         Mockito.doThrow(ClientAbortException.class)
             .when(filterChain)
             .doFilter(Mockito.eq(request), Mockito.eq(response));
-        filter.doFilterInternal(request, response, filterChain);
+        filter.doFilter(request, response, filterChain);
 
         assertThat(response.getStatus()).isEqualTo(502);
         assertLogging();
@@ -81,7 +81,7 @@ public class ExceptionHandlingFilterTest {
         Mockito.doThrow(NullPointerException.class)
             .when(filterChain)
             .doFilter(Mockito.eq(request), Mockito.eq(response));
-        filter.doFilterInternal(request, response, filterChain);
+        filter.doFilter(request, response, filterChain);
 
         assertThat(response.getStatus()).isEqualTo(500);
         assertLogging();
