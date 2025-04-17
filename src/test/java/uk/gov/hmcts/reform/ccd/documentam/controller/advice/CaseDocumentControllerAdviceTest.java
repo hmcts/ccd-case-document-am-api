@@ -16,6 +16,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
+import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.controller.endpoints.CaseDocumentAmController;
 import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
@@ -41,6 +43,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -69,6 +72,19 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
         assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
         assertEquals(HttpStatus.FORBIDDEN.value(), responseEntity.getStatusCodeValue());
+    }
+
+    @Test
+    void handleResponseStatusExceptionException() {
+        final ResponseStatusException responseStatusException = mock(ResponseStatusException.class);
+        when(responseStatusException.getStatus()).thenReturn(HttpStatus.INTERNAL_SERVER_ERROR);
+        when(responseStatusException.getMessage()).thenReturn("Internal Server Error");
+
+        final ResponseEntity<Object> responseEntity = underTest.handleResponseStatusException(responseStatusException,
+                                                                                              request);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
     }
 
     @Test
@@ -148,7 +164,8 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
     void testHandleMethodArgumentNotValidException() throws Exception {
         final CaseDocumentAmController controller = new CaseDocumentAmController(
             mock(DocumentManagementService.class),
-            mock(SecurityUtils.class)
+            mock(SecurityUtils.class),
+            mock(ApplicationParams.class)
         );
 
         final MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller)
