@@ -14,7 +14,9 @@ import org.springframework.mock.web.MockPart;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.BaseTest;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
@@ -28,6 +30,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -77,13 +80,14 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private ApplicationParams applicationParams;
+
     private static final String RESPONSE_RESULT_KEY = "Result";
     private static final String RESPONSE_STATUS_KEY = "status";
 
     private static final String SUCCESS = "Success";
     private static final int ERROR_403 = 403;
-    public static final String PATCH_ERROR_DESCRIPTION_BAD_REQUEST = "Document metadata exists for %s but the "
-        + "case type is not a moving case type: %s";
     private static final String MAIN_URL = "/cases/documents";
     private static final String ATTACH_TO_CASE_URL = "/attachToCase";
     private static final String SERVICE_NAME_CCD_DATA = "ccd_data";
@@ -97,7 +101,16 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
 
     @Test
     void shouldSuccessfullyUploadDocument() throws Exception {
+        uploadDocumentByIsStreamUploadEnabled(false);
+    }
 
+    @Test
+    void shouldSuccessfullyUploadStreamDocument() throws Exception {
+        uploadDocumentByIsStreamUploadEnabled(true);
+    }
+
+
+    private void uploadDocumentByIsStreamUploadEnabled(boolean isStreamUploadEnabled) throws Exception {
         Document document = Document.builder()
             .originalDocumentName(ORIGINAL_DOCUMENT_NAME)
             .size(1000L)
@@ -108,6 +121,10 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         DmUploadResponse dmUploadResponse = DmUploadResponse.builder()
             .embedded(DmUploadResponse.Embedded.builder().documents(List.of(document)).build())
             .build();
+
+        if (isStreamUploadEnabled) {
+            enableUploadStreaming();
+        }
 
         stubDocumentManagementUploadDocument(dmUploadResponse);
 
@@ -142,6 +159,16 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     @Test
     void shouldSuccessfullyUploadEmptyDocument() throws Exception {
 
+        uploadEmptyDocumentByIsStreamUploadEnabled(false);
+    }
+
+    @Test
+    void shouldSuccessfullyUploadStreamEmptyDocument() throws Exception {
+
+        uploadEmptyDocumentByIsStreamUploadEnabled(true);
+    }
+
+    private void uploadEmptyDocumentByIsStreamUploadEnabled(boolean isStreamUploadEnabled) throws Exception {
         Document document = Document.builder()
             .originalDocumentName(ORIGINAL_DOCUMENT_NAME)
             .size(0L)
@@ -152,6 +179,10 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         DmUploadResponse dmUploadResponse = DmUploadResponse.builder()
             .embedded(DmUploadResponse.Embedded.builder().documents(List.of(document)).build())
             .build();
+
+        if (isStreamUploadEnabled) {
+            enableUploadStreaming();
+        }
 
         stubDocumentManagementUploadDocument(dmUploadResponse);
 
@@ -370,6 +401,28 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     }
 
     @Test
+    void shouldSuccessfullyStreamDocumentBinaryContent() throws Exception {
+        final Document document = buildDocument();
+
+        stubDocumentUrlWithReadPermissions();
+        stubGetDocumentMetaData(document);
+        stubDocumentBinaryContent();
+
+        enableDownloadStreaming();
+
+        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + BINARY)
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+            .andExpect(status().isOk())
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                List.of(DOCUMENT_ID.toString()),
+                null,
+                null,
+                null));
+    }
+
+    @Test
     void shouldSuccessfullyGetDocumentBinaryContentNoCaseIdTTLInFuture() throws Exception {
         final Document document = buildDocumentWithoutCaseId(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)));
 
@@ -387,6 +440,28 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                         null,
                         null,
                         null));
+    }
+
+    @Test
+    void shouldSuccessfullyStreamDocumentBinaryContentNoCaseIdTTLInFuture() throws Exception {
+        final Document document = buildDocumentWithoutCaseId(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)));
+
+        stubDocumentUrlWithReadPermissions();
+        stubGetDocumentMetaData(document);
+        stubDocumentBinaryContent();
+
+        enableDownloadStreaming();
+
+        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + BINARY)
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+            .andExpect(status().isOk())
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                List.of(DOCUMENT_ID.toString()),
+                null,
+                null,
+                null));
     }
 
     @Test
@@ -414,6 +489,32 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     }
 
     @Test
+    void shouldErrorForbiddenStreamDocumentBinaryContentNoCaseIdTTLInPast() throws Exception {
+        final Document document = buildDocumentWithoutCaseId(Date.from(Instant.now().minus(1, ChronoUnit.HOURS)));
+
+        stubDocumentUrlWithReadPermissions();
+        stubGetDocumentMetaData(document);
+        stubDocumentBinaryContent();
+
+        enableDownloadStreaming();
+
+        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + BINARY)
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.error",
+                                is("Forbidden: Insufficient permissions: Document "
+                                       + DOCUMENT_ID
+                                       + " can not be downloaded as TTL has expired")))
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                List.of(DOCUMENT_ID.toString()),
+                null,
+                null,
+                null));
+    }
+
+    @Test
     void shouldErrorForbiddenGetDocumentBinaryContentNoCaseIdTTLIsNull() throws Exception {
         final Document document = buildDocumentWithoutCaseId(null);
 
@@ -435,6 +536,32 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                         null,
                         null,
                         null));
+    }
+
+    @Test
+    void shouldErrorForbiddenStreamDocumentBinaryContentNoCaseIdTTLIsNull() throws Exception {
+        final Document document = buildDocumentWithoutCaseId(null);
+
+        stubDocumentUrlWithReadPermissions();
+        stubGetDocumentMetaData(document);
+        stubDocumentBinaryContent();
+
+        enableDownloadStreaming();
+
+        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID + BINARY)
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.error",
+                                is("Forbidden: Insufficient permissions: Document "
+                                       + DOCUMENT_ID
+                                       + " can not be downloaded as TTL has expired")))
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                List.of(DOCUMENT_ID.toString()),
+                null,
+                null,
+                null));
     }
 
     @Test
@@ -789,6 +916,32 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     }
 
     @Test
+    void shouldFailToUploadStreamDocumentEmptyFile() throws Exception {
+
+        MockMultipartFile jsonFile1 =
+            new MockMultipartFile("name", null,
+                                  null, new byte[0]);
+
+        enableUploadStreaming();
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart(MAIN_URL)
+                            .file(jsonFile1)
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP))
+                            .param(CLASSIFICATION, CLASSIFICATION_VALUE)
+                            .param(CASE_TYPE_ID, CASE_TYPE_ID_VALUE)
+                            .param(JURISDICTION_ID, JURISDICTION_ID_VALUE)
+                            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+            .andExpect(status().isBadRequest())
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.UPLOAD_DOCUMENTS,
+                SERVICE_NAME_XUI_WEBAPP,
+                null,
+                null,
+                null,
+                null));
+    }
+
+    @Test
     void shouldBeForbiddenGetDocumentByDocumentIdWithNoPermissions() throws Exception {
         final Document document = buildDocument();
 
@@ -886,6 +1039,20 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 null,
                 null,
                 null));
+    }
+
+    private void enableDownloadStreaming() {
+        Field field = ReflectionUtils.findField(ApplicationParams.class, "isStreamDownloadEnabled");
+        assert field != null;
+        ReflectionUtils.makeAccessible(field);
+        ReflectionUtils.setField(field, applicationParams, true);
+    }
+
+    private void enableUploadStreaming() {
+        Field field = ReflectionUtils.findField(ApplicationParams.class, "isStreamUploadEnabled");
+        assert field != null;
+        ReflectionUtils.makeAccessible(field);
+        ReflectionUtils.setField(field, applicationParams, true);
     }
 
     private Document buildDocument() {
