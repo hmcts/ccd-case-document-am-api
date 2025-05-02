@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.ccd.documentam.util;
 
 import uk.gov.hmcts.reform.ccd.documentam.model.DocumentHashToken;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;

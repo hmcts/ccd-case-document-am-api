@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.ccd.documentam.configuration;
 
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.documentam.client.RestTemplateHeaderModifierInter
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class ApplicationConfiguration {
@@ -49,8 +50,8 @@ public class ApplicationConfiguration {
 
     private CloseableHttpClient getHttpClient() {
         RequestConfig config = RequestConfig.custom()
-                                            .setConnectTimeout(connectionTimeout)
-                                            .setSocketTimeout(readTimeout)
+                                            .setConnectionRequestTimeout(connectionTimeout, TimeUnit.MILLISECONDS)
+                                            .setResponseTimeout(readTimeout, TimeUnit.MILLISECONDS)
                                             .build();
 
         return HttpClientBuilder
