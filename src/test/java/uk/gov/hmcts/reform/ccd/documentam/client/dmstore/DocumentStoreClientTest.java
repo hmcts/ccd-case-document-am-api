@@ -19,6 +19,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
+import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.model.DmTtlRequest;
@@ -27,6 +28,8 @@ import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
+import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.util.List;
 
@@ -38,11 +41,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.buildPatchDocumentResponse;
 import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.buildTtlRequest;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_DISPOSITION;
@@ -53,7 +57,6 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.ORIGINAL_FI
 @ExtendWith(MockitoExtension.class)
 class DocumentStoreClientTest implements TestFixture {
     private static final String DM_STORE_URL = "http://localhost:4506";
-    private static final HttpEntity<Object> NULL_REQUEST_ENTITY = null;
 
     @Mock
     private RestTemplate restTemplate;
@@ -61,11 +64,20 @@ class DocumentStoreClientTest implements TestFixture {
     @Mock
     private ApplicationParams applicationParams;
 
+    @Mock
+    private SecurityUtils securityUtils;
+
     @InjectMocks
     private DocumentStoreClient underTest;
 
     @BeforeEach
     void prepare() {
+        final HttpHeaders authHeaders = new HttpHeaders();
+        authHeaders.add(Constants.SERVICE_AUTHORIZATION, "service_token");
+
+        when(securityUtils.serviceAuthorizationHeaders()).thenReturn(authHeaders);
+        when(securityUtils.getUserInfo()).thenReturn(UserInfo.builder().uid(USER_ID).build());
+
         doReturn(DM_STORE_URL).when(applicationParams).getDocumentURL();
     }
 
@@ -74,8 +86,13 @@ class DocumentStoreClientTest implements TestFixture {
         // GIVEN
         final Document expectedDocument = Document.builder().build();
 
-        doReturn(expectedDocument)
-            .when(restTemplate).getForObject(anyString(), ArgumentMatchers.<Class<Document>>any());
+        doReturn(ResponseEntity.ok().body(expectedDocument))
+            .when(restTemplate)
+            .exchange(
+                anyString(),
+                eq(HttpMethod.GET),
+                ArgumentMatchers.<HttpEntity<Void>>any(),
+                ArgumentMatchers.<Class<Document>>any());
 
         // WHEN
         final Either<ResourceNotFoundException, Document> actualResult = underTest.getDocument(DOCUMENT_ID);
@@ -85,9 +102,11 @@ class DocumentStoreClientTest implements TestFixture {
             .isRight()
             .hasRightValueSatisfying(actualDocument -> assertThat(actualDocument).isEqualTo(expectedDocument));
 
-        verify(restTemplate).getForObject(
-            DM_STORE_URL + "/documents/" + DOCUMENT_ID,
-            Document.class
+        verify(restTemplate, times(1)).exchange(
+            eq(String.format("%s/documents/%s", DM_STORE_URL, DOCUMENT_ID)),
+            eq(HttpMethod.GET),
+            any(HttpEntity.class),
+            eq(Document.class)
         );
     }
 
@@ -96,7 +115,11 @@ class DocumentStoreClientTest implements TestFixture {
         // GIVEN
         final HttpClientErrorException httpClientErrorException = new HttpClientErrorException(HttpStatus.NOT_FOUND);
         doThrow(httpClientErrorException)
-            .when(restTemplate).getForObject(anyString(), ArgumentMatchers.<Class<Document>>any());
+            .when(restTemplate).exchange(
+                anyString(),
+                eq(HttpMethod.GET),
+                ArgumentMatchers.<HttpEntity<Void>>any(),
+                ArgumentMatchers.<Class<Document>>any());
 
         // WHEN
         final Either<ResourceNotFoundException, Document> actualResult = underTest.getDocument(DOCUMENT_ID);
@@ -110,9 +133,11 @@ class DocumentStoreClientTest implements TestFixture {
                 assertThat(actualException.getCause()).isInstanceOf(HttpClientErrorException.class);
             });
 
-        verify(restTemplate).getForObject(
-            DM_STORE_URL + "/documents/" + DOCUMENT_ID,
-            Document.class
+        verify(restTemplate, times(1)).exchange(
+            eq(String.format("%s/documents/%s", DM_STORE_URL, DOCUMENT_ID)),
+            eq(HttpMethod.GET),
+            any(HttpEntity.class),
+            eq(Document.class)
         );
     }
 
@@ -174,25 +199,31 @@ class DocumentStoreClientTest implements TestFixture {
     }
 
     private void verifyRestExchangeByteArray() {
-        verify(restTemplate)
-            .exchange(DM_STORE_URL + "/documents/" + DOCUMENT_ID + "/binary",
-                      HttpMethod.GET,
-                      NULL_REQUEST_ENTITY,
-                      ByteArrayResource.class);
+        verify(restTemplate, times(1)).exchange(
+            eq(String.format("%s/documents/%s/binary", DM_STORE_URL, DOCUMENT_ID)),
+            eq(HttpMethod.GET),
+            any(HttpEntity.class),
+            eq(ByteArrayResource.class)
+        );
     }
 
     @Test
     void testShouldSuccessfullyDeleteDocument() {
         // GIVEN
         final boolean permanent = true;
-        doNothing().when(restTemplate).delete(anyString());
+        doReturn(ResponseEntity.ok().build()).when(restTemplate)
+            .exchange(anyString(), eq(HttpMethod.DELETE), any(), ArgumentMatchers.<Class<Void>>any());
 
         // WHEN
         underTest.deleteDocument(DOCUMENT_ID, permanent);
 
         // THEN
-        verify(restTemplate)
-            .delete(String.format("%s/documents/%s?permanent=%s", DM_STORE_URL, DOCUMENT_ID, permanent));
+        verify(restTemplate, times(1)).exchange(
+            eq(String.format("%s/documents/%s?permanent=%s", DM_STORE_URL, DOCUMENT_ID, permanent)),
+            eq(HttpMethod.DELETE),
+            any(HttpEntity.class),
+            eq(Void.class)
+        );
     }
 
     @Test
@@ -200,15 +231,20 @@ class DocumentStoreClientTest implements TestFixture {
         // GIVEN
         final boolean permanent = true;
         doThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND)).when(restTemplate)
-            .delete(String.format("%s/documents/%s?permanent=%s", DM_STORE_URL, DOCUMENT_ID, permanent));
+            .exchange(eq(String.format("%s/documents/%s?permanent=%s", DM_STORE_URL, DOCUMENT_ID, permanent)),
+                      eq(HttpMethod.DELETE), any(), ArgumentMatchers.<Class<Void>>any());
 
         // WHEN/THEN
         assertThatExceptionOfType(ResourceNotFoundException.class)
             .isThrownBy(() -> underTest.deleteDocument(DOCUMENT_ID, permanent))
             .withMessage("Resource not found " + DOCUMENT_ID);
 
-        verify(restTemplate)
-            .delete(String.format("%s/documents/%s?permanent=%s", DM_STORE_URL, DOCUMENT_ID, permanent));
+        verify(restTemplate, times(1)).exchange(
+            eq(String.format("%s/documents/%s?permanent=%s", DM_STORE_URL, DOCUMENT_ID, permanent)),
+            eq(HttpMethod.DELETE),
+            any(HttpEntity.class),
+            eq(Void.class)
+        );
     }
 
     @Test
@@ -219,7 +255,7 @@ class DocumentStoreClientTest implements TestFixture {
 
         doReturn(expectedResponse).when(restTemplate)
             .patchForObject(anyString(),
-                            ArgumentMatchers.<Class<DmTtlRequest>>any(),
+                            any(),
                             ArgumentMatchers.<Class<PatchDocumentResponse>>any());
 
         // WHEN
@@ -232,9 +268,9 @@ class DocumentStoreClientTest implements TestFixture {
             .hasRightValueSatisfying(right -> assertThat(right).isEqualTo(expectedResponse));
 
         verify(restTemplate).patchForObject(
-            String.format("%s/documents/%s", DM_STORE_URL, DOCUMENT_ID),
-            dmTtlRequest,
-            PatchDocumentResponse.class
+            eq(String.format("%s/documents/%s", DM_STORE_URL, DOCUMENT_ID)),
+            any(HttpEntity.class),
+            eq(PatchDocumentResponse.class)
         );
     }
 
@@ -244,7 +280,7 @@ class DocumentStoreClientTest implements TestFixture {
         final DmTtlRequest dmTtlRequest = buildTtlRequest();
         doThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND)).when(restTemplate)
             .patchForObject(anyString(),
-                            ArgumentMatchers.<Class<DmTtlRequest>>any(),
+                            any(),
                             ArgumentMatchers.<Class<PatchDocumentResponse>>any());
 
         // WHEN
@@ -260,9 +296,9 @@ class DocumentStoreClientTest implements TestFixture {
             });
 
         verify(restTemplate).patchForObject(
-            String.format("%s/documents/%s", DM_STORE_URL, DOCUMENT_ID),
-            dmTtlRequest,
-            PatchDocumentResponse.class
+            eq(String.format("%s/documents/%s", DM_STORE_URL, DOCUMENT_ID)),
+            any(HttpEntity.class),
+            eq(PatchDocumentResponse.class)
         );
     }
 
@@ -273,7 +309,7 @@ class DocumentStoreClientTest implements TestFixture {
 
         doAnswer(invocation -> null).when(restTemplate)
             .patchForObject(anyString(),
-                            ArgumentMatchers.<Class<UpdateDocumentsCommand>>any(),
+                            any(),
                             ArgumentMatchers.<Class<Void>>any());
 
         // WHEN
@@ -281,9 +317,9 @@ class DocumentStoreClientTest implements TestFixture {
 
         // THEN
         verify(restTemplate).patchForObject(
-            String.format("%s/documents", DM_STORE_URL),
-            updateDocumentsCommand,
-            Void.class
+            eq(String.format("%s/documents", DM_STORE_URL)),
+            any(HttpEntity.class),
+            eq(Void.class)
         );
     }
 
