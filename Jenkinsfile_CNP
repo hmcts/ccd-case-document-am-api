@@ -101,6 +101,14 @@ withPipeline("java", product, component) {
 
   afterAlways('test') {
       builder.gradle('integration')
+      publishHTML target: [
+            allowMissing         : true,
+            alwaysLinkToLastBuild: true,
+            keepAll              : true,
+            reportDir            : "build/reports/tests/integration",
+            reportFiles          : "index.html",
+            reportName           : "Integration Test Report"
+        ]
     }
 
   // Check if the build should be wired to an environment higher than 'preview'.
@@ -124,17 +132,61 @@ withPipeline("java", product, component) {
 
   afterAlways('functionalTest:preview') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Functional Tests/**/*'
+    publishHTML target: [
+            allowMissing         : true,
+            alwaysLinkToLastBuild: true,
+            keepAll              : true,
+            reportDir            : "target/BEFTA Report for Functional Tests",
+            reportFiles          : "overview-features.html",
+            reportName           : "Functional Test Report"
+    ]
   }
 
   afterAlways('functionalTest:aat') {
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Functional Tests/**/*'
+    //steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Functional Tests/**/*'
+    publishHTML target: [
+            allowMissing         : true,
+            alwaysLinkToLastBuild: true,
+            keepAll              : true,
+            reportDir            : "'**/BEFTA Report for Functional Tests/",
+            reportFiles          : "overview-features.html",
+            reportName           : "Functional Test Report"
+    ]
   }
 
   afterAlways('smoketest:preview') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Smoke Tests/**/*'
+    publishHTML target: [
+                allowMissing : true,
+                alwaysLinkToLastBuild: true,
+                keepAll : true,
+                reportDir : "BEFTA Report for Smoke Tests/reports/",
+                reportFiles : "BEFTA-Report-for-Smoke-Tests.html",
+                reportName : "Smoke Test Report"
+        ]
   }
 
   afterAlways('smoketest:aat') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Smoke Tests/**/*'
+    publishHTML target: [
+            allowMissing         : true,
+            alwaysLinkToLastBuild: true,
+            keepAll              : true,
+            reportDir            : "target/BEFTA Report for Smoke Tests/",
+            reportFiles          : "index.html",
+            reportName           : "Smoke Test Report"
+    ]
   }
+
+  afterAlways('pact-provider-verification') {
+        steps.archiveArtifacts allowEmptyArchive: true, artifacts: 'build/reports/tests/**/*'
+        publishHTML target: [
+             allowMissing         : true,
+             alwaysLinkToLastBuild: true,
+             keepAll              : true,
+            reportDir            : "build/reports/tests/runProviderPactVerification",
+            reportFiles          : "index.html",
+            reportName           : "Contract Tests Report"
+        ]
+    }
 }
