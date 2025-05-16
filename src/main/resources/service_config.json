@@ -353,5 +353,16 @@
         "UPDATE",
         "DELETE"
       ]
+    },
+    {
+      "id": "pcs_api",
+      "caseTypeId": ["PCS"],
+      "jurisdictionId": "CIVIL",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
     }]
 }
