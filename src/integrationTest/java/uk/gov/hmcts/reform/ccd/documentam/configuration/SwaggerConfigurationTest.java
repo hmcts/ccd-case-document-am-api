@@ -6,8 +6,6 @@ import org.springframework.boot.actuate.autoconfigure.endpoint.web.CorsEndpointP
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.actuate.endpoint.web.EndpointMediaTypes;
 import org.springframework.boot.actuate.endpoint.web.WebEndpointsSupplier;
-import org.springframework.boot.actuate.endpoint.web.annotation.ControllerEndpointsSupplier;
-import org.springframework.boot.actuate.endpoint.web.annotation.ServletEndpointsSupplier;
 import org.springframework.core.env.Environment;
 import uk.gov.hmcts.reform.ccd.documentam.BaseTest;
 
@@ -20,12 +18,6 @@ class SwaggerConfigurationTest extends BaseTest {
 
     @Autowired
     private WebEndpointsSupplier webEndpointsSupplier;
-
-    @Autowired
-    private ServletEndpointsSupplier servletEndpointsSupplier;
-
-    @Autowired
-    private ControllerEndpointsSupplier controllerEndpointsSupplier;
 
     @Autowired
     private EndpointMediaTypes endpointMediaTypes;
@@ -45,16 +37,14 @@ class SwaggerConfigurationTest extends BaseTest {
     @Test
     public void successfullyLoadWebEndpointServletHandlerMappingTest() {
         assertThat(webEndpointsSupplier).isNotNull();
-        assertThat(servletEndpointsSupplier).isNotNull();
-        assertThat(controllerEndpointsSupplier).isNotNull();
         assertThat(endpointMediaTypes).isNotNull();
         assertThat(corsProperties).isNotNull();
         assertThat(webEndpointProperties).isNotNull();
         assertThat(environment).isNotNull();
         assertThat(swaggerConfiguration).isNotNull();
 
-        assertThat(swaggerConfiguration.webEndpointServletHandlerMapping(webEndpointsSupplier, servletEndpointsSupplier,
-            controllerEndpointsSupplier, endpointMediaTypes,corsProperties, webEndpointProperties, environment))
+        assertThat(swaggerConfiguration.webEndpointServletHandlerMapping(webEndpointsSupplier, endpointMediaTypes,
+                corsProperties, webEndpointProperties, environment))
             .satisfies(mapping -> {
                 assertThat(mapping.getEndpoints().size()).isEqualTo(EXPECTED_TOTAL_ENDPOINTS);
                 assertThat(mapping.getApplicationContext().getId()).isEqualTo(EXPECTED_APPLICATION_CONTEXT_NAME);
