@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -24,7 +25,7 @@ import uk.gov.hmcts.reform.ccd.documentam.exception.RequiredFieldMissingExceptio
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.UnauthorizedException;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -178,11 +179,13 @@ public class CaseDocumentControllerAdvice {
             && causeOfException.getMessage().contains("Read timed out");
     }
 
-    private HttpStatus getClientStatusCode(HttpStatus httpStatus) {
-        return httpStatus != HttpStatus.UNAUTHORIZED ? HttpStatus.INTERNAL_SERVER_ERROR : httpStatus;
+    private HttpStatus getClientStatusCode(HttpStatusCode httpStatus) {
+        return httpStatus != HttpStatus.UNAUTHORIZED ? HttpStatus.INTERNAL_SERVER_ERROR 
+                : HttpStatus.valueOf(httpStatus.value());
     }
 
-    private HttpStatus getServerStatusCode(HttpStatus httpStatus) {
-        return httpStatus == HttpStatus.INTERNAL_SERVER_ERROR ? HttpStatus.BAD_GATEWAY : httpStatus;
+    private HttpStatus getServerStatusCode(HttpStatusCode httpStatus) {
+        return httpStatus == HttpStatus.INTERNAL_SERVER_ERROR ? HttpStatus.BAD_GATEWAY 
+                : HttpStatus.valueOf(httpStatus.value());
     }
 }

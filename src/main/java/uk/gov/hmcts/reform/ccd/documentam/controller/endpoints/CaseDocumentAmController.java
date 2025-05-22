@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.ccd.documentam.controller.endpoints;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -43,8 +43,9 @@ import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
@@ -85,30 +86,23 @@ public class CaseDocumentAmController {
         path = "/cases/documents/{documentId}",
         produces = {APPLICATION_JSON
         })
-    @ApiOperation(value = "Retrieves JSON representation of a Stored Document.", tags = "get")
-    @ApiResponses({
-        @ApiResponse(
-            code = 200,
-            message = "Success",
-            response = Document.class
-            ),
-        @ApiResponse(
-            code = 400,
-            message = CASE_DOCUMENT_ID_INVALID
-            ),
-        @ApiResponse(
-            code = 404,
-            message = CASE_DOCUMENT_NOT_FOUND
-            )
-    })
-
+    @Operation(summary = "Retrieves JSON representation of a Stored Document.", tags = "get")
+    @ApiResponse(
+        responseCode = "200",
+        description = "Success",
+        content = @Content(
+            schema = @Schema(implementation = Document.class)
+        )
+    )
+    @ApiResponse(responseCode = "400", description = CASE_DOCUMENT_ID_INVALID)
+    @ApiResponse(responseCode = "404", description = CASE_DOCUMENT_NOT_FOUND)
     @LogAudit(
         operationType = AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
         documentId = "#documentId"
     )
     public ResponseEntity<Document> getDocumentByDocumentId(
         @PathVariable("documentId") final UUID documentId,
-        @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
+        @Parameter(description = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken
     ) {
         final Document document = documentManagementService.getDocumentMetadata(documentId);
@@ -150,31 +144,20 @@ public class CaseDocumentAmController {
         path = "/cases/documents/{documentId}/binary",
         produces = {APPLICATION_JSON
         })
-    @ApiOperation(value = "Streams contents of the most recent Document associated with the Case Document.", tags =
-        "get")
-    @ApiResponses({
-        @ApiResponse(
-            code = 200,
-            message = "OK",
-            response = Object.class
-            ),
-        @ApiResponse(
-            code = 400,
-            message = CASE_DOCUMENT_ID_INVALID
-            ),
-        @ApiResponse(
-            code = 404,
-            message = CASE_DOCUMENT_NOT_FOUND
-            )
-    })
-
+    @Operation(
+        summary = "Streams contents of the most recent Document associated with the Case Document.",
+        tags = "get"
+    )
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "400", description = CASE_DOCUMENT_ID_INVALID)
+    @ApiResponse(responseCode = "404", description = CASE_DOCUMENT_NOT_FOUND)
     @LogAudit(
         operationType = AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
         documentId = "#documentId"
     )
     public ResponseEntity<ByteArrayResource> getDocumentBinaryContentByDocumentId(
-        @PathVariable("documentId") final UUID documentId,  final HttpServletResponse httpResponse,
-        @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
+        @PathVariable("documentId") final UUID documentId, final HttpServletResponse httpResponse,
+        @Parameter(description = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken,
         @ApiIgnore
         @RequestHeader final Map<String, String> requestHeaders
@@ -233,37 +216,27 @@ public class CaseDocumentAmController {
         produces = {APPLICATION_JSON},
         consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
     )
-    @ApiOperation(value = "creates a list of stored document by uploading a list of binary/text file", tags = "upload")
-    @ApiResponses({
-        @ApiResponse(
-            code = 200,
-            message = "Created",
-            response = UploadResponse.class
-            ),
-        @ApiResponse(
-            code = 400,
-            message = CASE_TYPE_ID_INVALID
-            ),
-        @ApiResponse(
-            code = 400,
-            message = JURISDICTION_ID_INVALID
-            ),
-        @ApiResponse(
-            code = 400,
-            message = CLASSIFICATION_ID_INVALID
-            )
-    })
-
+    @Operation(summary = "creates a list of stored document by uploading a list of binary/text file", tags = "upload")
+    @ApiResponse(
+        responseCode = "200",
+        description = "Created",
+        content = @Content(
+            schema = @Schema(implementation = UploadResponse.class)
+        )
+    )
+    @ApiResponse(responseCode = "400", description = CASE_TYPE_ID_INVALID)
+    @ApiResponse(responseCode = "400", description = JURISDICTION_ID_INVALID)
+    @ApiResponse(responseCode = "400", description = CLASSIFICATION_ID_INVALID)
     @LogAudit(
         operationType = AuditOperationType.UPLOAD_DOCUMENTS,
         caseType = "#documentUploadRequest.caseTypeId",
         jurisdiction = "#documentUploadRequest.jurisdictionId"
     )
     public UploadResponse uploadDocuments(
-        @ApiParam(value = "List of documents to be uploaded and their metadata", required = true)
+        @Parameter(description = "List of documents to be uploaded and their metadata", required = true)
         @Valid final DocumentUploadRequest documentUploadRequest,
         final BindingResult bindingResult,
-        @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
+        @Parameter(description = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken) {
 
         handleErrors(bindingResult);
@@ -290,23 +263,16 @@ public class CaseDocumentAmController {
         produces = {APPLICATION_JSON},
         consumes = {APPLICATION_JSON}
     )
-    @ApiOperation(value = "Updates ttl on document ", tags = "patch")
-    @ApiResponses({
-        @ApiResponse(
-            code = 200,
-            message = "Success",
-            response = PatchDocumentResponse.class
-            ),
-        @ApiResponse(
-            code = 400,
-            message = CASE_DOCUMENT_ID_INVALID
-            ),
-        @ApiResponse(
-            code = 404,
-            message = CASE_DOCUMENT_NOT_FOUND
-            )
-    })
-
+    @Operation(summary = "Updates ttl on document ", tags = "patch")
+    @ApiResponse(
+        responseCode = "200",
+        description = "Success",
+        content = @Content(
+            schema = @Schema(implementation = PatchDocumentResponse.class)
+        )
+    )
+    @ApiResponse(responseCode = "400", description = CASE_DOCUMENT_ID_INVALID)
+    @ApiResponse(responseCode = "404", description = CASE_DOCUMENT_NOT_FOUND)
     @LogAudit(
         operationType = AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID,
         documentId = "#documentId"
@@ -314,10 +280,10 @@ public class CaseDocumentAmController {
     public ResponseEntity<PatchDocumentResponse> patchDocumentByDocumentId(
         @PathVariable("documentId") final UUID documentId,
 
-        @ApiParam(value = "", required = true)
+        @Parameter(required = true)
         @Valid @RequestBody final UpdateTtlRequest ttlRequest,
 
-        @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
+        @Parameter(description = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken) {
 
         final Document document = documentManagementService.getDocumentMetadata(documentId);
@@ -344,38 +310,20 @@ public class CaseDocumentAmController {
         produces = {APPLICATION_JSON},
         consumes = {APPLICATION_JSON}
     )
-    @ApiOperation(value = "Updates a list of case document with provided metadata", tags = "patch")
-    @ApiResponses({
-        @ApiResponse(
-            code = 200,
-            message = "Success",
-            response = PatchDocumentMetaDataResponse.class
-            ),
-        @ApiResponse(
-            code = 400,
-            message = CASE_DOCUMENT_ID_INVALID
-            ),
-        @ApiResponse(
-            code = 400,
-            message = CASE_ID_NOT_VALID
-            ),
-        @ApiResponse(
-            code = 400,
-            message = CASE_TYPE_ID_INVALID
-            ),
-        @ApiResponse(
-            code = 400,
-            message = JURISDICTION_ID_INVALID
-            ),
-        @ApiResponse(
-            code = 400,
-            message = CASE_DOCUMENT_HASH_TOKEN_INVALID
-            ),
-        @ApiResponse(
-            code = 404,
-            message = CASE_DOCUMENT_NOT_FOUND
-            )
-    })
+    @Operation(summary = "Updates a list of case document with provided metadata", tags = "patch")
+    @ApiResponse(
+        responseCode = "200",
+        description = "Success",
+        content = @Content(
+            schema = @Schema(implementation = PatchDocumentMetaDataResponse.class)
+        )
+    )
+    @ApiResponse(responseCode = "400", description = CASE_DOCUMENT_ID_INVALID)
+    @ApiResponse(responseCode = "400", description = CASE_ID_NOT_VALID)
+    @ApiResponse(responseCode = "400", description = CASE_TYPE_ID_INVALID)
+    @ApiResponse(responseCode = "400", description = JURISDICTION_ID_INVALID)
+    @ApiResponse(responseCode = "400", description = CASE_DOCUMENT_HASH_TOKEN_INVALID)
+    @ApiResponse(responseCode = "404", description = CASE_DOCUMENT_NOT_FOUND)
     @LogAudit(
         operationType = AuditOperationType.PATCH_METADATA_ON_DOCUMENTS,
         documentIds = "T(uk.gov.hmcts.reform.ccd.documentam.util.DocumentIdsExtractor)"
@@ -383,10 +331,10 @@ public class CaseDocumentAmController {
         caseId = "#caseDocumentsMetadata.caseId"
     )
     public ResponseEntity<PatchDocumentMetaDataResponse> patchMetaDataOnDocuments(
-        @ApiParam(value = "", required = true)
+        @Parameter(required = true)
         @Valid @RequestBody final CaseDocumentsMetadata caseDocumentsMetadata,
 
-        @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
+        @Parameter(description = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken) {
 
         documentManagementService.checkServicePermission(
@@ -406,21 +354,10 @@ public class CaseDocumentAmController {
         path = "/cases/documents/{documentId}",
         produces = {APPLICATION_JSON}
     )
-    @ApiOperation(value = "Deletes a case document with service authorization.", tags = "delete")
-    @ApiResponses({
-        @ApiResponse(
-            code = 200,
-            message = "OK"
-            ),
-        @ApiResponse(
-            code = 400,
-            message = CASE_DOCUMENT_ID_INVALID
-            ),
-        @ApiResponse(
-            code = 404,
-            message = CASE_DOCUMENT_NOT_FOUND
-            )
-    })
+    @Operation(summary = "Deletes a case document with service authorization.", tags = "delete")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "400", description = CASE_DOCUMENT_ID_INVALID)
+    @ApiResponse(responseCode = "404", description = CASE_DOCUMENT_NOT_FOUND)
     @LogAudit(
         operationType = AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
         documentId = "#documentId"
@@ -428,7 +365,7 @@ public class CaseDocumentAmController {
     public ResponseEntity<Void> deleteDocumentByDocumentId(
         @PathVariable("documentId") final UUID documentId,
         @Valid @RequestParam(value = "permanent", required = false, defaultValue = "false") final Boolean permanent,
-        @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
+        @Parameter(description = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken
     ) {
         final Document document = documentManagementService.getDocumentMetadata(documentId);
@@ -449,29 +386,23 @@ public class CaseDocumentAmController {
         path = "/cases/documents/{documentId}/token",
         produces = {APPLICATION_JSON}
     )
-    @ApiOperation(value = "Retrieves the hashcode for document Id", tags = "get")
-    @ApiResponses({
-        @ApiResponse(
-            code = 200,
-            message = "Success",
-            response = GeneratedHashCodeResponse.class
-            ),
-        @ApiResponse(
-            code = 400,
-            message = CASE_DOCUMENT_ID_INVALID
-            ),
-        @ApiResponse(
-            code = 404,
-            message = CASE_DOCUMENT_NOT_FOUND
-            )
-    })
+    @Operation(summary = "Retrieves the hashcode for document Id", tags = "get")
+    @ApiResponse(
+        responseCode = "200",
+        description = "Success",
+        content = @Content(
+            schema = @Schema(implementation = GeneratedHashCodeResponse.class)
+        )
+    )
+    @ApiResponse(responseCode = "400", description = CASE_DOCUMENT_ID_INVALID)
+    @ApiResponse(responseCode = "404", description = CASE_DOCUMENT_NOT_FOUND)
     @LogAudit(
         operationType = AuditOperationType.GENERATE_HASH_CODE,
         documentId = "#documentId"
     )
     public ResponseEntity<GeneratedHashCodeResponse> generateHashCode(
         @PathVariable("documentId") final UUID documentId,
-        @ApiParam(value = "S2S JWT token for an approved micro-service", required = true)
+        @Parameter(description = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken
     ) {
         final Document document = documentManagementService.getDocumentMetadata(documentId);

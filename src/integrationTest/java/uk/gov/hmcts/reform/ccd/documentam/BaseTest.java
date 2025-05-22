@@ -7,8 +7,6 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.TextCodec;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -166,9 +164,9 @@ public class BaseTest {
 
     private static String generateS2SToken(String serviceName, long ttlMillis) {
         return Jwts.builder()
-            .setSubject(serviceName)
-            .setExpiration(new Date(System.currentTimeMillis() + ttlMillis))
-            .signWith(SignatureAlgorithm.HS256, TextCodec.BASE64.encode("AA"))
+            .subject(serviceName)
+            .expiration(new Date(System.currentTimeMillis() + ttlMillis))
+            .signWith(Jwts.SIG.HS256.key().build())
             .compact();
     }
 

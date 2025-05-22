@@ -78,7 +78,7 @@ public class DocumentStoreClient {
         this.applicationParams = applicationParams;
     }
 
-    @Retryable(value = {HttpServerErrorException.class, SocketTimeoutException.class},
+    @Retryable(retryFor = {HttpServerErrorException.class, SocketTimeoutException.class},
         maxAttemptsExpression = "${retry.maxAttempts}", backoff = @Backoff(delayExpression = "${retry.maxDelay}"))
     public Either<ResourceNotFoundException, Document> getDocument(final UUID documentId) {
         try {
@@ -104,7 +104,7 @@ public class DocumentStoreClient {
         }
     }
 
-    @Retryable(value = {HttpServerErrorException.class, SocketTimeoutException.class},
+    @Retryable(retryFor = {HttpServerErrorException.class, SocketTimeoutException.class},
         maxAttemptsExpression = "${retry.maxAttempts}", backoff = @Backoff(delayExpression = "${retry.maxDelay}"))
     @SuppressWarnings("ConstantConditions")
     public ResponseEntity<ByteArrayResource> getDocumentAsBinary(final UUID documentId) {

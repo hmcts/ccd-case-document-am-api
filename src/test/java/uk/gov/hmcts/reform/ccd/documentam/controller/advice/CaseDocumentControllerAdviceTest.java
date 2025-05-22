@@ -30,11 +30,10 @@ import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
@@ -61,7 +60,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         ResponseEntity<Object> responseEntity = underTest.handleUnauthorizedException(unauthorizedException, request);
 
         assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.UNAUTHORIZED.value(), responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), responseEntity.getStatusCode().value());
     }
 
     @Test
@@ -71,7 +70,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         final ResponseEntity<Object> responseEntity = underTest.handleForbiddenException(forbiddenException, request);
 
         assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.FORBIDDEN.value(), responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.FORBIDDEN.value(), responseEntity.getStatusCode().value());
     }
 
     @Test
@@ -140,7 +139,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
             .handleResourceNotFoundException(resourceNotFoundException, request);
 
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.NOT_FOUND.value(), responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.NOT_FOUND.value(), responseEntity.getStatusCode().value());
     }
 
     @Test
@@ -150,14 +149,14 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         ResponseEntity<Object> responseEntity = underTest.handleUnknownException(exception, request);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCode().value());
     }
 
     private void testBadRequest(final Exception exceptionClazz) {
         final ResponseEntity<Object> responseEntity = underTest.handleBadRequestException(exceptionClazz, request);
 
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), responseEntity.getStatusCode().value());
     }
 
     @Test
@@ -198,7 +197,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         final ResponseEntity<Object> responseEntity = underTest.handleHttpServerErrorException(exception, request);
 
         assertEquals(HttpStatus.BAD_GATEWAY, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.BAD_GATEWAY.value(), responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.BAD_GATEWAY.value(), responseEntity.getStatusCode().value());
 
         ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
         assert errorResponse != null;
@@ -214,7 +213,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         final ResponseEntity<Object> responseEntity = underTest.handleHttpServerErrorException(exception, request);
 
         assertEquals(HttpStatus.SERVICE_UNAVAILABLE, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.SERVICE_UNAVAILABLE.value(), responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE.value(), responseEntity.getStatusCode().value());
 
         ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
         assert errorResponse != null;
@@ -230,7 +229,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         final ResponseEntity<Object> responseEntity = underTest.handleHttpClientErrorException(exception, request);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCode().value());
 
         ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
         assert errorResponse != null;
@@ -246,7 +245,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         final ResponseEntity<Object> responseEntity = underTest.handleHttpClientErrorException(exception, request);
 
         assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.UNAUTHORIZED.value(), responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), responseEntity.getStatusCode().value());
 
         ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
         assert errorResponse != null;
@@ -262,7 +261,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         final ResponseEntity<Object> responseEntity = underTest.handleHttpClientErrorException(exception, request);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCode().value());
 
         ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
         assert errorResponse != null;
@@ -275,10 +274,10 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         FeignException.FeignServerException ex = new FeignException.FeignServerException(
             HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error",
             Request.create(Request.HttpMethod.GET, "Internal Server Error", Map.of(), new byte[0],
-                           Charset.defaultCharset(), null), new byte[0], Map.of());
+                           Charset.defaultCharset(), null), new byte[0], null);
         final ResponseEntity<Object> responseEntity = underTest.handleFeignServerException(ex, request);
 
-        assertEquals(HttpStatus.BAD_GATEWAY.value(), responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.BAD_GATEWAY.value(), responseEntity.getStatusCode().value());
     }
 
     @Test
@@ -286,10 +285,10 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         FeignException.FeignServerException ex = new FeignException.FeignServerException(
             HttpStatus.GATEWAY_TIMEOUT.value(), "Gateway Timeout",
             Request.create(Request.HttpMethod.GET, "Gateway Timeout", Map.of(), new byte[0],
-                           Charset.defaultCharset(), null), new byte[0], Map.of());
+                           Charset.defaultCharset(), null), new byte[0], null);
         final ResponseEntity<Object> response = underTest.handleFeignServerException(ex, request);
 
-        assertEquals(HttpStatus.GATEWAY_TIMEOUT.value(), response.getStatusCodeValue());
+        assertEquals(HttpStatus.GATEWAY_TIMEOUT.value(), response.getStatusCode().value());
     }
 
     @Test
@@ -297,11 +296,11 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         FeignException.FeignClientException ex = new FeignException.FeignClientException(
             HttpStatus.UNAUTHORIZED.value(), "UNAUTHORIZED",
             Request.create(Request.HttpMethod.GET, "UNAUTHORIZED", Map.of(), new byte[0],
-                           Charset.defaultCharset(), null), new byte[0], Map.of());
+                           Charset.defaultCharset(), null), new byte[0], null);
 
         final ResponseEntity<Object> response = underTest.handleFeignClientException(ex, request);
 
-        assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCodeValue());
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusCode().value());
     }
 
     @Test
@@ -309,12 +308,12 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         FeignException.FeignClientException ex = new FeignException.FeignClientException(
             HttpStatus.BAD_REQUEST.value(), "Bad Request",
             Request.create(Request.HttpMethod.GET, "Bad Request", Map.of(), new byte[0],
-                           Charset.defaultCharset(), null), new byte[0], Map.of());
+                           Charset.defaultCharset(), null), new byte[0], null);
 
         final ResponseEntity<Object> response = underTest
             .handleFeignClientException(ex, request);
 
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatusCodeValue());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatusCode().value());
     }
 
     @Test
@@ -329,7 +328,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         final ResponseEntity<Object> responseEntity = underTest.handleUnknownException(exception, request);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCode().value());
     }
 
     @Test
@@ -343,7 +342,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         final ResponseEntity<Object> responseEntity = underTest.handleUnknownException(ioException, request);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCode().value());
     }
 
     @Test
@@ -357,7 +356,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         final ResponseEntity<Object> responseEntity = underTest.handleUnknownException(ioException, request);
 
         assertEquals(HttpStatus.GATEWAY_TIMEOUT, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.GATEWAY_TIMEOUT.value(), responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.GATEWAY_TIMEOUT.value(), responseEntity.getStatusCode().value());
     }
 
     @Test
@@ -368,7 +367,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         final ResponseEntity<Object> responseEntity = underTest.handleUnknownException(socketTimeoutException, request);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCode().value());
     }
 
     @Test
@@ -378,7 +377,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         final ResponseEntity<Object> responseEntity = underTest.handleUnknownException(socketTimeoutException, request);
 
         assertEquals(HttpStatus.GATEWAY_TIMEOUT, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.GATEWAY_TIMEOUT.value(), responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.GATEWAY_TIMEOUT.value(), responseEntity.getStatusCode().value());
     }
 
     @Test
@@ -391,7 +390,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         final ResponseEntity<Object> responseEntity = underTest.handleUnknownException(exception, request);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCode().value());
     }
 
     private FeignException.FeignServerException createFeignServerException(final HttpStatus httpStatus,
@@ -399,6 +398,6 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         return new FeignException.FeignServerException(httpStatus.value(), message,
                                                        Request.create(Request.HttpMethod.GET, message, Map.of(),
                                                                       new byte[0], Charset.defaultCharset(), null),
-                                                       new byte[0], new HashMap<>());
+                                                       new byte[0], null);
     }
 }

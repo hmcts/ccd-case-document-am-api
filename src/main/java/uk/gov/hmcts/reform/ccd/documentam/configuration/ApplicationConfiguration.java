@@ -1,10 +1,9 @@
 package uk.gov.hmcts.reform.ccd.documentam.configuration;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -81,9 +80,9 @@ public class ApplicationConfiguration {
 
     private CloseableHttpClient getHttpClient() {
         RequestConfig config = RequestConfig.custom()
-            .setConnectTimeout(connectionTimeout)
-            .setSocketTimeout(readTimeout)
-            .build();
+                                            .setConnectionRequestTimeout(connectionTimeout, TimeUnit.MILLISECONDS)
+                                            .setResponseTimeout(readTimeout, TimeUnit.MILLISECONDS)
+                                            .build();
 
         return HttpClientBuilder
             .create()
