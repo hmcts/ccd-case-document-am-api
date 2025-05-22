@@ -56,7 +56,7 @@ public class CaseDocumentControllerAdvice {
     protected ResponseEntity<Object> handleResponseStatusException(final ResponseStatusException exception,
                                                               final HttpServletRequest request) {
 
-        return errorDetailsResponseEntity(exception, exception.getStatus(), getPath(request));
+        return errorDetailsResponseEntity(exception, exception.getStatusCode(), getPath(request));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -153,7 +153,7 @@ public class CaseDocumentControllerAdvice {
     }
 
     private ResponseEntity<Object> errorDetailsResponseEntity(final Exception ex,
-                                                              final HttpStatus httpStatus,
+                                                              final HttpStatusCode httpStatus,
                                                               final String requestPath) {
         logger.error(LOG_STRING, ex);
         final ErrorResponse errorDetails = ErrorResponse.builder()
@@ -180,12 +180,12 @@ public class CaseDocumentControllerAdvice {
     }
 
     private HttpStatus getClientStatusCode(HttpStatusCode httpStatus) {
-        return httpStatus != HttpStatus.UNAUTHORIZED ? HttpStatus.INTERNAL_SERVER_ERROR 
+        return httpStatus != HttpStatus.UNAUTHORIZED ? HttpStatus.INTERNAL_SERVER_ERROR
                 : HttpStatus.valueOf(httpStatus.value());
     }
 
     private HttpStatus getServerStatusCode(HttpStatusCode httpStatus) {
-        return httpStatus == HttpStatus.INTERNAL_SERVER_ERROR ? HttpStatus.BAD_GATEWAY 
+        return httpStatus == HttpStatus.INTERNAL_SERVER_ERROR ? HttpStatus.BAD_GATEWAY
                 : HttpStatus.valueOf(httpStatus.value());
     }
 }

@@ -76,14 +76,14 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
     @Test
     void handleResponseStatusExceptionException() {
         final ResponseStatusException responseStatusException = mock(ResponseStatusException.class);
-        when(responseStatusException.getStatus()).thenReturn(HttpStatus.INTERNAL_SERVER_ERROR);
+        when(responseStatusException.getStatusCode()).thenReturn(HttpStatus.INTERNAL_SERVER_ERROR);
         when(responseStatusException.getMessage()).thenReturn("Internal Server Error");
 
         final ResponseEntity<Object> responseEntity = underTest.handleResponseStatusException(responseStatusException,
                                                                                               request);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCodeValue());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
     }
 
     @Test
@@ -270,7 +270,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
 
     @Test
-    public void handleFeignServerException_shouldSwitch500_502() throws IOException {
+    public void handleFeignServerException_shouldSwitch500_502() {
         FeignException.FeignServerException ex = new FeignException.FeignServerException(
             HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error",
             Request.create(Request.HttpMethod.GET, "Internal Server Error", Map.of(), new byte[0],
@@ -281,7 +281,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
     }
 
     @Test
-    public void handleFeignServerException_shouldReturn5xx() throws IOException {
+    public void handleFeignServerException_shouldReturn5xx() {
         FeignException.FeignServerException ex = new FeignException.FeignServerException(
             HttpStatus.GATEWAY_TIMEOUT.value(), "Gateway Timeout",
             Request.create(Request.HttpMethod.GET, "Gateway Timeout", Map.of(), new byte[0],

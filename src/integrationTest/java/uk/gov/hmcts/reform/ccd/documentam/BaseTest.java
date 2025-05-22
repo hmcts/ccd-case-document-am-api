@@ -11,11 +11,11 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditEntry;
@@ -51,7 +51,7 @@ public class BaseTest {
     public static final String IDAM_MOCK_USER_ID = "445";
     private static final String EXAMPLE_REQUEST_ID = "TEST REQUEST ID";
 
-    @SpyBean
+    @MockitoSpyBean
     @Autowired
     protected AuditRepository auditRepository;
 

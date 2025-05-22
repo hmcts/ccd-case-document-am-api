@@ -2,17 +2,17 @@ package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Either;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.ContentBody;
-import org.apache.http.entity.mime.content.InputStreamBody;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.entity.mime.ContentBody;
+import org.apache.hc.client5.http.entity.mime.InputStreamBody;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.Header;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
@@ -41,7 +41,6 @@ import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -124,14 +123,14 @@ public class DocumentStoreClient {
         }
     }
 
-    @Retryable(value = {HttpServerErrorException.class, SocketTimeoutException.class},
+    @Retryable(retryFor = {HttpServerErrorException.class, SocketTimeoutException.class},
         maxAttemptsExpression = "${retry.maxAttempts}", backoff = @Backoff(delayExpression = "${retry.maxDelay}"))
     public void streamDocumentAsBinary(final UUID documentId, HttpServletResponse httpResponseOut,
                                        Map<String, String> requestHeaders) {
         try {
             HttpGet httpRequest = buildStreamBinaryHttpRequest(documentId, requestHeaders);
-            CloseableHttpResponse httpClientResponse = httpClient.execute(httpRequest);
-            HttpStatus statusCode = HttpStatus.valueOf(httpClientResponse.getStatusLine().getStatusCode());
+            ClassicHttpResponse httpClientResponse = httpClient.executeOpen(null, httpRequest, null);
+            HttpStatus statusCode = HttpStatus.valueOf(httpClientResponse.getCode());
 
             handleDownloadStreamResponse(statusCode, httpClientResponse, httpResponseOut, documentId);
         } catch (IOException exception) {
@@ -167,13 +166,13 @@ public class DocumentStoreClient {
     }
 
     private void handleDownloadStreamResponse(HttpStatus statusCode,
-                                              CloseableHttpResponse httpClientResponse,
+                                              ClassicHttpResponse httpClientResponse,
                                               HttpServletResponse httpResponseOut,
                                               UUID documentId) throws IOException {
         switch (statusCode) {
             case OK, PARTIAL_CONTENT -> {
                 httpResponseOut.setStatus(statusCode.value());
-                mapResponseHeaders(httpClientResponse.getAllHeaders(), httpResponseOut);
+                mapResponseHeaders(httpClientResponse.getHeaders(), httpResponseOut);
 
                 try (InputStream input = httpClientResponse.getEntity().getContent()) {
                     OutputStream output = httpResponseOut.getOutputStream();
@@ -197,7 +196,7 @@ public class DocumentStoreClient {
         }
     }
 
-    private void setCommonRequestHeaders(final HttpRequestBase httpBase) {
+    private void setCommonRequestHeaders(final HttpUriRequestBase httpBase) {
         HttpHeaders headers = securityUtils.serviceAuthorizationHeaders();
         headers.forEach((headerName, headerValues) ->
                             headerValues.forEach(headerValue -> httpBase.addHeader(headerName, headerValue))
@@ -280,9 +279,7 @@ public class DocumentStoreClient {
         bodyMap.set("ttl", getEffectiveTTL());
 
         documentUploadRequest.getFiles()
-            .forEach(file -> {
-                bodyMap.add(Constants.FILES, file.getResource());
-            });
+            .forEach(file -> bodyMap.add(Constants.FILES, file.getResource()));
 
         HttpHeaders headers = prepareRequestHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -312,16 +309,16 @@ public class DocumentStoreClient {
         return headers;
     }
 
-    @Retryable(value = {HttpServerErrorException.class, SocketTimeoutException.class},
+    @Retryable(retryFor = {HttpServerErrorException.class, SocketTimeoutException.class},
         maxAttemptsExpression = "${retry.maxAttempts}",
         backoff = @Backoff(delayExpression = "${retry.maxDelay}"))
     public DmUploadResponse uploadDocumentsAsStream(final DocumentUploadRequest documentUploadRequest) {
         try {
             HttpPost request = buildStreamUploadHttpRequest(documentUploadRequest);
-            HttpResponse httpClientResponse = httpClient.execute(request);
-            HttpStatus statusCode = HttpStatus.valueOf(httpClientResponse.getStatusLine().getStatusCode());
-
-            return handleUploadStreamResponse(statusCode, httpClientResponse);
+            try (ClassicHttpResponse httpClientResponse = httpClient.executeOpen(null, request, null)) {
+                HttpStatus statusCode = HttpStatus.valueOf(httpClientResponse.getCode());
+                return handleUploadStreamResponse(statusCode, httpClientResponse);
+            }
         } catch (IOException exception) {
             log.error("Error occurred", exception);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
@@ -331,23 +328,23 @@ public class DocumentStoreClient {
     }
 
     private DmUploadResponse handleUploadStreamResponse(HttpStatus statusCode,
-                                                        HttpResponse httpClientResponse) throws IOException {
+                                                        ClassicHttpResponse httpClientResponse) throws IOException {
         if (statusCode.is2xxSuccessful()) {
             var responseEntity = httpClientResponse.getEntity();
             if (responseEntity != null) {
                 try (InputStream responseStream = responseEntity.getContent()) {
                     return objectMapper.readValue(responseStream, DmUploadResponse.class);
                 }
-            } else {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Empty response from server");
             }
-        } else if (statusCode.is5xxServerError()) {
-            throw new HttpServerErrorException(statusCode, "Failed to upload document");
-        } else {
-            throw new ResponseStatusException(statusCode, "Failed to upload document");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Empty response from server");
         }
-    }
 
+        if (statusCode.is5xxServerError()) {
+            throw new HttpServerErrorException(statusCode, "Document upload failed due to server error");
+        }
+
+        throw new ResponseStatusException(statusCode, "Document upload failed with status: " + statusCode);
+    }
 
     private HttpPost buildStreamUploadHttpRequest(final DocumentUploadRequest documentUploadRequest)
         throws IOException {
@@ -359,7 +356,7 @@ public class DocumentStoreClient {
         return httpPost;
     }
 
-    public org.apache.http.HttpEntity buildUploadStreamEntity(DocumentUploadRequest documentUploadRequest)
+    public org.apache.hc.core5.http.HttpEntity buildUploadStreamEntity(DocumentUploadRequest documentUploadRequest)
         throws IOException {
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 

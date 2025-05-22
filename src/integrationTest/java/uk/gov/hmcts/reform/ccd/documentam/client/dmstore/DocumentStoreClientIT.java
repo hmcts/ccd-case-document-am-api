@@ -4,12 +4,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -32,10 +32,10 @@ import static org.mockito.Mockito.when;
 @EnableRetry
 public class DocumentStoreClientIT extends BaseTest implements TestFixture {
 
-    @MockBean(name = "restTemplate")
+    @MockitoBean(name = "restTemplate")
     private RestTemplate restTemplate;
 
-    @MockBean
+    @MockitoBean
     private SecurityUtils securityUtils;
 
     @Autowired

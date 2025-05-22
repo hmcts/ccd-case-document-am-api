@@ -1,9 +1,15 @@
 package uk.gov.hmcts.reform.ccd.documentam.configuration;
 
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.core5.util.TimeValue;
+import org.apache.hc.core5.util.Timeout;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +18,6 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PreDestroy;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,31 +100,39 @@ public class ApplicationConfiguration {
         cm = new PoolingHttpClientConnectionManager();
 
         log.info("""
-                HttpClient Configuration:
-                maxTotalHttpClient: {},
-                maxSecondsIdleConnection: {},
-                maxClientPerRoute: {},
-                validateAfterInactivity: {},
-                connectionReadTimeout: {}
-                connectionTimeout: {}""", maxTotalHttpClient, maxSecondsIdleConnection, maxClientPerRoute,
+            HttpClient Configuration:
+            maxTotalHttpClient: {},
+            maxSecondsIdleConnection: {},
+            maxClientPerRoute: {},
+            validateAfterInactivity: {},
+            connectionReadTimeout: {},
+            connectionTimeout: {}""",
+                 maxTotalHttpClient, maxSecondsIdleConnection, maxClientPerRoute,
                  validateAfterInactivity, readTimeout, connectionTimeout);
 
-        cm.setMaxTotal(maxTotalHttpClient);
-        cm.closeIdleConnections(maxSecondsIdleConnection, TimeUnit.SECONDS);
-        cm.setDefaultMaxPerRoute(maxClientPerRoute);
-        cm.setValidateAfterInactivity(validateAfterInactivity);
-        final RequestConfig
-            config =
-            RequestConfig.custom()
-                .setConnectTimeout(connectionTimeout)
-                .setConnectionRequestTimeout(connectionTimeout)
-                .setSocketTimeout(readTimeout)
-                .build();
+        // Configure connection validation and connection timeout at the connection manager level
+        ConnectionConfig connectionConfig = ConnectionConfig.custom()
+            .setValidateAfterInactivity(TimeValue.ofMilliseconds(validateAfterInactivity))
+            .setConnectTimeout(Timeout.ofMilliseconds(connectionTimeout))
+            .build();
 
-        return HttpClientBuilder.create()
+        cm.setDefaultConnectionConfig(connectionConfig);
+        cm.setMaxTotal(maxTotalHttpClient);
+        cm.setDefaultMaxPerRoute(maxClientPerRoute);
+
+        // Close idle connections after maxSecondsIdleConnection
+        cm.closeIdle(TimeValue.ofSeconds(maxSecondsIdleConnection));
+
+        // Configure request-level timeouts (response timeout)
+        RequestConfig requestConfig = RequestConfig.custom()
+            .setResponseTimeout(Timeout.ofMilliseconds(readTimeout))
+            .build();
+
+        return HttpClients.custom()
             .useSystemProperties()
-            .setDefaultRequestConfig(config)
+            .setDefaultRequestConfig(requestConfig)
             .setConnectionManager(cm)
+            .evictIdleConnections(TimeValue.ofSeconds(maxSecondsIdleConnection))
             .build();
     }
 

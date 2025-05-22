@@ -1,13 +1,12 @@
 package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.message.BasicStatusLine;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.BasicHttpEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +24,6 @@ import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,9 +33,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -100,19 +98,18 @@ class DocumentStoreClientStreamingTest {
     @Test
     void testStreamDocumentAsBinary_Success() throws IOException {
         final Map<String, String> requestHeaders = Map.of("Authorization", "Bearer token");
-
-        StatusLine statusLine = new BasicStatusLine(new HttpGet().getProtocolVersion(), 200, "OK");
-        when(httpResponse.getStatusLine()).thenReturn(statusLine);
-        InputStreamEntity entity = new InputStreamEntity(new ByteArrayInputStream("Document content".getBytes()));
+        when(httpResponse.getCode()).thenReturn(200);
+        when(httpResponse.getReasonPhrase()).thenReturn("OK");
+        HttpEntity entity = new BasicHttpEntity(new ByteArrayInputStream("Document content".getBytes()), null);
         when(httpResponse.getEntity()).thenReturn(entity);
 
         when(header1.getName()).thenReturn("Content-Type");
         when(header1.getValue()).thenReturn("application/json");
         when(header2.getName()).thenReturn("X-Custom-Header");
         when(header2.getValue()).thenReturn("custom-value");
-        when(httpResponse.getAllHeaders()).thenReturn(new Header[]{header1, header2});
+        when(httpResponse.getHeaders()).thenReturn(new Header[]{header1, header2});
 
-        when(httpClient.execute(any(HttpGet.class))).thenReturn(httpResponse);
+        when(httpClient.executeOpen(any(), any(HttpGet.class), any())).thenReturn(httpResponse);
 
         documentStoreClient.streamDocumentAsBinary(documentId, httpResponseOut, requestHeaders);
 
@@ -120,11 +117,11 @@ class DocumentStoreClientStreamingTest {
         assertEquals("application/json", httpResponseOut.getHeader(HttpHeaders.CONTENT_TYPE));
         assertEquals("custom-value", httpResponseOut.getHeader("X-Custom-Header"));
 
-        verify(httpClient).execute(httpGetCaptor.capture());
+        verify(httpClient).executeOpen(any(), httpGetCaptor.capture(), any());
         HttpGet capturedHttpGet = httpGetCaptor.getValue();
         assertNotNull(capturedHttpGet);
         assertEquals(String.format("%s/documents/%s/binary", applicationParams.getDocumentURL(), documentId),
-                     capturedHttpGet.getURI().toString()
+                     capturedHttpGet.getPath()
         );
 
         verify(securityUtils).serviceAuthorizationHeaders();
@@ -136,20 +133,22 @@ class DocumentStoreClientStreamingTest {
         final Map<String, String> requestHeaders =
             Map.of("Authorization", "Bearer token","Range", "bytes=0-999");
 
-        StatusLine statusLine =
-            new BasicStatusLine(new HttpGet().getProtocolVersion(), 206,"Partial Content");
-        when(httpResponse.getStatusLine()).thenReturn(statusLine);
-        InputStreamEntity entity =
-            new InputStreamEntity(new ByteArrayInputStream("Partial document content".getBytes()));
+        when(httpResponse.getCode()).thenReturn(206);
+        when(httpResponse.getReasonPhrase()).thenReturn("Partial Content");
+
+        HttpEntity entity = new BasicHttpEntity(
+            new ByteArrayInputStream("Partial document content".getBytes()),
+            null
+        );
         when(httpResponse.getEntity()).thenReturn(entity);
 
         when(header1.getName()).thenReturn("Content-Type");
         when(header1.getValue()).thenReturn("application/json");
         when(header2.getName()).thenReturn("Access-Control-Allow-Headers");
         when(header2.getValue()).thenReturn("Accept-Ranges");
-        when(httpResponse.getAllHeaders()).thenReturn(new Header[]{header1, header2});
+        when(httpResponse.getHeaders()).thenReturn(new Header[]{header1, header2});
 
-        when(httpClient.execute(any(HttpGet.class))).thenReturn(httpResponse);
+        when(httpClient.executeOpen(any(), any(HttpGet.class), any())).thenReturn(httpResponse);
 
         documentStoreClient.streamDocumentAsBinary(documentId, httpResponseOut, requestHeaders);
 
@@ -157,12 +156,11 @@ class DocumentStoreClientStreamingTest {
         assertEquals("application/json", httpResponseOut.getHeader(HttpHeaders.CONTENT_TYPE));
         assertEquals("Accept-Ranges", httpResponseOut.getHeader("Access-Control-Allow-Headers"));
 
-        verify(httpClient).execute(httpGetCaptor.capture());
+        verify(httpClient).executeOpen(any(), httpGetCaptor.capture(), any());
         HttpGet capturedHttpGet = httpGetCaptor.getValue();
         assertNotNull(capturedHttpGet);
         assertEquals(String.format("%s/documents/%s/binary", applicationParams.getDocumentURL(), documentId),
-                     capturedHttpGet.getURI().toString()
-        );
+                     capturedHttpGet.getPath());
 
         verify(securityUtils).serviceAuthorizationHeaders();
         verify(securityUtils).getUserInfo();
@@ -172,10 +170,9 @@ class DocumentStoreClientStreamingTest {
     void testStreamDocumentAsBinary_NotFound() throws IOException {
         final Map<String, String> requestHeaders = Collections.singletonMap("Authorization", "Bearer token");
 
-        StatusLine statusLine = new BasicStatusLine(new HttpGet().getProtocolVersion(), 404,
-                                                    "Internal server error");
-        when(httpResponse.getStatusLine()).thenReturn(statusLine);
-        when(httpClient.execute(any(HttpGet.class))).thenReturn(httpResponse);
+        when(httpResponse.getCode()).thenReturn(404);
+        when(httpResponse.getReasonPhrase()).thenReturn("Internal server error");
+        when(httpClient.executeOpen(any(), any(HttpGet.class), any())).thenReturn(httpResponse);
 
         when(header1.getName()).thenReturn("Content-Type");
         when(header1.getValue()).thenReturn("application/json");
@@ -184,11 +181,11 @@ class DocumentStoreClientStreamingTest {
                      () -> documentStoreClient.streamDocumentAsBinary(documentId, httpResponseOut, requestHeaders)
         );
 
-        verify(httpClient).execute(httpGetCaptor.capture());
+        verify(httpClient).executeOpen(any(), httpGetCaptor.capture(), any());
         HttpGet capturedHttpGet = httpGetCaptor.getValue();
         assertNotNull(capturedHttpGet);
         assertEquals(String.format("%s/documents/%s/binary", applicationParams.getDocumentURL(), documentId),
-                     capturedHttpGet.getURI().toString()
+                     capturedHttpGet.getPath()
         );
         verify(securityUtils).serviceAuthorizationHeaders();
     }
@@ -197,25 +194,24 @@ class DocumentStoreClientStreamingTest {
     void testStreamDocumentAsBinary_ServerError() throws IOException {
         final Map<String, String> requestHeaders = Collections.singletonMap("Authorization", "Bearer token");
 
-        StatusLine statusLine = new BasicStatusLine(new HttpGet().getProtocolVersion(), 503,
-                                                    "Service Unavailable");
-        when(httpResponse.getStatusLine()).thenReturn(statusLine);
+        when(httpResponse.getCode()).thenReturn(503);
+        when(httpResponse.getReasonPhrase()).thenReturn("Service Unavailable");
 
         when(header1.getName()).thenReturn("Content-Type");
         when(header1.getValue()).thenReturn("application/json");
-        when(httpResponse.getAllHeaders()).thenReturn(new Header[]{header1});
+        when(httpResponse.getHeaders()).thenReturn(new Header[]{header1});
 
-        when(httpClient.execute(any(HttpGet.class))).thenReturn(httpResponse);
+        when(httpClient.executeOpen(any(), any(HttpGet.class), any())).thenReturn(httpResponse);
 
         assertThrows(HttpServerErrorException.class,
                      () -> documentStoreClient.streamDocumentAsBinary(documentId, httpResponseOut, requestHeaders)
         );
 
-        verify(httpClient).execute(httpGetCaptor.capture());
+        verify(httpClient).executeOpen(any(), httpGetCaptor.capture(), any());
         HttpGet capturedHttpGet = httpGetCaptor.getValue();
         assertNotNull(capturedHttpGet);
         assertEquals(String.format("%s/documents/%s/binary", applicationParams.getDocumentURL(), documentId),
-                     capturedHttpGet.getURI().toString()
+                     capturedHttpGet.getPath()
         );
 
         verify(securityUtils).serviceAuthorizationHeaders();
@@ -226,25 +222,24 @@ class DocumentStoreClientStreamingTest {
     void testStreamDocumentAsBinary_DefaultError() throws IOException {
         final Map<String, String> requestHeaders = Map.of("Authorization", "Bearer token");
 
-        StatusLine statusLine = new BasicStatusLine(new HttpGet().getProtocolVersion(), 403,
-                                                    "Service Unavailable");
-        when(httpResponse.getStatusLine()).thenReturn(statusLine);
+        when(httpResponse.getCode()).thenReturn(403);
+        when(httpResponse.getReasonPhrase()).thenReturn("Service Unavailable");
 
         when(header1.getName()).thenReturn("Content-Type");
         when(header1.getValue()).thenReturn("application/json");
-        when(httpResponse.getAllHeaders()).thenReturn(new Header[]{header1});
+        when(httpResponse.getHeaders()).thenReturn(new Header[]{header1});
 
-        when(httpClient.execute(any(HttpGet.class))).thenReturn(httpResponse);
+        when(httpClient.executeOpen(any(), any(HttpGet.class), any())).thenReturn(httpResponse);
 
         assertThrows(ResponseStatusException.class,
                      () -> documentStoreClient.streamDocumentAsBinary(documentId, httpResponseOut, requestHeaders)
         );
 
-        verify(httpClient).execute(httpGetCaptor.capture());
+        verify(httpClient).executeOpen(any(), httpGetCaptor.capture(), any());
         HttpGet capturedHttpGet = httpGetCaptor.getValue();
         assertNotNull(capturedHttpGet);
         assertEquals(String.format("%s/documents/%s/binary", applicationParams.getDocumentURL(), documentId),
-                     capturedHttpGet.getURI().toString()
+                     capturedHttpGet.getPath()
         );
 
         verify(securityUtils).serviceAuthorizationHeaders();
@@ -255,15 +250,14 @@ class DocumentStoreClientStreamingTest {
     void testStreamDocumentAsBinary_IOError() throws IOException {
         final Map<String, String> requestHeaders = Map.of("Authorization", "Bearer token");
 
-        StatusLine statusLine = new BasicStatusLine(new HttpGet().getProtocolVersion(), 200,
-                                                    "OK");
-        when(httpResponse.getStatusLine()).thenReturn(statusLine);
+        when(httpResponse.getCode()).thenReturn(200);
+        when(httpResponse.getReasonPhrase()).thenReturn("OK");
 
         when(header1.getName()).thenReturn("Content-Type");
         when(header1.getValue()).thenReturn("application/json");
         when(header2.getName()).thenReturn("X-Custom-Header");
         when(header2.getValue()).thenReturn("custom-value");
-        when(httpResponse.getAllHeaders()).thenReturn(new Header[]{header1, header2});
+        when(httpResponse.getHeaders()).thenReturn(new Header[]{header1, header2});
 
         HttpEntity httpEntity = mock(HttpEntity.class);
         when(httpResponse.getEntity()).thenReturn(httpEntity);
@@ -271,7 +265,7 @@ class DocumentStoreClientStreamingTest {
         InputStream mockInputStream = mock(InputStream.class);
         doThrow(new IOException("Mocked IOException")).when(mockInputStream).read(any(byte[].class));
 
-        when(httpClient.execute(any(HttpGet.class))).thenReturn(httpResponse);
+        when(httpClient.executeOpen(any(), any(HttpGet.class), any())).thenReturn(httpResponse);
         when(httpResponse.getEntity().getContent()).thenReturn(mockInputStream);
 
         ResponseStatusException thrown = assertThrows(
@@ -282,14 +276,14 @@ class DocumentStoreClientStreamingTest {
             )
         );
         assertNotNull(thrown.getCause());
-        assertTrue(thrown.getCause() instanceof IOException);
+        assertInstanceOf(IOException.class, thrown.getCause());
         assertEquals("Mocked IOException", thrown.getCause().getMessage());
 
-        verify(httpClient).execute(httpGetCaptor.capture());
+        verify(httpClient).executeOpen(any(), httpGetCaptor.capture(), any());
         HttpGet capturedHttpGet = httpGetCaptor.getValue();
         assertNotNull(capturedHttpGet);
         assertEquals(String.format("%s/documents/%s/binary", applicationParams.getDocumentURL(), documentId),
-                     capturedHttpGet.getURI().toString()
+                     capturedHttpGet.getPath()
         );
 
         verify(securityUtils).serviceAuthorizationHeaders();
