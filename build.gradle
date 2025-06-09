@@ -26,7 +26,7 @@ ext {
   junit               = '5.11.4'
   junitPlatform       = '1.11.4'
   lombok              = '1.18.36'
-  tomcatEmbedded      = '10.1.34'
+  tomcatEmbedded      = '10.1.40'
   groovy              = '4.0.25'
 
   // TEST VERSIONS
