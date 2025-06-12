@@ -6,7 +6,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.retry.annotation.EnableRetry;
 
 @SpringBootApplication
-@EnableFeignClients
+@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.idam"})
 @EnableRetry
 @SuppressWarnings("checkstyle:HideUtilityClassConstructor")
 public class Application {

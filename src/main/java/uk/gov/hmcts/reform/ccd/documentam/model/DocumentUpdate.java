@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.ccd.documentam.model;
 
 import java.util.Map;
 import java.util.UUID;
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

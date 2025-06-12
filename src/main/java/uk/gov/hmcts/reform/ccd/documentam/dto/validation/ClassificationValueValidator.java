@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.ccd.documentam.dto.validation;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;

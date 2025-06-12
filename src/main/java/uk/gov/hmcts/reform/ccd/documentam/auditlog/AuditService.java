@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
