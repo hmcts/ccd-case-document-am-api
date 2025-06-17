@@ -334,7 +334,7 @@ dependencies {
   testImplementation libraries.junit5
 
   testImplementation group: 'com.github.hmcts', name: 'befta-fw', version: '9.2.1'
-  testImplementation group: 'com.github.hmcts', name: 'ccd-test-definitions', version: '7.25.0'
+  testImplementation group: 'com.github.hmcts', name: 'ccd-test-definitions', version: '7.25.1'
   testImplementation group: 'com.github.hmcts', name: 'fortify-client', version: '1.4.6', classifier: 'all'
   testImplementation group: 'net.javacrumbs.json-unit', name: 'json-unit-assertj', version: '2.27.0'
   testImplementation group: 'org.assertj', name: 'assertj-vavr', version: '0.4.2'

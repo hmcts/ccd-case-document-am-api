@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.controller.endpoints;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.client.datastore.CaseDataStoreClient;
@@ -38,12 +40,12 @@ import uk.gov.hmcts.reform.ccd.documentam.service.impl.DocumentManagementService
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -54,6 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.anyString;
@@ -81,12 +84,12 @@ class CaseDocumentAmControllerTest implements TestFixture {
 
     private static final Document DOCUMENT_WITH_FUTURE_TTL = Document.builder()
             .originalDocumentName("test.png")
-            .ttl(Date.from(LocalDateTime.now().plus(6, ChronoUnit.HOURS).toInstant(ZoneOffset.UTC)))
+            .ttl(Date.from(LocalDateTime.now().plusHours(6).toInstant(ZoneOffset.UTC)))
             .build();
 
     private static final Document DOCUMENT_WITH_PAST_TTL = Document.builder()
             .originalDocumentName("test.png")
-            .ttl(Date.from(LocalDateTime.now().minus(6, ChronoUnit.HOURS).toInstant(ZoneOffset.UTC)))
+            .ttl(Date.from(LocalDateTime.now().minusHours(6).toInstant(ZoneOffset.UTC)))
             .build();
 
     private static final Document DOCUMENT_WITH_CASE_ID = Document.builder()
@@ -117,11 +120,15 @@ class CaseDocumentAmControllerTest implements TestFixture {
     private BindingResult bindingResult;
     @Mock
     AuthorisedServices serviceConfig;
+    @Mock
+    private ApplicationParams applicationParams;
+    @Mock
+    private HttpServletResponse httpResponse;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        testee = new CaseDocumentAmController(documentManagementService, securityUtils);
+        testee = new CaseDocumentAmController(documentManagementService, securityUtils, applicationParams);
         when(securityUtils.getServiceNameFromS2SToken(TEST_S2S_TOKEN)).thenReturn(SERVICE_NAME_XUI_WEBAPP);
         doReturn(DOCUMENT_WITH_FUTURE_TTL).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
     }
@@ -330,6 +337,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
     @Test
     @DisplayName("should get 200 document binary content")
     void shouldGetDocumentBinaryContent() {
+        doReturn(false).when(applicationParams).isStreamDownloadEnabled();
         doNothing().when(documentManagementService)
             .checkUserPermission(DOCUMENT.getCaseId(),
                                  MATCHED_DOCUMENT_ID,
@@ -347,7 +355,8 @@ class CaseDocumentAmControllerTest implements TestFixture {
             .when(documentManagementService).getDocumentBinaryContent(MATCHED_DOCUMENT_ID);
 
         ResponseEntity<ByteArrayResource> response =
-            testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN);
+            testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, null,
+                                                        TEST_S2S_TOKEN, Map.of());
 
         assertAll(
             () -> verify(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID),
@@ -358,8 +367,43 @@ class CaseDocumentAmControllerTest implements TestFixture {
     }
 
     @Test
-    void shouldGetDocumentBinaryContentWithValidCaseId() {
+    @DisplayName("should stream 200 document binary content")
+    void shouldStreamDocumentBinaryContent() {
+        doReturn(true).when(applicationParams).isStreamDownloadEnabled();
+        doNothing().when(documentManagementService)
+            .checkUserPermission(DOCUMENT.getCaseId(),
+                                 MATCHED_DOCUMENT_ID,
+                                 Permission.READ,
+                                 USER_PERMISSION_ERROR,
+                                 MATCHED_DOCUMENT_ID.toString());
+        doReturn(AuthorisedService.builder().build()).when(documentManagementService)
+            .checkServicePermission(DOCUMENT.getCaseTypeId(),
+                                    DOCUMENT.getJurisdictionId(),
+                                    SERVICE_NAME_XUI_WEBAPP,
+                                    Permission.READ,
+                                    SERVICE_PERMISSION_ERROR,
+                                    MATCHED_DOCUMENT_ID.toString());
 
+        Map<String, String> headers = new HashMap<>();
+        doNothing().when(documentManagementService)
+            .streamDocumentBinaryContent(MATCHED_DOCUMENT_ID, httpResponse, headers);
+
+        ResponseEntity<ByteArrayResource> response =
+            testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, httpResponse,
+                                                        TEST_S2S_TOKEN, headers);
+
+        assertAll(
+            () -> verify(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID),
+            () -> verify(documentManagementService, times(1))
+                .streamDocumentBinaryContent(MATCHED_DOCUMENT_ID, httpResponse, headers),
+            () -> assertThat(response.getStatusCode(), is(HttpStatus.OK)),
+            () -> assertNull(response.getBody())
+        );
+    }
+
+    @Test
+    void shouldGetDocumentBinaryContentWithValidCaseId() {
+        doReturn(false).when(applicationParams).isStreamDownloadEnabled();
         doReturn(DOCUMENT_WITH_CASE_ID).when(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID);
         doNothing().when(documentManagementService)
                 .checkUserPermission(
@@ -380,7 +424,8 @@ class CaseDocumentAmControllerTest implements TestFixture {
                 .when(documentManagementService).getDocumentBinaryContent(MATCHED_DOCUMENT_ID);
 
         final ResponseEntity<ByteArrayResource> response =
-                testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN);
+                testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, null,
+                                                            TEST_S2S_TOKEN, Map.of());
 
         assertAll(
             () -> verify(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID),
@@ -392,6 +437,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
 
     @Test
     void shouldGetValidDocumentBinaryContentWithoutCallingDatastoreWhenDocumentMetadataHasTTLInFutureButNoCaseId() {
+        doReturn(false).when(applicationParams).isStreamDownloadEnabled();
         doReturn(AuthorisedService.builder().build()).when(documentManagementService)
                 .checkServicePermission(
                         DOCUMENT_WITH_FUTURE_TTL.getCaseTypeId(),
@@ -404,7 +450,8 @@ class CaseDocumentAmControllerTest implements TestFixture {
         doReturn(setDocumentBinaryContent("OK"))
                 .when(documentManagementService).getDocumentBinaryContent(MATCHED_DOCUMENT_ID);
         final ResponseEntity<ByteArrayResource> response =
-                testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN);
+                testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, null,
+                                                            TEST_S2S_TOKEN, Map.of());
 
         assertAll(
             () -> verify(documentManagementService).getDocumentMetadata(MATCHED_DOCUMENT_ID),
@@ -422,6 +469,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
 
     @Test
     void shouldThrowForbiddenExceptionWhenRetrievingDocumentBinaryContentWhenDocumentMetadataHasTTLInPastButNoCaseId() {
+        doReturn(false).when(applicationParams).isStreamDownloadEnabled();
         doReturn(AuthorisedService.builder().build()).when(documentManagementService)
                 .checkServicePermission(
                         DOCUMENT_WITH_FUTURE_TTL.getCaseTypeId(),
@@ -436,7 +484,8 @@ class CaseDocumentAmControllerTest implements TestFixture {
 
         ForbiddenException thrown = assertThrows(
             ForbiddenException.class,
-            () -> testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN),
+            () -> testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, null,
+                                                              TEST_S2S_TOKEN, Map.of()),
             "Failed to throw ForbiddenException"
         );
 
@@ -454,6 +503,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
 
     @Test
     void shouldThrowForbiddenExceptionWhenRetrievingDocumentBinaryContentWhenDocumentMetadataHasNullTTL() {
+        doReturn(false).when(applicationParams).isStreamDownloadEnabled();
         doReturn(AuthorisedService.builder().build()).when(documentManagementService)
                 .checkServicePermission(
                         DOCUMENT_WITH_FUTURE_TTL.getCaseTypeId(),
@@ -468,7 +518,8 @@ class CaseDocumentAmControllerTest implements TestFixture {
 
         ForbiddenException thrown = assertThrows(
             ForbiddenException.class,
-            () -> testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN),
+            () -> testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, null,
+                                                              TEST_S2S_TOKEN, Map.of()),
             "Failed to throw ForbiddenException"
         );
 
@@ -487,6 +538,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
     @Test
     @DisplayName("should throw 403 forbidden  when the requested document does not have read permission")
     void shouldThrowForbiddenWhenDocumentDoesNotHaveReadPermission() {
+        doReturn(false).when(applicationParams).isStreamDownloadEnabled();
         doReturn(AuthorisedService.builder().build()).when(documentManagementService)
             .checkServicePermission(DOCUMENT.getCaseTypeId(),
                                     DOCUMENT.getJurisdictionId(),
@@ -498,13 +550,15 @@ class CaseDocumentAmControllerTest implements TestFixture {
             .getDocumentBinaryContent(MATCHED_DOCUMENT_ID);
 
         assertThatExceptionOfType(ForbiddenException.class)
-            .isThrownBy(() -> testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN));
+            .isThrownBy(() -> testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, null,
+                                                                          TEST_S2S_TOKEN,Map.of()));
     }
 
 
     @Test
     @DisplayName("should throw 403 forbidden when the requested document does not match with available doc")
     void shouldThrowForbiddenWhenDocumentDoesNotMatch() {
+        doReturn(false).when(applicationParams).isStreamDownloadEnabled();
         Optional<DocumentPermissions> documentPermissions = Optional.of(getDocumentPermissions(
             Arrays.asList(
                 Permission.CREATE,
@@ -525,12 +579,14 @@ class CaseDocumentAmControllerTest implements TestFixture {
                                     MATCHED_DOCUMENT_ID.toString());
 
         assertThatExceptionOfType(ForbiddenException.class)
-            .isThrownBy(() -> testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN));
+            .isThrownBy(() -> testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, null,
+                                                                          TEST_S2S_TOKEN, Map.of()));
     }
 
     @Test
     @DisplayName("should throw 403 forbidden when the service is not authorised to access")
     void shouldThrowForbiddenWhenServiceIsNotAuthorised() {
+        doReturn(false).when(applicationParams).isStreamDownloadEnabled();
         Optional<DocumentPermissions> documentPermissions = Optional.of(getDocumentPermissions(
             Arrays.asList(
                 Permission.CREATE,
@@ -551,7 +607,8 @@ class CaseDocumentAmControllerTest implements TestFixture {
                                     MATCHED_DOCUMENT_ID.toString());
 
         assertThatExceptionOfType(ForbiddenException.class)
-            .isThrownBy(() -> testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN));
+            .isThrownBy(() -> testee.getDocumentBinaryContentByDocumentId(MATCHED_DOCUMENT_ID, null,
+                                                                          TEST_S2S_TOKEN, Map.of()));
     }
 
     @Test
@@ -713,6 +770,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
     @Test
     @DisplayName("Should go through happy path")
     void uploadDocuments_HappyPath() {
+        doReturn(false).when(applicationParams).isStreamUploadEnabled();
 
         UploadResponse mockResponse = new UploadResponse(List.of(Document.builder().build()));
 
@@ -746,7 +804,46 @@ class CaseDocumentAmControllerTest implements TestFixture {
     }
 
     @Test
+    @DisplayName("Should go through happy path streaming")
+    void uploadDocumentsAsStreaming_HappyPath() {
+        doReturn(true).when(applicationParams).isStreamUploadEnabled();
+
+        UploadResponse mockResponse = new UploadResponse(List.of(Document.builder().build()));
+
+        doReturn(AuthorisedService.builder().build()).when(documentManagementService).checkServicePermission(
+            eq(CASE_TYPE_ID_VALUE),
+            eq(JURISDICTION_ID_VALUE),
+            eq(SERVICE_NAME_XUI_WEBAPP),
+            eq(Permission.CREATE),
+            eq(SERVICE_PERMISSION_ERROR),
+            anyString()
+        );
+        List<MultipartFile> multipartFiles = generateMultipartList();
+
+
+        final DocumentUploadRequest documentUploadRequest = new DocumentUploadRequest(
+            multipartFiles,
+            Classification.PUBLIC.name(),
+            CASE_TYPE_ID_VALUE,
+            JURISDICTION_ID_VALUE
+        );
+
+        doReturn(mockResponse).when(documentManagementService).uploadStreamDocuments(documentUploadRequest);
+
+        UploadResponse finalResponse = testee.uploadDocuments(
+            documentUploadRequest,
+            bindingResult,
+            TEST_S2S_TOKEN
+        );
+
+        assertEquals(finalResponse, mockResponse);
+        verify(documentManagementService, times(1)).uploadStreamDocuments(documentUploadRequest);
+    }
+
+    @Test
     void testShouldRaiseExceptionWhenBindingResultHasErrorsDuringUploadDocuments() {
+        doReturn(false).when(applicationParams).isStreamUploadEnabled();
+
         doReturn(true).when(bindingResult).hasErrors();
 
         final DocumentUploadRequest documentUploadRequest = new DocumentUploadRequest(
@@ -826,7 +923,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
             testee.generateHashCode(MATCHED_DOCUMENT_ID, TEST_S2S_TOKEN);
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals("hashToken", responseEntity.getBody().getHashToken());
+        assertEquals("hashToken", Objects.requireNonNull(responseEntity.getBody()).getHashToken());
     }
 
     @Test
