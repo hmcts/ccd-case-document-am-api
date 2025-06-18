@@ -260,7 +260,7 @@ repositories {
   mavenLocal()
   mavenCentral()
   maven {
-    url = "https://jitpack.io"
+    url = 'https://pkgs.dev.azure.com/hmcts/Artifacts/_packaging/hmcts-lib/maven/v1'
   }
 }
 
@@ -306,8 +306,8 @@ dependencies {
 
   implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.1.8'
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.6'
-  implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.3'
-  implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '5.2.0'
+  implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.4'
+  implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '5.3.2'
   implementation group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: '4.9.0'
   implementation group: 'com.microsoft.azure', name: 'applicationinsights-spring-boot-starter', version: '2.6.4'
   implementation group: 'commons-beanutils', name: 'commons-beanutils', version: '1.10.0'
@@ -333,9 +333,9 @@ dependencies {
 
   testImplementation libraries.junit5
 
-  testImplementation group: 'com.github.hmcts', name: 'befta-fw', version: '9.2.1'
+  testImplementation group: 'com.github.hmcts', name: 'befta-fw', version: '9.2.4'
   testImplementation group: 'com.github.hmcts', name: 'ccd-test-definitions', version: '7.25.0'
-  testImplementation group: 'com.github.hmcts', name: 'fortify-client', version: '1.4.6', classifier: 'all'
+  testImplementation group: 'com.github.hmcts', name: 'fortify-client', version: '1.4.9', classifier: 'all'
   testImplementation group: 'net.javacrumbs.json-unit', name: 'json-unit-assertj', version: '2.27.0'
   testImplementation group: 'org.assertj', name: 'assertj-vavr', version: '0.4.2'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
