@@ -1,6 +1,11 @@
 package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
 import io.vavr.control.Either;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +21,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
@@ -31,12 +38,20 @@ import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.vavr.api.VavrAssertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -53,6 +68,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_DIS
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_TYPE;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DATA_SOURCE;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.ORIGINAL_FILE_NAME;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.RESOURCE_NOT_FOUND;
 
 @ExtendWith(MockitoExtension.class)
 class DocumentStoreClientTest implements TestFixture {
@@ -70,8 +86,24 @@ class DocumentStoreClientTest implements TestFixture {
     @InjectMocks
     private DocumentStoreClient underTest;
 
+    @Mock
+    private CloseableHttpClient httpClient;
+
+    @Mock
+    private HttpServletResponse httpResponseOut;
+
+    @Mock
+    private ClassicHttpResponse httpClientResponse;
+
+    private UUID documentId;
+    private Map<String, String> requestHeaders;
+
     @BeforeEach
     void prepare() {
+        documentId = UUID.randomUUID();
+        requestHeaders = new HashMap<>();
+        requestHeaders.put("Authorization", "Bearer token");
+
         final HttpHeaders authHeaders = new HttpHeaders();
         authHeaders.add(Constants.SERVICE_AUTHORIZATION, "service_token");
 
@@ -181,7 +213,8 @@ class DocumentStoreClientTest implements TestFixture {
         // THEN
         assertThat(responseEntity)
             .isNotNull()
-            .satisfies(entity -> assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST));
+            .satisfies(entity -> assertThat(entity.getStatusCode())
+                .isEqualTo(HttpStatus.BAD_REQUEST));
 
         verifyRestExchangeByteArray();
     }
@@ -385,8 +418,148 @@ class DocumentStoreClientTest implements TestFixture {
             .isNotNull()
             .satisfies(entity -> {
                 assertThat(entity.getEmbedded().getDocuments().size()).isEqualTo(1);
-                assertThat(entity.getEmbedded().getDocuments().get(0)).isEqualTo(document);
-            });;
+                assertThat(entity.getEmbedded().getDocuments().getFirst()).isEqualTo(document);
+            });
+    }
+
+    @Test
+    void shouldThrowResponseStatusExceptionForIOException() throws IOException {
+        when(httpClient.executeOpen(eq(null), any(HttpGet.class), eq(null)))
+            .thenThrow(new IOException("Connection failed"));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+            underTest.streamDocumentAsBinary(documentId, httpResponseOut, requestHeaders)
+        );
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
+        assertEquals("Error occurred while processing the request", exception.getReason());
+        assertInstanceOf(IOException.class, exception.getCause());
+
+        verify(httpClient).executeOpen(eq(null), any(HttpGet.class), eq(null));
+    }
+
+    @Test
+    void shouldThrowResponseStatusExceptionForBadRequestStatus() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.BAD_REQUEST.value());
+        when(httpClient.executeOpen(eq(null), any(HttpGet.class), eq(null))).thenReturn(httpClientResponse);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+            underTest.streamDocumentAsBinary(documentId, httpResponseOut, requestHeaders)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        Assertions.assertNotNull(exception.getReason());
+        assertTrue(exception.getReason().contains("Failed to retrieve document with ID: " + documentId));
+
+        verify(httpClient).executeOpen(eq(null), any(HttpGet.class), eq(null));
+    }
+
+
+    @Test
+    void shouldThrowResponseStatusExceptionForUnauthorizedStatus() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNAUTHORIZED.value());
+        when(httpClient.executeOpen(eq(null), any(HttpGet.class), eq(null))).thenReturn(httpClientResponse);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+            underTest.streamDocumentAsBinary(documentId, httpResponseOut, requestHeaders)
+        );
+
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
+        Assertions.assertNotNull(exception.getReason());
+        assertTrue(exception.getReason().contains("Failed to retrieve document with ID: " + documentId));
+
+        verify(httpClient).executeOpen(eq(null), any(HttpGet.class), eq(null));
+    }
+
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenDocumentNotFound() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.NOT_FOUND.value());
+        when(httpClient.executeOpen(eq(null), any(HttpGet.class), eq(null))).thenReturn(httpClientResponse);
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () ->
+            underTest.streamDocumentAsBinary(documentId, httpResponseOut, requestHeaders)
+        );
+
+        assertTrue(exception.getMessage().contains(documentId.toString()));
+        assertTrue(exception.getMessage().contains(RESOURCE_NOT_FOUND));
+
+        verify(httpClient).executeOpen(eq(null), any(HttpGet.class), eq(null));
+    }
+
+    @Test
+    void shouldThrowHttpServerErrorExceptionForInternalServerError() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        when(httpClient.executeOpen(eq(null), any(HttpGet.class), eq(null))).thenReturn(httpClientResponse);
+
+        HttpServerErrorException exception = assertThrows(HttpServerErrorException.class, () ->
+            underTest.streamDocumentAsBinary(documentId, httpResponseOut, requestHeaders)
+        );
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
+        assertTrue(exception.getMessage().contains("Failed to retrieve document with ID: " + documentId));
+
+        verify(httpClient).executeOpen(eq(null), any(HttpGet.class), eq(null));
+    }
+
+    @Test
+    void shouldThrowHttpServerErrorExceptionForBadGateway() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.BAD_GATEWAY.value());
+        when(httpClient.executeOpen(eq(null), any(HttpGet.class), eq(null))).thenReturn(httpClientResponse);
+
+        HttpServerErrorException exception = assertThrows(HttpServerErrorException.class, () ->
+            underTest.streamDocumentAsBinary(documentId, httpResponseOut, requestHeaders)
+        );
+
+        assertEquals(HttpStatus.BAD_GATEWAY, exception.getStatusCode());
+        assertTrue(exception.getMessage().contains("Failed to retrieve document with ID: " + documentId));
+
+        verify(httpClient).executeOpen(eq(null), any(HttpGet.class), eq(null));
+    }
+
+    @Test
+    void shouldThrowHttpServerErrorExceptionForServiceUnavailable() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.SERVICE_UNAVAILABLE.value());
+        when(httpClient.executeOpen(eq(null), any(HttpGet.class), eq(null))).thenReturn(httpClientResponse);
+
+        HttpServerErrorException exception = assertThrows(HttpServerErrorException.class, () ->
+            underTest.streamDocumentAsBinary(documentId, httpResponseOut, requestHeaders)
+        );
+
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
+        assertTrue(exception.getMessage().contains("Failed to retrieve document with ID: " + documentId));
+
+        verify(httpClient).executeOpen(eq(null), any(HttpGet.class), eq(null));
+    }
+
+    @Test
+    void shouldThrowHttpServerErrorExceptionForGatewayTimeout() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.GATEWAY_TIMEOUT.value());
+        when(httpClient.executeOpen(eq(null), any(HttpGet.class), eq(null))).thenReturn(httpClientResponse);
+
+        HttpServerErrorException exception = assertThrows(HttpServerErrorException.class, () ->
+            underTest.streamDocumentAsBinary(documentId, httpResponseOut, requestHeaders)
+        );
+
+        assertEquals(HttpStatus.GATEWAY_TIMEOUT, exception.getStatusCode());
+        assertTrue(exception.getMessage().contains("Failed to retrieve document with ID: " + documentId));
+
+        verify(httpClient).executeOpen(eq(null), any(HttpGet.class), eq(null));
+    }
+
+    @Test
+    void shouldThrowResponseStatusExceptionForForbiddenStatus() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.FORBIDDEN.value());
+        when(httpClient.executeOpen(eq(null), any(HttpGet.class), eq(null))).thenReturn(httpClientResponse);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+            underTest.streamDocumentAsBinary(documentId, httpResponseOut, requestHeaders)
+        );
+
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatusCode());
+        Assertions.assertNotNull(exception.getReason());
+        assertTrue(exception.getReason().contains("Failed to retrieve document with ID: " + documentId));
+
+        verify(httpClient).executeOpen(eq(null), any(HttpGet.class), eq(null));
     }
 
 }
