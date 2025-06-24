@@ -663,6 +663,53 @@ class DocumentManagementServiceImplTest implements TestFixture {
     }
 
     @Test
+    void uploadStreamDocuments_HappyPath() {
+        final Document document = Document.builder()
+            .size(1000L)
+            .mimeType(MIME_TYPE)
+            .originalDocumentName(ORIGINAL_DOCUMENT_NAME)
+            .classification(Classification.PUBLIC)
+            .links(TestFixture.getLinks())
+            .build();
+
+        final DmUploadResponse dmUploadResponse = DmUploadResponse.builder()
+            .embedded(DmUploadResponse.Embedded.builder().documents(List.of(document)).build())
+            .build();
+
+        stubGetSalt();
+        doReturn(dmUploadResponse).when(documentStoreClient).uploadDocumentsAsStream(any(DocumentUploadRequest.class));
+
+        final String expectedHash = ApplicationUtils
+            .generateHashCode(SALT.concat(DOCUMENT_ID.toString()
+                                              .concat(JURISDICTION_ID_VALUE)
+                                              .concat(CASE_TYPE_ID_VALUE)));
+
+        final DocumentUploadRequest uploadRequest = new DocumentUploadRequest(
+            List.of(new MockMultipartFile("afile", "some".getBytes())),
+            Classification.PUBLIC.name(),
+            CASE_TYPE_ID_VALUE,
+            JURISDICTION_ID_VALUE
+        );
+
+        final UploadResponse response = sut.uploadStreamDocuments(uploadRequest);
+
+        assertThat(response.getDocuments())
+            .hasSize(1)
+            .first()
+            .satisfies(doc -> {
+                assertThat(doc.getClassification()).isEqualTo(Classification.PUBLIC);
+                assertThat(doc.getSize()).isEqualTo(1000);
+                assertThat(doc.getMimeType()).isEqualTo(MIME_TYPE);
+                assertThat(doc.getOriginalDocumentName()).isEqualTo(ORIGINAL_DOCUMENT_NAME);
+                assertThat(doc.getHashToken()).isEqualTo(expectedHash);
+                assertThat(doc.getLinks().binary.href).isEqualTo(BINARY_LINK);
+                assertThat(doc.getLinks().self.href).isEqualTo(SELF_LINK);
+            });
+
+        verify(documentStoreClient).uploadDocumentsAsStream(uploadRequest);
+    }
+
+    @Test
     @SuppressWarnings("ConstantConditions")
     void testUploadDocumentsWhenDmUploadResponseIsNull() {
         final DmUploadResponse dmUploadResponse = null;
@@ -683,6 +730,29 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .satisfies(x -> assertThat(x.getDocuments()).isEmpty());
 
         verify(documentStoreClient).uploadDocuments(uploadRequest);
+    }
+
+    @Test
+    @SuppressWarnings("ConstantConditions")
+    void testUploadDocumentsAsStreamWhenDmUploadResponseIsNull() {
+        final DmUploadResponse dmUploadResponse = null;
+
+        doReturn(dmUploadResponse).when(documentStoreClient).uploadDocumentsAsStream(any(DocumentUploadRequest.class));
+
+        final DocumentUploadRequest uploadRequest = new DocumentUploadRequest(
+            List.of(new MockMultipartFile("afile", "some".getBytes())),
+            Classification.PUBLIC.name(),
+            CASE_TYPE_ID_VALUE,
+            JURISDICTION_ID_VALUE
+        );
+
+        final UploadResponse response = sut.uploadStreamDocuments(uploadRequest);
+
+        assertThat(response)
+            .isNotNull()
+            .satisfies(x -> assertThat(x.getDocuments()).isEmpty());
+
+        verify(documentStoreClient).uploadDocumentsAsStream(uploadRequest);
     }
 
     @Test
