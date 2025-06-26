@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.LogAudit;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
@@ -41,8 +44,11 @@ import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.time.Instant;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.APPLICATION_JSON;
@@ -66,12 +72,14 @@ public class CaseDocumentAmController {
     private final DocumentManagementService documentManagementService;
     private final SecurityUtils securityUtils;
     private static final String TTL_FORBIDDEN_MESSAGE = "Document %s can not be downloaded as TTL has expired";
+    private final ApplicationParams applicationParams;
 
     @Autowired
     public CaseDocumentAmController(final DocumentManagementService documentManagementService,
-                                    final SecurityUtils securityUtils) {
+                                    final SecurityUtils securityUtils, ApplicationParams applicationParams) {
         this.documentManagementService = documentManagementService;
         this.securityUtils = securityUtils;
+        this.applicationParams = applicationParams;
     }
 
     @GetMapping(
@@ -137,7 +145,7 @@ public class CaseDocumentAmController {
         produces = {APPLICATION_JSON
         })
     @Operation(
-        summary = "Streams contents of the most recent Document associated with the Case Document.", 
+        summary = "Streams contents of the most recent Document associated with the Case Document.",
         tags = "get"
     )
     @ApiResponse(responseCode = "200", description = "OK")
@@ -148,9 +156,11 @@ public class CaseDocumentAmController {
         documentId = "#documentId"
     )
     public ResponseEntity<ByteArrayResource> getDocumentBinaryContentByDocumentId(
-        @PathVariable("documentId") final UUID documentId,
+        @PathVariable("documentId") final UUID documentId, final HttpServletResponse httpResponse,
         @Parameter(description = "S2S JWT token for an approved micro-service", required = true)
-        @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken
+        @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken,
+        @Parameter(hidden = true)
+        @RequestHeader final Map<String, String> requestHeaders
     ) {
         final Document document = documentManagementService.getDocumentMetadata(documentId);
 
@@ -168,16 +178,37 @@ public class CaseDocumentAmController {
                     USER_PERMISSION_ERROR,
                     documentId.toString());
 
-            return documentManagementService.getDocumentBinaryContent(documentId);
+            return handleDocumentContent(documentId, httpResponse, requestHeaders);
         }
 
         if (ttlIsFutureDate(document.getTtl())) {
-            return documentManagementService.getDocumentBinaryContent(documentId);
+            return handleDocumentContent(documentId, httpResponse, requestHeaders);
         } else {
             String errorMessage = String.format(TTL_FORBIDDEN_MESSAGE, documentId);
             log.error(errorMessage);
             throw new ForbiddenException(errorMessage);
         }
+    }
+
+    private ResponseEntity<ByteArrayResource> handleDocumentContent(UUID documentId, HttpServletResponse httpResponse,
+        Map<String, String> requestHeaders) {
+        if (applicationParams.isStreamDownloadEnabled()) {
+            streamDocumentContent(documentId, httpResponse, requestHeaders);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return documentManagementService.getDocumentBinaryContent(documentId);
+        }
+    }
+
+    private void streamDocumentContent(UUID documentId, HttpServletResponse httpResponse,
+                                       Map<String, String> requestHeaders) {
+        removeAuthorizationHeaders(requestHeaders);
+        documentManagementService.streamDocumentBinaryContent(documentId, httpResponse, requestHeaders);
+    }
+
+    private void removeAuthorizationHeaders(Map<String, String> requestHeaders) {
+        requestHeaders.remove(HttpHeaders.AUTHORIZATION.toLowerCase());
+        requestHeaders.remove(SERVICE_AUTHORIZATION.toLowerCase());
     }
 
     @PostMapping(
@@ -204,9 +235,7 @@ public class CaseDocumentAmController {
     public UploadResponse uploadDocuments(
         @Parameter(description = "List of documents to be uploaded and their metadata", required = true)
         @Valid final DocumentUploadRequest documentUploadRequest,
-
         final BindingResult bindingResult,
-
         @Parameter(description = "S2S JWT token for an approved micro-service", required = true)
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken) {
 
@@ -221,6 +250,10 @@ public class CaseDocumentAmController {
                                                          Permission.CREATE,
                                                          SERVICE_PERMISSION_ERROR,
                                                          permissionFailureMessage);
+
+        if (applicationParams.isStreamUploadEnabled()) {
+            return documentManagementService.uploadStreamDocuments(documentUploadRequest);
+        }
 
         return documentManagementService.uploadDocuments(documentUploadRequest);
     }

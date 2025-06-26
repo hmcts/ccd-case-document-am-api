@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.documentam.util.ApplicationUtils;
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
@@ -85,6 +86,12 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Override
     public ResponseEntity<ByteArrayResource> getDocumentBinaryContent(UUID documentId) {
         return documentStoreClient.getDocumentAsBinary(documentId);
+    }
+
+    @Override
+    public void streamDocumentBinaryContent(UUID documentId, HttpServletResponse httpResponse,
+                                            Map<String, String> requestHeaders) {
+        documentStoreClient.streamDocumentAsBinary(documentId, httpResponse, requestHeaders);
     }
 
     @Override
@@ -266,6 +273,15 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     @Override
     public UploadResponse uploadDocuments(final DocumentUploadRequest documentUploadRequest) {
         final DmUploadResponse dmResponse = documentStoreClient.uploadDocuments(documentUploadRequest);
+
+        return buildUploadResponse(documentUploadRequest.getCaseTypeId(),
+                                   documentUploadRequest.getJurisdictionId(),
+                                   dmResponse);
+    }
+
+    @Override
+    public UploadResponse uploadStreamDocuments(final DocumentUploadRequest documentUploadRequest) {
+        final DmUploadResponse dmResponse = documentStoreClient.uploadDocumentsAsStream(documentUploadRequest);
 
         return buildUploadResponse(documentUploadRequest.getCaseTypeId(),
                                    documentUploadRequest.getJurisdictionId(),

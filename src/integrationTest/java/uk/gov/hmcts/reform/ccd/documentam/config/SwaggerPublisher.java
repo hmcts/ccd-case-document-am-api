@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 /**
  * Built-in feature which saves service's swagger specs in temporary directory.
@@ -22,19 +23,19 @@ class SwaggerPublisher extends BaseTest {
     @Autowired
     private MockMvc mvc;
 
-    @DisplayName("Generate swagger documentation")
+    @DisplayName("Generate OpenAPI documentation")
     @Test
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void generateDocs() throws Exception {
         byte[] specs = mvc.perform(get("/v3/api-docs"))
             .andExpect(status().isOk())
+            .andExpect(content().contentType("application/json"))
             .andReturn()
             .getResponse()
             .getContentAsByteArray();
 
-        try (OutputStream outputStream = Files.newOutputStream(Paths.get("/tmp/swagger-specs.json"))) {
+        try (OutputStream outputStream = Files.newOutputStream(Paths.get("build/api-docs.json"))) {
             outputStream.write(specs);
         }
-
     }
 }
