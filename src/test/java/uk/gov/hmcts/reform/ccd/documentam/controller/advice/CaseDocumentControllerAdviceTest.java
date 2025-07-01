@@ -34,6 +34,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
@@ -268,13 +269,33 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
     }
 
+    @Test
+    void testHandleHttpClientErrorExceptionWhenReceivedUnprocessableEntity() {
+        final HttpClientErrorException exception = HttpClientErrorException
+            .create(HttpStatus.UNPROCESSABLE_ENTITY, "myUniqueExceptionMessage", HttpHeaders.EMPTY,
+                    "myUniqueExceptionMessage".getBytes(StandardCharsets.UTF_8), Charset.defaultCharset());
+
+        final ResponseEntity<Object> responseEntity =
+            underTest.handleHttpClientUnprocessableEntityException(exception, request);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCode().value());
+
+        ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
+        assert errorResponse != null;
+        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
+    }
+
 
     @Test
     public void handleFeignServerException_shouldSwitch500_502() {
         FeignException.FeignServerException ex = new FeignException.FeignServerException(
             HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error",
-            Request.create(Request.HttpMethod.GET, "Internal Server Error", Map.of(), new byte[0],
-                           Charset.defaultCharset(), null), new byte[0], null);
+            Request.create(
+                Request.HttpMethod.GET, "Internal Server Error", Map.of(), new byte[0],
+                Charset.defaultCharset(), null
+            ), new byte[0], null
+        );
         final ResponseEntity<Object> responseEntity = underTest.handleFeignServerException(ex, request);
 
         assertEquals(HttpStatus.BAD_GATEWAY.value(), responseEntity.getStatusCode().value());
@@ -284,8 +305,11 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
     public void handleFeignServerException_shouldReturn5xx() {
         FeignException.FeignServerException ex = new FeignException.FeignServerException(
             HttpStatus.GATEWAY_TIMEOUT.value(), "Gateway Timeout",
-            Request.create(Request.HttpMethod.GET, "Gateway Timeout", Map.of(), new byte[0],
-                           Charset.defaultCharset(), null), new byte[0], null);
+            Request.create(
+                Request.HttpMethod.GET, "Gateway Timeout", Map.of(), new byte[0],
+                Charset.defaultCharset(), null
+            ), new byte[0], null
+        );
         final ResponseEntity<Object> response = underTest.handleFeignServerException(ex, request);
 
         assertEquals(HttpStatus.GATEWAY_TIMEOUT.value(), response.getStatusCode().value());
@@ -295,8 +319,11 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
     public void handleFeignClientException_shouldReturn401() {
         FeignException.FeignClientException ex = new FeignException.FeignClientException(
             HttpStatus.UNAUTHORIZED.value(), "UNAUTHORIZED",
-            Request.create(Request.HttpMethod.GET, "UNAUTHORIZED", Map.of(), new byte[0],
-                           Charset.defaultCharset(), null), new byte[0], null);
+            Request.create(
+                Request.HttpMethod.GET, "UNAUTHORIZED", Map.of(), new byte[0],
+                Charset.defaultCharset(), null
+            ), new byte[0], null
+        );
 
         final ResponseEntity<Object> response = underTest.handleFeignClientException(ex, request);
 

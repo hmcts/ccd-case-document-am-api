@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Either;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,6 +13,7 @@ import org.apache.hc.client5.http.entity.mime.InputStreamBody;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -45,6 +47,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Map;
@@ -329,21 +332,49 @@ public class DocumentStoreClient {
 
     private DmUploadResponse handleUploadStreamResponse(HttpStatus statusCode,
                                                         ClassicHttpResponse httpClientResponse) throws IOException {
+        var responseEntity = httpClientResponse.getEntity();
+        String responseBody = null;
+
+        if (responseEntity != null) {
+            try (InputStream responseStream = responseEntity.getContent()) {
+                responseBody = new String(responseStream.readAllBytes(), StandardCharsets.UTF_8);
+            }
+        }
+
         if (statusCode.is2xxSuccessful()) {
-            var responseEntity = httpClientResponse.getEntity();
-            if (responseEntity != null) {
-                try (InputStream responseStream = responseEntity.getContent()) {
-                    return objectMapper.readValue(responseStream, DmUploadResponse.class);
+            if (responseBody != null && !responseBody.isEmpty()) {
+                try {
+                    return objectMapper.readValue(responseBody, DmUploadResponse.class);
+                } catch (JsonProcessingException e) {
+                    log.error("Failed to parse success response: {}", responseBody, e);
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                                                      "Failed to parse server response", e);
                 }
             }
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Empty response from server");
         }
 
-        if (statusCode.is5xxServerError()) {
-            throw new HttpServerErrorException(statusCode, "Document upload failed due to server error");
+        if (statusCode == HttpStatus.UNPROCESSABLE_ENTITY) {
+            String errorFallback = HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase();
+
+            throw HttpClientErrorException.create(
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                errorFallback,
+               null,
+                responseBody != null ? responseBody.getBytes(StandardCharsets.UTF_8)
+                    : errorFallback.getBytes(StandardCharsets.UTF_8),
+                StandardCharsets.UTF_8
+            );
+
         }
 
-        throw new ResponseStatusException(statusCode, "Document upload failed with status: " + statusCode);
+        if (statusCode.is5xxServerError()) {
+            throw new HttpServerErrorException(statusCode,
+                                               "Document upload failed due to server error. Response: " + responseBody);
+        }
+
+        throw new ResponseStatusException(statusCode, "Document upload failed with status: " + statusCode + ". "
+            + "Response: " + responseBody);
     }
 
     private HttpPost buildStreamUploadHttpRequest(final DocumentUploadRequest documentUploadRequest)
@@ -368,11 +399,13 @@ public class DocumentStoreClient {
         for (MultipartFile fileInfo : documentUploadRequest.getFiles()) {
             InputStream inputStream = fileInfo.getInputStream();
             String filename = fileInfo.getOriginalFilename();
+            String type = fileInfo.getContentType();
+            ContentType contentType = type != null ? ContentType.parse(type) : ContentType.DEFAULT_BINARY;
 
             // Note: The InputStream provided to InputStreamBody is closed within the
             // org.apache.http.entity.mime.content.InputStreamBody#writeTo(OutputStream) method
             // after all data has been fully written to the output stream.
-            ContentBody contentBody = new InputStreamBody(inputStream, filename);
+            ContentBody contentBody = new InputStreamBody(inputStream, contentType, filename);
             builder.addPart(Constants.FILES, contentBody);
         }
         return builder.build();

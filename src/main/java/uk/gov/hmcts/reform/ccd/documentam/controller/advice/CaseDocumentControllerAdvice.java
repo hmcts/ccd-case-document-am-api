@@ -109,6 +109,17 @@ public class CaseDocumentControllerAdvice {
         return errorDetailsResponseEntity(exception, httpStatus, getPath(request));
     }
 
+    @ExceptionHandler(HttpClientErrorException.UnprocessableEntity.class)
+    protected ResponseEntity<Object> handleHttpClientUnprocessableEntityException(final HttpClientErrorException ex,
+                                                                    final HttpServletRequest request) {
+        HttpStatus httpStatus = getClientStatusCode(ex.getStatusCode());
+        String errorMessage = ex.getResponseBodyAsString();
+        errorMessage = HttpStatus.UNPROCESSABLE_ENTITY + ": \"" + errorMessage + "\"";
+        Exception wrapped = new HttpClientExceptionWrapper(errorMessage, ex);
+
+        return errorDetailsResponseEntity(wrapped, httpStatus, getPath(request));
+    }
+
     @ExceptionHandler(HttpServerErrorException.class)
     protected ResponseEntity<Object> handleHttpServerErrorException(final HttpServerErrorException exception,
                                                                     final HttpServletRequest request) {
