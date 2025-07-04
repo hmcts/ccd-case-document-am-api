@@ -1,5 +1,5 @@
 # renovate: datasource=github-releases depName=microsoft/ApplicationInsights-Java
-ARG APP_INSIGHTS_AGENT_VERSION=3.5.4
+ARG APP_INSIGHTS_AGENT_VERSION=3.7.3
 
 FROM openjdk:21-jdk-slim as builder
 
