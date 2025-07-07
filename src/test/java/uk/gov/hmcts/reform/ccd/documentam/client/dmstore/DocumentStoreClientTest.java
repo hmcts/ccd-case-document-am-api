@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Either;
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,9 +42,11 @@ import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -567,23 +571,27 @@ class DocumentStoreClientTest implements TestFixture {
         verify(httpClient).executeOpen(eq(null), any(HttpGet.class), eq(null));
     }
 
+
     @Test
     void shouldReturnDmUploadResponseForSuccessfulUpload() throws IOException {
         DmUploadResponse expectedResponse = createMockDmUploadResponse();
-
         when(httpClientResponse.getCode()).thenReturn(HttpStatus.OK.value());
         when(httpClient.executeOpen(eq(null), any(HttpPost.class), eq(null))).thenReturn(httpClientResponse);
 
         org.apache.hc.core5.http.HttpEntity mockEntity = mock(org.apache.hc.core5.http.HttpEntity.class);
         InputStream mockInputStream = mock(InputStream.class);
+
         when(httpClientResponse.getEntity()).thenReturn(mockEntity);
         when(mockEntity.getContent()).thenReturn(mockInputStream);
 
+        // Mock readAllBytes() to return actual byte data
+        String mockResponseJson = "{\"status\":\"success\",\"documentId\":\"123\"}"; // or whatever JSON you expect
+        when(mockInputStream.readAllBytes()).thenReturn(mockResponseJson.getBytes(StandardCharsets.UTF_8));
+
         DocumentStoreClient spyClient = spy(underTest);
         ObjectMapper mockObjectMapper = mock(ObjectMapper.class);
-        when(mockObjectMapper.readValue(any(InputStream.class), eq(DmUploadResponse.class)))
+        when(mockObjectMapper.readValue(eq(mockResponseJson), eq(DmUploadResponse.class)))
             .thenReturn(expectedResponse);
-
         setObjectMapperField(spyClient, mockObjectMapper);
 
         DocumentUploadRequest uploadRequest = createMockUploadRequest();
@@ -592,7 +600,7 @@ class DocumentStoreClientTest implements TestFixture {
         assertNotNull(result);
         assertEquals(expectedResponse, result);
         verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
-        verify(mockObjectMapper).readValue(any(InputStream.class), eq(DmUploadResponse.class));
+        verify(mockObjectMapper).readValue(eq(mockResponseJson), eq(DmUploadResponse.class));
     }
 
     @Test
@@ -715,6 +723,176 @@ class DocumentStoreClientTest implements TestFixture {
         assertEquals("Error occurred while processing the request", exception.getReason());
         assertInstanceOf(IOException.class, exception.getCause());
 
+        verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
+    }
+
+    @Test
+    void shouldThrowHttpClientErrorExceptionForUnprocessableEntityWithResponseBody() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNPROCESSABLE_ENTITY.value());
+        when(httpClient.executeOpen(eq(null), any(HttpPost.class), eq(null))).thenReturn(httpClientResponse);
+
+        org.apache.hc.core5.http.HttpEntity mockEntity = mock(org.apache.hc.core5.http.HttpEntity.class);
+        String errorResponseJson = "{\"error\":\"Validation failed\",\"field\":\"documentType\","
+            + "\"message\":\"Invalid document type\"}";
+        ByteArrayInputStream errorInputStream =
+            new ByteArrayInputStream(errorResponseJson.getBytes(StandardCharsets.UTF_8));
+
+        when(httpClientResponse.getEntity()).thenReturn(mockEntity);
+        when(mockEntity.getContent()).thenReturn(errorInputStream);
+
+        DocumentUploadRequest uploadRequest = createMockUploadRequest();
+
+        HttpClientErrorException exception = assertThrows(HttpClientErrorException.UnprocessableEntity.class,
+                                                          () -> underTest.uploadDocumentsAsStream(uploadRequest));
+
+        String expectedMessage = exception.getResponseBodyAsString();
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatusCode());
+        assertEquals(errorResponseJson, expectedMessage);
+        verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
+    }
+
+    @Test
+    void shouldThrowHttpClientErrorExceptionForUnprocessableEntityWithNullResponseBody() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNPROCESSABLE_ENTITY.value());
+        when(httpClient.executeOpen(eq(null), any(HttpPost.class), eq(null))).thenReturn(httpClientResponse);
+
+        org.apache.hc.core5.http.HttpEntity mockEntity = mock(org.apache.hc.core5.http.HttpEntity.class);
+        ByteArrayInputStream emptyInputStream = new ByteArrayInputStream(new byte[0]);
+
+        when(httpClientResponse.getEntity()).thenReturn(mockEntity);
+        when(mockEntity.getContent()).thenReturn(emptyInputStream);
+
+        DocumentUploadRequest uploadRequest = createMockUploadRequest();
+
+        HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
+                                                          () -> underTest.uploadDocumentsAsStream(uploadRequest));
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatusCode());
+        assertEquals("422 Unprocessable Entity", exception.getMessage());
+        verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
+    }
+
+    @Test
+    void shouldThrowHttpClientErrorExceptionForUnprocessableEntityWithEmptyResponseBody() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNPROCESSABLE_ENTITY.value());
+        when(httpClient.executeOpen(eq(null), any(HttpPost.class), eq(null))).thenReturn(httpClientResponse);
+
+        org.apache.hc.core5.http.HttpEntity mockEntity = mock(org.apache.hc.core5.http.HttpEntity.class);
+        String emptyResponse = "   ";
+        ByteArrayInputStream emptyInputStream =
+            new ByteArrayInputStream(emptyResponse.getBytes(StandardCharsets.UTF_8));
+
+        when(httpClientResponse.getEntity()).thenReturn(mockEntity);
+        when(mockEntity.getContent()).thenReturn(emptyInputStream);
+
+        DocumentUploadRequest uploadRequest = createMockUploadRequest();
+
+        HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
+                                                          () -> underTest.uploadDocumentsAsStream(uploadRequest));
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatusCode());
+        verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
+    }
+
+    @Test
+    void shouldThrowHttpClientErrorExceptionForUnprocessableEntityWithNoEntity() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNPROCESSABLE_ENTITY.value());
+        when(httpClient.executeOpen(eq(null), any(HttpPost.class), eq(null))).thenReturn(httpClientResponse);
+
+        when(httpClientResponse.getEntity()).thenReturn(null);
+
+        DocumentUploadRequest uploadRequest = createMockUploadRequest();
+
+        HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
+                                                          () -> underTest.uploadDocumentsAsStream(uploadRequest));
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatusCode());
+        assertEquals("422 Unprocessable Entity", exception.getMessage());
+        verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
+    }
+
+    @Test
+    void shouldThrowResponseStatusExceptionWhenJsonParsingFailsForSuccessResponse() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.OK.value());
+        when(httpClient.executeOpen(eq(null), any(HttpPost.class), eq(null))).thenReturn(httpClientResponse);
+
+        org.apache.hc.core5.http.HttpEntity mockEntity = mock(org.apache.hc.core5.http.HttpEntity.class);
+        String invalidJson = "{\"documentId\":\"123\",\"status\":\"success\",\"invalid\":}";
+        ByteArrayInputStream invalidJsonStream = new ByteArrayInputStream(invalidJson.getBytes(StandardCharsets.UTF_8));
+
+        when(httpClientResponse.getEntity()).thenReturn(mockEntity);
+        when(mockEntity.getContent()).thenReturn(invalidJsonStream);
+
+        DocumentStoreClient spyClient = spy(underTest);
+        ObjectMapper mockObjectMapper = mock(ObjectMapper.class);
+
+        JsonProcessingException jsonException = new JsonMappingException(null, "Invalid JSON structure");
+        when(mockObjectMapper.readValue(eq(invalidJson), eq(DmUploadResponse.class)))
+            .thenThrow(jsonException);
+
+        setObjectMapperField(spyClient, mockObjectMapper);
+        DocumentUploadRequest uploadRequest = createMockUploadRequest();
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                                                         () -> spyClient.uploadDocumentsAsStream(uploadRequest));
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
+        assertEquals("Failed to parse server response", exception.getReason());
+        assertEquals(jsonException, exception.getCause());
+
+        verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
+        verify(mockObjectMapper).readValue(eq(invalidJson), eq(DmUploadResponse.class));
+    }
+
+    @Test
+    void shouldThrowResponseStatusExceptionWhenJsonParsingFailsWithRealObjectMapper() throws IOException {
+        // Given
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.OK.value());
+        when(httpClient.executeOpen(eq(null), any(HttpPost.class), eq(null))).thenReturn(httpClientResponse);
+
+        org.apache.hc.core5.http.HttpEntity mockEntity = mock(org.apache.hc.core5.http.HttpEntity.class);
+        String malformedJson = "{\"documentId\":\"123\",\"status\":\"success\",\"timestamp\":invalid_date,"
+            + "\"data\":[1,2,}";
+        ByteArrayInputStream malformedJsonStream =
+            new ByteArrayInputStream(malformedJson.getBytes(StandardCharsets.UTF_8));
+
+        when(httpClientResponse.getEntity()).thenReturn(mockEntity);
+        when(mockEntity.getContent()).thenReturn(malformedJsonStream);
+
+        DocumentUploadRequest uploadRequest = createMockUploadRequest();
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                                                         () -> underTest.uploadDocumentsAsStream(uploadRequest));
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
+        assertEquals("Failed to parse server response", exception.getReason());
+        assertNotNull(exception.getCause());
+        assertInstanceOf(JsonProcessingException.class, exception.getCause());
+
+        verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
+    }
+
+    @Test
+    void shouldSuccessfullyParseValidJsonResponse() throws IOException {
+        DmUploadResponse expectedResponse = createMockDmUploadResponse();
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.OK.value());
+        when(httpClient.executeOpen(eq(null), any(HttpPost.class), eq(null))).thenReturn(httpClientResponse);
+
+        org.apache.hc.core5.http.HttpEntity mockEntity = mock(org.apache.hc.core5.http.HttpEntity.class);
+
+        ObjectMapper realObjectMapper = new ObjectMapper();
+        String validJson = realObjectMapper.writeValueAsString(expectedResponse);
+        ByteArrayInputStream validJsonStream = new ByteArrayInputStream(validJson.getBytes(StandardCharsets.UTF_8));
+
+        when(httpClientResponse.getEntity()).thenReturn(mockEntity);
+        when(mockEntity.getContent()).thenReturn(validJsonStream);
+
+        DocumentUploadRequest uploadRequest = createMockUploadRequest();
+
+        DmUploadResponse result = underTest.uploadDocumentsAsStream(uploadRequest);
+
+        assertNotNull(result);
+        assertEquals(expectedResponse, result);
         verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
     }
 
