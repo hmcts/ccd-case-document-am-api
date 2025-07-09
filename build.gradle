@@ -11,13 +11,13 @@ plugins {
   id 'net.serenity-bdd.serenity-gradle-plugin' version '4.2.33'
   id 'org.owasp.dependencycheck' version '11.1.1'
   id 'org.sonarqube' version '6.2.0.5505'
-  id 'org.springframework.boot' version '3.5.3'
+  id 'org.springframework.boot' version '3.4.1'
   id 'uk.gov.hmcts.java' version '0.12.67'
 
 }
 
 ext {
-  set('springCloudVersion', '2024.0.1')
+  set('springCloudVersion', '2024.0.0')
   set('spring-framework.version', '6.2.1')
   set('spring-security.version', '6.4.2')
   set('log4j2.version', '2.24.3')
