@@ -243,6 +243,12 @@ dependencyCheck {
   suppressionFile = 'config/owasp/suppressions.xml'
 }
 
+tasks.register("printSuppressionFile") {
+  doLast {
+    println "SUPPRESSION_FILE=${dependencyCheck.suppressionFile}"
+  }
+}
+
 dependencyUpdates.resolutionStrategy = {
   componentSelection { rules ->
     rules.all { ComponentSelection selection ->
