@@ -349,6 +349,7 @@ dependencies {
 
   contractTestImplementation sourceSets.main.runtimeClasspath
   contractTestImplementation sourceSets.test.runtimeClasspath
+  contractTestImplementation group: 'au.com.dius.pact', name: 'consumer', version: pactVersion
   contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'junit5', version: pactVersion
   contractTestImplementation group: 'au.com.dius.pact.provider', name: 'junit5', version: pactVersion
   contractTestImplementation group: 'au.com.dius.pact.provider', name: 'spring', version: pactVersion
@@ -439,19 +440,38 @@ project.ext {
   pactVersion = getCheckedOutGitCommitHash()
 }
 
-task contract(type: Test) {
+pact {
+  broker {
+    pactBrokerUrl = System.getenv("PACT_BROKER_FULL_URL") ?: 'http://localhost:80'
+  }
+  publish {
+    pactDirectory = "${project.buildDir}/pacts"
+    tags = [System.getenv("PACT_BRANCH_NAME") ?: 'Dev']
+    version = project.pactVersion
+  }
+}
+
+tasks.register("contract", Test) {
   description = 'Runs the consumer Pact tests'
+  systemProperty 'pact.writer.outputDir', "${project.projectDir}/pacts"
   useJUnitPlatform()
   testClassesDirs = sourceSets.contractTest.output.classesDirs
   classpath = sourceSets.contractTest.runtimeClasspath
-  include "uk/gov/hmcts/reform/ccd/documentam/controller/endpoints/**"
-
 }
 
-task runProviderPactVerification(type: Test) {
+tasks.register("runProviderPactVerification", Test) {
   testClassesDirs = sourceSets.contractTest.output.classesDirs
   classpath = sourceSets.contractTest.runtimeClasspath
   systemProperty 'pact.provider.version', project.pactVersion
+  include "uk/gov/hmcts/reform/ccd/documentam/controller/endpoints/**"
+}
+
+tasks.register("runAndPublishConsumerPactTests", Test) {
+  dependsOn(contract)
+  logger.lifecycle("Runs pact Tests")
+  testClassesDirs = sourceSets.contractTest.output.classesDirs
+  classpath = sourceSets.contractTest.runtimeClasspath
+  finalizedBy(pactPublish)
 }
 
 runProviderPactVerification.finalizedBy pactVerify
