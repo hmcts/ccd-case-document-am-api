@@ -1,5 +1,7 @@
 server:
   port: ${PORT:4455}
+  tomcat:
+    max-part-count: -1
 
 audit:
   log:
