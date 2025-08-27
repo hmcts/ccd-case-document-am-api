@@ -5,8 +5,7 @@ import au.com.dius.pact.provider.junit5.PactVerificationInvocationContextProvide
 import au.com.dius.pact.provider.junitsupport.IgnoreNoPactsToVerify;
 import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junitsupport.State;
-import au.com.dius.pact.provider.junitsupport.loader.PactBroker;
-import au.com.dius.pact.provider.junitsupport.loader.VersionSelector;
+import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
 import au.com.dius.pact.provider.spring.junit5.MockMvcTestTarget;
 import org.apache.commons.collections4.map.HashedMap;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,18 +21,21 @@ import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
+import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
 
 @ExtendWith(SpringExtension.class)
-@Provider("case-document-am-api")
-@PactBroker(url = "${PACT_BROKER_FULL_URL:http://localhost}",
-    consumerVersionSelectors = {@VersionSelector(tag = "master")})
+@Provider("CCD_CASE_DOCS_AM_API")
+@PactFolder("pacts")
 @ContextConfiguration(classes = {ContractConfig.class})
 @IgnoreNoPactsToVerify
 public class CaseDocumentAmProviderTest {
@@ -85,7 +87,38 @@ public class CaseDocumentAmProviderTest {
                                                                DOCUMENT_ID_UUID.toString())).willReturn(
                                                                    AuthorisedService.builder().build());
 
-        ResponseEntity response = new ResponseEntity(HttpStatus.OK);
+        ResponseEntity<?> response = new ResponseEntity<>(HttpStatus.OK);
         given(documentManagementService.getDocumentBinaryContent(DOCUMENT_ID_UUID)).willAnswer(x -> response);
+    }
+
+    @State({"A request to download a document"})
+    public void aRequestToDownloadADocument() throws IOException {
+        // Set up the document with FPRL case type and jurisdiction
+        Map<String, String> metadata = new HashedMap<>();
+        metadata.put(Constants.METADATA_CASE_TYPE_ID, "PRLAPPS");
+        metadata.put(Constants.METADATA_JURISDICTION_ID, "PRIVATELAW");
+        metadata.put(Constants.METADATA_CASE_ID, CASE_ID);
+
+        Document document = Document.builder()
+            .metadata(metadata)
+            .build();
+
+        UUID documentId = UUID.fromString("456c0976-3178-46dd-b9ce-5ab5d47c625a");
+        given(documentManagementService.getDocumentMetadata(documentId)).willReturn(document);
+        
+        // For valid authorization - return successful response
+        given(documentManagementService.checkServicePermission("PRLAPPS", "PRIVATELAW",
+                                                               null, Permission.READ, SERVICE_PERMISSION_ERROR,
+                                                               documentId.toString())).willReturn(
+                                                                   AuthorisedService.builder().build());
+
+        ResponseEntity<?> validResponse = new ResponseEntity<>(HttpStatus.OK);
+        given(documentManagementService.getDocumentBinaryContent(documentId)).willAnswer(x -> validResponse);
+    }
+
+    @State({"A request to upload a document"})
+    public void aRequestToUploadADocument() throws IOException {
+        // For upload requests, endpoint should accept the request and return 200 OK
+        // The upload logic will be handled by the controller
     }
 }

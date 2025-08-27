@@ -4,6 +4,7 @@
 *.class
 bin/main/application.yaml
 bin/functionalTest/
+bin/integrationTest/
 bin/main/
 
 ### STS ###
