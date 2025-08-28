@@ -20,8 +20,9 @@ import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
+import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
+import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
-import uk.gov.hmcts.reform.ccd.documentam.exception.ServiceException;
 
 import java.io.IOException;
 import java.util.Map;
@@ -30,7 +31,6 @@ import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
 
 @ExtendWith(SpringExtension.class)
@@ -49,7 +49,13 @@ public class CaseDocumentAmProviderTest {
     DocumentManagementService documentManagementService;
 
     @Autowired
-    CaseDocumentAmController caseDocumentAmController;
+    TestCaseDocumentAmController testCaseDocumentAmController;
+
+    @Autowired
+    SecurityUtils securityUtils;
+
+    @Autowired
+    ApplicationParams applicationParams;
 
     @TestTemplate
     @ExtendWith(PactVerificationInvocationContextProvider.class)
@@ -63,7 +69,7 @@ public class CaseDocumentAmProviderTest {
     void before(PactVerificationContext context) {
         MockMvcTestTarget testTarget = new MockMvcTestTarget();
         //System.getProperties().setProperty("pact.verifier.publishResults", "true");
-        testTarget.setControllers(caseDocumentAmController);
+        testTarget.setControllers(testCaseDocumentAmController);
         if (context != null) {
             context.setTarget(testTarget);
         }
@@ -106,19 +112,29 @@ public class CaseDocumentAmProviderTest {
         UUID documentId = UUID.fromString("456c0976-3178-46dd-b9ce-5ab5d47c625a");
         given(documentManagementService.getDocumentMetadata(documentId)).willReturn(document);
         
-        // For valid authorization - return successful response
-        given(documentManagementService.checkServicePermission("PRLAPPS", "PRIVATELAW",
-                                                               null, Permission.READ, SERVICE_PERMISSION_ERROR,
-                                                               documentId.toString())).willReturn(
+        // For valid authorization - return successful service
+        given(securityUtils.getServiceNameFromS2SToken("someServiceAuthToken")).willReturn("prl_dgs");
+        given(documentManagementService.checkServicePermission(anyString(), anyString(),
+                                                               anyString(), any(Permission.class), anyString(),
+                                                               anyString())).willReturn(
                                                                    AuthorisedService.builder().build());
 
-        ResponseEntity<?> validResponse = new ResponseEntity<>(HttpStatus.OK);
-        given(documentManagementService.getDocumentBinaryContent(documentId)).willAnswer(x -> validResponse);
+        // For invalid authorization - throw exception
+        given(securityUtils.getServiceNameFromS2SToken("invalidServiceAuthToken")).willThrow(new RuntimeException("Invalid token"));
     }
 
     @State({"A request to upload a document"})
     public void aRequestToUploadADocument() throws IOException {
-        // For upload requests, endpoint should accept the request and return 200 OK
-        // The upload logic will be handled by the controller
+        // Set up mocks for successful upload
+        given(documentManagementService.checkServicePermission(anyString(), anyString(),
+                                                               anyString(), any(Permission.class), anyString(),
+                                                               anyString())).willReturn(
+                                                                   AuthorisedService.builder().build());
+        
+        // Mock SecurityUtils for upload requests
+        given(securityUtils.getServiceNameFromS2SToken(anyString())).willReturn("prl_dgs");
+        
+        // Mock ApplicationParams for upload configuration
+        given(applicationParams.isStreamUploadEnabled()).willReturn(false);
     }
 }

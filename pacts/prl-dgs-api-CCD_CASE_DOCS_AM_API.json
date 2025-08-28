@@ -17,23 +17,7 @@
         }
       },
       "response": {
-        "status": 200,
-        "headers": {
-          "Content-Type": "application/vnd.uk.gov.hmcts.dm.document.v1+hal+json;charset=UTF-8"
-        },
-        "matchingRules": {
-          "header": {
-            "Content-Type": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "application/vnd.uk.gov.hmcts.dm.document.v1+hal+json;charset=UTF-8"
-                }
-              ],
-              "combine": "AND"
-            }
-          }
-        }
+        "status": 200
       },
       "providerStates": [
         {
@@ -51,23 +35,7 @@
         }
       },
       "response": {
-        "status": 500,
-        "headers": {
-          "Content-Type": "application/vnd.uk.gov.hmcts.dm.document.v1+hal+json;charset=UTF-8"
-        },
-        "matchingRules": {
-          "header": {
-            "Content-Type": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "application/vnd.uk.gov.hmcts.dm.document.v1+hal+json;charset=UTF-8"
-                }
-              ],
-              "combine": "AND"
-            }
-          }
-        }
+        "status": 500
       },
       "providerStates": [
         {
