@@ -5,7 +5,8 @@ import au.com.dius.pact.provider.junit5.PactVerificationInvocationContextProvide
 import au.com.dius.pact.provider.junitsupport.IgnoreNoPactsToVerify;
 import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junitsupport.State;
-import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
+import au.com.dius.pact.provider.junitsupport.loader.PactBroker;
+import au.com.dius.pact.provider.junitsupport.loader.VersionSelector;
 import au.com.dius.pact.provider.spring.junit5.MockMvcTestTarget;
 import org.apache.commons.collections4.map.HashedMap;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,8 +35,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
 
 @ExtendWith(SpringExtension.class)
-@Provider("CCD_CASE_DOCS_AM_API")
-@PactFolder("pacts")
+@PactBroker(url = "${PACT_BROKER_FULL_URL:http://localhost}",
+    consumerVersionSelectors = {@VersionSelector(tag = "master")})
 @ContextConfiguration(classes = {ContractConfig.class})
 @IgnoreNoPactsToVerify
 public class CaseDocumentAmProviderTest {
