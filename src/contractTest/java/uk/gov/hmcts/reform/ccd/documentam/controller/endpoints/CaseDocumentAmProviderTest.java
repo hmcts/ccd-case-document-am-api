@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.ccd.documentam.controller.endpoints;
 import au.com.dius.pact.provider.junit5.PactVerificationContext;
 import au.com.dius.pact.provider.junit5.PactVerificationInvocationContextProvider;
 import au.com.dius.pact.provider.junitsupport.IgnoreNoPactsToVerify;
-import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junitsupport.State;
 import au.com.dius.pact.provider.junitsupport.loader.PactBroker;
 import au.com.dius.pact.provider.junitsupport.loader.VersionSelector;
@@ -99,7 +98,7 @@ public class CaseDocumentAmProviderTest {
     }
 
     @State({"A request to download a document"})
-    public void aRequestToDownloadADocument() throws IOException {
+    public void requestToDownloadDocument() throws IOException {
         // Set up the document with FPRL case type and jurisdiction
         Map<String, String> metadata = new HashedMap<>();
         metadata.put(Constants.METADATA_CASE_TYPE_ID, "PRLAPPS");
@@ -121,11 +120,12 @@ public class CaseDocumentAmProviderTest {
                                                                    AuthorisedService.builder().build());
 
         // For invalid authorization - throw exception
-        given(securityUtils.getServiceNameFromS2SToken("invalidServiceAuthToken")).willThrow(new RuntimeException("Invalid token"));
+        given(securityUtils.getServiceNameFromS2SToken("invalidServiceAuthToken"))
+            .willThrow(new RuntimeException("Invalid token"));
     }
 
     @State({"A request to upload a document"})
-    public void aRequestToUploadADocument() throws IOException {
+    public void requestToUploadDocument() throws IOException {
         // Set up mocks for successful upload
         given(documentManagementService.checkServicePermission(anyString(), anyString(),
                                                                anyString(), any(Permission.class), anyString(),
