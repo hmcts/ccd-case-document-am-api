@@ -36,6 +36,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PER
 @ExtendWith(SpringExtension.class)
 @PactBroker(url = "${PACT_BROKER_FULL_URL:http://localhost}",
     consumerVersionSelectors = {@VersionSelector(tag = "master")})
+@Provider("CCD_CASE_DOCS_AM_API")
 @ContextConfiguration(classes = {ContractConfig.class})
 @IgnoreNoPactsToVerify
 public class CaseDocumentAmProviderTest {
