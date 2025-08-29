@@ -356,7 +356,7 @@
     },
     {
       "id": "pcs_api",
-      "caseTypeId": ["PCS"],
+      "caseTypeId": ["*"],
       "jurisdictionId": "PCS",
       "permissions": [
         "CREATE",
