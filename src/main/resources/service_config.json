@@ -356,8 +356,8 @@
     },
     {
       "id": "pcs_api",
-      "caseTypeId": ["PCS"],
-      "jurisdictionId": "CIVIL",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "PCS",
       "permissions": [
         "CREATE",
         "READ",
