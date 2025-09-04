@@ -186,8 +186,8 @@
     },
     {
       "id": "finrem_case_orchestration",
-      "caseTypeId": ["*"],
-      "jurisdictionId": "*",
+      "caseTypeId": ["FinancialRemedyContested","FinancialRemedyMVP2"],
+      "jurisdictionId": "DIVORCE",
       "permissions": [
         "CREATE",
         "READ",
