@@ -308,6 +308,17 @@
       ]
     },
     {
+      "id": "nfdiv_frontend",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "DIVORCE",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
       "id": "sptribs_dss_backend",
       "caseTypeId": [
         "CriminalInjuriesCompensation",
