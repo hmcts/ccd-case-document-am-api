@@ -45,6 +45,9 @@
         "READ",
         "UPDATE",
         "DELETE"
+      ],
+      "caseTypeIdOptionalFor" : [
+        "READ"
       ]
     },
     {
