@@ -27,7 +27,7 @@ ext {
   junitPlatform       = '1.13.4'
   jjwt                = '0.13.0'
   lombok              = '1.18.40'
-  groovy              = '5.0.1'
+  groovy              = '4.0.28'
 
   // TEST VERSIONS
   pactVersion         = '4.6.17'
