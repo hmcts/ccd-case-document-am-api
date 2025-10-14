@@ -80,6 +80,13 @@ public class DocumentStoreClient {
         this.applicationParams = applicationParams;
     }
 
+    private void jcdebug(final String method, final String message) {
+        log.info("JCDEBUG.info: DocumentStoreClient: {} {}", method, message);
+        log.warn("JCDEBUG.warn: DocumentStoreClient: {} {}", method, message);
+        log.error("JCDEBUG.error: DocumentStoreClient: {} {}", method, message);
+        log.debug("JCDEBUG.debug: DocumentStoreClient: {} {}", method, message);
+    }
+
     @Retryable(retryFor = {HttpServerErrorException.class, SocketTimeoutException.class},
         maxAttemptsExpression = "${retry.maxAttempts}", backoff = @Backoff(delayExpression = "${retry.maxDelay}"))
     public Either<ResourceNotFoundException, Document> getDocument(final UUID documentId) {
@@ -131,16 +138,30 @@ public class DocumentStoreClient {
     public void streamDocumentAsBinary(final UUID documentId, HttpServletResponse httpResponseOut,
                                        Map<String, String> requestHeaders) {
         try {
+            jcdebug("streamDocumentAsBinary()", "#1");
             HttpGet httpRequest = buildStreamBinaryHttpRequest(documentId, requestHeaders);
             ClassicHttpResponse httpClientResponse = httpClient.executeOpen(null, httpRequest, null);
             HttpStatus statusCode = HttpStatus.valueOf(httpClientResponse.getCode());
 
             handleDownloadStreamResponse(statusCode, httpClientResponse, httpResponseOut, documentId);
+            httpClientResponse.close();
         } catch (IOException exception) {
+            jcdebug("streamDocumentAsBinary()", "#2 " + exception.toString());
             log.error("Error occurred", exception);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                                              "Error occurred while processing the request", exception
+                                              "Error occurred while processing the request: " + exception.getMessage(),
+                                              exception
             );
+        } finally {
+            closeHttpClientResourses();
+        }
+    }
+
+    private void closeHttpClientResourses() {
+        try {
+            httpClient.close();
+        } catch (IOException exception) {
+            log.error("Error occurred closing resourses", exception);
         }
     }
 
