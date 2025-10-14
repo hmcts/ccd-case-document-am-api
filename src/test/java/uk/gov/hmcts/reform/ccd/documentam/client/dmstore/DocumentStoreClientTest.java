@@ -565,7 +565,7 @@ class DocumentStoreClientTest implements TestFixture {
         );
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
-        assertEquals("Error occurred while processing the request", exception.getReason());
+        assertEquals("Error occurred while processing the request: Connection failed", exception.getReason());
         assertInstanceOf(IOException.class, exception.getCause());
 
         verify(httpClient).executeOpen(eq(null), any(HttpGet.class), eq(null));
