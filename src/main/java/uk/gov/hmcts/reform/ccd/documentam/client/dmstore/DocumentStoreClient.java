@@ -152,16 +152,6 @@ public class DocumentStoreClient {
                                               "Error occurred while processing the request: " + exception.getMessage(),
                                               exception
             );
-        } finally {
-            closeHttpClientResourses();
-        }
-    }
-
-    private void closeHttpClientResourses() {
-        try {
-            httpClient.close();
-        } catch (IOException exception) {
-            log.error("Error occurred closing resourses", exception);
         }
     }
 
