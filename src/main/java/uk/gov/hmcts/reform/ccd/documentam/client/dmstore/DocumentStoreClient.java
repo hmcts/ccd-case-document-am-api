@@ -64,7 +64,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.RESOURCE_NO
 public class DocumentStoreClient {
 
     private final RestTemplate restTemplate;
-    public final CloseableHttpClient httpClient;
+    private final CloseableHttpClient httpClient;
     private final ApplicationParams applicationParams;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final SecurityUtils securityUtils;
@@ -140,8 +140,9 @@ public class DocumentStoreClient {
         } catch (IOException exception) {
             log.error("Error occurred", exception);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                                              "Error occurred while processing the request: " + exception.getMessage(),
-                                              exception
+                                              "Error occurred while processing the request " + String.format(
+                                                  "%s/documents/%s/binary", applicationParams.getDocumentURL(),
+                                                  documentId) + ": " + exception.getMessage(), exception
             );
         }
     }
@@ -329,8 +330,9 @@ public class DocumentStoreClient {
         } catch (IOException exception) {
             log.error("Error occurred", exception);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                                              "Error occurred while processing the request: " + exception.getMessage(),
-                                              exception
+                                              "Error occurred while processing the request " + String.format(
+                                                  "%s/documents", applicationParams.getDocumentURL()) + ": "
+                                                  + exception.getMessage(), exception
             );
         }
     }
