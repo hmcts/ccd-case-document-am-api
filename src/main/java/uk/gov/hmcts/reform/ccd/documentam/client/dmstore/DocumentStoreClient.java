@@ -333,9 +333,7 @@ public class DocumentStoreClient {
             HttpPost request = buildStreamUploadHttpRequest(documentUploadRequest);
             try (ClassicHttpResponse httpClientResponse = httpClient.executeOpen(null, request, null)) {
                 HttpStatus statusCode = HttpStatus.valueOf(httpClientResponse.getCode());
-                DmUploadResponse uploadResponse = handleUploadStreamResponse(statusCode, httpClientResponse);
-                httpClientResponse.close();
-                return uploadResponse;
+                return handleUploadStreamResponse(statusCode, httpClientResponse);
             }
         } catch (IOException exception) {
             log.error("Error occurred", exception);
