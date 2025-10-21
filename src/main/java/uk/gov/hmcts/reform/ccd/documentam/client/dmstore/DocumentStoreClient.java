@@ -178,41 +178,37 @@ public class DocumentStoreClient {
                                               ClassicHttpResponse httpClientResponse,
                                               HttpServletResponse httpResponseOut,
                                               UUID documentId) throws IOException {
-        try {
-            switch (statusCode) {
-                case OK, PARTIAL_CONTENT -> {
-                    httpResponseOut.setStatus(statusCode.value());
-                    mapResponseHeaders(httpClientResponse.getHeaders(), httpResponseOut);
+        switch (statusCode) {
+            case OK, PARTIAL_CONTENT -> {
+                httpResponseOut.setStatus(statusCode.value());
+                mapResponseHeaders(httpClientResponse.getHeaders(), httpResponseOut);
 
-                    try (InputStream input = httpClientResponse.getEntity().getContent()) {
-                        OutputStream output = httpResponseOut.getOutputStream();
-                        byte[] buffer = new byte[1024 * 1024]; // 1 MB buffer
-                        int bytesRead;
-                        while ((bytesRead = input.read(buffer)) >= 0) {
-                            output.write(buffer, 0, bytesRead);
-                        }
+                try (InputStream input = httpClientResponse.getEntity().getContent()) {
+                    OutputStream output = httpResponseOut.getOutputStream();
+                    byte[] buffer = new byte[1024 * 1024]; // 1 MB buffer
+                    int bytesRead;
+                    while ((bytesRead = input.read(buffer)) >= 0) {
+                        output.write(buffer, 0, bytesRead);
                     }
                 }
-                case NOT_FOUND -> {
-                    throw new ResourceNotFoundException(String.format("%s %s", RESOURCE_NOT_FOUND, documentId), null);
-                }
-                case INTERNAL_SERVER_ERROR, BAD_GATEWAY, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT -> {
-                    throw new HttpServerErrorException(
-                        statusCode, String.format(
-                        "Failed to retrieve document with ID: "
-                            + "%s", documentId
-                    )
-                    );
-                }
-                default -> {
-                    throw new ResponseStatusException(
-                        statusCode,
-                        String.format("Failed to retrieve document with ID: %s", documentId)
-                    );
-                }
             }
-        } finally {
-            httpClientResponse.close();
+            case NOT_FOUND -> {
+                throw new ResourceNotFoundException(String.format("%s %s", RESOURCE_NOT_FOUND, documentId), null);
+            }
+            case INTERNAL_SERVER_ERROR, BAD_GATEWAY, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT -> {
+                throw new HttpServerErrorException(
+                    statusCode, String.format(
+                    "Failed to retrieve document with ID: "
+                        + "%s", documentId
+                )
+                );
+            }
+            default -> {
+                throw new ResponseStatusException(
+                    statusCode,
+                    String.format("Failed to retrieve document with ID: %s", documentId)
+                );
+            }
         }
     }
 
@@ -351,58 +347,54 @@ public class DocumentStoreClient {
 
     private DmUploadResponse handleUploadStreamResponse(HttpStatus statusCode,
                                                         ClassicHttpResponse httpClientResponse) throws IOException {
-        try {
-            var responseEntity = httpClientResponse.getEntity();
-            String responseBody = null;
+        var responseEntity = httpClientResponse.getEntity();
+        String responseBody = null;
 
-            if (responseEntity != null) {
-                try (InputStream responseStream = responseEntity.getContent()) {
-                    responseBody = new String(responseStream.readAllBytes(), StandardCharsets.UTF_8);
-                }
+        if (responseEntity != null) {
+            try (InputStream responseStream = responseEntity.getContent()) {
+                responseBody = new String(responseStream.readAllBytes(), StandardCharsets.UTF_8);
             }
-
-            if (statusCode.is2xxSuccessful()) {
-                if (responseBody != null && !responseBody.isEmpty()) {
-                    try {
-                        return objectMapper.readValue(responseBody, DmUploadResponse.class);
-                    } catch (JsonProcessingException e) {
-                        log.error("Failed to parse success response: {}", responseBody, e);
-                        throw new ResponseStatusException(
-                            HttpStatus.INTERNAL_SERVER_ERROR,
-                            "Failed to parse server response", e
-                        );
-                    }
-                }
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Empty response from server");
-            }
-
-            if (statusCode == HttpStatus.UNPROCESSABLE_ENTITY) {
-                String errorFallback = HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase();
-                throw HttpClientErrorException.create(
-                    HttpStatus.UNPROCESSABLE_ENTITY,
-                    errorFallback,
-                    null,
-                    responseBody != null ? responseBody.getBytes(StandardCharsets.UTF_8)
-                        : errorFallback.getBytes(StandardCharsets.UTF_8),
-                    StandardCharsets.UTF_8
-                );
-
-            }
-
-            if (statusCode.is5xxServerError()) {
-                throw new HttpServerErrorException(
-                    statusCode,
-                    "Document upload failed due to server error. Response: " + responseBody
-                );
-            }
-
-            throw new ResponseStatusException(
-                statusCode, "Document upload failed with status: " + statusCode + ". "
-                + "Response: " + responseBody
-            );
-        } finally {
-            httpClientResponse.close();
         }
+
+        if (statusCode.is2xxSuccessful()) {
+            if (responseBody != null && !responseBody.isEmpty()) {
+                try {
+                    return objectMapper.readValue(responseBody, DmUploadResponse.class);
+                } catch (JsonProcessingException e) {
+                    log.error("Failed to parse success response: {}", responseBody, e);
+                    throw new ResponseStatusException(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Failed to parse server response", e
+                    );
+                }
+            }
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Empty response from server");
+        }
+
+        if (statusCode == HttpStatus.UNPROCESSABLE_ENTITY) {
+            String errorFallback = HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase();
+            throw HttpClientErrorException.create(
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                errorFallback,
+                null,
+                responseBody != null ? responseBody.getBytes(StandardCharsets.UTF_8)
+                    : errorFallback.getBytes(StandardCharsets.UTF_8),
+                StandardCharsets.UTF_8
+            );
+
+        }
+
+        if (statusCode.is5xxServerError()) {
+            throw new HttpServerErrorException(
+                statusCode,
+                "Document upload failed due to server error. Response: " + responseBody
+            );
+        }
+
+        throw new ResponseStatusException(
+            statusCode, "Document upload failed with status: " + statusCode + ". "
+            + "Response: " + responseBody
+        );
     }
 
     private HttpPost buildStreamUploadHttpRequest(final DocumentUploadRequest documentUploadRequest)
