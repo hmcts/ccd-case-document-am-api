@@ -192,23 +192,20 @@ public class DocumentStoreClient {
                     }
                 }
             }
-            case NOT_FOUND -> {
+            case NOT_FOUND ->
                 throw new ResourceNotFoundException(String.format("%s %s", RESOURCE_NOT_FOUND, documentId), null);
-            }
-            case INTERNAL_SERVER_ERROR, BAD_GATEWAY, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT -> {
+            case INTERNAL_SERVER_ERROR, BAD_GATEWAY, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT ->
                 throw new HttpServerErrorException(
                     statusCode, String.format(
                     "Failed to retrieve document with ID: "
                         + "%s", documentId
                 )
                 );
-            }
-            default -> {
+            default ->
                 throw new ResponseStatusException(
                     statusCode,
                     String.format("Failed to retrieve document with ID: %s", documentId)
                 );
-            }
         }
     }
 
@@ -362,9 +359,8 @@ public class DocumentStoreClient {
                     return objectMapper.readValue(responseBody, DmUploadResponse.class);
                 } catch (JsonProcessingException e) {
                     log.error("Failed to parse success response: {}", responseBody, e);
-                    throw new ResponseStatusException(
-                        HttpStatus.INTERNAL_SERVER_ERROR,
-                        "Failed to parse server response", e
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                                                      "Failed to parse server response", e
                     );
                 }
             }
@@ -385,14 +381,12 @@ public class DocumentStoreClient {
         }
 
         if (statusCode.is5xxServerError()) {
-            throw new HttpServerErrorException(
-                statusCode,
-                "Document upload failed due to server error. Response: " + responseBody
+            throw new HttpServerErrorException(statusCode,
+                                               "Document upload failed due to server error. Response: " + responseBody
             );
         }
 
-        throw new ResponseStatusException(
-            statusCode, "Document upload failed with status: " + statusCode + ". "
+        throw new ResponseStatusException(statusCode, "Document upload failed with status: " + statusCode + ". "
             + "Response: " + responseBody
         );
     }
