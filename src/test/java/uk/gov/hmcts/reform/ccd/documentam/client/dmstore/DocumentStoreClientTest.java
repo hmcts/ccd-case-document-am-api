@@ -8,7 +8,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.pool.PoolStats;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -100,6 +102,9 @@ class DocumentStoreClientTest implements TestFixture {
     private CloseableHttpClient httpClient;
 
     @Mock
+    private PoolingHttpClientConnectionManager httpClientConnectionManager;
+
+    @Mock
     private HttpServletResponse httpResponseOut;
 
     @Mock
@@ -107,6 +112,8 @@ class DocumentStoreClientTest implements TestFixture {
 
     private UUID documentId;
     private Map<String, String> requestHeaders;
+
+    private PoolStats poolStats = new PoolStats(0, 0, 0, 0);
 
     @BeforeEach
     void prepare() {
@@ -557,6 +564,7 @@ class DocumentStoreClientTest implements TestFixture {
 
     @Test
     void shouldThrowResponseStatusExceptionForIOException() throws IOException {
+        when(httpClientConnectionManager.getTotalStats()).thenReturn(poolStats);
         when(httpClient.executeOpen(eq(null), any(HttpGet.class), eq(null)))
             .thenThrow(new IOException("Connection failed"));
 
@@ -568,6 +576,7 @@ class DocumentStoreClientTest implements TestFixture {
         assertEquals("Error occurred while processing the request " + String.format("%s/documents/%s/binary",
                          DM_STORE_URL, documentId) + ": Connection failed", exception.getReason());
         assertInstanceOf(IOException.class, exception.getCause());
+        assertEquals(0, underTest.getHttpClientOpenConnections());
 
         verify(httpClient).executeOpen(eq(null), any(HttpGet.class), eq(null));
     }
@@ -713,6 +722,7 @@ class DocumentStoreClientTest implements TestFixture {
     void shouldThrowResponseStatusExceptionForUploadIOException() throws IOException {
         DocumentUploadRequest uploadRequest = createMockUploadRequest();
 
+        when(httpClientConnectionManager.getTotalStats()).thenReturn(poolStats);
         when(httpClient.executeOpen(eq(null), any(HttpPost.class), eq(null)))
             .thenThrow(new IOException("Network error"));
 
@@ -724,6 +734,7 @@ class DocumentStoreClientTest implements TestFixture {
         assertEquals("Error occurred while processing the request " + String.format("%s/documents", DM_STORE_URL)
                          + ": Network error", exception.getReason());
         assertInstanceOf(IOException.class, exception.getCause());
+        assertEquals(0, underTest.getHttpClientOpenConnections());
 
         verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
     }

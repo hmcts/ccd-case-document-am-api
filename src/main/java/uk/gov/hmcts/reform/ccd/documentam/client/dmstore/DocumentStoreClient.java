@@ -438,4 +438,8 @@ public class DocumentStoreClient {
         }
         return builder.build();
     }
+
+    public int getHttpClientOpenConnections() {
+        return httpClientConnectionManager.getTotalStats().getLeased();
+    }
 }
