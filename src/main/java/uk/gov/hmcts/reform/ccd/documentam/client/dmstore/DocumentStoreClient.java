@@ -195,9 +195,7 @@ public class DocumentStoreClient {
             case NOT_FOUND ->
                 throw new ResourceNotFoundException(String.format("%s %s", RESOURCE_NOT_FOUND, documentId), null);
             case INTERNAL_SERVER_ERROR, BAD_GATEWAY, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT ->
-                throw new HttpServerErrorException(
-                    statusCode, String.format(
-                    "Failed to retrieve document with ID: "
+                throw new HttpServerErrorException(statusCode, String.format("Failed to retrieve document with ID: "
                         + "%s", documentId
                 )
                 );
@@ -360,8 +358,7 @@ public class DocumentStoreClient {
                 } catch (JsonProcessingException e) {
                     log.error("Failed to parse success response: {}", responseBody, e);
                     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                                                      "Failed to parse server response", e
-                    );
+                                                      "Failed to parse server response", e);
                 }
             }
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Empty response from server");
@@ -382,13 +379,11 @@ public class DocumentStoreClient {
 
         if (statusCode.is5xxServerError()) {
             throw new HttpServerErrorException(statusCode,
-                                               "Document upload failed due to server error. Response: " + responseBody
-            );
+                                               "Document upload failed due to server error. Response: " + responseBody);
         }
 
         throw new ResponseStatusException(statusCode, "Document upload failed with status: " + statusCode + ". "
-            + "Response: " + responseBody
-        );
+            + "Response: " + responseBody);
     }
 
     private HttpPost buildStreamUploadHttpRequest(final DocumentUploadRequest documentUploadRequest)
