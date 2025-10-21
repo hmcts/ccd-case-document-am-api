@@ -47,7 +47,7 @@ public class ApplicationConfiguration {
     @Value("${http.client.validate.after.inactivity}")
     private int validateAfterInactivity;
 
-    private PoolingHttpClientConnectionManager cm;
+    private final PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
 
     @PreDestroy
     void close() {
@@ -61,6 +61,11 @@ public class ApplicationConfiguration {
     @Bean
     public CloseableHttpClient httpClient() {
         return getPoolingHttpClient();
+    }
+
+    @Bean
+    public PoolingHttpClientConnectionManager httpClientConnectionManager() {
+        return cm;
     }
 
     @Bean
@@ -99,8 +104,6 @@ public class ApplicationConfiguration {
     }
 
     private CloseableHttpClient getPoolingHttpClient() {
-        cm = new PoolingHttpClientConnectionManager();
-
         log.info("""
             HttpClient Configuration:
             maxTotalHttpClient: {},

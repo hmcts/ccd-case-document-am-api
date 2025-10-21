@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
@@ -56,6 +57,9 @@ class DocumentStoreClientStreamingTest {
     private CloseableHttpClient httpClient;
 
     @Mock
+    private PoolingHttpClientConnectionManager httpClientConnectionManager;
+
+    @Mock
     private CloseableHttpResponse httpResponse;
 
     @Mock
@@ -92,7 +96,8 @@ class DocumentStoreClientStreamingTest {
 
         when(applicationParams.getClientRequestHeadersToForward()).thenReturn(List.of("RANGE"));
 
-        documentStoreClient = new DocumentStoreClient(securityUtils, restTemplate, httpClient, applicationParams);
+        documentStoreClient = new DocumentStoreClient(securityUtils, restTemplate, httpClient,
+                                                      httpClientConnectionManager, applicationParams);
     }
 
     @Test

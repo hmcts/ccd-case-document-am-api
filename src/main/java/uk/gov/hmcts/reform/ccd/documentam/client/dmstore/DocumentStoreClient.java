@@ -12,6 +12,7 @@ import org.apache.hc.client5.http.entity.mime.ContentBody;
 import org.apache.hc.client5.http.entity.mime.InputStreamBody;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
@@ -65,6 +66,7 @@ public class DocumentStoreClient {
 
     private final RestTemplate restTemplate;
     private final CloseableHttpClient httpClient;
+    private final PoolingHttpClientConnectionManager httpClientConnectionManager;
     private final ApplicationParams applicationParams;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final SecurityUtils securityUtils;
@@ -73,10 +75,12 @@ public class DocumentStoreClient {
     @Autowired
     public DocumentStoreClient(SecurityUtils securityUtils, final RestTemplate restTemplate,
                                final CloseableHttpClient httpClient,
+                               final PoolingHttpClientConnectionManager httpClientConnectionManager,
                                final ApplicationParams applicationParams) {
         this.securityUtils = securityUtils;
         this.restTemplate = restTemplate;
         this.httpClient = httpClient;
+        this.httpClientConnectionManager = httpClientConnectionManager;
         this.applicationParams = applicationParams;
     }
 
