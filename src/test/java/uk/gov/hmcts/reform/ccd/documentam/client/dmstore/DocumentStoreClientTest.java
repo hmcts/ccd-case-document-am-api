@@ -565,7 +565,8 @@ class DocumentStoreClientTest implements TestFixture {
         );
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
-        assertEquals("Error occurred while processing the request", exception.getReason());
+        assertEquals("Error occurred while processing the request " + String.format("%s/documents/%s/binary",
+                         DM_STORE_URL, documentId) + ": Connection failed", exception.getReason());
         assertInstanceOf(IOException.class, exception.getCause());
 
         verify(httpClient).executeOpen(eq(null), any(HttpGet.class), eq(null));
@@ -720,7 +721,8 @@ class DocumentStoreClientTest implements TestFixture {
         );
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
-        assertEquals("Error occurred while processing the request", exception.getReason());
+        assertEquals("Error occurred while processing the request " + String.format("%s/documents", DM_STORE_URL)
+                         + ": Network error", exception.getReason());
         assertInstanceOf(IOException.class, exception.getCause());
 
         verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
