@@ -364,5 +364,16 @@
         "UPDATE",
         "DELETE"
       ]
+    },
+    {
+      "id": "pcs_frontend",
+      "caseTypeId": ["*"],
+      "jurisdictionId": "PCS",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
     }]
 }
