@@ -1,7 +1,7 @@
 # renovate: datasource=github-releases depName=microsoft/ApplicationInsights-Java
 ARG APP_INSIGHTS_AGENT_VERSION=3.7.3
 
-FROM openjdk:21-jdk-slim as builder
+FROM eclipse-temurin:21-jdk as builder
 
 ARG JAR_FILE=build/libs/ccd-case-document-am-api.jar
 COPY ${JAR_FILE} application.jar
