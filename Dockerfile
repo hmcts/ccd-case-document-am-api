@@ -13,6 +13,6 @@ LABEL maintainer="https://github.com/hmcts/ccd-definition-store-api"
 COPY build/libs/ccd-case-document-am-api.jar /opt/app/
 COPY lib/applicationinsights.json /opt/app
 
-EXPOSE 4451
+EXPOSE 4455
 
 CMD ["ccd-case-document-am-api.jar"]
