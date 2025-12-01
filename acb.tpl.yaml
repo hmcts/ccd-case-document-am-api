@@ -1,7 +1,7 @@
 version: 1.0-preview-1
 steps:
-  - id: pull-base-image-amd64
-    cmd: docker pull --platform linux/amd64 hmctspublic.azurecr.io/base/java:21-distroless && docker tag hmctspublic.azurecr.io/base/java:21-distroless hmctspublic.azurecr.io/base/java/linux/amd64:21-distroless
+  - id: pull-temurin-amd64
+    cmd: docker pull --platform linux/amd64 eclipse-temurin:21-jdk-jammy
     when: ["-"]
     retries: 3
     retryDelay: 5
@@ -9,29 +9,27 @@ steps:
   - id: runtime-amd64
     build: >
       -t {{.Run.Registry}}/{{CI_IMAGE_TAG}}-amd64
-      --build-arg PLATFORM=/linux/amd64
       --platform linux/amd64
       .
     when:
-      - pull-base-image-amd64
+      - pull-temurin-amd64
     retries: 3
     retryDelay: 5
 
-  - id: pull-base-image-arm64
-    cmd: docker pull --platform linux/arm64 hmctspublic.azurecr.io/base/java:21-distroless && docker tag hmctspublic.azurecr.io/base/java:21-distroless hmctspublic.azurecr.io/base/java/linux/arm64:21-distroless
+  - id: pull-temurin-arm64
+    cmd: docker pull --platform linux/arm64 eclipse-temurin:21-jdk-jammy
     when:
-      - pull-base-image-amd64
+      - pull-temurin-amd64
     retries: 3
     retryDelay: 5
 
   - id: runtime-arm64
     build: >
       -t {{.Run.Registry}}/{{CI_IMAGE_TAG}}-arm64
-      --build-arg PLATFORM=/linux/arm64
       --platform linux/arm64/v8
       .
     when:
-      - pull-base-image-arm64
+      - pull-temurin-arm64
     retries: 3
     retryDelay: 5
 
