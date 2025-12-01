@@ -21,16 +21,18 @@ USER hmcts
 # copy app-insights and extracted layers from builder
 COPY lib/applicationinsights.json /opt/app
 
+# The following layer ARGs are only needed to stop Fortify flagging an issue with the COPY instructions
 ARG DIR_LAYER_APPLICATION=application/
 ARG DIR_LAYER_DEPENDECIES=dependencies/
 ARG DIR_LAYER_SPRING_BOOT_LOADER=spring-boot-loader/
 ARG DIR_LAYER_SNAPSHOT_DEPENDENCIES=snapshot-dependencies/
 
-COPY --from=builder ${DIR_LAYER_APPLICATION} /app/
-COPY --from=builder ${DIR_LAYER_DEPENDECIES} /app/
-COPY --from=builder ${DIR_LAYER_SPRING_BOOT_LOADER} /app/
-COPY --from=builder ${DIR_LAYER_SNAPSHOT_DEPENDENCIES} /app/
+COPY --from=builder ${DIR_LAYER_APPLICATION} /opt/app/
+COPY --from=builder ${DIR_LAYER_DEPENDECIES} /opt/app/
+COPY --from=builder ${DIR_LAYER_SPRING_BOOT_LOADER} /opt/app/
+COPY --from=builder ${DIR_LAYER_SNAPSHOT_DEPENDENCIES} /opt/app/
 
 EXPOSE 4455
 
-ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
+# ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
+ENTRYPOINT ["/usr/bin/java", "org.springframework.boot.loader.launch.JarLauncher"]
