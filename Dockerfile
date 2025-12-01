@@ -26,10 +26,10 @@ ARG DIR_LAYER_DEPENDECIES=dependencies/
 ARG DIR_LAYER_SPRING_BOOT_LOADER=spring-boot-loader/
 ARG DIR_LAYER_SNAPSHOT_DEPENDENCIES=snapshot-dependencies/
 
-COPY --from=builder ${DIR_LAYER_APPLICATION} /opt/app/
-COPY --from=builder ${DIR_LAYER_DEPENDECIES} /opt/app/
-COPY --from=builder ${DIR_LAYER_SPRING_BOOT_LOADER} /opt/app/
-COPY --from=builder ${DIR_LAYER_SNAPSHOT_DEPENDENCIES} /opt/app/
+COPY --from=builder ${DIR_LAYER_APPLICATION} /app/
+COPY --from=builder ${DIR_LAYER_DEPENDECIES} /app/
+COPY --from=builder ${DIR_LAYER_SPRING_BOOT_LOADER} /app/
+COPY --from=builder ${DIR_LAYER_SNAPSHOT_DEPENDENCIES} /app/
 
 EXPOSE 4455
 
