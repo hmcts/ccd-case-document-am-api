@@ -1,10 +1,13 @@
 version: 1.0-preview-1
 steps:
   - id: pull-temurin-amd64
-    cmd: docker pull --platform linux/amd64 eclipse-temurin:21-jdk-jammy
+    cmd: >-
+    docker pull --platform linux/amd64 eclipse-temurin:21-jdk-jammy &&
+    docker tag eclipse-temurin:21-jdk-jammy hmctspublic.azurecr.io/base/java/linux/amd64:21-jdk
     when: ["-"]
     retries: 3
     retryDelay: 5
+  
 
   - id: runtime-amd64
     build: >
@@ -17,7 +20,9 @@ steps:
     retryDelay: 5
 
   - id: pull-temurin-arm64
-    cmd: docker pull --platform linux/arm64 eclipse-temurin:21-jdk-jammy
+    cmd: >-
+    docker pull --platform linux/arm64 eclipse-temurin:21-jdk-jammy &&
+    docker tag eclipse-temurin:21-jdk-jammy hmctspublic.azurecr.io/base/java/linux/arm64:21-jdk
     when:
       - pull-temurin-amd64
     retries: 3
