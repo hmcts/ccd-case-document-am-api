@@ -8,7 +8,7 @@ FROM hmctspublic.azurecr.io/base/java${PLATFORM}:21-distroless
 # Change to non-root privilege
 USER hmcts
 
-LABEL maintainer="https://github.com/hmcts/ccd-definition-store-api"
+LABEL maintainer="https://github.com/hmcts/ccd-case-document-am-api"
 
 COPY build/libs/ccd-case-document-am-api.jar /opt/app/
 COPY lib/applicationinsights.json /opt/app
