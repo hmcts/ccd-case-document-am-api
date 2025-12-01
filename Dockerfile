@@ -10,34 +10,39 @@ COPY ${JAR_FILE} application.jar
 # extract layers (Spring Boot layered jar)
 RUN java -Djarmode=layertools -jar application.jar extract
 
-# ---- runtime stage (also Temurin, includes /bin/sh) ----
-FROM eclipse-temurin:21-jdk-alpine
+# ---- runtime helper stage (prepare /opt/app) ----
+FROM eclipse-temurin:21-jdk-alpine AS runtime-helper
 
-# create hmcts user if you expect non-root user
-RUN addgroup -S hmcts && adduser -S -G hmcts hmcts
+# create runtime user and app dir
+RUN addgroup -S hmcts && adduser -S -G hmcts hmcts && mkdir -p /opt/app && chown -R hmcts:hmcts /opt/app
 
-USER hmcts
+# copy extras (run as root here)
+USER root
+COPY lib/applicationinsights.json /opt/app/
 
-# copy app-insights and extracted layers from builder
-COPY lib/applicationinsights.json /app
-
-# The following layer ARGs are only needed to stop Fortify flagging an issue with the COPY instructions
+# ARG names (spellings must match builder output)
 ARG DIR_LAYER_APPLICATION=application/
 ARG DIR_LAYER_DEPENDENCIES=dependencies/
 ARG DIR_LAYER_SPRING_BOOT_LOADER=spring-boot-loader/
 ARG DIR_LAYER_SNAPSHOT_DEPENDENCIES=snapshot-dependencies/
 
-COPY --from=builder application/ /opt/app/application/
-COPY --from=builder dependencies/ /opt/app/dependencies/
-COPY --from=builder spring-boot-loader/ /opt/app/spring-boot-loader/
-COPY --from=builder snapshot-dependencies/ /opt/app/snapshot-dependencies/
-COPY lib/applicationinsights.json /opt/app/
+COPY --from=builder ${DIR_LAYER_SPRING_BOOT_LOADER} /opt/app/spring-boot-loader/
+COPY --from=builder ${DIR_LAYER_DEPENDENCIES} /opt/app/dependencies/
+COPY --from=builder ${DIR_LAYER_SNAPSHOT_DEPENDENCIES} /opt/app/snapshot-dependencies/
+COPY --from=builder ${DIR_LAYER_APPLICATION} /opt/app/application/
+
+RUN chown -R hmcts:hmcts /opt/app
+
+# ---- final runtime (use same Temurin base so shell exists) ----
+FROM eclipse-temurin:21-jdk-alpine
+
+# create user (again) and set permissions
+RUN addgroup -S hmcts && adduser -S -G hmcts hmcts
+COPY --from=runtime-helper /opt/app /opt/app
+RUN chown -R hmcts:hmcts /opt/app
+
+USER hmcts
 
 EXPOSE 4455
 
-ENTRYPOINT [
-    "java",
-    " -cp",
-    "/opt/app/spring-boot-loader/spring-boot-loader.jar:/opt/app/dependencies/*:/opt/app/snapshot-dependencies/*:/opt/app/application/",
-    "org.springframework.boot.loader.launch.JarLauncher"
-]
+ENTRYPOINT ["java", "-cp", "/opt/app/spring-boot-loader/spring-boot-loader.jar:/opt/app/dependencies/*:/opt/app/snapshot-dependencies/*:/opt/app/application/", "org.springframework.boot.loader.launch.JarLauncher"]
