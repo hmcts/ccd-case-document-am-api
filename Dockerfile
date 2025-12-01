@@ -8,7 +8,6 @@ ARG JAR_FILE=build/libs/ccd-case-document-am-api.jar
 COPY ${JAR_FILE} application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
 
-FROM hmctspublic.azurecr.io/base/java:21-distroless
 USER hmcts
 
 COPY lib/applicationinsights.json /opt/app
