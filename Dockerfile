@@ -27,11 +27,17 @@ ARG DIR_LAYER_DEPENDENCIES=dependencies/
 ARG DIR_LAYER_SPRING_BOOT_LOADER=spring-boot-loader/
 ARG DIR_LAYER_SNAPSHOT_DEPENDENCIES=snapshot-dependencies/
 
-COPY --from=builder ${DIR_LAYER_APPLICATION} /app/
-COPY --from=builder ${DIR_LAYER_DEPENDENCIES} /app/
-COPY --from=builder ${DIR_LAYER_SPRING_BOOT_LOADER} /app/
-COPY --from=builder ${DIR_LAYER_SNAPSHOT_DEPENDENCIES} /app/
+COPY --from=builder application/ /opt/app/application/
+COPY --from=builder dependencies/ /opt/app/dependencies/
+COPY --from=builder spring-boot-loader/ /opt/app/spring-boot-loader/
+COPY --from=builder snapshot-dependencies/ /opt/app/snapshot-dependencies/
+COPY lib/applicationinsights.json /opt/app/
 
 EXPOSE 4455
 
-ENTRYPOINT ["java", "-cp", "/app/spring-boot-loader/spring-boot-loader.jar:/app/dependencies/*:/app/snapshot-dependencies/*:/app/application/", "org.springframework.boot.loader.launch.JarLauncher"]
+ENTRYPOINT [
+    "java",
+    " -cp",
+    "/opt/app/spring-boot-loader/spring-boot-loader.jar:/opt/app/dependencies/*:/opt/app/snapshot-dependencies/*:/opt/app/application/",
+    "org.springframework.boot.loader.launch.JarLauncher"
+]
