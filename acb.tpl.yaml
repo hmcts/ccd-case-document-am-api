@@ -2,7 +2,9 @@ version: 1.0-preview-1
 steps:
   - id: pull-temurin-amd64
     cmd: >
-      docker pull --platform linux/amd64 eclipse-temurin:21-jdk-jammy
+      # pull amd64 Temurin Alpine and tag it where the Dockerfile expects a base
+      docker pull --platform linux/amd64 eclipse-temurin:21-jdk-alpine &&
+      docker tag eclipse-temurin:21-jdk-alpine hmctspublic.azurecr.io/base/java/linux/amd64:21-jdk-alpine
     when: ["-"]
     retries: 3
     retryDelay: 5
@@ -12,6 +14,7 @@ steps:
       --pull
       --platform linux/amd64
       -t {{.Run.Registry}}/{{CI_IMAGE_TAG}}-amd64
+      --build-arg PLATFORM=/linux/amd64
       .
     when:
       - pull-temurin-amd64
@@ -20,7 +23,8 @@ steps:
 
   - id: pull-temurin-arm64
     cmd: >
-      docker pull --platform linux/arm64 eclipse-temurin:21-jdk-jammy
+      docker pull --platform linux/arm64 eclipse-temurin:21-jdk-alpine &&
+      docker tag eclipse-temurin:21-jdk-alpine hmctspublic.azurecr.io/base/java/linux/arm64:21-jdk-alpine
     when:
       - pull-temurin-amd64
     retries: 3
@@ -31,6 +35,7 @@ steps:
       --pull
       --platform linux/arm64/v8
       -t {{.Run.Registry}}/{{CI_IMAGE_TAG}}-arm64
+      --build-arg PLATFORM=/linux/arm64
       .
     when:
       - pull-temurin-arm64
