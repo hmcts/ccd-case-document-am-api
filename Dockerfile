@@ -1,6 +1,6 @@
 # renovate: datasource=github-releases depName=microsoft/ApplicationInsights-Java
 ARG JAVA_OPTS="-Djava.security.egd=file:/dev/./urandom"
-ARG APP_INSIGHTS_AGENT_VERSION=3.5.4
+ARG APP_INSIGHTS_AGENT_VERSION=3.7.3
 ARG PLATFORM=""
 
 FROM hmctspublic.azurecr.io/base/java${PLATFORM}:21-distroless
