@@ -300,6 +300,7 @@ dependencies {
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '5.3.3'
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.9'
 
+
   implementation group: 'com.auth0', name: 'java-jwt', version: '4.5.0'
   implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.2.2'
   implementation group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: '4.9.3'
