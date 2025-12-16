@@ -103,8 +103,8 @@ withPipeline("java", product, component) {
       builder.gradle('integration')
       steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/checkstyle/*.html'
       steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/pmd/*.html'
-      //copyIgnore('./build/reports/tests/test', './Unit Tests/')
-      //copyIgnore('./build/reports/tests/integration', './Integration Tests/')
+      copyIgnore('./build/reports/tests/test', './Unit Tests/')
+      copyIgnore('./build/reports/tests/integration', './Integration Tests/')
       steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Unit Tests/**/*'
       steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Integration Tests/**/*'
 
