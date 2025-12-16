@@ -108,6 +108,7 @@ withPipeline("java", product, component) {
       steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Unit Tests/**/*'
       steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Integration Tests/**/*'
 
+
       publishHTML target: [
           allowMissing         : true,
           alwaysLinkToLastBuild: true,
