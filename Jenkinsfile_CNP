@@ -122,7 +122,7 @@ withPipeline("java", product, component) {
       allowMissing         : true,
       alwaysLinkToLastBuild: true,
       keepAll              : true,
-      reportDir            : 'Integration Tests',
+      reportDir            : 'build/reports/tests/integration/',
       reportFiles          : "index.html",
       reportName           : "Integration Test Report"
       ]
