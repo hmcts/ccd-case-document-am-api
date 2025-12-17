@@ -101,32 +101,33 @@ withPipeline("java", product, component) {
 
   afterAlways('test') {
       builder.gradle('integration')
-      steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/checkstyle/*.html'
-      steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/pmd/*.html'
-      //copyIgnore('./build/reports/tests/test', './Unit Tests/')
-      //copyIgnore('./build/reports/tests/integration', './Integration Tests/')
-      steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Unit Tests/**/*'
-      steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Integration Tests/**/*'
+     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/checkstyle/*.html'
+     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/pmd/*.html'
 
+    copyIgnore('./build/reports/tests/test', './Unit Tests/')
+    copyIgnore('./build/reports/tests/integration', './Integration Tests/')
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Unit Tests/**/*'
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Integration Tests/**/*'
 
-      publishHTML target: [
-          allowMissing         : true,
-          alwaysLinkToLastBuild: true,
-          keepAll              : true,
-          reportDir            : 'build/reports/tests/test/',
-          reportFiles          : "index.html",
-          reportName           : "Unit Test Report"
+   publishHTML target: [
+            allowMissing         : true,
+            alwaysLinkToLastBuild: true,
+            keepAll              : true,
+            reportDir            : 'Unit Tests',
+            reportFiles          : "index.html",
+            reportName           : "Unit Test Report"
         ]
 
-      publishHTML target: [
-      allowMissing         : true,
-      alwaysLinkToLastBuild: true,
-      keepAll              : true,
-      reportDir            : 'build/reports/tests/integration/',
-      reportFiles          : "index.html",
-      reportName           : "Integration Test Report"
-      ]
-    }
+    publishHTML target: [
+            allowMissing         : true,
+            alwaysLinkToLastBuild: true,
+            keepAll              : true,
+            reportDir            : "Integration Tests",
+            reportFiles          : "index.html",
+            reportName           : "Integration Test Report"
+        ]
+
+  }
 
   // Check if the build should be wired to an environment higher than 'preview'.
   if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'demo' || env.BRANCH_NAME == 'perftest' || env.BRANCH_NAME == 'ithc' || prsToUseAat.toLowerCase().contains(env.BRANCH_NAME.toLowerCase())) {
