@@ -128,8 +128,8 @@ withPipeline("java", product, component) {
     //copyIgnore('./build/reports/tests/test', './Unit Tests/')
     //copyIgnore('./build/reports/tests/integration', './Integration Tests/')
 
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Unit Tests/**/*'
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Integration Tests/**/*'
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/build/reports/tests/test/**/*'
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/build/reports/tests/integration/**/*'
 
    publishHTML target: [
             allowMissing         : true,
