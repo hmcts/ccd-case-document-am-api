@@ -130,16 +130,13 @@ withPipeline("java", product, component) {
      steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Integration Tests/**/*'
 
      copyIgnore('./build/reports/tests/test', './Unit Tests/')
-     //copyIgnore('./build/reports/tests/integration', './Integration Tests/')
-
-     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/build/reports/tests/test/**/*'
-     //steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/build/reports/tests/integration/**/*'
+     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Unit Tests/**/*'
 
    publishHTML target: [
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
             keepAll              : true,
-            reportDir            : 'build/reports/tests/test/',
+            reportDir            : 'Unit Tests',
             reportFiles          : "index.html",
             reportName           : "Unit Test Report"
         ]
