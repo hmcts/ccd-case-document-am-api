@@ -122,14 +122,18 @@ withPipeline("java", product, component) {
 
   afterAlways('test') {
      builder.gradle('integration')
+
      steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/checkstyle/*.html'
      steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/pmd/*.html'
 
-     copyIgnore('./build/reports/tests/test', './Unit Tests/')
      copyIgnore('./build/reports/tests/integration', './Integration Tests/')
+     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Integration Tests/**/*'
+
+     copyIgnore('./build/reports/tests/test', './Unit Tests/')
+     //copyIgnore('./build/reports/tests/integration', './Integration Tests/')
 
      steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/build/reports/tests/test/**/*'
-     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/build/reports/tests/integration/**/*'
+     //steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/build/reports/tests/integration/**/*'
 
    publishHTML target: [
             allowMissing         : true,
@@ -144,7 +148,7 @@ withPipeline("java", product, component) {
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
             keepAll              : true,
-            reportDir            : "build/reports/tests/integration/",
+            reportDir            : "Integration Tests",
             reportFiles          : "index.html",
             reportName           : "Integration Test Report"
         ]
