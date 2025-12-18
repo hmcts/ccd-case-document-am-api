@@ -136,7 +136,7 @@ withPipeline("java", product, component) {
             allowMissing         : true,
             alwaysLinkToLastBuild: true,
             keepAll              : true,
-            reportDir            : 'Unit Tests',
+            reportDir            : "Unit Tests",
             reportFiles          : "index.html",
             reportName           : "Unit Test Report"
         ]
