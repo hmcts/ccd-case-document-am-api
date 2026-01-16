@@ -1,0 +1,74 @@
+{
+  "provider": {
+    "name": "CCD_CASE_DOCS_AM_API"
+  },
+  "consumer": {
+    "name": "prl-dgs-api"
+  },
+  "interactions": [
+    {
+      "description": "a request to download a valid document",
+      "request": {
+        "method": "GET",
+        "path": "/cases/documents/456c0976-3178-46dd-b9ce-5ab5d47c625a",
+        "headers": {
+          "Authorization": "someAuthToken",
+          "ServiceAuthorization": "someServiceAuthToken"
+        }
+      },
+      "response": {
+        "status": 200
+      },
+      "providerStates": [
+        {
+          "name": "A request to download a document"
+        }
+      ]
+    },
+    {
+      "description": "a request to download a valid document with invalid authorisation",
+      "request": {
+        "method": "GET",
+        "path": "/cases/documents/456c0976-3178-46dd-b9ce-5ab5d47c625a",
+        "headers": {
+          "ServiceAuthorization": "invalidServiceAuthToken"
+        }
+      },
+      "response": {
+        "status": 500
+      },
+      "providerStates": [
+        {
+          "name": "A request to download a document"
+        }
+      ]
+    },
+    {
+      "description": "a request to upload a document with valid authorization",
+      "request": {
+        "method": "POST",
+        "path": "/cases/documents",
+        "headers": {
+          "Authorization": "someAuthToken",
+          "ServiceAuthorization": "someServiceAuthToken"
+        }
+      },
+      "response": {
+        "status": 200
+      },
+      "providerStates": [
+        {
+          "name": "A request to upload a document"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "4.1.11"
+    }
+  }
+}

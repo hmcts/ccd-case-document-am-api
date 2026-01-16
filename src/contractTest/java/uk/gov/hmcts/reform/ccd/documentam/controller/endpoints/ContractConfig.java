@@ -22,8 +22,8 @@ public class ContractConfig {
 
     @Bean
     @Primary
-    public CaseDocumentAmController caseDocumentAmController() {
-        return new CaseDocumentAmController(documentManagementService, securityUtils, applicationParams);
+    public TestCaseDocumentAmController testCaseDocumentAmController() {
+        return new TestCaseDocumentAmController();
     }
 
 }
