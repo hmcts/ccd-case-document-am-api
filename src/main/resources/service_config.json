@@ -174,20 +174,9 @@
       ]
     },
     {
-      "id": "finrem_document_generator",
-      "caseTypeId": ["FinancialRemedyContested","FinancialRemedyMVP2"],
-      "jurisdictionId": "DIVORCE",
-      "permissions": [
-        "CREATE",
-        "READ",
-        "DELETE",
-        "UPDATE"
-      ]
-    },
-    {
       "id": "finrem_case_orchestration",
-      "caseTypeId": ["*"],
-      "jurisdictionId": "*",
+      "caseTypeId": ["FinancialRemedyContested","FinancialRemedyMVP2", "FINREM_ExceptionRecord"],
+      "jurisdictionId": "DIVORCE",
       "permissions": [
         "CREATE",
         "READ",
