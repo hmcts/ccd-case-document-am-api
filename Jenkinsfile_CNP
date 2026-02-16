@@ -99,33 +99,7 @@ withPipeline("java", product, component) {
     ])
   }
 
-  afterAlways('test') {
-      builder.gradle('integration')
-      steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/checkstyle/*.html'
-      steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/pmd/*.html'
-      //copyIgnore('./build/reports/tests/test', './Unit Tests/')
-      //copyIgnore('./build/reports/tests/integration', './Integration Tests/')
-      steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Unit Tests/**/*'
-      steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Integration Tests/**/*'
 
-      publishHTML target: [
-          allowMissing         : true,
-          alwaysLinkToLastBuild: true,
-          keepAll              : true,
-          reportDir            : 'build/reports/tests/test/',
-          reportFiles          : "index.html",
-          reportName           : "Unit Test Report"
-        ]
-
-      publishHTML target: [
-      allowMissing         : true,
-      alwaysLinkToLastBuild: true,
-      keepAll              : true,
-      reportDir            : 'Integration Tests',
-      reportFiles          : "index.html",
-      reportName           : "Integration Test Report"
-      ]
-    }
 
   // Check if the build should be wired to an environment higher than 'preview'.
   if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'demo' || env.BRANCH_NAME == 'perftest' || env.BRANCH_NAME == 'ithc' || prsToUseAat.toLowerCase().contains(env.BRANCH_NAME.toLowerCase())) {
@@ -146,7 +120,40 @@ withPipeline("java", product, component) {
   enableAksStagingDeployment()
   disableLegacyDeployment()
 
+  afterAlways('test') {
+     builder.gradle('integration')
+
+     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/checkstyle/*.html'
+     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/pmd/*.html'
+
+     copyIgnore('./build/reports/tests/integration', './Integration Tests/')
+     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Integration Tests/**/*'
+
+     copyIgnore('./build/reports/tests/test', './Unit Tests/')
+     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Unit Tests/**/*'
+
+   publishHTML target: [
+            allowMissing         : true,
+            alwaysLinkToLastBuild: true,
+            keepAll              : true,
+            reportDir            : "Unit Tests",
+            reportFiles          : "index.html",
+            reportName           : "Unit Test Report"
+        ]
+
+    publishHTML target: [
+            allowMissing         : true,
+            alwaysLinkToLastBuild: true,
+            keepAll              : true,
+            reportDir            : "Integration Tests",
+            reportFiles          : "index.html",
+            reportName           : "Integration Test Report"
+        ]
+
+  }
+
   afterAlways('functionalTest:preview') {
+    copyIgnore('./build/reports/tests/befta/functional/cucumber-html-reports', './BEFTA Report for Functional Tests/')
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Functional Tests/**/*'
     publishHTML target: [
             allowMissing         : true,
@@ -159,6 +166,7 @@ withPipeline("java", product, component) {
   }
 
   afterAlways('functionalTest:aat') {
+    copyIgnore('./build/reports/tests/befta/functional/cucumber-html-reports', './BEFTA Report for Functional Tests/')
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Functional Tests/**/*'
     publishHTML target: [
             allowMissing         : true,
@@ -171,6 +179,7 @@ withPipeline("java", product, component) {
   }
 
   afterAlways('smoketest:preview') {
+    copyIgnore('./build/reports/tests/befta/smoke/cucumber-html-reports', './BEFTA Report for Smoke Tests/')
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Smoke Tests/**/*'
     publishHTML target: [
       allowMissing         : true,
@@ -183,6 +192,7 @@ withPipeline("java", product, component) {
   }
 
   afterAlways('smoketest:aat') {
+    copyIgnore('./build/reports/tests/befta/smoke/cucumber-html-reports', './BEFTA Report for Smoke Tests/')
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/BEFTA Report for Smoke Tests/**/*'
     publishHTML target: [
             allowMissing         : true,
@@ -205,4 +215,11 @@ withPipeline("java", product, component) {
             reportName           : "Contract Tests Report"
         ]
     }
+}
+
+/**
+ * Forces a recursive copy by always returning 0 regardless of errors
+ */
+def copyIgnore(filePath, destinationDir) {
+  steps.sh("cp -R '${filePath}' '${destinationDir}' || :")
 }
