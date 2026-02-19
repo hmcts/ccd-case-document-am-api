@@ -21,6 +21,8 @@ import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
+import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
+import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 
 import java.io.IOException;
@@ -28,12 +30,14 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
 
 @ExtendWith(SpringExtension.class)
-@Provider("case-document-am-api")
 @PactBroker(url = "${PACT_BROKER_FULL_URL:http://localhost}",
     consumerVersionSelectors = {@VersionSelector(tag = "master")})
+@Provider("CCD_CASE_DOCS_AM_API")
 @ContextConfiguration(classes = {ContractConfig.class})
 @IgnoreNoPactsToVerify
 public class CaseDocumentAmProviderTest {
@@ -47,7 +51,13 @@ public class CaseDocumentAmProviderTest {
     DocumentManagementService documentManagementService;
 
     @Autowired
-    CaseDocumentAmController caseDocumentAmController;
+    TestCaseDocumentAmController testCaseDocumentAmController;
+
+    @Autowired
+    SecurityUtils securityUtils;
+
+    @Autowired
+    ApplicationParams applicationParams;
 
     @TestTemplate
     @ExtendWith(PactVerificationInvocationContextProvider.class)
@@ -61,7 +71,7 @@ public class CaseDocumentAmProviderTest {
     void before(PactVerificationContext context) {
         MockMvcTestTarget testTarget = new MockMvcTestTarget();
         //System.getProperties().setProperty("pact.verifier.publishResults", "true");
-        testTarget.setControllers(caseDocumentAmController);
+        testTarget.setControllers(testCaseDocumentAmController);
         if (context != null) {
             context.setTarget(testTarget);
         }
@@ -85,7 +95,49 @@ public class CaseDocumentAmProviderTest {
                                                                DOCUMENT_ID_UUID.toString())).willReturn(
                                                                    AuthorisedService.builder().build());
 
-        ResponseEntity response = new ResponseEntity(HttpStatus.OK);
+        ResponseEntity<?> response = new ResponseEntity<>(HttpStatus.OK);
         given(documentManagementService.getDocumentBinaryContent(DOCUMENT_ID_UUID)).willAnswer(x -> response);
+    }
+
+    @State({"A request to download a document"})
+    public void requestToDownloadDocument() throws IOException {
+        // Set up the document with FPRL case type and jurisdiction
+        Map<String, String> metadata = new HashedMap<>();
+        metadata.put(Constants.METADATA_CASE_TYPE_ID, "PRLAPPS");
+        metadata.put(Constants.METADATA_JURISDICTION_ID, "PRIVATELAW");
+        metadata.put(Constants.METADATA_CASE_ID, CASE_ID);
+
+        Document document = Document.builder()
+            .metadata(metadata)
+            .build();
+
+        UUID documentId = UUID.fromString("456c0976-3178-46dd-b9ce-5ab5d47c625a");
+        given(documentManagementService.getDocumentMetadata(documentId)).willReturn(document);
+        
+        // For valid authorization - return successful service
+        given(securityUtils.getServiceNameFromS2SToken("someServiceAuthToken")).willReturn("prl_dgs");
+        given(documentManagementService.checkServicePermission(anyString(), anyString(),
+                                                               anyString(), any(Permission.class), anyString(),
+                                                               anyString())).willReturn(
+                                                                   AuthorisedService.builder().build());
+
+        // For invalid authorization - throw exception
+        given(securityUtils.getServiceNameFromS2SToken("invalidServiceAuthToken"))
+            .willThrow(new RuntimeException("Invalid token"));
+    }
+
+    @State({"A request to upload a document"})
+    public void requestToUploadDocument() throws IOException {
+        // Set up mocks for successful upload
+        given(documentManagementService.checkServicePermission(anyString(), anyString(),
+                                                               anyString(), any(Permission.class), anyString(),
+                                                               anyString())).willReturn(
+                                                                   AuthorisedService.builder().build());
+        
+        // Mock SecurityUtils for upload requests
+        given(securityUtils.getServiceNameFromS2SToken(anyString())).willReturn("prl_dgs");
+        
+        // Mock ApplicationParams for upload configuration
+        given(applicationParams.isStreamUploadEnabled()).willReturn(false);
     }
 }
