@@ -181,6 +181,10 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     private void verifyHashTokenValidity(DocumentHashToken documentHashToken,
                                          Document documentMetadata) {
+        log.debug("Incoming hash token for document {}: {}", documentHashToken.getId(),
+            documentHashToken.getHashToken()
+        );
+
         String hashcodeFromStoredDocument = generateHashToken(documentHashToken.getId(), documentMetadata.getCaseId(),
                               documentMetadata.getJurisdictionId(), documentMetadata.getCaseTypeId());
         if (!hashcodeFromStoredDocument.equals(documentHashToken.getHashToken())) {
