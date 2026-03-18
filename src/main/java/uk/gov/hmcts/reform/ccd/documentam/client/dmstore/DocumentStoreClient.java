@@ -64,7 +64,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.RESOURCE_NO
 public class DocumentStoreClient {
 
     private final RestTemplate restTemplate;
-    public final CloseableHttpClient httpClient;
+    private final CloseableHttpClient httpClient;
     private final ApplicationParams applicationParams;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final SecurityUtils securityUtils;
@@ -132,14 +132,16 @@ public class DocumentStoreClient {
                                        Map<String, String> requestHeaders) {
         try {
             HttpGet httpRequest = buildStreamBinaryHttpRequest(documentId, requestHeaders);
-            ClassicHttpResponse httpClientResponse = httpClient.executeOpen(null, httpRequest, null);
-            HttpStatus statusCode = HttpStatus.valueOf(httpClientResponse.getCode());
-
-            handleDownloadStreamResponse(statusCode, httpClientResponse, httpResponseOut, documentId);
+            try (ClassicHttpResponse httpClientResponse = httpClient.executeOpen(null, httpRequest, null)) {
+                HttpStatus statusCode = HttpStatus.valueOf(httpClientResponse.getCode());
+                handleDownloadStreamResponse(statusCode, httpClientResponse, httpResponseOut, documentId);
+            }
         } catch (IOException exception) {
             log.error("Error occurred", exception);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                                              "Error occurred while processing the request", exception
+                                              "Error occurred while processing the request " + String.format(
+                                                  "%s/documents/%s/binary", applicationParams.getDocumentURL(),
+                                                  documentId) + ": " + exception.getMessage(), exception
             );
         }
     }
@@ -325,7 +327,9 @@ public class DocumentStoreClient {
         } catch (IOException exception) {
             log.error("Error occurred", exception);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                                              "Error occurred while processing the request", exception
+                                              "Error occurred while processing the request " + String.format(
+                                                  "%s/documents", applicationParams.getDocumentURL()) + ": "
+                                                  + exception.getMessage(), exception
             );
         }
     }
@@ -360,7 +364,7 @@ public class DocumentStoreClient {
             throw HttpClientErrorException.create(
                 HttpStatus.UNPROCESSABLE_ENTITY,
                 errorFallback,
-               null,
+                null,
                 responseBody != null ? responseBody.getBytes(StandardCharsets.UTF_8)
                     : errorFallback.getBytes(StandardCharsets.UTF_8),
                 StandardCharsets.UTF_8
