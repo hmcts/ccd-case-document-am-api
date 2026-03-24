@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
@@ -35,6 +36,17 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PER
 @Provider("case-document-am-api")
 @PactBroker(url = "${PACT_BROKER_FULL_URL:http://localhost}")
 @ContextConfiguration(classes = {ContractConfig.class})
+@TestPropertySource(properties = {
+    "case.document.am.api.enabled=true",
+    "documentStoreUrl=http://dm-store",
+    "documentTtlInDays=1",
+    "idam.s2s-auth.totp_secret=test-salt",
+    "hash.check.enabled=false",
+    "moving.case.types=",
+    "request.forwarded_headers.from_client=",
+    "stream.download.enabled=false",
+    "stream.upload.enabled=false"
+})
 @IgnoreNoPactsToVerify
 public class CaseDocumentAmProviderTest {
 
