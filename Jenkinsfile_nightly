@@ -12,8 +12,10 @@ def type = "java"
 def product = "ccd"
 def component = "case-document-am-api"
 
-// Prevent Docker hub rate limit errors by ensuring that testcontainers uses images from hmctspublic ACR
-env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX = "hmctspublic.azurecr.io/imported/"
+// Prevent Docker hub rate limit errors by ensuring that testcontainers uses images from hmctsprod ACR
+env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX = "hmctsprod.azurecr.io/imported/"
+env.OIDC_ISSUER = "https://forgerock-am.service.core-compute-idam-aat.internal:8443/openam/oauth2/hmcts"
+env.VERIFY_OIDC_ISSUER = "true"
 
 withNightlyPipeline(type, product, component) {
   enableSlackNotifications('#ccd-case-document-am-api-builds')

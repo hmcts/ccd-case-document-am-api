@@ -6,7 +6,8 @@ import au.com.dius.pact.provider.junitsupport.IgnoreNoPactsToVerify;
 import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junitsupport.State;
 import au.com.dius.pact.provider.junitsupport.loader.PactBroker;
-import au.com.dius.pact.provider.junitsupport.loader.VersionSelector;
+import au.com.dius.pact.provider.junitsupport.loader.PactBrokerConsumerVersionSelectors;
+import au.com.dius.pact.provider.junitsupport.loader.SelectorBuilder;
 import au.com.dius.pact.provider.spring.junit5.MockMvcTestTarget;
 import org.apache.commons.collections4.map.HashedMap;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,8 +33,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PER
 
 @ExtendWith(SpringExtension.class)
 @Provider("case-document-am-api")
-@PactBroker(url = "${PACT_BROKER_FULL_URL:http://localhost}",
-    consumerVersionSelectors = {@VersionSelector(tag = "master")})
+@PactBroker(url = "${PACT_BROKER_FULL_URL:http://localhost}")
 @ContextConfiguration(classes = {ContractConfig.class})
 @IgnoreNoPactsToVerify
 public class CaseDocumentAmProviderTest {
@@ -48,6 +48,11 @@ public class CaseDocumentAmProviderTest {
 
     @Autowired
     CaseDocumentAmController caseDocumentAmController;
+
+    @PactBrokerConsumerVersionSelectors
+    public static SelectorBuilder consumerVersionSelectors() {
+        return new SelectorBuilder().tag("master");
+    }
 
     @TestTemplate
     @ExtendWith(PactVerificationInvocationContextProvider.class)

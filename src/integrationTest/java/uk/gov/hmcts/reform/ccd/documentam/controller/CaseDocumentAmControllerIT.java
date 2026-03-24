@@ -109,6 +109,13 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         uploadDocumentByIsStreamUploadEnabled(true);
     }
 
+    @Test
+    void shouldRejectRequestWhenTokenIssIsUnexpected() throws Exception {
+        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID)
+                            .headers(createHttpHeaders("http://unexpected-issuer/o", SERVICE_NAME_XUI_WEBAPP)))
+            .andExpect(status().isUnauthorized());
+    }
+
 
     private void uploadDocumentByIsStreamUploadEnabled(boolean isStreamUploadEnabled) throws Exception {
         Document document = Document.builder()
