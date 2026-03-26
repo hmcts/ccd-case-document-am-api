@@ -21,13 +21,13 @@ class SecurityConfigurationIT extends BaseTest {
     private JwtDecoder jwtDecoder;
 
     @Value("${oidc.issuer}")
-    private String expectedIssuer;
+    private String enforcedIssuer;
 
     @Test
     void shouldDecodeJwtWhenTokenIssMatchesConfiguredIssuer() throws JOSEException {
-        Jwt jwt = assertDoesNotThrow(() -> jwtDecoder.decode(generateAuthToken(AUTH_TOKEN_TTL, expectedIssuer)));
+        Jwt jwt = assertDoesNotThrow(() -> jwtDecoder.decode(generateAuthToken(AUTH_TOKEN_TTL, enforcedIssuer)));
 
-        assertThat(jwt.getIssuer().toString()).isEqualTo(expectedIssuer);
+        assertThat(jwt.getIssuer().toString()).isEqualTo(enforcedIssuer);
     }
 
     @Test

@@ -48,10 +48,10 @@ The following environment variables are required:
 | IDAM_USER_URL | http://idam-api:5000 | Base URL for IDAM user APIs. |
 | IDAM_S2S_URL | http://service-auth-provider-api:8080 | Base URL for S2S auth provider. |
 | IDAM_OIDC_URL | - | Base URL for IDAM OIDC discovery and JWKS lookup. |
-| OIDC_ISSUER | - | Enforced JWT issuer value. This must match the `iss` claim in real access tokens accepted by this service. |
+| OIDC_ISSUER | - | Enforced issuer. This must match the `iss` claim in real access tokens accepted by this service. |
 | JAVA_TOOL_OPTIONS | -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket, server=y,suspend=n,address=5005 | JVM options for local running. |
 
-`IDAM_OIDC_URL` and `OIDC_ISSUER` are intentionally separate. Discovery and JWKS retrieval use `IDAM_OIDC_URL`, while JWT validation enforces `OIDC_ISSUER`. If these do not align with the issuer used in real caller tokens, authenticated requests will be rejected with `401`.
+`IDAM_OIDC_URL` and `OIDC_ISSUER` are intentionally separate. `IDAM_OIDC_URL` supplies `issuer-uri` for discovery and JWKS retrieval, while `OIDC_ISSUER` supplies the enforced issuer. If `OIDC_ISSUER` does not match the `iss` used in real caller tokens, authenticated requests will be rejected with `401`.
 
 ## Building the application
 
@@ -162,7 +162,7 @@ export BEFTA_S2S_CLIENT_SECRET_OF_XUI_WEBAPP=AAAAAAAAAAAAAAAA
 export DM_STORE_BASE_URL=http://localhost:4506
 ```
 
-To verify the live OIDC issuer locally, export `VERIFY_OIDC_ISSUER=true` together with the normal functional test credentials and `OIDC_ISSUER`. The verifier will fetch a real IDAM token, decode its `iss` claim, and fail if it does not exactly match `OIDC_ISSUER`.
+To verify the live enforced issuer locally, export `VERIFY_OIDC_ISSUER=true` together with the normal functional test credentials and `OIDC_ISSUER`. The verifier will fetch a real IDAM token, decode its `iss` claim, and fail if it does not exactly match `OIDC_ISSUER`.
 
 These tests also rely on the `CCD_BEFTA_JURISDICTION2.xlsx` file to be already imported. This file should be available in your local environment already.
 

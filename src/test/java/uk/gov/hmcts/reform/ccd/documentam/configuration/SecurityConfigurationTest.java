@@ -16,18 +16,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SecurityConfigurationTest {
 
-    private static final String VALID_ISSUER = "http://fr-am:8080/openam/oauth2/hmcts";
-    private static final String INVALID_ISSUER = "http://unexpected-issuer";
+    private static final String ENFORCED_ISSUER = "http://fr-am:8080/openam/oauth2/hmcts";
+    private static final String UNEXPECTED_ISSUER = "http://unexpected-issuer";
 
     @Test
     void shouldAcceptJwtFromConfiguredIssuer() {
-        assertFalse(validator().validate(buildJwt(VALID_ISSUER, Instant.now().plusSeconds(300))).hasErrors());
+        assertFalse(validator().validate(buildJwt(ENFORCED_ISSUER, Instant.now().plusSeconds(300))).hasErrors());
     }
 
     @Test
     void shouldRejectJwtFromUnexpectedIssuer() {
         OAuth2TokenValidatorResult result =
-            validator().validate(buildJwt(INVALID_ISSUER, Instant.now().plusSeconds(300)));
+            validator().validate(buildJwt(UNEXPECTED_ISSUER, Instant.now().plusSeconds(300)));
 
         assertTrue(result.hasErrors());
         assertThat(result.getErrors())
@@ -36,21 +36,21 @@ class SecurityConfigurationTest {
 
     @Test
     void shouldRejectExpiredJwtEvenWhenIssuerMatches() {
-        assertTrue(validator().validate(buildJwt(VALID_ISSUER, Instant.now().minusSeconds(60))).hasErrors());
+        assertTrue(validator().validate(buildJwt(ENFORCED_ISSUER, Instant.now().minusSeconds(60))).hasErrors());
     }
 
     private OAuth2TokenValidator<Jwt> validator() {
         return new DelegatingOAuth2TokenValidator<>(
             new JwtTimestampValidator(),
-            new JwtIssuerValidator(VALID_ISSUER)
+            new JwtIssuerValidator(ENFORCED_ISSUER)
         );
     }
 
-    private Jwt buildJwt(String issuer, Instant expiresAt) {
+    private Jwt buildJwt(String tokenIssuer, Instant expiresAt) {
         Instant issuedAt = expiresAt.minusSeconds(60);
         return Jwt.withTokenValue("token")
             .header("alg", "RS256")
-            .issuer(issuer)
+            .issuer(tokenIssuer)
             .subject("user")
             .issuedAt(issuedAt)
             .expiresAt(expiresAt)

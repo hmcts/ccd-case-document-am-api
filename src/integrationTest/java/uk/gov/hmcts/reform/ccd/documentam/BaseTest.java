@@ -63,8 +63,8 @@ public class BaseTest {
         return createHttpHeaders(AUTH_TOKEN_TTL, oidcIssuer, serviceName, AUTH_TOKEN_TTL);
     }
 
-    protected HttpHeaders createHttpHeaders(String authIssuer, String serviceName) throws JOSEException {
-        return createHttpHeaders(AUTH_TOKEN_TTL, authIssuer, serviceName, AUTH_TOKEN_TTL);
+    protected HttpHeaders createHttpHeaders(String tokenIssuer, String serviceName) throws JOSEException {
+        return createHttpHeaders(AUTH_TOKEN_TTL, tokenIssuer, serviceName, AUTH_TOKEN_TTL);
     }
 
     protected HttpHeaders createHttpHeaders(long authTtlMillis,
@@ -74,11 +74,11 @@ public class BaseTest {
     }
 
     protected HttpHeaders createHttpHeaders(long authTtlMillis,
-                                            String authIssuer,
+                                            String tokenIssuer,
                                             String serviceName,
                                             long s2sAuthTtlMillis) throws JOSEException {
         HttpHeaders headers = new HttpHeaders();
-        String authToken = BEARER + generateAuthToken(authTtlMillis, authIssuer);
+        String authToken = BEARER + generateAuthToken(authTtlMillis, tokenIssuer);
         headers.add(AUTHORIZATION, authToken);
         String s2SToken = generateS2SToken(serviceName, s2sAuthTtlMillis);
         headers.add(SERVICE_AUTHORIZATION, s2SToken);
@@ -159,11 +159,11 @@ public class BaseTest {
         }
     }
 
-    public static String generateAuthToken(long ttlMillis, String issuer) throws JOSEException {
+    public static String generateAuthToken(long ttlMillis, String tokenIssuer) throws JOSEException {
 
         JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder()
             .subject("API_Stub")
-            .issuer(issuer)
+            .issuer(tokenIssuer)
             .issueTime(new Date())
             .claim(TOKEN_NAME, ACCESS_TOKEN)
             .expirationTime(new Date(System.currentTimeMillis() + ttlMillis));

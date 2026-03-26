@@ -34,7 +34,7 @@ public class SecurityConfiguration {
     private String issuerUri;
 
     @Value("${oidc.issuer}")
-    private String issuerOverride;
+    private String enforcedIssuer;
 
     private final ServiceAuthFilter serviceAuthFilter;
     private final ExceptionHandlingFilter exceptionHandlingFilter;
@@ -89,9 +89,9 @@ public class SecurityConfiguration {
     @SuppressWarnings("PMD")
     JwtDecoder jwtDecoder() {
         NimbusJwtDecoder jwtDecoder = (NimbusJwtDecoder) JwtDecoders.fromOidcIssuerLocation(issuerUri);
-        // We are using issuerOverride instead of issuerUri as SIDAM has the wrong issuer at the moment
+        // See docs/security/jwt-issuer-validation.md for issuer-uri discovery and oidc.issuer enforcement.
         OAuth2TokenValidator<Jwt> withTimestamp = new JwtTimestampValidator();
-        OAuth2TokenValidator<Jwt> withIssuer = new JwtIssuerValidator(issuerOverride);
+        OAuth2TokenValidator<Jwt> withIssuer = new JwtIssuerValidator(enforcedIssuer);
         OAuth2TokenValidator<Jwt> validator = new DelegatingOAuth2TokenValidator<>(withTimestamp, withIssuer);
         jwtDecoder.setJwtValidator(validator);
         return jwtDecoder;

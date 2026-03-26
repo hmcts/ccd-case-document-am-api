@@ -200,7 +200,7 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
 }
 
 task verifyFunctionalTestJwtIssuer(type: JavaExec) {
-  description = 'Verifies the functional/smoke test token issuer matches OIDC_ISSUER'
+  description = 'Verifies the functional/smoke test token iss matches OIDC_ISSUER'
   group = 'Verification'
   dependsOn functionalTestClasses
 
@@ -211,6 +211,35 @@ task verifyFunctionalTestJwtIssuer(type: JavaExec) {
   mainClass = "uk.gov.hmcts.ccd.documentam.befta.JwtIssuerVerificationApp"
   classpath += configurations.cucumberRuntime + sourceSets.functionalTest.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
 }
+
+task verifyOidcIssuerPolicy {
+  description = 'Fails if oidc.issuer is derived from discovery configuration'
+  group = 'Verification'
+
+  doLast {
+    def policyFiles = [
+      'src/main/resources/application.yaml',
+      'src/integrationTest/resources/application-itest.yaml'
+    ]
+
+    def violations = policyFiles.findAll { path ->
+      def configFile = file(path)
+      configFile.exists() && configFile.readLines().any { line ->
+        def normalized = line.replaceAll(/\s+/, '')
+        normalized.startsWith('issuer:${OIDC_ISSUER:${IDAM_OIDC_URL')
+          || normalized.startsWith('issuer:${OIDC_ISSUER:${idam.api.url')
+      }
+    }
+
+    if (!violations.isEmpty()) {
+      throw new GradleException(
+        "OIDC issuer policy violation. Do not derive oidc.issuer from discovery config in: ${violations.join(', ')}"
+      )
+    }
+  }
+}
+
+check.dependsOn verifyOidcIssuerPolicy
 
 jacocoTestReport {
   executionData(test, integration)
