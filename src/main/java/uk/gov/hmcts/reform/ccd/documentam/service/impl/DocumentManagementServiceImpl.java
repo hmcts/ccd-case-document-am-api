@@ -380,7 +380,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                 || (!StringUtils.isEmpty(caseTypeId)
                     && (caseTypeIds.contains("*") || caseTypeIds.contains(caseTypeId)));
 
-        log.info("Case Type Id is {} and validation result is {}", caseTypeId, result);
+        log.debug("Case Type Id is {} and validation result is {}", caseTypeId, result);
 
         return result;
     }
@@ -392,7 +392,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             || (!StringUtils.isEmpty(jurisdictionId) && (serviceConfig.getJurisdictionId().equals("*")
                 || serviceConfig.getJurisdictionId().equals(jurisdictionId)));
 
-        log.info("JurisdictionI Id is {} and validation result is {}", jurisdictionId, result);
+        log.debug("Jurisdictional Id is {} and validation result is {}", jurisdictionId, result);
 
         return result;
     }
@@ -400,7 +400,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     private boolean validatePermissions(AuthorisedService serviceConfig, Permission permission) {
         List<Permission> servicePermissions = serviceConfig.getPermissions();
         boolean result = !servicePermissions.isEmpty() && (servicePermissions.contains(permission));
-        log.info("Permission is {} and validation result is {}", permission, result);
+        log.debug("Permission is {} and validation result is {}", permission, result);
         return result;
     }
 
