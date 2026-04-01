@@ -9,12 +9,31 @@
 - JWT issuer validation is enabled in the active `JwtDecoder`.
 - OIDC discovery and issuer enforcement are configured separately on purpose.
 - The enforced issuer must be taken from a real access token `iss` claim, not inferred from discovery metadata or deployment naming.
+- See [HMCTS Guidance](#hmcts-guidance) for the central policy reference.
+
+## HMCTS Guidance
+
+- [JWT iss Claim Validation guidance](https://tools.hmcts.net/confluence/spaces/SISM/pages/1958056812/JWT+iss+Claim+Validation+for+OIDC+and+OAuth+2+Tokens#JWTissClaimValidationforOIDCandOAuth2Tokens-Configurationrecommendation)
+- Use that guidance as the reference point for service-level issuer decisions and configuration recommendations.
+
+## Quick Reference
+
+| Topic | Current repo position |
+| --- | --- |
+| Validation model | Single configured issuer |
+| Discovery source | `spring.security.oauth2.client.provider.oidc.issuer-uri` |
+| Enforced issuer | `oidc.issuer` / `OIDC_ISSUER` |
+| Repo wiring | Helm and Jenkins currently use explicit issuer values |
+| Runtime rule | `OIDC_ISSUER` must match the `iss` claim in real accepted tokens |
 
 ## Discovery vs enforced issuer
 
-- `spring.security.oauth2.client.provider.oidc.issuer-uri` is the discovery location. The service uses it to load OIDC metadata and the JWKS endpoint.
-- `oidc.issuer` / `OIDC_ISSUER` is the enforced issuer. The active `JwtDecoder` validates the token `iss` claim against this value.
-- These values can differ. Discovery can point at the public IDAM OIDC endpoint while enforcement pins the exact `iss` emitted in real access tokens.
+| Setting | Purpose | Notes |
+| --- | --- | --- |
+| `spring.security.oauth2.client.provider.oidc.issuer-uri` | OIDC discovery and JWKS lookup | The service uses it to load OIDC metadata and keys |
+| `oidc.issuer` / `OIDC_ISSUER` | Enforced token issuer | The active `JwtDecoder` validates the token `iss` claim against this value |
+
+These values can differ. Discovery can point at the public IDAM OIDC endpoint while enforcement pins the exact `iss` emitted in real access tokens.
 
 ## Runtime behavior
 
@@ -31,9 +50,11 @@
 
 ## Coverage
 
-- Unit coverage in `src/test/java/uk/gov/hmcts/reform/ccd/documentam/configuration/SecurityConfigurationTest.java` checks valid issuer, invalid issuer, and expired token behaviour at validator level.
-- Decoder exception coverage in `src/integrationTest/java/uk/gov/hmcts/reform/ccd/documentam/configuration/SecurityConfigurationIT.java` checks decoder-level issuer failures with the active decoder and signed test JWTs.
-- Integration coverage in `src/integrationTest/java/uk/gov/hmcts/reform/ccd/documentam/controller/CaseDocumentAmControllerIT.java` exercises authenticated endpoint rejection when a token carries unexpected `iss`.
+| Test area | Coverage |
+| --- | --- |
+| `src/test/java/uk/gov/hmcts/reform/ccd/documentam/configuration/SecurityConfigurationTest.java` | Valid issuer, invalid issuer, and expired token behaviour at validator level |
+| `src/integrationTest/java/uk/gov/hmcts/reform/ccd/documentam/configuration/SecurityConfigurationIT.java` | Decoder-level issuer failures with the active decoder and signed test JWTs |
+| `src/integrationTest/java/uk/gov/hmcts/reform/ccd/documentam/controller/CaseDocumentAmControllerIT.java` | Authenticated endpoint rejection when a token carries unexpected `iss` |
 
 ## Test and pipeline verification
 
@@ -53,6 +74,7 @@
 - Because the verifier runs in the build container before deployed app env is available, Jenkins and Helm issuer values must stay aligned.
 - If external services still send tokens with a different issuer, this change will reject them with `401` until configuration or token issuance is aligned.
 - For local running, `IDAM_OIDC_URL` should usually point to `http://localhost:5000`, while `OIDC_ISSUER` must exactly match the `iss` claim in the local access tokens being used.
+- Use [HMCTS Guidance](#hmcts-guidance) as the central policy reference for service-level issuer decisions.
 
 ## How to derive OIDC_ISSUER
 
@@ -119,3 +141,7 @@ Do not merge if any of the following are true:
 - Requiring explicit `OIDC_ISSUER` with no static fallback in main runtime config is the preferred pattern, but it is not yet mandatory across all services.
 - Local or test-only fallbacks are acceptable only when they are static, intentional, and clearly scoped to non-production use.
 - The build enforces this policy with `verifyOidcIssuerPolicy`, which fails if `oidc.issuer` is derived from discovery config.
+
+## References
+
+- [HMCTS Guidance](#hmcts-guidance)
