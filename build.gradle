@@ -124,6 +124,7 @@ tasks.withType(JavaCompile) {
 }
 
 task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
+  dependsOn 'functionalTestClasses', 'verifyFunctionalTestJwtIssuer'
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
   classpath = sourceSets.functionalTest.runtimeClasspath
 
@@ -165,6 +166,7 @@ task integration(type: Test, description: 'Runs the integration tests.', group: 
 }
 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
+  dependsOn 'functionalTestClasses', 'verifyFunctionalTestJwtIssuer'
   setTestClassesDirs(sourceSets.functionalTest.output.classesDirs)
   setClasspath(sourceSets.functionalTest.runtimeClasspath)
   include "uk/gov/hmcts/ccd/documentam/befta/**"
@@ -196,6 +198,48 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
 
   outputs.upToDateWhen { false }
 }
+
+task verifyFunctionalTestJwtIssuer(type: JavaExec) {
+  description = 'Verifies the functional/smoke test token iss matches OIDC_ISSUER'
+  group = 'Verification'
+  dependsOn functionalTestClasses
+
+  onlyIf {
+    System.getenv('VERIFY_OIDC_ISSUER')?.toBoolean()
+  }
+
+  mainClass = "uk.gov.hmcts.ccd.documentam.befta.JwtIssuerVerificationApp"
+  classpath += configurations.cucumberRuntime + sourceSets.functionalTest.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
+}
+
+task verifyOidcIssuerPolicy {
+  description = 'Fails if oidc.issuer is derived from discovery configuration'
+  group = 'Verification'
+
+  doLast {
+    def policyFiles = [
+      'src/main/resources/application.yaml',
+      'src/integrationTest/resources/application-itest.yaml'
+    ]
+
+    def violations = policyFiles.findAll { path ->
+      def configFile = file(path)
+      configFile.exists() && configFile.readLines().any { line ->
+        def normalized = line.replaceAll(/\s+/, '')
+        normalized.startsWith('issuer:${OIDC_ISSUER:${IDAM_OIDC_URL')
+          || normalized.startsWith('issuer:${OIDC_ISSUER:${idam.api.url')
+      }
+    }
+
+    if (!violations.isEmpty()) {
+      throw new GradleException(
+        "OIDC issuer policy violation. Do not derive oidc.issuer from discovery config in: ${violations.join(', ')}"
+      )
+    }
+  }
+}
+
+check.dependsOn verifyOidcIssuerPolicy
 
 jacocoTestReport {
   executionData(test, integration)
@@ -297,8 +341,9 @@ dependencies {
 
   // HMCTS Dependencies
   implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.5'
+
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '5.3.3'
-  implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.9'
+  implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '8.0.0'
 
 
   implementation group: 'com.auth0', name: 'java-jwt', version: '4.5.0'
