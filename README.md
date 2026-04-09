@@ -24,26 +24,34 @@ Users & services with sufficient permissions only will be able to upload, modify
 
 This service works with the DocStore Api and CaseData Api alongside their databases CCD Data Store and Document Management Store.
 
+### Codex Workflow Docs
+
+Repo-local workflow docs are indexed in `AGENTS.md`.
+
 #### Environment variables
 The following environment variables are required:
 
 | Name | Default | Description |
 |------|---------|-------------|
-      |CASE_DOCUMENT_S2S_AUTHORISED_SERVICES| ccd_case_document_am_api, ccd_gw, xui_webapp, ccd_data, bulk_scan_processor, bulk_scan_orchestrator|
-      |REFORM_SERVICE_NAME| ccd-case-document-am-api|
-      |REFORM_TEAM| ccd
-      |REFORM_ENVIRONMENT| local
-      |S2S_SECRET|
-      |S2S_KEY| S2S_KEY
-      |CCD_DOCUMENT_API_IDAM_KEY|
-      |DEFINITION_STORE_HOST|
-      |USER_PROFILE_HOST|
-      |DM_STORE_BASE_URL| http://dm-store:8080|
-      |CCD_DATA_STORE_API_BASE_URL| http://ccd-data-store-api:4452|
-      |app-insights-connection-string|
-      |IDAM_USER_URL| http://idam-api:5000 |
-      |IDAM_S2S_URL| http://service-auth-provider-api:8080|
-      |JAVA_TOOL_OPTIONS| -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket, server=y,suspend=n,address=5005
+| CASE_DOCUMENT_S2S_AUTHORISED_SERVICES | ccd_case_document_am_api, ccd_gw, xui_webapp, ccd_data, bulk_scan_processor, bulk_scan_orchestrator | Authorised service names for S2S calls. |
+| REFORM_SERVICE_NAME | ccd-case-document-am-api | Service name. |
+| REFORM_TEAM | ccd | Owning team. |
+| REFORM_ENVIRONMENT | local | Runtime environment name. |
+| S2S_SECRET | - | Service-to-service secret. |
+| S2S_KEY | S2S_KEY | S2S key alias. |
+| CCD_DOCUMENT_API_IDAM_KEY | - | IDAM key for this service where required by local setup. |
+| DEFINITION_STORE_HOST | - | Base URL for the definition store dependency. |
+| USER_PROFILE_HOST | - | Base URL for the user profile dependency. |
+| DM_STORE_BASE_URL | http://dm-store:8080 | Base URL for Document Management Store. |
+| CCD_DATA_STORE_API_BASE_URL | http://ccd-data-store-api:4452 | Base URL for CCD Data Store API. |
+| app-insights-connection-string | - | Application Insights connection string. |
+| IDAM_USER_URL | http://idam-api:5000 | Base URL for IDAM user APIs. |
+| IDAM_S2S_URL | http://service-auth-provider-api:8080 | Base URL for S2S auth provider. |
+| IDAM_OIDC_URL | - | Base URL for IDAM OIDC discovery and JWKS lookup. |
+| OIDC_ISSUER | - | Enforced issuer. This must match the `iss` claim in real access tokens accepted by this service. |
+| JAVA_TOOL_OPTIONS | -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket, server=y,suspend=n,address=5005 | JVM options for local running. |
+
+`IDAM_OIDC_URL` and `OIDC_ISSUER` are intentionally separate. `IDAM_OIDC_URL` supplies `issuer-uri` for discovery and JWKS retrieval, while `OIDC_ISSUER` supplies the enforced issuer. If `OIDC_ISSUER` does not match the `iss` used in real caller tokens, authenticated requests will be rejected with `401`.
 
 ## Building the application
 
@@ -153,6 +161,8 @@ export BEFTA_S2S_CLIENT_ID_OF_XUI_WEBAPP=xui_webapp
 export BEFTA_S2S_CLIENT_SECRET_OF_XUI_WEBAPP=AAAAAAAAAAAAAAAA
 export DM_STORE_BASE_URL=http://localhost:4506
 ```
+
+To verify the live enforced issuer locally, export `VERIFY_OIDC_ISSUER=true` together with the normal functional test credentials and `OIDC_ISSUER`. The verifier will fetch a real IDAM token, decode its `iss` claim, and fail if it does not exactly match `OIDC_ISSUER`.
 
 These tests also rely on the `CCD_BEFTA_JURISDICTION2.xlsx` file to be already imported. This file should be available in your local environment already.
 
