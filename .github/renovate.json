@@ -21,6 +21,17 @@
         "Renovate All-minor-patch"
       ],
       "automerge": false
+    },
+    {
+      "matchManagers": [
+        "gradle"
+      ],
+      "matchDepNames": [
+        "ccd-test-definitions",
+        "befta-fw"
+      ],
+      "matchCurrentValue": "!/^[0-9]+\\.[0-9]+\\.[0-9]+$/",
+      "enabled": false
     }
   ]
 }
