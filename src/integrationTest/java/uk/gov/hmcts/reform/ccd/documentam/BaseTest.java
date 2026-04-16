@@ -9,6 +9,7 @@ import com.nimbusds.jwt.SignedJWT;
 import io.jsonwebtoken.Jwts;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
@@ -144,10 +145,18 @@ public class BaseTest {
         }
     }
 
+    private static String oidcIssuer;
+
+    @Value("${oidc.issuer}")
+    public void setOidcIssuer(String value) {
+        BaseTest.oidcIssuer = value;
+    }
+
     private static String generateAuthToken(long ttlMillis) throws JOSEException {
 
         JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder()
             .subject("API_Stub")
+            .issuer(oidcIssuer)
             .issueTime(new Date())
             .claim(TOKEN_NAME, ACCESS_TOKEN)
             .expirationTime(new Date(System.currentTimeMillis() + ttlMillis));
