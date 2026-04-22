@@ -185,7 +185,7 @@
       ]
     },
     {
-      "id": "finrem-citizen-ui",
+      "id": "finrem_citizen_ui",
       "caseTypeId": [
         "FinancialRemedyContested",
         "FinancialRemedyMVP2",
