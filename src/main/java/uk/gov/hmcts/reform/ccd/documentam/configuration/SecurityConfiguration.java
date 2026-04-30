@@ -78,7 +78,9 @@ public class SecurityConfiguration {
             .formLogin(fl -> fl.disable())
             .logout(l -> l.disable())
             .authorizeHttpRequests(req -> req.anyRequest().authenticated())
-            .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
+            .oauth2ResourceServer(oauth -> oauth.jwt(
+                jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)
+            ));
 
         return http.build();
     }
