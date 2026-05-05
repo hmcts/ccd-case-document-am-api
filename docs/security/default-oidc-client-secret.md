@@ -10,7 +10,7 @@ The service uses Spring Security as a resource server for bearer-token JWT valid
 
 Leaving a hardcoded default client secret in main application configuration creates avoidable security noise and could become a credential risk if future code starts using that client registration in a non-test environment.
 
-## Remediation
+## Resolution
 
 The unused Spring OAuth2 client registration and its hardcoded default secret have been removed. The service remains configured as an OAuth2 resource server for inbound caller bearer JWT validation, and the existing S2S token validation/authorization wiring is unchanged.
 
@@ -21,7 +21,7 @@ The unused OAuth2 client starter dependency, `oauth2Client` security configurati
 Check that the default secret and OAuth2 client wiring are absent:
 
 ```bash
-rg "client-secret: internal|spring-boot-starter-oauth2-client|oauth2Client|TestIdamConfiguration"
+rg -n "client-secret: internal|spring-boot-starter-oauth2-client|\.oauth2Client\(|TestIdamConfiguration" --glob '!docs/**' .
 ```
 
 Run the focused security regression test:
