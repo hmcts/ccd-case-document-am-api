@@ -268,6 +268,7 @@ repositories {
   maven {
     url = 'https://pkgs.dev.azure.com/hmcts/Artifacts/_packaging/hmcts-lib/maven/v1'
   }
+  gradlePluginPortal()
 }
 
 dependencies {
