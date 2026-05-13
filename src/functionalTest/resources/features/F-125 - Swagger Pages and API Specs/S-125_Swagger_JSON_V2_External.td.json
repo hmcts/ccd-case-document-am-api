@@ -15,6 +15,7 @@
     "responseMessage" : "OK",
     "body" : {
       "openapi": "3.1.0",
+      "servers": "[[ANYTHING_PRESENT]]",
       "paths": "[[ANYTHING_PRESENT]]",
       "components": "[[ANYTHING_PRESENT]]",
       "info": {
