@@ -1,6 +1,6 @@
 {
   "_guid_": "S-125.1",
-  "title": "must show Swagger UI page for Internal V1 APIs",
+  "title": "must show Swagger UI page for default API docs",
   "_extends_": "F-125_Swagger_UI",
 
   "specs": [
@@ -8,10 +8,6 @@
   ],
 
   "request": {
-    "queryParams": {
-      "urls.primaryName": "v1_internal"
-    }
   }
 
 }
-

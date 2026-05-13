@@ -5,7 +5,7 @@ Feature: F-125: Swagger Pages and Open API Specs
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 @S-125.1
-Scenario: must show Swagger UI page for Internal V1 APIs
+Scenario: must show Swagger UI page for default API docs
 
     Given an appropriate test context as detailed in the test data source,
 
@@ -18,7 +18,7 @@ Scenario: must show Swagger UI page for Internal V1 APIs
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 @S-125.2
-Scenario: must show Swagger UI page for External V1 APIs
+Scenario: must show Swagger UI page for published API docs
 
     Given an appropriate test context as detailed in the test data source,
 
@@ -31,7 +31,7 @@ Scenario: must show Swagger UI page for External V1 APIs
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 @S-125.3
-Scenario: must show Swagger UI page for Internal V2 APIs
+Scenario: must show Swagger UI page for OpenAPI docs
 
     Given an appropriate test context as detailed in the test data source,
 
@@ -44,7 +44,7 @@ Scenario: must show Swagger UI page for Internal V2 APIs
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 @S-125.4
-Scenario: must show Swagger UI page for External V2 APIs
+Scenario: must show Swagger UI page for current API docs
 
     Given an appropriate test context as detailed in the test data source,
 
