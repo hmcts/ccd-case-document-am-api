@@ -6,6 +6,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
@@ -52,6 +53,11 @@ public class SecurityUtils {
 
     public UserInfo getUserInfo() {
         return idamRepository.getUserInfo(getUserBearerToken());
+    }
+
+    public String getUserId() {
+        UserInfo userInfo = getUserInfo();
+        return StringUtils.hasText(userInfo.getUid()) ? userInfo.getUid() : userInfo.getSub();
     }
 
     public String getServiceNameFromS2SToken(String serviceAuthenticationToken) {

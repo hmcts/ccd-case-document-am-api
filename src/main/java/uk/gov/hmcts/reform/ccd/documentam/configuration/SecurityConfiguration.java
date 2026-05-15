@@ -39,6 +39,9 @@ public class SecurityConfiguration {
     @Value("${oidc.issuer}")
     private String issuerOverride;
 
+    @Value("${idam.api.url}")
+    private String idamApiUrl;
+
     @Value("${idam.api.url}/o")
     private String idamApiIssuer;
 
@@ -103,6 +106,6 @@ public class SecurityConfiguration {
     }
 
     private List<String> validIssuers() {
-        return Arrays.asList(issuerUri, issuerOverride, idamApiIssuer);
+        return Arrays.asList(issuerUri, issuerOverride, idamApiUrl, idamApiIssuer);
     }
 }

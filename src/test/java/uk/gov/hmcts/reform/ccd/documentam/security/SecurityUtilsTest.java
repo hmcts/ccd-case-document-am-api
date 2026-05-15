@@ -34,6 +34,7 @@ class SecurityUtilsTest {
 
     private static final String SERVICE_JWT = "7gf364fg367f67";
     private static final String USER_ID = "123";
+    private static final String USER_SUB = "emailId@a.com";
     private static final String USER_JWT = "8gf364fg367f67";
 
     @Mock
@@ -98,7 +99,7 @@ class SecurityUtilsTest {
     void shouldReturnUserInfo() {
         UserInfo userInfo = UserInfo.builder()
             .uid(USER_ID)
-            .sub("emailId@a.com")
+            .sub(USER_SUB)
             .build();
 
         when(idamRepository.getUserInfo("Bearer " + USER_JWT)).thenReturn(userInfo);
@@ -107,6 +108,37 @@ class SecurityUtilsTest {
         doReturn(authentication).when(securityContext).getAuthentication();
 
         assertThat(securityUtils.getUserInfo(), is(userInfo));
+    }
+
+    @Test
+    @DisplayName("Get user ID")
+    void shouldReturnUserIdFromUid() {
+        UserInfo userInfo = UserInfo.builder()
+            .uid(USER_ID)
+            .sub(USER_SUB)
+            .build();
+
+        when(idamRepository.getUserInfo("Bearer " + USER_JWT)).thenReturn(userInfo);
+
+        doReturn(jwt).when(authentication).getPrincipal();
+        doReturn(authentication).when(securityContext).getAuthentication();
+
+        assertThat(securityUtils.getUserId(), is(USER_ID));
+    }
+
+    @Test
+    @DisplayName("Get user ID from sub when uid is missing")
+    void shouldReturnUserIdFromSubWhenUidIsMissing() {
+        UserInfo userInfo = UserInfo.builder()
+            .sub(USER_SUB)
+            .build();
+
+        when(idamRepository.getUserInfo("Bearer " + USER_JWT)).thenReturn(userInfo);
+
+        doReturn(jwt).when(authentication).getPrincipal();
+        doReturn(authentication).when(securityContext).getAuthentication();
+
+        assertThat(securityUtils.getUserId(), is(USER_SUB));
     }
 
     @Test
