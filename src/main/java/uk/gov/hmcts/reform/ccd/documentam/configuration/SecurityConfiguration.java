@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.ccd.documentam.security.JwtGrantedAuthoritiesConverte
 import uk.gov.hmcts.reform.ccd.documentam.security.filters.ExceptionHandlingFilter;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
@@ -37,6 +38,9 @@ public class SecurityConfiguration {
 
     @Value("${oidc.issuer}")
     private String issuerOverride;
+
+    @Value("${idam.api.url}/o")
+    private String idamApiIssuer;
 
     private final ServiceAuthFilter serviceAuthFilter;
     private final ExceptionHandlingFilter exceptionHandlingFilter;
@@ -91,11 +95,14 @@ public class SecurityConfiguration {
     @SuppressWarnings("PMD")
     JwtDecoder jwtDecoder() {
         NimbusJwtDecoder jwtDecoder = (NimbusJwtDecoder) JwtDecoders.fromOidcIssuerLocation(issuerUri);
-        // We are using issuerOverride instead of issuerUri as SIDAM has the wrong issuer at the moment
         OAuth2TokenValidator<Jwt> withTimestamp = new JwtTimestampValidator();
-        OAuth2TokenValidator<Jwt> withIssuer = new MultiIssuerValidator(Arrays.asList(issuerUri, issuerOverride));
+        OAuth2TokenValidator<Jwt> withIssuer = new MultiIssuerValidator(validIssuers());
         OAuth2TokenValidator<Jwt> validator = new DelegatingOAuth2TokenValidator<>(withTimestamp, withIssuer);
         jwtDecoder.setJwtValidator(validator);
         return jwtDecoder;
+    }
+
+    private List<String> validIssuers() {
+        return Arrays.asList(issuerUri, issuerOverride, idamApiIssuer);
     }
 }

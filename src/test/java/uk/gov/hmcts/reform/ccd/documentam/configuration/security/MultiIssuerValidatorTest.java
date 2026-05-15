@@ -12,10 +12,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class MultiIssuerValidatorTest {
 
     private static final String OIDC_ISSUER = "https://idam-web-public.aat.platform.hmcts.net/o";
+    private static final String IDAM_API_ISSUER = "https://idam-api.aat.platform.hmcts.net/o";
     private static final String FORGEROCK_ISSUER =
         "https://forgerock-am.service.core-compute-idam-aat.internal:8443/openam/oauth2/hmcts";
 
-    private final MultiIssuerValidator validator = new MultiIssuerValidator(List.of(OIDC_ISSUER, FORGEROCK_ISSUER));
+    private final MultiIssuerValidator validator = new MultiIssuerValidator(
+        List.of(OIDC_ISSUER, FORGEROCK_ISSUER, IDAM_API_ISSUER)
+    );
 
     @Test
     void shouldAcceptOidcIssuer() {
@@ -27,6 +30,13 @@ class MultiIssuerValidatorTest {
     @Test
     void shouldAcceptForgerockIssuer() {
         OAuth2TokenValidatorResult result = validator.validate(jwtWithIssuer(FORGEROCK_ISSUER));
+
+        assertFalse(result.hasErrors());
+    }
+
+    @Test
+    void shouldAcceptIdamApiIssuer() {
+        OAuth2TokenValidatorResult result = validator.validate(jwtWithIssuer(IDAM_API_ISSUER));
 
         assertFalse(result.hasErrors());
     }
