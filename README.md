@@ -49,9 +49,14 @@ The following environment variables are required:
 | IDAM_S2S_URL | http://service-auth-provider-api:8080 | Base URL for S2S auth provider. |
 | IDAM_OIDC_URL | - | Base URL for IDAM OIDC discovery and JWKS lookup. |
 | OIDC_ISSUER | - | Enforced issuer. This must match the `iss` claim in real access tokens accepted by this service. |
+| OIDC_ALLOWED_ISSUERS | - | Optional comma-separated additional issuers for IDAM migration. Set only in environments that receive valid tokens whose `iss` differs from `OIDC_ISSUER`; each value must exactly match a real token `iss` claim. |
 | JAVA_TOOL_OPTIONS | -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket, server=y,suspend=n,address=5005 | JVM options for local running. |
 
-`IDAM_OIDC_URL` and `OIDC_ISSUER` are intentionally separate. `IDAM_OIDC_URL` supplies `issuer-uri` for discovery and JWKS retrieval, while `OIDC_ISSUER` supplies the enforced issuer. If `OIDC_ISSUER` does not match the `iss` used in real caller tokens, authenticated requests will be rejected with `401`.
+`IDAM_OIDC_URL` and `OIDC_ISSUER` are intentionally separate. `IDAM_OIDC_URL` supplies `issuer-uri` for discovery and JWKS retrieval, while `OIDC_ISSUER` supplies the primary enforced issuer. If `OIDC_ISSUER` does not match the `iss` used in real caller tokens, authenticated requests will be rejected with `401` unless the exact issuer is temporarily listed in `OIDC_ALLOWED_ISSUERS`.
+
+Leave `OIDC_ALLOWED_ISSUERS` unset by default. Do not set it to `IDAM_OIDC_URL`, an OIDC discovery URL, a prefix, a wildcard, or a guessed realm URL. Use only explicit additional `iss` values copied from real accepted access tokens. This setting is temporary because each additional issuer broadens the set of trusted token issuers; remove it once traffic has converged on `OIDC_ISSUER`.
+
+The build-integrated functional/smoke verifier currently validates the real token `iss` against `OIDC_ISSUER` only. `OIDC_ALLOWED_ISSUERS` affects runtime validation, but the verifier must be updated before it can accept additional migration issuers.
 
 ## Building the application
 

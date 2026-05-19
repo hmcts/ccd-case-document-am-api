@@ -77,6 +77,9 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     @Value("${idam.s2s-auth.totp_secret}")
     protected String salt;
 
+    @Value("${oidc.allowed-issuers}")
+    private String allowedIssuer;
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -114,6 +117,29 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
         mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID)
                             .headers(createHttpHeaders("http://unexpected-issuer/o", SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void shouldAcceptRequestWhenTokenIssMatchesAllowedIssuer() throws Exception {
+        final Document document = buildDocument();
+
+        stubDocumentUrlWithReadPermissions();
+        stubGetDocumentMetaData(document);
+
+        mockMvc.perform(get(MAIN_URL + "/" + DOCUMENT_ID)
+                            .headers(createHttpHeaders(allowedIssuer, SERVICE_NAME_XUI_WEBAPP)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath(META_DATA_JSON_EXPRESSION + METADATA_CASE_ID, is(CASE_ID_VALUE)))
+            .andExpect(jsonPath(META_DATA_JSON_EXPRESSION + METADATA_CASE_TYPE_ID, is(CASE_TYPE_ID_VALUE)))
+            .andExpect(jsonPath(META_DATA_JSON_EXPRESSION + METADATA_JURISDICTION_ID, is(JURISDICTION_ID_VALUE)))
+            .andExpect(jsonPath("$._links.self.href", is(SELF_LINK)))
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
+                SERVICE_NAME_XUI_WEBAPP,
+                List.of(DOCUMENT_ID.toString()),
+                null,
+                null,
+                null));
     }
 
 

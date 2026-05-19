@@ -213,7 +213,7 @@ task verifyFunctionalTestJwtIssuer(type: JavaExec) {
 }
 
 task verifyOidcIssuerPolicy {
-  description = 'Fails if oidc.issuer is derived from discovery configuration'
+  description = 'Fails if OIDC issuer enforcement is derived from discovery configuration'
   group = 'Verification'
 
   doLast {
@@ -228,12 +228,15 @@ task verifyOidcIssuerPolicy {
         def normalized = line.replaceAll(/\s+/, '')
         normalized.startsWith('issuer:${OIDC_ISSUER:${IDAM_OIDC_URL')
           || normalized.startsWith('issuer:${OIDC_ISSUER:${idam.api.url')
+          || normalized.startsWith('allowed-issuers:${OIDC_ALLOWED_ISSUERS:${IDAM_OIDC_URL')
+          || normalized.startsWith('allowed-issuers:${OIDC_ALLOWED_ISSUERS:${idam.api.url')
       }
     }
 
     if (!violations.isEmpty()) {
       throw new GradleException(
-        "OIDC issuer policy violation. Do not derive oidc.issuer from discovery config in: ${violations.join(', ')}"
+        "OIDC issuer policy violation. Do not derive issuer enforcement from discovery config in: "
+          + "${violations.join(', ')}"
       )
     }
   }

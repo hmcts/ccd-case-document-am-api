@@ -23,6 +23,9 @@ class SecurityConfigurationIT extends BaseTest {
     @Value("${oidc.issuer}")
     private String enforcedIssuer;
 
+    @Value("${oidc.allowed-issuers}")
+    private String allowedIssuer;
+
     @Test
     void shouldDecodeJwtWhenTokenIssMatchesConfiguredIssuer() throws JOSEException {
         Jwt jwt = assertDoesNotThrow(() -> jwtDecoder.decode(generateAuthToken(AUTH_TOKEN_TTL, enforcedIssuer)));
@@ -31,10 +34,37 @@ class SecurityConfigurationIT extends BaseTest {
     }
 
     @Test
+    void shouldDecodeJwtWhenTokenIssMatchesAllowedIssuer() throws JOSEException {
+        Jwt jwt = assertDoesNotThrow(() -> jwtDecoder.decode(generateAuthToken(AUTH_TOKEN_TTL, allowedIssuer)));
+
+        assertThat(jwt.getIssuer().toString()).isEqualTo(allowedIssuer);
+    }
+
+    @Test
     void shouldRejectJwtWhenTokenIssIsUnexpected() throws JOSEException {
         JwtValidationException exception = assertThrows(
             JwtValidationException.class,
             () -> jwtDecoder.decode(generateAuthToken(AUTH_TOKEN_TTL, UNEXPECTED_ISSUER))
+        );
+
+        assertThat(exception.getMessage()).contains("iss");
+    }
+
+    @Test
+    void shouldRejectJwtWhenTokenIssOnlyPartiallyMatchesAllowedIssuer() throws JOSEException {
+        JwtValidationException exception = assertThrows(
+            JwtValidationException.class,
+            () -> jwtDecoder.decode(generateAuthToken(AUTH_TOKEN_TTL, allowedIssuer + "/child"))
+        );
+
+        assertThat(exception.getMessage()).contains("iss");
+    }
+
+    @Test
+    void shouldRejectJwtWhenTokenIssIsMissing() throws JOSEException {
+        JwtValidationException exception = assertThrows(
+            JwtValidationException.class,
+            () -> jwtDecoder.decode(generateAuthToken(AUTH_TOKEN_TTL, null))
         );
 
         assertThat(exception.getMessage()).contains("iss");

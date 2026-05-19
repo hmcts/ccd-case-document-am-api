@@ -163,10 +163,13 @@ public class BaseTest {
 
         JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder()
             .subject("API_Stub")
-            .issuer(tokenIssuer)
             .issueTime(new Date())
             .claim(TOKEN_NAME, ACCESS_TOKEN)
             .expirationTime(new Date(System.currentTimeMillis() + ttlMillis));
+
+        if (tokenIssuer != null) {
+            builder.issuer(tokenIssuer);
+        }
 
         SignedJWT signedJWT = new SignedJWT(
             new JWSHeader.Builder(JWSAlgorithm.RS256)
