@@ -19,8 +19,23 @@ if ! command -v az >/dev/null 2>&1; then
 fi
 
 if ! az account show >/dev/null 2>&1; then
-  echo "Azure CLI is not logged in or has no active subscription."
-  exit 2
+  if [ -n "${AZURE_CLIENT_ID:-}" ] && [ -n "${AZURE_CLIENT_SECRET:-}" ] && [ -n "${AZURE_TENANT_ID:-}" ]; then
+    echo "Azure CLI is not logged in. Logging in with supplied service principal credentials."
+    az login \
+      --service-principal \
+      --username "$AZURE_CLIENT_ID" \
+      --password "$AZURE_CLIENT_SECRET" \
+      --tenant "$AZURE_TENANT_ID" \
+      --output none
+  else
+    echo "Azure CLI is not logged in or has no active subscription."
+    echo "Set AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, and AZURE_TENANT_ID, or run this from an authenticated az session."
+    exit 2
+  fi
+fi
+
+if [ -n "${AZURE_SUBSCRIPTION_ID:-}" ]; then
+  az account set --subscription "$AZURE_SUBSCRIPTION_ID"
 fi
 
 is_true() {
