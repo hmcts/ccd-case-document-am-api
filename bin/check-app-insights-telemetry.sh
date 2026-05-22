@@ -12,6 +12,7 @@ APP_INSIGHTS_POLL_SECONDS="${APP_INSIGHTS_POLL_SECONDS:-30}"
 APP_INSIGHTS_TRACE_MARKER="${APP_INSIGHTS_TRACE_MARKER:-LA-CDAM}"
 REQUIRE_DEPENDENCY_TELEMETRY="${REQUIRE_DEPENDENCY_TELEMETRY:-true}"
 REQUIRE_TRACE_TELEMETRY="${REQUIRE_TRACE_TELEMETRY:-true}"
+attempt=1
 
 if ! command -v az >/dev/null 2>&1; then
   echo "Azure CLI 'az' is required to query Application Insights."
@@ -36,6 +37,8 @@ fi
 
 if [ -n "${AZURE_SUBSCRIPTION_ID:-}" ]; then
   az account set --subscription "$AZURE_SUBSCRIPTION_ID"
+else
+  AZURE_SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
 fi
 
 is_true() {
@@ -45,15 +48,28 @@ is_true() {
   esac
 }
 
+json_escape() {
+  printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
 query_count() {
-  query="$1"
-  if ! count=$(az monitor app-insights query \
-      --app "$APP_INSIGHTS_APP_NAME" \
-      --resource-group "$APP_INSIGHTS_RESOURCE_GROUP" \
-      --analytics-query "$query" \
+  label="$1"
+  query="$2"
+  escaped_query="$(json_escape "$query")"
+  body="{\"query\":\"${escaped_query}\"}"
+
+  echo "Querying ${label} telemetry..." >&2
+
+  uri="https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${APP_INSIGHTS_RESOURCE_GROUP}/providers/Microsoft.Insights/components/${APP_INSIGHTS_APP_NAME}/query?api-version=2018-04-20"
+
+  if ! count=$(az rest \
+      --method post \
+      --uri "$uri" \
+      --headers "Content-Type=application/json" \
+      --body "$body" \
       --query "tables[0].rows[0][0]" \
       --output tsv 2>&1); then
-    echo "Failed to query Application Insights:"
+    echo "Failed to query ${label} telemetry from Application Insights:"
     echo "$count"
     exit 2
   fi
@@ -65,27 +81,9 @@ query_count() {
   echo "$count"
 }
 
-requests_query="
-requests
-| where timestamp > ago(${APP_INSIGHTS_LOOKBACK})
-| where cloud_RoleName == '${APP_INSIGHTS_ROLE_NAME}'
-| summarize Count=count()
-"
-
-dependencies_query="
-dependencies
-| where timestamp > ago(${APP_INSIGHTS_LOOKBACK})
-| where cloud_RoleName == '${APP_INSIGHTS_ROLE_NAME}'
-| summarize Count=count()
-"
-
-traces_query="
-traces
-| where timestamp > ago(${APP_INSIGHTS_LOOKBACK})
-| where cloud_RoleName == '${APP_INSIGHTS_ROLE_NAME}'
-| where message has '${APP_INSIGHTS_TRACE_MARKER}'
-| summarize Count=count()
-"
+requests_query="requests | where timestamp > ago(${APP_INSIGHTS_LOOKBACK}) | where cloud_RoleName == '${APP_INSIGHTS_ROLE_NAME}' | summarize Count=count()"
+dependencies_query="dependencies | where timestamp > ago(${APP_INSIGHTS_LOOKBACK}) | where cloud_RoleName == '${APP_INSIGHTS_ROLE_NAME}' | summarize Count=count()"
+traces_query="traces | where timestamp > ago(${APP_INSIGHTS_LOOKBACK}) | where cloud_RoleName == '${APP_INSIGHTS_ROLE_NAME}' | where message has '${APP_INSIGHTS_TRACE_MARKER}' | summarize Count=count()"
 
 deadline=$(( $(date +%s) + APP_INSIGHTS_TIMEOUT_SECONDS ))
 
@@ -94,44 +92,69 @@ echo "  app: ${APP_INSIGHTS_APP_NAME}"
 echo "  resource group: ${APP_INSIGHTS_RESOURCE_GROUP}"
 echo "  cloud role: ${APP_INSIGHTS_ROLE_NAME}"
 echo "  lookback: ${APP_INSIGHTS_LOOKBACK}"
+echo "  subscription: ${AZURE_SUBSCRIPTION_ID}"
+echo "  required: requests=true, dependencies=${REQUIRE_DEPENDENCY_TELEMETRY}, traces=${REQUIRE_TRACE_TELEMETRY}"
 
 while true; do
-  request_count=$(query_count "$requests_query")
-  dependency_count=$(query_count "$dependencies_query")
-  trace_count=$(query_count "$traces_query")
+  echo "Application Insights telemetry check attempt ${attempt}"
 
-  echo "Telemetry counts: requests=${request_count}, dependencies=${dependency_count}, traces=${trace_count}"
+  request_count=$(query_count "request" "$requests_query")
+  dependency_count=$(query_count "dependency" "$dependencies_query")
+  trace_count=$(query_count "trace" "$traces_query")
+
+  request_status="PASS"
+  dependency_status="SKIP"
+  trace_status="SKIP"
+
+  if [ "$request_count" -lt 1 ]; then
+    request_status="FAIL"
+  fi
+
+  if is_true "$REQUIRE_DEPENDENCY_TELEMETRY"; then
+    dependency_status="PASS"
+    if [ "$dependency_count" -lt 1 ]; then
+      dependency_status="FAIL"
+    fi
+  fi
+
+  if is_true "$REQUIRE_TRACE_TELEMETRY"; then
+    trace_status="PASS"
+    if [ "$trace_count" -lt 1 ]; then
+      trace_status="FAIL"
+    fi
+  fi
+
+  echo "Telemetry result: requests=${request_status} (${request_count}), dependencies=${dependency_status} (${dependency_count}), traces=${trace_status} (${trace_count})"
 
   passed=true
 
-  if [ "$request_count" -lt 1 ]; then
+  if [ "$request_status" = "FAIL" ]; then
     passed=false
   fi
 
-  if is_true "$REQUIRE_DEPENDENCY_TELEMETRY" && [ "$dependency_count" -lt 1 ]; then
+  if [ "$dependency_status" = "FAIL" ]; then
     passed=false
   fi
 
-  if is_true "$REQUIRE_TRACE_TELEMETRY" && [ "$trace_count" -lt 1 ]; then
+  if [ "$trace_status" = "FAIL" ]; then
     passed=false
   fi
 
   if [ "$passed" = "true" ]; then
-    echo "Application Insights telemetry check passed."
+    echo "Application Insights telemetry check PASSED."
     exit 0
   fi
 
   if [ "$(date +%s)" -ge "$deadline" ]; then
-    echo "Application Insights telemetry check failed before timeout."
-    echo "Expected at least one request telemetry item."
-    if is_true "$REQUIRE_DEPENDENCY_TELEMETRY"; then
-      echo "Expected at least one dependency telemetry item."
-    fi
-    if is_true "$REQUIRE_TRACE_TELEMETRY"; then
-      echo "Expected at least one trace containing '${APP_INSIGHTS_TRACE_MARKER}'."
-    fi
+    echo "Application Insights telemetry check FAILED before timeout."
+    echo "Missing required telemetry:"
+    [ "$request_status" = "FAIL" ] && echo "  - request telemetry for cloud role '${APP_INSIGHTS_ROLE_NAME}'"
+    [ "$dependency_status" = "FAIL" ] && echo "  - dependency telemetry for cloud role '${APP_INSIGHTS_ROLE_NAME}'"
+    [ "$trace_status" = "FAIL" ] && echo "  - trace telemetry containing '${APP_INSIGHTS_TRACE_MARKER}'"
     exit 1
   fi
 
+  echo "Telemetry not complete yet. Waiting ${APP_INSIGHTS_POLL_SECONDS}s for App Insights ingestion..."
+  attempt=$((attempt + 1))
   sleep "$APP_INSIGHTS_POLL_SECONDS"
 done

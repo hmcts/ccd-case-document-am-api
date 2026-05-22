@@ -234,5 +234,6 @@ def verifyAppInsightsTelemetry(environment) {
     return
   }
 
+  steps.echo("Verifying Application Insights telemetry for ${environment}")
   steps.sh("APP_INSIGHTS_ENV='${environment}' ./bin/check-app-insights-telemetry.sh")
 }
