@@ -163,6 +163,7 @@ withPipeline("java", product, component) {
             reportFiles          : "overview-features.html",
             reportName           : "Functional Test Report"
     ]
+    verifyAppInsightsTelemetry('preview')
   }
 
   afterAlways('functionalTest:aat') {
@@ -176,6 +177,7 @@ withPipeline("java", product, component) {
             reportFiles          : "overview-features.html",
             reportName           : "Functional Test Report"
     ]
+    verifyAppInsightsTelemetry('aat')
   }
 
   afterAlways('smoketest:preview') {
@@ -222,4 +224,13 @@ withPipeline("java", product, component) {
  */
 def copyIgnore(filePath, destinationDir) {
   steps.sh("cp -R '${filePath}' '${destinationDir}' || :")
+}
+
+def verifyAppInsightsTelemetry(environment) {
+  if (!env.VERIFY_APP_INSIGHTS_TELEMETRY?.toBoolean()) {
+    steps.echo("Skipping Application Insights telemetry check for ${environment}")
+    return
+  }
+
+  steps.sh("APP_INSIGHTS_ENV='${environment}' ./bin/check-app-insights-telemetry.sh")
 }

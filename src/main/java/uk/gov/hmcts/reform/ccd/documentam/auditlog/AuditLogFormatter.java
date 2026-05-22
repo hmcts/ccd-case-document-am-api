@@ -1,13 +1,11 @@
 package uk.gov.hmcts.reform.ccd.documentam.auditlog;
 
-import com.microsoft.applicationinsights.core.dependencies.google.common.collect.Lists;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.PredicateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,7 +27,7 @@ public class AuditLogFormatter {
     }
 
     public String format(AuditEntry entry) {
-        List<String> formattedPairs = Lists.newArrayList(
+        String formattedPairs = Stream.of(
             getPair("dateTime", entry.getDateTime()),
             getPair("operationType", entry.getOperationType()),
             getPair("idamId", entry.getIdamId()),
@@ -41,11 +39,11 @@ public class AuditLogFormatter {
             getPair("caseType", entry.getCaseType()),
             getPair("caseId", entry.getCaseId()),
             getPair("X-Request-ID", entry.getRequestId())
-        );
+        )
+            .filter(Objects::nonNull)
+            .collect(Collectors.joining(COMMA));
 
-        CollectionUtils.filter(formattedPairs, PredicateUtils.notNullPredicate());
-
-        return TAG + " " + String.join(COMMA, formattedPairs);
+        return TAG + " " + formattedPairs;
     }
 
     private String commaSeparatedList(List<String> list) {
