@@ -230,10 +230,23 @@ def copyIgnore(filePath, destinationDir) {
 
 def verifyAppInsightsTelemetry(environment) {
   if (!env.VERIFY_APP_INSIGHTS_TELEMETRY?.toBoolean()) {
-    steps.echo("Skipping Application Insights telemetry check for ${environment}")
     return
   }
 
   steps.echo("Verifying Application Insights telemetry for ${environment}")
-  steps.sh("APP_INSIGHTS_ENV='${environment}' ./bin/check-app-insights-telemetry.sh")
+  def status = steps.sh(
+      script: "APP_INSIGHTS_ENV='${environment}' ./bin/check-app-insights-telemetry.sh",
+      returnStatus: true
+  )
+
+  if (status == 0) {
+    return
+  }
+
+  def message = "Application Insights telemetry check did not pass for ${environment} (exit code ${status})"
+  if (env.VERIFY_APP_INSIGHTS_TELEMETRY_REQUIRED?.toBoolean()) {
+    steps.error(message)
+  }
+
+  steps.echo("WARNING: ${message}. Not failing pipeline because VERIFY_APP_INSIGHTS_TELEMETRY_REQUIRED is not true.")
 }
