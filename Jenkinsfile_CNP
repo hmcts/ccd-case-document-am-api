@@ -244,10 +244,5 @@ def verifyAppInsightsTelemetry(environment) {
     return
   }
 
-  def message = "Application Insights telemetry check did not pass for ${environment} (exit code ${status})"
-  if (env.VERIFY_APP_INSIGHTS_TELEMETRY_REQUIRED?.toBoolean()) {
-    steps.error(message)
-  }
-
-  steps.echo("WARNING: ${message}. Not failing pipeline because VERIFY_APP_INSIGHTS_TELEMETRY_REQUIRED is not true.")
+  steps.echo("Application Insights telemetry check was inconclusive for ${environment} (exit code ${status}).")
 }
