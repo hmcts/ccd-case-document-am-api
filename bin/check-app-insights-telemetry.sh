@@ -6,13 +6,39 @@ APP_INSIGHTS_ENV="${APP_INSIGHTS_ENV:-aat}"
 APP_INSIGHTS_APP_NAME="${APP_INSIGHTS_APP_NAME:-ccd-${APP_INSIGHTS_ENV}}"
 APP_INSIGHTS_RESOURCE_GROUP="${APP_INSIGHTS_RESOURCE_GROUP:-ccd-shared-${APP_INSIGHTS_ENV}}"
 APP_INSIGHTS_ROLE_NAME="${APP_INSIGHTS_ROLE_NAME:-ccd-case-document-am-api}"
-APP_INSIGHTS_LOOKBACK="${APP_INSIGHTS_LOOKBACK:-60m}"
+APP_INSIGHTS_LOOKBACK="${APP_INSIGHTS_LOOKBACK:-${APP_INSIGHTS_TELEMETRY_LOOKBACK:-2h}}"
 APP_INSIGHTS_TIMEOUT_SECONDS="${APP_INSIGHTS_TIMEOUT_SECONDS:-600}"
 APP_INSIGHTS_POLL_SECONDS="${APP_INSIGHTS_POLL_SECONDS:-30}"
-APP_INSIGHTS_TRACE_MARKER="${APP_INSIGHTS_TRACE_MARKER:-LA-CDAM}"
 REQUIRE_DEPENDENCY_TELEMETRY="${REQUIRE_DEPENDENCY_TELEMETRY:-true}"
 REQUIRE_TRACE_TELEMETRY="${REQUIRE_TRACE_TELEMETRY:-true}"
 attempt=1
+
+resolve_trace_marker() {
+  if [ -n "${APP_INSIGHTS_TRACE_MARKER:-}" ]; then
+    echo "$APP_INSIGHTS_TRACE_MARKER"
+    return
+  fi
+
+  if [ ! -x "./gradlew" ]; then
+    echo "APP_INSIGHTS_TRACE_MARKER is not set and ./gradlew is not available to resolve the audit log tag." >&2
+    exit 2
+  fi
+
+  if ! marker="$(./gradlew -q printAuditLogTag 2>&1)"; then
+    echo "Failed to resolve audit log tag from AuditLogFormatter.TAG:" >&2
+    echo "$marker" >&2
+    exit 2
+  fi
+
+  marker="$(printf '%s\n' "$marker" | sed '/^[[:space:]]*$/d' | tail -n 1)"
+
+  if [ -z "$marker" ]; then
+    echo "AuditLogFormatter.TAG resolved to an empty value." >&2
+    exit 2
+  fi
+
+  echo "$marker"
+}
 
 if ! command -v az >/dev/null 2>&1; then
   echo "Azure CLI 'az' is required to query Application Insights."
@@ -40,6 +66,8 @@ if [ -n "${AZURE_SUBSCRIPTION_ID:-}" ]; then
 else
   AZURE_SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
 fi
+
+APP_INSIGHTS_TRACE_MARKER="$(resolve_trace_marker)"
 
 is_true() {
   case "$1" in

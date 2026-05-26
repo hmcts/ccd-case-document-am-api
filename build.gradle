@@ -249,6 +249,25 @@ tasks.register("printSuppressionFile") {
   }
 }
 
+tasks.register("printAuditLogTag") {
+  group = "Help"
+  description = "Prints the audit log tag used by AuditLogFormatter."
+  dependsOn classes
+
+  doLast {
+    URL[] classpathUrls = sourceSets.main.runtimeClasspath.files.collect { it.toURI().toURL() } as URL[]
+    URLClassLoader classLoader = new URLClassLoader(classpathUrls, (ClassLoader) null)
+    Class<?> formatterClass = Class.forName(
+      "uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditLogFormatter",
+      false,
+      classLoader
+    )
+    def tagField = formatterClass.getDeclaredField("TAG")
+    tagField.setAccessible(true)
+    println tagField.get(null)
+  }
+}
+
 dependencyUpdates.resolutionStrategy = {
   componentSelection { rules ->
     rules.all { ComponentSelection selection ->

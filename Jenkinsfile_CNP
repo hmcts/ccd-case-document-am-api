@@ -82,8 +82,8 @@ env.PACT_BROKER_URL = "pact-broker.platform.hmcts.net"
 env.PACT_BROKER_PORT = "443"
 env.PACT_BROKER_SCHEME = "https"
 
-env.VERIFY_APP_INSIGHTS_TELEMETRY = "true"
-env.VERIFY_APP_INSIGHTS_TELEMETRY_REQUIRED = "true"
+env.APP_INSIGHTS_TELEMETRY_SMOKE_ENABLED = "true"
+env.APP_INSIGHTS_TELEMETRY_REQUIRED = "true"
 
 // Prevent Docker hub rate limit errors by ensuring that testcontainers uses images from hmctsprod ACR
 env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX = "hmctsprod.azurecr.io/imported/"
@@ -166,7 +166,10 @@ withPipeline("java", product, component) {
             reportFiles          : "overview-features.html",
             reportName           : "Functional Test Report"
     ]
-    verifyAppInsightsTelemetry('preview')
+  }
+
+  afterSuccess('functionalTest:preview') {
+    runTelemetrySmokeCheck('preview')
   }
 
   afterAlways('functionalTest:aat') {
@@ -180,7 +183,10 @@ withPipeline("java", product, component) {
             reportFiles          : "overview-features.html",
             reportName           : "Functional Test Report"
     ]
-    verifyAppInsightsTelemetry('aat')
+  }
+
+  afterSuccess('functionalTest:aat') {
+    runTelemetrySmokeCheck('aat')
   }
 
   afterAlways('smoketest:preview') {
@@ -229,14 +235,17 @@ def copyIgnore(filePath, destinationDir) {
   steps.sh("cp -R '${filePath}' '${destinationDir}' || :")
 }
 
-def verifyAppInsightsTelemetry(environment) {
-  if (!env.VERIFY_APP_INSIGHTS_TELEMETRY?.toBoolean()) {
+def runTelemetrySmokeCheck(environment) {
+  if (!env.APP_INSIGHTS_TELEMETRY_SMOKE_ENABLED?.toBoolean()) {
+    steps.echo("Skipping App Insights telemetry smoke check for ${environment}; set APP_INSIGHTS_TELEMETRY_SMOKE_ENABLED=true to enable.")
     return
   }
 
-  steps.echo("Verifying Application Insights telemetry for ${environment}")
+  def azureConfigDir = env.AZURE_CONFIG_DIR?.trim() ?: '/opt/jenkins/.azure-nonprod'
+  steps.echo("Running Application Insights telemetry smoke check for ${environment}")
+  steps.echo("Using Azure CLI config ${azureConfigDir} for Application Insights telemetry check")
   def status = steps.sh(
-      script: "APP_INSIGHTS_ENV='${environment}' ./bin/check-app-insights-telemetry.sh",
+      script: "AZURE_CONFIG_DIR='${azureConfigDir}' APP_INSIGHTS_ENV='${environment}' ./bin/check-app-insights-telemetry.sh",
       returnStatus: true
   )
 
@@ -244,5 +253,9 @@ def verifyAppInsightsTelemetry(environment) {
     return
   }
 
-  steps.echo("Application Insights telemetry check was inconclusive for ${environment} (exit code ${status}).")
+  def message = "Application Insights telemetry check did not pass for ${environment} (exit code ${status})."
+  if (env.APP_INSIGHTS_TELEMETRY_REQUIRED?.toBoolean()) {
+    steps.error(message)
+  }
+  steps.echo("${message} Continuing because APP_INSIGHTS_TELEMETRY_REQUIRED is not true.")
 }
