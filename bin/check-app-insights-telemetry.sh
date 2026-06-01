@@ -128,13 +128,13 @@ query_telemetry_counts() {
   rm -f "$error_file"
 
   set -- $counts
-  if [ "$#" -ne 3 ]; then
+  if [ "$#" -ne 6 ]; then
     echo "Unexpected telemetry query result:" >&2
     echo "$counts" >&2
     exit 2
   fi
 
-  for count in "$1" "$2" "$3"; do
+  for count in "$@"; do
     case "$count" in
       ''|*[!0-9]*)
         echo "Unexpected telemetry count:" >&2
@@ -144,7 +144,7 @@ query_telemetry_counts() {
     esac
   done
 
-  printf '%s %s %s\n' "$1" "$2" "$3"
+  printf '%s %s %s %s %s %s\n' "$1" "$2" "$3" "$4" "$5" "$6"
 }
 
 role_name="$(kql_escape "$APP_INSIGHTS_ROLE_NAME")"
@@ -170,7 +170,7 @@ fi
 
 telemetry_query="let matching_requests = requests | where ${request_filter} | project operation_Id;"
 telemetry_query="${telemetry_query} let request_operations = matching_requests | distinct operation_Id;"
-telemetry_query="${telemetry_query} print RequestCount=toscalar(matching_requests | summarize Count=count()), DependencyCount=${dependency_count_expression}, TraceCount=${trace_count_expression}"
+telemetry_query="${telemetry_query} print RequestCount=toscalar(matching_requests | summarize Count=count()), RoleRequestCount=toscalar(requests | where ${base_filter} | summarize Count=count()), DependencyCount=${dependency_count_expression}, RoleDependencyCount=toscalar(dependencies | where ${base_filter} | summarize Count=count()), TraceCount=${trace_count_expression}, RoleTraceMarkerCount=toscalar(traces | where ${base_filter} | where message contains '${trace_marker}' | summarize Count=count())"
 
 deadline=$(( $(date +%s) + APP_INSIGHTS_TIMEOUT_SECONDS ))
 
@@ -193,8 +193,11 @@ while true; do
   counts=$(query_telemetry_counts "$telemetry_query")
   set -- $counts
   request_count="$1"
-  dependency_count="$2"
-  trace_count="$3"
+  role_request_count="$2"
+  dependency_count="$3"
+  role_dependency_count="$4"
+  trace_count="$5"
+  role_trace_marker_count="$6"
 
   request_status="PASS"
   dependency_status="SKIP"
@@ -219,6 +222,7 @@ while true; do
   fi
 
   echo "Telemetry result: requests=${request_status} (${request_count}), dependencies=${dependency_status} (${dependency_count}), traces=${trace_status} (${trace_count})"
+  echo "Telemetry diagnostics: role_requests=${role_request_count}, role_dependencies=${role_dependency_count}, role_traces_with_marker=${role_trace_marker_count}"
 
   passed=true
 
@@ -245,6 +249,13 @@ while true; do
     [ "$request_status" = "FAIL" ] && echo "  - request telemetry for cloud role '${APP_INSIGHTS_ROLE_NAME}'"
     [ "$dependency_status" = "FAIL" ] && echo "  - dependency telemetry correlated with matching request telemetry"
     [ "$trace_status" = "FAIL" ] && echo "  - trace telemetry containing '${APP_INSIGHTS_TRACE_MARKER}' and correlated with matching request telemetry"
+    echo "Diagnostic counts:"
+    echo "  - role request telemetry: ${role_request_count}"
+    echo "  - matching request telemetry: ${request_count}"
+    echo "  - role dependency telemetry: ${role_dependency_count}"
+    echo "  - correlated dependency telemetry: ${dependency_count}"
+    echo "  - role trace telemetry containing '${APP_INSIGHTS_TRACE_MARKER}': ${role_trace_marker_count}"
+    echo "  - correlated trace telemetry containing '${APP_INSIGHTS_TRACE_MARKER}': ${trace_count}"
     exit 1
   fi
 
