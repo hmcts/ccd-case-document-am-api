@@ -173,7 +173,7 @@ withPipeline("java", product, component) {
   }
 
   afterSuccess('functionalTest:preview') {
-    runTelemetrySmokeCheck('preview')
+    runTelemetrySmokeCheckAfterFunctional('preview')
   }
 
   afterAlways('functionalTest:aat') {
@@ -190,7 +190,7 @@ withPipeline("java", product, component) {
   }
 
   afterSuccess('functionalTest:aat') {
-    runTelemetrySmokeCheck('aat')
+    runTelemetrySmokeCheckAfterFunctional('aat')
   }
 
   afterAlways('smoketest:preview') {
@@ -239,6 +239,14 @@ def copyIgnore(filePath, destinationDir) {
   steps.sh("cp -R '${filePath}' '${destinationDir}' || :")
 }
 
+def runTelemetrySmokeCheckAfterFunctional(environment) {
+  steps.stage("Application Insights telemetry - ${environment}") {
+    steps.catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+      runTelemetrySmokeCheck(environment)
+    }
+  }
+}
+
 def runTelemetrySmokeCheck(environment) {
   if (!env.APP_INSIGHTS_TELEMETRY_SMOKE_ENABLED?.toBoolean()) {
     steps.echo("Skipping App Insights telemetry smoke check for ${environment}; set APP_INSIGHTS_TELEMETRY_SMOKE_ENABLED=true to enable.")
@@ -251,10 +259,14 @@ def runTelemetrySmokeCheck(environment) {
   steps.echo("Running Application Insights telemetry smoke check for ${environment}")
   steps.echo("Using Azure CLI config ${azureConfigDir} for Application Insights telemetry check")
   steps.echo("Using ${appInsightsEnvironment} Application Insights for ${environment} telemetry check")
+  def requestUrlContains = environment == 'preview' ? (env.TEST_URL?.trim() ?: '') : ''
+  requestUrlContains = requestUrlContains.replaceFirst('^https?://', '').replaceFirst('/.*$', '')
   def status = steps.sh(
       script: """
         AZURE_CONFIG_DIR='${azureConfigDir}' \\
+        APP_INSIGHTS_SOURCE_ENV='${environment}' \\
         APP_INSIGHTS_ENV='${appInsightsEnvironment}' \\
+        APP_INSIGHTS_REQUEST_URL_CONTAINS='${requestUrlContains}' \\
         ./bin/check-app-insights-telemetry.sh
       """,
       returnStatus: true
@@ -265,9 +277,9 @@ def runTelemetrySmokeCheck(environment) {
   }
 
   def message = "Application Insights telemetry check did not pass for ${environment} (exit code ${status})."
-  def telemetryRequired = env.APP_INSIGHTS_TELEMETRY_REQUIRED?.toBoolean() && environment != 'preview'
-  if (telemetryRequired) {
+  steps.echo(message)
+  if (env.APP_INSIGHTS_TELEMETRY_REQUIRED?.toBoolean()) {
     steps.error(message)
   }
-  steps.echo("${message} Continuing because telemetry smoke check is non-blocking for ${environment}.")
+  steps.echo("${message} Continuing because APP_INSIGHTS_TELEMETRY_REQUIRED is not true.")
 }
