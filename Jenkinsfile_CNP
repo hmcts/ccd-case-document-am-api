@@ -241,9 +241,7 @@ def copyIgnore(filePath, destinationDir) {
 
 def runTelemetrySmokeCheckAfterFunctional(environment) {
   steps.stage("Application Insights telemetry - ${environment}") {
-    steps.catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-      runTelemetrySmokeCheck(environment)
-    }
+    runTelemetrySmokeCheck(environment)
   }
 }
 
@@ -261,16 +259,21 @@ def runTelemetrySmokeCheck(environment) {
   steps.echo("Using ${appInsightsEnvironment} Application Insights for ${environment} telemetry check")
   def requestUrlContains = environment == 'preview' ? (env.TEST_URL?.trim() ?: '') : ''
   requestUrlContains = requestUrlContains.replaceFirst('^https?://', '').replaceFirst('/.*$', '')
-  def status = steps.sh(
-      script: """
+  def telemetryScript = """
         AZURE_CONFIG_DIR='${azureConfigDir}' \\
         APP_INSIGHTS_SOURCE_ENV='${environment}' \\
         APP_INSIGHTS_ENV='${appInsightsEnvironment}' \\
         APP_INSIGHTS_REQUEST_URL_CONTAINS='${requestUrlContains}' \\
         ./bin/check-app-insights-telemetry.sh
-      """,
-      returnStatus: true
-  )
+      """
+
+  if (env.APP_INSIGHTS_TELEMETRY_REQUIRED?.toBoolean()) {
+    steps.echo("Application Insights telemetry is required; a failed telemetry check will fail this stage.")
+    steps.sh(script: telemetryScript)
+    return
+  }
+
+  def status = steps.sh(script: telemetryScript, returnStatus: true)
 
   if (status == 0) {
     return
@@ -278,8 +281,5 @@ def runTelemetrySmokeCheck(environment) {
 
   def message = "Application Insights telemetry check did not pass for ${environment} (exit code ${status})."
   steps.echo(message)
-  if (env.APP_INSIGHTS_TELEMETRY_REQUIRED?.toBoolean()) {
-    steps.error(message)
-  }
   steps.echo("${message} Continuing because APP_INSIGHTS_TELEMETRY_REQUIRED is not true.")
 }
