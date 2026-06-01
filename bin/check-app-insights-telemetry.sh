@@ -3,7 +3,7 @@
 set -eu
 
 APP_INSIGHTS_ENV="${APP_INSIGHTS_ENV:-aat}"
-APP_INSIGHTS_APP_NAME="${APP_INSIGHTS_APP_NAME:-ccd-${APP_INSIGHTS_ENV}}"
+APP_INSIGHTS_APP_NAME="${APP_INSIGHTS_APP_NAME:-${APP_INSIGHTS_APP:-ccd-${APP_INSIGHTS_ENV}}}"
 APP_INSIGHTS_RESOURCE_GROUP="${APP_INSIGHTS_RESOURCE_GROUP:-ccd-shared-${APP_INSIGHTS_ENV}}"
 APP_INSIGHTS_ROLE_NAME="${APP_INSIGHTS_ROLE_NAME:-ccd-case-document-am-api}"
 APP_INSIGHTS_LOOKBACK="${APP_INSIGHTS_LOOKBACK:-${APP_INSIGHTS_TELEMETRY_LOOKBACK:-2h}}"
@@ -80,15 +80,24 @@ json_escape() {
   printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
 }
 
+kql_escape() {
+  printf '%s' "$1" | sed "s/'/''/g"
+}
+
 query_count() {
   label="$1"
   query="$2"
   escaped_query="$(json_escape "$query")"
   body="{\"query\":\"${escaped_query}\"}"
+  error_file="$(mktemp)"
 
   echo "Querying ${label} telemetry..." >&2
 
-  uri="https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${APP_INSIGHTS_RESOURCE_GROUP}/providers/Microsoft.Insights/components/${APP_INSIGHTS_APP_NAME}/query?api-version=2018-04-20"
+  if [ -n "${APP_INSIGHTS_RESOURCE_ID:-}" ]; then
+    uri="https://management.azure.com${APP_INSIGHTS_RESOURCE_ID}/query?api-version=2018-04-20"
+  else
+    uri="https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${APP_INSIGHTS_RESOURCE_GROUP}/providers/Microsoft.Insights/components/${APP_INSIGHTS_APP_NAME}/query?api-version=2018-04-20"
+  fi
 
   if ! count=$(az rest \
       --method post \
@@ -96,29 +105,44 @@ query_count() {
       --headers "Content-Type=application/json" \
       --body "$body" \
       --query "tables[0].rows[0][0]" \
-      --output tsv 2>&1); then
-    echo "Failed to query ${label} telemetry from Application Insights:"
-    echo "$count"
+      --output tsv 2>"$error_file"); then
+    echo "Failed to query ${label} telemetry from Application Insights:" >&2
+    cat "$error_file" >&2
+    rm -f "$error_file"
     exit 2
   fi
+  rm -f "$error_file"
 
   if [ -z "$count" ]; then
     count=0
   fi
 
+  case "$count" in
+    *[!0-9]*)
+      echo "Unexpected ${label} telemetry query result:" >&2
+      echo "$count" >&2
+      exit 2
+      ;;
+  esac
+
   echo "$count"
 }
 
-requests_query="requests | where timestamp > ago(${APP_INSIGHTS_LOOKBACK}) | where cloud_RoleName == '${APP_INSIGHTS_ROLE_NAME}' | summarize Count=count()"
-dependencies_query="dependencies | where timestamp > ago(${APP_INSIGHTS_LOOKBACK}) | where cloud_RoleName == '${APP_INSIGHTS_ROLE_NAME}' | summarize Count=count()"
-traces_query="traces | where timestamp > ago(${APP_INSIGHTS_LOOKBACK}) | where cloud_RoleName == '${APP_INSIGHTS_ROLE_NAME}' | where message has '${APP_INSIGHTS_TRACE_MARKER}' | summarize Count=count()"
+role_name="$(kql_escape "$APP_INSIGHTS_ROLE_NAME")"
+trace_marker="$(kql_escape "$APP_INSIGHTS_TRACE_MARKER")"
+base_filter="timestamp > ago(${APP_INSIGHTS_LOOKBACK}) | where cloud_RoleName == '${role_name}'"
+requests_query="requests | where ${base_filter} | summarize Count=count()"
+dependencies_query="dependencies | where ${base_filter} | summarize Count=count()"
+traces_query="traces | where ${base_filter} | where message contains '${trace_marker}' | summarize Count=count()"
 
 deadline=$(( $(date +%s) + APP_INSIGHTS_TIMEOUT_SECONDS ))
 
 echo "Checking Application Insights telemetry"
 echo "  app: ${APP_INSIGHTS_APP_NAME}"
 echo "  resource group: ${APP_INSIGHTS_RESOURCE_GROUP}"
+echo "  resource id: ${APP_INSIGHTS_RESOURCE_ID:-}"
 echo "  cloud role: ${APP_INSIGHTS_ROLE_NAME}"
+echo "  marker: ${APP_INSIGHTS_TRACE_MARKER}"
 echo "  lookback: ${APP_INSIGHTS_LOOKBACK}"
 echo "  subscription: ${AZURE_SUBSCRIPTION_ID}"
 echo "  required: requests=true, dependencies=${REQUIRE_DEPENDENCY_TELEMETRY}, traces=${REQUIRE_TRACE_TELEMETRY}"
