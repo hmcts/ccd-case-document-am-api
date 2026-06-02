@@ -1,6 +1,7 @@
 #!groovy
 @Library("Infrastructure")
 
+import groovy.transform.Field
 import uk.gov.hmcts.contino.GradleBuilder
 import uk.gov.hmcts.contino.GithubAPI
 import uk.gov.hmcts.contino.AppPipelineDsl
@@ -52,8 +53,8 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
   ]
 }
 
-def vaultOverrides = [
-    'preview' : 'aat'
+@Field Map<String, String> vaultOverrides = [
+    preview: 'aat'
 ]
 
 // Vars needed for functional and smoke tests run against AKS
