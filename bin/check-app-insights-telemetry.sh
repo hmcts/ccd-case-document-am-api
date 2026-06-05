@@ -3,10 +3,11 @@
 set -eu
 
 APP_INSIGHTS_ENV="${APP_INSIGHTS_ENV:-aat}"
-APP_INSIGHTS_APP_NAME="${APP_INSIGHTS_APP_NAME:-${APP_INSIGHTS_APP:-ccd-${APP_INSIGHTS_ENV}}}"
+# Canonical script inputs: keep the configuration surface narrow and explicit.
+APP_INSIGHTS_APP_NAME="${APP_INSIGHTS_APP_NAME:-ccd-${APP_INSIGHTS_ENV}}"
 APP_INSIGHTS_RESOURCE_GROUP="${APP_INSIGHTS_RESOURCE_GROUP:-ccd-shared-${APP_INSIGHTS_ENV}}"
 APP_INSIGHTS_ROLE_NAME="${APP_INSIGHTS_ROLE_NAME:-ccd-case-document-am-api}"
-APP_INSIGHTS_LOOKBACK="${APP_INSIGHTS_LOOKBACK:-${APP_INSIGHTS_TELEMETRY_LOOKBACK:-2h}}"
+APP_INSIGHTS_LOOKBACK="${APP_INSIGHTS_LOOKBACK:-2h}"
 APP_INSIGHTS_TIMEOUT_SECONDS="${APP_INSIGHTS_TIMEOUT_SECONDS:-600}"
 APP_INSIGHTS_POLL_SECONDS="${APP_INSIGHTS_POLL_SECONDS:-30}"
 APP_INSIGHTS_SOURCE_ENV="${APP_INSIGHTS_SOURCE_ENV:-${APP_INSIGHTS_ENV}}"
@@ -14,6 +15,21 @@ APP_INSIGHTS_REQUEST_URL_CONTAINS="${APP_INSIGHTS_REQUEST_URL_CONTAINS:-}"
 REQUIRE_DEPENDENCY_TELEMETRY="${REQUIRE_DEPENDENCY_TELEMETRY:-true}"
 REQUIRE_TRACE_TELEMETRY="${REQUIRE_TRACE_TELEMETRY:-true}"
 attempt=1
+
+if [ "$APP_INSIGHTS_SOURCE_ENV" = "preview" ]; then
+  if [ -z "$APP_INSIGHTS_REQUEST_URL_CONTAINS" ]; then
+    case "${BRANCH_NAME:-}" in
+      PR-*|pr-*)
+        APP_INSIGHTS_REQUEST_URL_CONTAINS="$(printf '%s' "${APP_INSIGHTS_ROLE_NAME}-${BRANCH_NAME}.preview.platform.hmcts.net" | tr '[:upper:]' '[:lower:]')"
+        ;;
+    esac
+  fi
+
+  if [ -z "$APP_INSIGHTS_REQUEST_URL_CONTAINS" ]; then
+    echo "Preview telemetry check requires APP_INSIGHTS_REQUEST_URL_CONTAINS or a PR-* BRANCH_NAME." >&2
+    exit 2
+  fi
+fi
 
 resolve_trace_marker() {
   if [ -n "${APP_INSIGHTS_TRACE_MARKER:-}" ]; then
@@ -71,19 +87,6 @@ fi
 
 APP_INSIGHTS_TRACE_MARKER="$(resolve_trace_marker)"
 
-if [ -z "$APP_INSIGHTS_REQUEST_URL_CONTAINS" ] && [ "$APP_INSIGHTS_SOURCE_ENV" = "preview" ]; then
-  case "${BRANCH_NAME:-}" in
-    PR-*|pr-*)
-      APP_INSIGHTS_REQUEST_URL_CONTAINS="$(printf '%s' "${APP_INSIGHTS_ROLE_NAME}-${BRANCH_NAME}.preview.platform.hmcts.net" | tr '[:upper:]' '[:lower:]')"
-      ;;
-  esac
-fi
-
-if [ -z "$APP_INSIGHTS_REQUEST_URL_CONTAINS" ] && [ "$APP_INSIGHTS_SOURCE_ENV" = "preview" ]; then
-  echo "Preview telemetry check requires APP_INSIGHTS_REQUEST_URL_CONTAINS or a PR-* BRANCH_NAME." >&2
-  exit 2
-fi
-
 is_true() {
   case "$1" in
     true|TRUE|True|1|yes|YES|Yes) return 0 ;;
@@ -104,14 +107,17 @@ query_telemetry_counts() {
   escaped_query="$(json_escape "$query")"
   body="{\"query\":\"${escaped_query}\"}"
   error_file="$(mktemp)"
+  app_insights_api_version="2018-04-20"
+  telemetry_count_columns=6
 
   echo "Querying telemetry..." >&2
 
   if [ -n "${APP_INSIGHTS_RESOURCE_ID:-}" ]; then
-    uri="https://management.azure.com${APP_INSIGHTS_RESOURCE_ID}/query?api-version=2018-04-20"
+    uri_app_insights="https://management.azure.com${APP_INSIGHTS_RESOURCE_ID}"
   else
-    uri="https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${APP_INSIGHTS_RESOURCE_GROUP}/providers/Microsoft.Insights/components/${APP_INSIGHTS_APP_NAME}/query?api-version=2018-04-20"
+    uri_app_insights="https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${APP_INSIGHTS_RESOURCE_GROUP}/providers/Microsoft.Insights/components/${APP_INSIGHTS_APP_NAME}"
   fi
+  uri="${uri_app_insights}/query?api-version=${app_insights_api_version}"
 
   if ! counts=$(az rest \
       --method post \
@@ -128,7 +134,7 @@ query_telemetry_counts() {
   rm -f "$error_file"
 
   set -- $counts
-  if [ "$#" -ne 6 ]; then
+  if [ "$#" -ne "$telemetry_count_columns" ]; then
     echo "Unexpected telemetry query result:" >&2
     echo "$counts" >&2
     exit 2
@@ -150,27 +156,31 @@ query_telemetry_counts() {
 role_name="$(kql_escape "$APP_INSIGHTS_ROLE_NAME")"
 trace_marker="$(kql_escape "$APP_INSIGHTS_TRACE_MARKER")"
 base_filter="timestamp > ago(${APP_INSIGHTS_LOOKBACK}) | where cloud_RoleName == '${role_name}'"
-request_filter="$base_filter"
+request_url_filter=""
 
 if [ -n "$APP_INSIGHTS_REQUEST_URL_CONTAINS" ]; then
   request_url_contains="$(kql_escape "$APP_INSIGHTS_REQUEST_URL_CONTAINS")"
-  request_filter="${request_filter} | where url contains '${request_url_contains}'"
+  request_url_filter=" | where url contains '${request_url_contains}'"
 fi
 
 dependency_count_expression="0"
 trace_count_expression="0"
 
 if is_true "$REQUIRE_DEPENDENCY_TELEMETRY"; then
-  dependency_count_expression="toscalar(dependencies | where ${base_filter} | where operation_Id in (request_operations) | summarize Count=count())"
+  dependency_count_expression="toscalar(filtered_dependencies | where operation_Id in (request_operations) | summarize Count=count())"
 fi
 
 if is_true "$REQUIRE_TRACE_TELEMETRY"; then
-  trace_count_expression="toscalar(traces | where ${base_filter} | where operation_Id in (request_operations) | where message contains '${trace_marker}' | summarize Count=count())"
+  trace_count_expression="toscalar(filtered_traces_with_marker | where operation_Id in (request_operations) | summarize Count=count())"
 fi
 
-telemetry_query="let matching_requests = requests | where ${request_filter} | project operation_Id;"
+telemetry_query="let filtered_requests = requests | where ${base_filter};"
+telemetry_query="${telemetry_query} let filtered_dependencies = dependencies | where ${base_filter};"
+telemetry_query="${telemetry_query} let filtered_traces = traces | where ${base_filter};"
+telemetry_query="${telemetry_query} let filtered_traces_with_marker = filtered_traces | where message contains '${trace_marker}';"
+telemetry_query="${telemetry_query} let matching_requests = filtered_requests${request_url_filter} | project operation_Id;"
 telemetry_query="${telemetry_query} let request_operations = matching_requests | distinct operation_Id;"
-telemetry_query="${telemetry_query} print RequestCount=toscalar(matching_requests | summarize Count=count()), RoleRequestCount=toscalar(requests | where ${base_filter} | summarize Count=count()), DependencyCount=${dependency_count_expression}, RoleDependencyCount=toscalar(dependencies | where ${base_filter} | summarize Count=count()), TraceCount=${trace_count_expression}, RoleTraceMarkerCount=toscalar(traces | where ${base_filter} | where message contains '${trace_marker}' | summarize Count=count())"
+telemetry_query="${telemetry_query} print RequestCount=toscalar(matching_requests | summarize Count=count()), RoleRequestCount=toscalar(filtered_requests | summarize Count=count()), DependencyCount=${dependency_count_expression}, RoleDependencyCount=toscalar(filtered_dependencies | summarize Count=count()), TraceCount=${trace_count_expression}, RoleTraceMarkerCount=toscalar(filtered_traces_with_marker | summarize Count=count())"
 
 deadline=$(( $(date +%s) + APP_INSIGHTS_TIMEOUT_SECONDS ))
 
@@ -226,15 +236,7 @@ while true; do
 
   passed=true
 
-  if [ "$request_status" = "FAIL" ]; then
-    passed=false
-  fi
-
-  if [ "$dependency_status" = "FAIL" ]; then
-    passed=false
-  fi
-
-  if [ "$trace_status" = "FAIL" ]; then
+  if [ "$request_status" = "FAIL" ] || [ "$dependency_status" = "FAIL" ] || [ "$trace_status" = "FAIL" ]; then
     passed=false
   fi
 
