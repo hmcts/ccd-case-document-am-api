@@ -14,6 +14,7 @@ APP_INSIGHTS_SOURCE_ENV="${APP_INSIGHTS_SOURCE_ENV:-${APP_INSIGHTS_ENV}}"
 APP_INSIGHTS_REQUEST_URL_CONTAINS="${APP_INSIGHTS_REQUEST_URL_CONTAINS:-}"
 REQUIRE_DEPENDENCY_TELEMETRY="${REQUIRE_DEPENDENCY_TELEMETRY:-true}"
 REQUIRE_TRACE_TELEMETRY="${REQUIRE_TRACE_TELEMETRY:-true}"
+APP_INSIGHTS_API_VERSION="${APP_INSIGHTS_API_VERSION:-2018-04-20}"
 attempt=1
 
 if [ "$APP_INSIGHTS_SOURCE_ENV" = "preview" ]; then
@@ -29,6 +30,33 @@ if [ "$APP_INSIGHTS_SOURCE_ENV" = "preview" ]; then
     echo "Preview telemetry check requires APP_INSIGHTS_REQUEST_URL_CONTAINS or a PR-* BRANCH_NAME." >&2
     exit 2
   fi
+fi
+
+if ! command -v az >/dev/null 2>&1; then
+  echo "Azure CLI 'az' is required to query Application Insights."
+  exit 2
+fi
+
+if ! az account show >/dev/null 2>&1; then
+  if [ -n "${AZURE_CLIENT_ID:-}" ] && [ -n "${AZURE_CLIENT_SECRET:-}" ] && [ -n "${AZURE_TENANT_ID:-}" ]; then
+    echo "Azure CLI is not logged in. Logging in with supplied service principal credentials."
+    az login \
+      --service-principal \
+      --username "$AZURE_CLIENT_ID" \
+      --password "$AZURE_CLIENT_SECRET" \
+      --tenant "$AZURE_TENANT_ID" \
+      --output none
+  else
+    echo "Azure CLI is not logged in or has no active subscription."
+    echo "Set AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, and AZURE_TENANT_ID, or run this from an authenticated az session."
+    exit 2
+  fi
+fi
+
+if [ -n "${AZURE_SUBSCRIPTION_ID:-}" ]; then
+  az account set --subscription "$AZURE_SUBSCRIPTION_ID"
+else
+  AZURE_SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
 fi
 
 resolve_trace_marker() {
@@ -58,33 +86,6 @@ resolve_trace_marker() {
   echo "$marker"
 }
 
-if ! command -v az >/dev/null 2>&1; then
-  echo "Azure CLI 'az' is required to query Application Insights."
-  exit 2
-fi
-
-if ! az account show >/dev/null 2>&1; then
-  if [ -n "${AZURE_CLIENT_ID:-}" ] && [ -n "${AZURE_CLIENT_SECRET:-}" ] && [ -n "${AZURE_TENANT_ID:-}" ]; then
-    echo "Azure CLI is not logged in. Logging in with supplied service principal credentials."
-    az login \
-      --service-principal \
-      --username "$AZURE_CLIENT_ID" \
-      --password "$AZURE_CLIENT_SECRET" \
-      --tenant "$AZURE_TENANT_ID" \
-      --output none
-  else
-    echo "Azure CLI is not logged in or has no active subscription."
-    echo "Set AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, and AZURE_TENANT_ID, or run this from an authenticated az session."
-    exit 2
-  fi
-fi
-
-if [ -n "${AZURE_SUBSCRIPTION_ID:-}" ]; then
-  az account set --subscription "$AZURE_SUBSCRIPTION_ID"
-else
-  AZURE_SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
-fi
-
 APP_INSIGHTS_TRACE_MARKER="$(resolve_trace_marker)"
 
 is_true() {
@@ -107,17 +108,16 @@ query_telemetry_counts() {
   escaped_query="$(json_escape "$query")"
   body="{\"query\":\"${escaped_query}\"}"
   error_file="$(mktemp)"
-  app_insights_api_version="2018-04-20"
-  telemetry_count_columns=6
+  TELEMETRY_COUNT_COLUMNS=6
 
   echo "Querying telemetry..." >&2
 
   if [ -n "${APP_INSIGHTS_RESOURCE_ID:-}" ]; then
-    uri_app_insights="https://management.azure.com${APP_INSIGHTS_RESOURCE_ID}"
+    app_insights_uri="https://management.azure.com${APP_INSIGHTS_RESOURCE_ID}"
   else
-    uri_app_insights="https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${APP_INSIGHTS_RESOURCE_GROUP}/providers/Microsoft.Insights/components/${APP_INSIGHTS_APP_NAME}"
+    app_insights_uri="https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${APP_INSIGHTS_RESOURCE_GROUP}/providers/Microsoft.Insights/components/${APP_INSIGHTS_APP_NAME}"
   fi
-  uri="${uri_app_insights}/query?api-version=${app_insights_api_version}"
+  uri="${app_insights_uri}/query?api-version=${APP_INSIGHTS_API_VERSION}"
 
   if ! counts=$(az rest \
       --method post \
@@ -134,7 +134,7 @@ query_telemetry_counts() {
   rm -f "$error_file"
 
   set -- $counts
-  if [ "$#" -ne "$telemetry_count_columns" ]; then
+  if [ "$#" -ne "$TELEMETRY_COUNT_COLUMNS" ]; then
     echo "Unexpected telemetry query result:" >&2
     echo "$counts" >&2
     exit 2
@@ -153,9 +153,9 @@ query_telemetry_counts() {
   printf '%s %s %s %s %s %s\n' "$1" "$2" "$3" "$4" "$5" "$6"
 }
 
-role_name="$(kql_escape "$APP_INSIGHTS_ROLE_NAME")"
+cloud_role_name="$(kql_escape "$APP_INSIGHTS_ROLE_NAME")"
 trace_marker="$(kql_escape "$APP_INSIGHTS_TRACE_MARKER")"
-base_filter="timestamp > ago(${APP_INSIGHTS_LOOKBACK}) | where cloud_RoleName == '${role_name}'"
+base_filter="timestamp > ago(${APP_INSIGHTS_LOOKBACK}) | where cloud_RoleName == '${cloud_role_name}'"
 request_url_filter=""
 
 if [ -n "$APP_INSIGHTS_REQUEST_URL_CONTAINS" ]; then
