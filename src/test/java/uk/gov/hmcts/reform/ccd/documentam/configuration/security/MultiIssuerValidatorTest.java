@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class MultiIssuerValidatorTest {
 
     private static final String OIDC_ISSUER = "https://idam-web-public.aat.platform.hmcts.net/o";
-    private static final String HMCTS_ACCESS_ISSUER = "https://hmcts-access.aat.platform.hmcts.net/o";
     private static final String IDAM_API_BASE_ISSUER = "https://idam-api.aat.platform.hmcts.net";
     private static final String IDAM_API_ISSUER = "https://idam-api.aat.platform.hmcts.net/o";
     private static final String FORGEROCK_ISSUER =
@@ -20,7 +19,7 @@ class MultiIssuerValidatorTest {
     private static final String OIDC_ISSUER_WITH_TRAILING_SLASH = OIDC_ISSUER + "/";
 
     private final MultiIssuerValidator validator = new MultiIssuerValidator(
-        List.of(OIDC_ISSUER, HMCTS_ACCESS_ISSUER, FORGEROCK_ISSUER, IDAM_API_BASE_ISSUER, IDAM_API_ISSUER)
+        List.of(OIDC_ISSUER, FORGEROCK_ISSUER, IDAM_API_BASE_ISSUER, IDAM_API_ISSUER)
     );
 
     private final MultiIssuerValidator validatorWithTrailingSlashConfig = new MultiIssuerValidator(
@@ -37,13 +36,6 @@ class MultiIssuerValidatorTest {
     @Test
     void shouldAcceptForgerockIssuer() {
         OAuth2TokenValidatorResult result = validator.validate(jwtWithIssuer(FORGEROCK_ISSUER));
-
-        assertFalse(result.hasErrors());
-    }
-
-    @Test
-    void shouldAcceptHmctsAccessIssuer() {
-        OAuth2TokenValidatorResult result = validator.validate(jwtWithIssuer(HMCTS_ACCESS_ISSUER));
 
         assertFalse(result.hasErrors());
     }
