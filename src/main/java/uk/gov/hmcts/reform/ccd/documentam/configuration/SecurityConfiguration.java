@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.ccd.documentam.configuration;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,14 +32,11 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-    @Value("${spring.security.oauth2.client.provider.oidc.issuer-uri}")
-    private String issuerUri;
+    private final String issuerUri;
 
-    @Value("${oidc.issuer}")
-    private String enforcedIssuer;
+    private final String enforcedIssuer;
 
-    @Value("${oidc.allowed-issuers:}")
-    private String allowedIssuers;
+    private final String allowedIssuers;
 
     private final ServiceAuthFilter serviceAuthFilter;
     private final ExceptionHandlingFilter exceptionHandlingFilter;
@@ -60,12 +56,18 @@ public class SecurityConfiguration {
         "/"
     };
 
-    @Autowired
     public SecurityConfiguration(ServiceAuthFilter serviceAuthFilter,
-                                 JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter) {
+                                 JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter,
+                                 @Value("${spring.security.oauth2.client.provider.oidc.issuer-uri}")
+                                 String issuerUri,
+                                 @Value("${oidc.issuer}") String enforcedIssuer,
+                                 @Value("${oidc.allowed-issuers:}") String allowedIssuers) {
         super();
         this.serviceAuthFilter = serviceAuthFilter;
         this.exceptionHandlingFilter = new ExceptionHandlingFilter();
+        this.issuerUri = issuerUri;
+        this.enforcedIssuer = enforcedIssuer;
+        this.allowedIssuers = allowedIssuers;
         jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
     }

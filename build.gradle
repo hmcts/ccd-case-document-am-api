@@ -370,6 +370,7 @@ dependencies {
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok
   testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok
   integrationTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok
+  functionalTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok
 
   testImplementation libraries.junit5
 

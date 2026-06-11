@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.ccd.documentam.security;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -8,13 +11,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class OidcIssuerConfigurationTest {
 
     @Test
-    void shouldFallbackToPrimaryIssuerWhenAllowedIssuersUnset() {
+    void shouldReturnOnlyPrimaryIssuerWhenAllowedIssuersUnset() {
         assertThat(OidcIssuerConfiguration.allowedIssuers("primary", null))
             .containsExactly("primary");
     }
 
     @Test
-    void shouldFallbackToPrimaryIssuerWhenAllowedIssuersBlank() {
+    void shouldReturnOnlyPrimaryIssuerWhenAllowedIssuersBlank() {
         assertThat(OidcIssuerConfiguration.allowedIssuers("primary", " "))
             .containsExactly("primary");
     }
@@ -26,12 +29,28 @@ class OidcIssuerConfigurationTest {
     }
 
     @Test
-    void shouldRejectMissingPrimaryIssuer() {
-        assertThatThrownBy(() -> OidcIssuerConfiguration.allowedIssuers(null, "secondary"))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessage("oidc.issuer must not be blank");
+    void shouldIgnoreEmptyAllowedIssuerEntryBeforeComma() {
+        assertThat(OidcIssuerConfiguration.allowedIssuers("primary", ", secondary"))
+            .containsExactly("primary", "secondary");
+    }
 
-        assertThatThrownBy(() -> OidcIssuerConfiguration.allowedIssuers(" ", "secondary"))
+    @Test
+    void shouldIgnoreEmptyAllowedIssuerEntryAfterComma() {
+        assertThat(OidcIssuerConfiguration.allowedIssuers("primary", "secondary,"))
+            .containsExactly("primary", "secondary");
+    }
+
+    @Test
+    void shouldIgnoreEmptyAllowedIssuerEntryBetweenCommas() {
+        assertThat(OidcIssuerConfiguration.allowedIssuers("primary", "secondary,,tertiary"))
+            .containsExactly("primary", "secondary", "tertiary");
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" "})
+    void shouldRejectMissingPrimaryIssuer(String primaryIssuer) {
+        assertThatThrownBy(() -> OidcIssuerConfiguration.allowedIssuers(primaryIssuer, "secondary"))
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("oidc.issuer must not be blank");
     }

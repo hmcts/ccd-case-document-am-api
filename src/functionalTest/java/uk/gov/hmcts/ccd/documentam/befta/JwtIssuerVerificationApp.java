@@ -5,11 +5,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Feign;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.befta.auth.AuthApi;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 public final class JwtIssuerVerificationApp {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -30,7 +34,7 @@ public final class JwtIssuerVerificationApp {
             );
         }
 
-        System.out.println("Verified OIDC_ISSUER matches functional test token iss: " + actualIssuer);
+        log.info("Verified OIDC_ISSUER matches functional test token iss: {}", actualIssuer);
     }
 
     private static String fetchAccessToken() {
@@ -39,16 +43,16 @@ public final class JwtIssuerVerificationApp {
             .decoder(new JacksonDecoder())
             .target(AuthApi.class, firstAvailableEnv("IDAM_API_URL_BASE", "IDAM_URL"));
 
-        String[] credentials = firstAvailableCredentials(
-            "CCD_CASEWORKER_AUTOTEST_EMAIL", "CCD_CASEWORKER_AUTOTEST_PASSWORD",
-            "DEFINITION_IMPORTER_USERNAME", "DEFINITION_IMPORTER_PASSWORD"
-        );
+        CredentialValuePair credentials = firstAvailableCredentials(List.of(
+            new CredentialVariablePair("CCD_CASEWORKER_AUTOTEST_EMAIL", "CCD_CASEWORKER_AUTOTEST_PASSWORD"),
+            new CredentialVariablePair("DEFINITION_IMPORTER_USERNAME", "DEFINITION_IMPORTER_PASSWORD")
+        ));
         String clientId = firstAvailableEnv("CCD_API_GATEWAY_OAUTH2_CLIENT_ID", "OAUTH2_CLIENT_ID");
         String clientSecret = firstAvailableEnv("CCD_API_GATEWAY_OAUTH2_CLIENT_SECRET", "OAUTH2_CLIENT_SECRET");
         String redirectUri = firstAvailableEnv("CCD_API_GATEWAY_OAUTH2_REDIRECT_URL", "OAUTH2_REDIRECT_URI");
 
         String basicAuthorisation = BASIC + Base64.getEncoder()
-            .encodeToString((credentials[0] + ":" + credentials[1]).getBytes(StandardCharsets.UTF_8));
+            .encodeToString((credentials.username() + ":" + credentials.password()).getBytes(StandardCharsets.UTF_8));
 
         AuthApi.AuthenticateUserResponse authenticateUserResponse = authApi.authenticateUser(
             basicAuthorisation,
@@ -68,19 +72,22 @@ public final class JwtIssuerVerificationApp {
         return tokenExchangeResponse.getAccessToken();
     }
 
-    private static String[] firstAvailableCredentials(String... envNames) {
-        for (int index = 0; index < envNames.length; index += 2) {
-            String username = System.getenv(envNames[index]);
-            String password = System.getenv(envNames[index + 1]);
+    private static CredentialValuePair firstAvailableCredentials(List<CredentialVariablePair> credentialVariablePairs) {
+        for (CredentialVariablePair credentialVariablePair : credentialVariablePairs) {
+            String username = System.getenv(credentialVariablePair.usernameVariable());
+            String password = System.getenv(credentialVariablePair.passwordVariable());
             if (username != null && !username.isBlank() && password != null && !password.isBlank()) {
-                return new String[]{username, password};
+                return new CredentialValuePair(username, password);
             }
         }
 
+        String expectedVariables = credentialVariablePairs.stream()
+            .map(pair -> pair.usernameVariable() + "/" + pair.passwordVariable())
+            .collect(Collectors.joining(", "));
+
         throw new IllegalStateException(
             "No credentials available for JWT issuer verification. "
-                + "Expected one of: CCD_CASEWORKER_AUTOTEST_EMAIL/PASSWORD or "
-                + "DEFINITION_IMPORTER_USERNAME/PASSWORD"
+                + "Expected one of: " + expectedVariables
         );
     }
 
@@ -120,5 +127,11 @@ public final class JwtIssuerVerificationApp {
             throw new IllegalStateException("Missing required environment variable: " + name);
         }
         return value;
+    }
+
+    private record CredentialVariablePair(String usernameVariable, String passwordVariable) {
+    }
+
+    private record CredentialValuePair(String username, String password) {
     }
 }

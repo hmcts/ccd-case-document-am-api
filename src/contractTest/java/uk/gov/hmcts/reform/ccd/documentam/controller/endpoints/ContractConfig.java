@@ -10,23 +10,9 @@ import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 
 import java.util.List;
 
-import static org.mockito.Mockito.mock;
-
 
 @Configuration
 public class ContractConfig {
-    @Bean
-    @Primary
-    public DocumentManagementService documentManagementService() {
-        return mock(DocumentManagementService.class);
-    }
-
-    @Bean
-    @Primary
-    public SecurityUtils securityUtils() {
-        return mock(SecurityUtils.class);
-    }
-
     @Bean
     @Primary
     public ApplicationParams applicationParams() {

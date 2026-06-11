@@ -18,12 +18,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
+import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
-import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 
 import java.io.IOException;
 import java.util.Map;
@@ -48,6 +50,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PER
     "stream.upload.enabled=false"
 })
 @IgnoreNoPactsToVerify
+@MockitoBean(types = SecurityUtils.class)
 public class CaseDocumentAmProviderTest {
 
     private static final String CASE_TYPE_ID = "some-case-type-id";
@@ -55,7 +58,7 @@ public class CaseDocumentAmProviderTest {
     private static final String CASE_ID = "some-case-id";
     private static final UUID DOCUMENT_ID_UUID = UUID.fromString("6c3c3906-2b51-468e-8cbb-a4002eded076");
 
-    @Autowired
+    @MockitoBean
     DocumentManagementService documentManagementService;
 
     @Autowired
