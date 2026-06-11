@@ -49,7 +49,7 @@ class OidcIssuerConfigurationTest {
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {" "})
-    void shouldRejectMissingPrimaryIssuer(String primaryIssuer) {
+    void shouldRejectMissingPrimaryIssuerEvenWhenAllowedIssuersAreConfigured(String primaryIssuer) {
         assertThatThrownBy(() -> OidcIssuerConfiguration.allowedIssuers(primaryIssuer, "secondary"))
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("oidc.issuer must not be blank");
