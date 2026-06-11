@@ -39,6 +39,9 @@ public class SecurityConfiguration {
     @Value("${oidc.issuer}")
     private String issuerOverride;
 
+    @Value("${oidc.hmcts-access-issuer}")
+    private String hmctsAccessIssuer;
+
     @Value("${idam.api.url}")
     private String idamApiUrl;
 
@@ -106,6 +109,6 @@ public class SecurityConfiguration {
     }
 
     private List<String> validIssuers() {
-        return Arrays.asList(issuerUri, issuerOverride, idamApiUrl, idamApiIssuer);
+        return Arrays.asList(issuerUri, issuerOverride, hmctsAccessIssuer, idamApiUrl, idamApiIssuer);
     }
 }
