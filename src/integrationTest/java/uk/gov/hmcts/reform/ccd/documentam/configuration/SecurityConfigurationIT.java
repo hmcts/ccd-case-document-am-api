@@ -3,7 +3,10 @@ package uk.gov.hmcts.reform.ccd.documentam.configuration;
 import com.nimbusds.jose.JOSEException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidationException;
@@ -20,11 +23,24 @@ class SecurityConfigurationIT extends BaseTest {
     @Autowired
     private JwtDecoder jwtDecoder;
 
+    @Autowired
+    private ConfigurableApplicationContext applicationContext;
+
     @Value("${oidc.issuer}")
     private String enforcedIssuer;
 
     @Value("${oidc.allowed-issuers}")
     private String allowedIssuer;
+
+    @Test
+    void shouldUseJwtDecoderBeanFromSecurityConfiguration() {
+        assertThat(applicationContext.getBeanNamesForType(JwtDecoder.class)).containsOnly("jwtDecoder");
+
+        BeanDefinition jwtDecoderBeanDefinition = applicationContext.getBeanFactory().getBeanDefinition("jwtDecoder");
+
+        assertThat(jwtDecoderBeanDefinition.getFactoryBeanName()).isEqualTo("securityConfiguration");
+        assertThat(jwtDecoderBeanDefinition.getFactoryMethodName()).isEqualTo("jwtDecoder");
+    }
 
     @Test
     void shouldDecodeJwtWhenTokenIssMatchesConfiguredIssuer() throws JOSEException {
@@ -68,5 +84,13 @@ class SecurityConfigurationIT extends BaseTest {
         );
 
         assertThat(exception.getMessage()).contains("iss");
+    }
+
+    @Test
+    void shouldRejectExpiredJwtEvenWhenTokenIssMatchesConfiguredIssuer() throws JOSEException {
+        assertThrows(
+            BadJwtException.class,
+            () -> jwtDecoder.decode(generateAuthToken(-60_000, enforcedIssuer))
+        );
     }
 }
