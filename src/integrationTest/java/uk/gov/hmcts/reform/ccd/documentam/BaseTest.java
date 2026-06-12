@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditRepository;
 import uk.gov.hmcts.reform.ccd.documentam.configuration.AuditConfiguration;
 import uk.gov.hmcts.reform.ccd.documentam.utils.KeyGenUtil;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
@@ -166,6 +167,29 @@ public class BaseTest {
             .issueTime(new Date())
             .claim(TOKEN_NAME, ACCESS_TOKEN)
             .expirationTime(new Date(System.currentTimeMillis() + ttlMillis));
+
+        if (tokenIssuer != null) {
+            builder.issuer(tokenIssuer);
+        }
+
+        SignedJWT signedJWT = new SignedJWT(
+            new JWSHeader.Builder(JWSAlgorithm.RS256)
+                .keyID(KeyGenUtil.getRsaJWK().getKeyID()).build(),
+            builder.build()
+        );
+        signedJWT.sign(new RSASSASigner(KeyGenUtil.getRsaJWK()));
+
+        return signedJWT.serialize();
+    }
+
+    public static String generateAuthToken(String tokenIssuer,
+                                           Instant issuedAt,
+                                           Instant expiresAt) throws JOSEException {
+        JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder()
+            .subject("API_Stub")
+            .issueTime(Date.from(issuedAt))
+            .claim(TOKEN_NAME, ACCESS_TOKEN)
+            .expirationTime(Date.from(expiresAt));
 
         if (tokenIssuer != null) {
             builder.issuer(tokenIssuer);
