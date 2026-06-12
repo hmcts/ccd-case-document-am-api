@@ -15,21 +15,23 @@ class SecurityConfigurationTest {
     private static final String ALLOWED_MIGRATION_ISSUER = "http://allowed-issuer/o";
     private static final String SECOND_ALLOWED_MIGRATION_ISSUER = "http://second-allowed-issuer/o";
     private static final String UNEXPECTED_ISSUER = "http://unexpected-issuer";
+    private static final Instant VALID_TOKEN_EXPIRES_AT = Instant.parse("2099-01-01T00:00:00Z");
+    private static final Instant EXPIRED_TOKEN_EXPIRES_AT = Instant.parse("2024-01-01T00:00:00Z");
 
     @Test
     void shouldAcceptJwtFromConfiguredIssuerWhenAllowedIssuersAreEmpty() {
-        assertThat(validate(ENFORCED_ISSUER, "", Instant.now().plusSeconds(300)).hasErrors()).isFalse();
+        assertThat(validate(ENFORCED_ISSUER, "", VALID_TOKEN_EXPIRES_AT).hasErrors()).isFalse();
     }
 
     @Test
     void shouldAcceptJwtFromConfiguredIssuerWhenAllowedIssuersAreConfigured() {
-        assertThat(validate(ENFORCED_ISSUER, ALLOWED_MIGRATION_ISSUER, Instant.now().plusSeconds(300)).hasErrors())
+        assertThat(validate(ENFORCED_ISSUER, ALLOWED_MIGRATION_ISSUER, VALID_TOKEN_EXPIRES_AT).hasErrors())
             .isFalse();
     }
 
     @Test
     void shouldAcceptJwtFromAllowedMigrationIssuer() {
-        assertThat(validate(ALLOWED_MIGRATION_ISSUER, ALLOWED_MIGRATION_ISSUER, Instant.now().plusSeconds(300))
+        assertThat(validate(ALLOWED_MIGRATION_ISSUER, ALLOWED_MIGRATION_ISSUER, VALID_TOKEN_EXPIRES_AT)
                        .hasErrors())
             .isFalse();
     }
@@ -38,7 +40,7 @@ class SecurityConfigurationTest {
     void shouldAcceptJwtFromMultipleAllowedMigrationIssuers() {
         String allowedIssuers = ALLOWED_MIGRATION_ISSUER + ", " + SECOND_ALLOWED_MIGRATION_ISSUER;
 
-        assertThat(validate(SECOND_ALLOWED_MIGRATION_ISSUER, allowedIssuers, Instant.now().plusSeconds(300))
+        assertThat(validate(SECOND_ALLOWED_MIGRATION_ISSUER, allowedIssuers, VALID_TOKEN_EXPIRES_AT)
                        .hasErrors())
             .isFalse();
     }
@@ -46,7 +48,7 @@ class SecurityConfigurationTest {
     @Test
     void shouldRejectJwtFromUnexpectedIssuerWhenAllowedIssuersAreEmpty() {
         OAuth2TokenValidatorResult result =
-            validate(UNEXPECTED_ISSUER, "", Instant.now().plusSeconds(300));
+            validate(UNEXPECTED_ISSUER, "", VALID_TOKEN_EXPIRES_AT);
 
         assertIssuerValidationError(result);
     }
@@ -54,7 +56,7 @@ class SecurityConfigurationTest {
     @Test
     void shouldRejectJwtFromUnexpectedIssuerWhenAllowedIssuersAreConfigured() {
         OAuth2TokenValidatorResult result =
-            validate(UNEXPECTED_ISSUER, ALLOWED_MIGRATION_ISSUER, Instant.now().plusSeconds(300));
+            validate(UNEXPECTED_ISSUER, ALLOWED_MIGRATION_ISSUER, VALID_TOKEN_EXPIRES_AT);
 
         assertIssuerValidationError(result);
     }
@@ -62,7 +64,7 @@ class SecurityConfigurationTest {
     @Test
     void shouldRejectJwtWhenIssuerOnlyPartiallyMatchesAllowedIssuer() {
         OAuth2TokenValidatorResult result =
-            validate(ALLOWED_MIGRATION_ISSUER + "/child", ALLOWED_MIGRATION_ISSUER, Instant.now().plusSeconds(300));
+            validate(ALLOWED_MIGRATION_ISSUER + "/child", ALLOWED_MIGRATION_ISSUER, VALID_TOKEN_EXPIRES_AT);
 
         assertIssuerValidationError(result);
     }
@@ -70,22 +72,22 @@ class SecurityConfigurationTest {
     @Test
     void shouldRejectJwtWhenIssuerDiffersOnlyByTrailingSlash() {
         OAuth2TokenValidatorResult result =
-            validate(ALLOWED_MIGRATION_ISSUER + "/", ALLOWED_MIGRATION_ISSUER, Instant.now().plusSeconds(300));
+            validate(ALLOWED_MIGRATION_ISSUER + "/", ALLOWED_MIGRATION_ISSUER, VALID_TOKEN_EXPIRES_AT);
 
         assertIssuerValidationError(result);
     }
 
     @Test
     void shouldRejectJwtWhenIssuerIsMissing() {
-        OAuth2TokenValidatorResult result =
-            validator(ALLOWED_MIGRATION_ISSUER).validate(buildJwtWithoutIssuer(Instant.now().plusSeconds(300)));
+        OAuth2TokenValidatorResult result = validator(ALLOWED_MIGRATION_ISSUER)
+            .validate(buildJwtWithoutIssuer(VALID_TOKEN_EXPIRES_AT));
 
         assertIssuerValidationError(result);
     }
 
     @Test
     void shouldRejectExpiredJwtEvenWhenIssuerMatches() {
-        assertThat(validate(ENFORCED_ISSUER, ALLOWED_MIGRATION_ISSUER, Instant.now().minusSeconds(60)).hasErrors())
+        assertThat(validate(ENFORCED_ISSUER, ALLOWED_MIGRATION_ISSUER, EXPIRED_TOKEN_EXPIRES_AT).hasErrors())
             .isTrue();
     }
 
