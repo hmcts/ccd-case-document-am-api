@@ -185,6 +185,21 @@
       ]
     },
     {
+      "id": "finrem_citizen_ui",
+      "caseTypeId": [
+        "FinancialRemedyContested",
+        "FinancialRemedyMVP2",
+        "FINREM_ExceptionRecord"
+      ],
+      "jurisdictionId": "DIVORCE",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE",
+        "DELETE"
+      ]
+    },
+    {
       "id": "fpl_case_service",
       "caseTypeId": ["CARE_SUPERVISION_EPO"],
       "jurisdictionId": "PUBLICLAW",
