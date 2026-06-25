@@ -69,6 +69,24 @@ validate_positive_integer_config "APP_INSIGHTS_TIMEOUT_SECONDS" "$APP_INSIGHTS_T
 validate_positive_integer_config "APP_INSIGHTS_POLL_SECONDS" "$APP_INSIGHTS_POLL_SECONDS"
 validate_duration_config "APP_INSIGHTS_LOOKBACK" "$APP_INSIGHTS_LOOKBACK"
 
+is_true() {
+  case "$1" in
+    true|TRUE|True|1|yes|YES|Yes) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+require_dependency_telemetry=false
+require_trace_telemetry=false
+
+if is_true "$REQUIRE_DEPENDENCY_TELEMETRY"; then
+  require_dependency_telemetry=true
+fi
+
+if is_true "$REQUIRE_TRACE_TELEMETRY"; then
+  require_trace_telemetry=true
+fi
+
 if [ "$APP_INSIGHTS_SOURCE_ENV" = "preview" ]; then
   if [ -z "$APP_INSIGHTS_REQUEST_URL_CONTAINS" ]; then
     case "${BRANCH_NAME:-}" in
@@ -89,7 +107,9 @@ if ! command -v az >/dev/null 2>&1; then
   exit "$EXIT_SCRIPT_ERROR"
 fi
 
-if ! az account show >/dev/null 2>&1; then
+AZURE_ACCOUNT_SUBSCRIPTION_ID=""
+
+if ! AZURE_ACCOUNT_SUBSCRIPTION_ID="$(az account show --query id --output tsv 2>/dev/null)"; then
   if [ -n "${AZURE_CLIENT_ID:-}" ] && [ -n "${AZURE_CLIENT_SECRET:-}" ] && [ -n "${AZURE_TENANT_ID:-}" ]; then
     echo "Azure CLI is not logged in. Logging in with supplied service principal credentials."
     az login \
@@ -108,7 +128,10 @@ fi
 if [ -n "${AZURE_SUBSCRIPTION_ID:-}" ]; then
   az account set --subscription "$AZURE_SUBSCRIPTION_ID"
 else
-  AZURE_SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
+  if [ -z "$AZURE_ACCOUNT_SUBSCRIPTION_ID" ]; then
+    AZURE_ACCOUNT_SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
+  fi
+  AZURE_SUBSCRIPTION_ID="$AZURE_ACCOUNT_SUBSCRIPTION_ID"
 fi
 
 resolve_trace_marker() {
@@ -138,14 +161,11 @@ resolve_trace_marker() {
   echo "$marker"
 }
 
-APP_INSIGHTS_TRACE_MARKER="$(resolve_trace_marker)"
+APP_INSIGHTS_TRACE_MARKER="${APP_INSIGHTS_TRACE_MARKER:-}"
 
-is_true() {
-  case "$1" in
-    true|TRUE|True|1|yes|YES|Yes) return 0 ;;
-    *) return 1 ;;
-  esac
-}
+if [ "$require_trace_telemetry" = "true" ]; then
+  APP_INSIGHTS_TRACE_MARKER="$(resolve_trace_marker)"
+fi
 
 json_escape() {
   printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
@@ -191,13 +211,6 @@ query_telemetry_counts() {
     exit "$EXIT_SCRIPT_ERROR"
   fi
 
-  request_count="$1"
-  role_request_count="$2"
-  dependency_count="$3"
-  role_dependency_count="$4"
-  trace_count="$5"
-  role_trace_marker_count="$6"
-
   for count in "$@"; do
     case "$count" in
       ''|*[!0-9]*)
@@ -208,17 +221,10 @@ query_telemetry_counts() {
     esac
   done
 
-  printf '%s %s %s %s %s %s\n' \
-    "$request_count" \
-    "$role_request_count" \
-    "$dependency_count" \
-    "$role_dependency_count" \
-    "$trace_count" \
-    "$role_trace_marker_count"
+  printf '%s\n' "$counts"
 }
 
 cloud_role_name="$(kql_escape "$APP_INSIGHTS_ROLE_NAME")"
-trace_marker="$(kql_escape "$APP_INSIGHTS_TRACE_MARKER")"
 base_filter="timestamp > ago(${APP_INSIGHTS_LOOKBACK}) | where cloud_RoleName == '${cloud_role_name}'"
 request_url_filter=""
 
@@ -228,23 +234,29 @@ if [ -n "$APP_INSIGHTS_REQUEST_URL_CONTAINS" ]; then
 fi
 
 dependency_count_expression="$DISABLED_TELEMETRY_COUNT_EXPRESSION"
+role_dependency_count_expression="$DISABLED_TELEMETRY_COUNT_EXPRESSION"
 trace_count_expression="$DISABLED_TELEMETRY_COUNT_EXPRESSION"
-
-if is_true "$REQUIRE_DEPENDENCY_TELEMETRY"; then
-  dependency_count_expression="toscalar(filtered_dependencies | where operation_Id in (request_operations) | summarize Count=count())"
-fi
-
-if is_true "$REQUIRE_TRACE_TELEMETRY"; then
-  trace_count_expression="toscalar(filtered_traces_with_marker | where operation_Id in (request_operations) | summarize Count=count())"
-fi
+role_trace_marker_count_expression="$DISABLED_TELEMETRY_COUNT_EXPRESSION"
 
 telemetry_query="let filtered_requests = requests | where ${base_filter};"
-telemetry_query="${telemetry_query} let filtered_dependencies = dependencies | where ${base_filter};"
-telemetry_query="${telemetry_query} let filtered_traces = traces | where ${base_filter};"
-telemetry_query="${telemetry_query} let filtered_traces_with_marker = filtered_traces | where message contains '${trace_marker}';"
 telemetry_query="${telemetry_query} let matching_requests = filtered_requests${request_url_filter} | project operation_Id;"
 telemetry_query="${telemetry_query} let request_operations = matching_requests | distinct operation_Id;"
-telemetry_query="${telemetry_query} print RequestCount=toscalar(matching_requests | summarize Count=count()), RoleRequestCount=toscalar(filtered_requests | summarize Count=count()), DependencyCount=${dependency_count_expression}, RoleDependencyCount=toscalar(filtered_dependencies | summarize Count=count()), TraceCount=${trace_count_expression}, RoleTraceMarkerCount=toscalar(filtered_traces_with_marker | summarize Count=count())"
+
+if [ "$require_dependency_telemetry" = "true" ]; then
+  telemetry_query="${telemetry_query} let filtered_dependencies = dependencies | where ${base_filter};"
+  dependency_count_expression="toscalar(filtered_dependencies | where operation_Id in (request_operations) | summarize Count=count())"
+  role_dependency_count_expression="toscalar(filtered_dependencies | summarize Count=count())"
+fi
+
+if [ "$require_trace_telemetry" = "true" ]; then
+  trace_marker="$(kql_escape "$APP_INSIGHTS_TRACE_MARKER")"
+  telemetry_query="${telemetry_query} let filtered_traces = traces | where ${base_filter};"
+  telemetry_query="${telemetry_query} let filtered_traces_with_marker = filtered_traces | where message contains '${trace_marker}';"
+  trace_count_expression="toscalar(filtered_traces_with_marker | where operation_Id in (request_operations) | summarize Count=count())"
+  role_trace_marker_count_expression="toscalar(filtered_traces_with_marker | summarize Count=count())"
+fi
+
+telemetry_query="${telemetry_query} print RequestCount=toscalar(matching_requests | summarize Count=count()), RoleRequestCount=toscalar(filtered_requests | summarize Count=count()), DependencyCount=${dependency_count_expression}, RoleDependencyCount=${role_dependency_count_expression}, TraceCount=${trace_count_expression}, RoleTraceMarkerCount=${role_trace_marker_count_expression}"
 
 deadline=$(( $(date +%s) + APP_INSIGHTS_TIMEOUT_SECONDS ))
 
@@ -255,7 +267,11 @@ echo "  resource id: ${APP_INSIGHTS_RESOURCE_ID:-}"
 echo "  cloud role: ${APP_INSIGHTS_ROLE_NAME}"
 echo "  source env: ${APP_INSIGHTS_SOURCE_ENV}"
 echo "  request URL contains: ${APP_INSIGHTS_REQUEST_URL_CONTAINS:-<not set>}"
-echo "  marker: ${APP_INSIGHTS_TRACE_MARKER}"
+if [ "$require_trace_telemetry" = "true" ]; then
+  echo "  marker: ${APP_INSIGHTS_TRACE_MARKER}"
+else
+  echo "  marker: <not required>"
+fi
 echo "  lookback: ${APP_INSIGHTS_LOOKBACK}"
 echo "  subscription: ${AZURE_SUBSCRIPTION_ID}"
 echo "  required: requests=true, dependencies=${REQUIRE_DEPENDENCY_TELEMETRY}, traces=${REQUIRE_TRACE_TELEMETRY}"
@@ -281,14 +297,14 @@ while true; do
     request_status="$STATUS_FAIL"
   fi
 
-  if is_true "$REQUIRE_DEPENDENCY_TELEMETRY"; then
+  if [ "$require_dependency_telemetry" = "true" ]; then
     dependency_status="$STATUS_PASS"
     if [ "$dependency_count" -lt "$MIN_REQUIRED_TELEMETRY_COUNT" ]; then
       dependency_status="$STATUS_FAIL"
     fi
   fi
 
-  if is_true "$REQUIRE_TRACE_TELEMETRY"; then
+  if [ "$require_trace_telemetry" = "true" ]; then
     trace_status="$STATUS_PASS"
     if [ "$trace_count" -lt "$MIN_REQUIRED_TELEMETRY_COUNT" ]; then
       trace_status="$STATUS_FAIL"
@@ -296,7 +312,14 @@ while true; do
   fi
 
   echo "Telemetry result: requests=${request_status} (${request_count}), dependencies=${dependency_status} (${dependency_count}), traces=${trace_status} (${trace_count})"
-  echo "Telemetry diagnostics: role_requests=${role_request_count}, role_dependencies=${role_dependency_count}, role_traces_with_marker=${role_trace_marker_count}"
+  diagnostics="Telemetry diagnostics: role_requests=${role_request_count}"
+  if [ "$require_dependency_telemetry" = "true" ]; then
+    diagnostics="${diagnostics}, role_dependencies=${role_dependency_count}"
+  fi
+  if [ "$require_trace_telemetry" = "true" ]; then
+    diagnostics="${diagnostics}, role_traces_with_marker=${role_trace_marker_count}"
+  fi
+  echo "$diagnostics"
 
   passed=true
 
@@ -318,10 +341,14 @@ while true; do
     echo "Diagnostic counts:"
     echo "  - role request telemetry: ${role_request_count}"
     echo "  - matching request telemetry: ${request_count}"
-    echo "  - role dependency telemetry: ${role_dependency_count}"
-    echo "  - correlated dependency telemetry: ${dependency_count}"
-    echo "  - role trace telemetry containing '${APP_INSIGHTS_TRACE_MARKER}': ${role_trace_marker_count}"
-    echo "  - correlated trace telemetry containing '${APP_INSIGHTS_TRACE_MARKER}': ${trace_count}"
+    if [ "$require_dependency_telemetry" = "true" ]; then
+      echo "  - role dependency telemetry: ${role_dependency_count}"
+      echo "  - correlated dependency telemetry: ${dependency_count}"
+    fi
+    if [ "$require_trace_telemetry" = "true" ]; then
+      echo "  - role trace telemetry containing '${APP_INSIGHTS_TRACE_MARKER}': ${role_trace_marker_count}"
+      echo "  - correlated trace telemetry containing '${APP_INSIGHTS_TRACE_MARKER}': ${trace_count}"
+    fi
     exit "$EXIT_TELEMETRY_FAILED"
   fi
 
