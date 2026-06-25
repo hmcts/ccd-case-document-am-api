@@ -38,8 +38,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_AUT
 import static uk.gov.hmcts.reform.ccd.documentam.security.JwtGrantedAuthoritiesConverter.TOKEN_NAME;
 
 @SpringBootTest(classes = {
-    Application.class,
-    TestIdamConfiguration.class
+    Application.class
 })
 @AutoConfigureMockMvc
 @AutoConfigureWireMock(port = 0, stubs = "classpath:/wiremock-stubs")

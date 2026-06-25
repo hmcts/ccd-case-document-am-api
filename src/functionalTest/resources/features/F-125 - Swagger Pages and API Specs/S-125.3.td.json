@@ -1,0 +1,13 @@
+{
+  "_guid_": "S-125.3",
+  "title": "must show Swagger UI page for OpenAPI docs",
+  "_extends_": "F-125_Swagger_UI",
+
+  "specs": [
+    "to observe the swagger UI content"
+  ],
+
+  "request": {
+  }
+
+}
