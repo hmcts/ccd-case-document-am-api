@@ -15,7 +15,59 @@ APP_INSIGHTS_REQUEST_URL_CONTAINS="${APP_INSIGHTS_REQUEST_URL_CONTAINS:-}"
 REQUIRE_DEPENDENCY_TELEMETRY="${REQUIRE_DEPENDENCY_TELEMETRY:-true}"
 REQUIRE_TRACE_TELEMETRY="${REQUIRE_TRACE_TELEMETRY:-true}"
 APP_INSIGHTS_API_VERSION="${APP_INSIGHTS_API_VERSION:-2018-04-20}"
-attempt=1
+readonly EXIT_SUCCESS=0
+readonly EXIT_TELEMETRY_FAILED=1
+readonly EXIT_SCRIPT_ERROR=2
+readonly INITIAL_ATTEMPT=1
+readonly MIN_REQUIRED_TELEMETRY_COUNT=1
+readonly TELEMETRY_COUNT_COLUMNS=6
+readonly DISABLED_TELEMETRY_COUNT_EXPRESSION="0"
+readonly STATUS_PASS="PASS"
+readonly STATUS_FAIL="FAIL"
+readonly STATUS_SKIP="SKIP"
+attempt="$INITIAL_ATTEMPT"
+
+is_positive_integer() {
+  case "$1" in
+    ''|*[!0-9]*) return 1 ;;
+  esac
+
+  [ "$1" -gt 0 ] 2>/dev/null
+}
+
+validate_positive_integer_config() {
+  variable_name="$1"
+  value="$2"
+
+  if ! is_positive_integer "$value"; then
+    echo "${variable_name} must be a positive integer, got '${value}'." >&2
+    exit "$EXIT_SCRIPT_ERROR"
+  fi
+}
+
+validate_duration_config() {
+  variable_name="$1"
+  value="$2"
+  duration_amount="${value%?}"
+  duration_unit="${value#"${duration_amount}"}"
+
+  if ! is_positive_integer "$duration_amount"; then
+    echo "${variable_name} must be a positive duration ending in s, m, h, or d; got '${value}'." >&2
+    exit "$EXIT_SCRIPT_ERROR"
+  fi
+
+  case "$duration_unit" in
+    s|m|h|d) ;;
+    *)
+      echo "${variable_name} must be a positive duration ending in s, m, h, or d; got '${value}'." >&2
+      exit "$EXIT_SCRIPT_ERROR"
+      ;;
+  esac
+}
+
+validate_positive_integer_config "APP_INSIGHTS_TIMEOUT_SECONDS" "$APP_INSIGHTS_TIMEOUT_SECONDS"
+validate_positive_integer_config "APP_INSIGHTS_POLL_SECONDS" "$APP_INSIGHTS_POLL_SECONDS"
+validate_duration_config "APP_INSIGHTS_LOOKBACK" "$APP_INSIGHTS_LOOKBACK"
 
 if [ "$APP_INSIGHTS_SOURCE_ENV" = "preview" ]; then
   if [ -z "$APP_INSIGHTS_REQUEST_URL_CONTAINS" ]; then
@@ -28,13 +80,13 @@ if [ "$APP_INSIGHTS_SOURCE_ENV" = "preview" ]; then
 
   if [ -z "$APP_INSIGHTS_REQUEST_URL_CONTAINS" ]; then
     echo "Preview telemetry check requires APP_INSIGHTS_REQUEST_URL_CONTAINS or a PR-* BRANCH_NAME." >&2
-    exit 2
+    exit "$EXIT_SCRIPT_ERROR"
   fi
 fi
 
 if ! command -v az >/dev/null 2>&1; then
   echo "Azure CLI 'az' is required to query Application Insights."
-  exit 2
+  exit "$EXIT_SCRIPT_ERROR"
 fi
 
 if ! az account show >/dev/null 2>&1; then
@@ -49,7 +101,7 @@ if ! az account show >/dev/null 2>&1; then
   else
     echo "Azure CLI is not logged in or has no active subscription."
     echo "Set AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, and AZURE_TENANT_ID, or run this from an authenticated az session."
-    exit 2
+    exit "$EXIT_SCRIPT_ERROR"
   fi
 fi
 
@@ -67,20 +119,20 @@ resolve_trace_marker() {
 
   if [ ! -x "./gradlew" ]; then
     echo "APP_INSIGHTS_TRACE_MARKER is not set and ./gradlew is not available to resolve the audit log tag." >&2
-    exit 2
+    exit "$EXIT_SCRIPT_ERROR"
   fi
 
   if ! marker="$(./gradlew -q printAuditLogTag 2>&1)"; then
     echo "Failed to resolve audit log tag from AuditLogFormatter.TAG:" >&2
     echo "$marker" >&2
-    exit 2
+    exit "$EXIT_SCRIPT_ERROR"
   fi
 
   marker="$(printf '%s\n' "$marker" | sed '/^[[:space:]]*$/d' | tail -n 1)"
 
   if [ -z "$marker" ]; then
     echo "AuditLogFormatter.TAG resolved to an empty value." >&2
-    exit 2
+    exit "$EXIT_SCRIPT_ERROR"
   fi
 
   echo "$marker"
@@ -108,7 +160,6 @@ query_telemetry_counts() {
   escaped_query="$(json_escape "$query")"
   body="{\"query\":\"${escaped_query}\"}"
   error_file="$(mktemp)"
-  TELEMETRY_COUNT_COLUMNS=6
 
   echo "Querying telemetry..." >&2
 
@@ -129,7 +180,7 @@ query_telemetry_counts() {
     echo "Failed to query telemetry from Application Insights:" >&2
     cat "$error_file" >&2
     rm -f "$error_file"
-    exit 2
+    exit "$EXIT_SCRIPT_ERROR"
   fi
   rm -f "$error_file"
 
@@ -137,20 +188,33 @@ query_telemetry_counts() {
   if [ "$#" -ne "$TELEMETRY_COUNT_COLUMNS" ]; then
     echo "Unexpected telemetry query result:" >&2
     echo "$counts" >&2
-    exit 2
+    exit "$EXIT_SCRIPT_ERROR"
   fi
+
+  request_count="$1"
+  role_request_count="$2"
+  dependency_count="$3"
+  role_dependency_count="$4"
+  trace_count="$5"
+  role_trace_marker_count="$6"
 
   for count in "$@"; do
     case "$count" in
       ''|*[!0-9]*)
         echo "Unexpected telemetry count:" >&2
         echo "$count" >&2
-        exit 2
+        exit "$EXIT_SCRIPT_ERROR"
         ;;
     esac
   done
 
-  printf '%s %s %s %s %s %s\n' "$1" "$2" "$3" "$4" "$5" "$6"
+  printf '%s %s %s %s %s %s\n' \
+    "$request_count" \
+    "$role_request_count" \
+    "$dependency_count" \
+    "$role_dependency_count" \
+    "$trace_count" \
+    "$role_trace_marker_count"
 }
 
 cloud_role_name="$(kql_escape "$APP_INSIGHTS_ROLE_NAME")"
@@ -163,8 +227,8 @@ if [ -n "$APP_INSIGHTS_REQUEST_URL_CONTAINS" ]; then
   request_url_filter=" | where url contains '${request_url_contains}'"
 fi
 
-dependency_count_expression="0"
-trace_count_expression="0"
+dependency_count_expression="$DISABLED_TELEMETRY_COUNT_EXPRESSION"
+trace_count_expression="$DISABLED_TELEMETRY_COUNT_EXPRESSION"
 
 if is_true "$REQUIRE_DEPENDENCY_TELEMETRY"; then
   dependency_count_expression="toscalar(filtered_dependencies | where operation_Id in (request_operations) | summarize Count=count())"
@@ -209,25 +273,25 @@ while true; do
   trace_count="$5"
   role_trace_marker_count="$6"
 
-  request_status="PASS"
-  dependency_status="SKIP"
-  trace_status="SKIP"
+  request_status="$STATUS_PASS"
+  dependency_status="$STATUS_SKIP"
+  trace_status="$STATUS_SKIP"
 
-  if [ "$request_count" -lt 1 ]; then
-    request_status="FAIL"
+  if [ "$request_count" -lt "$MIN_REQUIRED_TELEMETRY_COUNT" ]; then
+    request_status="$STATUS_FAIL"
   fi
 
   if is_true "$REQUIRE_DEPENDENCY_TELEMETRY"; then
-    dependency_status="PASS"
-    if [ "$dependency_count" -lt 1 ]; then
-      dependency_status="FAIL"
+    dependency_status="$STATUS_PASS"
+    if [ "$dependency_count" -lt "$MIN_REQUIRED_TELEMETRY_COUNT" ]; then
+      dependency_status="$STATUS_FAIL"
     fi
   fi
 
   if is_true "$REQUIRE_TRACE_TELEMETRY"; then
-    trace_status="PASS"
-    if [ "$trace_count" -lt 1 ]; then
-      trace_status="FAIL"
+    trace_status="$STATUS_PASS"
+    if [ "$trace_count" -lt "$MIN_REQUIRED_TELEMETRY_COUNT" ]; then
+      trace_status="$STATUS_FAIL"
     fi
   fi
 
@@ -236,21 +300,21 @@ while true; do
 
   passed=true
 
-  if [ "$request_status" = "FAIL" ] || [ "$dependency_status" = "FAIL" ] || [ "$trace_status" = "FAIL" ]; then
+  if [ "$request_status" = "$STATUS_FAIL" ] || [ "$dependency_status" = "$STATUS_FAIL" ] || [ "$trace_status" = "$STATUS_FAIL" ]; then
     passed=false
   fi
 
   if [ "$passed" = "true" ]; then
     echo "Application Insights telemetry check PASSED."
-    exit 0
+    exit "$EXIT_SUCCESS"
   fi
 
   if [ "$(date +%s)" -ge "$deadline" ]; then
     echo "Application Insights telemetry check FAILED before timeout."
     echo "Missing required telemetry:"
-    [ "$request_status" = "FAIL" ] && echo "  - request telemetry for cloud role '${APP_INSIGHTS_ROLE_NAME}'"
-    [ "$dependency_status" = "FAIL" ] && echo "  - dependency telemetry correlated with matching request telemetry"
-    [ "$trace_status" = "FAIL" ] && echo "  - trace telemetry containing '${APP_INSIGHTS_TRACE_MARKER}' and correlated with matching request telemetry"
+    [ "$request_status" = "$STATUS_FAIL" ] && echo "  - request telemetry for cloud role '${APP_INSIGHTS_ROLE_NAME}'"
+    [ "$dependency_status" = "$STATUS_FAIL" ] && echo "  - dependency telemetry correlated with matching request telemetry"
+    [ "$trace_status" = "$STATUS_FAIL" ] && echo "  - trace telemetry containing '${APP_INSIGHTS_TRACE_MARKER}' and correlated with matching request telemetry"
     echo "Diagnostic counts:"
     echo "  - role request telemetry: ${role_request_count}"
     echo "  - matching request telemetry: ${request_count}"
@@ -258,7 +322,7 @@ while true; do
     echo "  - correlated dependency telemetry: ${dependency_count}"
     echo "  - role trace telemetry containing '${APP_INSIGHTS_TRACE_MARKER}': ${role_trace_marker_count}"
     echo "  - correlated trace telemetry containing '${APP_INSIGHTS_TRACE_MARKER}': ${trace_count}"
-    exit 1
+    exit "$EXIT_TELEMETRY_FAILED"
   fi
 
   echo "Telemetry not complete yet. Waiting ${APP_INSIGHTS_POLL_SECONDS}s for App Insights ingestion..."
