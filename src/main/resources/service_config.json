@@ -233,6 +233,7 @@
       "caseTypeId": ["*"],
       "jurisdictionId": "EMPLOYMENT",
       "permissions": [
+        "ATTACH",
         "CREATE",
         "READ"
       ]
@@ -341,6 +342,7 @@
       ],
       "jurisdictionId": "*",
       "permissions": [
+        "ATTACH",
         "CREATE",
         "READ",
         "UPDATE",
