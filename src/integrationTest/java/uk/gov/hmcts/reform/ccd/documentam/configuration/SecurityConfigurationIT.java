@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.ccd.documentam.configuration;
 
-import com.nimbusds.jose.JOSEException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;

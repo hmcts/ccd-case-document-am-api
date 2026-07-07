@@ -1,0 +1,28 @@
+{
+  "_guid_": "S-125_Swagger_JSON_V2_Internal",
+  "title": "Must return a positive response when the published Swagger JSON URL is accessed",
+  "_extends_": "F-125_Swagger_JSON",
+
+  "specs": [
+    "to observe the swagger json content"
+  ],
+
+  "request" :{
+  },
+
+  "expectedResponse": {
+    "responseCode" : 200,
+    "responseMessage" : "OK",
+    "body" : {
+      "openapi": "3.1.0",
+      "servers": "[[ANYTHING_PRESENT]]",
+      "paths": "[[ANYTHING_PRESENT]]",
+      "components": "[[ANYTHING_PRESENT]]",
+      "info": {
+        "description": "download, upload",
+        "title": "CCD Case Document AM API",
+        "version": "2-beta"
+      }
+    }
+  }
+}
