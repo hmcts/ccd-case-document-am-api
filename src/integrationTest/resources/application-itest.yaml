@@ -12,10 +12,6 @@ spring:
           oidc:
             issuer-uri: http://localhost:${wiremock.server.port}/o
 
-oidc:
-  issuer: http://localhost:${wiremock.server.port}/o
-  allowed-issuers: http://allowed-issuer/o
-
 azure:
   application-insights:
     web:
