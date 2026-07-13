@@ -1,121 +1,80 @@
 package uk.gov.hmcts.reform.ccd.documentam.configuration;
 
-import com.nimbusds.jose.JOSEException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.security.oauth2.jwt.BadJwtException;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtValidationException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.ClassUtils;
 import uk.gov.hmcts.reform.ccd.documentam.BaseTest;
+import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
+import uk.gov.hmcts.reform.ccd.documentam.model.Document;
+import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 
-import java.time.Instant;
+import java.util.Date;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.CoreMatchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CASE_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CASE_TYPE_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_JURISDICTION_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubDocumentUrlWithReadPermissions;
+import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubGetDocumentMetaData;
 
-class SecurityConfigurationIT extends BaseTest {
+class SecurityConfigurationIT extends BaseTest implements TestFixture {
 
-    private static final String UNEXPECTED_ISSUER = "http://unexpected-issuer/o";
-    private static final Instant TOKEN_ISSUED_AT = Instant.parse("2024-01-01T00:00:00Z");
-    private static final Instant VALID_TOKEN_EXPIRES_AT = Instant.parse("2099-01-01T00:00:00Z");
-    private static final Instant EXPIRED_TOKEN_EXPIRES_AT = Instant.parse("2024-01-01T01:00:00Z");
+    private static final String CLIENT_REGISTRATION_REPOSITORY =
+        "org.springframework.security.oauth2.client.registration.ClientRegistrationRepository";
 
     @Autowired
-    private JwtDecoder jwtDecoder;
+    private ApplicationContext applicationContext;
 
     @Autowired
-    private ConfigurableApplicationContext applicationContext;
-
-    @Value("${oidc.issuer}")
-    private String enforcedIssuer;
-
-    @Value("${oidc.allowed-issuers}")
-    private String allowedIssuer;
+    private MockMvc mockMvc;
 
     @Test
-    void shouldUseJwtDecoderBeanFromSecurityConfiguration() {
-        assertThat(applicationContext.getBeanNamesForType(JwtDecoder.class)).containsOnly("jwtDecoder");
+    void shouldAuthenticateBearerJwtWithoutOauth2ClientRegistration() throws Exception {
+        assertThat(applicationContext.getEnvironment()
+                       .containsProperty("spring.security.oauth2.client.registration.oidc.client-secret"))
+            .isFalse();
+        assertThat(getBeanNamesForTypeIfPresent(CLIENT_REGISTRATION_REPOSITORY))
+            .isEmpty();
 
-        BeanDefinition jwtDecoderBeanDefinition = applicationContext.getBeanFactory().getBeanDefinition("jwtDecoder");
+        stubDocumentUrlWithReadPermissions();
+        stubGetDocumentMetaData(buildDocument());
 
-        assertThat(jwtDecoderBeanDefinition.getFactoryBeanName()).isEqualTo("securityConfiguration");
-        assertThat(jwtDecoderBeanDefinition.getFactoryMethodName()).isEqualTo("jwtDecoder");
+        mockMvc.perform(get("/cases/documents/" + DOCUMENT_ID)
+                            .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.metadata." + METADATA_CASE_ID, is(CASE_ID_VALUE)))
+            .andExpect(jsonPath("$.metadata." + METADATA_CASE_TYPE_ID, is(CASE_TYPE_ID_VALUE)))
+            .andExpect(jsonPath("$.metadata." + METADATA_JURISDICTION_ID, is(JURISDICTION_ID_VALUE)));
     }
 
-    @Test
-    void shouldDecodeJwtWhenTokenIssMatchesConfiguredIssuer() {
-        String token = authToken(enforcedIssuer, VALID_TOKEN_EXPIRES_AT);
-
-        Jwt jwt = assertDoesNotThrow(() -> jwtDecoder.decode(token));
-
-        assertThat(jwt.getIssuer().toString()).isEqualTo(enforcedIssuer);
-    }
-
-    @Test
-    void shouldDecodeJwtWhenTokenIssMatchesAllowedIssuer() {
-        String token = authToken(allowedIssuer, VALID_TOKEN_EXPIRES_AT);
-
-        Jwt jwt = assertDoesNotThrow(() -> jwtDecoder.decode(token));
-
-        assertThat(jwt.getIssuer().toString()).isEqualTo(allowedIssuer);
-    }
-
-    @Test
-    void shouldRejectJwtWhenTokenIssIsUnexpected() {
-        String token = authToken(UNEXPECTED_ISSUER, VALID_TOKEN_EXPIRES_AT);
-
-        JwtValidationException exception = assertThrows(
-            JwtValidationException.class,
-            () -> jwtDecoder.decode(token)
-        );
-
-        assertThat(exception.getMessage()).contains("iss");
-    }
-
-    @Test
-    void shouldRejectJwtWhenTokenIssOnlyPartiallyMatchesAllowedIssuer() {
-        String token = authToken(allowedIssuer + "/child", VALID_TOKEN_EXPIRES_AT);
-
-        JwtValidationException exception = assertThrows(
-            JwtValidationException.class,
-            () -> jwtDecoder.decode(token)
-        );
-
-        assertThat(exception.getMessage()).contains("iss");
-    }
-
-    @Test
-    void shouldRejectJwtWhenTokenIssIsMissing() {
-        String token = authToken(null, VALID_TOKEN_EXPIRES_AT);
-
-        JwtValidationException exception = assertThrows(
-            JwtValidationException.class,
-            () -> jwtDecoder.decode(token)
-        );
-
-        assertThat(exception.getMessage()).contains("iss");
-    }
-
-    @Test
-    void shouldRejectExpiredJwtEvenWhenTokenIssMatchesConfiguredIssuer() {
-        String token = authToken(enforcedIssuer, EXPIRED_TOKEN_EXPIRES_AT);
-
-        assertThrows(
-            BadJwtException.class,
-            () -> jwtDecoder.decode(token)
-        );
-    }
-
-    private String authToken(String tokenIssuer, Instant expiresAt) {
-        try {
-            return generateAuthToken(tokenIssuer, TOKEN_ISSUED_AT, expiresAt);
-        } catch (JOSEException exception) {
-            throw new IllegalStateException("Failed to generate JWT for test", exception);
+    private String[] getBeanNamesForTypeIfPresent(String className) throws ClassNotFoundException {
+        if (!ClassUtils.isPresent(className, applicationContext.getClassLoader())) {
+            return new String[0];
         }
+
+        return applicationContext.getBeanNamesForType(Class.forName(className));
+    }
+
+    private Document buildDocument() {
+        return Document.builder()
+            .classification(Classification.PUBLIC)
+            .createdOn(new Date())
+            .metadata(Map.of(
+                METADATA_CASE_ID, CASE_ID_VALUE,
+                METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE,
+                METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE
+            ))
+            .links(TestFixture.getLinks())
+            .build();
     }
 }
