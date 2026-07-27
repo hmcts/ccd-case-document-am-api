@@ -381,5 +381,27 @@
         "UPDATE",
         "DELETE"
       ]
-    }]
+    },
+      {
+        "id": "pt_api",
+        "caseTypeId": ["*"],
+        "jurisdictionId": "PT",
+        "permissions": [
+          "CREATE",
+          "READ",
+          "UPDATE",
+          "DELETE"
+        ]
+      },
+      {
+        "id": "pt_frontend",
+        "caseTypeId": ["*"],
+        "jurisdictionId": "PT",
+        "permissions": [
+          "CREATE",
+          "READ",
+          "UPDATE",
+          "DELETE"
+        ]
+      }]
 }
