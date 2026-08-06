@@ -60,7 +60,6 @@ env.DEFINITION_STORE_URL_BASE   = "https://ccd-definition-store-api-${definition
 env.IDAM_URL = "https://idam-api.aat.platform.hmcts.net"
 env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
 env.OAUTH2_CLIENT_ID = "ccd_gateway"
-env.OAUTH2_REDIRECT_URI = "https://www-ccd.aat.platform.hmcts.net/oauth2redirect"
 env.DM_STORE_BASE_URL = "http://dm-store-aat.service.core-compute-aat.internal"
 
 env.CCD_API_GATEWAY_OAUTH2_CLIENT_ID = "ccd_gateway"
