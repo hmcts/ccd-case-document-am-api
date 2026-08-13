@@ -86,7 +86,7 @@ env.PACT_BROKER_SCHEME = "https"
 env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX = "hmctsprod.azurecr.io/imported/"
 
 withPipeline("java", product, component) {
-  enableCveDashboardIngestion()
+  //enableCveDashboardIngestion()
   onMaster {
     enablePactAs([
       AppPipelineDsl.PactRoles.PROVIDER
