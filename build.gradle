@@ -30,7 +30,7 @@ ext {
   groovy              = '4.0.28'
 
   // TEST VERSIONS
-  pactVersion         = '4.6.17'
+  pactVersion         = '4.6.18'
 }
 
 ext.libraries = [

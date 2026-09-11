@@ -13,7 +13,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -24,6 +26,7 @@ import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
 
@@ -85,7 +88,11 @@ public class CaseDocumentAmProviderTest {
                                                                DOCUMENT_ID_UUID.toString())).willReturn(
                                                                    AuthorisedService.builder().build());
 
-        ResponseEntity response = new ResponseEntity(HttpStatus.OK);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        ResponseEntity<ByteArrayResource> response = ResponseEntity.ok()
+            .headers(headers)
+            .body(new ByteArrayResource("test pdf content".getBytes(StandardCharsets.UTF_8)));
         given(documentManagementService.getDocumentBinaryContent(DOCUMENT_ID_UUID)).willAnswer(x -> response);
     }
 }
