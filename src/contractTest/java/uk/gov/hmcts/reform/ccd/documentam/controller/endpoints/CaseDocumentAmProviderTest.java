@@ -13,17 +13,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
-import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
 
@@ -42,6 +44,7 @@ public class CaseDocumentAmProviderTest {
     private static final String JURISDICTION_ID = "some-jurisdiction-id";
     private static final String CASE_ID = "some-case-id";
     private static final UUID DOCUMENT_ID_UUID = UUID.fromString("6c3c3906-2b51-468e-8cbb-a4002eded076");
+    private static final byte[] PDF_CONTENT = "%PDF-1.4\n%%EOF".getBytes(StandardCharsets.UTF_8);
 
     @Autowired
     DocumentManagementService documentManagementService;
@@ -85,7 +88,9 @@ public class CaseDocumentAmProviderTest {
                                                                DOCUMENT_ID_UUID.toString())).willReturn(
                                                                    AuthorisedService.builder().build());
 
-        ResponseEntity response = new ResponseEntity(HttpStatus.OK);
-        given(documentManagementService.getDocumentBinaryContent(DOCUMENT_ID_UUID)).willAnswer(x -> response);
+        ResponseEntity<ByteArrayResource> response = ResponseEntity.ok()
+            .contentType(MediaType.APPLICATION_PDF)
+            .body(new ByteArrayResource(PDF_CONTENT));
+        given(documentManagementService.getDocumentBinaryContent(DOCUMENT_ID_UUID)).willReturn(response);
     }
 }
