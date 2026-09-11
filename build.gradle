@@ -344,6 +344,7 @@ dependencies {
   contractTestImplementation group: 'au.com.dius.pact.provider', name: 'junit5', version: pactVersion
   contractTestImplementation group: 'au.com.dius.pact.provider', name: 'spring', version: pactVersion
   contractTestImplementation group: 'au.com.dius.pact.provider', name: 'junit5spring', version: pactVersion
+  contractTestImplementation group: 'com.sun.mail', name: 'mailapi', version: '2.0.2'
   contractTestImplementation group: 'org.projectlombok', name: 'lombok', version: lombok
   contractTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok
 
