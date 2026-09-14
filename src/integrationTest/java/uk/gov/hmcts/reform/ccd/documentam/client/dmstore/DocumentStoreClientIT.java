@@ -32,7 +32,6 @@ import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
-import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -70,7 +69,7 @@ public class DocumentStoreClientIT extends BaseTest implements TestFixture {
         authHeaders.add(Constants.SERVICE_AUTHORIZATION, "service_token");
 
         when(securityUtils.serviceAuthorizationHeaders()).thenReturn(authHeaders);
-        when(securityUtils.getUserInfo()).thenReturn(UserInfo.builder().uid(USER_ID).build());
+        when(securityUtils.getUserId()).thenReturn(USER_ID);
     }
 
     @Test
