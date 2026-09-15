@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.ccd.documentam.service.impl;
 
 import io.vavr.control.Either;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -99,7 +98,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         final UpdateDocumentsCommand updateDocumentsCommand
             = prepareRequestForAttachingDocumentToCase(caseDocumentsMetadata);
 
-        if (CollectionUtils.isNotEmpty(updateDocumentsCommand.getDocuments())) {
+        if (updateDocumentsCommand.getDocuments() != null && !updateDocumentsCommand.getDocuments().isEmpty()) {
             documentStoreClient.patchDocumentMetadata(updateDocumentsCommand);
         }
     }

@@ -249,6 +249,25 @@ tasks.register("printSuppressionFile") {
   }
 }
 
+tasks.register("printAuditLogTag") {
+  group = "Help"
+  description = "Prints the audit log tag used by AuditLogFormatter."
+  dependsOn classes
+
+  doLast {
+    URL[] classpathUrls = sourceSets.main.runtimeClasspath.files.collect { it.toURI().toURL() } as URL[]
+    URLClassLoader classLoader = new URLClassLoader(classpathUrls, (ClassLoader) null)
+    Class<?> formatterClass = Class.forName(
+      "uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditLogFormatter",
+      false,
+      classLoader
+    )
+    def tagField = formatterClass.getDeclaredField("TAG")
+    tagField.setAccessible(true)
+    println tagField.get(null)
+  }
+}
+
 dependencyUpdates.resolutionStrategy = {
   componentSelection { rules ->
     rules.all { ComponentSelection selection ->
@@ -303,8 +322,6 @@ dependencies {
   implementation group: 'com.auth0', name: 'java-jwt', version: '4.5.0'
   implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.2.2'
   implementation group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: '4.9.3'
-  implementation group: 'com.microsoft.azure', name: 'applicationinsights-spring-boot-starter', version: '2.6.4'
-  implementation group: 'commons-beanutils', name: 'commons-beanutils', version: '1.11.0'
   implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: jjwt
   implementation group: 'io.jsonwebtoken', name: 'jjwt-impl', version: jjwt
   runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: jjwt
