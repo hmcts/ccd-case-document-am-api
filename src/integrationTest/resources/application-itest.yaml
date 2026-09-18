@@ -5,6 +5,8 @@ idam:
     url: http://localhost:${wiremock.server.port}/s2s
   oidc:
     url: http://localhost:${wiremock.server.port}
+  security:
+    allowed-issuers: "http://localhost:${wiremock.server.port}/o,https://localhost/test-issuer" # include pre-generated token issuer
 
 spring:
   security:
