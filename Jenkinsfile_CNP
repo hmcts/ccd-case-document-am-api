@@ -72,7 +72,6 @@ env.BEFTA_S2S_CLIENT_ID_OF_XUI_WEBAPP = "xui_webapp"
 env.BEFTA_S2S_CLIENT_ID_OF_BULK_SCAN_PROCESSOR = "bulk_scan_processor"
 env.OAUTH2_ACCESS_TOKEN_TYPE = "OIDC" // use new OIDC authentication for BEFTA tests
 env.OAUTH2_SCOPE_VARIABLES = "profile openid roles"
-env.BEFTA_HTTP_LOGGING_ENABLED = "true"
 
 env.BEFTA_RESPONSE_HEADER_CHECK_POLICY = "JUST_WARN"
 
