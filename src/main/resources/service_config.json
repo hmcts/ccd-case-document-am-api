@@ -408,10 +408,6 @@
         "caseTypeId": ["*"],
         "jurisdictionId": "*",
         "permissions": [
-          "CREATE",
-          "READ",
-          "UPDATE",
-          "DELETE",
           "HASHTOKEN"
         ]
       }
