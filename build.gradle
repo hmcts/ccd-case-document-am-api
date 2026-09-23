@@ -123,6 +123,11 @@ tasks.withType(JavaCompile) {
   options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 }
 
+def beftaOidcEnvironment = [
+  OAUTH2_ACCESS_TOKEN_TYPE: System.getenv('OAUTH2_ACCESS_TOKEN_TYPE') ?: 'OIDC',
+  OAUTH2_SCOPE_VARIABLES : System.getenv('OAUTH2_SCOPE_VARIABLES') ?: 'profile openid roles'
+]
+
 task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
   classpath = sourceSets.functionalTest.runtimeClasspath
@@ -135,6 +140,7 @@ task functional(type: Test, description: 'Runs the functional tests.', group: 'V
               '--plugin', "junit:${buildDir}/test-results/functional/cucumber.xml",
               '--tags', 'not @Ignore',
               '--glue', 'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features/']
+      environment beftaOidcEnvironment
       jvmArgs = [ '--add-opens=java.base/java.lang.reflect=ALL-UNNAMED' ]
     }
   }
@@ -180,6 +186,7 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
               '--plugin', "junit:${buildDir}/test-results/smoke/cucumber.xml",
               '--tags', '@Smoke',
               '--glue', 'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features']
+      environment beftaOidcEnvironment
       jvmArgs = [ '--add-opens=java.base/java.lang.reflect=ALL-UNNAMED' ]
     }
   }
