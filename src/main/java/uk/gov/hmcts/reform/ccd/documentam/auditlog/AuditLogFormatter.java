@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.ccd.documentam.auditlog;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.Nullable;
@@ -10,6 +8,9 @@ import org.springframework.stereotype.Component;
 import java.util.LinkedHashMap;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -28,24 +29,23 @@ public class AuditLogFormatter {
     }
 
     public String format(AuditEntry entry) {
-        Map<String, Object> logEntry = new LinkedHashMap<>();
-        logEntry.put("tag", TAG);
-        add(logEntry, "dateTime", entry.getDateTime());
-        add(logEntry, "operationType", entry.getOperationType());
-        add(logEntry, "idamId", entry.getIdamId());
-        add(logEntry, "invokingService", entry.getInvokingService());
-        add(logEntry, "endpointCalled", buildEndpoint(entry));
-        add(logEntry, "operationalOutcome", entry.getHttpStatus());
-        add(logEntry, "documentId", limitedList(entry.getDocumentIds()));
-        add(logEntry, "jurisdiction", entry.getJurisdiction());
-        add(logEntry, "caseType", entry.getCaseType());
-        add(logEntry, "caseId", entry.getCaseId());
-        add(logEntry, "X-Request-ID", entry.getRequestId());
-        try {
-            return objectMapper.writeValueAsString(logEntry);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Failed to format audit log entry", e);
-        }
+        String formattedPairs = Stream.of(
+            getPair("dateTime", entry.getDateTime()),
+            getPair("operationType", entry.getOperationType()),
+            getPair("idamId", entry.getIdamId()),
+            getPair("invokingService", entry.getInvokingService()),
+            getPair("endpointCalled", entry.getHttpMethod() + " " + entry.getRequestPath()),
+            getPair("operationalOutcome", String.valueOf(entry.getHttpStatus())),
+            getPair("documentId", commaSeparatedList(entry.getDocumentIds())),
+            getPair("jurisdiction", entry.getJurisdiction()),
+            getPair("caseType", entry.getCaseType()),
+            getPair("caseId", entry.getCaseId()),
+            getPair("X-Request-ID", entry.getRequestId())
+        )
+            .filter(Objects::nonNull)
+            .collect(Collectors.joining(COMMA));
+
+        return TAG + " " + formattedPairs;
     }
 
     private String buildEndpoint(AuditEntry entry) {
