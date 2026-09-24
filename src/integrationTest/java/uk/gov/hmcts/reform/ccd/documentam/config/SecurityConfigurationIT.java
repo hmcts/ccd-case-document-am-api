@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.ccd.documentam.config;
 
-import com.nimbusds.jose.jwk.RSAKey;
 import io.jsonwebtoken.Jwts;
 import uk.gov.hmcts.reform.ccd.documentam.Application;
 import uk.gov.hmcts.reform.ccd.documentam.utils.KeyGenUtil;
@@ -29,7 +28,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class SecurityConfigurationIT {
 
     private static final String ISSUER = "http://localhost:%s/o";
-    private static RSAKey rsaJwk;
 
     @Autowired
     private JwtDecoder jwtDecoder;
