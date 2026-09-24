@@ -1,25 +1,24 @@
 package uk.gov.hmcts.reform.ccd.documentam.auditlog;
 
-import com.microsoft.applicationinsights.core.dependencies.google.common.collect.Lists;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.PredicateUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.util.LinkedHashMap;
+import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Map;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Component
 public class AuditLogFormatter {
 
     private static final String TAG = "LA-CDAM";
-
-    private static final String COMMA = ",";
-    private static final String COLON = ":";
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private final int auditLogMaxListSize;
 
@@ -29,40 +28,53 @@ public class AuditLogFormatter {
     }
 
     public String format(AuditEntry entry) {
-        List<String> formattedPairs = Lists.newArrayList(
-            getPair("dateTime", entry.getDateTime()),
-            getPair("operationType", entry.getOperationType()),
-            getPair("idamId", entry.getIdamId()),
-            getPair("invokingService", entry.getInvokingService()),
-            getPair("endpointCalled", entry.getHttpMethod() + " " + entry.getRequestPath()),
-            getPair("operationalOutcome", String.valueOf(entry.getHttpStatus())),
-            getPair("documentId", commaSeparatedList(entry.getDocumentIds())),
-            getPair("jurisdiction", entry.getJurisdiction()),
-            getPair("caseType", entry.getCaseType()),
-            getPair("caseId", entry.getCaseId()),
-            getPair("X-Request-ID", entry.getRequestId())
-        );
-
-        CollectionUtils.filter(formattedPairs, PredicateUtils.notNullPredicate());
-
-        return TAG + " " + String.join(COMMA, formattedPairs);
+        Map<String, Object> logEntry = new LinkedHashMap<>();
+        logEntry.put("tag", TAG);
+        add(logEntry, "dateTime", entry.getDateTime());
+        add(logEntry, "operationType", entry.getOperationType());
+        add(logEntry, "idamId", entry.getIdamId());
+        add(logEntry, "invokingService", entry.getInvokingService());
+        add(logEntry, "endpointCalled", buildEndpoint(entry));
+        add(logEntry, "operationalOutcome", entry.getHttpStatus());
+        add(logEntry, "documentId", limitedList(entry.getDocumentIds()));
+        add(logEntry, "jurisdiction", entry.getJurisdiction());
+        add(logEntry, "caseType", entry.getCaseType());
+        add(logEntry, "caseId", entry.getCaseId());
+        add(logEntry, "X-Request-ID", entry.getRequestId());
+        try {
+            return objectMapper.writeValueAsString(logEntry);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Failed to format audit log entry", e);
+        }
     }
 
-    private String commaSeparatedList(List<String> list) {
-        if (list == null) {
+    private String buildEndpoint(AuditEntry entry) {
+        if (isBlank(entry.getHttpMethod()) || isBlank(entry.getRequestPath())) {
             return null;
         }
-
-        Stream<String> stream = list.stream();
-        if (this.auditLogMaxListSize > 0) {
-            stream = stream.limit(this.auditLogMaxListSize);
-        }
-
-        return stream.collect(Collectors.joining(COMMA));
+        return entry.getHttpMethod() + " " + entry.getRequestPath();
     }
 
-    private String getPair(String label, String value) {
-        return isNotBlank(value) ? label + COLON + value : null;
+    private List<String> limitedList(List<String> list) {
+        if (list == null) {
+            return List.of();
+        }
+        if (this.auditLogMaxListSize > 0) {
+            return list.stream().limit(this.auditLogMaxListSize).toList();
+        }
+        return list;
+    }
+
+    private void add(Map<String, Object> logEntry, String label, @Nullable Object value) {
+        if (value instanceof String string && isBlank(string)) {
+            return;
+        }
+        if (value instanceof Collection<?> collection && collection.isEmpty()) {
+            return;
+        }
+        if (value != null) {
+            logEntry.put(label, value);
+        }
     }
 
 }
