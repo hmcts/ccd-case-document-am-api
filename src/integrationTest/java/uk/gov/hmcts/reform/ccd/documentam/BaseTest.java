@@ -49,6 +49,7 @@ public class BaseTest {
 
     public static final String IDAM_MOCK_USER_ID = "445";
     private static final String EXAMPLE_REQUEST_ID = "TEST REQUEST ID";
+    private static final String ISSUER = "https://localhost/test-issuer";
 
     @MockitoSpyBean
     @Autowired
@@ -148,6 +149,7 @@ public class BaseTest {
         JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder()
             .subject("API_Stub")
             .issueTime(new Date())
+            .issuer(ISSUER)
             .claim(TOKEN_NAME, ACCESS_TOKEN)
             .expirationTime(new Date(System.currentTimeMillis() + ttlMillis));
 
