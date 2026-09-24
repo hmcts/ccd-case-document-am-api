@@ -60,7 +60,7 @@ spring:
       client:
         provider:
           oidc:
-            issuer-uri: ${IDAM_OIDC_URL:idam.api.url}/o
+            issuer-uri: ${IDAM_OIDC_URL:http://localhost:9002}/o
 
 idam:
   api:
