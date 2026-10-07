@@ -5,6 +5,7 @@
 bin/main/application.yaml
 bin/functionalTest/
 bin/main/
+bin/integrationTest/
 
 ### STS ###
 .apt_generated

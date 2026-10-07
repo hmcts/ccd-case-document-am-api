@@ -4,6 +4,9 @@ idam:
   s2s-auth:
     url: http://localhost:${wiremock.server.port}/s2s
 
+oidc:
+  issuer: http://localhost:${wiremock.server.port}/o
+
 spring:
   security:
     oauth2:

@@ -73,6 +73,7 @@ idam:
     services: ${CASE_DOCUMENT_S2S_AUTHORISED_SERVICES:ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor,em_npa_app,fprl_dgs_api,dg_docassembly_api,cmc_claim_store,civil_service,civil_general_applications,bulk_scan_orchestrator,ethos_repl_service,et_cos,nfdiv_case_api,divorce_frontend,pcs_api,finrem_citizen_ui}
 oidc:
   issuer: ${OIDC_ISSUER:http://fr-am:8080/openam/oauth2/hmcts}
+  hmcts-access-issuer: ${OIDC_ISSUER_HMCTS_ACCESS:${IDAM_OIDC_URL:http://localhost:5000}/o}
 
 azure:
   application-insights:

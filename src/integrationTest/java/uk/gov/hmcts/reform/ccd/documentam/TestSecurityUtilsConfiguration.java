@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
-import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -24,7 +23,7 @@ public class TestSecurityUtilsConfiguration {
         final HttpHeaders authHeaders = new HttpHeaders();
         authHeaders.add(Constants.SERVICE_AUTHORIZATION, SERVICE_AUTHORISATION_VALUE);
         doReturn(authHeaders).when(securityUtils).serviceAuthorizationHeaders();
-        doReturn(UserInfo.builder().uid(USER_ID).build()).when(securityUtils).getUserInfo();
+        doReturn(USER_ID).when(securityUtils).getUserId();
 
         return securityUtils;
     }

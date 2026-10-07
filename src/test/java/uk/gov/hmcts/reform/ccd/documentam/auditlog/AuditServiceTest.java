@@ -14,7 +14,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.aop.AuditContext;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
-import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -36,10 +35,6 @@ class AuditServiceTest implements TestFixture {
         .withZone(ZoneOffset.UTC);
 
     private final Clock fixedClock = Clock.fixed(Instant.parse("2021-04-28T14:42:32.08Z"), ZoneOffset.UTC);
-
-    private final UserInfo userInfo = UserInfo.builder()
-        .uid(CREATED_BY)
-        .build();
 
     private AuditService underTest;
 
@@ -70,7 +65,7 @@ class AuditServiceTest implements TestFixture {
             .requestPath(REQUEST_PATH)
             .requestId(REQUEST_ID)
             .build();
-        given(securityUtils.getUserInfo()).willReturn(userInfo);
+        given(securityUtils.getUserId()).willReturn(CREATED_BY);
 
         // WHEN
         underTest.audit(auditContext);
@@ -102,7 +97,7 @@ class AuditServiceTest implements TestFixture {
             .auditOperationType(null)
             .httpStatus(HttpStatus.OK.value())
             .build();
-        given(securityUtils.getUserInfo()).willReturn(userInfo);
+        given(securityUtils.getUserId()).willReturn(CREATED_BY);
 
         // WHEN
         underTest.audit(auditContext);
@@ -127,7 +122,7 @@ class AuditServiceTest implements TestFixture {
         final AuditContext auditContext = AuditContext.auditContextWith()
             .httpStatus(HttpStatus.OK.value())
             .build();
-        given(securityUtils.getUserInfo()).willReturn(userInfo);
+        given(securityUtils.getUserId()).willReturn(CREATED_BY);
 
         // WHEN
         underTest.audit(auditContext);
@@ -140,7 +135,7 @@ class AuditServiceTest implements TestFixture {
             .isNotNull()
             .satisfies(x -> {
                 assertThat(x.getHttpStatus()).isEqualTo(auditContext.getHttpStatus());
-                assertThat(x.getIdamId()).isEqualTo(userInfo.getUid());
+                assertThat(x.getIdamId()).isEqualTo(CREATED_BY);
             });
     }
 
@@ -154,7 +149,7 @@ class AuditServiceTest implements TestFixture {
             .documentIds(documentIds)
             .caseId(CASE_ID_VALUE)
             .build();
-        given(securityUtils.getUserInfo()).willReturn(userInfo);
+        given(securityUtils.getUserId()).willReturn(CREATED_BY);
 
         // WHEN
         underTest.audit(auditContext);

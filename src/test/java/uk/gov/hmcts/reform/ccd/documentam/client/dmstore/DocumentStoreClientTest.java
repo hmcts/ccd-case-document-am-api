@@ -40,7 +40,6 @@ import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.UpdateDocumentsCommand;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
-import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -118,7 +117,7 @@ class DocumentStoreClientTest implements TestFixture {
         authHeaders.add(Constants.SERVICE_AUTHORIZATION, "service_token");
 
         when(securityUtils.serviceAuthorizationHeaders()).thenReturn(authHeaders);
-        when(securityUtils.getUserInfo()).thenReturn(UserInfo.builder().uid(USER_ID).build());
+        when(securityUtils.getUserId()).thenReturn(USER_ID);
 
         doReturn(DM_STORE_URL).when(applicationParams).getDocumentURL();
     }

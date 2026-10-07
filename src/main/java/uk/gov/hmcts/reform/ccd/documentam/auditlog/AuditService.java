@@ -40,7 +40,7 @@ public class AuditService {
         entry.setRequestPath(auditContext.getRequestPath());
         entry.setRequestId(auditContext.getRequestId());
 
-        entry.setIdamId(securityUtils.getUserInfo().getUid());
+        entry.setIdamId(securityUtils.getUserId());
         entry.setInvokingService(auditContext.getInvokingService());
 
         entry.setOperationType(auditContext.getAuditOperationType() != null

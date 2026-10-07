@@ -206,7 +206,7 @@ public class DocumentStoreClient {
         headers.forEach((headerName, headerValues) ->
                             headerValues.forEach(headerValue -> httpBase.addHeader(headerName, headerValue))
         );
-        httpBase.addHeader(Constants.USERID, securityUtils.getUserInfo().getUid());
+        httpBase.addHeader(Constants.USERID, securityUtils.getUserId());
     }
 
     private void mapResponseHeaders(Header[] responseHeaders, HttpServletResponse httpResponseOut) {
@@ -308,7 +308,7 @@ public class DocumentStoreClient {
 
     private HttpHeaders prepareRequestHeaders() {
         HttpHeaders headers = securityUtils.serviceAuthorizationHeaders();
-        headers.set(Constants.USERID, securityUtils.getUserInfo().getUid());
+        headers.set(Constants.USERID, securityUtils.getUserId());
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         return headers;

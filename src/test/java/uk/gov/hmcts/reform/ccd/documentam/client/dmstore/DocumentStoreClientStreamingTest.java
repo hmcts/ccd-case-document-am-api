@@ -22,7 +22,6 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
-import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -88,7 +87,7 @@ class DocumentStoreClientStreamingTest {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Accept", "test");
         when(securityUtils.serviceAuthorizationHeaders()).thenReturn(headers);
-        when(securityUtils.getUserInfo()).thenReturn(UserInfo.builder().uid(UID).build());
+        when(securityUtils.getUserId()).thenReturn(UID);
 
         when(applicationParams.getClientRequestHeadersToForward()).thenReturn(List.of("RANGE"));
 
@@ -125,7 +124,7 @@ class DocumentStoreClientStreamingTest {
         );
 
         verify(securityUtils).serviceAuthorizationHeaders();
-        verify(securityUtils).getUserInfo();
+        verify(securityUtils).getUserId();
     }
 
     @Test
@@ -163,7 +162,7 @@ class DocumentStoreClientStreamingTest {
                      capturedHttpGet.getPath());
 
         verify(securityUtils).serviceAuthorizationHeaders();
-        verify(securityUtils).getUserInfo();
+        verify(securityUtils).getUserId();
     }
 
     @Test
@@ -215,7 +214,7 @@ class DocumentStoreClientStreamingTest {
         );
 
         verify(securityUtils).serviceAuthorizationHeaders();
-        verify(securityUtils).getUserInfo();
+        verify(securityUtils).getUserId();
     }
 
     @Test
@@ -243,7 +242,7 @@ class DocumentStoreClientStreamingTest {
         );
 
         verify(securityUtils).serviceAuthorizationHeaders();
-        verify(securityUtils).getUserInfo();
+        verify(securityUtils).getUserId();
     }
 
     @Test
@@ -287,7 +286,7 @@ class DocumentStoreClientStreamingTest {
         );
 
         verify(securityUtils).serviceAuthorizationHeaders();
-        verify(securityUtils).getUserInfo();
+        verify(securityUtils).getUserId();
     }
 
     @AfterEach
