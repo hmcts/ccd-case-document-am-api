@@ -365,6 +365,7 @@
       "caseTypeId": ["*"],
       "jurisdictionId": "PCS",
       "permissions": [
+        "ATTACH",
         "CREATE",
         "READ",
         "UPDATE",
