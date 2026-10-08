@@ -9,7 +9,7 @@ properties([
   pipelineTriggers([cron('H 07 * * 1-5')])
 ])
 
-@Library("Infrastructure@2.12.1")
+@Library("Infrastructure@cve-dashboard")
 
 def type = "java"
 def product = "ccd"
