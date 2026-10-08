@@ -361,6 +361,16 @@
       ]
     },
     {
+      "id": "deed_poll_api",
+      "caseTypeId": ["DEEDPOLL"],
+      "jurisdictionId": "DEEDPOLL",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE"
+      ]
+    },
+    {
       "id": "pcs_api",
       "caseTypeId": ["*"],
       "jurisdictionId": "PCS",
