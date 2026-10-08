@@ -9,6 +9,7 @@ import org.springframework.validation.annotation.Validated;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Validated
@@ -43,4 +44,13 @@ public class AuthorisedService {
     @Builder.Default
     @JsonProperty("jurisdictionIdOptionalFor")
     private List<Permission> jurisdictionIdOptionalFor = new ArrayList<>();
+
+    // A user with this role, calling as this service, can read documents within the service's own case types
+    // without a CCD check
+    @JsonProperty("systemReadRole")
+    private String systemReadRole;
+
+    public boolean allowsSystemRead(Collection<String> userRoles) {
+        return systemReadRole != null && userRoles.contains(systemReadRole);
+    }
 }
