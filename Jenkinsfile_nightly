@@ -19,6 +19,7 @@ def component = "case-document-am-api"
 env.TESTCONTAINERS_HUB_IMAGE_NAME_PREFIX = "hmctsprod.azurecr.io/imported/"
 
 withNightlyPipeline(type, product, component) {
+  enableCveDashboardIngestion()
   enableSlackNotifications('#ccd-case-document-am-api-builds')
   enableFortifyScan()
   afterAlways('fortify-scan') {
