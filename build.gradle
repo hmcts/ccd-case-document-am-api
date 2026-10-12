@@ -286,6 +286,7 @@ dependencies {
 
   // put CVE Vulnerability (sub)dependency overrides here e.g.
   // implementation group: 'com.example', name: 'example-lib', version: '1.0.0' //  parent dependency name
+  implementation group: 'org.eclipse.angus', name: 'angus-mail', version: '2.0.5'
 
   // end::CVE Vulnerability dependency overrides
 
