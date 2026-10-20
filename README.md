@@ -173,6 +173,73 @@ CURRENT_LOCATION='/Users/736062/HMCTS-Projects/AM/ccd-case-document-utilities/au
 Run the scripts that follow.
 Once this is done, try to run your functional tests.
 
+## Error handling and support
+
+JSON error responses include stable string codes to help support identify the error category.
+A code describes the HTTP status; it does not identify an individual incident or establish its cause.
+
+| HTTP status | Code |
+| --- | --- |
+| 400, 422 | `INVALID_REQUEST` |
+| 401 | `AUTHENTICATION_REQUIRED` |
+| 403 | `ACCESS_DENIED` |
+| 404 | `RESOURCE_NOT_FOUND` |
+| 405 | `METHOD_NOT_ALLOWED` |
+| 413 | `REQUEST_TOO_LARGE` |
+| 415 | `UNSUPPORTED_MEDIA_TYPE` |
+| 429 | `TOO_MANY_REQUESTS` |
+| 5xx | `INTERNAL_ERROR` |
+| Other errors | `REQUEST_FAILED` |
+
+Authentication and service-authentication filters return empty 401/403 bodies and record the category
+in handler logs. Controller errors can return JSON bodies. Fallback JSON and HTML error pages may
+omit the code. Normal failure logs contain safe summaries; original diagnostic details require DEBUG.
+
+### Investigating a failure
+
+Record the service/environment, UTC time, HTTP status, error code where available and an existing
+telemetry operation ID. Use the operation ID and time to find related requests and logs in App Insights.
+No additional incident reference is generated. Do not request bearer tokens or credentials from users.
+
+For 400/422, check the request format and validation messages. For 401, check sign-in; for 403, check
+permissions. Escalate unexpected 5xx failures with the recorded context. Detailed logs should be
+accessible only through the environment's restricted administrator/support access.
+
+### Temporarily enabling diagnostics
+
+Enable DEBUG only for the logger needed to investigate the failure. For request or authentication
+failures, use the relevant entry below in the deployment's logging configuration:
+
+```yaml
+logging:
+  level:
+    uk.gov.hmcts.reform.ccd.documentam.controller.advice.CaseDocumentControllerAdvice: DEBUG
+    uk.gov.hmcts.reform.ccd.documentam.security.SafeAuthenticationErrors: DEBUG
+```
+
+Other diagnostic loggers are:
+
+- `uk.gov.hmcts.reform.ccd.documentam.security.SafeServiceAuthFilter` for service authentication.
+- `uk.gov.hmcts.reform.ccd.documentam.logging.SafeHealthDiagnosticsFilter` for health checks.
+- `uk.gov.hmcts.reform.ccd.documentam.logging.SafeDependencyDiagnosticsFilter` for database/framework diagnostics.
+
+- `uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditInterceptor` and `uk.gov.hmcts.reform.ccd.documentam.auditlog.aop.AuditAspect` for audit failures.
+- `uk.gov.hmcts.reform.ccd.documentam.security.filters.ExceptionHandlingFilter` for unexpected security-chain failures.
+- `uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DocumentStoreClient` for document-store client failures.
+- `uk.gov.hmcts.reform.ccd.documentam.client.datastore.CaseDataStoreClientImpl` for data-store client failures.
+
+If using the Application Insights Java agent, its logging collection threshold must also allow DEBUG:
+
+```text
+APPLICATIONINSIGHTS_INSTRUMENTATION_LOGGING_LEVEL=DEBUG
+```
+
+Apply startup configuration through the normal deployment process and restart/roll out as required.
+Reproduce the failure and check related trace/exception telemetry using the operation ID. Diagnostics
+are available only for failures occurring while DEBUG is enabled; earlier details cannot be recovered.
+Restore both logger and collection thresholds afterwards. DEBUG diagnostics can contain sensitive
+information and must remain subject to restricted log access.
+
 ## LICENSE
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.

@@ -17,7 +17,8 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "error": "Meta data does not exist for documentId: 00000000-0000-0000-0000-000000000000"
+      "code": "RESOURCE_NOT_FOUND",
+      "error": "Not Found"
     }
   }
 }

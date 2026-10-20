@@ -121,7 +121,8 @@ class CaseDataStoreClientImplTest implements TestFixture {
                                                                 Charset.defaultCharset()));
 
         assertThatExceptionOfType(ForbiddenException.class)
-            .isThrownBy(() -> sut.getCaseDocumentMetadata(CASE_ID_VALUE, MATCHED_DOCUMENT_ID));
+            .isThrownBy(() -> sut.getCaseDocumentMetadata(CASE_ID_VALUE, MATCHED_DOCUMENT_ID))
+            .withCauseInstanceOf(HttpClientErrorException.class);
     }
 
     @Test
@@ -135,7 +136,8 @@ class CaseDataStoreClientImplTest implements TestFixture {
                                                                 "404", new HttpHeaders(), new byte[1],
                                                                 Charset.defaultCharset()));
         assertThatExceptionOfType(BadRequestException.class)
-            .isThrownBy(() -> sut.getCaseDocumentMetadata(CASE_ID_VALUE, MATCHED_DOCUMENT_ID));
+            .isThrownBy(() -> sut.getCaseDocumentMetadata(CASE_ID_VALUE, MATCHED_DOCUMENT_ID))
+            .withCauseInstanceOf(HttpClientErrorException.class);
     }
 
     @Test
@@ -150,7 +152,8 @@ class CaseDataStoreClientImplTest implements TestFixture {
                                                                 Charset.defaultCharset()));
 
         assertThatExceptionOfType(ServiceException.class)
-            .isThrownBy(() -> sut.getCaseDocumentMetadata(CASE_ID_VALUE, MATCHED_DOCUMENT_ID));
+            .isThrownBy(() -> sut.getCaseDocumentMetadata(CASE_ID_VALUE, MATCHED_DOCUMENT_ID))
+            .withCauseInstanceOf(HttpClientErrorException.class);
     }
 
     private HttpHeaders prepareRequestForUpload() {

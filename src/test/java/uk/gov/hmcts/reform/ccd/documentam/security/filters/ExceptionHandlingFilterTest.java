@@ -37,9 +37,10 @@ public class ExceptionHandlingFilterTest {
     private ExceptionHandlingFilter filter;
 
     private Logger logger;
+    private Level previousLevel;
     private ListAppender<ILoggingEvent> listAppender;
 
-    private static final String EXCEPTION_MESSAGE = "Exception thrown in the security filter chain";
+    private static final String EXCEPTION_MESSAGE = "Security filter request failed: code=INTERNAL_ERROR status=";
     private static final String EXCEPTION_LOGGER_TYPE =
         "uk.gov.hmcts.reform.ccd.documentam.security.filters.ExceptionHandlingFilter";
 
@@ -50,6 +51,8 @@ public class ExceptionHandlingFilterTest {
         response = new MockHttpServletResponse();
 
         logger = (Logger) LoggerFactory.getLogger(ExceptionHandlingFilter.class);
+        previousLevel = logger.getLevel();
+        logger.setLevel(Level.INFO);
         // create and start a ListAppender
         listAppender = new ListAppender<>();
         listAppender.start();
@@ -60,6 +63,7 @@ public class ExceptionHandlingFilterTest {
 
     @AfterEach
     public void tearDown() {
+        logger.setLevel(previousLevel);
         listAppender.stop();
         logger.detachAppender(listAppender);
     }
@@ -87,12 +91,55 @@ public class ExceptionHandlingFilterTest {
         assertLogging();
     }
 
+    @Test
+    public void clearsUncommittedDiagnosticsOnFailure() throws ServletException, IOException {
+        Mockito.doAnswer(invocation -> {
+            response.setContentType("text/plain");
+            response.setContentLength(100);
+            response.getWriter().write("private diagnostic");
+            throw new ServletException("private diagnostic");
+        }).when(filterChain).doFilter(request, response);
+        filter.doFilter(request, response, filterChain);
+        assertThat(response.getStatus()).isEqualTo(500);
+        assertThat(((MockHttpServletResponse) response).getContentAsString()).isEmpty();
+        assertThat(response.getHeader("Content-Length")).isNull();
+        assertLogging();
+    }
+
+    @Test
+    public void doesNotRewriteAnAlreadyCommittedResponse() throws ServletException, IOException {
+        Mockito.doAnswer(invocation -> {
+            response.setStatus(206);
+            response.getWriter().write("partial content");
+            response.flushBuffer();
+            throw new IOException("private diagnostic");
+        }).when(filterChain).doFilter(request, response);
+        filter.doFilter(request, response, filterChain);
+        assertThat(response.getStatus()).isEqualTo(206);
+        assertThat(((MockHttpServletResponse) response).getContentAsString()).isEqualTo("partial content");
+        assertLogging();
+    }
+
+    @Test
+    public void originalFailureIsAvailableOnlyAtDebug() throws ServletException, IOException {
+        logger.setLevel(Level.DEBUG);
+        Mockito.doThrow(new ServletException("Synthetic filter diagnostic"))
+            .when(filterChain).doFilter(request, response);
+        filter.doFilter(request, response, filterChain);
+        assertThat(response.getStatus()).isEqualTo(500);
+        assertThat(listAppender.list.size()).isEqualTo(2);
+        assertThat(listAppender.list.get(0).getThrowableProxy()).isNull();
+        assertThat(listAppender.list.get(1).getLevel()).isEqualTo(Level.DEBUG);
+        assertThat(listAppender.list.get(1).getThrowableProxy().getMessage()).isEqualTo("Synthetic filter diagnostic");
+    }
+
     private void assertLogging() {
         List<ILoggingEvent> logsList = listAppender.list;
         ILoggingEvent lastLogEntry = logsList.get(logsList.size() - 1);
 
         assertThat(lastLogEntry.getLevel()).isEqualTo(Level.ERROR);
         assertThat(lastLogEntry.getLoggerName()).isEqualTo(EXCEPTION_LOGGER_TYPE);
-        assertThat(lastLogEntry.getMessage()).contains(EXCEPTION_MESSAGE);
+        assertThat(lastLogEntry.getFormattedMessage()).contains(EXCEPTION_MESSAGE);
+        assertThat(lastLogEntry.getThrowableProxy()).isNull();
     }
 }

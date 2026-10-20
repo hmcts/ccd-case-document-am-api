@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.ccd.documentam.controller.advice;
 
 import lombok.Builder;
 import lombok.Getter;
+import uk.gov.hmcts.reform.ccd.documentam.security.ErrorCode;
 
 @Getter
 @Builder
@@ -11,7 +12,9 @@ public class ErrorResponse {
 
     private final String error;
 
-    private final String exception;
+    public ErrorCode getCode() {
+        return ErrorCode.fromStatus(status);
+    }
 
     private final String timestamp;
 

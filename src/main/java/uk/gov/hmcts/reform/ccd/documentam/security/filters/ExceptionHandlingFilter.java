@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.ccd.documentam.security.filters;
 
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.reform.ccd.documentam.logging.SafeFailureLogging;
+import uk.gov.hmcts.reform.ccd.documentam.security.ErrorCode;
 import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -23,12 +25,19 @@ public class ExceptionHandlingFilter extends OncePerRequestFilter {
         try {
             filterChain.doFilter(request, response);
         } catch (Exception exception) {
-            log.error("Exception thrown in the security filter chain", exception);
-
-            if (exception instanceof ClientAbortException) {
-                response.setStatus(HttpStatus.BAD_GATEWAY.value());
-            } else {
-                response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            HttpStatus status = exception instanceof ClientAbortException
+                ? HttpStatus.BAD_GATEWAY : HttpStatus.INTERNAL_SERVER_ERROR;
+            if (SafeFailureLogging.firstFailure(request)) {
+                log.error("Security filter request failed: code={} status={}",
+                    ErrorCode.fromStatus(status.value()), status.value());
+                log.debug("Original security filter failure: code={} status={}",
+                    ErrorCode.fromStatus(status.value()), status.value(), exception);
+            }
+            if (!response.isCommitted()) {
+                response.resetBuffer();
+                response.setHeader("Content-Length", null);
+                response.setContentType(null);
+                response.setStatus(status.value());
             }
         }
     }

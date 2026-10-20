@@ -22,7 +22,8 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "error": "Meta data does not exist for documentId: ${[scenarioContext][testData][request][pathVariables][documentId]}"
+      "code": "RESOURCE_NOT_FOUND",
+      "error": "Not Found"
     }
   }
 }

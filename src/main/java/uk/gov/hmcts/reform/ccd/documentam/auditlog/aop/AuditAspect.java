@@ -68,9 +68,9 @@ public class AuditAspect {
                 return evaluator.condition(condition, methodKey, evaluationContext, returnType);
 
             } catch (SpelEvaluationException ex) {
-                log.warn("Error evaluating LogAudit annotation expression:{} on method:{}",
-                         condition, method.getName(), ex
-                );
+                log.warn("Audit condition evaluation failed");
+                log.debug("Original audit condition failure for expression:{} on method:{}",
+                    condition, method.getName(), ex);
                 return null;
             }
 

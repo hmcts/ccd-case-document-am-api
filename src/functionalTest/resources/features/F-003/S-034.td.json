@@ -18,7 +18,8 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "error": "[[ANYTHING_PRESENT]]"
+      "code": "INVALID_REQUEST",
+      "error": "Bad Request"
     }
   }
 }
