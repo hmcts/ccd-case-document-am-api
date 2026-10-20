@@ -26,7 +26,7 @@ ext {
   junit               = '5.13.4'
   junitPlatform       = '1.13.4'
   jjwt                = '0.13.0'
-  lombok              = '1.18.42'
+  lombok              = '1.18.48'
   groovy              = '4.0.28'
 
   // TEST VERSIONS
@@ -240,13 +240,8 @@ configure(sonarqube) {
 //https://jeremylong.github.io/DependencyCheck/dependency-check-gradle/configuration.html
 apply from: './gradle/suppress.gradle'
 dependencyCheck {
+  formats = ['HTML', 'XML']
   suppressionFile = 'config/owasp/suppressions.xml'
-}
-
-tasks.register("printSuppressionFile") {
-  doLast {
-    println "SUPPRESSION_FILE=${dependencyCheck.suppressionFile}"
-  }
 }
 
 dependencyUpdates.resolutionStrategy = {
