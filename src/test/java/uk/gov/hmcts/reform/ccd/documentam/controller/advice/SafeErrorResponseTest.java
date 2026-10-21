@@ -88,7 +88,7 @@ class SafeErrorResponseTest {
     }
 
     @Test
-    void incompatibleAcceptHeadersKeepLegacyNegotiationWithoutDiagnosticLogs() throws Exception {
+    void incompatibleAcceptHeadersKeepLegacyNegotiationAndServerDiagnostics() throws Exception {
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         Logger advice = (Logger) LoggerFactory.getLogger(CaseDocumentControllerAdvice.class);
         Level previousLevel = advice.getLevel();
@@ -114,10 +114,11 @@ class SafeErrorResponseTest {
                     .andExpect(status().isInternalServerError())
                     .andExpect(content().string(""));
             }
-            assertThat(appender.list).filteredOn(event -> event.getLevel().isGreaterOrEqual(Level.WARN))
+            assertThat(appender.list)
+                .filteredOn(event -> event.getLoggerName().equals(CaseDocumentControllerAdvice.class.getName()))
                 .hasSize(4).allSatisfy(event -> {
                     assertThat(event.getLoggerName()).isEqualTo(CaseDocumentControllerAdvice.class.getName());
-                    assertThat(event.getThrowableProxy()).isNull();
+                    assertThat(event.getThrowableProxy()).isNotNull();
                 });
         } finally {
             context.getTurboFilterList().remove(dependencies);
@@ -169,7 +170,7 @@ class SafeErrorResponseTest {
     }
 
     @Test
-    void logsSafeCodesAndKeepsOriginalExceptionsAtDebug() throws Exception {
+    void logsSafeCodesAndRetainsOriginalExceptionsAtInfo() throws Exception {
         Logger logger = (Logger) LoggerFactory.getLogger(CaseDocumentControllerAdvice.class);
         Level previousLevel = logger.getLevel();
         ListAppender<ILoggingEvent> appender = new ListAppender<>();
@@ -185,16 +186,16 @@ class SafeErrorResponseTest {
                 "Request failed: code=INVALID_REQUEST status=400");
             assertThat(appender.list).allSatisfy(event -> {
                 assertThat(event.getLevel()).isEqualTo(Level.ERROR);
-                assertThat(event.getThrowableProxy()).isNull();
+                assertThat(event.getThrowableProxy()).isNotNull();
             });
             appender.list.clear();
             logger.setLevel(Level.DEBUG);
             mvc.perform(get("/error-probe/failure")).andExpect(status().isInternalServerError());
-            assertThat(appender.list).hasSize(2);
-            ILoggingEvent diagnostic = appender.list.get(1);
-            assertThat(diagnostic.getLevel()).isEqualTo(Level.DEBUG);
+            assertThat(appender.list).hasSize(1);
+            ILoggingEvent diagnostic = appender.list.get(0);
+            assertThat(diagnostic.getLevel()).isEqualTo(Level.ERROR);
             assertThat(diagnostic.getFormattedMessage()).isEqualTo(
-                "Original request failure: code=INTERNAL_ERROR status=500");
+                "Request failed: code=INTERNAL_ERROR status=500");
             assertThat(diagnostic.getThrowableProxy().getMessage()).isEqualTo(DIAGNOSTIC);
         } finally {
             logger.setLevel(previousLevel);

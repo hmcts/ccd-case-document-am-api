@@ -1,5 +1,19 @@
 # CCD-7882: controlled error responses
 
+## Current support logging policy
+
+Public error responses remain generic. Detailed request failures, including exception causes
+and stack traces, are retained at normal WARN/ERROR levels in server logs; DEBUG is optional
+additional troubleshooting. Dependency and health diagnostics retain their originating severity
+and respect the source logger threshold. Support must not need to enable DEBUG and reproduce
+an incident to obtain its original failure details.
+
+This policy supersedes the DEBUG-only descriptions and test expectations in earlier verification
+entries below. Those entries describe historical checks. Deployment acceptance still requires
+administrator-only log access, suitable retention and verification of logging/Application Insights
+collection. Local tests do not establish those infrastructure controls.
+
+
 Latest CDAM verification (16 October 2026): **256 unit tests and 70 integration tests passed**, no
 failures/errors/skips. Main, test and integration Checkstyle passed; functional Java compilation and
 resource processing passed; all 53 changed functional JSON fixtures parsed successfully. Security-chain
@@ -34,7 +48,7 @@ At merge/deployment planning, assign the delivery owner, QA contact, target date
 
 ## Civil ITHC 2026 F6 / PSC-02 (VUL-8410)
 
-This change owns CDAM handling for `/cases/documents` and document resource/version endpoints used through Manage Case `/documentsv2`. It does not change Docmosis or conversion-service behavior (EM-7381), or ExUI presentation (EXUI-5252).
+This change owns CDAM handling for `/cases/documents` and document resource/version endpoints used through Manage Case `/documentsv2`. Conversion behaviour and UI presentation are outside this change.
 
 Error JSON retains `status`, `error`, `timestamp` and `path`; `exception` is removed and `error` is a controlled HTTP description. Existing downstream mappings remain: HTTP/Feign client exceptions map to 500 except 401; server 500 maps to 502. Explicit ResponseStatusException statuses remain unchanged, including document upload validation statuses. Share this contract with EXUI-5252 before deployment; clients must use status codes rather than parse diagnostic text. Cross-team agreement is not claimed by this change.
 
@@ -232,8 +246,7 @@ logging:
 `compileIntegrationTestJava` and `compileFunctionalTestJava` passed. Regression coverage includes
 public health UP/DOWN response redaction (200/503), S2S 401/403/allowlist/Bearer handling and actual
 shared-bean replacement, INFO/DEBUG diagnostic separation, response serialization (subsequently restored to 400), and
-preserved 405 Allow / 415 Accept headers. Translation/CPO also cover whole security-chain logging
-and committed error handling; CPO/CDAM cover audit interceptor and SpEL failures with log capture.
+preserved 405 Allow / 415 Accept headers.
 
 Health functional fixtures now expect status without component diagnostics. Existing error fixtures
 retain their existing HTTP statuses. Integration/functional
@@ -261,9 +274,7 @@ logging:
 
 Framework-path regression results: **225 affected tests passed**, no failures/errors/skips.
 Tests now use real AbstractHealthIndicator implementations (including nested composite contributors)
-and capture propagated INFO/DEBUG logs. Translation/CPO also simulate IDAM failures through the
-full bearer chain, verifying empty 500 responses, no WWW-Authenticate header, no normal-level
-throwables, and DEBUG-only causes. Public health status/body and existing bearer checks remain green.
+and capture propagated INFO/DEBUG logs. Public health status/body and existing bearer checks remain green.
 Checkstyle and integration/functional compilation are checked separately; deployed functional tests
 and App Insights ingestion are still outstanding.
 
@@ -276,11 +287,11 @@ URIs, scopes or identifiers. Dependency diagnostics use owned DEBUG logging; hea
 respect source logger thresholds and survive logging reloads without duplicate registration. Error
 responses use generic messages and route templates instead of document identifiers.
 
-All three checked-out branches are `CCD-7882_Verbose_Error_Messages`. Their ErrorCode enum bodies
-and mappings are identical to the proposed table. Generic advice/HTML responses, disabled Boot
+The reviewed branch is `CCD-7882_Verbose_Error_Messages`. Its ErrorCode enum
+and mappings were checked against the proposed table. Generic advice/HTML responses, disabled Boot
 exception/message/trace/binding output and DEBUG diagnostics implement the main remediation.
 This is a source/documentation review, not evidence of deployment, administrator-only log access,
-retesting the reported ITHC URLs, or stakeholder approval of the shared code names. See the README
+retesting the reported ITHC URLs, or stakeholder approval of the error category names. See the README
 for the concise contract and unresolved branch-specific gaps. No implementation changes or test
 reruns were made for this documentation confirmation.
 
@@ -341,7 +352,7 @@ These fixture checks do not constitute a deployed BEFTA pass.
 ```
 
 Deployed functional/ITHC retesting, upstream/container responses, administrator-only log access and
-App Insights/independent agent instrumentation remain environment acceptance checks. Shared code
+App Insights/independent agent instrumentation remain environment acceptance checks. Error category
 names are suitable categories; stakeholder approval is not established by the local tests.
 Changes remain uncommitted.
 
@@ -367,3 +378,38 @@ Public fallback responses can still use the generic safe HTML page; authenticati
 Validation: **273 unit tests and 74 integration tests passed**, no failures/errors/skips. All four
 Checkstyle tasks, functional Java compilation and diff checks passed. Deployment verification remains
 outstanding; no content-negotiation contract change is being requested for approval.
+
+## Authoritative remediation and support requirement
+
+The supplied CCD-7882 finding concerns unauthenticated disclosure of implementation details
+through HTTP error responses. This note covers the remediation and verification for this service.
+
+The remediation requires generic public error pages/responses and states: "The server should
+still log the detailed information, but access to the log will be restricted to administrators."
+An event reference is optional. It does not prescribe DEBUG-only logging or require support
+to restart a service to obtain diagnostics.
+
+Response sanitisation and administrator diagnostics are separate requirements. DEBUG-only
+implementation details described elsewhere in this note record the implementation, not an
+acceptance criterion from the finding. If production DEBUG is disabled and no other approved
+mechanism records the detailed failure, that is a support/acceptance gap: enabling DEBUG after
+an incident cannot recover its missing diagnostics. A safe category/status summary alone does
+not satisfy the detailed-log requirement.
+
+Before release, verify that detailed failures are recorded and accessible only to administrators,
+including the deployed logging/Application Insights configuration, while public responses stay
+generic. Preserve useful validation responses and existing protocol behaviour. Select and test
+the logging policy against these requirements; do not assume that moving every diagnostic to
+ERROR, or enabling DEBUG globally, is the required solution. Existing local test results do not
+establish this deployed acceptance. This requirement also applies to the current support logging policy above.
+
+## Support logging verification — 21 October 2026
+
+43 focused tests passed, zero failures/errors/skips. Checks cover the applicable request/error
+paths and confirm that public responses remain sanitised while original exception diagnostics
+are retained without enabling DEBUG. Java main/test Checkstyle passed.
+Administrator-only log access, retention and deployed collection remain environment acceptance checks.
+
+## Logging uniqueness review — 21 October 2026
+
+43 focused tests and main/test Checkstyle passed. Redundant DEBUG exception events have been removed. The regressions require one owned exception event at INFO and DEBUG.

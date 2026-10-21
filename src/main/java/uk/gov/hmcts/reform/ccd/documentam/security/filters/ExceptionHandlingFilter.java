@@ -29,8 +29,6 @@ public class ExceptionHandlingFilter extends OncePerRequestFilter {
                 ? HttpStatus.BAD_GATEWAY : HttpStatus.INTERNAL_SERVER_ERROR;
             if (SafeFailureLogging.firstFailure(request)) {
                 log.error("Security filter request failed: code={} status={}",
-                    ErrorCode.fromStatus(status.value()), status.value());
-                log.debug("Original security filter failure: code={} status={}",
                     ErrorCode.fromStatus(status.value()), status.value(), exception);
             }
             if (!response.isCommitted()) {

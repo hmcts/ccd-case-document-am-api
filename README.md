@@ -193,7 +193,7 @@ A code describes the HTTP status; it does not identify an individual incident or
 
 Authentication and service-authentication filters return empty 401/403 bodies and record the category
 in handler logs. Controller errors can return JSON bodies. Fallback JSON and HTML error pages may
-omit the code. Normal failure logs contain safe summaries; original diagnostic details require DEBUG.
+omit the code. Normal WARN/ERROR failure logs retain exception details for administrator support; public responses remain generic.
 
 ### Investigating a failure
 
@@ -205,9 +205,9 @@ For 400/422, check the request format and validation messages. For 401, check si
 permissions. Escalate unexpected 5xx failures with the recorded context. Detailed logs should be
 accessible only through the environment's restricted administrator/support access.
 
-### Temporarily enabling diagnostics
+### Optional additional DEBUG diagnostics
 
-Enable DEBUG only for the logger needed to investigate the failure. For request or authentication
+Original failure exceptions are already retained at normal WARN/ERROR levels. For additional tracing, enable DEBUG only for the logger needed. For request or authentication
 failures, use the relevant entry below in the deployment's logging configuration:
 
 ```yaml
@@ -235,9 +235,8 @@ APPLICATIONINSIGHTS_INSTRUMENTATION_LOGGING_LEVEL=DEBUG
 ```
 
 Apply startup configuration through the normal deployment process and restart/roll out as required.
-Reproduce the failure and check related trace/exception telemetry using the operation ID. Diagnostics
-are available only for failures occurring while DEBUG is enabled; earlier details cannot be recovered.
-Restore both logger and collection thresholds afterwards. DEBUG diagnostics can contain sensitive
+Reproduce the failure and check related trace/exception telemetry using the operation ID. Additional DEBUG events are available only while DEBUG is enabled; normal failure diagnostics remain available subject to collection and retention.
+Restore both logger and collection thresholds afterwards. Server diagnostics can contain sensitive
 information and must remain subject to restricted log access.
 
 ## LICENSE

@@ -93,13 +93,13 @@ class SafeServiceAuthFilterTest {
                 assertThat(appender.list).hasSize(1);
                 assertThat(appender.list.get(0).getFormattedMessage())
                     .isEqualTo("Service authentication failed: code=AUTHENTICATION_REQUIRED status=401");
-                assertThat(appender.list.get(0).getThrowableProxy()).isNull();
+                assertThat(appender.list.get(0).getThrowableProxy()).isNotNull();
                 logger.setLevel(Level.DEBUG);
                 appender.list.clear();
                 filter.doFilterInternal(request(), new MockHttpServletResponse(), chain);
-                assertThat(appender.list).hasSize(2);
-                assertThat(appender.list.get(1).getLevel()).isEqualTo(Level.DEBUG);
-                assertThat(appender.list.get(1).getThrowableProxy().getMessage())
+                assertThat(appender.list).hasSize(1);
+                assertThat(appender.list.get(0).getLevel()).isEqualTo(Level.WARN);
+                assertThat(appender.list.get(0).getThrowableProxy().getMessage())
                     .isEqualTo("Synthetic private diagnostic");
             }
         } finally {

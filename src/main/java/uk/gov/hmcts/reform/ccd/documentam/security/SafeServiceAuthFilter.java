@@ -44,8 +44,7 @@ public class SafeServiceAuthFilter extends ServiceAuthFilter {
                 response.setStatus(HttpStatus.FORBIDDEN.value());
             }
         } catch (InvalidTokenException | ServiceException exception) {
-            log.warn("Service authentication failed: code={} status=401", ErrorCode.AUTHENTICATION_REQUIRED);
-            log.debug("Original service authentication failure", exception);
+            log.warn("Service authentication failed: code={} status=401", ErrorCode.AUTHENTICATION_REQUIRED, exception);
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
         }
     }

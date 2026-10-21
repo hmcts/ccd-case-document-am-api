@@ -57,7 +57,7 @@ class HealthDiagnosticRedactionTest {
     }
 
     @Test
-    void realAndNestedIndicatorDiagnosticsAreOnlyAvailableAtDebug() {
+    void realAndNestedIndicatorDiagnosticsRemainAvailableAtInfo() {
         YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
         yaml.setResources(new ClassPathResource("application.yaml"));
         for (boolean nested : new boolean[] {false, true}) {
@@ -87,14 +87,14 @@ class HealthDiagnosticRedactionTest {
                         assertThat(appender.list).hasSize(1);
                         assertThat(appender.list.get(0).getLevel()).isEqualTo(Level.WARN);
                         assertThat(appender.list.get(0).getFormattedMessage())
-                            .isEqualTo("Health check failed: code=INTERNAL_ERROR");
-                        assertThat(appender.list.get(0).getThrowableProxy()).isNull();
+                            .contains("Health check");
+                        assertThat(appender.list.get(0).getThrowableProxy()).isNotNull();
                         appender.list.clear();
                         logger.setLevel(Level.DEBUG);
                         endpoint.health(ApiVersion.V3, WebServerNamespace.SERVER, SecurityContext.NONE);
-                        assertThat(appender.list).hasSize(2);
-                        assertThat(appender.list.get(1).getLevel()).isEqualTo(Level.DEBUG);
-                        assertThat(appender.list.get(1).getThrowableProxy().getMessage())
+                        assertThat(appender.list).hasSize(1);
+                        assertThat(appender.list.get(0).getLevel()).isEqualTo(Level.WARN);
+                        assertThat(appender.list.get(0).getThrowableProxy().getMessage())
                             .isEqualTo("Synthetic private health diagnostic");
                     } finally {
                         logger.setLevel(previousLevel);

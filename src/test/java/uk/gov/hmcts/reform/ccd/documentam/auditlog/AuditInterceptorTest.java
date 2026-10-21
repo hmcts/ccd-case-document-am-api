@@ -173,15 +173,15 @@ class AuditInterceptorTest implements TestFixture {
             assertThat(AuditContextHolder.getAuditContext()).isNull();
             assertThat(appender.list).hasSize(1);
             assertThat(appender.list.get(0).getFormattedMessage()).isEqualTo("Request audit failed");
-            assertThat(appender.list.get(0).getThrowableProxy()).isNull();
+            assertThat(appender.list.get(0).getThrowableProxy()).isNotNull();
             AuditContextHolder.setAuditContext(auditContext);
             appender.list.clear();
             logger.setLevel(Level.DEBUG);
             underTest.afterCompletion(request, response, handler, null);
             assertThat(AuditContextHolder.getAuditContext()).isNull();
-            assertThat(appender.list).hasSize(2);
-            assertThat(appender.list.get(1).getLevel()).isEqualTo(Level.DEBUG);
-            assertThat(appender.list.get(1).getThrowableProxy().getMessage()).isEqualTo("Synthetic audit diagnostic");
+            assertThat(appender.list).hasSize(1);
+            assertThat(appender.list.get(0).getLevel()).isEqualTo(Level.ERROR);
+            assertThat(appender.list.get(0).getThrowableProxy().getMessage()).isEqualTo("Synthetic audit diagnostic");
         } finally {
             logger.setLevel(previousLevel);
             rootLogger.detachAppender(appender);

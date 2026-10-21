@@ -39,7 +39,7 @@ class AuditDiagnosticRedactionTest {
                 .allSatisfy(event -> {
                     assertThat(event.getFormattedMessage())
                         .doesNotContain("internalDiagnosticField", "synthetic-private-id");
-                    assertThat(event.getThrowableProxy()).isNull();
+                    assertThat(event.getThrowableProxy()).isNotNull();
                 });
             assertThat(appender.list).extracting(ILoggingEvent::getFormattedMessage)
                 .contains("Audit condition evaluation failed");
@@ -47,8 +47,8 @@ class AuditDiagnosticRedactionTest {
             appender.list.clear();
             ReflectionTestUtils.invokeMethod(aspect, "getValue", joinPoint,
                 "#p0.internalDiagnosticField", null, String.class);
-            assertThat(appender.list).filteredOn(event -> event.getLevel() == Level.DEBUG)
-                .anySatisfy(event -> assertThat(event.getThrowableProxy()).isNotNull());
+            assertThat(appender.list).filteredOn(event -> event.getLevel() == Level.WARN)
+                .singleElement().satisfies(event -> assertThat(event.getThrowableProxy()).isNotNull());
         } finally {
             logger.setLevel(previousLevel);
             rootLogger.detachAppender(appender);

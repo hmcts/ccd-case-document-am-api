@@ -121,16 +121,16 @@ public class ExceptionHandlingFilterTest {
     }
 
     @Test
-    public void originalFailureIsAvailableOnlyAtDebug() throws ServletException, IOException {
+    public void originalFailureRemainsAvailableAtInfoAndDebug() throws ServletException, IOException {
         logger.setLevel(Level.DEBUG);
         Mockito.doThrow(new ServletException("Synthetic filter diagnostic"))
             .when(filterChain).doFilter(request, response);
         filter.doFilter(request, response, filterChain);
         assertThat(response.getStatus()).isEqualTo(500);
-        assertThat(listAppender.list.size()).isEqualTo(2);
-        assertThat(listAppender.list.get(0).getThrowableProxy()).isNull();
-        assertThat(listAppender.list.get(1).getLevel()).isEqualTo(Level.DEBUG);
-        assertThat(listAppender.list.get(1).getThrowableProxy().getMessage()).isEqualTo("Synthetic filter diagnostic");
+        assertThat(listAppender.list.size()).isEqualTo(1);
+        assertThat(listAppender.list.get(0).getThrowableProxy()).isNotNull();
+        assertThat(listAppender.list.get(0).getLevel()).isEqualTo(Level.ERROR);
+        assertThat(listAppender.list.get(0).getThrowableProxy().getMessage()).isEqualTo("Synthetic filter diagnostic");
     }
 
     private void assertLogging() {
@@ -140,6 +140,6 @@ public class ExceptionHandlingFilterTest {
         assertThat(lastLogEntry.getLevel()).isEqualTo(Level.ERROR);
         assertThat(lastLogEntry.getLoggerName()).isEqualTo(EXCEPTION_LOGGER_TYPE);
         assertThat(lastLogEntry.getFormattedMessage()).contains(EXCEPTION_MESSAGE);
-        assertThat(lastLogEntry.getThrowableProxy()).isNull();
+        assertThat(lastLogEntry.getThrowableProxy()).isNotNull();
     }
 }

@@ -149,8 +149,6 @@ public class CaseDocumentControllerAdvice {
                                                               final HttpServletRequest request) {
         if (SafeFailureLogging.firstFailure(request)) {
             log.error("Request failed: code={} status={}",
-                ErrorCode.fromStatus(httpStatus.value()), httpStatus.value());
-            log.debug("Original request failure: code={} status={}",
                 ErrorCode.fromStatus(httpStatus.value()), httpStatus.value(), ex);
         }
         final ErrorResponse errorDetails = ErrorResponse.builder()

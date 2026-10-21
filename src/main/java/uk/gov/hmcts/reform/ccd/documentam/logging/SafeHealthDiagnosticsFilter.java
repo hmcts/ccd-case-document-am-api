@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.ccd.documentam.security.ErrorCode;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-/** Keeps framework health diagnostics behind an owned DEBUG logger. */
+/** Retains framework health diagnostics in administrator-controlled server logs. */
 @Slf4j
 public class SafeHealthDiagnosticsFilter extends TurboFilter {
 
@@ -36,14 +36,18 @@ public class SafeHealthDiagnosticsFilter extends TurboFilter {
         if (!level.isGreaterOrEqual(logger.getEffectiveLevel())) {
             return FilterReply.DENY;
         }
-        if (level == Level.ERROR) {
-            log.error("Health check failed: code={}", ErrorCode.INTERNAL_ERROR);
-        } else {
-            log.warn("Health check failed: code={}", ErrorCode.INTERNAL_ERROR);
-        }
         FormattingTuple diagnostic = MessageFormatter.arrayFormat(format, arguments);
-        log.debug("Original health check failure: component={} message={}", logger.getName(),
-            diagnostic.getMessage(), exception != null ? exception : diagnostic.getThrowable());
+        Throwable cause = exception != null ? exception : diagnostic.getThrowable();
+        if (level == Level.ERROR) {
+            log.error("Health check failure: code={} logger={} message={}",
+                ErrorCode.INTERNAL_ERROR, logger.getName(), diagnostic.getMessage(), cause);
+        } else if (level == Level.INFO) {
+            log.info("Health check failure: code={} logger={} message={}",
+                ErrorCode.REQUEST_FAILED, logger.getName(), diagnostic.getMessage(), cause);
+        } else {
+            log.warn("Health check failure: code={} logger={} message={}",
+                ErrorCode.REQUEST_FAILED, logger.getName(), diagnostic.getMessage(), cause);
+        }
         return FilterReply.DENY;
     }
 }

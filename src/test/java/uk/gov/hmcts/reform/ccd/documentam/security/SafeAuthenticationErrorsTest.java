@@ -45,7 +45,7 @@ class SafeAuthenticationErrorsTest {
             assertThat(appender.list).hasSize(1);
             assertThat(appender.list.get(0).getFormattedMessage())
                 .isEqualTo("Authentication failed: code=INVALID_REQUEST status=400");
-            assertThat(appender.list.get(0).getThrowableProxy()).isNull();
+            assertThat(appender.list.get(0).getThrowableProxy()).isNotNull();
         } finally {
             logger.setLevel(previousLevel);
             logger.detachAppender(appender);
@@ -112,7 +112,7 @@ class SafeAuthenticationErrorsTest {
                 "Access denied: code=ACCESS_DENIED status=403");
             assertThat(appender.list).allSatisfy(event -> {
                 assertThat(event.getLevel()).isEqualTo(Level.WARN);
-                assertThat(event.getThrowableProxy()).isNull();
+                assertThat(event.getThrowableProxy()).isNotNull();
             });
             appender.list.clear();
             logger.setLevel(Level.DEBUG);
@@ -120,12 +120,12 @@ class SafeAuthenticationErrorsTest {
                 new BadCredentialsException("Synthetic authentication detail"));
             handler.handle(new MockHttpServletRequest(), new MockHttpServletResponse(),
                 new AccessDeniedException("Synthetic access detail"));
-            assertThat(appender.list).hasSize(4);
-            assertThat(appender.list.get(1).getLevel()).isEqualTo(Level.DEBUG);
-            assertThat(appender.list.get(1).getThrowableProxy().getMessage())
+            assertThat(appender.list).hasSize(2);
+            assertThat(appender.list.get(0).getLevel()).isEqualTo(Level.WARN);
+            assertThat(appender.list.get(0).getThrowableProxy().getMessage())
                 .isEqualTo("Synthetic authentication detail");
-            assertThat(appender.list.get(3).getLevel()).isEqualTo(Level.DEBUG);
-            assertThat(appender.list.get(3).getThrowableProxy().getMessage()).isEqualTo("Synthetic access detail");
+            assertThat(appender.list.get(1).getLevel()).isEqualTo(Level.WARN);
+            assertThat(appender.list.get(1).getThrowableProxy().getMessage()).isEqualTo("Synthetic access detail");
         } finally {
             logger.setLevel(previousLevel);
             logger.detachAppender(appender);
