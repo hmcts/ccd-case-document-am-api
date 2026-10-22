@@ -425,3 +425,18 @@ Fresh execution passed **272 unit tests and 74 integration tests**, with no fail
 Main, unit, integration and functional Checkstyle passed; functional Java compilation/resource processing,
 all 147 functional JSON fixtures and diff checks passed. Deployed BEFTA/ITHC, broker-backed Pact and
 administrator-only telemetry access/collection remain unverified locally.
+
+## Local Docker verification — 22 October 2026
+
+Rebuilt the current bootJar and passed **12 Docker checks** with synthetic IDAM/S2S/document services:
+anonymous JSON/HTML/XML requests, missing/invalid bearer credentials, disallowed services, IDAM failure,
+missing documents, failing public health, missing-resource HTML and malformed HTTP. Public responses
+remained sanitised with their expected statuses/challenges. Container logs retained original IDAM,
+document-store and health diagnostics at normal levels without enabling DEBUG.
+
+The unchanged production Dockerfile could not pull `hmctsprod.azurecr.io/base/java:21-distroless`
+because registry authentication was unavailable. The check instead ran the rebuilt CDAM JAR in the
+cached HMCTS `hmcts/definition-store-api:local` Java 21.0.9 runtime, as its non-root `hmcts` user,
+with synthetic dependencies and telemetry disabled. This verifies containerised application/logging
+behaviour, not the exact production image, Application Insights ingestion or administrator-only log
+access. Those remain deployment checks. Temporary verification resources were removed afterward.
