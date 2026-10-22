@@ -6,7 +6,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
@@ -146,7 +145,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                     && !either.get().getMetadata().isEmpty()
                     && !allowMetadataOverride(either.get(), caseDocumentsMetadata, documentHashToken)) {
                     // graceful failure with warning.
-                    log.warn("Document metadata already exists for docId:{} with caseType:{} and caseId:{}. "
+                    log.warn("Document metadata override refused");
+                    log.debug("Document metadata already exists for docId:{} with caseType:{} and caseId:{}. "
                                  + "Cannot override with caseType:{}, caseId:{}",
                              documentHashToken.getId(), either.get().getCaseTypeId(), either.get().getCaseId(),
                              caseDocumentsMetadata.getCaseTypeId(), caseDocumentsMetadata.getCaseId());
@@ -342,7 +342,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
         if (!documentPermissions.getId().equals(documentId)
             || !documentPermissions.getPermissions().contains(permissionToCheck)) {
-            log.error(logMessage, HttpStatus.FORBIDDEN);
             throw new ForbiddenException(exceptionMessage);
         }
     }
@@ -362,7 +361,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             || !validateJurisdictionId(serviceConfig, jurisdictionId, permission)
             || !validatePermissions(serviceConfig, permission)
         ) {
-            log.error(logMessage, HttpStatus.FORBIDDEN);
             throw new ForbiddenException(exceptionMessage);
         }
 
@@ -408,10 +406,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         return authorisedServices.getAuthServices().stream()
             .filter(service -> service.getId().equals(serviceId))
             .findAny()
-            .orElseThrow(() -> {
-                log.error("Service Id {} is not authorized to access API ", serviceId);
-                throw new ForbiddenException(String.format(Constants.EXCEPTION_SERVICE_ID_NOT_AUTHORISED, serviceId));
-            });
+            .orElseThrow(() -> new ForbiddenException(
+                String.format(Constants.EXCEPTION_SERVICE_ID_NOT_AUTHORISED, serviceId)));
     }
 
 }

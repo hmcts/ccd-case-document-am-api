@@ -41,7 +41,6 @@ import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -183,7 +182,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
                                                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                                                         .content(TestFixture.objectToJsonString(body)))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.error", is("At least one document should be provided")))
+            .andExpect(jsonPath("$.error", is("Bad Request")))
             .andExpect(result -> assertThat(result.getResolvedException())
                 .isNotNull()
                 .satisfies(throwable -> assertThat(throwable).isInstanceOf(MethodArgumentNotValidException.class)));
@@ -202,7 +201,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
         ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
         assert errorResponse != null;
-        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
+        assertEquals(HttpStatus.valueOf(errorResponse.getStatus()).getReasonPhrase(), errorResponse.getError());
     }
 
     @Test
@@ -218,7 +217,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
         ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
         assert errorResponse != null;
-        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
+        assertEquals(HttpStatus.valueOf(errorResponse.getStatus()).getReasonPhrase(), errorResponse.getError());
     }
 
     @Test
@@ -234,7 +233,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
         ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
         assert errorResponse != null;
-        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
+        assertEquals(HttpStatus.valueOf(errorResponse.getStatus()).getReasonPhrase(), errorResponse.getError());
     }
 
     @Test
@@ -250,7 +249,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
         ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
         assert errorResponse != null;
-        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
+        assertEquals(HttpStatus.valueOf(errorResponse.getStatus()).getReasonPhrase(), errorResponse.getError());
     }
 
     @Test
@@ -266,7 +265,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
         ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
         assert errorResponse != null;
-        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
+        assertEquals(HttpStatus.valueOf(errorResponse.getStatus()).getReasonPhrase(), errorResponse.getError());
     }
 
     @Test
@@ -283,7 +282,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
         ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
         assert errorResponse != null;
-        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
+        assertEquals(HttpStatus.valueOf(errorResponse.getStatus()).getReasonPhrase(), errorResponse.getError());
     }
 
 

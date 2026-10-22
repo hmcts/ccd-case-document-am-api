@@ -30,7 +30,8 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "error": "Provide the Jurisdiction ID"
+      "code": "INVALID_REQUEST",
+      "error": "Bad Request"
     }
   }
 }

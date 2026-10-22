@@ -34,7 +34,8 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "error": "Case Type ID is not valid"
+      "code": "INVALID_REQUEST",
+      "error": "Bad Request"
     }
   }
 }

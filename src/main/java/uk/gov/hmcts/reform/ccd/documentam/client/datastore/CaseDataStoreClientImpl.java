@@ -61,20 +61,19 @@ public class CaseDataStoreClientImpl implements CaseDataStoreClient {
                 .map(CaseDocumentResource::getDocumentMetadata)
                 .map(CaseDocumentMetadata::getDocumentPermissions);
         } catch (HttpClientErrorException exception) {
-            log.error("Exception occurred while getting document permissions from CCD Data store: {}",
-                      exception.getMessage());
             if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
+                log.debug("Original CCD document permissions request failure", exception);
                 return Optional.empty();
             } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
-                throw new ForbiddenException(CASE_ERROR_MESSAGE + caseId);
+                throw new ForbiddenException(CASE_ERROR_MESSAGE + caseId, exception);
             } else if (HttpStatus.BAD_REQUEST.equals(exception.getStatusCode())) {
-                throw new BadRequestException(Constants.INPUT_INVALID);
+                throw new BadRequestException(Constants.INPUT_INVALID, exception);
             } else {
                 throw new ServiceException(String.format(
                     "Problem  fetching the document for document id: %s because of %s",
                     documentId,
                     exception.getMessage()
-                ));
+                ), exception);
             }
         }
     }

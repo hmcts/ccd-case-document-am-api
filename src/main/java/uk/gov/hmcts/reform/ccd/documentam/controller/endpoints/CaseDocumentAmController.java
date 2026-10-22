@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -65,7 +64,6 @@ import static uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils.SERVICE_
 
 @Tag(name = "cases")
 @RestController
-@Slf4j
 @ConditionalOnProperty(value = "case.document.am.api.enabled", havingValue = "true")
 public class CaseDocumentAmController {
 
@@ -131,7 +129,6 @@ public class CaseDocumentAmController {
             return ResponseEntity.ok(document);
         } else {
             String errorMessage = String.format(TTL_FORBIDDEN_MESSAGE, documentId);
-            log.error(errorMessage);
             throw new ForbiddenException(errorMessage);
         }
     }
@@ -185,7 +182,6 @@ public class CaseDocumentAmController {
             return handleDocumentContent(documentId, httpResponse, requestHeaders);
         } else {
             String errorMessage = String.format(TTL_FORBIDDEN_MESSAGE, documentId);
-            log.error(errorMessage);
             throw new ForbiddenException(errorMessage);
         }
     }
