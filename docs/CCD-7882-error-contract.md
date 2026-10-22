@@ -413,3 +413,15 @@ Administrator-only log access, retention and deployed collection remain environm
 ## Logging uniqueness review — 21 October 2026
 
 43 focused tests and main/test Checkstyle passed. Redundant DEBUG exception events have been removed. The regressions require one owned exception event at INFO and DEBUG.
+
+## Full local verification — 22 October 2026
+
+Reproduced the stale DEBUG-only assertion in `SecurityConfigurationIT`. Both authentication integration
+tests now reflect the committed support-logging policy: original exception diagnostics remain in one
+server-log event at INFO-configured and DEBUG-configured levels; public bodies/challenges remain safe.
+No production code or HTTP behaviour changed in this correction.
+
+Fresh execution passed **272 unit tests and 74 integration tests**, with no failures/errors/skips.
+Main, unit, integration and functional Checkstyle passed; functional Java compilation/resource processing,
+all 147 functional JSON fixtures and diff checks passed. Deployed BEFTA/ITHC, broker-backed Pact and
+administrator-only telemetry access/collection remain unverified locally.

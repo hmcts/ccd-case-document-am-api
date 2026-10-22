@@ -48,7 +48,7 @@ class SecurityConfigurationIT extends BaseTest implements TestFixture {
     private MockMvc mockMvc;
 
     @Test
-    void authenticationFailuresKeepStatusesAndChallengesWithoutDiagnosticLogs() throws Exception {
+    void authenticationFailuresKeepResponsesSafeAndRetainServerDiagnostics() throws Exception {
         assertThat(applicationContext.getBean(ServiceAuthFilter.class)).isInstanceOf(SafeServiceAuthFilter.class);
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         ListAppender<ILoggingEvent> appender = new ListAppender<>();
@@ -73,7 +73,11 @@ class SecurityConfigurationIT extends BaseTest implements TestFixture {
                 .andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE, "Bearer error=\"invalid_token\""));
             assertThat(appender.list).filteredOn(event -> event.getLevel().isGreaterOrEqual(Level.WARN))
                 .hasSize(4).allSatisfy(event -> {
-                    assertThat(event.getThrowableProxy()).isNull();
+                    if (event.getFormattedMessage().startsWith("Service access denied:")) {
+                        assertThat(event.getThrowableProxy()).isNull();
+                    } else {
+                        assertThat(event.getThrowableProxy()).isNotNull();
+                    }
                     assertThat(event.getFormattedMessage()).doesNotContain(
                         DOCUMENT_ID.toString(), "private-disallowed-service", "private-invalid-token", "Exception");
                 });
@@ -84,7 +88,7 @@ class SecurityConfigurationIT extends BaseTest implements TestFixture {
     }
 
     @Test
-    void idamFailuresRetainOriginalCausesOnlyAtDebug() throws Exception {
+    void idamFailuresRetainOriginalCausesAtInfoAndDebug() throws Exception {
         var stub = com.github.tomakehurst.wiremock.client.WireMock.stubFor(
             com.github.tomakehurst.wiremock.client.WireMock.get("/o/userinfo").atPriority(1)
                 .willReturn(com.github.tomakehurst.wiremock.client.WireMock.aResponse().withStatus(500)
@@ -107,15 +111,15 @@ class SecurityConfigurationIT extends BaseTest implements TestFixture {
                     .andExpect(header().doesNotExist(HttpHeaders.WWW_AUTHENTICATE));
                 assertThat(appender.list).filteredOn(event -> event.getLevel().isGreaterOrEqual(Level.WARN))
                     .hasSize(1).allSatisfy(event -> {
-                        assertThat(event.getThrowableProxy()).isNull();
+                        assertThat(event.getLoggerName()).isEqualTo(logger.getName());
+                        assertThat(event.getLevel()).isEqualTo(Level.ERROR);
+                        assertThat(event.getThrowableProxy()).isNotNull();
+                        assertThat(event.getThrowableProxy().getMessage()).contains("private-idam-diagnostic");
                         assertThat(event.getFormattedMessage()).isEqualTo(
                             "Security filter request failed: code=INTERNAL_ERROR status=500");
                     });
-                if (level == Level.DEBUG) {
-                    assertThat(appender.list).filteredOn(event -> event.getLoggerName().equals(logger.getName())
-                        && event.getLevel() == Level.DEBUG).singleElement().satisfies(event ->
-                            assertThat(event.getThrowableProxy().getMessage()).contains("private-idam-diagnostic"));
-                }
+                assertThat(appender.list).filteredOn(event -> event.getLoggerName().equals(logger.getName()))
+                    .hasSize(1);
             }
         } finally {
             logger.setLevel(previousLevel);
