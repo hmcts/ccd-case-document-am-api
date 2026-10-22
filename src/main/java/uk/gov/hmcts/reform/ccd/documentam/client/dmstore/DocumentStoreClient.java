@@ -17,10 +17,12 @@ import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Backoff;
@@ -284,12 +286,30 @@ public class DocumentStoreClient {
         bodyMap.set("ttl", getEffectiveTTL());
 
         documentUploadRequest.getFiles()
-            .forEach(file -> bodyMap.add(Constants.FILES, file.getResource()));
+            .forEach(file -> bodyMap.add(Constants.FILES, buildFilePart(file)));
 
         HttpHeaders headers = prepareRequestHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         return new HttpEntity<>(bodyMap, headers);
+    }
+
+    private HttpEntity<Resource> buildFilePart(final MultipartFile file) {
+        HttpHeaders partHeaders = new HttpHeaders();
+        partHeaders.setContentType(resolveContentType(file.getContentType()));
+        return new HttpEntity<>(file.getResource(), partHeaders);
+    }
+
+    private MediaType resolveContentType(final String declaredType) {
+        if (declaredType == null || declaredType.isBlank()) {
+            return MediaType.APPLICATION_OCTET_STREAM;
+        }
+        try {
+            final MediaType mediaType = MediaType.parseMediaType(declaredType);
+            return mediaType.isConcrete() ? mediaType : MediaType.APPLICATION_OCTET_STREAM;
+        } catch (InvalidMediaTypeException exception) {
+            return MediaType.APPLICATION_OCTET_STREAM;
+        }
     }
 
     private String getEffectiveTTL() {
