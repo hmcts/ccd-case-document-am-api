@@ -237,13 +237,8 @@ configure(sonarqube) {
 //https://jeremylong.github.io/DependencyCheck/dependency-check-gradle/configuration.html
 apply from: './gradle/suppress.gradle'
 dependencyCheck {
+  formats = ['HTML', 'XML']
   suppressionFile = 'config/owasp/suppressions.xml'
-}
-
-tasks.register("printSuppressionFile") {
-  doLast {
-    println "SUPPRESSION_FILE=${dependencyCheck.suppressionFile}"
-  }
 }
 
 dependencyUpdates.resolutionStrategy {

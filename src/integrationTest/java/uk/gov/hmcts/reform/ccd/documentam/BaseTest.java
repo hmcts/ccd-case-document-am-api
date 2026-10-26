@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditRepository;
 import uk.gov.hmcts.reform.ccd.documentam.configuration.AuditConfiguration;
 import uk.gov.hmcts.reform.ccd.documentam.utils.KeyGenUtil;
+import uk.gov.hmcts.reform.ccd.documentam.wiremock.WireMockTestConfiguration;
 
 import java.util.Date;
 import java.util.List;
@@ -42,8 +43,12 @@ import static uk.gov.hmcts.reform.ccd.documentam.security.JwtGrantedAuthoritiesC
     Application.class
 })
 @AutoConfigureMockMvc
-@EnableWireMock
-@ConfigureWireMock(port = 0, filesUnderClasspath = "wiremock-stubs")
+@EnableWireMock({
+    @ConfigureWireMock(
+        filesUnderClasspath = "wiremock-stubs",
+        configurationCustomizers = WireMockTestConfiguration.class
+    )
+})
 @ActiveProfiles("itest")
 public class BaseTest {
 

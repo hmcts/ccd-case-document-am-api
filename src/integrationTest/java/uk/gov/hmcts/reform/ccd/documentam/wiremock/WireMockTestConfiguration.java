@@ -12,7 +12,11 @@ import org.springframework.boot.webmvc.actuate.endpoint.web.WebMvcEndpointHandle
 import org.springframework.boot.actuate.endpoint.ExposableEndpoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.wiremock.spring.ConfigureWireMock;
 import org.wiremock.spring.WireMockConfigurationCustomizer;
+
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.documentam.wiremock.extension.ConnectionClosedTransformer;
@@ -24,17 +28,15 @@ import java.util.Collection;
 import java.util.List;
 
 @Configuration
-public class WireMockTestConfiguration {
+public class WireMockTestConfiguration implements WireMockConfigurationCustomizer {
 
-    @Bean
-    WireMockConfigurationCustomizer optionsCustomizer() {
-        return (options, configure) -> {
-            options.extensions(
-                new ConnectionClosedTransformer(),
-                new DynamicS2sDetailsResponseTransformer(),
-                new DynamicOAuthJwkSetResponseTransformer()
-            );
-        };
+    @Override
+    public void customize(WireMockConfiguration config, ConfigureWireMock configureWireMock) {
+        config.extensions(
+            new ConnectionClosedTransformer(),
+            new DynamicS2sDetailsResponseTransformer(),
+            new DynamicOAuthJwkSetResponseTransformer()
+        );
     }
 
     //CCD-3509 CVE-2021-22044 required to fix null pointers in integration tests,
