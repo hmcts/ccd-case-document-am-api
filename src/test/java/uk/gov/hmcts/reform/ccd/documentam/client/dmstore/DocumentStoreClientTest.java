@@ -729,8 +729,8 @@ class DocumentStoreClientTest implements TestFixture {
     }
 
     @Test
-    void shouldThrowHttpClientErrorExceptionForUnprocessableEntityWithResponseBody() throws IOException {
-        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNPROCESSABLE_ENTITY.value());
+    void shouldThrowHttpClientErrorExceptionForUnprocessableContentWithResponseBody() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNPROCESSABLE_CONTENT.value());
         when(httpClient.executeOpen(eq(null), any(HttpPost.class), eq(null))).thenReturn(httpClientResponse);
 
         org.apache.hc.core5.http.HttpEntity mockEntity = mock(org.apache.hc.core5.http.HttpEntity.class);
@@ -744,18 +744,18 @@ class DocumentStoreClientTest implements TestFixture {
 
         DocumentUploadRequest uploadRequest = createMockUploadRequest();
 
-        HttpClientErrorException exception = assertThrows(HttpClientErrorException.UnprocessableEntity.class,
+        HttpClientErrorException exception = assertThrows(HttpClientErrorException.UnprocessableContent.class,
                                                           () -> underTest.uploadDocumentsAsStream(uploadRequest));
 
         String expectedMessage = exception.getResponseBodyAsString();
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatusCode());
+        assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, exception.getStatusCode());
         assertEquals(errorResponseJson, expectedMessage);
         verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
     }
 
     @Test
-    void shouldThrowHttpClientErrorExceptionForUnprocessableEntityWithNullResponseBody() throws IOException {
-        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNPROCESSABLE_ENTITY.value());
+    void shouldThrowHttpClientErrorExceptionForUnprocessableContentWithNullResponseBody() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNPROCESSABLE_CONTENT.value());
         when(httpClient.executeOpen(eq(null), any(HttpPost.class), eq(null))).thenReturn(httpClientResponse);
 
         org.apache.hc.core5.http.HttpEntity mockEntity = mock(org.apache.hc.core5.http.HttpEntity.class);
@@ -769,14 +769,14 @@ class DocumentStoreClientTest implements TestFixture {
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
                                                           () -> underTest.uploadDocumentsAsStream(uploadRequest));
 
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatusCode());
-        assertEquals("422 Unprocessable Entity", exception.getMessage());
+        assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, exception.getStatusCode());
+        assertEquals("422 Unprocessable Content", exception.getMessage());
         verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
     }
 
     @Test
-    void shouldThrowHttpClientErrorExceptionForUnprocessableEntityWithEmptyResponseBody() throws IOException {
-        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNPROCESSABLE_ENTITY.value());
+    void shouldThrowHttpClientErrorExceptionForUnprocessableContentWithEmptyResponseBody() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNPROCESSABLE_CONTENT.value());
         when(httpClient.executeOpen(eq(null), any(HttpPost.class), eq(null))).thenReturn(httpClientResponse);
 
         org.apache.hc.core5.http.HttpEntity mockEntity = mock(org.apache.hc.core5.http.HttpEntity.class);
@@ -792,13 +792,13 @@ class DocumentStoreClientTest implements TestFixture {
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
                                                           () -> underTest.uploadDocumentsAsStream(uploadRequest));
 
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatusCode());
+        assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, exception.getStatusCode());
         verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
     }
 
     @Test
-    void shouldThrowHttpClientErrorExceptionForUnprocessableEntityWithNoEntity() throws IOException {
-        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNPROCESSABLE_ENTITY.value());
+    void shouldThrowHttpClientErrorExceptionForUnprocessableContentWithNoEntity() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNPROCESSABLE_CONTENT.value());
         when(httpClient.executeOpen(eq(null), any(HttpPost.class), eq(null))).thenReturn(httpClientResponse);
 
         when(httpClientResponse.getEntity()).thenReturn(null);
@@ -808,8 +808,8 @@ class DocumentStoreClientTest implements TestFixture {
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
                                                           () -> underTest.uploadDocumentsAsStream(uploadRequest));
 
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatusCode());
-        assertEquals("422 Unprocessable Entity", exception.getMessage());
+        assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, exception.getStatusCode());
+        assertEquals("422 Unprocessable Content", exception.getMessage());
         verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
     }
 

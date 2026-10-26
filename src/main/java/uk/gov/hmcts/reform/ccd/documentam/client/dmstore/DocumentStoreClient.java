@@ -358,11 +358,11 @@ public class DocumentStoreClient {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Empty response from server");
         }
 
-        if (statusCode == HttpStatus.UNPROCESSABLE_ENTITY) {
-            String errorFallback = HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase();
+        if (statusCode == HttpStatus.UNPROCESSABLE_CONTENT) {
+            String errorFallback = HttpStatus.UNPROCESSABLE_CONTENT.getReasonPhrase();
 
             throw HttpClientErrorException.create(
-                HttpStatus.UNPROCESSABLE_ENTITY,
+                HttpStatus.UNPROCESSABLE_CONTENT,
                 errorFallback,
                 null,
                 responseBody != null ? responseBody.getBytes(StandardCharsets.UTF_8)

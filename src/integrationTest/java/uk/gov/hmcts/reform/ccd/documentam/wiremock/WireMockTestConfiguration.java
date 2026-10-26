@@ -8,11 +8,11 @@ import org.springframework.boot.actuate.endpoint.web.ExposableWebEndpoint;
 import org.springframework.boot.actuate.endpoint.web.WebEndpointsSupplier;
 import org.springframework.boot.actuate.endpoint.web.EndpointMapping;
 import org.springframework.boot.actuate.endpoint.web.EndpointLinksResolver;
-import org.springframework.boot.actuate.endpoint.web.servlet.WebMvcEndpointHandlerMapping;
+import org.springframework.boot.webmvc.actuate.endpoint.web.WebMvcEndpointHandlerMapping;
 import org.springframework.boot.actuate.endpoint.ExposableEndpoint;
-import org.springframework.cloud.contract.wiremock.WireMockConfigurationCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.wiremock.spring.WireMockConfigurationCustomizer;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.documentam.wiremock.extension.ConnectionClosedTransformer;
@@ -28,7 +28,7 @@ public class WireMockTestConfiguration {
 
     @Bean
     WireMockConfigurationCustomizer optionsCustomizer() {
-        return options -> {
+        return (options, configure) -> {
             options.extensions(
                 new ConnectionClosedTransformer(),
                 new DynamicS2sDetailsResponseTransformer(),
