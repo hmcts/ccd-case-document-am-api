@@ -21,7 +21,6 @@
   <suppress><cve>CVE-2026-29145</cve></suppress>
   <suppress><cve>CVE-2026-29146</cve></suppress>
   <suppress><cve>CVE-2026-33117</cve></suppress>
-  <suppress><cve>CVE-2026-34477</cve></suppress>
   <suppress><cve>CVE-2026-34478</cve></suppress>
   <suppress><cve>CVE-2026-34479</cve></suppress>
   <suppress><cve>CVE-2026-34480</cve></suppress>
