@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.InvalidRequest;
 import uk.gov.hmcts.reform.ccd.documentam.exception.RequiredFieldMissingException;
+import uk.gov.hmcts.reform.ccd.documentam.exception.RequestValidationException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.UnauthorizedException;
 
@@ -63,7 +64,8 @@ public class CaseDocumentControllerAdvice {
         final MethodArgumentNotValidException exception,
         final HttpServletRequest request
     ) {
-        return errorDetailsResponseEntity(exception, HttpStatus.BAD_REQUEST, request);
+        return errorDetailsResponseEntity(exception, HttpStatus.BAD_REQUEST, request,
+            RequestValidationException.safeMessage(exception.getBindingResult()));
     }
 
     @ExceptionHandler({BadRequestException.class,
@@ -147,6 +149,14 @@ public class CaseDocumentControllerAdvice {
     private ResponseEntity<Object> errorDetailsResponseEntity(final Exception ex,
                                                               final HttpStatusCode httpStatus,
                                                               final HttpServletRequest request) {
+        String message = ex instanceof RequestValidationException ? ex.getMessage() : safeMessage(httpStatus);
+        return errorDetailsResponseEntity(ex, httpStatus, request, message);
+    }
+
+    private ResponseEntity<Object> errorDetailsResponseEntity(final Exception ex,
+                                                              final HttpStatusCode httpStatus,
+                                                              final HttpServletRequest request,
+                                                              final String message) {
         if (SafeFailureLogging.firstFailure(request)) {
             log.error("Request failed: code={} status={}",
                 ErrorCode.fromStatus(httpStatus.value()), httpStatus.value(), ex);
@@ -154,7 +164,7 @@ public class CaseDocumentControllerAdvice {
         final ErrorResponse errorDetails = ErrorResponse.builder()
             .status(httpStatus.value())
             .path(getPath(request))
-            .error(safeMessage(httpStatus))
+            .error(message)
             .timestamp(getTimeStamp())
             .build();
 

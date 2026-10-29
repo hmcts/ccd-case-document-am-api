@@ -31,7 +31,7 @@
     },
     "body": {
       "code": "INVALID_REQUEST",
-      "error": "Bad Request"
+      "error": "Provide the Case Type ID"
     }
   }
 }

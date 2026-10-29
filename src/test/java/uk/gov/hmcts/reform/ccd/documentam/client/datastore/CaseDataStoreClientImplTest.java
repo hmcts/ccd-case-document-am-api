@@ -1,5 +1,10 @@
 package uk.gov.hmcts.reform.ccd.documentam.client.datastore;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import org.slf4j.LoggerFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -98,15 +103,26 @@ class CaseDataStoreClientImplTest implements TestFixture {
         HttpHeaders headers = prepareRequestForUpload();
         HttpEntity<LinkedMultiValueMap<String, CaseDocumentResource>> requestEntity = new HttpEntity<>(headers);
 
-        doThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND))
+        HttpClientErrorException failure = new HttpClientErrorException(HttpStatus.NOT_FOUND, "original diagnostic");
+        doThrow(failure)
             .when(restTemplate).exchange(documentUrl, HttpMethod.GET, requestEntity, CaseDocumentResource.class);
 
-        final Optional<DocumentPermissions> caseDocumentMetadata = sut.getCaseDocumentMetadata(
-            CASE_ID_VALUE,
-            MATCHED_DOCUMENT_ID
-        );
-
-        assertThat(caseDocumentMetadata).isNotPresent();
+        Logger logger = (Logger) LoggerFactory.getLogger(CaseDataStoreClientImpl.class);
+        Level previousLevel = logger.getLevel();
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            logger.setLevel(Level.INFO);
+            assertThat(sut.getCaseDocumentMetadata(CASE_ID_VALUE, MATCHED_DOCUMENT_ID)).isEmpty();
+            assertThat(appender.list).hasSize(1);
+            assertThat(appender.list.get(0).getLevel()).isEqualTo(Level.ERROR);
+            assertThat(appender.list.get(0).getThrowableProxy().getMessage()).contains("original diagnostic");
+        } finally {
+            logger.setLevel(previousLevel);
+            logger.detachAppender(appender);
+            appender.stop();
+        }
     }
 
     @Test

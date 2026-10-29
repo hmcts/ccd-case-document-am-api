@@ -65,7 +65,22 @@ class SafeServiceAuthFilterTest {
     void disallowedServiceRemainsAnEmpty403() throws Exception {
         when(validator.getServiceName(anyString())).thenReturn("private-service-id");
         MockHttpServletResponse response = new MockHttpServletResponse();
-        filter.doFilterInternal(request(), response, chain);
+        Logger logger = (Logger) LoggerFactory.getLogger(SafeServiceAuthFilter.class);
+        Level previousLevel = logger.getLevel();
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            logger.setLevel(Level.INFO);
+            filter.doFilterInternal(request(), response, chain);
+            assertThat(appender.list).hasSize(1);
+            assertThat(appender.list.get(0).getLevel()).isEqualTo(Level.WARN);
+            assertThat(appender.list.get(0).getFormattedMessage()).contains("service=private-service-id");
+        } finally {
+            logger.setLevel(previousLevel);
+            logger.detachAppender(appender);
+            appender.stop();
+        }
         assertThat(response.getStatus()).isEqualTo(403);
         assertThat(response.getContentAsString()).isEmpty();
         assertThat(response.getHeader("WWW-Authenticate")).isNull();

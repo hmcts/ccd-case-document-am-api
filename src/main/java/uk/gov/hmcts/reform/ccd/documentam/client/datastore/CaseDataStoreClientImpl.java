@@ -62,7 +62,7 @@ public class CaseDataStoreClientImpl implements CaseDataStoreClient {
                 .map(CaseDocumentMetadata::getDocumentPermissions);
         } catch (HttpClientErrorException exception) {
             if (HttpStatus.NOT_FOUND.equals(exception.getStatusCode())) {
-                log.debug("Original CCD document permissions request failure", exception);
+                log.error("CCD document permissions request returned 404", exception);
                 return Optional.empty();
             } else if (HttpStatus.FORBIDDEN.equals(exception.getStatusCode())) {
                 throw new ForbiddenException(CASE_ERROR_MESSAGE + caseId, exception);

@@ -39,8 +39,7 @@ public class SafeServiceAuthFilter extends ServiceAuthFilter {
             if (authorisedServices.contains(serviceName)) {
                 chain.doFilter(request, response);
             } else {
-                log.warn("Service access denied: code={} status=403", ErrorCode.ACCESS_DENIED);
-                log.debug("Original service access denial: service={}", serviceName);
+                log.warn("Service access denied: code={} status=403 service={}", ErrorCode.ACCESS_DENIED, serviceName);
                 response.setStatus(HttpStatus.FORBIDDEN.value());
             }
         } catch (InvalidTokenException | ServiceException exception) {
