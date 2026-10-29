@@ -23,7 +23,6 @@ ext {
   set('log4j2.version', '2.24.3')
   set('jackson.version', '2.18.2')
   set('snakeyaml.version', '2.3')
-  set('tomcat.version', '10.1.61')
   junit               = '5.13.4'
   junitPlatform       = '1.13.4'
   jjwt                = '0.13.0'
