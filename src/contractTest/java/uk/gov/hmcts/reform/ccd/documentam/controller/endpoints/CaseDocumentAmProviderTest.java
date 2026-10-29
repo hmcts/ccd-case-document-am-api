@@ -147,7 +147,7 @@ public class CaseDocumentAmProviderTest {
             document.getCaseTypeId(),
             document.getJurisdictionId(),
             null,
-            Permission.UPDATE,
+            Permission.DELETE,
             SERVICE_PERMISSION_ERROR,
             DOCUMENT_ID_UUID.toString()
         )).willReturn(AuthorisedService.builder().build());
