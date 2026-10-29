@@ -373,7 +373,7 @@ public class CaseDocumentAmController {
         documentManagementService.checkServicePermission(document.getCaseTypeId(),
                                                          document.getJurisdictionId(),
                                                          getServiceNameFromS2SToken(s2sToken),
-                                                         Permission.UPDATE,
+                                                         Permission.DELETE,
                                                          SERVICE_PERMISSION_ERROR,
                                                          documentId.toString());
 
