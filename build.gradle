@@ -267,6 +267,12 @@ repositories {
 
 dependencies {
 
+  constraints {
+    implementation('commons-fileupload:commons-fileupload:1.6.0') {
+      because 'Fix CVE-2025-48976 multipart header resource exhaustion'
+    }
+  }
+
   // start::CVE Vulnerability dependency overrides                                                // MAIN PARENT DEPENDEDNCY
 
   // put CVE Vulnerability (sub)dependency overrides here e.g.
