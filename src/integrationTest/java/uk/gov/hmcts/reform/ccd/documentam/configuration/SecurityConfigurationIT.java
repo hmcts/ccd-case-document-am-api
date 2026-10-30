@@ -75,11 +75,14 @@ class SecurityConfigurationIT extends BaseTest implements TestFixture {
                 .hasSize(4).allSatisfy(event -> {
                     if (event.getFormattedMessage().startsWith("Service access denied:")) {
                         assertThat(event.getThrowableProxy()).isNull();
+                        assertThat(event.getFormattedMessage()).isEqualTo(
+                            "Service access denied: code=ACCESS_DENIED status=403 service=private-disallowed-service");
                     } else {
                         assertThat(event.getThrowableProxy()).isNotNull();
+                        assertThat(event.getFormattedMessage()).doesNotContain("private-disallowed-service");
                     }
                     assertThat(event.getFormattedMessage()).doesNotContain(
-                        DOCUMENT_ID.toString(), "private-disallowed-service", "private-invalid-token", "Exception");
+                        DOCUMENT_ID.toString(), "private-invalid-token", "Exception");
                 });
         } finally {
             root.detachAppender(appender);
