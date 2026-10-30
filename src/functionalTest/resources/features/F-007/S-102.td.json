@@ -24,7 +24,8 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "error": "Forbidden: Insufficient permissions: ${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][metadata][case_type_id]} ${[scenarioContext][childContexts][F-007-Upload_Document1][testData][actualResponse][body][documents][0][metadata][jurisdiction]}"
+      "code": "ACCESS_DENIED",
+      "error": "Forbidden"
     }
   }
 }

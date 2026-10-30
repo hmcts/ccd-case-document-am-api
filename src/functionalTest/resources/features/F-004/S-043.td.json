@@ -34,6 +34,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
+      "code": "INVALID_REQUEST",
       "error": "Jurisdiction ID is not valid"
     }
   }

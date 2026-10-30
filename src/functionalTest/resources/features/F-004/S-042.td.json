@@ -30,6 +30,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
+      "code": "INVALID_REQUEST",
       "error": "Provide the Case Type ID"
     }
   }

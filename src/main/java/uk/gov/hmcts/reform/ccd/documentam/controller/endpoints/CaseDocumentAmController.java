@@ -6,10 +6,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -31,7 +29,7 @@ import uk.gov.hmcts.reform.ccd.documentam.auditlog.LogAudit;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
-import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
+import uk.gov.hmcts.reform.ccd.documentam.exception.RequestValidationException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
@@ -65,7 +63,6 @@ import static uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils.SERVICE_
 
 @Tag(name = "cases")
 @RestController
-@Slf4j
 @ConditionalOnProperty(value = "case.document.am.api.enabled", havingValue = "true")
 public class CaseDocumentAmController {
 
@@ -131,7 +128,6 @@ public class CaseDocumentAmController {
             return ResponseEntity.ok(document);
         } else {
             String errorMessage = String.format(TTL_FORBIDDEN_MESSAGE, documentId);
-            log.error(errorMessage);
             throw new ForbiddenException(errorMessage);
         }
     }
@@ -185,7 +181,6 @@ public class CaseDocumentAmController {
             return handleDocumentContent(documentId, httpResponse, requestHeaders);
         } else {
             String errorMessage = String.format(TTL_FORBIDDEN_MESSAGE, documentId);
-            log.error(errorMessage);
             throw new ForbiddenException(errorMessage);
         }
     }
@@ -432,13 +427,7 @@ public class CaseDocumentAmController {
 
     private void handleErrors(final BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            final String message = bindingResult.getAllErrors()
-                .stream()
-                .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                .findFirst()
-                .orElse(null);
-
-            throw new BadRequestException(message);
+            throw new RequestValidationException(bindingResult);
         }
     }
 }

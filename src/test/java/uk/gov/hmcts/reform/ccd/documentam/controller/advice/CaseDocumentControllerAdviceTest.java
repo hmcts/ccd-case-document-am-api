@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.ccd.documentam.controller.advice;
 import feign.FeignException;
 import feign.Request;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -10,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.client.HttpClientErrorException;
@@ -24,6 +28,7 @@ import uk.gov.hmcts.reform.ccd.documentam.exception.BadRequestException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.InvalidRequest;
 import uk.gov.hmcts.reform.ccd.documentam.exception.RequiredFieldMissingException;
+import uk.gov.hmcts.reform.ccd.documentam.exception.RequestValidationException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.exception.UnauthorizedException;
 import uk.gov.hmcts.reform.ccd.documentam.model.CaseDocumentsMetadata;
@@ -36,15 +41,16 @@ import java.net.SocketTimeoutException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.HashMap;
 
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -189,6 +195,67 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
                 .satisfies(throwable -> assertThat(throwable).isInstanceOf(MethodArgumentNotValidException.class)));
     }
 
+    @ParameterizedTest
+    @CsvSource({
+        "caseTypeId,invalid@,Case Type ID is not valid",
+        "caseTypeId,,Provide the Case Type ID",
+        "jurisdictionId,invalid@,Jurisdiction ID is not valid",
+        "jurisdictionId,,Provide the Jurisdiction ID",
+        "classification,invalid,Classification is not valid",
+        "files,,Provide some file to be uploaded"
+    })
+    void preservesUploadValidationMessages(String field, String value, String message) throws Exception {
+        final CaseDocumentAmController controller = new CaseDocumentAmController(
+            mock(DocumentManagementService.class), mock(SecurityUtils.class), mock(ApplicationParams.class));
+        final MockMvc mvc = MockMvcBuilders.standaloneSetup(controller).setControllerAdvice(underTest).build();
+        var upload = multipart("/cases/documents");
+        upload.header("ServiceAuthorization", "test");
+        if (!field.equals("files")) {
+            upload.file("files", new byte[] {1});
+        }
+        Map<String, String> values = new HashMap<>(Map.of(
+            "caseTypeId", "CASE", "jurisdictionId", "JURISDICTION", "classification", "PUBLIC"));
+        values.remove(field);
+        if (value != null) {
+            values.put(field, value);
+        }
+        values.forEach(upload::param);
+        mvc.perform(upload)
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error", is(message)))
+            .andExpect(jsonPath("$.code", is("INVALID_REQUEST")))
+            .andExpect(jsonPath("$.exception").doesNotExist());
+    }
+
+    @Test
+    void preservesMissingTtlMessage() throws Exception {
+        final CaseDocumentAmController controller = new CaseDocumentAmController(
+            mock(DocumentManagementService.class), mock(SecurityUtils.class), mock(ApplicationParams.class));
+        final MockMvc mvc = MockMvcBuilders.standaloneSetup(controller).setControllerAdvice(underTest).build();
+        mvc.perform(patch("/cases/documents/00000000-0000-0000-0000-000000000000")
+                .header("ServiceAuthorization", "test").contentType(MediaType.APPLICATION_JSON).content("{}"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error", is("Provide the TTL")))
+            .andExpect(jsonPath("$.code", is("INVALID_REQUEST")));
+    }
+
+    @Test
+    void hidesUnapprovedValidationAndBindingMessages() {
+        for (boolean bindingFailure : new boolean[] {false, true}) {
+            var errors = new BeanPropertyBindingResult(new Object(), "request");
+            errors.addError(new FieldError(
+                "request", "files", "secret rejected value", bindingFailure, null, null,
+                bindingFailure ? "Provide some file to be uploaded" : "internal diagnostic"));
+            var exception = new RequestValidationException(errors);
+            assertThat(exception.getCause()).isInstanceOf(org.springframework.validation.BindException.class);
+            assertThat(exception.getCause().getMessage()).contains("secret rejected value");
+            var response = underTest.handleBadRequestException(exception, request);
+            assertThat(((ErrorResponse) response.getBody()).getError()).isEqualTo("Bad Request");
+        }
+        var response = underTest.handleBadRequestException(new BadRequestException("internal diagnostic"), request);
+        assertThat(((ErrorResponse) response.getBody()).getError()).isEqualTo("Bad Request");
+    }
+
     @Test
     void testHandleHttpServerErrorExceptionWhenReceivedInternalServerError() {
         final HttpServerErrorException exception = HttpServerErrorException
@@ -202,7 +269,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
         ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
         assert errorResponse != null;
-        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
+        assertEquals(HttpStatus.valueOf(errorResponse.getStatus()).getReasonPhrase(), errorResponse.getError());
     }
 
     @Test
@@ -218,7 +285,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
         ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
         assert errorResponse != null;
-        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
+        assertEquals(HttpStatus.valueOf(errorResponse.getStatus()).getReasonPhrase(), errorResponse.getError());
     }
 
     @Test
@@ -234,7 +301,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
         ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
         assert errorResponse != null;
-        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
+        assertEquals(HttpStatus.valueOf(errorResponse.getStatus()).getReasonPhrase(), errorResponse.getError());
     }
 
     @Test
@@ -250,7 +317,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
         ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
         assert errorResponse != null;
-        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
+        assertEquals(HttpStatus.valueOf(errorResponse.getStatus()).getReasonPhrase(), errorResponse.getError());
     }
 
     @Test
@@ -266,7 +333,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
         ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
         assert errorResponse != null;
-        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
+        assertEquals(HttpStatus.valueOf(errorResponse.getStatus()).getReasonPhrase(), errorResponse.getError());
     }
 
     @Test
@@ -283,7 +350,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
 
         ErrorResponse errorResponse = (ErrorResponse) responseEntity.getBody();
         assert errorResponse != null;
-        assertTrue(errorResponse.getError().contains("myUniqueExceptionMessage"));
+        assertEquals(HttpStatus.valueOf(errorResponse.getStatus()).getReasonPhrase(), errorResponse.getError());
     }
 
 
