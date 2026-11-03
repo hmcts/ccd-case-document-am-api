@@ -94,7 +94,8 @@ class DocumentStoreClientStreamingTest {
 
         when(applicationParams.getClientRequestHeadersToForward()).thenReturn(List.of("RANGE"));
 
-        documentStoreClient = new DocumentStoreClient(securityUtils, restTemplate, httpClient, applicationParams, JsonMapper.builder().build());
+        documentStoreClient = new DocumentStoreClient(securityUtils, restTemplate, httpClient, 
+                applicationParams, JsonMapper.builder().build());
     }
 
     @Test

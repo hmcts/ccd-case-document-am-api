@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
 import io.vavr.control.Either;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -70,7 +69,7 @@ public class DocumentStoreClient {
     private final RestTemplate restTemplate;
     private final CloseableHttpClient httpClient;
     private final ApplicationParams applicationParams;
-    private final JsonMapper objectMapper;
+    private final JsonMapper jsonMapper;
     private final SecurityUtils securityUtils;
 
 
@@ -78,12 +77,12 @@ public class DocumentStoreClient {
     public DocumentStoreClient(SecurityUtils securityUtils, final RestTemplate restTemplate,
                                final CloseableHttpClient httpClient,
                                final ApplicationParams applicationParams,
-                               final JsonMapper objectMapper) {
+                               final JsonMapper jsonMapper) {
         this.securityUtils = securityUtils;
         this.restTemplate = restTemplate;
         this.httpClient = httpClient;
         this.applicationParams = applicationParams;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
     }
 
     @Retryable(retryFor = {HttpServerErrorException.class, SocketTimeoutException.class},
@@ -354,7 +353,7 @@ public class DocumentStoreClient {
         if (statusCode.is2xxSuccessful()) {
             if (responseBody != null && !responseBody.isEmpty()) {
                 try {
-                    return objectMapper.readValue(responseBody, DmUploadResponse.class);
+                    return jsonMapper.readValue(responseBody, DmUploadResponse.class);
                 } catch (JacksonException e) {
                     log.error("Failed to parse success response: {}", responseBody, e);
                     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,

@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
 import io.vavr.control.Either;
 import jakarta.servlet.http.HttpServletResponse;
+
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -25,6 +26,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
@@ -52,6 +54,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.util.Collections.emptyList;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.vavr.api.VavrAssertions.assertThat;
@@ -71,6 +74,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import tools.jackson.databind.json.JsonMapper;
 import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.buildPatchDocumentResponse;
 import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.buildTtlRequest;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_DISPOSITION;
@@ -120,6 +125,7 @@ class DocumentStoreClientTest implements TestFixture {
         when(securityUtils.getUserInfo()).thenReturn(UserInfo.builder().uid(USER_ID).build());
 
         doReturn(DM_STORE_URL).when(applicationParams).getDocumentURL();
+        setJsonMapperField(underTest, JsonMapper.builder().build());
     }
 
     @Test
@@ -589,10 +595,10 @@ class DocumentStoreClientTest implements TestFixture {
         when(mockInputStream.readAllBytes()).thenReturn(mockResponseJson.getBytes(StandardCharsets.UTF_8));
 
         DocumentStoreClient spyClient = spy(underTest);
-        ObjectMapper mockObjectMapper = mock(ObjectMapper.class);
-        when(mockObjectMapper.readValue(eq(mockResponseJson), eq(DmUploadResponse.class)))
+        JsonMapper mockJsonMapper = mock(JsonMapper.class);
+        when(mockJsonMapper.readValue(eq(mockResponseJson), eq(DmUploadResponse.class)))
             .thenReturn(expectedResponse);
-        setObjectMapperField(spyClient, mockObjectMapper);
+        setJsonMapperField(spyClient, mockJsonMapper);
 
         DocumentUploadRequest uploadRequest = createMockUploadRequest();
         DmUploadResponse result = spyClient.uploadDocumentsAsStream(uploadRequest);
@@ -600,7 +606,7 @@ class DocumentStoreClientTest implements TestFixture {
         assertNotNull(result);
         assertEquals(expectedResponse, result);
         verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
-        verify(mockObjectMapper).readValue(eq(mockResponseJson), eq(DmUploadResponse.class));
+        verify(mockJsonMapper).readValue(eq(mockResponseJson), eq(DmUploadResponse.class));
     }
 
     @Test
@@ -825,16 +831,16 @@ class DocumentStoreClientTest implements TestFixture {
         when(mockEntity.getContent()).thenReturn(invalidJsonStream);
 
         DocumentStoreClient spyClient = spy(underTest);
-        ObjectMapper mockObjectMapper = mock(ObjectMapper.class);
+        JsonMapper mockJsonMapper = mock(JsonMapper.class);
 
         JacksonException jsonException = JacksonException.wrapWithPath(
             new Throwable("Invalid JSON structure"),
             new JacksonException.Reference("","")
         );
-        when(mockObjectMapper.readValue(eq(invalidJson), eq(DmUploadResponse.class)))
+        when(mockJsonMapper.readValue(eq(invalidJson), eq(DmUploadResponse.class)))
             .thenThrow(jsonException);
 
-        setObjectMapperField(spyClient, mockObjectMapper);
+        setJsonMapperField(spyClient, mockJsonMapper);
         DocumentUploadRequest uploadRequest = createMockUploadRequest();
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
@@ -845,7 +851,7 @@ class DocumentStoreClientTest implements TestFixture {
         assertEquals(jsonException, exception.getCause());
 
         verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
-        verify(mockObjectMapper).readValue(eq(invalidJson), eq(DmUploadResponse.class));
+        verify(mockJsonMapper).readValue(eq(invalidJson), eq(DmUploadResponse.class));
     }
 
     @Test
@@ -921,13 +927,13 @@ class DocumentStoreClientTest implements TestFixture {
         return DmUploadResponse.builder().build();
     }
 
-    private void setObjectMapperField(DocumentStoreClient client, ObjectMapper mockObjectMapper) {
+    private void setJsonMapperField(DocumentStoreClient client, JsonMapper mockJsonMapper) {
         try {
-            Field objectMapperField = DocumentStoreClient.class.getDeclaredField("objectMapper");
-            objectMapperField.setAccessible(true);
-            objectMapperField.set(client, mockObjectMapper);
+            Field jsonMapperField = DocumentStoreClient.class.getDeclaredField("jsonMapper");
+            jsonMapperField.setAccessible(true);
+            jsonMapperField.set(client, mockJsonMapper);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to set objectMapper field", e);
+            throw new RuntimeException("Failed to set jsonMapper field", e);
         }
     }
 }
