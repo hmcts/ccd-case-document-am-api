@@ -268,16 +268,16 @@ dependencies {
 
   // put CVE Vulnerability (sub)dependency overrides here e.g.
   // implementation "com.example:example-lib:1.0.0" //  parent dependency name
-
+  
   // end::CVE Vulnerability dependency overrides
 
   // Spring Dependencies
   implementation "org.springframework:spring-context-support"
-  implementation "org.springframework.boot:spring-boot-starter-web"
+  implementation "org.springframework.boot:spring-boot-starter-webmvc"
   implementation "org.springframework.boot:spring-boot-starter-validation"
   implementation "org.springframework.boot:spring-boot-starter-actuator"
   implementation "org.springframework.boot:spring-boot-starter-aspectj"
-  implementation "org.springframework.boot:spring-boot-starter-json"
+  implementation "org.springframework.boot:spring-boot-starter-jackson"
   implementation "org.springframework.boot:spring-boot-starter-cache"
   implementation "org.springframework.boot:spring-boot-starter-oauth2-resource-server"
   implementation "org.springframework.cloud:spring-cloud-starter-openfeign"
@@ -334,8 +334,7 @@ dependencies {
   contractTestImplementation sourceSets.test.runtimeClasspath
   contractTestImplementation "au.com.dius.pact.consumer:junit5:${pactVersion}"
   contractTestImplementation "au.com.dius.pact.provider:junit5:${pactVersion}"
-  contractTestImplementation "au.com.dius.pact.provider:spring6:${pactVersion}"
-  contractTestImplementation "au.com.dius.pact.provider:junit5spring:${pactVersion}"
+  contractTestImplementation "au.com.dius.pact.provider:spring7:${pactVersion}"
   contractTestImplementation "org.projectlombok:lombok:${lombok}"
   contractTestAnnotationProcessor "org.projectlombok:lombok:${lombok}"
 

@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
     @ConfigureWireMock(
         filesUnderClasspath = "wiremock-stubs",
         configurationCustomizers = WireMockTestConfiguration.class
-    )
+        )
 })
 class SecurityConfigurationIT {
 

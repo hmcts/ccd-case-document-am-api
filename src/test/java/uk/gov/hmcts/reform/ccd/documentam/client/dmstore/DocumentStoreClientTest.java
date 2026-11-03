@@ -1,8 +1,5 @@
 package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Either;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -28,6 +25,8 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
@@ -828,7 +827,10 @@ class DocumentStoreClientTest implements TestFixture {
         DocumentStoreClient spyClient = spy(underTest);
         ObjectMapper mockObjectMapper = mock(ObjectMapper.class);
 
-        JsonProcessingException jsonException = new JsonMappingException(null, "Invalid JSON structure");
+        JacksonException jsonException = JacksonException.wrapWithPath(
+            new Throwable("Invalid JSON structure"),
+            new JacksonException.Reference("","")
+        );
         when(mockObjectMapper.readValue(eq(invalidJson), eq(DmUploadResponse.class)))
             .thenThrow(jsonException);
 
@@ -869,7 +871,7 @@ class DocumentStoreClientTest implements TestFixture {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
         assertEquals("Failed to parse server response", exception.getReason());
         assertNotNull(exception.getCause());
-        assertInstanceOf(JsonProcessingException.class, exception.getCause());
+        assertInstanceOf(JacksonException.class, exception.getCause());
 
         verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
     }

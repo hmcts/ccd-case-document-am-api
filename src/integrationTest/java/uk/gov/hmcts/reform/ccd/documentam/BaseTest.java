@@ -47,7 +47,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.security.JwtGrantedAuthoritiesC
     @ConfigureWireMock(
         filesUnderClasspath = "wiremock-stubs",
         configurationCustomizers = WireMockTestConfiguration.class
-    )
+        )
 })
 @ActiveProfiles("itest")
 public class BaseTest {

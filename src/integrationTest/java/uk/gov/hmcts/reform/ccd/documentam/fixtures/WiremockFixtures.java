@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.fixtures;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

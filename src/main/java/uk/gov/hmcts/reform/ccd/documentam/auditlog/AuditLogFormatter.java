@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.ccd.documentam.auditlog;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
@@ -43,7 +43,7 @@ public class AuditLogFormatter {
         add(logEntry, "X-Request-ID", entry.getRequestId());
         try {
             return objectMapper.writeValueAsString(logEntry);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Failed to format audit log entry", e);
         }
     }

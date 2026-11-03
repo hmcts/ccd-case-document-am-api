@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import io.vavr.control.Either;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -349,7 +349,7 @@ public class DocumentStoreClient {
             if (responseBody != null && !responseBody.isEmpty()) {
                 try {
                     return objectMapper.readValue(responseBody, DmUploadResponse.class);
-                } catch (JsonProcessingException e) {
+                } catch (JacksonException e) {
                     log.error("Failed to parse success response: {}", responseBody, e);
                     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                                                       "Failed to parse server response", e);

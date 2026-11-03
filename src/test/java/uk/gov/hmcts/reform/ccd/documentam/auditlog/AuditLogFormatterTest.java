@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.ccd.documentam.auditlog;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ class AuditLogFormatterTest implements TestFixture {
         final JsonNode json = objectMapper.readTree(result);
 
         // THEN
-        assertThat(json.get("tag").asText()).isEqualTo(AUDIT_LOG_TAG);
+        assertThat(json.get("tag").asString()).isEqualTo(AUDIT_LOG_TAG);
     }
 
     @Test
@@ -63,19 +63,19 @@ class AuditLogFormatterTest implements TestFixture {
         final JsonNode json = objectMapper.readTree(result);
 
         // THEN
-        assertThat(json.get("tag").asText()).isEqualTo(AUDIT_LOG_TAG);
-        assertThat(json.get("dateTime").asText()).isEqualTo("2021-04-26 15:39:45");
-        assertThat(json.get("operationType").asText()).isEqualTo("TEST_OPERATION_TYPE");
-        assertThat(json.get("idamId").asText()).isEqualTo("test_idamId");
-        assertThat(json.get("invokingService").asText()).isEqualTo("test_invokingService");
-        assertThat(json.get("endpointCalled").asText()).isEqualTo("GET " + REQUEST_PATH);
+        assertThat(json.get("tag").asString()).isEqualTo(AUDIT_LOG_TAG);
+        assertThat(json.get("dateTime").asString()).isEqualTo("2021-04-26 15:39:45");
+        assertThat(json.get("operationType").asString()).isEqualTo("TEST_OPERATION_TYPE");
+        assertThat(json.get("idamId").asString()).isEqualTo("test_idamId");
+        assertThat(json.get("invokingService").asString()).isEqualTo("test_invokingService");
+        assertThat(json.get("endpointCalled").asString()).isEqualTo("GET " + REQUEST_PATH);
         assertThat(json.get("operationalOutcome").asInt()).isEqualTo(200);
         assertThat(json.get("documentId").size()).isEqualTo(1);
-        assertThat(json.get("documentId").get(0).asText()).isEqualTo(DOCUMENT_ID.toString());
-        assertThat(json.get("jurisdiction").asText()).isEqualTo(JURISDICTION);
-        assertThat(json.get("caseType").asText()).isEqualTo(CASE_TYPE);
-        assertThat(json.get("caseId").asText()).isEqualTo(CASE_ID_VALUE);
-        assertThat(json.get("X-Request-ID").asText()).isEqualTo(REQUEST_ID);
+        assertThat(json.get("documentId").get(0).asString()).isEqualTo(DOCUMENT_ID.toString());
+        assertThat(json.get("jurisdiction").asString()).isEqualTo(JURISDICTION);
+        assertThat(json.get("caseType").asString()).isEqualTo(CASE_TYPE);
+        assertThat(json.get("caseId").asString()).isEqualTo(CASE_ID_VALUE);
+        assertThat(json.get("X-Request-ID").asString()).isEqualTo(REQUEST_ID);
     }
 
     @Test
@@ -94,9 +94,9 @@ class AuditLogFormatterTest implements TestFixture {
         final JsonNode json = objectMapper.readTree(result);
 
         // THEN
-        assertThat(json.get("tag").asText()).isEqualTo(AUDIT_LOG_TAG);
-        assertThat(json.get("dateTime").asText()).isEqualTo("2021-04-26 15:39:45");
-        assertThat(json.get("endpointCalled").asText()).isEqualTo("GET " + REQUEST_PATH);
+        assertThat(json.get("tag").asString()).isEqualTo(AUDIT_LOG_TAG);
+        assertThat(json.get("dateTime").asString()).isEqualTo("2021-04-26 15:39:45");
+        assertThat(json.get("endpointCalled").asString()).isEqualTo("GET " + REQUEST_PATH);
         assertThat(json.get("operationalOutcome").asInt()).isEqualTo(200);
         assertThat(json.has("operationType")).isFalse();
         assertThat(json.has("documentId")).isFalse();
@@ -121,9 +121,9 @@ class AuditLogFormatterTest implements TestFixture {
 
         // THEN
         assertThat(json.get("documentId").size()).isEqualTo(2);
-        assertThat(json.get("documentId").get(0).asText()).isEqualTo(DOCUMENT_ID_1.toString());
-        assertThat(json.get("documentId").get(1).asText()).isEqualTo(DOCUMENT_ID_2.toString());
-        assertThat(json.get("caseId").asText()).isEqualTo(CASE_ID_VALUE);
+        assertThat(json.get("documentId").get(0).asString()).isEqualTo(DOCUMENT_ID_1.toString());
+        assertThat(json.get("documentId").get(1).asString()).isEqualTo(DOCUMENT_ID_2.toString());
+        assertThat(json.get("caseId").asString()).isEqualTo(CASE_ID_VALUE);
     }
 
     @Test
@@ -148,9 +148,9 @@ class AuditLogFormatterTest implements TestFixture {
 
         // THEN
         assertThat(json.get("documentId").size()).isEqualTo(2);
-        assertThat(json.get("documentId").get(0).asText()).isEqualTo(DOCUMENT_ID_1.toString());
-        assertThat(json.get("documentId").get(1).asText()).isEqualTo(DOCUMENT_ID_2.toString());
-        assertThat(json.get("caseId").asText()).isEqualTo(CASE_ID_VALUE);
+        assertThat(json.get("documentId").get(0).asString()).isEqualTo(DOCUMENT_ID_1.toString());
+        assertThat(json.get("documentId").get(1).asString()).isEqualTo(DOCUMENT_ID_2.toString());
+        assertThat(json.get("caseId").asString()).isEqualTo(CASE_ID_VALUE);
     }
 
 }
