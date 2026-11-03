@@ -6,7 +6,6 @@ import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomize
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import tools.jackson.databind.cfg.DateTimeFeature;
-import tools.jackson.databind.json.JsonMapper;
 
 import java.util.TimeZone;
 
@@ -25,13 +24,6 @@ public class JacksonConfiguration {
             .defaultTimeZone(TimeZone.getTimeZone("UTC"))
             .defaultDateFormat(new StdDateFormat().withColonInTimeZone(true))
             .enable(DateTimeFeature.WRITE_UTC_AS_OFFSET);
-    }
-
-    @Bean
-    public JsonMapper jsonMapper(JsonMapperBuilderCustomizer customizer) {
-        JsonMapper.Builder builder = JsonMapper.builder();
-        customizer.customize(builder);
-        return builder.build();
     }
 
 }

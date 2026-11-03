@@ -46,6 +46,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
 
@@ -72,7 +73,7 @@ public class CaseDocumentAmProviderTest {
     CaseDocumentAmController caseDocumentAmController;
 
     @Autowired
-    JsonMapper jsonMapper;
+    JsonMapperBuilderCustomizer jsonMapperCustomizer;
 
     @TestTemplate
     @ExtendWith(PactVerificationInvocationContextProvider.class)
@@ -84,6 +85,9 @@ public class CaseDocumentAmProviderTest {
 
     @BeforeEach
     void before(PactVerificationContext context) {
+        JsonMapper.Builder jsonMapperBuilder = JsonMapper.builder();
+        jsonMapperCustomizer.customize(jsonMapperBuilder);
+        JsonMapper jsonMapper = jsonMapperBuilder.build();
         Spring7MockMvcTestTarget testTarget = new Spring7MockMvcTestTarget();
         testTarget.setControllers(caseDocumentAmController);
         testTarget.setMessageConverters(
