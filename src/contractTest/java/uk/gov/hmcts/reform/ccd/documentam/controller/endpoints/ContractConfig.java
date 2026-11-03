@@ -39,7 +39,8 @@ public class ContractConfig {
 
     @Bean
     public JsonMapperBuilderCustomizer jsonMapperCustomizer() {
-        return builder -> {};
+        return builder -> {
+        };
     }
 
 }
