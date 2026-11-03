@@ -71,6 +71,9 @@ public class CaseDocumentAmProviderTest {
     @Autowired
     CaseDocumentAmController caseDocumentAmController;
 
+    @Autowired
+    JsonMapper jsonMapper;
+
     @TestTemplate
     @ExtendWith(PactVerificationInvocationContextProvider.class)
     void pactVerificationTestTemplate(PactVerificationContext context) {
@@ -81,7 +84,6 @@ public class CaseDocumentAmProviderTest {
 
     @BeforeEach
     void before(PactVerificationContext context) {
-        JsonMapper jsonMapper = JsonMapper.builder().build();
         Spring7MockMvcTestTarget testTarget = new Spring7MockMvcTestTarget();
         testTarget.setControllers(caseDocumentAmController);
         testTarget.setMessageConverters(

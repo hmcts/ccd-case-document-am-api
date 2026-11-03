@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 
 @Configuration
 public class ContractConfig {
+    
     @MockitoBean
     DocumentManagementService documentManagementService;
 
