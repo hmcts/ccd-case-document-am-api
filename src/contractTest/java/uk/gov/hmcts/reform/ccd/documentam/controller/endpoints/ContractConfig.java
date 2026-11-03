@@ -2,30 +2,44 @@ package uk.gov.hmcts.reform.ccd.documentam.controller.endpoints;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 
 import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 
+import static org.mockito.Mockito.mock;
+
 
 @Configuration
 public class ContractConfig {
-    
-    @MockitoBean
-    DocumentManagementService documentManagementService;
-
-    @MockitoBean
-    SecurityUtils securityUtils;
-
-    @MockitoBean
-    ApplicationParams applicationParams;
 
     @Bean
-    @Primary
-    public CaseDocumentAmController caseDocumentAmController() {
+    public DocumentManagementService documentManagementService() {
+        return mock(DocumentManagementService.class);
+    }
+
+    @Bean
+    public SecurityUtils securityUtils() {
+        return mock(SecurityUtils.class);
+    }
+
+    @Bean
+    public ApplicationParams applicationParams() {
+        return mock(ApplicationParams.class);
+    }
+
+    @Bean
+    public CaseDocumentAmController caseDocumentAmController(
+            DocumentManagementService documentManagementService,
+            SecurityUtils securityUtils,
+            ApplicationParams applicationParams) {
         return new CaseDocumentAmController(documentManagementService, securityUtils, applicationParams);
+    }
+
+    @Bean
+    public JsonMapperBuilderCustomizer jsonMapperCustomizer() {
+        return builder -> {};
     }
 
 }
