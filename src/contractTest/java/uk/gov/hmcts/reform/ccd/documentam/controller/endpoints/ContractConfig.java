@@ -24,17 +24,13 @@ public class ContractConfig {
         return mock(SecurityUtils.class);
     }
 
-    @Bean
-    public ApplicationParams applicationParams() {
-        return mock(ApplicationParams.class);
-    }
+    public ApplicationParams applicationParamMock = mock(ApplicationParams.class);
 
     @Bean
     public CaseDocumentAmController caseDocumentAmController(
             DocumentManagementService documentManagementService,
-            SecurityUtils securityUtils,
-            ApplicationParams applicationParams) {
-        return new CaseDocumentAmController(documentManagementService, securityUtils, applicationParams);
+            SecurityUtils securityUtils) {
+        return new CaseDocumentAmController(documentManagementService, securityUtils, applicationParamMock);
     }
 
     @Bean
