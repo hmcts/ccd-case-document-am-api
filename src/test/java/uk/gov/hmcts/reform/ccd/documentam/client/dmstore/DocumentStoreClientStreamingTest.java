@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
 import jakarta.servlet.http.HttpServletResponse;
+import tools.jackson.databind.json.JsonMapper;
+
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
@@ -92,7 +94,7 @@ class DocumentStoreClientStreamingTest {
 
         when(applicationParams.getClientRequestHeadersToForward()).thenReturn(List.of("RANGE"));
 
-        documentStoreClient = new DocumentStoreClient(securityUtils, restTemplate, httpClient, applicationParams);
+        documentStoreClient = new DocumentStoreClient(securityUtils, restTemplate, httpClient, applicationParams, JsonMapper.builder().build());
     }
 
     @Test

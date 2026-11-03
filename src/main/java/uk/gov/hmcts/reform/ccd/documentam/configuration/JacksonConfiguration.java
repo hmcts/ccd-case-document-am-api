@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.ccd.documentam.configuration;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import tools.jackson.databind.cfg.DateTimeFeature;
 
 import java.util.TimeZone;
 
@@ -17,13 +17,13 @@ import java.util.TimeZone;
 public class JacksonConfiguration {
 
     @Bean
-    public Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder() {
-        Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
-        builder.propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .serializationInclusion(JsonInclude.Include.NON_NULL)
-            .dateFormat(new StdDateFormat().withColonInTimeZone(true))
-            .timeZone(TimeZone.getTimeZone("UTC"));
-        return builder;
+    JsonMapperBuilderCustomizer jsonMapperBuilderCustomizer() {
+        return builder -> builder
+            .changeDefaultPropertyInclusion(incl ->
+                                                incl.withValueInclusion(JsonInclude.Include.NON_NULL))
+            .defaultTimeZone(TimeZone.getTimeZone("UTC"))
+            .defaultDateFormat(new StdDateFormat().withColonInTimeZone(true))
+            .enable(DateTimeFeature.WRITE_UTC_AS_OFFSET);
     }
 
 }

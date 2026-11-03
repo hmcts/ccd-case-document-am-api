@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.ccd.documentam.auditlog;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ class AuditLogFormatterTest implements TestFixture {
 
     @BeforeEach
     void setUp() {
-        underTest = new AuditLogFormatter(0);
+        underTest = new AuditLogFormatter(0, JsonMapper.builder().build());
     }
 
     @Test
@@ -140,7 +141,7 @@ class AuditLogFormatterTest implements TestFixture {
         auditEntry.setCaseId(CASE_ID_VALUE);
 
         int auditLogMaxListSize = 2;
-        underTest = new AuditLogFormatter(auditLogMaxListSize);
+        underTest = new AuditLogFormatter(auditLogMaxListSize, JsonMapper.builder().build());
 
         // WHEN
         final String result = underTest.format(auditEntry);

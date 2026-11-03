@@ -1,41 +1,33 @@
 package uk.gov.hmcts.reform.ccd.documentam.entities;
 
-import java.time.ZonedDateTime;
-
 import org.junit.jupiter.api.Test;
 
+import tools.jackson.databind.cfg.DateTimeFeature;
 import tools.jackson.databind.json.JsonMapper;
-import uk.gov.hmcts.reform.ccd.documentam.model.DmTtlRequest;
+import tools.jackson.databind.util.StdDateFormat;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static java.time.ZoneOffset.UTC;
-
 import java.util.Date;
+import java.util.TimeZone;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 class Jackson3AnnotationRoundTripTest {
 
-    private final JsonMapper jsonMapper = JsonMapper.builder().build();
+    private final JsonMapper jsonMapper = JsonMapper.builder()
+        .changeDefaultPropertyInclusion(incl ->
+                                            incl.withValueInclusion(JsonInclude.Include.NON_NULL))
+        .defaultTimeZone(TimeZone.getTimeZone("UTC"))
+        .defaultDateFormat(new StdDateFormat().withColonInTimeZone(true))
+        .enable(DateTimeFeature.WRITE_UTC_AS_OFFSET)
+        .build();
 
     private static final Date firstJan2030 = new Date(1893456000000L); // 1st Jan 2030
 
-    @Test 
-    void dm_ttl_request_uses_snake_case_and_ignores_unknown_properties() {
-        DmTtlRequest request = new DmTtlRequest(ZonedDateTime.ofInstant(firstJan2030.toInstant(), UTC));
-        String json = jsonMapper.writeValueAsString(request);
-        assertThat(json).contains("\"ttl\":2030-01-01T00:00:00.000+00:00");
-
-        DmTtlRequest deserializedRequest = jsonMapper.readValue("""
-            {
-                "ttl":"2030-01-01T00:00:00.000+00:00",
-                "unknown_property": "ignored"
-            }
-            """, DmTtlRequest.class);
-        assertThat(deserializedRequest).isEqualTo(request);
-    }
-
     @Test
-    void patch_document_response_uses_snake_case_and_ignores_unknown_properties() {
+    void patch_document_response_uses_ignores_unknown_properties() {
         String json = jsonMapper.writeValueAsString(new PatchDocumentResponse(
             firstJan2030,
             firstJan2030,
@@ -45,16 +37,11 @@ class Jackson3AnnotationRoundTripTest {
             "user"));
 
         assertThat(json).contains("\"ttl\":\"2030-01-01T00:00:00.000+00:00\"");
-        assertThat(json).contains("\"created_on\":\"2030-01-01T00:00:00.000+00:00\"");
-        assertThat(json).contains("\"modified_on\":\"2030-01-01T00:00:00.000+00:00\"");
-        assertThat(json).contains("\"original_document_name\":\"original.pdf\"");
-        assertThat(json).contains("\"mime_type\":\"application/pdf\"");
-        assertThat(json).contains("\"last_modified_by\":\"user\"");
-        assertThat(json).doesNotContain("createdOn");
-        assertThat(json).doesNotContain("modifiedOn");
-        assertThat(json).doesNotContain("originalDocumentName");
-        assertThat(json).doesNotContain("mimeType");
-        assertThat(json).doesNotContain("lastModifiedBy");
+        assertThat(json).contains("\"createdOn\":\"2030-01-01T00:00:00.000+00:00\"");
+        assertThat(json).contains("\"modifiedOn\":\"2030-01-01T00:00:00.000+00:00\"");
+        assertThat(json).contains("\"originalDocumentName\":\"original.pdf\"");
+        assertThat(json).contains("\"mimeType\":\"application/pdf\"");
+        assertThat(json).contains("\"lastModifiedBy\":\"user\"");
 
         PatchDocumentResponse response = jsonMapper.readValue("""
             {

@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.ccd.documentam.auditlog;
 
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.jspecify.annotations.Nullable;
@@ -18,13 +18,15 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class AuditLogFormatter {
 
     private static final String TAG = "LA-CDAM";
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private final int auditLogMaxListSize;
+    private final JsonMapper objectMapper;
 
     @Autowired
-    public AuditLogFormatter(@Value("${audit.log.max-list-size:0}") int auditLogMaxListSize) {
+    public AuditLogFormatter(@Value("${audit.log.max-list-size:0}") int auditLogMaxListSize,
+                             JsonMapper objectMapper) {
         this.auditLogMaxListSize = auditLogMaxListSize;
+        this.objectMapper = objectMapper;
     }
 
     public String format(AuditEntry entry) {

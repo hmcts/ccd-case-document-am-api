@@ -5,6 +5,7 @@ import tools.jackson.databind.ObjectMapper;
 import io.vavr.control.Either;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
@@ -32,6 +33,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+
 import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
@@ -55,6 +57,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.springframework.http.HttpMethod.GET;
+
+import tools.jackson.databind.json.JsonMapper;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DM_DATE_TIME_FORMATTER;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DOCUMENT_METADATA_NOT_FOUND;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.RESOURCE_NOT_FOUND;
@@ -66,18 +70,20 @@ public class DocumentStoreClient {
     private final RestTemplate restTemplate;
     private final CloseableHttpClient httpClient;
     private final ApplicationParams applicationParams;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final JsonMapper objectMapper;
     private final SecurityUtils securityUtils;
 
 
     @Autowired
     public DocumentStoreClient(SecurityUtils securityUtils, final RestTemplate restTemplate,
                                final CloseableHttpClient httpClient,
-                               final ApplicationParams applicationParams) {
+                               final ApplicationParams applicationParams,
+                               final JsonMapper objectMapper) {
         this.securityUtils = securityUtils;
         this.restTemplate = restTemplate;
         this.httpClient = httpClient;
         this.applicationParams = applicationParams;
+        this.objectMapper = objectMapper;
     }
 
     @Retryable(retryFor = {HttpServerErrorException.class, SocketTimeoutException.class},
