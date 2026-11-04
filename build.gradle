@@ -123,7 +123,7 @@ tasks.withType(JavaCompile) {
 task functionalTestsJunit(type: Test, description: 'Runs the functional tests with JUnit.', group: 'Verification') {
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
   classpath = sourceSets.functionalTest.runtimeClasspath
-  failOnNoDiscoveredTests = false
+  failOnNoDiscoveredTests = false  // Required to handle split task execution
 
   outputs.upToDateWhen { false }
 }
@@ -166,7 +166,7 @@ task smokeTestsJunit(type: Test, description: 'Runs the smoke tests with JUnit.'
   setTestClassesDirs(sourceSets.functionalTest.output.classesDirs)
   setClasspath(sourceSets.functionalTest.runtimeClasspath)
   include "uk/gov/hmcts/ccd/documentam/befta/**"
-  failOnNoDiscoveredTests = false
+  failOnNoDiscoveredTests = false  // Required to handle split task execution
   useJUnitPlatform {
     includeTags 'smoke'
   }
