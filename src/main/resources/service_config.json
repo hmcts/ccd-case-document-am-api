@@ -414,5 +414,13 @@
           "UPDATE",
           "DELETE"
         ]
-      }]
+      },{
+        "id": "ccd_case_disposer",
+        "caseTypeId": ["*"],
+        "jurisdictionId": "*",
+        "permissions": [
+          "HASHTOKEN"
+        ]
+      }
+    ]
 }
