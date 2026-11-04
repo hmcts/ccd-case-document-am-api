@@ -1,23 +1,23 @@
 package uk.gov.hmcts.reform.ccd.documentam.wiremock.extension;
 
-import com.github.tomakehurst.wiremock.common.FileSource;
-import com.github.tomakehurst.wiremock.extension.Parameters;
-import com.github.tomakehurst.wiremock.extension.ResponseTransformer;
+import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.Response;
+import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
+
 import org.springframework.http.HttpStatus;
 
 /*
  * Customises the static stubbed response before sending it back to the client
  */
-public abstract class AbstractDynamicResponseTransformer extends ResponseTransformer {
+public abstract class AbstractDynamicResponseTransformer implements ResponseTransformerV2 {
 
     @Override
-    public Response transform(Request request, Response response, FileSource files, Parameters parameters) {
+    public Response transform(Response response, ServeEvent serveEvent) {
         try {
             return Response.Builder.like(response)
                 .but()
-                .body(dynamicResponse(request, response, parameters))
+                .body(dynamicResponse(serveEvent.getRequest(), response))
                 .build();
 
         } catch (SecurityException ex) {
@@ -36,5 +36,5 @@ public abstract class AbstractDynamicResponseTransformer extends ResponseTransfo
         return false;
     }
 
-    protected abstract String dynamicResponse(Request request, Response response, Parameters parameters);
+    protected abstract String dynamicResponse(Request request, Response response);
 }

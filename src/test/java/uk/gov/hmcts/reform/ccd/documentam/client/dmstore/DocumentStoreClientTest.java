@@ -1,10 +1,8 @@
 package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Either;
 import jakarta.servlet.http.HttpServletResponse;
+
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -28,6 +26,9 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
@@ -53,6 +54,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.util.Collections.emptyList;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.vavr.api.VavrAssertions.assertThat;
@@ -72,6 +74,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import tools.jackson.databind.json.JsonMapper;
 import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.buildPatchDocumentResponse;
 import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.buildTtlRequest;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.CONTENT_DISPOSITION;
@@ -121,6 +125,7 @@ class DocumentStoreClientTest implements TestFixture {
         when(securityUtils.getUserInfo()).thenReturn(UserInfo.builder().uid(USER_ID).build());
 
         doReturn(DM_STORE_URL).when(applicationParams).getDocumentURL();
+        setJsonMapperField(underTest, JsonMapper.builder().build());
     }
 
     @Test
@@ -590,10 +595,10 @@ class DocumentStoreClientTest implements TestFixture {
         when(mockInputStream.readAllBytes()).thenReturn(mockResponseJson.getBytes(StandardCharsets.UTF_8));
 
         DocumentStoreClient spyClient = spy(underTest);
-        ObjectMapper mockObjectMapper = mock(ObjectMapper.class);
-        when(mockObjectMapper.readValue(eq(mockResponseJson), eq(DmUploadResponse.class)))
+        JsonMapper mockJsonMapper = mock(JsonMapper.class);
+        when(mockJsonMapper.readValue(eq(mockResponseJson), eq(DmUploadResponse.class)))
             .thenReturn(expectedResponse);
-        setObjectMapperField(spyClient, mockObjectMapper);
+        setJsonMapperField(spyClient, mockJsonMapper);
 
         DocumentUploadRequest uploadRequest = createMockUploadRequest();
         DmUploadResponse result = spyClient.uploadDocumentsAsStream(uploadRequest);
@@ -601,7 +606,7 @@ class DocumentStoreClientTest implements TestFixture {
         assertNotNull(result);
         assertEquals(expectedResponse, result);
         verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
-        verify(mockObjectMapper).readValue(eq(mockResponseJson), eq(DmUploadResponse.class));
+        verify(mockJsonMapper).readValue(eq(mockResponseJson), eq(DmUploadResponse.class));
     }
 
     @Test
@@ -729,8 +734,8 @@ class DocumentStoreClientTest implements TestFixture {
     }
 
     @Test
-    void shouldThrowHttpClientErrorExceptionForUnprocessableEntityWithResponseBody() throws IOException {
-        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNPROCESSABLE_ENTITY.value());
+    void shouldThrowHttpClientErrorExceptionForUnprocessableContentWithResponseBody() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNPROCESSABLE_CONTENT.value());
         when(httpClient.executeOpen(eq(null), any(HttpPost.class), eq(null))).thenReturn(httpClientResponse);
 
         org.apache.hc.core5.http.HttpEntity mockEntity = mock(org.apache.hc.core5.http.HttpEntity.class);
@@ -744,18 +749,18 @@ class DocumentStoreClientTest implements TestFixture {
 
         DocumentUploadRequest uploadRequest = createMockUploadRequest();
 
-        HttpClientErrorException exception = assertThrows(HttpClientErrorException.UnprocessableEntity.class,
+        HttpClientErrorException exception = assertThrows(HttpClientErrorException.UnprocessableContent.class,
                                                           () -> underTest.uploadDocumentsAsStream(uploadRequest));
 
         String expectedMessage = exception.getResponseBodyAsString();
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatusCode());
+        assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, exception.getStatusCode());
         assertEquals(errorResponseJson, expectedMessage);
         verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
     }
 
     @Test
-    void shouldThrowHttpClientErrorExceptionForUnprocessableEntityWithNullResponseBody() throws IOException {
-        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNPROCESSABLE_ENTITY.value());
+    void shouldThrowHttpClientErrorExceptionForUnprocessableContentWithNullResponseBody() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNPROCESSABLE_CONTENT.value());
         when(httpClient.executeOpen(eq(null), any(HttpPost.class), eq(null))).thenReturn(httpClientResponse);
 
         org.apache.hc.core5.http.HttpEntity mockEntity = mock(org.apache.hc.core5.http.HttpEntity.class);
@@ -769,14 +774,14 @@ class DocumentStoreClientTest implements TestFixture {
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
                                                           () -> underTest.uploadDocumentsAsStream(uploadRequest));
 
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatusCode());
-        assertEquals("422 Unprocessable Entity", exception.getMessage());
+        assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, exception.getStatusCode());
+        assertEquals("422 Unprocessable Content", exception.getMessage());
         verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
     }
 
     @Test
-    void shouldThrowHttpClientErrorExceptionForUnprocessableEntityWithEmptyResponseBody() throws IOException {
-        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNPROCESSABLE_ENTITY.value());
+    void shouldThrowHttpClientErrorExceptionForUnprocessableContentWithEmptyResponseBody() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNPROCESSABLE_CONTENT.value());
         when(httpClient.executeOpen(eq(null), any(HttpPost.class), eq(null))).thenReturn(httpClientResponse);
 
         org.apache.hc.core5.http.HttpEntity mockEntity = mock(org.apache.hc.core5.http.HttpEntity.class);
@@ -792,13 +797,13 @@ class DocumentStoreClientTest implements TestFixture {
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
                                                           () -> underTest.uploadDocumentsAsStream(uploadRequest));
 
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatusCode());
+        assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, exception.getStatusCode());
         verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
     }
 
     @Test
-    void shouldThrowHttpClientErrorExceptionForUnprocessableEntityWithNoEntity() throws IOException {
-        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNPROCESSABLE_ENTITY.value());
+    void shouldThrowHttpClientErrorExceptionForUnprocessableContentWithNoEntity() throws IOException {
+        when(httpClientResponse.getCode()).thenReturn(HttpStatus.UNPROCESSABLE_CONTENT.value());
         when(httpClient.executeOpen(eq(null), any(HttpPost.class), eq(null))).thenReturn(httpClientResponse);
 
         when(httpClientResponse.getEntity()).thenReturn(null);
@@ -808,8 +813,8 @@ class DocumentStoreClientTest implements TestFixture {
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
                                                           () -> underTest.uploadDocumentsAsStream(uploadRequest));
 
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatusCode());
-        assertEquals("422 Unprocessable Entity", exception.getMessage());
+        assertEquals(HttpStatus.UNPROCESSABLE_CONTENT, exception.getStatusCode());
+        assertEquals("422 Unprocessable Content", exception.getMessage());
         verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
     }
 
@@ -826,13 +831,16 @@ class DocumentStoreClientTest implements TestFixture {
         when(mockEntity.getContent()).thenReturn(invalidJsonStream);
 
         DocumentStoreClient spyClient = spy(underTest);
-        ObjectMapper mockObjectMapper = mock(ObjectMapper.class);
+        JsonMapper mockJsonMapper = mock(JsonMapper.class);
 
-        JsonProcessingException jsonException = new JsonMappingException(null, "Invalid JSON structure");
-        when(mockObjectMapper.readValue(eq(invalidJson), eq(DmUploadResponse.class)))
+        JacksonException jsonException = JacksonException.wrapWithPath(
+            new Throwable("Invalid JSON structure"),
+            new JacksonException.Reference("","")
+        );
+        when(mockJsonMapper.readValue(eq(invalidJson), eq(DmUploadResponse.class)))
             .thenThrow(jsonException);
 
-        setObjectMapperField(spyClient, mockObjectMapper);
+        setJsonMapperField(spyClient, mockJsonMapper);
         DocumentUploadRequest uploadRequest = createMockUploadRequest();
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
@@ -843,7 +851,7 @@ class DocumentStoreClientTest implements TestFixture {
         assertEquals(jsonException, exception.getCause());
 
         verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
-        verify(mockObjectMapper).readValue(eq(invalidJson), eq(DmUploadResponse.class));
+        verify(mockJsonMapper).readValue(eq(invalidJson), eq(DmUploadResponse.class));
     }
 
     @Test
@@ -869,7 +877,7 @@ class DocumentStoreClientTest implements TestFixture {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
         assertEquals("Failed to parse server response", exception.getReason());
         assertNotNull(exception.getCause());
-        assertInstanceOf(JsonProcessingException.class, exception.getCause());
+        assertInstanceOf(JacksonException.class, exception.getCause());
 
         verify(httpClient).executeOpen(eq(null), any(HttpPost.class), eq(null));
     }
@@ -919,13 +927,13 @@ class DocumentStoreClientTest implements TestFixture {
         return DmUploadResponse.builder().build();
     }
 
-    private void setObjectMapperField(DocumentStoreClient client, ObjectMapper mockObjectMapper) {
+    private void setJsonMapperField(DocumentStoreClient client, JsonMapper mockJsonMapper) {
         try {
-            Field objectMapperField = DocumentStoreClient.class.getDeclaredField("objectMapper");
-            objectMapperField.setAccessible(true);
-            objectMapperField.set(client, mockObjectMapper);
+            Field jsonMapperField = DocumentStoreClient.class.getDeclaredField("jsonMapper");
+            jsonMapperField.setAccessible(true);
+            jsonMapperField.set(client, mockJsonMapper);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to set objectMapper field", e);
+            throw new RuntimeException("Failed to set jsonMapper field", e);
         }
     }
 }

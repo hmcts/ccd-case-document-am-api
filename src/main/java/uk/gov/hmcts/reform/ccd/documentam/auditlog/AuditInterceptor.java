@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.ccd.documentam.auditlog;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.aop.AuditContext;

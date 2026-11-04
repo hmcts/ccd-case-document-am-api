@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.method.HandlerMethod;
@@ -13,7 +14,6 @@ import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.aop.AuditContext;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.aop.AuditContextHolder;
 import uk.gov.hmcts.reform.ccd.documentam.configuration.AuditConfiguration;
-import wiremock.org.eclipse.jetty.http.HttpStatus;
 
 import java.util.List;
 
@@ -27,8 +27,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 @ExtendWith(MockitoExtension.class)
 class AuditInterceptorTest implements TestFixture {
 
-    private static final int STATUS_HIDDEN = HttpStatus.IM_A_TEAPOT_418;
-    private static final int STATUS_NOT_HIDDEN = HttpStatus.OK_200;
+    private static final int STATUS_HIDDEN = HttpStatus.CONFLICT.value();
+    private static final int STATUS_NOT_HIDDEN = HttpStatus.OK.value();
     private static final String METHOD = "GET";
 
     private final AuditContext auditContext = new AuditContext();

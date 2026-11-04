@@ -1,13 +1,16 @@
 package uk.gov.hmcts.reform.ccd.documentam;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.DmTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Instant;
@@ -76,9 +79,11 @@ public interface TestFixture {
     }
 
     static ObjectMapper objectMapper() {
-        final ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.findAndRegisterModules();
-        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        final ObjectMapper objectMapper = JsonMapper.builder()
+            .propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
+            .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .enable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+            .build();
 
         return objectMapper;
     }
@@ -88,7 +93,7 @@ public interface TestFixture {
             final ObjectMapper objectMapper = objectMapper();
 
             return objectMapper.writeValueAsString(object);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }
