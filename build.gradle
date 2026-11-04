@@ -333,6 +333,10 @@ dependencies {
   functionalTestImplementation "org.apache.groovy:groovy-json:${groovy}"
   functionalTestImplementation "org.apache.groovy:groovy-xml:${groovy}"
 
+  cucumberRuntime "org.apache.groovy:groovy:${groovy}"
+  cucumberRuntime "org.apache.groovy:groovy-json:${groovy}"
+  cucumberRuntime "org.apache.groovy:groovy-xml:${groovy}"
+
   contractTestImplementation sourceSets.main.runtimeClasspath
   contractTestImplementation sourceSets.test.runtimeClasspath
   contractTestImplementation "au.com.dius.pact.consumer:junit5:${pactVersion}"
