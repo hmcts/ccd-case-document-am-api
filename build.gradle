@@ -329,6 +329,9 @@ dependencies {
 
   functionalTestImplementation sourceSets.main.runtimeClasspath
   functionalTestImplementation sourceSets.test.runtimeClasspath
+  functionalTestImplementation "org.apache.groovy:groovy:${groovy}"
+  functionalTestImplementation "org.apache.groovy:groovy-json:${groovy}"
+  functionalTestImplementation "org.apache.groovy:groovy-xml:${groovy}"
 
   contractTestImplementation sourceSets.main.runtimeClasspath
   contractTestImplementation sourceSets.test.runtimeClasspath
