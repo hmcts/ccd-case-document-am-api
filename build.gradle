@@ -120,21 +120,23 @@ tasks.withType(JavaCompile) {
   options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 }
 
-task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
+task functionalTestsJunit(type: Test, description: 'Runs the functional tests with JUnit.', group: 'Verification') {
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
   classpath = sourceSets.functionalTest.runtimeClasspath
 
-  doFirst {
-    javaexec {
-      mainClass = "uk.gov.hmcts.ccd.documentam.befta.CaseDocumentAmBeftaMain"
-      classpath += configurations.cucumberRuntime + sourceSets.functionalTest.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
-      args = ['--plugin', "json:${rootDir}/target/cucumber.json",
-              '--plugin', "junit:${buildDir}/test-results/functional/cucumber.xml",
-              '--tags', 'not @Ignore',
-              '--glue', 'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features/']
-      jvmArgs = [ '--add-opens=java.base/java.lang.reflect=ALL-UNNAMED' ]
-    }
-  }
+  outputs.upToDateWhen { false }
+}
+
+task functional(type: JavaExec, description: 'Runs the functional tests.', group: 'Verification') {
+  dependsOn functionalTestsJunit
+
+  mainClass = "uk.gov.hmcts.ccd.documentam.befta.CaseDocumentAmBeftaMain"
+  classpath = configurations.cucumberRuntime + sourceSets.functionalTest.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
+  args = ['--plugin', "json:${rootDir}/target/cucumber.json",
+          '--plugin', "junit:${buildDir}/test-results/functional/cucumber.xml",
+          '--tags', 'not @Ignore',
+          '--glue', 'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features/']
+  jvmArgs = [ '--add-opens=java.base/java.lang.reflect=ALL-UNNAMED' ]
 
   finalizedBy {
     generateCucumberReports.enabled = true
@@ -147,8 +149,6 @@ task functional(type: Test, description: 'Runs the functional tests.', group: 'V
       }
     }
   }
-
-  outputs.upToDateWhen { false }
 }
 
 serenity {
@@ -161,7 +161,7 @@ task integration(type: Test, description: 'Runs the integration tests.', group: 
   finalizedBy aggregate
 }
 
-task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
+task smokeTestsJunit(type: Test, description: 'Runs the smoke tests with JUnit.', group: 'Verification') {
   setTestClassesDirs(sourceSets.functionalTest.output.classesDirs)
   setClasspath(sourceSets.functionalTest.runtimeClasspath)
   include "uk/gov/hmcts/ccd/documentam/befta/**"
@@ -169,17 +169,19 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
     includeTags 'smoke'
   }
 
-  doLast {
-    javaexec {
-      mainClass = "uk.gov.hmcts.ccd.documentam.befta.CaseDocumentAmBeftaMain"
-      classpath += configurations.cucumberRuntime + sourceSets.functionalTest.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
-      args = ['--plugin', "json:${rootDir}/target/cucumber.json",
-              '--plugin', "junit:${buildDir}/test-results/smoke/cucumber.xml",
-              '--tags', '@Smoke',
-              '--glue', 'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features']
-      jvmArgs = [ '--add-opens=java.base/java.lang.reflect=ALL-UNNAMED' ]
-    }
-  }
+  outputs.upToDateWhen { false }
+}
+
+task smoke(type: JavaExec, description: 'Runs the smoke tests.', group: 'Verification') {
+  dependsOn smokeTestsJunit
+
+  mainClass = "uk.gov.hmcts.ccd.documentam.befta.CaseDocumentAmBeftaMain"
+  classpath = configurations.cucumberRuntime + sourceSets.functionalTest.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
+  args = ['--plugin', "json:${rootDir}/target/cucumber.json",
+          '--plugin', "junit:${buildDir}/test-results/smoke/cucumber.xml",
+          '--tags', '@Smoke',
+          '--glue', 'uk.gov.hmcts.befta.player', 'src/functionalTest/resources/features']
+  jvmArgs = [ '--add-opens=java.base/java.lang.reflect=ALL-UNNAMED' ]
 
   finalizedBy {
     generateCucumberReports.enabled = true
@@ -190,8 +192,6 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
       }
     }
   }
-
-  outputs.upToDateWhen { false }
 }
 
 jacocoTestReport {
