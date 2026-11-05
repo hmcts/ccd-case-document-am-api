@@ -46,6 +46,9 @@ ext.libraries = [
 ]
 
 dependencyManagement {
+  dependencies {
+    dependency 'org.apache.commons:commons-lang3:3.18.0'
+  }
   imports {
     mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
   }
