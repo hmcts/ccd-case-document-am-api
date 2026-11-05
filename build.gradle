@@ -248,21 +248,6 @@ dependencyCheck {
   suppressionFile = 'config/owasp/suppressions.xml'
 }
 
-tasks.register("printSuppressionFile") {
-  doLast {
-    def suppressionFile = dependencyCheck.getSuppressionFile()
-    if (suppressionFile?.metaClass?.respondsTo(suppressionFile, "getOrNull")) {
-      suppressionFile = suppressionFile.getOrNull()
-    } else if (suppressionFile?.metaClass?.respondsTo(suppressionFile, "get")) {
-      suppressionFile = suppressionFile.get()
-    }
-    if (!suppressionFile) {
-      throw new GradleException("No dependency-check suppression file configured")
-    }
-    println "SUPPRESSION_FILE=${suppressionFile}"
-  }
-}
-
 tasks.register("printAuditLogTag") {
   group = "Help"
   description = "Prints the audit log tag used by AuditLogFormatter."
