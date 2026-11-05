@@ -6,7 +6,8 @@ import au.com.dius.pact.provider.junitsupport.IgnoreNoPactsToVerify;
 import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junitsupport.State;
 import au.com.dius.pact.provider.junitsupport.loader.PactBroker;
-import au.com.dius.pact.provider.junitsupport.loader.VersionSelector;
+import au.com.dius.pact.provider.junitsupport.loader.PactBrokerConsumerVersionSelectors;
+import au.com.dius.pact.provider.junitsupport.loader.SelectorBuilder;
 import au.com.dius.pact.provider.spring.spring6.Spring6MockMvcTestTarget;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -24,6 +25,8 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
@@ -31,6 +34,7 @@ import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Classification;
 import uk.gov.hmcts.reform.ccd.documentam.model.enums.Permission;
+import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.ccd.documentam.service.DocumentManagementService;
 
 import java.nio.charset.StandardCharsets;
@@ -48,10 +52,21 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PER
 
 @ExtendWith(SpringExtension.class)
 @Provider("case-document-am-api")
-@PactBroker(url = "${PACT_BROKER_FULL_URL:http://localhost}",
-    consumerVersionSelectors = {@VersionSelector(tag = "master")})
+@PactBroker(url = "${PACT_BROKER_FULL_URL:http://localhost}")
 @ContextConfiguration(classes = {ContractConfig.class})
+@TestPropertySource(properties = {
+    "case.document.am.api.enabled=true",
+    "documentStoreUrl=http://dm-store",
+    "documentTtlInDays=1",
+    "idam.s2s-auth.totp_secret=test-salt",
+    "hash.check.enabled=false",
+    "moving.case.types=",
+    "request.forwarded_headers.from_client=",
+    "stream.download.enabled=false",
+    "stream.upload.enabled=false"
+})
 @IgnoreNoPactsToVerify
+@MockitoBean(types = SecurityUtils.class)
 public class CaseDocumentAmProviderTest {
 
     private static final String CASE_TYPE_ID = "some-case-type-id";
@@ -62,11 +77,16 @@ public class CaseDocumentAmProviderTest {
     private static final byte[] FILE_CONTENT = "%PDF-1.4\ntest document content\n%%EOF"
         .getBytes(StandardCharsets.US_ASCII);
 
-    @Autowired
+    @MockitoBean
     DocumentManagementService documentManagementService;
 
     @Autowired
     CaseDocumentAmController caseDocumentAmController;
+
+    @PactBrokerConsumerVersionSelectors
+    public static SelectorBuilder consumerVersionSelectors() {
+        return new SelectorBuilder().tag("master");
+    }
 
     @TestTemplate
     @ExtendWith(PactVerificationInvocationContextProvider.class)
