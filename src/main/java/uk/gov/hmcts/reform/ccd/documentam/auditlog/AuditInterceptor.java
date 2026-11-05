@@ -48,7 +48,7 @@ public class AuditInterceptor implements AsyncHandlerInterceptor {
                 try {
                     auditService.audit(auditContext);
                 } catch (Exception e) {  // Ignoring audit failures
-                    log.error("Error while auditing the request data:{}", e.getMessage());
+                    log.error("Request audit failed", e);
                 }
             }
 

@@ -312,9 +312,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error",
-                        is("Forbidden: Insufficient permissions: Document "
-                                + DOCUMENT_ID
-                                + " can not be downloaded as TTL has expired")))
+                        is("Forbidden")))
+                .andExpect(jsonPath("$.code", is("ACCESS_DENIED")))
+                .andExpect(jsonPath("$.exception").doesNotExist())
+                .andExpect(result -> assertThat(result.getResponse().getContentAsString())
+                    .doesNotContain(DOCUMENT_ID.toString()))
                 .andExpect(hasGeneratedLogAudit(
                         AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
                         SERVICE_NAME_XUI_WEBAPP,
@@ -335,9 +337,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error",
-                        is("Forbidden: Insufficient permissions: Document "
-                                + DOCUMENT_ID
-                                + " can not be downloaded as TTL has expired")))
+                        is("Forbidden")))
+                .andExpect(jsonPath("$.code", is("ACCESS_DENIED")))
+                .andExpect(jsonPath("$.exception").doesNotExist())
+                .andExpect(result -> assertThat(result.getResponse().getContentAsString())
+                    .doesNotContain(DOCUMENT_ID.toString()))
                 .andExpect(hasGeneratedLogAudit(
                         AuditOperationType.DOWNLOAD_DOCUMENT_BY_ID,
                         SERVICE_NAME_XUI_WEBAPP,
@@ -476,9 +480,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error",
-                        is("Forbidden: Insufficient permissions: Document "
-                                + DOCUMENT_ID
-                                + " can not be downloaded as TTL has expired")))
+                        is("Forbidden")))
+                .andExpect(jsonPath("$.code", is("ACCESS_DENIED")))
+                .andExpect(jsonPath("$.exception").doesNotExist())
+                .andExpect(result -> assertThat(result.getResponse().getContentAsString())
+                    .doesNotContain(DOCUMENT_ID.toString()))
                 .andExpect(hasGeneratedLogAudit(
                         AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
                         SERVICE_NAME_XUI_WEBAPP,
@@ -502,9 +508,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isForbidden())
             .andExpect(jsonPath("$.error",
-                                is("Forbidden: Insufficient permissions: Document "
-                                       + DOCUMENT_ID
-                                       + " can not be downloaded as TTL has expired")))
+                                is("Forbidden")))
+                .andExpect(jsonPath("$.code", is("ACCESS_DENIED")))
+                .andExpect(jsonPath("$.exception").doesNotExist())
+                .andExpect(result -> assertThat(result.getResponse().getContentAsString())
+                    .doesNotContain(DOCUMENT_ID.toString()))
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
                 SERVICE_NAME_XUI_WEBAPP,
@@ -526,9 +534,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error",
-                        is("Forbidden: Insufficient permissions: Document "
-                                + DOCUMENT_ID
-                                + " can not be downloaded as TTL has expired")))
+                        is("Forbidden")))
+                .andExpect(jsonPath("$.code", is("ACCESS_DENIED")))
+                .andExpect(jsonPath("$.exception").doesNotExist())
+                .andExpect(result -> assertThat(result.getResponse().getContentAsString())
+                    .doesNotContain(DOCUMENT_ID.toString()))
                 .andExpect(hasGeneratedLogAudit(
                         AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
                         SERVICE_NAME_XUI_WEBAPP,
@@ -552,9 +562,11 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isForbidden())
             .andExpect(jsonPath("$.error",
-                                is("Forbidden: Insufficient permissions: Document "
-                                       + DOCUMENT_ID
-                                       + " can not be downloaded as TTL has expired")))
+                                is("Forbidden")))
+                .andExpect(jsonPath("$.code", is("ACCESS_DENIED")))
+                .andExpect(jsonPath("$.exception").doesNotExist())
+                .andExpect(result -> assertThat(result.getResponse().getContentAsString())
+                    .doesNotContain(DOCUMENT_ID.toString()))
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DOWNLOAD_DOCUMENT_BINARY_CONTENT_BY_ID,
                 SERVICE_NAME_XUI_WEBAPP,

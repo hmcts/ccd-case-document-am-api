@@ -3,7 +3,7 @@
 	"_extends_": "Common_Response",
 
 	"responseCode": 404,
-	"responseMessage": "Bad Request",
+	"responseMessage": "Not Found",
 
 	"headers": {
 		"_extends_": "Common_404_Response_Headers"
@@ -12,8 +12,8 @@
   "body" : {
     "status" : 404,
     "path" : "[[ANYTHING_PRESENT]]",
-    "exception" : "[[ANYTHING_PRESENT]]",
-    "error" : "[[ANYTHING_PRESENT]]",
+    "code": "RESOURCE_NOT_FOUND",
+    "error" : "Not Found",
     "timestamp" : "[[ANYTHING_PRESENT]]"
   }
 }

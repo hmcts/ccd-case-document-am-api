@@ -23,6 +23,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
+      "code": "INVALID_REQUEST",
       "error": "[[ANY_STRING_NOT_NULLABLE]]"
     }
   }

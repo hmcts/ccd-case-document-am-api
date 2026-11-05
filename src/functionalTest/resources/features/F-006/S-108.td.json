@@ -19,7 +19,8 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "error": "Forbidden: Insufficient permissions: ${[scenarioContext][testData][request][pathVariables][documentId]}"
+      "code": "ACCESS_DENIED",
+      "error": "Forbidden"
     }
   }
 }

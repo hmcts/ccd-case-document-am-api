@@ -12,8 +12,8 @@
   "body" : {
     "status" : 400,
     "path" : "[[ANYTHING_PRESENT]]",
-    "exception" : "[[ANYTHING_PRESENT]]",
-    "error" : "[[ANYTHING_PRESENT]]",
+    "code": "INVALID_REQUEST",
+    "error" : "Bad Request",
     "timestamp" : "[[ANYTHING_PRESENT]]"
   }
 }

@@ -137,7 +137,6 @@ public class DocumentStoreClient {
                 handleDownloadStreamResponse(statusCode, httpClientResponse, httpResponseOut, documentId);
             }
         } catch (IOException exception) {
-            log.error("Error occurred", exception);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                                               "Error occurred while processing the request " + String.format(
                                                   "%s/documents/%s/binary", applicationParams.getDocumentURL(),
@@ -325,7 +324,6 @@ public class DocumentStoreClient {
                 return handleUploadStreamResponse(statusCode, httpClientResponse);
             }
         } catch (IOException exception) {
-            log.error("Error occurred", exception);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                                               "Error occurred while processing the request " + String.format(
                                                   "%s/documents", applicationParams.getDocumentURL()) + ": "
@@ -350,7 +348,6 @@ public class DocumentStoreClient {
                 try {
                     return objectMapper.readValue(responseBody, DmUploadResponse.class);
                 } catch (JsonProcessingException e) {
-                    log.error("Failed to parse success response: {}", responseBody, e);
                     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                                                       "Failed to parse server response", e);
                 }
