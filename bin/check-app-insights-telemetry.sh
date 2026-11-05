@@ -1,0 +1,358 @@
+#!/usr/bin/env sh
+
+set -eu
+
+APP_INSIGHTS_ENV="${APP_INSIGHTS_ENV:-aat}"
+# Canonical script inputs: keep the configuration surface narrow and explicit.
+APP_INSIGHTS_APP_NAME="${APP_INSIGHTS_APP_NAME:-ccd-${APP_INSIGHTS_ENV}}"
+APP_INSIGHTS_RESOURCE_GROUP="${APP_INSIGHTS_RESOURCE_GROUP:-ccd-shared-${APP_INSIGHTS_ENV}}"
+APP_INSIGHTS_ROLE_NAME="${APP_INSIGHTS_ROLE_NAME:-ccd-case-document-am-api}"
+APP_INSIGHTS_LOOKBACK="${APP_INSIGHTS_LOOKBACK:-2h}"
+APP_INSIGHTS_TIMEOUT_SECONDS="${APP_INSIGHTS_TIMEOUT_SECONDS:-600}"
+APP_INSIGHTS_POLL_SECONDS="${APP_INSIGHTS_POLL_SECONDS:-30}"
+APP_INSIGHTS_SOURCE_ENV="${APP_INSIGHTS_SOURCE_ENV:-${APP_INSIGHTS_ENV}}"
+APP_INSIGHTS_REQUEST_URL_CONTAINS="${APP_INSIGHTS_REQUEST_URL_CONTAINS:-}"
+REQUIRE_DEPENDENCY_TELEMETRY="${REQUIRE_DEPENDENCY_TELEMETRY:-true}"
+REQUIRE_TRACE_TELEMETRY="${REQUIRE_TRACE_TELEMETRY:-true}"
+APP_INSIGHTS_API_VERSION="${APP_INSIGHTS_API_VERSION:-2018-04-20}"
+readonly EXIT_SUCCESS=0
+readonly EXIT_TELEMETRY_FAILED=1
+readonly EXIT_SCRIPT_ERROR=2
+readonly INITIAL_ATTEMPT=1
+readonly MIN_REQUIRED_TELEMETRY_COUNT=1
+readonly TELEMETRY_COUNT_COLUMNS=6
+readonly DISABLED_TELEMETRY_COUNT_EXPRESSION="0"
+readonly STATUS_PASS="PASS"
+readonly STATUS_FAIL="FAIL"
+readonly STATUS_SKIP="SKIP"
+attempt="$INITIAL_ATTEMPT"
+
+is_positive_integer() {
+  case "$1" in
+    ''|*[!0-9]*) return 1 ;;
+  esac
+
+  [ "$1" -gt 0 ] 2>/dev/null
+}
+
+validate_positive_integer_config() {
+  variable_name="$1"
+  value="$2"
+
+  if ! is_positive_integer "$value"; then
+    echo "${variable_name} must be a positive integer, got '${value}'." >&2
+    exit "$EXIT_SCRIPT_ERROR"
+  fi
+}
+
+validate_duration_config() {
+  variable_name="$1"
+  value="$2"
+  duration_amount="${value%?}"
+  duration_unit="${value#"${duration_amount}"}"
+
+  if ! is_positive_integer "$duration_amount"; then
+    echo "${variable_name} must be a positive duration ending in s, m, h, or d; got '${value}'." >&2
+    exit "$EXIT_SCRIPT_ERROR"
+  fi
+
+  case "$duration_unit" in
+    s|m|h|d) ;;
+    *)
+      echo "${variable_name} must be a positive duration ending in s, m, h, or d; got '${value}'." >&2
+      exit "$EXIT_SCRIPT_ERROR"
+      ;;
+  esac
+}
+
+validate_positive_integer_config "APP_INSIGHTS_TIMEOUT_SECONDS" "$APP_INSIGHTS_TIMEOUT_SECONDS"
+validate_positive_integer_config "APP_INSIGHTS_POLL_SECONDS" "$APP_INSIGHTS_POLL_SECONDS"
+validate_duration_config "APP_INSIGHTS_LOOKBACK" "$APP_INSIGHTS_LOOKBACK"
+
+is_true() {
+  case "$1" in
+    true|TRUE|True|1|yes|YES|Yes) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+require_dependency_telemetry=false
+require_trace_telemetry=false
+
+if is_true "$REQUIRE_DEPENDENCY_TELEMETRY"; then
+  require_dependency_telemetry=true
+fi
+
+if is_true "$REQUIRE_TRACE_TELEMETRY"; then
+  require_trace_telemetry=true
+fi
+
+if [ "$APP_INSIGHTS_SOURCE_ENV" = "preview" ]; then
+  if [ -z "$APP_INSIGHTS_REQUEST_URL_CONTAINS" ]; then
+    case "${BRANCH_NAME:-}" in
+      PR-*|pr-*)
+        APP_INSIGHTS_REQUEST_URL_CONTAINS="$(printf '%s' "${APP_INSIGHTS_ROLE_NAME}-${BRANCH_NAME}.preview.platform.hmcts.net" | tr '[:upper:]' '[:lower:]')"
+        ;;
+    esac
+  fi
+
+  if [ -z "$APP_INSIGHTS_REQUEST_URL_CONTAINS" ]; then
+    echo "Preview telemetry check requires APP_INSIGHTS_REQUEST_URL_CONTAINS or a PR-* BRANCH_NAME." >&2
+    exit "$EXIT_SCRIPT_ERROR"
+  fi
+fi
+
+if ! command -v az >/dev/null 2>&1; then
+  echo "Azure CLI 'az' is required to query Application Insights."
+  exit "$EXIT_SCRIPT_ERROR"
+fi
+
+AZURE_ACCOUNT_SUBSCRIPTION_ID=""
+
+if ! AZURE_ACCOUNT_SUBSCRIPTION_ID="$(az account show --query id --output tsv 2>/dev/null)"; then
+  if [ -n "${AZURE_CLIENT_ID:-}" ] && [ -n "${AZURE_CLIENT_SECRET:-}" ] && [ -n "${AZURE_TENANT_ID:-}" ]; then
+    echo "Azure CLI is not logged in. Logging in with supplied service principal credentials."
+    az login \
+      --service-principal \
+      --username "$AZURE_CLIENT_ID" \
+      --password "$AZURE_CLIENT_SECRET" \
+      --tenant "$AZURE_TENANT_ID" \
+      --output none
+  else
+    echo "Azure CLI is not logged in or has no active subscription."
+    echo "Set AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, and AZURE_TENANT_ID, or run this from an authenticated az session."
+    exit "$EXIT_SCRIPT_ERROR"
+  fi
+fi
+
+if [ -n "${AZURE_SUBSCRIPTION_ID:-}" ]; then
+  az account set --subscription "$AZURE_SUBSCRIPTION_ID"
+else
+  if [ -z "$AZURE_ACCOUNT_SUBSCRIPTION_ID" ]; then
+    AZURE_ACCOUNT_SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
+  fi
+  AZURE_SUBSCRIPTION_ID="$AZURE_ACCOUNT_SUBSCRIPTION_ID"
+fi
+
+resolve_trace_marker() {
+  if [ -n "${APP_INSIGHTS_TRACE_MARKER:-}" ]; then
+    echo "$APP_INSIGHTS_TRACE_MARKER"
+    return
+  fi
+
+  if [ ! -x "./gradlew" ]; then
+    echo "APP_INSIGHTS_TRACE_MARKER is not set and ./gradlew is not available to resolve the audit log tag." >&2
+    exit "$EXIT_SCRIPT_ERROR"
+  fi
+
+  if ! marker="$(./gradlew -q printAuditLogTag 2>&1)"; then
+    echo "Failed to resolve audit log tag from AuditLogFormatter.TAG:" >&2
+    echo "$marker" >&2
+    exit "$EXIT_SCRIPT_ERROR"
+  fi
+
+  marker="$(printf '%s\n' "$marker" | sed '/^[[:space:]]*$/d' | tail -n 1)"
+
+  if [ -z "$marker" ]; then
+    echo "AuditLogFormatter.TAG resolved to an empty value." >&2
+    exit "$EXIT_SCRIPT_ERROR"
+  fi
+
+  echo "$marker"
+}
+
+APP_INSIGHTS_TRACE_MARKER="${APP_INSIGHTS_TRACE_MARKER:-}"
+
+if [ "$require_trace_telemetry" = "true" ]; then
+  APP_INSIGHTS_TRACE_MARKER="$(resolve_trace_marker)"
+fi
+
+json_escape() {
+  printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
+kql_escape() {
+  printf '%s' "$1" | sed "s/'/''/g"
+}
+
+query_telemetry_counts() {
+  query="$1"
+  escaped_query="$(json_escape "$query")"
+  body="{\"query\":\"${escaped_query}\"}"
+  error_file="$(mktemp)"
+
+  echo "Querying telemetry..." >&2
+
+  if [ -n "${APP_INSIGHTS_RESOURCE_ID:-}" ]; then
+    app_insights_uri="https://management.azure.com${APP_INSIGHTS_RESOURCE_ID}"
+  else
+    app_insights_uri="https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${APP_INSIGHTS_RESOURCE_GROUP}/providers/Microsoft.Insights/components/${APP_INSIGHTS_APP_NAME}"
+  fi
+  uri="${app_insights_uri}/query?api-version=${APP_INSIGHTS_API_VERSION}"
+
+  if ! counts=$(az rest \
+      --method post \
+      --uri "$uri" \
+      --headers "Content-Type=application/json" \
+      --body "$body" \
+      --query "tables[0].rows[0]" \
+      --output tsv 2>"$error_file"); then
+    echo "Failed to query telemetry from Application Insights:" >&2
+    cat "$error_file" >&2
+    rm -f "$error_file"
+    exit "$EXIT_SCRIPT_ERROR"
+  fi
+  rm -f "$error_file"
+
+  set -- $counts
+  if [ "$#" -ne "$TELEMETRY_COUNT_COLUMNS" ]; then
+    echo "Unexpected telemetry query result:" >&2
+    echo "$counts" >&2
+    exit "$EXIT_SCRIPT_ERROR"
+  fi
+
+  for count in "$@"; do
+    case "$count" in
+      ''|*[!0-9]*)
+        echo "Unexpected telemetry count:" >&2
+        echo "$count" >&2
+        exit "$EXIT_SCRIPT_ERROR"
+        ;;
+    esac
+  done
+
+  printf '%s\n' "$counts"
+}
+
+cloud_role_name="$(kql_escape "$APP_INSIGHTS_ROLE_NAME")"
+base_filter="timestamp > ago(${APP_INSIGHTS_LOOKBACK}) | where cloud_RoleName == '${cloud_role_name}'"
+request_url_filter=""
+
+if [ -n "$APP_INSIGHTS_REQUEST_URL_CONTAINS" ]; then
+  request_url_contains="$(kql_escape "$APP_INSIGHTS_REQUEST_URL_CONTAINS")"
+  request_url_filter=" | where url contains '${request_url_contains}'"
+fi
+
+dependency_count_expression="$DISABLED_TELEMETRY_COUNT_EXPRESSION"
+role_dependency_count_expression="$DISABLED_TELEMETRY_COUNT_EXPRESSION"
+trace_count_expression="$DISABLED_TELEMETRY_COUNT_EXPRESSION"
+role_trace_marker_count_expression="$DISABLED_TELEMETRY_COUNT_EXPRESSION"
+
+telemetry_query="let filtered_requests = requests | where ${base_filter};"
+telemetry_query="${telemetry_query} let matching_requests = filtered_requests${request_url_filter} | project operation_Id;"
+telemetry_query="${telemetry_query} let request_operations = matching_requests | distinct operation_Id;"
+
+if [ "$require_dependency_telemetry" = "true" ]; then
+  telemetry_query="${telemetry_query} let filtered_dependencies = dependencies | where ${base_filter};"
+  dependency_count_expression="toscalar(filtered_dependencies | where operation_Id in (request_operations) | summarize Count=count())"
+  role_dependency_count_expression="toscalar(filtered_dependencies | summarize Count=count())"
+fi
+
+if [ "$require_trace_telemetry" = "true" ]; then
+  trace_marker="$(kql_escape "$APP_INSIGHTS_TRACE_MARKER")"
+  telemetry_query="${telemetry_query} let filtered_traces = traces | where ${base_filter};"
+  telemetry_query="${telemetry_query} let filtered_traces_with_marker = filtered_traces | where message contains '${trace_marker}';"
+  trace_count_expression="toscalar(filtered_traces_with_marker | where operation_Id in (request_operations) | summarize Count=count())"
+  role_trace_marker_count_expression="toscalar(filtered_traces_with_marker | summarize Count=count())"
+fi
+
+telemetry_query="${telemetry_query} print RequestCount=toscalar(matching_requests | summarize Count=count()), RoleRequestCount=toscalar(filtered_requests | summarize Count=count()), DependencyCount=${dependency_count_expression}, RoleDependencyCount=${role_dependency_count_expression}, TraceCount=${trace_count_expression}, RoleTraceMarkerCount=${role_trace_marker_count_expression}"
+
+deadline=$(( $(date +%s) + APP_INSIGHTS_TIMEOUT_SECONDS ))
+
+echo "Checking Application Insights telemetry"
+echo "  app: ${APP_INSIGHTS_APP_NAME}"
+echo "  resource group: ${APP_INSIGHTS_RESOURCE_GROUP}"
+echo "  resource id: ${APP_INSIGHTS_RESOURCE_ID:-}"
+echo "  cloud role: ${APP_INSIGHTS_ROLE_NAME}"
+echo "  source env: ${APP_INSIGHTS_SOURCE_ENV}"
+echo "  request URL contains: ${APP_INSIGHTS_REQUEST_URL_CONTAINS:-<not set>}"
+if [ "$require_trace_telemetry" = "true" ]; then
+  echo "  marker: ${APP_INSIGHTS_TRACE_MARKER}"
+else
+  echo "  marker: <not required>"
+fi
+echo "  lookback: ${APP_INSIGHTS_LOOKBACK}"
+echo "  subscription: ${AZURE_SUBSCRIPTION_ID}"
+echo "  required: requests=true, dependencies=${REQUIRE_DEPENDENCY_TELEMETRY}, traces=${REQUIRE_TRACE_TELEMETRY}"
+echo "  dependency/trace scope: correlated by operation_Id to matching request telemetry"
+
+while true; do
+  echo "Application Insights telemetry check attempt ${attempt}"
+
+  counts=$(query_telemetry_counts "$telemetry_query")
+  set -- $counts
+  request_count="$1"
+  role_request_count="$2"
+  dependency_count="$3"
+  role_dependency_count="$4"
+  trace_count="$5"
+  role_trace_marker_count="$6"
+
+  request_status="$STATUS_PASS"
+  dependency_status="$STATUS_SKIP"
+  trace_status="$STATUS_SKIP"
+
+  if [ "$request_count" -lt "$MIN_REQUIRED_TELEMETRY_COUNT" ]; then
+    request_status="$STATUS_FAIL"
+  fi
+
+  if [ "$require_dependency_telemetry" = "true" ]; then
+    dependency_status="$STATUS_PASS"
+    if [ "$dependency_count" -lt "$MIN_REQUIRED_TELEMETRY_COUNT" ]; then
+      dependency_status="$STATUS_FAIL"
+    fi
+  fi
+
+  if [ "$require_trace_telemetry" = "true" ]; then
+    trace_status="$STATUS_PASS"
+    if [ "$trace_count" -lt "$MIN_REQUIRED_TELEMETRY_COUNT" ]; then
+      trace_status="$STATUS_FAIL"
+    fi
+  fi
+
+  echo "Telemetry result: requests=${request_status} (${request_count}), dependencies=${dependency_status} (${dependency_count}), traces=${trace_status} (${trace_count})"
+  diagnostics="Telemetry diagnostics: role_requests=${role_request_count}"
+  if [ "$require_dependency_telemetry" = "true" ]; then
+    diagnostics="${diagnostics}, role_dependencies=${role_dependency_count}"
+  fi
+  if [ "$require_trace_telemetry" = "true" ]; then
+    diagnostics="${diagnostics}, role_traces_with_marker=${role_trace_marker_count}"
+  fi
+  echo "$diagnostics"
+
+  passed=true
+
+  if [ "$request_status" = "$STATUS_FAIL" ] || [ "$dependency_status" = "$STATUS_FAIL" ] || [ "$trace_status" = "$STATUS_FAIL" ]; then
+    passed=false
+  fi
+
+  if [ "$passed" = "true" ]; then
+    echo "Application Insights telemetry check PASSED."
+    exit "$EXIT_SUCCESS"
+  fi
+
+  if [ "$(date +%s)" -ge "$deadline" ]; then
+    echo "Application Insights telemetry check FAILED before timeout."
+    echo "Missing required telemetry:"
+    [ "$request_status" = "$STATUS_FAIL" ] && echo "  - request telemetry for cloud role '${APP_INSIGHTS_ROLE_NAME}'"
+    [ "$dependency_status" = "$STATUS_FAIL" ] && echo "  - dependency telemetry correlated with matching request telemetry"
+    [ "$trace_status" = "$STATUS_FAIL" ] && echo "  - trace telemetry containing '${APP_INSIGHTS_TRACE_MARKER}' and correlated with matching request telemetry"
+    echo "Diagnostic counts:"
+    echo "  - role request telemetry: ${role_request_count}"
+    echo "  - matching request telemetry: ${request_count}"
+    if [ "$require_dependency_telemetry" = "true" ]; then
+      echo "  - role dependency telemetry: ${role_dependency_count}"
+      echo "  - correlated dependency telemetry: ${dependency_count}"
+    fi
+    if [ "$require_trace_telemetry" = "true" ]; then
+      echo "  - role trace telemetry containing '${APP_INSIGHTS_TRACE_MARKER}': ${role_trace_marker_count}"
+      echo "  - correlated trace telemetry containing '${APP_INSIGHTS_TRACE_MARKER}': ${trace_count}"
+    fi
+    exit "$EXIT_TELEMETRY_FAILED"
+  fi
+
+  echo "Telemetry not complete yet. Waiting ${APP_INSIGHTS_POLL_SECONDS}s for App Insights ingestion..."
+  attempt=$((attempt + 1))
+  sleep "$APP_INSIGHTS_POLL_SECONDS"
+done

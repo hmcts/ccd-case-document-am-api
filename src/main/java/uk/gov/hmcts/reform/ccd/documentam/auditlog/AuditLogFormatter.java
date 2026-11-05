@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-import java.util.LinkedHashMap;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +29,7 @@ public class AuditLogFormatter {
 
     public String format(AuditEntry entry) {
         Map<String, Object> logEntry = new LinkedHashMap<>();
-        logEntry.put("tag", TAG);
+        add(logEntry, "tag", TAG);
         add(logEntry, "dateTime", entry.getDateTime());
         add(logEntry, "operationType", entry.getOperationType());
         add(logEntry, "idamId", entry.getIdamId());
@@ -41,10 +41,11 @@ public class AuditLogFormatter {
         add(logEntry, "caseType", entry.getCaseType());
         add(logEntry, "caseId", entry.getCaseId());
         add(logEntry, "X-Request-ID", entry.getRequestId());
+
         try {
             return objectMapper.writeValueAsString(logEntry);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Failed to format audit log entry", e);
+        } catch (JsonProcessingException exception) {
+            throw new IllegalStateException("Unable to format audit log entry", exception);
         }
     }
 
