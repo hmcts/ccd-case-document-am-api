@@ -107,7 +107,7 @@ public class CaseDocumentAmController {
     ) {
         final Document document = documentManagementService.getDocumentMetadata(documentId);
 
-        documentManagementService.checkServicePermission(
+        final AuthorisedService authorisedService = documentManagementService.checkServicePermission(
             document.getCaseTypeId(),
             document.getJurisdictionId(),
             getServiceNameFromS2SToken(s2sToken),
@@ -117,12 +117,7 @@ public class CaseDocumentAmController {
         );
 
         if (document.getCaseId() != null) {
-            documentManagementService.checkUserPermission(
-                    document.getCaseId(),
-                    documentId,
-                    Permission.READ,
-                    USER_PERMISSION_ERROR,
-                    documentId.toString());
+            checkUserReadPermission(document, documentId, authorisedService);
 
             return ResponseEntity.ok(document);
         }
@@ -134,6 +129,20 @@ public class CaseDocumentAmController {
             log.error(errorMessage);
             throw new ForbiddenException(errorMessage);
         }
+    }
+
+    private void checkUserReadPermission(Document document, UUID documentId, AuthorisedService authorisedService) {
+        if (authorisedService.allowsSystemRead(securityUtils.getUserRoles())) {
+            log.info("System read of document {} by service {} for case type {}",
+                     documentId, authorisedService.getId(), document.getCaseTypeId());
+            return;
+        }
+
+        documentManagementService.checkUserPermission(document.getCaseId(),
+                                                      documentId,
+                                                      Permission.READ,
+                                                      USER_PERMISSION_ERROR,
+                                                      documentId.toString());
     }
 
     private boolean ttlIsFutureDate(Date ttl) {
@@ -164,19 +173,17 @@ public class CaseDocumentAmController {
     ) {
         final Document document = documentManagementService.getDocumentMetadata(documentId);
 
-        documentManagementService.checkServicePermission(document.getCaseTypeId(),
-                                                         document.getJurisdictionId(),
-                                                         getServiceNameFromS2SToken(s2sToken),
-                                                         Permission.READ,
-                                                         SERVICE_PERMISSION_ERROR,
-                                                         documentId.toString());
+        final AuthorisedService authorisedService = documentManagementService.checkServicePermission(
+            document.getCaseTypeId(),
+            document.getJurisdictionId(),
+            getServiceNameFromS2SToken(s2sToken),
+            Permission.READ,
+            SERVICE_PERMISSION_ERROR,
+            documentId.toString()
+        );
 
         if (document.getCaseId() != null) {
-            documentManagementService.checkUserPermission(document.getCaseId(),
-                    documentId,
-                    Permission.READ,
-                    USER_PERMISSION_ERROR,
-                    documentId.toString());
+            checkUserReadPermission(document, documentId, authorisedService);
 
             return handleDocumentContent(documentId, httpResponse, requestHeaders);
         }

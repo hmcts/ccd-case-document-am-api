@@ -3,12 +3,15 @@ package uk.gov.hmcts.reform.ccd.documentam.security;
 import com.auth0.jwt.JWT;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+
+import java.util.List;
 
 @Component
 public class SecurityUtils {
@@ -52,6 +55,13 @@ public class SecurityUtils {
 
     public UserInfo getUserInfo() {
         return idamRepository.getUserInfo(getUserBearerToken());
+    }
+
+    // Roles resolved from IDAM when the user token was authenticated; see JwtGrantedAuthoritiesConverter
+    public List<String> getUserRoles() {
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .toList();
     }
 
     public String getServiceNameFromS2SToken(String serviceAuthenticationToken) {
