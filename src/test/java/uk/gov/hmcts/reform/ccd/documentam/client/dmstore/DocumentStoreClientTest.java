@@ -928,4 +928,57 @@ class DocumentStoreClientTest implements TestFixture {
             throw new RuntimeException("Failed to set objectMapper field", e);
         }
     }
+
+    @Test
+    void controlledBufferedUploadStoresAuthoritativePendingCaseBinding() {
+        final DocumentUploadRequest request = new DocumentUploadRequest(
+            List.of(new MockMultipartFile("file", "synthetic".getBytes())), "PUBLIC", "type", "jurisdiction");
+        request.setPendingAccess(true);
+        request.setCaseId("1234567890123456");
+        underTest.uploadDocuments(request);
+        final org.mockito.ArgumentCaptor<HttpEntity> captor = org.mockito.ArgumentCaptor.forClass(HttpEntity.class);
+        verify(restTemplate).postForObject(anyString(), captor.capture(), eq(DmUploadResponse.class));
+        final Map<?, ?> body = (Map<?, ?>) captor.getValue().getBody();
+        assertThat(body.get("metadata[pending_access_controlled]")).isEqualTo(List.of("true"));
+        assertThat(body.get("metadata[pending_case_id]")).isEqualTo(List.of("1234567890123456"));
+        assertThat(body.get("metadata[case_id]")).isNull();
+    }
+
+    @Test
+    void controlledStreamUploadStoresTheSamePendingBinding() throws Exception {
+        org.mockito.Mockito.reset(securityUtils, applicationParams);
+        when(applicationParams.getDocumentTtlInDays()).thenReturn(1);
+        final DocumentUploadRequest request = new DocumentUploadRequest(
+            List.of(new MockMultipartFile("file", "synthetic".getBytes())), "PUBLIC", "type", "jurisdiction");
+        request.setPendingAccess(true);
+        request.setCaseId("1234567890123456");
+        final java.io.ByteArrayOutputStream output = new java.io.ByteArrayOutputStream();
+        underTest.buildUploadStreamEntity(request).writeTo(output);
+        final String multipart = output.toString(java.nio.charset.StandardCharsets.UTF_8);
+        assertThat(multipart).contains("name=\"metadata[pending_access_controlled]\"", "true",
+            "name=\"metadata[pending_case_id]\"", "1234567890123456");
+        assertThat(multipart).doesNotContain("name=\"metadata[case_id]\"");
+    }
+
+    @Test
+    void metadataOnlyPatchDoesNotUseTheTtlChangingBulkEndpoint() {
+        final Map<String, String> metadata = Map.of("pending_access_revoked", "true");
+        underTest.patchDocumentMetadataOnly(documentId, metadata);
+        verify(restTemplate).patchForObject(eq(DM_STORE_URL + "/documents/" + documentId + "/metadata"),
+            org.mockito.ArgumentMatchers.argThat(entity -> entity instanceof HttpEntity<?>
+                && metadata.equals(((HttpEntity<?>) entity).getBody())), eq(Void.class));
+        org.mockito.Mockito.verifyNoMoreInteractions(restTemplate);
+    }
+
+    @Test
+    void missingMetadataOnlyCapabilityFailsWithoutBulkFallback() {
+        doThrow(new org.springframework.web.client.HttpClientErrorException(HttpStatus.NOT_FOUND))
+            .when(restTemplate).patchForObject(anyString(), any(), eq(Void.class));
+        org.junit.jupiter.api.Assertions.assertThrows(
+            org.springframework.web.client.HttpClientErrorException.class,
+            () -> underTest.patchDocumentMetadataOnly(documentId, Map.of("pending_access_revoked", "true")));
+        verify(restTemplate).patchForObject(eq(DM_STORE_URL + "/documents/" + documentId + "/metadata"),
+            any(), eq(Void.class));
+        org.mockito.Mockito.verifyNoMoreInteractions(restTemplate);
+    }
 }
