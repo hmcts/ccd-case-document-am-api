@@ -258,12 +258,6 @@ public class DocumentStoreClient {
         }
     }
 
-    public void patchDocumentMetadataOnly(UUID documentId, Map<String, String> metadata) {
-        restTemplate.patchForObject(
-            String.format("%s/documents/%s/metadata", applicationParams.getDocumentURL(), documentId),
-            getRequestHttpEntity(metadata), Void.class);
-    }
-
     public void patchDocumentMetadata(final UpdateDocumentsCommand updateDocumentsCommand) {
         restTemplate.patchForObject(
             String.format("%s/documents", applicationParams.getDocumentURL()),

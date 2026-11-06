@@ -11,28 +11,24 @@ reference, case type and jurisdiction. Both buffered and streamed uploads retain
 the binding in document-store metadata.
 
 Before attachment, controlled metadata, binary and token access requires the
-upload creator, a future expiry, no withdrawn grant and current bound-case access.
-After attachment, actual case/document permissions take over. Attachment checks
-the controlled document's binding, expiry, withdrawn state and hash. Existing
-unmarked consumers retain their policy.
+upload creator, a future expiry and current bound-case access. TTL updates and
+deletion also check pending ownership. After attachment, actual case/document
+permissions take over; controlled TTL changes require document UPDATE permission
+and deletion requires DELETE permission. Attachment checks the document's binding,
+case type, jurisdiction, expiry and hash. Existing unmarked consumers retain their
+policy.
 
-`DELETE /cases/documents/{id}/pending-access` withdraws only a pending grant; it
-never deletes file content. The caller needs CREATE service permission and must
-be the upload owner. An attached document is unchanged, subject to its current
-case/document read permission. This allows an owner to withdraw pending access
-after losing access to the case without returning document data.
+Cancellation and abandoned-upload behavior retain the existing document expiry
+lifecycle. There is no immediate grant-withdrawal API, event-token cancellation
+ledger, additional metadata mutation or document deletion on form cancellation.
+Pending documents remain private to their creator until expiry; bound-case access
+must still be current. Real `case_id` attachment consumes the pending policy and
+switches reads to current CCD document authorization.
 
-Withdrawal requires DM's additive `PATCH /documents/{id}/metadata` endpoint,
-which preserves expiry and existing metadata under a row lock. There is no
-fallback to bulk PATCH: an older DM rejects the operation safely. Until the
-coordinated backend versions are available, leave the consuming toolkit's
-pending-access capability disabled.
-
-A browser abandoning an upload before receiving its ID cannot explicitly withdraw
-that grant; the document remains private and subject to normal expiry. Saved
-draft references must not be withdrawn merely because a browser's edited value
-changes or a save response is lost. This API models document-resource access; it
-does not add a CCD event-token cancellation ledger.
+This implementation uses the existing document-store upload and attachment APIs.
+It does not require document-management-store changes. Enable the consuming
+client capability only after deploying this CDAM endpoint and verifying the
+supported case-type scope. Historical document routing remains unchanged.
 
 Validation commands:
 
@@ -40,4 +36,4 @@ Validation commands:
 ./gradlew test checkstyleMain checkstyleTest
 ```
 
-Full deployed integration is required with the matching DM and toolkit changes.
+Full deployed integration is required with the matching toolkit/webapp changes.

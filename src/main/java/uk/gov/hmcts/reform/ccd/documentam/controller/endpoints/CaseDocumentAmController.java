@@ -457,27 +457,6 @@ public class CaseDocumentAmController {
                                      .build());
     }
 
-    @DeleteMapping(path = "/cases/documents/{documentId}/pending-access")
-    @Operation(summary = "Revokes a controlled pending upload without deleting document content", tags = "delete")
-    @ApiResponse(responseCode = "204", description = "Pending access revoked or no longer applicable")
-    @ApiResponse(responseCode = "403", description = "Insufficient pending document permission")
-    @LogAudit(operationType = AuditOperationType.PATCH_DOCUMENT_BY_DOCUMENT_ID, documentId = "#documentId")
-    public ResponseEntity<Void> revokePendingAccess(
-        @PathVariable("documentId") final UUID documentId,
-        @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken) {
-        final Document document = documentManagementService.getDocumentMetadata(documentId);
-        documentManagementService.checkServicePermission(document.getCaseTypeId(), document.getJurisdictionId(),
-            getServiceNameFromS2SToken(s2sToken), Permission.CREATE, SERVICE_PERMISSION_ERROR, documentId.toString());
-        if (document.getCaseId() != null && document.isPendingAccessControlled()) {
-            documentManagementService.checkUserPermission(document.getCaseId(), documentId,
-                Permission.READ, USER_PERMISSION_ERROR, documentId.toString());
-        } else if (document.isPendingAccessControlled()) {
-            documentManagementService.revokePendingDocumentAccess(documentId, document,
-                securityUtils.getUserInfo().getUid());
-        }
-        return ResponseEntity.noContent().build();
-    }
-
     private void checkControlledOperationAccess(UUID documentId, Document document, Permission permission) {
         if (!document.isPendingAccessControlled()) {
             return;

@@ -960,25 +960,4 @@ class DocumentStoreClientTest implements TestFixture {
         assertThat(multipart).doesNotContain("name=\"metadata[case_id]\"");
     }
 
-    @Test
-    void metadataOnlyPatchDoesNotUseTheTtlChangingBulkEndpoint() {
-        final Map<String, String> metadata = Map.of("pending_access_revoked", "true");
-        underTest.patchDocumentMetadataOnly(documentId, metadata);
-        verify(restTemplate).patchForObject(eq(DM_STORE_URL + "/documents/" + documentId + "/metadata"),
-            org.mockito.ArgumentMatchers.argThat(entity -> entity instanceof HttpEntity<?>
-                && metadata.equals(((HttpEntity<?>) entity).getBody())), eq(Void.class));
-        org.mockito.Mockito.verifyNoMoreInteractions(restTemplate);
-    }
-
-    @Test
-    void missingMetadataOnlyCapabilityFailsWithoutBulkFallback() {
-        doThrow(new org.springframework.web.client.HttpClientErrorException(HttpStatus.NOT_FOUND))
-            .when(restTemplate).patchForObject(anyString(), any(), eq(Void.class));
-        org.junit.jupiter.api.Assertions.assertThrows(
-            org.springframework.web.client.HttpClientErrorException.class,
-            () -> underTest.patchDocumentMetadataOnly(documentId, Map.of("pending_access_revoked", "true")));
-        verify(restTemplate).patchForObject(eq(DM_STORE_URL + "/documents/" + documentId + "/metadata"),
-            any(), eq(Void.class));
-        org.mockito.Mockito.verifyNoMoreInteractions(restTemplate);
-    }
 }

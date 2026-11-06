@@ -76,18 +76,6 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
     }
 
     @Override
-    public void revokePendingDocumentAccess(UUID documentId, Document document, String userId) {
-        if (document.getCaseId() != null || !document.isPendingAccessControlled()) {
-            return;
-        }
-        if (StringUtils.isBlank(userId) || !userId.equals(document.getCreatedBy())) {
-            throw new ForbiddenException("Only the pending upload owner can revoke access");
-        }
-        documentStoreClient.patchDocumentMetadataOnly(documentId,
-            Map.of(Constants.METADATA_PENDING_ACCESS_REVOKED, "true"));
-    }
-
-    @Override
     public void checkPendingUploadAccess(DocumentUploadRequest request) {
         if (request.getCaseId() != null) {
             if (!request.isPendingAccess() || !request.getCaseId().matches("[0-9]{16}")) {
@@ -103,7 +91,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         if (document.getCaseId() != null || !document.isPendingAccessControlled()) {
             return;
         }
-        if (document.isPendingAccessRevoked() || StringUtils.isBlank(userId)
+        if (StringUtils.isBlank(userId)
             || !userId.equals(document.getCreatedBy())
             || document.getTtl() == null || !document.getTtl().after(new Date())) {
             throw new ForbiddenException("Pending document access is not permitted");
@@ -169,7 +157,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
             if (either.isRight() && either.get().getCaseId() == null
                 && either.get().isPendingAccessControlled()) {
                 final Document pending = either.get();
-                if (pending.isPendingAccessRevoked() || pending.getTtl() == null
+                if (pending.getTtl() == null
                     || !pending.getTtl().after(new Date()) || documentHashToken.getHashToken() == null
                     || !Objects.equals(pending.getCaseTypeId(), caseDocumentsMetadata.getCaseTypeId())
                     || !Objects.equals(pending.getJurisdictionId(), caseDocumentsMetadata.getJurisdictionId())

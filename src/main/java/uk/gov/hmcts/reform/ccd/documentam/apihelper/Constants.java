@@ -55,7 +55,6 @@ public final class Constants {
 
     public static final String METADATA_PENDING_ACCESS = "pending_access_controlled";
     public static final String METADATA_PENDING_CASE_ID = "pending_case_id";
-    public static final String METADATA_PENDING_ACCESS_REVOKED = "pending_access_revoked";
 
     public static final String METADATA_CASE_ID = "case_id";
     public static final String METADATA_CASE_TYPE_ID = "case_type_id";

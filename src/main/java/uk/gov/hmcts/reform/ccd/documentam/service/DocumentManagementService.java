@@ -17,8 +17,6 @@ import java.util.UUID;
 
 public interface DocumentManagementService {
 
-    void revokePendingDocumentAccess(UUID documentId, Document document, String userId);
-
     void checkPendingUploadAccess(DocumentUploadRequest request);
 
     void checkPendingDocumentAccess(Document document, String userId);

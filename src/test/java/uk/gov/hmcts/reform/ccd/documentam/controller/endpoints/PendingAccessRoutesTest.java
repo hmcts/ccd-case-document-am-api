@@ -57,37 +57,6 @@ class PendingAccessRoutesTest {
     }
 
     @Test
-    void configuredXuiUploadPermissionCanWithdrawOnlyItsOwnersPendingGrant() throws Exception {
-        final var services = new com.fasterxml.jackson.databind.ObjectMapper().readValue(
-            getClass().getResourceAsStream("/service_config.json"),
-            uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedServices.class);
-        final var documents = mock(uk.gov.hmcts.reform.ccd.documentam.client.dmstore.DocumentStoreClient.class);
-        final var cases = mock(uk.gov.hmcts.reform.ccd.documentam.client.datastore.CaseDataStoreClient.class);
-        final var service = new uk.gov.hmcts.reform.ccd.documentam.service.impl.DocumentManagementServiceImpl(
-            documents, cases, services, mock(ApplicationParams.class));
-        final UUID id = UUID.randomUUID();
-        final Document pending = Document.builder().createdBy("owner")
-            .metadata(Map.of("pending_access_controlled", "true", "case_type_id", "type",
-                "jurisdiction", "jurisdiction")).build();
-        when(documents.getDocument(id)).thenReturn(io.vavr.control.Either.right(pending));
-        final SecurityUtils security = mock(SecurityUtils.class);
-        when(security.getServiceNameFromS2SToken("xui")).thenReturn("xui_webapp");
-        when(security.getServiceNameFromS2SToken("read-only")).thenReturn("em_npa_app");
-        when(security.getUserInfo()).thenReturn(UserInfo.builder().uid("owner").build());
-        final var controller = new CaseDocumentAmController(service, security, mock(ApplicationParams.class));
-        org.junit.jupiter.api.Assertions.assertEquals(204, controller.revokePendingAccess(id, "xui")
-            .getStatusCode().value());
-        verify(documents).patchDocumentMetadataOnly(id, Map.of("pending_access_revoked", "true"));
-        org.mockito.Mockito.clearInvocations(documents);
-        assertThrows(ForbiddenException.class, () -> controller.revokePendingAccess(id, "read-only"));
-        verify(documents, never()).patchDocumentMetadataOnly(any(), any());
-        when(security.getUserInfo()).thenReturn(UserInfo.builder().uid("other").build());
-        assertThrows(ForbiddenException.class, () -> controller.revokePendingAccess(id, "xui"));
-        verify(documents, never()).patchDocumentMetadataOnly(any(), any());
-        org.mockito.Mockito.verifyNoInteractions(cases);
-    }
-
-    @Test
     void pendingUploadEndpointForcesAccessControlEvenIfCallerOmitsTheFlag() {
         final DocumentManagementService service = mock(DocumentManagementService.class);
         final CaseDocumentAmController controller = new CaseDocumentAmController(service, mock(SecurityUtils.class),

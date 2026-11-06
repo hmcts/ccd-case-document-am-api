@@ -89,16 +89,8 @@ class CaseBoundPendingAccessTest {
     @Test
     void attachedAuthorizationTakesPriorityOverPendingFlags() {
         final Document attached = pending("other", -60).toBuilder().metadata(Map.of(
-            "case_id", CASE_ID, "pending_access_controlled", "true", "pending_access_revoked", "true")).build();
+            "case_id", CASE_ID, "pending_access_controlled", "true")).build();
         service.checkPendingDocumentAccess(attached, "owner");
-        verifyNoInteractions(cases);
-    }
-
-    @Test
-    void revokedPendingDocumentIsDeniedToItsOwner() {
-        final Document revoked = pending("owner", 60).toBuilder().metadata(Map.of(
-            "pending_access_controlled", "true", "pending_access_revoked", "true")).build();
-        assertThrows(ForbiddenException.class, () -> service.checkPendingDocumentAccess(revoked, "owner"));
         verifyNoInteractions(cases);
     }
 
@@ -123,33 +115,6 @@ class CaseBoundPendingAccessTest {
         request.setPendingAccess(true);
         service.checkPendingUploadAccess(request);
         verify(cases).checkCaseAccess(CASE_ID, "type", "jurisdiction");
-    }
-
-    @Test
-    void cancellationOnlyMergesTheTerminalFlagAndPreservesTtl() {
-        final DocumentStoreClient documents = mock(DocumentStoreClient.class);
-        service = new DocumentManagementServiceImpl(documents, cases, null, null);
-        final UUID id = UUID.randomUUID();
-        service.revokePendingDocumentAccess(id, pending("owner", 60), "owner");
-        verify(documents).patchDocumentMetadataOnly(id, Map.of("pending_access_revoked", "true"));
-        verify(documents, never()).patchDocumentMetadata(org.mockito.ArgumentMatchers.any());
-        verifyNoInteractions(cases);
-    }
-
-    @Test
-    void anotherUserCannotCancelTheUpload() {
-        assertThrows(ForbiddenException.class,
-            () -> service.revokePendingDocumentAccess(UUID.randomUUID(), pending("owner", 60), "other"));
-    }
-
-    @Test
-    void cancellationDoesNotChangeAnAttachedDocument() {
-        final DocumentStoreClient documents = mock(DocumentStoreClient.class);
-        service = new DocumentManagementServiceImpl(documents, cases, null, null);
-        final Document attached = Document.builder().metadata(Map.of(
-            "case_id", CASE_ID, "pending_access_controlled", "true")).build();
-        service.revokePendingDocumentAccess(UUID.randomUUID(), attached, "owner");
-        verifyNoInteractions(documents, cases);
     }
 
     @Test
@@ -185,16 +150,4 @@ class CaseBoundPendingAccessTest {
             command.getValue().getDocuments().getFirst().getMetadata().get("case_id"));
     }
 
-    @Test
-    void revokedPendingDocumentCannotBeAttached() {
-        final DocumentStoreClient documents = mock(DocumentStoreClient.class);
-        service = new DocumentManagementServiceImpl(documents, cases, null, null);
-        final UUID id = UUID.randomUUID();
-        final Document revoked = pending("owner", 60).toBuilder().metadata(Map.of(
-            "pending_access_controlled", "true", "pending_access_revoked", "true")).build();
-        when(documents.getDocument(id)).thenReturn(Either.right(revoked));
-        assertThrows(ForbiddenException.class, () -> service.patchDocumentMetadata(
-            new CaseDocumentsMetadata(CASE_ID, "type", "jurisdiction", List.of(new DocumentHashToken(id, "hash")))));
-        verify(documents, never()).patchDocumentMetadata(org.mockito.ArgumentMatchers.any());
-    }
 }
