@@ -361,6 +361,16 @@
       ]
     },
     {
+      "id": "deed_poll_api",
+      "caseTypeId": ["DEEDPOLL"],
+      "jurisdictionId": "DEEDPOLL",
+      "permissions": [
+        "CREATE",
+        "READ",
+        "UPDATE"
+      ]
+    },
+    {
       "id": "pcs_api",
       "caseTypeId": ["*"],
       "jurisdictionId": "PCS",
@@ -404,5 +414,13 @@
           "UPDATE",
           "DELETE"
         ]
-      }]
+      },{
+        "id": "ccd_case_disposer",
+        "caseTypeId": ["*"],
+        "jurisdictionId": "*",
+        "permissions": [
+          "HASHTOKEN"
+        ]
+      }
+    ]
 }
