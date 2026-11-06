@@ -16,6 +16,8 @@ import java.util.Optional;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CASE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_JURISDICTION_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_PENDING_ACCESS;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_PENDING_CASE_ID;
 
 @Builder(toBuilder = true)
 @Jacksonized
@@ -39,6 +41,16 @@ public class Document {
 
     public  Map<String, String> getMetadata() {
         return Optional.ofNullable(metadata).orElse(Collections.emptyMap());
+    }
+
+    @JsonIgnore
+    public boolean isPendingAccessControlled() {
+        return "true".equals(getMetadata().get(METADATA_PENDING_ACCESS));
+    }
+
+    @JsonIgnore
+    public String getPendingCaseId() {
+        return getMetadata().get(METADATA_PENDING_CASE_ID);
     }
 
     @JsonIgnore
