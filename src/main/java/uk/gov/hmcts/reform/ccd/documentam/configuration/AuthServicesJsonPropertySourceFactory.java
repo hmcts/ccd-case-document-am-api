@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.ccd.documentam.configuration;
 
-import tools.jackson.databind.ObjectMapper;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.PropertySourceFactory;
+import tools.jackson.databind.json.JsonMapper;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedServices;
 
 import java.io.IOException;
@@ -14,7 +14,7 @@ public class AuthServicesJsonPropertySourceFactory implements PropertySourceFact
 
     @Override
     public PropertySource<?> createPropertySource(String name, EncodedResource resource) throws IOException {
-        AuthorisedServices authServices = new ObjectMapper().readValue(resource.getInputStream(),
+        AuthorisedServices authServices = JsonMapper.builder().build().readValue(resource.getInputStream(),
                                                                        AuthorisedServices.class);
         return new MapPropertySource("json-source", Map.of("authServices", authServices.getAuthServices()));
     }

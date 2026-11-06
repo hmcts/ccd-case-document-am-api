@@ -1,17 +1,17 @@
 package uk.gov.hmcts.reform.ccd.documentam.configuration;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.util.StdDateFormat;
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.util.StdDateFormat;
 
 import java.util.TimeZone;
 
 /**
  * Global Jackson configuration for JSON serialization/deserialization.
- * Configures snake_case property naming and ISO-8601 date formatting across the application.
+ * Configures ISO-8601 date formatting across the application.
  */
 @Configuration
 public class JacksonConfiguration {

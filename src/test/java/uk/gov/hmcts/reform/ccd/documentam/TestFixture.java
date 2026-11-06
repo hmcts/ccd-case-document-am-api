@@ -82,6 +82,7 @@ public interface TestFixture {
         final ObjectMapper objectMapper = JsonMapper.builder()
             .propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
             .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .enable(DateTimeFeature.WRITE_UTC_AS_OFFSET)
             .enable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
             .build();
 
