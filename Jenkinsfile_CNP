@@ -39,6 +39,7 @@ def secrets = [
         secret('microservicekey-ccd-gw', 'BEFTA_S2S_CLIENT_SECRET'),
         secret('microservicekey-ccd-data', 'BEFTA_S2S_CLIENT_SECRET_OF_CCD_DATA'),
         secret('microservicekey-bulk-scan-processor', 'BEFTA_S2S_CLIENT_SECRET_OF_BULK_SCAN_PROCESSOR'),
+        secret('microservicekey-bulk-scan-orchestrator', 'BEFTA_S2S_CLIENT_SECRET_OF_BULK_SCAN_ORCHESTRATOR'),
         secret('microservicekey-xui-webapp', 'BEFTA_S2S_CLIENT_SECRET_OF_XUI_WEBAPP')
     ]
 ]
@@ -70,6 +71,7 @@ env.BEFTA_S2S_CLIENT_ID = "ccd_gw"
 env.BEFTA_S2S_CLIENT_ID_OF_CCD_DATA = "ccd_data"
 env.BEFTA_S2S_CLIENT_ID_OF_XUI_WEBAPP = "xui_webapp"
 env.BEFTA_S2S_CLIENT_ID_OF_BULK_SCAN_PROCESSOR = "bulk_scan_processor"
+env.BEFTA_S2S_CLIENT_ID_OF_BULK_SCAN_ORCHESTRATOR = "bulk_scan_orchestrator"
 
 env.BEFTA_RESPONSE_HEADER_CHECK_POLICY = "JUST_WARN"
 
