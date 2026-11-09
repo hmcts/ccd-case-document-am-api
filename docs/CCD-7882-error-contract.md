@@ -466,3 +466,16 @@ not an extra production runtime dependency. Synthetic raw logs are local diagnos
 Production image/ingress verification, deployed BEFTA/ITHC, actual Azure ingestion, retention
 and administrator-only access remain release gates. The local telemetry collector proves the
 specific agent/SDK path tested, not production collection settings.
+
+## Message compatibility — 9 November 2026
+
+Retain the public `message` field. Spring Boot JSON fallback now explicitly supplies
+standard HTTP status text, even when raw exception-message inclusion is disabled.
+Exception details, traces and binding diagnostics remain private, including when
+requested through query parameters. Existing advice validation messages and HTTP
+statuses are unchanged by this follow-up. Full diagnostics remain in server logs.
+Focused fallback regressions assert the safe message and absence of diagnostic fields.
+Consumer Pact/BEFTA and effective deployed configuration still require verification;
+field preservation alone does not prove exact-text contract compatibility.
+
+Focused verification: 2 tests, 0 failures, 0 errors, 0 skipped; main/test Checkstyle passed.

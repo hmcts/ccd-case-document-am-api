@@ -10,6 +10,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.AbstractView;
 import org.springframework.web.servlet.view.BeanNameViewResolver;
+import org.springframework.http.HttpStatus;
 
 import java.util.Map;
 
@@ -23,6 +24,11 @@ public class ErrorPageConfiguration {
             public Map<String, Object> getErrorAttributes(WebRequest request, ErrorAttributeOptions options) {
                 Map<String, Object> attributes = super.getErrorAttributes(request, options);
                 attributes.put("path", "/");
+                HttpStatus status = HttpStatus.resolve((Integer) attributes.get("status"));
+                attributes.put("message", status == null ? "Request failed" : status.getReasonPhrase());
+                attributes.remove("exception");
+                attributes.remove("trace");
+                attributes.remove("errors");
                 return attributes;
             }
         };

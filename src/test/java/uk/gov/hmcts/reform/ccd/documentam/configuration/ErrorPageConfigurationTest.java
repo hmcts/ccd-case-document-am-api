@@ -35,7 +35,8 @@ class ErrorPageConfigurationTest {
         request.setParameter("message", "true");
         request.setParameter("errors", "true");
         assertThat(controller.error(request).getBody())
-            .doesNotContainKeys("exception", "trace", "message", "errors");
+            .doesNotContainKeys("exception", "trace", "errors");
+        assertThat(controller.error(request).getBody()).containsEntry("message", "Internal Server Error");
         assertThat(controller.error(request).getStatusCode().value()).isEqualTo(500);
         assertThat(controller.error(request).getBody()).containsEntry("path", "/");
     }
