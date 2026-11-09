@@ -20,6 +20,7 @@ ext {
   set('springCloudVersion', '2025.0.0')
   set('spring-framework.version', '6.2.14')
   set('spring-security.version', '6.5.7')
+  set('tomcat.version', '10.1.61')
   set('log4j2.version', '2.24.3')
   set('jackson.version', '2.18.2')
   set('snakeyaml.version', '2.3')
@@ -46,6 +47,9 @@ ext.libraries = [
 ]
 
 dependencyManagement {
+  dependencies {
+    dependency 'org.apache.commons:commons-lang3:3.18.0'
+  }
   imports {
     mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
   }
