@@ -87,3 +87,13 @@ Feature: F-006: Get hashtoken by Document ID
     And it is submitted to call the [Get hashtoken by Document ID] operation of [CCD Case Document AM API],
     Then a negative response is received,
     And the response has all the details as expected.
+
+  @S-109
+  Scenario: must get an error response when Bulk Scan Processor tries to access get hashtoken API
+    Given a user with [an active caseworker profile in CCD with full permissions on a document field],
+    And a successful call [by another privileged user to upload a document with mandatory metadata] as in [Default_Document_Upload_Data],
+    When a request is prepared with appropriate values,
+    And the request [contains the document Id from just uploaded document],
+    And it is submitted to call the [Get hashtoken by Document ID] operation of [CCD Case Document AM API],
+    Then a negative response is received,
+    And the response has all the details as expected.

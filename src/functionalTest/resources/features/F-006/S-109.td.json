@@ -1,0 +1,24 @@
+{
+  "title": "must get an error response when Bulk Scan Processor tries to access get hashtoken API",
+  "_guid_": "S-109",
+  "_extends_": "F-006_Test_Base_data",
+  "s2sClientId": "bulk_scan_processor",
+  "specs": [
+    "contains the document Id from just uploaded document"
+  ],
+  "request": {
+    "pathVariables": {
+      "documentId": "${[scenarioContext][childContexts][Default_Document_Upload_Data][customValues][documentIdInTheResponse]}"
+    }
+  },
+  "expectedResponse": {
+    "_extends_": "AM_403_Response",
+    "headers": {
+      "Content-Type": "application/json",
+      "Content-Length": "[[ANYTHING_PRESENT]]"
+    },
+    "body": {
+      "error": "Forbidden: Insufficient permissions: ${[scenarioContext][testData][request][pathVariables][documentId]}"
+    }
+  }
+}
