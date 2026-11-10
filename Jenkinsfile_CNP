@@ -124,7 +124,7 @@ withPipeline("java", product, component) {
   disableLegacyDeployment()
 
   afterAlways('test') {
-     builder.gradle('integration')
+     builder.gradle('jacocoTestCoverageVerification')
 
      steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/checkstyle/*.html'
      steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/pmd/*.html'
