@@ -119,6 +119,36 @@ class DocumentTokenGenerationIT extends BaseTest implements TestFixture {
     }
 
     @Test
+    void shouldGenerateTokenAndPatchPermittedDefaultJurisdiction() throws Exception {
+        final Document document = Document.builder()
+            .metadata(Map.of(METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE))
+            .build();
+        stubGetDocumentMetaData(document);
+        stubPatchDocumentMetaData(document);
+
+        mockMvc.perform(get(TOKEN_URL)
+                            .headers(createHttpHeaders(SERVICE_NAME_BULK_SCAN_ORCHESTRATOR)))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.hashToken").exists());
+
+        verify(1, patchRequestedFor(urlPathEqualTo("/documents")));
+        verify(patchRequestedFor(urlPathEqualTo("/documents"))
+                   .withRequestBody(equalToJson("""
+                       {
+                         "ttl": null,
+                         "documents": [{
+                           "documentId": "%s",
+                           "metadata": {
+                             "case_type_id": "%s",
+                             "jurisdiction": "AUTOTEST1"
+                           }
+                         }]
+                       }
+                       """.formatted(DOCUMENT_ID, CASE_TYPE_ID_VALUE))));
+    }
+
+    @Test
     void shouldRejectTokenGenerationWhenServiceLacksPermission() throws Exception {
         final Document document = Document.builder()
             .metadata(Map.of(
