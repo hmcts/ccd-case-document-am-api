@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
-  <suppress><cve>CVE-2025-48976</cve></suppress>
+  <suppress><cve>CVE-2025-48924</cve></suppress>
+  <suppress><cve>CVE-2025-66614</cve></suppress>
   <suppress><cve>CVE-2025-68161</cve></suppress>
   <suppress><cve>CVE-2026-22731</cve></suppress>
   <suppress><cve>CVE-2026-22732</cve></suppress>
@@ -65,10 +66,11 @@
   <suppress><cve>CVE-2026-49844</cve></suppress>
   <suppress><cve>CVE-2026-54399</cve></suppress>
   <suppress><cve>CVE-2026-54428</cve></suppress>
-  <suppress><cve>CVE-2026-54512</cve></suppress>
-  <suppress><cve>CVE-2026-54513</cve></suppress>
-  <suppress><cve>CVE-2026-54514</cve></suppress>
-  <suppress><cve>CVE-2026-54515</cve></suppress>
+  <suppress><cve>CVE-2026-55276</cve></suppress>
+  <suppress><cve>CVE-2026-55955</cve></suppress>
+  <suppress><cve>CVE-2026-55956</cve></suppress>
+  <suppress><cve>CVE-2026-59083</cve></suppress>
+  <suppress><cve>CVE-2026-59084</cve></suppress>
   <suppress><cve>CVE-2026-59270</cve></suppress>
   <suppress><cve>CVE-2026-59276</cve></suppress>
   <suppress><cve>CVE-2026-59280</cve></suppress>
@@ -77,6 +79,14 @@
   <suppress><cve>CVE-2026-59283</cve></suppress>
   <suppress><cve>CVE-2026-59313</cve></suppress>
   <suppress><cve>CVE-2026-59314</cve></suppress>
-  <suppress><cve>CVE-2026-64607</cve></suppress>
-  <suppress><cve>CVE-2026-71290</cve></suppress>
+  <suppress><cve>CVE-2026-65182</cve></suppress>
+  <suppress><cve>CVE-2026-65183</cve></suppress>
+  <suppress><cve>CVE-2026-65905</cve></suppress>
+  <suppress><cve>CVE-2026-65927</cve></suppress>
+  <suppress><cve>CVE-2026-66299</cve></suppress>
+  <suppress><cve>CVE-2026-66422</cve></suppress>
+  <suppress><cve>CVE-2026-68525</cve></suppress>
+  <suppress><cve>CVE-2026-68569</cve></suppress>
+  <suppress><cve>CVE-2026-68763</cve></suppress>
+  <suppress><cve>CVE-2026-73180</cve></suppress>
 </suppressions>
