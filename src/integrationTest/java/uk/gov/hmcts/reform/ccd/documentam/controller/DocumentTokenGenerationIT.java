@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.ccd.documentam.controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -28,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CASE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CASE_TYPE_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_JURISDICTION_ID;
+import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_AUTHORIZATION;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.DOCUMENTS_URL;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubGetDocumentMetaData;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubNotFoundGetDocumentMetaData;
@@ -181,6 +183,48 @@ class DocumentTokenGenerationIT extends BaseTest implements TestFixture {
             .andExpect(jsonPath("$.hashToken").doesNotExist());
 
         verify(getRequestedFor(urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID)));
+        verify(0, patchRequestedFor(urlPathEqualTo("/documents")));
+    }
+
+    @Test
+    void shouldRejectTokenGenerationWithoutUserBearerToken() throws Exception {
+        final HttpHeaders headers = createHttpHeaders(SERVICE_NAME_BULK_SCAN_ORCHESTRATOR);
+        headers.remove(HttpHeaders.AUTHORIZATION);
+
+        assertUnauthorizedWithoutDocumentLookup(headers);
+    }
+
+    @Test
+    void shouldRejectTokenGenerationWithExpiredUserBearerToken() throws Exception {
+        final HttpHeaders headers = createHttpHeaders(-1, SERVICE_NAME_BULK_SCAN_ORCHESTRATOR, AUTH_TOKEN_TTL);
+
+        assertUnauthorizedWithoutDocumentLookup(headers);
+    }
+
+    @Test
+    void shouldRejectTokenGenerationWithoutServiceAuthorizationToken() throws Exception {
+        final HttpHeaders headers = createHttpHeaders(SERVICE_NAME_BULK_SCAN_ORCHESTRATOR);
+        headers.remove(SERVICE_AUTHORIZATION);
+
+        assertUnauthorizedWithoutDocumentLookup(headers);
+    }
+
+    @Test
+    void shouldRejectTokenGenerationWithExpiredServiceAuthorizationToken() throws Exception {
+        final HttpHeaders headers = createHttpHeaders(
+            AUTH_TOKEN_TTL,
+            SERVICE_NAME_BULK_SCAN_ORCHESTRATOR,
+            -1
+        );
+
+        assertUnauthorizedWithoutDocumentLookup(headers);
+    }
+
+    private void assertUnauthorizedWithoutDocumentLookup(final HttpHeaders headers) throws Exception {
+        mockMvc.perform(get(TOKEN_URL).headers(headers))
+            .andExpect(status().isUnauthorized());
+
+        verify(0, getRequestedFor(urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID)));
         verify(0, patchRequestedFor(urlPathEqualTo("/documents")));
     }
 }
