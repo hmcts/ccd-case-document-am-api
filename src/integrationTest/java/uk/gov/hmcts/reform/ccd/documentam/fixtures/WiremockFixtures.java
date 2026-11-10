@@ -97,6 +97,14 @@ public class WiremockFixtures implements TestFixture {
                                     .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
     }
 
+    public static void stubNotFoundGetDocumentMetaData(final UUID documentId) {
+        stubFor(WireMock.get(urlPathEqualTo(DOCUMENTS_URL + documentId))
+                    .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
+                    .willReturn(aResponse()
+                                    .withStatus(HTTP_NOT_FOUND)
+                                    .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
+    }
+
     public static void stubDeleteDocumentByDocumentId() {
         stubFor(WireMock.delete(urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID))
                     .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))

@@ -30,6 +30,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_CA
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.METADATA_JURISDICTION_ID;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.DOCUMENTS_URL;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubGetDocumentMetaData;
+import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubNotFoundGetDocumentMetaData;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubPatchDocumentMetaData;
 
 // Fix the test salt so the expected SHA-256 values are independent of the production hashing helper.
@@ -163,6 +164,21 @@ class DocumentTokenGenerationIT extends BaseTest implements TestFixture {
                 null,
                 null,
                 null));
+
+        verify(getRequestedFor(urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID)));
+        verify(0, patchRequestedFor(urlPathEqualTo("/documents")));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenDocumentDoesNotExist() throws Exception {
+        stubNotFoundGetDocumentMetaData(DOCUMENT_ID);
+
+        mockMvc.perform(get(TOKEN_URL)
+                            .headers(createHttpHeaders(SERVICE_NAME_BULK_SCAN_ORCHESTRATOR)))
+            .andExpect(status().isNotFound())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.error", is("Meta data does not exist for documentId: " + DOCUMENT_ID)))
+            .andExpect(jsonPath("$.hashToken").doesNotExist());
 
         verify(getRequestedFor(urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID)));
         verify(0, patchRequestedFor(urlPathEqualTo("/documents")));
