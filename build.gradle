@@ -82,18 +82,6 @@ application {
   mainClass = 'uk.gov.hmcts.reform.ccd.documentam.Application'
 }
 
-jacocoTestCoverageVerification {
-  violationRules {
-    rule {
-      limit {
-        counter = 'LINE'
-        value = 'COVEREDRATIO'
-        minimum = 0.0
-      }
-    }
-  }
-}
-
 sourceSets {
   functionalTest {
     java {
@@ -167,6 +155,22 @@ task integration(type: Test, description: 'Runs the integration tests.', group: 
   classpath = sourceSets.integrationTest.runtimeClasspath
   finalizedBy aggregate
 }
+
+jacocoTestCoverageVerification {
+  dependsOn test, integration
+  executionData(test, integration)
+  violationRules {
+    rule {
+      limit {
+        counter = 'LINE'
+        value = 'COVEREDRATIO'
+        minimum = 0.90
+      }
+    }
+  }
+}
+
+check.dependsOn jacocoTestCoverageVerification
 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
   setTestClassesDirs(sourceSets.functionalTest.output.classesDirs)
