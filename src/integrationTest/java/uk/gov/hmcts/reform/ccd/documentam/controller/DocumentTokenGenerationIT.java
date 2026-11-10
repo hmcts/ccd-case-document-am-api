@@ -141,7 +141,7 @@ class DocumentTokenGenerationIT extends BaseTest implements TestFixture {
                            "documentId": "%s",
                            "metadata": {
                              "case_type_id": "%s",
-                             "jurisdiction": "AUTOTEST1"
+                             "jurisdiction": "BULKSCAN"
                            }
                          }]
                        }
