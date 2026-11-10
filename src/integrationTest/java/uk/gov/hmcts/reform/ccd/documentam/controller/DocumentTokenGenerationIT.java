@@ -33,6 +33,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_AUT
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.DOCUMENTS_URL;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubGetDocumentMetaData;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubNotFoundGetDocumentMetaData;
+import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubPatchDocumentMetaDataFailure;
 import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubPatchDocumentMetaData;
 
 // Fix the test salt so the expected SHA-256 values are independent of the production hashing helper.
@@ -218,6 +219,24 @@ class DocumentTokenGenerationIT extends BaseTest implements TestFixture {
         );
 
         assertUnauthorizedWithoutDocumentLookup(headers);
+    }
+
+    @Test
+    void shouldNotReturnTokenWhenMetadataDefaultingPatchFails() throws Exception {
+        final Document document = Document.builder()
+            .metadata(Map.of(METADATA_JURISDICTION_ID, "BULKSCAN"))
+            .build();
+        stubGetDocumentMetaData(document);
+        stubPatchDocumentMetaDataFailure();
+
+        mockMvc.perform(get(TOKEN_URL)
+                            .headers(createHttpHeaders(SERVICE_NAME_BULK_SCAN_ORCHESTRATOR)))
+            .andExpect(status().isBadGateway())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.hashToken").doesNotExist());
+
+        verify(getRequestedFor(urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID)));
+        verify(1, patchRequestedFor(urlPathEqualTo("/documents")));
     }
 
     private void assertUnauthorizedWithoutDocumentLookup(final HttpHeaders headers) throws Exception {
