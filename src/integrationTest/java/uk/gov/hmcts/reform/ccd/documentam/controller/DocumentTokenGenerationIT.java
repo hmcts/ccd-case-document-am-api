@@ -37,6 +37,7 @@ import static uk.gov.hmcts.reform.ccd.documentam.fixtures.WiremockFixtures.stubP
 class DocumentTokenGenerationIT extends BaseTest implements TestFixture {
 
     private static final String SERVICE_NAME_BULK_SCAN_ORCHESTRATOR = "bulk_scan_orchestrator";
+    private static final String SERVICE_NAME_BULK_SCAN_PROCESSOR = "bulk_scan_processor";
     private static final String TOKEN_URL = "/cases/documents/" + DOCUMENT_ID + "/token";
 
     @Autowired
@@ -131,6 +132,33 @@ class DocumentTokenGenerationIT extends BaseTest implements TestFixture {
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.GENERATE_HASH_CODE,
                 SERVICE_NAME_XUI_WEBAPP,
+                List.of(DOCUMENT_ID.toString()),
+                null,
+                null,
+                null));
+
+        verify(getRequestedFor(urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID)));
+        verify(0, patchRequestedFor(urlPathEqualTo("/documents")));
+    }
+
+    @Test
+    void shouldRejectTokenGenerationForBulkScanProcessor() throws Exception {
+        final Document document = Document.builder()
+            .metadata(Map.of(
+                METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE,
+                METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE))
+            .build();
+        stubGetDocumentMetaData(document);
+
+        mockMvc.perform(get(TOKEN_URL)
+                            .headers(createHttpHeaders(SERVICE_NAME_BULK_SCAN_PROCESSOR)))
+            .andExpect(status().isForbidden())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.error", is("Forbidden: Insufficient permissions: " + DOCUMENT_ID)))
+            .andExpect(jsonPath("$.hashToken").doesNotExist())
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.GENERATE_HASH_CODE,
+                SERVICE_NAME_BULK_SCAN_PROCESSOR,
                 List.of(DOCUMENT_ID.toString()),
                 null,
                 null,
