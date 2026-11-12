@@ -31,3 +31,6 @@ bin/main/
 
 applicationinsights-agent-*.jar
 *.log
+
+### ASDF
+.tool-versions
