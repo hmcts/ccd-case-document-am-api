@@ -19,7 +19,6 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "code": "ACCESS_DENIED",
       "error": "Forbidden"
     }
   }

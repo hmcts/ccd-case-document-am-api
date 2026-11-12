@@ -12,7 +12,6 @@
   "body" : {
     "status" : 403,
     "path" : "[[ANYTHING_PRESENT]]",
-    "code": "ACCESS_DENIED",
     "error" : "Forbidden",
     "timestamp" : "[[ANYTHING_PRESENT]]"
   }

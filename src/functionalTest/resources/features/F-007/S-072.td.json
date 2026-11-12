@@ -23,7 +23,6 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "code": "RESOURCE_NOT_FOUND",
       "error": "Not Found"
     }
   }

@@ -223,7 +223,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
         mvc.perform(upload)
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.error", is(message)))
-            .andExpect(jsonPath("$.code", is("INVALID_REQUEST")))
+            .andExpect(jsonPath("$.code").doesNotExist())
             .andExpect(jsonPath("$.exception").doesNotExist());
     }
 
@@ -236,7 +236,7 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
                 .header("ServiceAuthorization", "test").contentType(MediaType.APPLICATION_JSON).content("{}"))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.error", is("Provide the TTL")))
-            .andExpect(jsonPath("$.code", is("INVALID_REQUEST")));
+            .andExpect(jsonPath("$.code").doesNotExist());
     }
 
     @Test

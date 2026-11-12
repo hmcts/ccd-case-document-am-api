@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.ccd.documentam.security;
 
+import uk.gov.hmcts.reform.ccd.documentam.logging.FailureDiagnostics;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -34,14 +36,18 @@ public class SafeAuthenticationErrors implements AuthenticationEntryPoint, Acces
             }
         }
         ErrorCode code = ErrorCode.fromStatus(status.value());
-        log.warn("Authentication failed: code={} status={}", code, status.value(), exception);
+        try (var diagnostics = FailureDiagnostics.open(exception, status.value())) {
+            log.warn("Authentication failed: code={} status={}", code, status.value(), exception);
+        }
         response.setHeader(HttpHeaders.WWW_AUTHENTICATE, challenge);
         response.setStatus(status.value());
     }
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException exception) {
-        log.warn("Access denied: code={} status=403", ErrorCode.ACCESS_DENIED, exception);
+        try (var diagnostics = FailureDiagnostics.open(exception, 403)) {
+            log.warn("Access denied: code={} status=403", ErrorCode.ACCESS_DENIED, exception);
+        }
         response.setHeader(HttpHeaders.WWW_AUTHENTICATE,
             request.getUserPrincipal() instanceof AbstractOAuth2TokenAuthenticationToken<?>
                 ? "Bearer error=\"insufficient_scope\"" : "Bearer");

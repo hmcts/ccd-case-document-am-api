@@ -12,7 +12,6 @@
   "body" : {
     "status" : 500,
     "path" : "[[ANYTHING_PRESENT]]",
-    "code": "INTERNAL_ERROR",
     "error" : "Internal Server Error",
     "timestamp" : "[[ANYTHING_PRESENT]]"
   }

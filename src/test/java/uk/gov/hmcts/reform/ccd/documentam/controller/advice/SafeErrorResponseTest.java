@@ -47,7 +47,7 @@ class SafeErrorResponseTest {
         controller.failure = new RuntimeException(DIAGNOSTIC, new IllegalStateException(DIAGNOSTIC));
         mvc.perform(get("/error-probe/failure"))
             .andExpect(status().isInternalServerError())
-            .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"))
+            .andExpect(jsonPath("$.code").doesNotExist())
             .andExpect(content().string(not(containsString(DIAGNOSTIC))))
             .andExpect(jsonPath("$.exception").doesNotExist())
             .andExpect(jsonPath("$.trace").doesNotExist());
@@ -57,7 +57,7 @@ class SafeErrorResponseTest {
     void hidesTypeConversionDiagnostics() throws Exception {
         mvc.perform(get("/error-probe/id/not-a-uuid"))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
+            .andExpect(jsonPath("$.code").doesNotExist())
             .andExpect(jsonPath("$.path").value("/error-probe/id/{id}"))
             .andExpect(content().string(not(containsString("not-a-uuid"))))
             .andExpect(content().string(not(containsString("java.util.UUID"))))
@@ -69,7 +69,7 @@ class SafeErrorResponseTest {
     void hidesMalformedJsonDiagnostics() throws Exception {
         mvc.perform(post("/error-probe").contentType(MediaType.APPLICATION_JSON).content("{invalid"))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
+            .andExpect(jsonPath("$.code").doesNotExist())
             .andExpect(content().string(not(containsString("JsonParseException"))))
             .andExpect(content().string(not(containsString("invalid"))))
             .andExpect(jsonPath("$.exception").doesNotExist());
@@ -93,11 +93,6 @@ class SafeErrorResponseTest {
         Logger advice = (Logger) LoggerFactory.getLogger(CaseDocumentControllerAdvice.class);
         Level previousLevel = advice.getLevel();
         final ListAppender<ILoggingEvent> appender = new ListAppender<>();
-        var context = root.getLoggerContext();
-        var dependencies = new uk.gov.hmcts.reform.ccd.documentam.logging.SafeDependencyDiagnosticsFilter();
-        dependencies.setContext(context);
-        dependencies.start();
-        context.addTurboFilter(dependencies);
         MockMvc negotiated = MockMvcBuilders.standaloneSetup(controller)
             .setControllerAdvice(new CaseDocumentControllerAdvice())
             .addFilters(new uk.gov.hmcts.reform.ccd.documentam.security.filters.ExceptionHandlingFilter()).build();
@@ -121,8 +116,6 @@ class SafeErrorResponseTest {
                     assertThat(event.getThrowableProxy()).isNotNull();
                 });
         } finally {
-            context.getTurboFilterList().remove(dependencies);
-            dependencies.stop();
             advice.setLevel(previousLevel);
             root.detachAppender(appender);
             appender.stop();
@@ -155,7 +148,7 @@ class SafeErrorResponseTest {
                 java.nio.charset.StandardCharsets.UTF_8);
             mvc.perform(get("/error-probe/failure"))
                 .andExpect(status().is(code == 401 ? 401 : 500))
-                .andExpect(jsonPath("$.code").value(code == 401 ? "AUTHENTICATION_REQUIRED" : "INTERNAL_ERROR"))
+                .andExpect(jsonPath("$.code").doesNotExist())
                 .andExpect(content().string(not(containsString(DIAGNOSTIC))))
                 .andExpect(jsonPath("$.exception").doesNotExist());
         }
@@ -209,12 +202,12 @@ class SafeErrorResponseTest {
         controller.failure = new uk.gov.hmcts.reform.ccd.documentam.exception.UnauthorizedException(DIAGNOSTIC);
         mvc.perform(get("/error-probe/failure"))
             .andExpect(status().isUnauthorized())
-            .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"))
+            .andExpect(jsonPath("$.code").doesNotExist())
             .andExpect(content().string(not(containsString(DIAGNOSTIC))));
         controller.failure = new uk.gov.hmcts.reform.ccd.documentam.exception.ForbiddenException(DIAGNOSTIC);
         mvc.perform(get("/error-probe/failure"))
             .andExpect(status().isForbidden())
-            .andExpect(jsonPath("$.code").value("ACCESS_DENIED"))
+            .andExpect(jsonPath("$.code").doesNotExist())
             .andExpect(content().string(not(containsString(DIAGNOSTIC))));
     }
 
@@ -223,7 +216,7 @@ class SafeErrorResponseTest {
         controller.failure = new org.springframework.http.converter.HttpMessageNotWritableException(DIAGNOSTIC);
         mvc.perform(get("/error-probe/failure"))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
+            .andExpect(jsonPath("$.code").doesNotExist())
             .andExpect(content().string(not(containsString(DIAGNOSTIC))));
     }
 

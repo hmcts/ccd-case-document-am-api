@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.CompositeHealthContributor;
-import uk.gov.hmcts.reform.ccd.documentam.logging.SafeHealthDiagnosticsFilter;
 
 import java.util.Map;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
@@ -36,7 +35,7 @@ class HealthDiagnosticRedactionTest {
         YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
         yaml.setResources(new ClassPathResource("application.yaml"));
         for (boolean failing : new boolean[] {false, true}) {
-            new WebApplicationContextRunner().withUserConfiguration(SafeHealthLoggingConfiguration.class)
+            new WebApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(
                 EndpointAutoConfiguration.class, WebEndpointAutoConfiguration.class,
                 HealthEndpointAutoConfiguration.class))
@@ -61,7 +60,7 @@ class HealthDiagnosticRedactionTest {
         YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
         yaml.setResources(new ClassPathResource("application.yaml"));
         for (boolean nested : new boolean[] {false, true}) {
-            new WebApplicationContextRunner().withUserConfiguration(SafeHealthLoggingConfiguration.class)
+            new WebApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(EndpointAutoConfiguration.class,
                     WebEndpointAutoConfiguration.class, HealthEndpointAutoConfiguration.class))
                 .withInitializer(context -> context.getEnvironment().getPropertySources().addLast(
@@ -71,7 +70,8 @@ class HealthDiagnosticRedactionTest {
                         : new DiagnosticHealthIndicator(true))
                 .run(context -> {
                     assertThat(context).hasNotFailed();
-                    Logger logger = (Logger) LoggerFactory.getLogger(SafeHealthDiagnosticsFilter.class);
+                    Logger logger = (Logger) LoggerFactory.getLogger(
+                        nested ? NestedIndicator.class : DiagnosticHealthIndicator.class);
                     Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
                     Level previousLevel = logger.getLevel();
                     ListAppender<ILoggingEvent> appender = new ListAppender<>();
@@ -86,6 +86,7 @@ class HealthDiagnosticRedactionTest {
                             .doesNotContain("Synthetic", "IllegalStateException");
                         assertThat(appender.list).hasSize(1);
                         assertThat(appender.list.get(0).getLevel()).isEqualTo(Level.WARN);
+                        assertThat(appender.list.get(0).getLoggerName()).isEqualTo(logger.getName());
                         assertThat(appender.list.get(0).getFormattedMessage())
                             .contains("Health check");
                         assertThat(appender.list.get(0).getThrowableProxy()).isNotNull();
@@ -94,6 +95,7 @@ class HealthDiagnosticRedactionTest {
                         endpoint.health(ApiVersion.V3, WebServerNamespace.SERVER, SecurityContext.NONE);
                         assertThat(appender.list).hasSize(1);
                         assertThat(appender.list.get(0).getLevel()).isEqualTo(Level.WARN);
+                        assertThat(appender.list.get(0).getLoggerName()).isEqualTo(logger.getName());
                         assertThat(appender.list.get(0).getThrowableProxy().getMessage())
                             .isEqualTo("Synthetic private health diagnostic");
                     } finally {

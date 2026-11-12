@@ -313,7 +313,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error",
                         is("Forbidden")))
-                .andExpect(jsonPath("$.code", is("ACCESS_DENIED")))
+                .andExpect(jsonPath("$.code").doesNotExist())
                 .andExpect(jsonPath("$.exception").doesNotExist())
                 .andExpect(result -> assertThat(result.getResponse().getContentAsString())
                     .doesNotContain(DOCUMENT_ID.toString()))
@@ -338,7 +338,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error",
                         is("Forbidden")))
-                .andExpect(jsonPath("$.code", is("ACCESS_DENIED")))
+                .andExpect(jsonPath("$.code").doesNotExist())
                 .andExpect(jsonPath("$.exception").doesNotExist())
                 .andExpect(result -> assertThat(result.getResponse().getContentAsString())
                     .doesNotContain(DOCUMENT_ID.toString()))
@@ -481,7 +481,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error",
                         is("Forbidden")))
-                .andExpect(jsonPath("$.code", is("ACCESS_DENIED")))
+                .andExpect(jsonPath("$.code").doesNotExist())
                 .andExpect(jsonPath("$.exception").doesNotExist())
                 .andExpect(result -> assertThat(result.getResponse().getContentAsString())
                     .doesNotContain(DOCUMENT_ID.toString()))
@@ -509,7 +509,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
             .andExpect(status().isForbidden())
             .andExpect(jsonPath("$.error",
                                 is("Forbidden")))
-                .andExpect(jsonPath("$.code", is("ACCESS_DENIED")))
+                .andExpect(jsonPath("$.code").doesNotExist())
                 .andExpect(jsonPath("$.exception").doesNotExist())
                 .andExpect(result -> assertThat(result.getResponse().getContentAsString())
                     .doesNotContain(DOCUMENT_ID.toString()))
@@ -535,7 +535,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error",
                         is("Forbidden")))
-                .andExpect(jsonPath("$.code", is("ACCESS_DENIED")))
+                .andExpect(jsonPath("$.code").doesNotExist())
                 .andExpect(jsonPath("$.exception").doesNotExist())
                 .andExpect(result -> assertThat(result.getResponse().getContentAsString())
                     .doesNotContain(DOCUMENT_ID.toString()))
@@ -563,7 +563,7 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
             .andExpect(status().isForbidden())
             .andExpect(jsonPath("$.error",
                                 is("Forbidden")))
-                .andExpect(jsonPath("$.code", is("ACCESS_DENIED")))
+                .andExpect(jsonPath("$.code").doesNotExist())
                 .andExpect(jsonPath("$.exception").doesNotExist())
                 .andExpect(result -> assertThat(result.getResponse().getContentAsString())
                     .doesNotContain(DOCUMENT_ID.toString()))

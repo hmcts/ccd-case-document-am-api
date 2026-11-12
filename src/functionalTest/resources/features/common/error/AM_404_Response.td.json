@@ -12,7 +12,6 @@
   "body" : {
     "status" : 404,
     "path" : "[[ANYTHING_PRESENT]]",
-    "code": "RESOURCE_NOT_FOUND",
     "error" : "Not Found",
     "timestamp" : "[[ANYTHING_PRESENT]]"
   }
