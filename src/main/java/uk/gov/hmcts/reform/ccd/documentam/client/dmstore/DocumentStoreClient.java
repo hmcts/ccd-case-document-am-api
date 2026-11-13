@@ -282,6 +282,12 @@ public class DocumentStoreClient {
         bodyMap.set("metadata[jurisdiction]", documentUploadRequest.getJurisdictionId());
         bodyMap.set("metadata[case_type_id]", documentUploadRequest.getCaseTypeId());
         bodyMap.set("ttl", getEffectiveTTL());
+        if (documentUploadRequest.isPendingAccess()) {
+            bodyMap.set("metadata[pending_access_controlled]", "true");
+            if (documentUploadRequest.getCaseId() != null) {
+                bodyMap.set("metadata[pending_case_id]", documentUploadRequest.getCaseId());
+            }
+        }
 
         documentUploadRequest.getFiles()
             .forEach(file -> bodyMap.add(Constants.FILES, file.getResource()));
@@ -399,6 +405,12 @@ public class DocumentStoreClient {
         builder.addTextBody("metadata[jurisdiction]", documentUploadRequest.getJurisdictionId());
         builder.addTextBody("metadata[case_type_id]", documentUploadRequest.getCaseTypeId());
         builder.addTextBody("ttl", getEffectiveTTL());
+        if (documentUploadRequest.isPendingAccess()) {
+            builder.addTextBody("metadata[pending_access_controlled]", "true");
+            if (documentUploadRequest.getCaseId() != null) {
+                builder.addTextBody("metadata[pending_case_id]", documentUploadRequest.getCaseId());
+            }
+        }
 
         for (MultipartFile fileInfo : documentUploadRequest.getFiles()) {
             InputStream inputStream = fileInfo.getInputStream();
