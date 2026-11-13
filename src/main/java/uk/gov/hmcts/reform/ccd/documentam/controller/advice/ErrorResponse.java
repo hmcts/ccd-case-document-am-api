@@ -11,8 +11,6 @@ public class ErrorResponse {
 
     private final String error;
 
-    private final String exception;
-
     private final String timestamp;
 
     private final String path;

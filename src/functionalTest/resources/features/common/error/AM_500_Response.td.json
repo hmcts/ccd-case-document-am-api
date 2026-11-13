@@ -12,8 +12,7 @@
   "body" : {
     "status" : 500,
     "path" : "[[ANYTHING_PRESENT]]",
-    "exception" : "[[ANYTHING_PRESENT]]",
-    "error" : "[[ANYTHING_PRESENT]]",
+    "error" : "Internal Server Error",
     "timestamp" : "[[ANYTHING_PRESENT]]"
   }
 }

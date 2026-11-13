@@ -36,7 +36,7 @@ public class ApplicationUtils {
 
             return hashText.toString();
         } catch (NoSuchAlgorithmException exception) {
-            log.error("Error while generating the hashcode :", exception);
+            log.error("Error while generating the hashcode", exception);
         }
         return null;
     }

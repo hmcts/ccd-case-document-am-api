@@ -1,4 +1,11 @@
 server:
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+    whitelabel:
+      enabled: false
   port: ${PORT:4455}
 
 audit:
@@ -12,7 +19,7 @@ audit:
 management:
   endpoint:
     health:
-      show-details: "always"
+      show-details: "never"
       cache:
         time-to-live: 10s
     loggers:
