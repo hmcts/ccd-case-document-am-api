@@ -26,7 +26,7 @@ class AuthServicesJsonPropertySourceFactoryTest extends BaseTest {
             .satisfies(service -> {
                 assertThat(service.getId()).isEqualTo(SERVICE_ID);
                 assertThat(service.getCaseTypeId().size()).isEqualTo(1);
-                assertThat(service.getJurisdictionId()).isEqualTo(JURISDICTION_ID);
+                assertThat(service.getJurisdictionId()).containsExactly(JURISDICTION_ID);
                 assertThat(service.getCaseTypeId()).contains(CASE_TYPE_ID_ALL_WILDCARD);
                 assertThat(service.getPermissions()).contains(Permission.CREATE);
             });

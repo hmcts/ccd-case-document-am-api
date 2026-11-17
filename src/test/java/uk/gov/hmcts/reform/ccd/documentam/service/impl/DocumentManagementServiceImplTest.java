@@ -241,6 +241,34 @@ class DocumentManagementServiceImplTest implements TestFixture {
     }
 
     @Test
+    void checkServicePermission_AllowsJurisdictionInMultiJurisdictionList() {
+        final AuthorisedService authorisedService = mockAuthorisedServiceWithJurisdictions(List.of("A", "B"));
+
+        final AuthorisedService result = sut.checkServicePermission(
+            CASE_TYPE_ID_VALUE,
+            "B",
+            SERVICE_NAME_XUI_WEBAPP,
+            Permission.READ,
+            "log string",
+            "exception string");
+
+        assertThat(result).isSameAs(authorisedService);
+    }
+
+    @Test
+    void checkServicePermission_DeniesJurisdictionNotInMultiJurisdictionList() {
+        mockAuthorisedServiceWithJurisdictions(List.of("A", "B"));
+
+        assertThrows(ForbiddenException.class, () -> sut.checkServicePermission(
+            CASE_TYPE_ID_VALUE,
+            "C",
+            SERVICE_NAME_XUI_WEBAPP,
+            Permission.READ,
+            "log string",
+            "exception string"));
+    }
+
+    @Test
     void checkUserPermission_Throws_CaseNotFoundException() {
         final Document document = buildDocument("1234567890123456", "", "");
 
@@ -966,6 +994,18 @@ class DocumentManagementServiceImplTest implements TestFixture {
             .build();
 
         doReturn(List.of(authorisedService)).when(authorisedServicesMock).getAuthServices();
+    }
+
+    private AuthorisedService mockAuthorisedServiceWithJurisdictions(List<String> jurisdictionIds) {
+        final AuthorisedService authorisedService = AuthorisedService.builder()
+            .id(SERVICE_NAME_XUI_WEBAPP)
+            .caseTypeId(List.of(CASE_TYPE_ID_VALUE))
+            .jurisdictionId(jurisdictionIds)
+            .permissions(List.of(Permission.READ))
+            .build();
+
+        doReturn(List.of(authorisedService)).when(authorisedServicesMock).getAuthServices();
+        return authorisedService;
     }
 
 }

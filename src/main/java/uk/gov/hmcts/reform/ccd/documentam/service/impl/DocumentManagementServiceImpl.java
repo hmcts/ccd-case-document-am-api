@@ -389,8 +389,8 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
                                            Permission permission) {
         boolean result =
             (StringUtils.isEmpty(jurisdictionId) && serviceConfig.getJurisdictionIdOptionalFor().contains(permission))
-            || (!StringUtils.isEmpty(jurisdictionId) && (serviceConfig.getJurisdictionId().equals("*")
-                || serviceConfig.getJurisdictionId().equals(jurisdictionId)));
+            || (!StringUtils.isEmpty(jurisdictionId) && (serviceConfig.getJurisdictionId().contains("*")
+                || serviceConfig.getJurisdictionId().contains(jurisdictionId)));
 
         log.info("JurisdictionI Id is {} and validation result is {}", jurisdictionId, result);
 
