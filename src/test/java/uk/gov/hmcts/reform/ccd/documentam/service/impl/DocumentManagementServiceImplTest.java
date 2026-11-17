@@ -838,7 +838,7 @@ class DocumentManagementServiceImplTest implements TestFixture {
 
         doNothing().when(documentStoreClient).patchDocumentMetadata(any(UpdateDocumentsCommand.class));
 
-        final String defaultJurisdiction = "BULKSCAN";
+        final String defaultJurisdiction = "AUTOTEST1";
         final String result = sut.generateHashToken(DOCUMENT_ID, AuthorisedService.builder()
             .defaultJurisdictionForTokenGeneration(defaultJurisdiction)
             .jurisdictionIdOptionalFor(List.of(Permission.HASHTOKEN))
