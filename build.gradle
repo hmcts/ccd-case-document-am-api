@@ -86,18 +86,6 @@ application {
   mainClass = 'uk.gov.hmcts.reform.ccd.documentam.Application'
 }
 
-jacocoTestCoverageVerification {
-  violationRules {
-    rule {
-      limit {
-        counter = 'LINE'
-        value = 'COVEREDRATIO'
-        minimum = 0.0
-      }
-    }
-  }
-}
-
 sourceSets {
   functionalTest {
     java {
@@ -171,6 +159,22 @@ task integration(type: Test, description: 'Runs the integration tests.', group: 
   classpath = sourceSets.integrationTest.runtimeClasspath
   finalizedBy aggregate
 }
+
+jacocoTestCoverageVerification {
+  dependsOn test, integration
+  executionData(test, integration)
+  violationRules {
+    rule {
+      limit {
+        counter = 'LINE'
+        value = 'COVEREDRATIO'
+        minimum = 0.90
+      }
+    }
+  }
+}
+
+check.dependsOn jacocoTestCoverageVerification
 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
   setTestClassesDirs(sourceSets.functionalTest.output.classesDirs)
@@ -309,7 +313,7 @@ dependencies {
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '8.0.0'
 
 
-  implementation group: 'com.auth0', name: 'java-jwt', version: '4.5.0'
+  implementation group: 'com.auth0', name: 'java-jwt', version: '4.6.2'
   implementation group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.2.2'
   implementation group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: '4.9.3'
   implementation group: 'com.microsoft.azure', name: 'applicationinsights-spring-boot-starter', version: '2.6.4'
