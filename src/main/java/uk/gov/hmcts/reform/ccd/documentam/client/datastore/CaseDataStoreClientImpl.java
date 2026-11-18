@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.ccd.documentam.client.datastore;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +44,28 @@ public class CaseDataStoreClientImpl implements CaseDataStoreClient {
         this.restTemplate = restTemplate;
         this.caseDataStoreUrl = caseDataStoreUrl;
         this.securityUtils = securityUtils;
+    }
+
+    @Override
+    public void checkCaseAccess(String caseId, String caseTypeId, String jurisdictionId) {
+        if (caseId == null || !caseId.matches("[0-9]{16}")
+            || StringUtils.isBlank(caseTypeId) || StringUtils.isBlank(jurisdictionId)) {
+            throw new ForbiddenException("Pending document case context is not accessible");
+        }
+        try {
+            final ResponseEntity<JsonNode> response = restTemplate.exchange(
+                String.format("%s/cases/%s", caseDataStoreUrl, caseId), HttpMethod.GET,
+                new HttpEntity<>(prepareRequestForUpload()), JsonNode.class);
+            final JsonNode body = response.getBody();
+            if (!response.getStatusCode().is2xxSuccessful() || body == null
+                || !caseId.equals(body.path("id").asText())
+                || !caseTypeId.equals(body.path("case_type").asText())
+                || !jurisdictionId.equals(body.path("jurisdiction").asText())) {
+                throw new ForbiddenException("Pending document case context is not accessible");
+            }
+        } catch (HttpClientErrorException exception) {
+            throw new ForbiddenException("Pending document case context is not accessible");
+        }
     }
 
     @Override

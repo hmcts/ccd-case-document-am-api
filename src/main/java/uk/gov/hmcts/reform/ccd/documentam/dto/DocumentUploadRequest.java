@@ -20,6 +20,13 @@ import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.JURISDICTIO
 
 @Data
 public class DocumentUploadRequest {
+    @Parameter(description = "Restrict the pending upload to its authenticated creator")
+    private boolean pendingAccess;
+
+    @Parameter(description = "Existing case binding for a controlled pending upload")
+    @Pattern(regexp = "^[0-9]{16}$", message = "Case ID must contain 16 digits")
+    private String caseId;
+
     @Parameter(description = "List of file to be uploaded", required = true)
     @NotNull(message = "Provide some file to be uploaded")
     @Size(min = 1, message = "Please provide at least one file to be uploaded.")
