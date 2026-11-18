@@ -9,6 +9,7 @@ import com.nimbusds.jwt.SignedJWT;
 import io.jsonwebtoken.Jwts;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditRepository;
 import uk.gov.hmcts.reform.ccd.documentam.configuration.AuditConfiguration;
 import uk.gov.hmcts.reform.ccd.documentam.utils.KeyGenUtil;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
@@ -54,15 +56,29 @@ public class BaseTest {
     @Autowired
     protected AuditRepository auditRepository;
 
-    public static HttpHeaders createHttpHeaders(String serviceName) throws JOSEException {
-        return createHttpHeaders(AUTH_TOKEN_TTL, serviceName, AUTH_TOKEN_TTL);
+    @Value("${oidc.issuer}")
+    private String oidcIssuer;
+
+    protected HttpHeaders createHttpHeaders(String serviceName) throws JOSEException {
+        return createHttpHeaders(AUTH_TOKEN_TTL, oidcIssuer, serviceName, AUTH_TOKEN_TTL);
     }
 
-    protected static HttpHeaders createHttpHeaders(long authTtlMillis,
+    protected HttpHeaders createHttpHeaders(String tokenIssuer, String serviceName) throws JOSEException {
+        return createHttpHeaders(AUTH_TOKEN_TTL, tokenIssuer, serviceName, AUTH_TOKEN_TTL);
+    }
+
+    protected HttpHeaders createHttpHeaders(long authTtlMillis,
                                             String serviceName,
-                                            long s2sAuthTtlMillis)  throws JOSEException {
+                                            long s2sAuthTtlMillis) throws JOSEException {
+        return createHttpHeaders(authTtlMillis, oidcIssuer, serviceName, s2sAuthTtlMillis);
+    }
+
+    protected HttpHeaders createHttpHeaders(long authTtlMillis,
+                                            String tokenIssuer,
+                                            String serviceName,
+                                            long s2sAuthTtlMillis) throws JOSEException {
         HttpHeaders headers = new HttpHeaders();
-        String authToken = BEARER + generateAuthToken(authTtlMillis);
+        String authToken = BEARER + generateAuthToken(authTtlMillis, tokenIssuer);
         headers.add(AUTHORIZATION, authToken);
         String s2SToken = generateS2SToken(serviceName, s2sAuthTtlMillis);
         headers.add(SERVICE_AUTHORIZATION, s2SToken);
@@ -143,13 +159,40 @@ public class BaseTest {
         }
     }
 
-    private static String generateAuthToken(long ttlMillis) throws JOSEException {
+    public static String generateAuthToken(long ttlMillis, String tokenIssuer) throws JOSEException {
 
         JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder()
             .subject("API_Stub")
             .issueTime(new Date())
             .claim(TOKEN_NAME, ACCESS_TOKEN)
             .expirationTime(new Date(System.currentTimeMillis() + ttlMillis));
+
+        if (tokenIssuer != null) {
+            builder.issuer(tokenIssuer);
+        }
+
+        SignedJWT signedJWT = new SignedJWT(
+            new JWSHeader.Builder(JWSAlgorithm.RS256)
+                .keyID(KeyGenUtil.getRsaJWK().getKeyID()).build(),
+            builder.build()
+        );
+        signedJWT.sign(new RSASSASigner(KeyGenUtil.getRsaJWK()));
+
+        return signedJWT.serialize();
+    }
+
+    public static String generateAuthToken(String tokenIssuer,
+                                           Instant issuedAt,
+                                           Instant expiresAt) throws JOSEException {
+        JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder()
+            .subject("API_Stub")
+            .issueTime(Date.from(issuedAt))
+            .claim(TOKEN_NAME, ACCESS_TOKEN)
+            .expirationTime(Date.from(expiresAt));
+
+        if (tokenIssuer != null) {
+            builder.issuer(tokenIssuer);
+        }
 
         SignedJWT signedJWT = new SignedJWT(
             new JWSHeader.Builder(JWSAlgorithm.RS256)
