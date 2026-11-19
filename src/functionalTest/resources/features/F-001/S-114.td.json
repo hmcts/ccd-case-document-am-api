@@ -18,7 +18,7 @@
       "Content-Length": "[[ANYTHING_PRESENT]]"
     },
     "body": {
-      "error": "Forbidden: Insufficient permissions: Document ${[scenarioContext][testData][request][pathVariables][documentId]} can not be downloaded as TTL has expired"
+      "error": "Forbidden"
     }
   }
 }
