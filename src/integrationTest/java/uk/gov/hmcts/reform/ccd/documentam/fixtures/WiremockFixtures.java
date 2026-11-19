@@ -27,6 +27,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
 import static java.net.HttpURLConnection.HTTP_OK;
+import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static uk.gov.hmcts.reform.ccd.documentam.TestFixture.objectToJsonString;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.BEARER;
@@ -97,6 +98,14 @@ public class WiremockFixtures implements TestFixture {
                                     .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
     }
 
+    public static void stubNotFoundGetDocumentMetaData(final UUID documentId) {
+        stubFor(WireMock.get(urlPathEqualTo(DOCUMENTS_URL + documentId))
+                    .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
+                    .willReturn(aResponse()
+                                    .withStatus(HTTP_NOT_FOUND)
+                                    .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
+    }
+
     public static void stubDeleteDocumentByDocumentId() {
         stubFor(WireMock.delete(urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID))
                     .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
@@ -149,6 +158,13 @@ public class WiremockFixtures implements TestFixture {
                                     .withStatus(HTTP_OK)
                                     .withBody(objectToJsonString(response))
                                     .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
+    }
+
+    public static void stubPatchDocumentMetaDataFailure() {
+        stubFor(WireMock.patch(urlPathEqualTo("/documents"))
+                    .withHeader(SERVICE_AUTHORIZATION, equalTo(SERVICE_AUTHORISATION_VALUE))
+                    .withRequestBody(containing("\"ttl\":null"))
+                    .willReturn(aResponse().withStatus(HTTP_INTERNAL_ERROR)));
     }
 
     private static CaseDocumentMetadata getCaseDocumentMetaData(final List<Permission> permissionList) {
