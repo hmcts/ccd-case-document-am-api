@@ -151,6 +151,9 @@
       ],
       "caseTypeIdOptionalFor" : [
         "HASHTOKEN"
+      ],
+      "jurisdictionIdOptionalFor" : [
+        "HASHTOKEN"
       ]
     },
     {
