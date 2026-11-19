@@ -127,7 +127,8 @@
       "permissions": [
         "CREATE",
         "READ",
-        "UPDATE"
+        "UPDATE",
+        "DELETE"
       ]
     },
     {
@@ -228,7 +229,8 @@
       "permissions": [
         "CREATE",
         "READ",
-        "UPDATE"
+        "UPDATE",
+        "DELETE"
       ]
     },
     {

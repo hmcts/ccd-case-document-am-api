@@ -618,15 +618,9 @@ class CaseDocumentAmControllerTest implements TestFixture {
             .checkServicePermission(DOCUMENT.getCaseTypeId(),
                                     DOCUMENT.getJurisdictionId(),
                                     SERVICE_NAME_XUI_WEBAPP,
-                                    Permission.UPDATE,
+                                    Permission.DELETE,
                                     SERVICE_PERMISSION_ERROR,
                                     MATCHED_DOCUMENT_ID.toString());
-        doNothing().when(documentManagementService)
-            .checkUserPermission(DOCUMENT.getCaseId(),
-                                 MATCHED_DOCUMENT_ID,
-                                 Permission.UPDATE,
-                                 USER_PERMISSION_ERROR,
-                                 MATCHED_DOCUMENT_ID.toString());
         doNothing().when(documentManagementService).deleteDocument(MATCHED_DOCUMENT_ID, true);
 
         final ResponseEntity<Void> response = testee.deleteDocumentByDocumentId(MATCHED_DOCUMENT_ID,
@@ -635,7 +629,13 @@ class CaseDocumentAmControllerTest implements TestFixture {
 
         assertAll(
             () -> assertNotNull(response, VALID_RESPONSE),
-            () -> assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode(), NO_CONTENT_RESPONSE_CODE)
+            () -> assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode(), NO_CONTENT_RESPONSE_CODE),
+            () -> verify(documentManagementService).checkServicePermission(DOCUMENT.getCaseTypeId(),
+                                                                           DOCUMENT.getJurisdictionId(),
+                                                                           SERVICE_NAME_XUI_WEBAPP,
+                                                                           Permission.DELETE,
+                                                                           SERVICE_PERMISSION_ERROR,
+                                                                           MATCHED_DOCUMENT_ID.toString())
         );
     }
 
@@ -646,15 +646,9 @@ class CaseDocumentAmControllerTest implements TestFixture {
             .checkServicePermission(DOCUMENT.getCaseTypeId(),
                                     DOCUMENT.getJurisdictionId(),
                                     SERVICE_NAME_XUI_WEBAPP,
-                                    Permission.UPDATE,
+                                    Permission.DELETE,
                                     SERVICE_PERMISSION_ERROR,
                                     MATCHED_DOCUMENT_ID.toString());
-        doNothing().when(documentManagementService)
-            .checkUserPermission(DOCUMENT.getCaseId(),
-                                 MATCHED_DOCUMENT_ID,
-                                 Permission.UPDATE,
-                                 USER_PERMISSION_ERROR,
-                                 MATCHED_DOCUMENT_ID.toString());
 
         doNothing().when(documentManagementService).deleteDocument(MATCHED_DOCUMENT_ID, true);
 
