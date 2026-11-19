@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.ccd.documentam.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,8 +27,9 @@ public class AuthorisedService {
     @JsonProperty("caseTypeId")
     private List<String> caseTypeId;
 
+    @NotEmpty
     @JsonProperty("jurisdictionId")
-    private String jurisdictionId;
+    private List<String> jurisdictionId;
 
     @JsonProperty("defaultJurisdictionForTokenGeneration")
     private String defaultJurisdictionForTokenGeneration;
@@ -43,4 +47,10 @@ public class AuthorisedService {
     @Builder.Default
     @JsonProperty("jurisdictionIdOptionalFor")
     private List<Permission> jurisdictionIdOptionalFor = new ArrayList<>();
+
+    @JsonIgnore
+    @AssertTrue(message = "jurisdictionId: \"*\" must be the only element when present")
+    public boolean isJurisdictionIdWildcardAlone() {
+        return jurisdictionId == null || jurisdictionId.size() <= 1 || !jurisdictionId.contains("*");
+    }
 }
