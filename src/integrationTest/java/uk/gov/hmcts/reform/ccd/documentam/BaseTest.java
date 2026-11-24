@@ -9,20 +9,22 @@ import com.nimbusds.jwt.SignedJWT;
 import io.jsonwebtoken.Jwts;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.wiremock.spring.ConfigureWireMock;
+import org.wiremock.spring.EnableWireMock;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditEntry;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditOperationType;
 import uk.gov.hmcts.reform.ccd.documentam.auditlog.AuditRepository;
 import uk.gov.hmcts.reform.ccd.documentam.configuration.AuditConfiguration;
 import uk.gov.hmcts.reform.ccd.documentam.utils.KeyGenUtil;
+import uk.gov.hmcts.reform.ccd.documentam.wiremock.WireMockTestConfiguration;
 
 import java.util.Date;
 import java.util.List;
@@ -41,7 +43,12 @@ import static uk.gov.hmcts.reform.ccd.documentam.security.JwtGrantedAuthoritiesC
     Application.class
 })
 @AutoConfigureMockMvc
-@AutoConfigureWireMock(port = 0, stubs = "classpath:/wiremock-stubs")
+@EnableWireMock({
+    @ConfigureWireMock(
+        filesUnderClasspath = "wiremock-stubs",
+        configurationCustomizers = WireMockTestConfiguration.class
+        )
+})
 @ActiveProfiles("itest")
 public class BaseTest {
 

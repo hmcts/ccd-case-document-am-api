@@ -19,7 +19,9 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
+
 import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
+import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.exception.ResourceNotFoundException;
 import uk.gov.hmcts.reform.ccd.documentam.security.SecurityUtils;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
@@ -92,7 +94,8 @@ class DocumentStoreClientStreamingTest {
 
         when(applicationParams.getClientRequestHeadersToForward()).thenReturn(List.of("RANGE"));
 
-        documentStoreClient = new DocumentStoreClient(securityUtils, restTemplate, httpClient, applicationParams);
+        documentStoreClient = new DocumentStoreClient(securityUtils, restTemplate, httpClient, 
+                applicationParams, TestFixture.jsonMapper());
     }
 
     @Test

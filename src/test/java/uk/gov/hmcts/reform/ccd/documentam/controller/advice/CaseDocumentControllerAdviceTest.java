@@ -270,13 +270,13 @@ class CaseDocumentControllerAdviceTest implements TestFixture {
     }
 
     @Test
-    void testHandleHttpClientErrorExceptionWhenReceivedUnprocessableEntity() {
+    void testHandleHttpClientErrorExceptionWhenReceivedUnprocessableContent() {
         final HttpClientErrorException exception = HttpClientErrorException
-            .create(HttpStatus.UNPROCESSABLE_ENTITY, "myUniqueExceptionMessage", HttpHeaders.EMPTY,
+            .create(HttpStatus.UNPROCESSABLE_CONTENT, "myUniqueExceptionMessage", HttpHeaders.EMPTY,
                     "myUniqueExceptionMessage".getBytes(StandardCharsets.UTF_8), Charset.defaultCharset());
 
         final ResponseEntity<Object> responseEntity =
-            underTest.handleHttpClientUnprocessableEntityException(exception, request);
+            underTest.handleHttpClientUnprocessableContentException(exception, request);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), responseEntity.getStatusCode().value());

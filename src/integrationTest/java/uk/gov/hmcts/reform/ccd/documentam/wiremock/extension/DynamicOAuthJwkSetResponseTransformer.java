@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.ccd.documentam.wiremock.extension;
 
-import com.github.tomakehurst.wiremock.extension.Parameters;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.Response;
 import com.nimbusds.jose.JOSEException;
@@ -16,7 +15,7 @@ public class DynamicOAuthJwkSetResponseTransformer extends AbstractDynamicRespon
     static final String DYNAMIC_OAUTH_JWK_SET_RESPONSE_TRANSFORMER = "dynamic-oauth-jwk-set-response-transformer";
 
     @Override
-    protected String dynamicResponse(Request request, Response response, Parameters parameters) {
+    protected String dynamicResponse(Request request, Response response) {
 
         try {
 

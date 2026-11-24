@@ -7,9 +7,8 @@ import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junitsupport.State;
 import au.com.dius.pact.provider.junitsupport.loader.PactBroker;
 import au.com.dius.pact.provider.junitsupport.loader.VersionSelector;
-import au.com.dius.pact.provider.spring.spring6.Spring6MockMvcTestTarget;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import au.com.dius.pact.provider.spring.spring7.Spring7MockMvcTestTarget;
+
 import org.apache.commons.collections4.map.HashedMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestTemplate;
@@ -22,9 +21,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import tools.jackson.databind.json.JsonMapper;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UploadResponse;
 import uk.gov.hmcts.reform.ccd.documentam.model.AuthorisedService;
@@ -44,9 +45,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
+
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.SERVICE_PERMISSION_ERROR;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith({SpringExtension.class, MockitoExtension.class})
 @Provider("case-document-am-api")
 @PactBroker(url = "${PACT_BROKER_FULL_URL:http://localhost}",
     consumerVersionSelectors = {@VersionSelector(tag = "master")})
@@ -68,6 +72,9 @@ public class CaseDocumentAmProviderTest {
     @Autowired
     CaseDocumentAmController caseDocumentAmController;
 
+    @Autowired
+    JsonMapperBuilderCustomizer jsonMapperCustomizer;
+
     @TestTemplate
     @ExtendWith(PactVerificationInvocationContextProvider.class)
     void pactVerificationTestTemplate(PactVerificationContext context) {
@@ -78,14 +85,15 @@ public class CaseDocumentAmProviderTest {
 
     @BeforeEach
     void before(PactVerificationContext context) {
-        ObjectMapper objectMapper = new ObjectMapper()
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        Spring6MockMvcTestTarget testTarget = new Spring6MockMvcTestTarget();
+        JsonMapper.Builder jsonMapperBuilder = JsonMapper.builder();
+        jsonMapperCustomizer.customize(jsonMapperBuilder);
+        JsonMapper jsonMapper = jsonMapperBuilder.build();
+        Spring7MockMvcTestTarget testTarget = new Spring7MockMvcTestTarget();
         testTarget.setControllers(caseDocumentAmController);
         testTarget.setMessageConverters(
             new ByteArrayHttpMessageConverter(),
             new ResourceHttpMessageConverter(),
-            new MappingJackson2HttpMessageConverter(objectMapper)
+            new JacksonJsonHttpMessageConverter(jsonMapper)
         );
         if (context != null) {
             context.setTarget(testTarget);

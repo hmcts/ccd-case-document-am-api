@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.fixtures;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -115,7 +115,7 @@ public class WiremockFixtures implements TestFixture {
     }
 
     public static void stubNotFoundDeleteDocumentByDocumentId(final UUID random) {
-        final ObjectNode objectNode = TestFixture.objectMapper().createObjectNode();
+        final ObjectNode objectNode = TestFixture.jsonMapper().createObjectNode();
         objectNode.put("status", 404);
         objectNode.put("path", DOCUMENTS_URL + random);
         objectNode.put("error", "Delete error");

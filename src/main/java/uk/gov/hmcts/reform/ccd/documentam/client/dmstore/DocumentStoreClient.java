@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Either;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +30,9 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
+
 import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
 import uk.gov.hmcts.reform.ccd.documentam.dto.DocumentUploadRequest;
@@ -66,18 +67,20 @@ public class DocumentStoreClient {
     private final RestTemplate restTemplate;
     private final CloseableHttpClient httpClient;
     private final ApplicationParams applicationParams;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final JsonMapper jsonMapper;
     private final SecurityUtils securityUtils;
 
 
     @Autowired
     public DocumentStoreClient(SecurityUtils securityUtils, final RestTemplate restTemplate,
                                final CloseableHttpClient httpClient,
-                               final ApplicationParams applicationParams) {
+                               final ApplicationParams applicationParams,
+                               final JsonMapper jsonMapper) {
         this.securityUtils = securityUtils;
         this.restTemplate = restTemplate;
         this.httpClient = httpClient;
         this.applicationParams = applicationParams;
+        this.jsonMapper = jsonMapper;
     }
 
     @Retryable(retryFor = {HttpServerErrorException.class, SocketTimeoutException.class},
@@ -348,8 +351,8 @@ public class DocumentStoreClient {
         if (statusCode.is2xxSuccessful()) {
             if (responseBody != null && !responseBody.isEmpty()) {
                 try {
-                    return objectMapper.readValue(responseBody, DmUploadResponse.class);
-                } catch (JsonProcessingException e) {
+                    return jsonMapper.readValue(responseBody, DmUploadResponse.class);
+                } catch (JacksonException e) {
                     log.error("Failed to parse success response: {}", responseBody, e);
                     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                                                       "Failed to parse server response", e);
@@ -358,11 +361,11 @@ public class DocumentStoreClient {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Empty response from server");
         }
 
-        if (statusCode == HttpStatus.UNPROCESSABLE_ENTITY) {
-            String errorFallback = HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase();
+        if (statusCode == HttpStatus.UNPROCESSABLE_CONTENT) {
+            String errorFallback = HttpStatus.UNPROCESSABLE_CONTENT.getReasonPhrase();
 
             throw HttpClientErrorException.create(
-                HttpStatus.UNPROCESSABLE_ENTITY,
+                HttpStatus.UNPROCESSABLE_CONTENT,
                 errorFallback,
                 null,
                 responseBody != null ? responseBody.getBytes(StandardCharsets.UTF_8)

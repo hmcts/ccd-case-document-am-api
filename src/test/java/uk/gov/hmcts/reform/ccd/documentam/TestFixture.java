@@ -1,13 +1,15 @@
 package uk.gov.hmcts.reform.ccd.documentam;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
 import uk.gov.hmcts.reform.ccd.documentam.dto.UpdateTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.DmTtlRequest;
 import uk.gov.hmcts.reform.ccd.documentam.model.Document;
 import uk.gov.hmcts.reform.ccd.documentam.model.PatchDocumentResponse;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Instant;
@@ -75,20 +77,23 @@ public interface TestFixture {
             .build();
     }
 
-    static ObjectMapper objectMapper() {
-        final ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.findAndRegisterModules();
-        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+    public static JsonMapper jsonMapper() {
+        final JsonMapper jsonMapper = JsonMapper.builder()
+            .propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
+            .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .enable(DateTimeFeature.WRITE_UTC_AS_OFFSET)
+            .enable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+            .build();
 
-        return objectMapper;
+        return jsonMapper;
     }
 
     static String objectToJsonString(final Object object) {
         try {
-            final ObjectMapper objectMapper = objectMapper();
+            final JsonMapper jsonMapper = jsonMapper();
 
-            return objectMapper.writeValueAsString(object);
-        } catch (IOException e) {
+            return jsonMapper.writeValueAsString(object);
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }

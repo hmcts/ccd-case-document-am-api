@@ -11,10 +11,10 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
-import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.tomcat.TomcatWebServerFactory;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.CollectionUtils;
@@ -50,7 +50,7 @@ public class ApplicationConfiguration {
     private PoolingHttpClientConnectionManager cm;
 
     @PreDestroy
-    void close() {
+    public void close() {
         log.info("PreDestroy called");
         if (null != cm) {
             log.info("closing connection manager");
@@ -144,7 +144,7 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    public WebServerFactoryCustomizer<TomcatServletWebServerFactory> tomcatCustomizer() {
+    public WebServerFactoryCustomizer<TomcatWebServerFactory> tomcatCustomizer() {
         return factory ->
             factory.addConnectorCustomizers(connector -> connector.setMaxPartCount(-1));
     }
