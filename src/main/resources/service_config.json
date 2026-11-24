@@ -150,6 +150,9 @@
       ],
       "caseTypeIdOptionalFor" : [
         "HASHTOKEN"
+      ],
+      "jurisdictionIdOptionalFor" : [
+        "HASHTOKEN"
       ]
     },
     {
@@ -398,6 +401,7 @@
         "caseTypeId": ["*"],
         "jurisdictionId": "PT",
         "permissions": [
+          "ATTACH",
           "CREATE",
           "READ",
           "UPDATE",

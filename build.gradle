@@ -3,7 +3,7 @@ plugins {
   id 'checkstyle'
   id 'pmd'
   id 'jacoco'
-  id 'au.com.dius.pact' version '4.7.5'
+  id 'au.com.dius.pact' version '4.7.7'
   id 'io.github.ben-manes.versions' version '0.66.0'
   id 'com.github.spacialcircumstances.gradle-cucumber-reporting' version '0.1.25'
   id 'info.solidsoft.pitest' version '1.19.0'
@@ -43,6 +43,9 @@ ext.libraries = [
 ]
 
 dependencyManagement {
+  dependencies {
+    dependency 'org.apache.commons:commons-lang3:3.18.0'
+  }
   imports {
     mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
   }
@@ -73,18 +76,6 @@ java {
 
 application {
   mainClass = 'uk.gov.hmcts.reform.ccd.documentam.Application'
-}
-
-jacocoTestCoverageVerification {
-  violationRules {
-    rule {
-      limit {
-        counter = 'LINE'
-        value = 'COVEREDRATIO'
-        minimum = 0.0
-      }
-    }
-  }
 }
 
 sourceSets {
@@ -161,6 +152,22 @@ task integration(type: Test, description: 'Runs the integration tests.', group: 
   classpath = sourceSets.integrationTest.runtimeClasspath
   finalizedBy aggregate
 }
+
+jacocoTestCoverageVerification {
+  dependsOn test, integration
+  executionData(test, integration)
+  violationRules {
+    rule {
+      limit {
+        counter = 'LINE'
+        value = 'COVEREDRATIO'
+        minimum = 0.90
+      }
+    }
+  }
+}
+
+check.dependsOn jacocoTestCoverageVerification
 
 task smokeTestsJunit(type: Test, description: 'Runs the smoke tests with JUnit.', group: 'Verification') {
   setTestClassesDirs(sourceSets.functionalTest.output.classesDirs)
@@ -265,6 +272,12 @@ repositories {
 }
 
 dependencies {
+
+  constraints {
+    implementation('commons-fileupload:commons-fileupload:1.6.0') {
+      because 'Fix CVE-2025-48976 multipart header resource exhaustion'
+    }
+  }
 
   // start::CVE Vulnerability dependency overrides                                                // MAIN PARENT DEPENDEDNCY
 

@@ -1,10 +1,8 @@
 package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
-import tools.jackson.core.JacksonException;
 import io.vavr.control.Either;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
@@ -32,6 +30,8 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
@@ -56,8 +56,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.springframework.http.HttpMethod.GET;
-
-import tools.jackson.databind.json.JsonMapper;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DM_DATE_TIME_FORMATTER;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.DOCUMENT_METADATA_NOT_FOUND;
 import static uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants.RESOURCE_NOT_FOUND;

@@ -20,13 +20,13 @@ public class AuditLogFormatter {
     private static final String TAG = "LA-CDAM";
 
     private final int auditLogMaxListSize;
-    private final JsonMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
     @Autowired
     public AuditLogFormatter(@Value("${audit.log.max-list-size:0}") int auditLogMaxListSize,
-                             JsonMapper objectMapper) {
+                             JsonMapper jsonMapper) {
         this.auditLogMaxListSize = auditLogMaxListSize;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
     }
 
     public String format(AuditEntry entry) {
@@ -44,7 +44,7 @@ public class AuditLogFormatter {
         add(logEntry, "caseId", entry.getCaseId());
         add(logEntry, "X-Request-ID", entry.getRequestId());
         try {
-            return objectMapper.writeValueAsString(logEntry);
+            return jsonMapper.writeValueAsString(logEntry);
         } catch (JacksonException e) {
             throw new IllegalStateException("Failed to format audit log entry", e);
         }

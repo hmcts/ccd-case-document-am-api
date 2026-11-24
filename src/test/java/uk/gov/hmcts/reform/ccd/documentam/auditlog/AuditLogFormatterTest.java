@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.auditlog;
 
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,13 +16,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AuditLogFormatterTest implements TestFixture {
 
     private static final String AUDIT_LOG_TAG = "LA-CDAM";
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final JsonMapper jsonMapper = TestFixture.jsonMapper();
 
     private AuditLogFormatter underTest;
 
     @BeforeEach
     void setUp() {
-        underTest = new AuditLogFormatter(0, JsonMapper.builder().build());
+        underTest = new AuditLogFormatter(0, jsonMapper);
     }
 
     @Test
@@ -34,7 +33,7 @@ class AuditLogFormatterTest implements TestFixture {
 
         // WHEN
         final String result = underTest.format(auditEntry);
-        final JsonNode json = objectMapper.readTree(result);
+        final JsonNode json = jsonMapper.readTree(result);
 
         // THEN
         assertThat(json.get("tag").asString()).isEqualTo(AUDIT_LOG_TAG);
@@ -61,7 +60,7 @@ class AuditLogFormatterTest implements TestFixture {
 
         // WHEN
         final String result = underTest.format(auditEntry);
-        final JsonNode json = objectMapper.readTree(result);
+        final JsonNode json = jsonMapper.readTree(result);
 
         // THEN
         assertThat(json.get("tag").asString()).isEqualTo(AUDIT_LOG_TAG);
@@ -92,7 +91,7 @@ class AuditLogFormatterTest implements TestFixture {
 
         // WHEN
         final String result = underTest.format(auditEntry);
-        final JsonNode json = objectMapper.readTree(result);
+        final JsonNode json = jsonMapper.readTree(result);
 
         // THEN
         assertThat(json.get("tag").asString()).isEqualTo(AUDIT_LOG_TAG);
@@ -118,7 +117,7 @@ class AuditLogFormatterTest implements TestFixture {
 
         // WHEN
         final String result = underTest.format(auditEntry);
-        final JsonNode json = objectMapper.readTree(result);
+        final JsonNode json = jsonMapper.readTree(result);
 
         // THEN
         assertThat(json.get("documentId").size()).isEqualTo(2);
@@ -141,11 +140,11 @@ class AuditLogFormatterTest implements TestFixture {
         auditEntry.setCaseId(CASE_ID_VALUE);
 
         int auditLogMaxListSize = 2;
-        underTest = new AuditLogFormatter(auditLogMaxListSize, JsonMapper.builder().build());
+        underTest = new AuditLogFormatter(auditLogMaxListSize, TestFixture.jsonMapper());
 
         // WHEN
         final String result = underTest.format(auditEntry);
-        final JsonNode json = objectMapper.readTree(result);
+        final JsonNode json = jsonMapper.readTree(result);
 
         // THEN
         assertThat(json.get("documentId").size()).isEqualTo(2);

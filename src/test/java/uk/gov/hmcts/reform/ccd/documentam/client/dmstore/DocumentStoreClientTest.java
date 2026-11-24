@@ -28,7 +28,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.ccd.documentam.ApplicationParams;
 import uk.gov.hmcts.reform.ccd.documentam.TestFixture;
 import uk.gov.hmcts.reform.ccd.documentam.apihelper.Constants;
@@ -125,7 +124,7 @@ class DocumentStoreClientTest implements TestFixture {
         when(securityUtils.getUserInfo()).thenReturn(UserInfo.builder().uid(USER_ID).build());
 
         doReturn(DM_STORE_URL).when(applicationParams).getDocumentURL();
-        setJsonMapperField(underTest, JsonMapper.builder().build());
+        setJsonMapperField(underTest, TestFixture.jsonMapper());
     }
 
     @Test
@@ -855,7 +854,7 @@ class DocumentStoreClientTest implements TestFixture {
     }
 
     @Test
-    void shouldThrowResponseStatusExceptionWhenJsonParsingFailsWithRealObjectMapper() throws IOException {
+    void shouldThrowResponseStatusExceptionWhenJsonParsingFailsWithRealJsonMapper() throws IOException {
         // Given
         when(httpClientResponse.getCode()).thenReturn(HttpStatus.OK.value());
         when(httpClient.executeOpen(eq(null), any(HttpPost.class), eq(null))).thenReturn(httpClientResponse);
@@ -890,8 +889,8 @@ class DocumentStoreClientTest implements TestFixture {
 
         org.apache.hc.core5.http.HttpEntity mockEntity = mock(org.apache.hc.core5.http.HttpEntity.class);
 
-        ObjectMapper realObjectMapper = new ObjectMapper();
-        String validJson = realObjectMapper.writeValueAsString(expectedResponse);
+        JsonMapper realJsonMapper = TestFixture.jsonMapper();
+        String validJson = realJsonMapper.writeValueAsString(expectedResponse);
         ByteArrayInputStream validJsonStream = new ByteArrayInputStream(validJson.getBytes(StandardCharsets.UTF_8));
 
         when(httpClientResponse.getEntity()).thenReturn(mockEntity);

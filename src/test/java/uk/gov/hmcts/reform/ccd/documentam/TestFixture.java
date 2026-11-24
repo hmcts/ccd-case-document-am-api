@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam;
 
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.PropertyNamingStrategies;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.cfg.DateTimeFeature;
@@ -78,22 +77,22 @@ public interface TestFixture {
             .build();
     }
 
-    static ObjectMapper objectMapper() {
-        final ObjectMapper objectMapper = JsonMapper.builder()
+    public static JsonMapper jsonMapper() {
+        final JsonMapper jsonMapper = JsonMapper.builder()
             .propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
             .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
             .enable(DateTimeFeature.WRITE_UTC_AS_OFFSET)
             .enable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
             .build();
 
-        return objectMapper;
+        return jsonMapper;
     }
 
     static String objectToJsonString(final Object object) {
         try {
-            final ObjectMapper objectMapper = objectMapper();
+            final JsonMapper jsonMapper = jsonMapper();
 
-            return objectMapper.writeValueAsString(object);
+            return jsonMapper.writeValueAsString(object);
         } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
