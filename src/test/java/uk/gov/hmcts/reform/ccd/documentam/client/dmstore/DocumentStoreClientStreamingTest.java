@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.ccd.documentam.client.dmstore;
 
 import jakarta.servlet.http.HttpServletResponse;
-import tools.jackson.databind.json.JsonMapper;
-
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
