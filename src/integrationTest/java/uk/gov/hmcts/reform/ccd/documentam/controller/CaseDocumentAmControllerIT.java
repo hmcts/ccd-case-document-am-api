@@ -92,6 +92,10 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     private static final String ATTACH_TO_CASE_URL = "/attachToCase";
     private static final String SERVICE_NAME_CCD_DATA = "ccd_data";
     private static final String SERVICE_NAME_CCD_GW = "ccd_gw";
+    private static final String SERVICE_NAME_CIVIL_SERVICE = "civil_service";
+    private static final String SERVICE_NAME_DS_UI = "ds_ui";
+    private static final String CASE_TYPE_ID_CIVIL = "CIVIL";
+    private static final String JURISDICTION_ID_CIVIL = "CIVIL";
 
     private static final String CLASSIFICATION_VALUE = "PUBLIC";
     private static final String CASE_TYPE_ID_MOVING_CASE_VALUE = "CMC_ExceptionRecord";
@@ -360,6 +364,45 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
                 SERVICE_NAME_CCD_GW,
+                List.of(DOCUMENT_ID.toString()),
+                null,
+                null,
+                null));
+    }
+
+    @Test
+    void shouldSuccessfullyDeleteDocumentByDocumentIdWhenServiceHasDeletePermission() throws Exception {
+        final Document document = buildDocument(CASE_TYPE_ID_CIVIL, JURISDICTION_ID_CIVIL);
+
+        stubGetDocumentMetaData(document);
+        stubDeleteDocumentByDocumentId();
+
+        mockMvc.perform(delete(MAIN_URL + "/" + DOCUMENT_ID)
+                            .headers(createHttpHeaders(SERVICE_NAME_CIVIL_SERVICE)))
+            .andExpect(status().isNoContent())
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
+                SERVICE_NAME_CIVIL_SERVICE,
+                List.of(DOCUMENT_ID.toString()),
+                null,
+                null,
+                null));
+    }
+
+    @Test
+    void shouldBeForbiddenWhenDeletingDocumentByDocumentIdWithUpdateButNoDeletePermission() throws Exception {
+        final Document document = buildDocument();
+
+        stubGetDocumentMetaData(document);
+        stubDeleteDocumentByDocumentId();
+
+        mockMvc.perform(delete(MAIN_URL + "/" + DOCUMENT_ID)
+                            .headers(createHttpHeaders(SERVICE_NAME_DS_UI)))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath(RESPONSE_STATUS_KEY, is(ERROR_403)))
+            .andExpect(hasGeneratedLogAudit(
+                AuditOperationType.DELETE_DOCUMENT_BY_DOCUMENT_ID,
+                SERVICE_NAME_DS_UI,
                 List.of(DOCUMENT_ID.toString()),
                 null,
                 null,
@@ -1056,10 +1099,14 @@ public class CaseDocumentAmControllerIT extends BaseTest implements TestFixture 
     }
 
     private Document buildDocument() {
+        return buildDocument(CASE_TYPE_ID_VALUE, JURISDICTION_ID_VALUE);
+    }
+
+    private Document buildDocument(final String caseTypeId, final String jurisdictionId) {
         final Map<String, String> metadata = Map.of(
             METADATA_CASE_ID, CASE_ID_VALUE,
-            METADATA_CASE_TYPE_ID, CASE_TYPE_ID_VALUE,
-            METADATA_JURISDICTION_ID, JURISDICTION_ID_VALUE);
+            METADATA_CASE_TYPE_ID, caseTypeId,
+            METADATA_JURISDICTION_ID, jurisdictionId);
 
         return Document.builder()
             .classification(Classification.PUBLIC)
