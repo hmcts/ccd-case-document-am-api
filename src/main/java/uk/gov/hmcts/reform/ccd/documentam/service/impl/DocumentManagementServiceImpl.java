@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -72,6 +73,33 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         this.caseDataStoreClient = caseDataStoreClient;
         this.authorisedServices = authorisedServices;
         this.applicationParams = applicationParams;
+    }
+
+    @Override
+    public void checkPendingUploadAccess(DocumentUploadRequest request) {
+        if (request.getCaseId() != null) {
+            if (!request.isPendingAccess() || !request.getCaseId().matches("[0-9]{16}")) {
+                throw new ForbiddenException("A case binding requires controlled pending access");
+            }
+            caseDataStoreClient.checkCaseAccess(request.getCaseId(), request.getCaseTypeId(),
+                                               request.getJurisdictionId());
+        }
+    }
+
+    @Override
+    public void checkPendingDocumentAccess(Document document, String userId) {
+        if (document.getCaseId() != null || !document.isPendingAccessControlled()) {
+            return;
+        }
+        if (StringUtils.isBlank(userId)
+            || !userId.equals(document.getCreatedBy())
+            || document.getTtl() == null || !document.getTtl().after(new Date())) {
+            throw new ForbiddenException("Pending document access is not permitted");
+        }
+        if (document.getPendingCaseId() != null) {
+            caseDataStoreClient.checkCaseAccess(document.getPendingCaseId(), document.getCaseTypeId(),
+                                               document.getJurisdictionId());
+        }
     }
 
     @Override
@@ -125,6 +153,23 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
         for (DocumentHashToken documentHashToken : caseDocumentsMetadata.getDocumentHashTokens()) {
             final Either<ResourceNotFoundException, Document> either =
                 documentStoreClient.getDocument(documentHashToken.getId());
+
+            if (either.isRight() && either.get().getCaseId() == null
+                && either.get().isPendingAccessControlled()) {
+                final Document pending = either.get();
+                if (pending.getTtl() == null
+                    || !pending.getTtl().after(new Date()) || documentHashToken.getHashToken() == null
+                    || !Objects.equals(pending.getCaseTypeId(), caseDocumentsMetadata.getCaseTypeId())
+                    || !Objects.equals(pending.getJurisdictionId(), caseDocumentsMetadata.getJurisdictionId())
+                    || (pending.getPendingCaseId() != null
+                    && !pending.getPendingCaseId().equals(caseDocumentsMetadata.getCaseId()))) {
+                    throw new ForbiddenException("Pending document cannot be attached to this case");
+                }
+                if (pending.getPendingCaseId() != null) {
+                    caseDataStoreClient.checkCaseAccess(pending.getPendingCaseId(), pending.getCaseTypeId(),
+                                                       pending.getJurisdictionId());
+                }
+            }
 
             if (documentHashToken.getHashToken() != null) {
                 if (either.isLeft()) {
@@ -272,6 +317,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Override
     public UploadResponse uploadDocuments(final DocumentUploadRequest documentUploadRequest) {
+        checkPendingUploadAccess(documentUploadRequest);
         final DmUploadResponse dmResponse = documentStoreClient.uploadDocuments(documentUploadRequest);
 
         return buildUploadResponse(documentUploadRequest.getCaseTypeId(),
@@ -281,6 +327,7 @@ public class DocumentManagementServiceImpl implements DocumentManagementService 
 
     @Override
     public UploadResponse uploadStreamDocuments(final DocumentUploadRequest documentUploadRequest) {
+        checkPendingUploadAccess(documentUploadRequest);
         final DmUploadResponse dmResponse = documentStoreClient.uploadDocumentsAsStream(documentUploadRequest);
 
         return buildUploadResponse(documentUploadRequest.getCaseTypeId(),

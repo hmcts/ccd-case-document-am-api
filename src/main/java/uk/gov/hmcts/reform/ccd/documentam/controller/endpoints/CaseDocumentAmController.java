@@ -116,6 +116,8 @@ public class CaseDocumentAmController {
             documentId.toString()
         );
 
+        checkPendingAccess(document);
+
         if (document.getCaseId() != null) {
             documentManagementService.checkUserPermission(
                     document.getCaseId(),
@@ -170,6 +172,8 @@ public class CaseDocumentAmController {
                                                          Permission.READ,
                                                          SERVICE_PERMISSION_ERROR,
                                                          documentId.toString());
+
+        checkPendingAccess(document);
 
         if (document.getCaseId() != null) {
             documentManagementService.checkUserPermission(document.getCaseId(),
@@ -240,7 +244,28 @@ public class CaseDocumentAmController {
         @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken) {
 
         handleErrors(bindingResult);
+        if (documentUploadRequest.isPendingAccess() || documentUploadRequest.getCaseId() != null) {
+            throw new BadRequestException("Controlled pending uploads require the pending upload endpoint");
+        }
+        return uploadDocumentRequest(documentUploadRequest, s2sToken);
+    }
 
+    @PostMapping(path = "/cases/documents/pending", produces = APPLICATION_JSON,
+        consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Uploads a document with creator-controlled pending access", tags = "upload")
+    @ApiResponse(responseCode = "200", description = "Controlled pending documents uploaded")
+    @LogAudit(operationType = AuditOperationType.UPLOAD_DOCUMENTS,
+        caseType = "#documentUploadRequest.caseTypeId", jurisdiction = "#documentUploadRequest.jurisdictionId")
+    public UploadResponse uploadPendingDocuments(
+        @Valid final DocumentUploadRequest documentUploadRequest,
+        final BindingResult bindingResult,
+        @RequestHeader(SERVICE_AUTHORIZATION) final String s2sToken) {
+        handleErrors(bindingResult);
+        documentUploadRequest.setPendingAccess(true);
+        return uploadDocumentRequest(documentUploadRequest, s2sToken);
+    }
+
+    private UploadResponse uploadDocumentRequest(DocumentUploadRequest documentUploadRequest, String s2sToken) {
         final String permissionFailureMessage = documentUploadRequest.getCaseTypeId() + " "
             + documentUploadRequest.getJurisdictionId();
 
@@ -296,6 +321,8 @@ public class CaseDocumentAmController {
             SERVICE_PERMISSION_ERROR,
             documentId.toString()
         );
+
+        checkControlledOperationAccess(documentId, document, Permission.UPDATE);
 
         final PatchDocumentResponse patchDocumentResponse = documentManagementService.patchDocument(
             documentId,
@@ -377,6 +404,8 @@ public class CaseDocumentAmController {
                                                          SERVICE_PERMISSION_ERROR,
                                                          documentId.toString());
 
+        checkControlledOperationAccess(documentId, document, Permission.DELETE);
+
         documentManagementService.deleteDocument(documentId, permanent);
 
         return ResponseEntity.noContent().build();
@@ -417,6 +446,8 @@ public class CaseDocumentAmController {
                 documentId.toString()
             );
 
+        checkControlledOperationAccess(documentId, document, Permission.READ);
+
         return ResponseEntity.ok(GeneratedHashCodeResponse.builder()
                                      .hashToken(documentManagementService.generateHashToken(
                                          documentId,
@@ -424,6 +455,24 @@ public class CaseDocumentAmController {
                                          Permission.HASHTOKEN
                                      ))
                                      .build());
+    }
+
+    private void checkControlledOperationAccess(UUID documentId, Document document, Permission permission) {
+        if (!document.isPendingAccessControlled()) {
+            return;
+        }
+        if (document.getCaseId() != null) {
+            documentManagementService.checkUserPermission(document.getCaseId(), documentId,
+                permission, USER_PERMISSION_ERROR, documentId.toString());
+        } else {
+            checkPendingAccess(document);
+        }
+    }
+
+    private void checkPendingAccess(Document document) {
+        if (document.getCaseId() == null && document.isPendingAccessControlled()) {
+            documentManagementService.checkPendingDocumentAccess(document, securityUtils.getUserInfo().getUid());
+        }
     }
 
     private String getServiceNameFromS2SToken(String s2sToken) {

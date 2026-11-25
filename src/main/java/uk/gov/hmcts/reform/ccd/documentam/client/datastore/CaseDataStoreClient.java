@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface CaseDataStoreClient {
+    void checkCaseAccess(String caseId, String caseTypeId, String jurisdictionId);
+
     /**
      * Root GET endpoint.
      *
