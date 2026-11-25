@@ -125,6 +125,7 @@
       "caseTypeId": ["CIVIL" ,"GENERALAPPLICATION"],
       "jurisdictionId": "CIVIL",
       "permissions": [
+        "ATTACH",
         "CREATE",
         "READ",
         "UPDATE"
