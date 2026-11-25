@@ -964,7 +964,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
             List.of(AuthorisedService.builder()
                         .id("xui_webapp")
                         .caseTypeId(List.of("*"))
-                        .jurisdictionId("*")
+                        .jurisdictionId(List.of("*"))
                         .permissions(List.of(Permission.HASHTOKEN, Permission.READ))
                         .caseTypeIdOptionalFor(List.of(Permission.HASHTOKEN))
                         .build());
@@ -993,7 +993,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
             List.of(AuthorisedService.builder()
                         .id("xui_webapp")
                         .caseTypeId(List.of("*"))
-                        .jurisdictionId("*")
+                        .jurisdictionId(List.of("*"))
                         .permissions(List.of(Permission.HASHTOKEN, Permission.READ))
                         .jurisdictionIdOptionalFor(List.of(Permission.HASHTOKEN))
                         .build());
@@ -1022,7 +1022,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
             List.of(AuthorisedService.builder()
                         .id("xui_webapp")
                         .caseTypeId(List.of("*"))
-                        .jurisdictionId("*")
+                        .jurisdictionId(List.of("*"))
                         .permissions(List.of(Permission.CREATE, Permission.READ))
                         .build());
         doReturn(authServices).when(serviceConfig).getAuthServices();
@@ -1050,7 +1050,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
             List.of(AuthorisedService.builder()
                         .id("xui_webapp")
                         .caseTypeId(List.of("*"))
-                        .jurisdictionId("*")
+                        .jurisdictionId(List.of("*"))
                         .permissions(List.of(Permission.CREATE, Permission.READ))
                         .build());
         doReturn(authServices).when(serviceConfig).getAuthServices();
@@ -1078,7 +1078,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
             List.of(AuthorisedService.builder()
                         .id("xui_webapp")
                         .caseTypeId(List.of("*"))
-                        .jurisdictionId("*")
+                        .jurisdictionId(List.of("*"))
                         .permissions(List.of(Permission.CREATE, Permission.HASHTOKEN))
                         .caseTypeIdOptionalFor(List.of(Permission.HASHTOKEN))
                         .build());
@@ -1107,7 +1107,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
             List.of(AuthorisedService.builder()
                         .id("xui_webapp")
                         .caseTypeId(List.of("*"))
-                        .jurisdictionId("*")
+                        .jurisdictionId(List.of("*"))
                         .permissions(List.of(Permission.CREATE, Permission.HASHTOKEN))
                         .caseTypeIdOptionalFor(List.of(Permission.HASHTOKEN))
                         .jurisdictionIdOptionalFor(List.of(Permission.HASHTOKEN))
@@ -1136,7 +1136,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
             List.of(AuthorisedService.builder()
                         .id("xui_webapp")
                         .caseTypeId(List.of("*"))
-                        .jurisdictionId("*")
+                        .jurisdictionId(List.of("*"))
                         .permissions(List.of(Permission.HASHTOKEN, Permission.READ))
                         .build());
         doReturn(authServices).when(serviceConfig).getAuthServices();
@@ -1165,7 +1165,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
             List.of(AuthorisedService.builder()
                         .id("xui_webapp")
                         .caseTypeId(List.of("*"))
-                        .jurisdictionId("*")
+                        .jurisdictionId(List.of("*"))
                         .permissions(List.of(Permission.HASHTOKEN, Permission.READ))
                         .caseTypeIdOptionalFor(List.of(Permission.HASHTOKEN))
                         .build());
@@ -1195,7 +1195,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
             List.of(AuthorisedService.builder()
                         .id("xui_webapp")
                         .caseTypeId(List.of("*"))
-                        .jurisdictionId("*")
+                        .jurisdictionId(List.of("*"))
                         .permissions(List.of(Permission.HASHTOKEN, Permission.READ))
                         .caseTypeIdOptionalFor(List.of(Permission.HASHTOKEN))
                         .build());
@@ -1225,7 +1225,7 @@ class CaseDocumentAmControllerTest implements TestFixture {
             List.of(AuthorisedService.builder()
                         .id("xui_webapp")
                         .caseTypeId(List.of("*"))
-                        .jurisdictionId("*")
+                        .jurisdictionId(List.of("*"))
                         .permissions(List.of(Permission.HASHTOKEN, Permission.READ))
                         .caseTypeIdOptionalFor(List.of(Permission.READ))
                         .jurisdictionIdOptionalFor(List.of(Permission.HASHTOKEN))

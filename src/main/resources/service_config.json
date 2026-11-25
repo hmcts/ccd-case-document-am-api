@@ -2,7 +2,7 @@
     "authorisedServices": [{
       "id": "xui_webapp",
       "caseTypeId": ["*"],
-      "jurisdictionId": "*",
+      "jurisdictionId": ["*"],
       "permissions": [
         "CREATE",
         "READ"
@@ -11,7 +11,7 @@
     {
       "id": "bulk_scan_processor",
       "caseTypeId": ["*"],
-      "jurisdictionId": "*",
+      "jurisdictionId": ["*"],
       "permissions": [
         "CREATE"
       ]
@@ -19,7 +19,7 @@
     {
       "id": "sscs",
       "caseTypeId": ["*"],
-      "jurisdictionId": "SSCS",
+      "jurisdictionId": ["SSCS"],
       "permissions": [
         "CREATE",
         "READ"
@@ -28,7 +28,7 @@
     {
       "id": "iac",
       "caseTypeId": ["Asylum", "Bail"],
-      "jurisdictionId": "IA",
+      "jurisdictionId": ["IA"],
       "permissions": [
         "CREATE",
         "READ",
@@ -38,8 +38,8 @@
     },
     {
       "id": "probate_backend",
-        "caseTypeId": ["*"],
-        "jurisdictionId": "PROBATE",
+      "caseTypeId": ["*"],
+      "jurisdictionId": ["PROBATE"],
       "permissions": [
         "CREATE",
         "READ",
@@ -50,7 +50,7 @@
     {
       "id": "ccd_data",
       "caseTypeId": ["*"],
-      "jurisdictionId": "*",
+      "jurisdictionId": ["*"],
       "permissions": [
         "ATTACH",
         "READ"
@@ -58,8 +58,8 @@
     },
     {
       "id": "ccd_gw",
-        "caseTypeId": ["BEFTA_CASETYPE_2_1","BEFTA_CASETYPE_2_2","BEFTA_CASETYPE_2"],
-        "jurisdictionId": "BEFTA_JURISDICTION_2",
+      "caseTypeId": ["BEFTA_CASETYPE_2_1","BEFTA_CASETYPE_2_2","BEFTA_CASETYPE_2"],
+      "jurisdictionId": ["BEFTA_JURISDICTION_2"],
       "permissions": [
         "CREATE",
         "READ",
@@ -70,7 +70,7 @@
     {
       "id": "em_npa_app",
       "caseTypeId": ["*"],
-      "jurisdictionId": "*",
+      "jurisdictionId": ["*"],
       "permissions": [
         "READ"
       ]
@@ -78,7 +78,7 @@
     {
       "id": "fprl_dgs_api",
       "caseTypeId": ["C100"],
-      "jurisdictionId": "PRIVATELAW",
+      "jurisdictionId": ["PRIVATELAW"],
       "permissions": [
         "CREATE",
         "READ"
@@ -87,7 +87,7 @@
     {
       "id": "dg_docassembly_api",
       "caseTypeId": ["*"],
-      "jurisdictionId": "*",
+      "jurisdictionId": ["*"],
       "permissions": [
         "CREATE",
         "READ"
@@ -96,7 +96,7 @@
     {
       "id": "em_stitching_api",
       "caseTypeId": ["*"],
-      "jurisdictionId": "*",
+      "jurisdictionId": ["*"],
       "permissions": [
         "CREATE",
         "READ"
@@ -105,7 +105,7 @@
     {
       "id": "em_ccd_orchestrator",
       "caseTypeId": ["*"],
-      "jurisdictionId": "*",
+      "jurisdictionId": ["*"],
       "permissions": [
         "CREATE",
         "READ"
@@ -114,7 +114,7 @@
     {
       "id": "cmc_claim_store",
       "caseTypeId": ["*"],
-      "jurisdictionId": "CMC",
+      "jurisdictionId": ["CMC"],
       "permissions": [
         "CREATE",
         "READ"
@@ -123,7 +123,7 @@
     {
       "id": "civil_service",
       "caseTypeId": ["CIVIL" ,"GENERALAPPLICATION"],
-      "jurisdictionId": "CIVIL",
+      "jurisdictionId": ["CIVIL"],
       "permissions": [
         "CREATE",
         "READ",
@@ -133,7 +133,7 @@
     {
       "id": "civil_general_applications",
       "caseTypeId": ["CIVIL","GENERALAPPLICATIONS"],
-      "jurisdictionId": "CIVIL",
+      "jurisdictionId": ["CIVIL"],
       "permissions": [
         "CREATE",
         "READ"
@@ -142,7 +142,7 @@
     {
       "id": "bulk_scan_orchestrator",
       "caseTypeId": ["*"],
-      "jurisdictionId": "*",
+      "jurisdictionId": ["*"],
       "defaultJurisdictionForTokenGeneration": "BULKSCAN",
       "defaultCaseTypeForTokenGeneration": "BULKSCAN_Exception",
       "permissions": [
@@ -158,7 +158,7 @@
     {
       "id": "ethos_repl_service",
       "caseTypeId": ["*"],
-      "jurisdictionId": "EMPLOYMENT",
+      "jurisdictionId": ["EMPLOYMENT"],
       "permissions": [
         "CREATE",
         "READ",
@@ -169,7 +169,7 @@
     {
       "id": "divorce_document_generator",
       "caseTypeId": ["DIVORCE","DIVORCE_BulkAction","DIVORCE_NOTICE_OF_ACTING"],
-      "jurisdictionId": "DIVORCE",
+      "jurisdictionId": ["DIVORCE"],
       "permissions": [
         "CREATE",
         "READ",
@@ -179,7 +179,7 @@
     {
       "id": "finrem_case_orchestration",
       "caseTypeId": ["FinancialRemedyContested","FinancialRemedyMVP2", "FINREM_ExceptionRecord"],
-      "jurisdictionId": "DIVORCE",
+      "jurisdictionId": ["DIVORCE"],
       "permissions": [
         "CREATE",
         "READ",
@@ -194,7 +194,7 @@
         "FinancialRemedyMVP2",
         "FINREM_ExceptionRecord"
       ],
-      "jurisdictionId": "DIVORCE",
+      "jurisdictionId": ["DIVORCE"],
       "permissions": [
         "CREATE",
         "READ",
@@ -205,7 +205,7 @@
     {
       "id": "fpl_case_service",
       "caseTypeId": ["CARE_SUPERVISION_EPO"],
-      "jurisdictionId": "PUBLICLAW",
+      "jurisdictionId": ["PUBLICLAW"],
       "permissions": [
         "CREATE",
         "READ"
@@ -214,7 +214,7 @@
     {
       "id": "prl_dgs_api",
       "caseTypeId": ["C100","PRLAPPS"],
-      "jurisdictionId": "PRIVATELAW",
+      "jurisdictionId": ["PRIVATELAW"],
       "permissions": [
         "CREATE",
         "READ",
@@ -224,7 +224,7 @@
     {
       "id": "prl_cos_api",
       "caseTypeId": ["C100","PRLAPPS"],
-      "jurisdictionId": "PRIVATELAW",
+      "jurisdictionId": ["PRIVATELAW"],
       "permissions": [
         "CREATE",
         "READ",
@@ -234,7 +234,7 @@
     {
       "id": "et_cos",
       "caseTypeId": ["*"],
-      "jurisdictionId": "EMPLOYMENT",
+      "jurisdictionId": ["EMPLOYMENT"],
       "permissions": [
         "ATTACH",
         "CREATE",
@@ -244,7 +244,7 @@
     {
       "id": "et_sya_api",
       "caseTypeId": ["*"],
-      "jurisdictionId": "EMPLOYMENT",
+      "jurisdictionId": ["EMPLOYMENT"],
       "permissions": [
         "CREATE",
         "READ",
@@ -255,7 +255,7 @@
     {
       "id": "adoption_cos_api",
       "caseTypeId": ["A58"],
-      "jurisdictionId": "ADOPTION",
+      "jurisdictionId": ["ADOPTION"],
       "permissions": [
         "CREATE",
         "READ",
@@ -266,7 +266,7 @@
     {
       "id": "adoption_web",
       "caseTypeId": ["A58"],
-      "jurisdictionId": "ADOPTION",
+      "jurisdictionId": ["ADOPTION"],
       "permissions": [
         "CREATE",
         "READ",
@@ -277,7 +277,7 @@
     {
       "id": "fis_cos_api",
       "caseTypeId": ["*"],
-      "jurisdictionId": "*",
+      "jurisdictionId": ["*"],
       "permissions": [
         "CREATE",
         "READ",
@@ -288,7 +288,7 @@
     {
       "id": "ds_ui",
       "caseTypeId": ["*"],
-      "jurisdictionId": "*",
+      "jurisdictionId": ["*"],
       "permissions": [
         "CREATE",
         "READ",
@@ -297,7 +297,7 @@
     {
       "id": "prl_citizen_frontend",
       "caseTypeId": ["PRLAPPS"],
-      "jurisdictionId": "PRIVATELAW",
+      "jurisdictionId": ["PRIVATELAW"],
       "permissions": [
         "CREATE",
         "READ",
@@ -307,7 +307,7 @@
     {
       "id": "nfdiv_case_api",
       "caseTypeId": ["*"],
-      "jurisdictionId": "DIVORCE",
+      "jurisdictionId": ["DIVORCE"],
       "permissions": [
         "CREATE",
         "READ",
@@ -325,7 +325,7 @@
         "PrimaryHealthLists",
         "MentalHeath"
       ],
-      "jurisdictionId": "*",
+      "jurisdictionId": ["*"],
       "permissions": [
         "CREATE",
         "READ",
@@ -343,7 +343,7 @@
         "PrimaryHealthLists",
         "MentalHeath"
       ],
-      "jurisdictionId": "*",
+      "jurisdictionId": ["*"],
       "permissions": [
         "ATTACH",
         "CREATE",
@@ -355,7 +355,7 @@
     {
       "id": "divorce_frontend",
       "caseTypeId": ["NFD"],
-      "jurisdictionId": "DIVORCE",
+      "jurisdictionId": ["DIVORCE"],
       "permissions": [
         "CREATE",
         "READ",
@@ -366,7 +366,7 @@
     {
       "id": "deed_poll_api",
       "caseTypeId": ["DEEDPOLL"],
-      "jurisdictionId": "DEEDPOLL",
+      "jurisdictionId": ["DEEDPOLL"],
       "permissions": [
         "CREATE",
         "READ",
@@ -376,7 +376,7 @@
     {
       "id": "pcs_api",
       "caseTypeId": ["*"],
-      "jurisdictionId": "PCS",
+      "jurisdictionId": ["PCS"],
       "permissions": [
         "ATTACH",
         "CREATE",
@@ -388,7 +388,7 @@
     {
       "id": "pcs_frontend",
       "caseTypeId": ["*"],
-      "jurisdictionId": "PCS",
+      "jurisdictionId": ["PCS"],
       "permissions": [
         "CREATE",
         "READ",
@@ -399,7 +399,7 @@
       {
         "id": "pt_api",
         "caseTypeId": ["*"],
-        "jurisdictionId": "PT",
+        "jurisdictionId": ["PT"],
         "permissions": [
           "ATTACH",
           "CREATE",
@@ -411,7 +411,7 @@
       {
         "id": "pt_frontend",
         "caseTypeId": ["*"],
-        "jurisdictionId": "PT",
+        "jurisdictionId": ["PT"],
         "permissions": [
           "CREATE",
           "READ",
@@ -421,7 +421,7 @@
       },{
         "id": "ccd_case_disposer",
         "caseTypeId": ["*"],
-        "jurisdictionId": "*",
+        "jurisdictionId": ["*"],
         "permissions": [
           "HASHTOKEN"
         ]
