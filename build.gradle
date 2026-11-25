@@ -21,7 +21,7 @@ ext {
   set('spring-framework.version', '6.2.14')
   set('spring-security.version', '6.5.7')
   set('tomcat.version', '10.1.61')
-  set('log4j2.version', '2.24.3')
+  set('log4j2.version', '2.25.4')
   set('jackson.version', '2.18.12')
   set('snakeyaml.version', '2.3')
   // Align Pact's separately resolved fluent client with the direct HttpClient dependency.
