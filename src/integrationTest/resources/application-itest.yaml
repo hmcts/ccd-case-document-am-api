@@ -1,6 +1,8 @@
 idam:
   api:
     url: http://localhost:${wiremock.server.port}
+  oidc:
+    url: http://localhost:${wiremock.server.port}
   s2s-auth:
     url: http://localhost:${wiremock.server.port}/s2s
 
