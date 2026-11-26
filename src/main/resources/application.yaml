@@ -65,6 +65,8 @@ spring:
 idam:
   api:
     url: ${IDAM_API_URL:http://localhost:5000}
+  oidc:
+    url: ${IDAM_OIDC_URL:http://localhost:5000}
   s2s-auth:
     microservice: ccd_case_document_am_api
     totp_secret: ${CASE_DOCUMENT_AM_API_S2S_SECRET:AABBCCDDEEFFGGHH}
