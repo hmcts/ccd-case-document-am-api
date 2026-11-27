@@ -161,7 +161,7 @@ class DocumentTokenGenerationIT extends BaseTest implements TestFixture {
                             .headers(createHttpHeaders(SERVICE_NAME_XUI_WEBAPP)))
             .andExpect(status().isForbidden())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.error", is("Forbidden: Insufficient permissions: " + DOCUMENT_ID)))
+            .andExpect(jsonPath("$.error", is("Forbidden")))
             .andExpect(jsonPath("$.hashToken").doesNotExist())
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.GENERATE_HASH_CODE,
@@ -188,7 +188,7 @@ class DocumentTokenGenerationIT extends BaseTest implements TestFixture {
                             .headers(createHttpHeaders(SERVICE_NAME_BULK_SCAN_PROCESSOR)))
             .andExpect(status().isForbidden())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.error", is("Forbidden: Insufficient permissions: " + DOCUMENT_ID)))
+            .andExpect(jsonPath("$.error", is("Forbidden")))
             .andExpect(jsonPath("$.hashToken").doesNotExist())
             .andExpect(hasGeneratedLogAudit(
                 AuditOperationType.GENERATE_HASH_CODE,
@@ -210,7 +210,7 @@ class DocumentTokenGenerationIT extends BaseTest implements TestFixture {
                             .headers(createHttpHeaders(SERVICE_NAME_BULK_SCAN_ORCHESTRATOR)))
             .andExpect(status().isNotFound())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.error", is("Meta data does not exist for documentId: " + DOCUMENT_ID)))
+            .andExpect(jsonPath("$.error", is("Not Found")))
             .andExpect(jsonPath("$.hashToken").doesNotExist());
 
         verify(getRequestedFor(urlPathEqualTo(DOCUMENTS_URL + DOCUMENT_ID)));

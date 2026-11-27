@@ -175,6 +175,12 @@ CURRENT_LOCATION='/Users/736062/HMCTS-Projects/AM/ccd-case-document-utilities/au
 Run the scripts that follow.
 Once this is done, try to run your functional tests.
 
+## Error handling and support
+
+Public error responses withhold technical diagnostics. Operational failure codes remain private.
+See the [support investigation guide](docs/CCD-7882-error-contract.md#support) for
+Application Insights → Logs steps, KQL, correlation and verification limits.
+
 ## LICENSE
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
